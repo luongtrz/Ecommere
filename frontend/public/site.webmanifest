@@ -1,0 +1,16 @@
+{
+  "name": "Shop Chai Xịt Thái Lan",
+  "short_name": "Thai Spray",
+  "description": "Shop chuyên cung cấp chai xịt Thái Lan chất lượng cao",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
