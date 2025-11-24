@@ -10,6 +10,9 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { AccountPage } from '@/features/auth/pages/AccountPage';
 
+// User Pages
+import { AddressesPage } from '@/features/users/pages/AddressesPage';
+
 // Catalog Pages
 import { HomePage } from '@/features/catalog/pages/HomePage';
 import { CatalogPage } from '@/features/catalog/pages/CatalogPage';
@@ -60,6 +63,7 @@ export function AppRouter() {
         {/* Protected User Routes */}
         <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
           <Route path="account" element={<AccountPage />} />
+          <Route path="addresses" element={<AddressesPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:orderId" element={<OrderDetailPage />} />

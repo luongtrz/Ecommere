@@ -62,12 +62,24 @@ export function useAuth() {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const updatedUser = await authApi.getProfile();
+      queryClient.setQueryData([QUERY_KEYS.USER], updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      throw error;
+    }
+  };
+
   return {
     user,
     isLoading,
     login: loginMutation.mutate,
     register: registerMutation.mutate,
     logout,
+    refreshUser,
     isLoginLoading: loginMutation.isPending,
     isRegisterLoading: registerMutation.isPending,
     loginError: loginMutation.error as AxiosError<any> | null,

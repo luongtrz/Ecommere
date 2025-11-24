@@ -12,16 +12,16 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center gap-4">
+      <div className="container flex h-14 items-center gap-3">
         <Link to="/" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold text-primary">Thai Spray</span>
+          <span className="text-xl font-bold text-primary">Thai Spray</span>
         </Link>
 
         <div className="flex-1 max-w-xl mx-auto">
           <SearchBox />
         </div>
 
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-3">
           <Link to="/cart">
             <CartBadge />
           </Link>

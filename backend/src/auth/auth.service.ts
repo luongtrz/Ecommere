@@ -327,29 +327,35 @@ export class AuthService {
   /**
    * Logout user and revoke refresh tokens
    */
-  async logout(userId: string, refreshToken: string | undefined, response: Response) {
-    // Clear cookies
+  async logout(refreshToken: string | undefined, response: Response) {
+    // Clear cookies first
     clearAuthCookies(response);
 
     // If refresh token provided, revoke its entire family
     if (refreshToken) {
       try {
-        const tokenHash = hashToken(refreshToken);
-        const tokenRecord = await this.prisma.refreshToken.findUnique({
-          where: { tokenHash },
-        });
+        // Decode token to get userId (don't verify as it might be expired)
+        const decoded = this.jwtService.decode(refreshToken) as any;
+        const userId = decoded?.sub;
 
-        if (tokenRecord) {
-          // Revoke entire token family
-          await this.prisma.refreshToken.updateMany({
-            where: {
-              userId,
-              tokenFamily: tokenRecord.tokenFamily,
-            },
-            data: { revokedAt: new Date() },
+        if (userId) {
+          const tokenHash = hashToken(refreshToken);
+          const tokenRecord = await this.prisma.refreshToken.findUnique({
+            where: { tokenHash },
           });
 
-          this.logger.log(`Logout: Revoked token family ${tokenRecord.tokenFamily}`);
+          if (tokenRecord) {
+            // Revoke entire token family
+            await this.prisma.refreshToken.updateMany({
+              where: {
+                userId,
+                tokenFamily: tokenRecord.tokenFamily,
+              },
+              data: { revokedAt: new Date() },
+            });
+
+            this.logger.log(`Logout: Revoked token family ${tokenRecord.tokenFamily} for user ${userId}`);
+          }
         }
       } catch (error) {
         // Silent fail - user is logging out anyway

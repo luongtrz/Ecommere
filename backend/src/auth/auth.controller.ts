@@ -56,17 +56,17 @@ export class AuthController {
     return this.authService.refresh(refreshToken, response);
   }
 
+  @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
   async logout(
-    @CurrentUser('id') userId: string,
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
     const refreshToken = request.cookies['refreshToken'];
-    return this.authService.logout(userId, refreshToken, response);
+    return this.authService.logout(refreshToken, response);
   }
 
   @Public()
