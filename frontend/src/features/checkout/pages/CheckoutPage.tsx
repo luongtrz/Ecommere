@@ -5,7 +5,6 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { useAddresses } from '@/features/users/hooks/useAddresses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
@@ -13,9 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatters';
 import { PAYMENT_METHODS, SHIPPING_METHODS } from '@/lib/constants';
 import apiClient from '@/lib/api';
-import { ArrowLeft, Truck, CreditCard, Shield, CheckCircle, MapPin, User, Phone, ShoppingBag, Plus } from 'lucide-react';
+import { ArrowLeft, Truck, CreditCard, Shield, CheckCircle, MapPin, Phone, ShoppingBag, Plus } from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
-import type { Address } from '@/features/users/api/users.api';
 
 export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();

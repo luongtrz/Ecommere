@@ -75,15 +75,6 @@ export function AdminOrdersPage() {
     }
   };
 
-  const parseAddress = (addressJson: string) => {
-    try {
-      const addr = JSON.parse(addressJson);
-      return `${addr.fullName} - ${addr.phone} - ${addr.line1}, ${addr.ward}, ${addr.district}, ${addr.province}`;
-    } catch {
-      return addressJson;
-    }
-  };
-
   return (
     <>
       <SEO title="Quản lý đơn hàng - Admin" />
