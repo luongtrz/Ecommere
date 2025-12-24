@@ -1,5 +1,5 @@
 import { SEO } from '@/lib/seo';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,8 +43,6 @@ const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
 
 export function AdminOrderDetailPage() {
     const { id } = useParams<{ id: string }>();
-    const { id } = useParams<{ id: string }>();
-    const toast = useToast();
     const toast = useToast();
 
     // Fetch orders with filter by ID
