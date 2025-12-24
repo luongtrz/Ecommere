@@ -229,7 +229,6 @@ export function AdminProductFormPage() {
                   <Input
                     id="basePrice"
                     type="number"
-                    step="1000"
                     placeholder="0"
                     {...register('basePrice', { valueAsNumber: true })}
                   />
