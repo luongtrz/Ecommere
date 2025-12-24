@@ -18,9 +18,9 @@ import { DashboardPage } from '@/features/admin/pages/DashboardPage';
 import { AdminProductsPage } from '@/features/admin/pages/AdminProductsPage';
 import { AdminProductFormPage } from '@/features/admin/pages/AdminProductFormPage';
 import { AdminOrdersPage } from '@/features/admin/pages/AdminOrdersPage';
-import { AdminOrderDetailPage } from '@/features/admin/pages/AdminOrderDetailPage';
 import { AdminCouponsPage } from '@/features/admin/pages/AdminCouponsPage';
 import { AdminInventoryPage } from '@/features/admin/pages/AdminInventoryPage';
+
 
 // Error Pages
 import { ErrorPage } from '@/pages/ErrorPage';
@@ -57,7 +57,6 @@ export const router = createBrowserRouter([
       { path: 'products/new', element: <AdminProductFormPage /> },
       { path: 'products/:id/edit', element: <AdminProductFormPage /> },
       { path: 'orders', element: <AdminOrdersPage /> },
-      { path: 'orders/:id', element: <AdminOrderDetailPage /> },
       { path: 'coupons', element: <AdminCouponsPage /> },
       { path: 'inventory', element: <AdminInventoryPage /> },
       { path: 'account', element: <AccountPage /> },
