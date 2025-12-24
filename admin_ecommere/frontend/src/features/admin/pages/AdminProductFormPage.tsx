@@ -202,8 +202,8 @@ export function AdminProductFormPage() {
                     <SelectTrigger>
                       <SelectValue placeholder={isLoadingCategories ? "Đang tải..." : "Chọn danh mục"} />
                     </SelectTrigger>
-                      {categories && categories.length > 0 ? (
                     <SelectContent>
+                      {categories && categories.length > 0 ? (
                         categories.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
                             {category.name}
