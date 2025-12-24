@@ -41,6 +41,7 @@
   "devDependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@types/node": "^20.11.5",
+    "@types/prop-types": "^15.7.15",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
