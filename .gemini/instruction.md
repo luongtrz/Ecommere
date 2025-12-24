@@ -241,6 +241,7 @@ git commit -m "feat: Phase X - [description]"
 - [x] **UI Enhancement**:
   - Cập nhật cột "Sản phẩm" hiển thị chi tiết: Ảnh thumbnail + Tên sản phẩm + Số lượng + Phân loại.
   - Xử lý hiển thị "xem thêm" gọn gàng nếu đơn hàng có nhiều hơn 2 sản phẩm.
+  - Hiển thị đầy đủ địa chỉ khách hàng (không cắt bớt), chấp nhận xuống dòng.
   - Styling lại trạng thái đơn hàng (badges).
 
 #### 4. UI/UX Chung

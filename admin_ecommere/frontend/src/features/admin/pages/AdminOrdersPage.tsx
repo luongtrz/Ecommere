@@ -270,7 +270,7 @@ export function AdminOrdersPage() {
                       <td className="px-6 py-4">
                         <div className="font-medium text-gray-900">{order.user?.name || order.user?.email}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">{order.user?.phone || 'Chưa cập nhật SĐT'}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 max-w-[150px] truncate" title={order.addressJson}>
+                        <div className="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap" title={order.addressJson}>
                           {parseAddress(order.addressJson)}
                         </div>
                       </td>
