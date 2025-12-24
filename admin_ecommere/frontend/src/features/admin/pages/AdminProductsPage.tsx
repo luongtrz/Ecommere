@@ -16,12 +16,31 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+import { useDeleteProduct } from '../hooks/useAdminProducts';
+import { useToast } from '@/hooks/useToast';
+
 export function AdminProductsPage() {
   const { data, isLoading } = useProducts({
     page: 1,
     limit: 100,
     sortBy: 'newest',
   });
+
+  const deleteProduct = useDeleteProduct();
+  const toast = useToast();
+
+  const handleDelete = async (id: string, name: string) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`)) {
+      deleteProduct.mutate(id, {
+        onSuccess: () => {
+          toast.success('Xóa sản phẩm thành công');
+        },
+        onError: () => {
+          toast.error('Xóa sản phẩm thất bại. Vui lòng thử lại.');
+        },
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -112,12 +131,12 @@ export function AdminProductsPage() {
                             {product.rating?.toFixed(1) || '0.0'}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                          ({product.reviewCount || 0})
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                            ({product.reviewCount || 0})
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -143,6 +162,7 @@ export function AdminProductsPage() {
                             size="sm"
                             title="Xóa"
                             className="text-destructive hover:text-destructive"
+                            onClick={() => handleDelete(product.id, product.name)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
