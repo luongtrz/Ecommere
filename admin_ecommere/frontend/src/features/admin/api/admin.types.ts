@@ -62,6 +62,14 @@ export const topProductSchema = z.object({
 
 export type TopProduct = z.infer<typeof topProductSchema>;
 
+// Revenue History
+export const revenueHistorySchema = z.object({
+  name: z.string(),
+  total: z.number(),
+});
+
+export type RevenueHistory = z.infer<typeof revenueHistorySchema>;
+
 // Dashboard Stats (main)
 export const dashboardStatsSchema = z.object({
   revenue: revenueStatsSchema,
@@ -70,6 +78,7 @@ export const dashboardStatsSchema = z.object({
   customers: customerStatsSchema,
   recentOrders: z.array(recentOrderSchema),
   topProducts: z.array(topProductSchema),
+  revenueHistory: z.array(revenueHistorySchema),
 });
 
 export type DashboardStats = z.infer<typeof dashboardStatsSchema>;

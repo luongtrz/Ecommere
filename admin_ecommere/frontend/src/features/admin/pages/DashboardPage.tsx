@@ -12,15 +12,7 @@ import { Link } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Mock data for charts (since backend doesn't provide history yet)
-const revenueData = [
-  { name: 'T1', total: 12000000 },
-  { name: 'T2', total: 18000000 },
-  { name: 'T3', total: 15000000 },
-  { name: 'T4', total: 22000000 },
-  { name: 'T5', total: 28000000 },
-  { name: 'T6', total: 24000000 },
-  { name: 'T7', total: 32000000 },
-];
+// Removed mock data as we are now using real API data
 
 export function DashboardPage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
@@ -181,7 +173,7 @@ export function DashboardPage() {
             <CardContent className="pl-2">
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={revenueData}>
+                  <AreaChart data={stats.revenueHistory}>
                     <defs>
                       <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
