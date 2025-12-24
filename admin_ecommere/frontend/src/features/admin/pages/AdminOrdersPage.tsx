@@ -128,7 +128,7 @@ export function AdminOrdersPage() {
         <Card className="shadow-sm border-l-4 border-l-blue-500">
           <CardHeader className="pb-2">
             <CardDescription>Tổng đơn hàng tháng này</CardDescription>
-            <CardTitle className="text-2xl font-bold">{data?.meta.total || 0}</CardTitle>
+            <CardTitle className="text-2xl font-bold">{data?.meta?.total || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card className="shadow-sm border-l-4 border-l-yellow-500">
@@ -298,7 +298,7 @@ export function AdminOrdersPage() {
         )}
 
         {/* Pagination */}
-        {data && data.meta.pages > 1 && (
+        {data && data?.meta?.pages > 1 && (
           <div className="border-t border-gray-100 px-6 py-4 flex items-center justify-between bg-gray-50/50">
             <span className="text-sm text-gray-500">
               Trang {page} / {data.meta.pages}
