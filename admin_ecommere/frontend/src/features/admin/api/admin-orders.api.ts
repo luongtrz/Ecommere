@@ -25,6 +25,17 @@ export const orderItemSchema = z.object({
   quantity: z.number(),
   unitPrice: z.number(),
   lineTotal: z.number(),
+  variant: z.object({
+    id: z.string(),
+    sku: z.string(),
+    scent: z.string(),
+    volumeMl: z.number(),
+    product: z.object({
+      id: z.string(),
+      name: z.string(),
+      images: z.array(z.string()).optional(),
+    }).optional(),
+  }).optional(),
 });
 
 export type OrderItem = z.infer<typeof orderItemSchema>;
