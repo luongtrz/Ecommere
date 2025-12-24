@@ -193,9 +193,9 @@ export function AdminOrdersPage() {
                             <div className="text-xs text-muted-foreground">{order.paymentMethod}</div>
                           </td>
                           <td className="py-3 px-4">
-                            <div className="flex -space-x-2 overflow-hidden">
+                            <div className="flex -space-x-3 overflow-hidden">
                               {order.items?.slice(0, 3).map((item: any, idx) => (
-                                <div key={idx} className="w-8 h-8 rounded-full border-2 border-white bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                                <div key={idx} className="w-12 h-12 rounded-lg border-2 border-white bg-muted flex items-center justify-center overflow-hidden shrink-0 shadow-sm relative z-0 hover:z-10 hover:scale-110 transition-transform cursor-pointer">
                                   {item.variant?.product?.images?.[0] ? (
                                     <img
                                       src={item.variant.product.images[0]}
@@ -204,12 +204,12 @@ export function AdminOrdersPage() {
                                       title={item.variant?.product?.name}
                                     />
                                   ) : (
-                                    <Package className="h-4 w-4 text-muted-foreground" />
+                                    <Package className="h-5 w-5 text-muted-foreground" />
                                   )}
                                 </div>
                               ))}
                               {order.items?.length > 3 && (
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-muted text-xs font-medium shrink-0">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-white bg-muted text-xs font-medium shrink-0 shadow-sm relative z-0">
                                   +{order.items.length - 3}
                                 </div>
                               )}
@@ -288,9 +288,9 @@ export function AdminOrdersPage() {
 
                       {/* Product Images Mobile */}
                       <div className="flex items-center gap-2">
-                        <div className="flex -space-x-2">
+                        <div className="flex -space-x-3">
                           {order.items?.slice(0, 4).map((item: any, idx) => (
-                            <div key={idx} className="w-8 h-8 rounded-full border-2 border-white bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                            <div key={idx} className="w-12 h-12 rounded-lg border-2 border-white bg-muted flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                               {item.variant?.product?.images?.[0] ? (
                                 <img
                                   src={item.variant.product.images[0]}
@@ -298,12 +298,12 @@ export function AdminOrdersPage() {
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <Package className="h-4 w-4 text-muted-foreground" />
+                                <Package className="h-5 w-5 text-muted-foreground" />
                               )}
                             </div>
                           ))}
                           {order.items?.length > 4 && (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-muted text-xs font-medium shrink-0">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-white bg-muted text-xs font-medium shrink-0 shadow-sm">
                               +{order.items.length - 4}
                             </div>
                           )}
