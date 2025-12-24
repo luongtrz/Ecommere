@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /account/
-Disallow: /checkout/
-
-Sitemap: https://thaisprayshop.com/sitemap.xml

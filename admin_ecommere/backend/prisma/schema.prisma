@@ -1,0 +1,291 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PACKING
+  SHIPPED
+  DELIVERED
+  CANCELED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum CouponType {
+  PERCENT
+  FIXED
+  FREESHIP
+}
+
+enum StockMovementType {
+  IN
+  OUT
+  ADJUST
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(CUSTOMER)
+  name         String?
+  phone        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  addresses     Address[]
+  cart          Cart?
+  orders        Order[]
+  reviews       Review[]
+  refreshTokens RefreshToken[]
+  
+  @@map("users")
+}
+
+model RefreshToken {
+  id          String    @id @default(cuid())
+  userId      String
+  tokenFamily String    // UUID to track rotation chain
+  tokenHash   String    @unique // SHA-256 hash of the actual token
+  expiresAt   DateTime
+  replacedBy  String?   // ID of the token that replaced this one
+  revokedAt   DateTime? // Timestamp when revoked (for security breach)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt @default(now()) // Track when token was replaced
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([tokenFamily])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  fullName  String
+  phone     String
+  province  String
+  district  String
+  ward      String
+  line1     String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("addresses")
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  parentId  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
+  products Product[]
+  
+  @@map("categories")
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String    @db.Text
+  brand       String?
+  images      String[]
+  categoryId  String
+  basePrice   Int       @default(0)
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  category    Category         @relation(fields: [categoryId], references: [id])
+  variants    ProductVariant[]
+  reviews     Review[]
+  orderItems  OrderItem[]
+  
+  @@index([categoryId])
+  @@index([slug])
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+  productId String
+  sku       String   @unique
+  scent     String
+  volumeMl  Int
+  price     Int
+  salePrice Int?
+  stock     Int      @default(0)
+  barcode   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  product        Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
+  
+  @@index([productId])
+  @@index([sku])
+  @@map("product_variants")
+}
+
+model Coupon {
+  code             String      @id
+  type             CouponType
+  value            Int
+  minOrder         Int?
+  maxDiscount      Int?
+  validFrom        DateTime?
+  validUntil       DateTime?
+  maxUses          Int?
+  maxUsesPerUser   Int?
+  usedCount        Int         @default(0)
+  active           Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  carts            Cart[]
+  
+  @@map("coupons")
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  couponId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon Coupon?    @relation(fields: [couponId], references: [code])
+  items  CartItem[]
+  
+  @@map("carts")
+}
+
+model CartItem {
+  id            String   @id @default(cuid())
+  cartId        String
+  variantId     String
+  quantity      Int      @default(1)
+  priceSnapshot Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+  
+  @@unique([cartId, variantId])
+  @@map("cart_items")
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  userId        String
+  code          String        @unique
+  subtotal      Int
+  discount      Int           @default(0)
+  shippingFee   Int           @default(0)
+  total         Int
+  status        OrderStatus   @default(PENDING_PAYMENT)
+  paymentMethod String
+  paymentStatus PaymentStatus @default(PENDING)
+  addressJson   String        @db.Text
+  couponCode    String?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+  
+  @@index([userId])
+  @@index([code])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  productId      String
+  variantId      String
+  nameSnapshot   String
+  scentSnapshot  String
+  volumeSnapshot Int
+  quantity       Int
+  unitPrice      Int
+  lineTotal      Int
+  createdAt      DateTime @default(now())
+  
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id])
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+  
+  @@map("order_items")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  rating    Int
+  content   String   @db.Text
+  images    String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+  @@index([productId])
+  @@map("reviews")
+}
+
+model StockMovement {
+  id            String            @id @default(cuid())
+  variantId     String
+  type          StockMovementType
+  quantity      Int
+  previousStock Int
+  newStock      Int
+  notes         String?
+  createdAt     DateTime          @default(now())
+  
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+  
+  @@index([variantId])
+  @@map("stock_movements")
+}
