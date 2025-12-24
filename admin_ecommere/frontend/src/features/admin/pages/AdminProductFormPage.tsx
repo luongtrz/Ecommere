@@ -130,140 +130,162 @@ export function AdminProductFormPage() {
   return (
     <>
       <SEO title={isEditMode ? `Chỉnh sửa sản phẩm - ${product?.name || ''}` : 'Thêm sản phẩm mới'} />
-      <div>
+      <div className="w-full max-w-[98%] mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/admin/products">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-bold">
-            {isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
-          </h1>
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/admin/products">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <h1 className="text-2xl font-bold">
+              {isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
+            </h1>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/admin/products')}
+              disabled={isSubmitting}
+            >
+              Hủy
+            </Button>
+            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang lưu...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Lưu sản phẩm
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông tin sản phẩm</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Product Name */}
-              <div className="space-y-2">
-                <Label htmlFor="name">
-                  Tên sản phẩm <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="Nhập tên sản phẩm"
-                  {...register('name')}
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name.message}</p>
-                )}
+          <div className="space-y-4">
+            {/* Top Section: Images & Main Info */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Left Column: Images */}
+              <div className="lg:col-span-1">
+                <Card className="h-full">
+                  <CardHeader className="pb-3">
+                    <CardTitle>Hình ảnh</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <ImageUpload images={images} onChange={setImages} maxImages={5} />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description">
-                  Mô tả <span className="text-destructive">*</span>
-                </Label>
-                <Textarea
-                  id="description"
-                  placeholder="Nhập mô tả sản phẩm"
-                  rows={5}
-                  {...register('description')}
-                />
-                {errors.description && (
-                  <p className="text-sm text-destructive">{errors.description.message}</p>
-                )}
-              </div>
-              {/* Product Images */}
-              <div className="space-y-2">
-                <Label>
-                  Hình ảnh sản phẩm
-                </Label>
-                <ImageUpload images={images} onChange={setImages} maxImages={5} />
-              </div>
-
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Category */}
-                <div className="space-y-2">
-                  <Label htmlFor="categoryId">
-                    Danh mục <span className="text-destructive">*</span>
-                  </Label>
-                  <Select
-                    value={watch('categoryId')}
-                    onValueChange={(value) => setValue('categoryId', value)}
-                    disabled={isLoadingCategories}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingCategories ? "Đang tải..." : "Chọn danh mục"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories && categories.length > 0 ? (
-                        categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-categories" disabled>
-                          Không có danh mục nào
-                        </SelectItem>
+              {/* Right Column: Main Info */}
+              <div className="lg:col-span-1">
+                <Card className="h-full">
+                  <CardHeader className="pb-3">
+                    <CardTitle>Thông tin chung</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Product Name */}
+                    <div className="space-y-2">
+                      <Label htmlFor="name">
+                        Tên sản phẩm <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="name"
+                        placeholder="Nhập tên sản phẩm"
+                        {...register('name')}
+                      />
+                      {errors.name && (
+                        <p className="text-sm text-destructive">{errors.name.message}</p>
                       )}
-                    </SelectContent>
-                  </Select>
-                  {errors.categoryId && (
-                    <p className="text-sm text-destructive">{errors.categoryId.message}</p>
-                  )}
-                </div>
+                    </div>
 
-                {/* Base Price */}
-                <div className="space-y-2">
-                  <Label htmlFor="basePrice">
-                    Giá cơ bản <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="basePrice"
-                    type="number"
-                    placeholder="0"
-                    {...register('basePrice', { valueAsNumber: true })}
-                  />
-                  {errors.basePrice && (
-                    <p className="text-sm text-destructive">{errors.basePrice.message}</p>
-                  )}
-                </div>
+                    {/* Description */}
+                    <div className="space-y-2">
+                      <Label htmlFor="description">
+                        Mô tả <span className="text-destructive">*</span>
+                      </Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Nhập mô tả sản phẩm"
+                        rows={6}
+                        className="resize-none"
+                        {...register('description')}
+                      />
+                      {errors.description && (
+                        <p className="text-sm text-destructive">{errors.description.message}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
+            </div>
 
-              {/* Form Actions */}
-              <div className="flex gap-4 pt-4">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang lưu...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      {isEditMode ? 'Cập nhật sản phẩm' : 'Tạo sản phẩm'}
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/admin/products')}
-                  disabled={isSubmitting}
-                >
-                  Hủy
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Bottom Section: Category & Price */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle>Phân loại & Giá</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Category */}
+                  <div className="space-y-2">
+                    <Label htmlFor="categoryId">
+                      Danh mục <span className="text-destructive">*</span>
+                    </Label>
+                    <Select
+                      value={watch('categoryId')}
+                      onValueChange={(value) => setValue('categoryId', value)}
+                      disabled={isLoadingCategories}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={isLoadingCategories ? "Đang tải..." : "Chọn danh mục"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories && categories.length > 0 ? (
+                          categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-categories" disabled>
+                            Không có danh mục nào
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {errors.categoryId && (
+                      <p className="text-sm text-destructive">{errors.categoryId.message}</p>
+                    )}
+                  </div>
+
+                  {/* Base Price */}
+                  <div className="space-y-2">
+                    <Label htmlFor="basePrice">
+                      Giá cơ bản <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="basePrice"
+                      type="number"
+                      placeholder="0"
+                      {...register('basePrice', { valueAsNumber: true })}
+                    />
+                    {errors.basePrice && (
+                      <p className="text-sm text-destructive">{errors.basePrice.message}</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </form>
       </div>
     </>

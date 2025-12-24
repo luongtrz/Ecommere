@@ -446,6 +446,7 @@ export class OrdersService {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
         items: {
@@ -522,6 +523,7 @@ export class OrdersService {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
       },
