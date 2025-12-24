@@ -111,7 +111,19 @@ export function AdminOrdersPage() {
     if (!addressJson) return '';
     try {
       const addr = JSON.parse(addressJson);
-      return typeof addr === 'object' ? (addr.address || addr.line1 || addressJson) : addressJson;
+      if (typeof addr === 'object' && addr !== null) {
+        const parts = [
+          addr.line1,
+          addr.ward,
+          addr.district,
+          addr.province
+        ].filter(Boolean);
+
+        if (parts.length > 0) return parts.join(', ');
+
+        return addr.address || addressJson;
+      }
+      return addressJson;
     } catch {
       return addressJson;
     }

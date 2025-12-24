@@ -237,7 +237,7 @@ git commit -m "feat: Phase X - [description]"
   - `data.orders` -> `data.data`
   - `data.meta.total` -> `data.total`
   - `data.meta.pages` -> `data.totalPages`
-- [x] **Fix Address Crash**: Sửa hiển thị địa chỉ từ `order.address` (undefined) thành `order.addressJson` và parse JSON an toàn.
+- [x] **Fix Address Crash & Logic**: Sửa hiển thị địa chỉ từ `order.address` (undefined) thành `order.addressJson`, parse JSON an toàn và **ghép đầy đủ (Đường, Phường, Quận, TP)**.
 - [x] **UI Enhancement**:
   - Cập nhật cột "Sản phẩm" hiển thị chi tiết: Ảnh thumbnail + Tên sản phẩm + Số lượng + Phân loại.
   - Xử lý hiển thị "xem thêm" gọn gàng nếu đơn hàng có nhiều hơn 2 sản phẩm.
