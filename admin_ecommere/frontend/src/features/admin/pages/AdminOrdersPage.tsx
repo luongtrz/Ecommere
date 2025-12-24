@@ -140,7 +140,7 @@ export function AdminOrdersPage() {
         <Card className="shadow-sm border-l-4 border-l-blue-500">
           <CardHeader className="pb-2">
             <CardDescription>Tổng đơn hàng tháng này</CardDescription>
-            <CardTitle className="text-2xl font-bold">{data?.meta?.total || 0}</CardTitle>
+            <CardTitle className="text-2xl font-bold">{data?.total || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card className="shadow-sm border-l-4 border-l-yellow-500">
@@ -212,7 +212,7 @@ export function AdminOrdersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {!data?.orders?.length ? (
+                {!data?.data?.length ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                       <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -220,7 +220,7 @@ export function AdminOrdersPage() {
                     </td>
                   </tr>
                 ) : (
-                  data?.orders?.map((order) => (
+                  data?.data?.map((order) => (
                     <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
@@ -260,8 +260,8 @@ export function AdminOrdersPage() {
                       <td className="px-6 py-4">
                         <div className="font-medium text-gray-900">{order.user?.name || order.user?.email}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">{order.user?.phone || 'Chưa cập nhật SĐT'}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 max-w-[150px] truncate" title={order.address}>
-                          {parseAddress(order.address)}
+                        <div className="text-xs text-muted-foreground mt-0.5 max-w-[150px] truncate" title={order.addressJson}>
+                          {parseAddress(order.addressJson)}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -310,10 +310,10 @@ export function AdminOrdersPage() {
         )}
 
         {/* Pagination */}
-        {data && data?.meta?.pages > 1 && (
+        {data && data?.totalPages > 1 && (
           <div className="border-t border-gray-100 px-6 py-4 flex items-center justify-between bg-gray-50/50">
             <span className="text-sm text-gray-500">
-              Trang {page} / {data.meta.pages}
+              Trang {page} / {data.totalPages}
             </span>
             <div className="flex gap-2">
               <Button
@@ -329,8 +329,8 @@ export function AdminOrdersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage(p => Math.min(data.meta.pages, p + 1))}
-                disabled={page === data.meta.pages}
+                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
+                disabled={page === data.totalPages}
                 className="h-8"
               >
                 Sau
