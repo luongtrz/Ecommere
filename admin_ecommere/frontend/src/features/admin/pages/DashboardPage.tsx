@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Mock data for charts (since backend doesn't provide history yet)
 const revenueData = [
@@ -104,19 +104,19 @@ export function DashboardPage() {
   ];
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' }> = {
+    const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
       PENDING_PAYMENT: { label: 'Chờ thanh toán', variant: 'outline' },
-      PAID: { label: 'Đã thanh toán', variant: 'secondary' }, // Secondary often looks good for paid
+      PAID: { label: 'Đã thanh toán', variant: 'secondary' },
       PACKING: { label: 'Đang đóng gói', variant: 'secondary' },
       SHIPPED: { label: 'Đã giao vận', variant: 'default' },
-      DELIVERED: { label: 'Đã giao', variant: 'default' }, // Should differentiate if possible, but default is fine
+      DELIVERED: { label: 'Đã giao', variant: 'default' },
       CANCELED: { label: 'Đã hủy', variant: 'destructive' },
       REFUNDED: { label: 'Đã hoàn tiền', variant: 'destructive' },
     };
 
     const config = statusMap[status] || { label: status, variant: 'outline' };
 
-    // Custom style for DELIVERED/PAID if needed, but sticking to shadcn variants for consistency
+    // Custom style for DELIVERED/PAID
     let className = "";
     if (status === 'PAID') className = "bg-green-100 text-green-700 hover:bg-green-200 border-transparent";
     if (status === 'DELIVERED') className = "bg-blue-100 text-blue-700 hover:bg-blue-200 border-transparent";
