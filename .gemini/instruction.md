@@ -218,3 +218,39 @@ git commit -m "feat: Phase X - [description]"
 ✅ Backward compatible (no breaking changes)
 ✅ Ready for more advanced features (promise toasts, loading states)
 
+## Cập nhật Session (2025-12-25 03:00 - 04:00)
+
+### Các Tính Năng Đã Thực Hiện
+
+#### 1. Dashboard Revamp
+- [x] Tích hợp API thật cho biểu đồ doanh thu (`/api/admin/dashboard/stats`).
+- [x] Hiển thị dữ liệu lịch sử doanh thu thực tế thay vì mock data.
+
+#### 2. Quản Lý Sản Phẩm (AdminProductsPage)
+- [x] Implement chức năng **Xóa sản phẩm**.
+- [x] Thêm `window.confirm` để xác nhận trước khi xóa.
+- [x] Tích hợp `useToast` thông báo kết quả (thành công/lỗi).
+
+#### 3. Quản Lý Đơn Hàng (AdminOrdersPage) - QUAN TRỌNG
+- [x] **Fix Critical Bug**: Giao diện bị lỗi đỏ do sai cú pháp JSX.
+- [x] **Fix Data Mapping**: Sửa đường dẫn truy cập dữ liệu API:
+  - `data.orders` -> `data.data`
+  - `data.meta.total` -> `data.total`
+  - `data.meta.pages` -> `data.totalPages`
+- [x] **Fix Address Crash**: Sửa hiển thị địa chỉ từ `order.address` (undefined) thành `order.addressJson` và parse JSON an toàn.
+- [x] **UI Enhancement**:
+  - Cập nhật cột "Sản phẩm" hiển thị chi tiết: Ảnh thumbnail + Tên sản phẩm + Số lượng + Phân loại.
+  - Xử lý hiển thị "xem thêm" gọn gàng nếu đơn hàng có nhiều hơn 2 sản phẩm.
+  - Styling lại trạng thái đơn hàng (badges).
+
+#### 4. UI/UX Chung
+- [x] **Sidebar Toggle**: Thêm nút thu gọn/mở rộng sidebar.
+  - Chế độ mở: Hiển thị đầy đủ icon + text (width 256px).
+  - Chế độ đóng: Hiển thị dạng mini icon (width 80px), ẩn text.
+  - Hiệu ứng transition mượt mà.
+
+### Trạng Thái Codebase
+- Đã git commit đầy đủ các thay đổi.
+- Không còn lỗi runtime crash trên trang Orders.
+- API tích hợp đúng schema.
+
