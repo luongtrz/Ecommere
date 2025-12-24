@@ -13,7 +13,7 @@ import {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Lấy tất cả thống kê cho dashboard admin
@@ -32,6 +32,7 @@ export class AdminService {
       customers,
       recentOrders,
       topProducts,
+      revenueHistory,
     ] = await Promise.all([
       this.getRevenueStats(firstDayOfMonth, firstDayOfLastMonth, lastDayOfLastMonth),
       this.getOrderStats(firstDayOfMonth, firstDayOfLastMonth, lastDayOfLastMonth),
@@ -39,6 +40,7 @@ export class AdminService {
       this.getCustomerStats(firstDayOfMonth, firstDayOfLastMonth, lastDayOfLastMonth),
       this.getRecentOrders(),
       this.getTopProducts(),
+      this.getRevenueHistory(),
     ]);
 
     return {
@@ -48,6 +50,7 @@ export class AdminService {
       customers,
       recentOrders,
       topProducts,
+      revenueHistory,
     };
   }
 
@@ -378,5 +381,58 @@ export class AdminService {
         revenue: revenueMap.get(item.productId) || 0,
       };
     });
+  }
+
+  /**
+   * Thống kê doanh thu theo tháng (6 tháng gần nhất)
+   */
+  private async getRevenueHistory() {
+    const months = 6;
+    const history = [];
+
+    // Loop for last 6 months including current
+    for (let i = months - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+
+      const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+      const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+
+      const monthLabel = `T${date.getMonth() + 1}`;
+
+      history.push({
+        firstDay,
+        lastDay,
+        name: monthLabel,
+        fullDate: date, // Keep date for sorting if needed, but not returned
+      });
+    }
+
+    // Execute queries in parallel
+    const data = await Promise.all(
+      history.map(async (month) => {
+        const result = await this.prisma.order.aggregate({
+          where: {
+            status: {
+              in: [OrderStatus.PAID, OrderStatus.PACKING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+            },
+            createdAt: {
+              gte: month.firstDay,
+              lte: month.lastDay,
+            },
+          },
+          _sum: {
+            total: true,
+          },
+        });
+
+        return {
+          name: month.name,
+          total: result._sum.total || 0,
+        };
+      })
+    );
+
+    return data;
   }
 }
