@@ -97,264 +97,107 @@ export function AdminOrdersPage() {
 
 
   return (
-    <>
-      <SEO title="Quản lý đơn hàng - Admin" />
-      <div>
-        <h1 className="text-3xl font-bold mb-8">Quản lý đơn hàng</h1>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Quản lý đơn hàng</h1>
+          <p className="text-muted-foreground mt-1">Theo dõi và xử lý các đơn hàng của cửa hàng.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="hidden md:flex">
+            <Calendar className="mr-2 h-4 w-4" />
+            Hôm nay: {new Date().toLocaleDateString('vi-VN')}
+          </Button>
+          <Button>+ Tạo đơn hàng</Button>
+        </div>
+      </div>
 
-        {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Tìm theo mã đơn, email khách hàng..."
-                      value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                      className="pl-9"
-                    />
-                  </div>
-                  <Button onClick={handleSearch}>Tìm kiếm</Button>
-                </div>
-              </div>
-              <Select value={status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Lọc theo trạng thái" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
-                  {Object.entries(ORDER_STATUS_MAP).map(([key, { label }]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="shadow-sm border-l-4 border-l-blue-500">
+          <CardHeader className="pb-2">
+            <CardDescription>Tổng đơn hàng tháng này</CardDescription>
+            <CardTitle className="text-2xl font-bold">{data?.meta.total || 0}</CardTitle>
+          </CardHeader>
         </Card>
-
-        {/* Orders Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Danh sách đơn hàng
-              {data && <span className="ml-2 text-muted-foreground font-normal">({data.total} đơn)</span>}
+        <Card className="shadow-sm border-l-4 border-l-yellow-500">
+          <CardHeader className="pb-2">
+            <CardDescription>Đang chờ xử lý</CardDescription>
+            <CardTitle className="text-2xl font-bold text-yellow-600">
+              {/* Placeholder Logic */}
+              --
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {isLoading || isFetching ? (
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 border rounded">
-                    <Skeleton className="h-16 w-16" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-48" />
-                    </div>
-                    <Skeleton className="h-8 w-24" />
-                  </div>
-                ))}
+        </Card>
+        <Card className="shadow-sm border-l-4 border-l-green-500">
+          <CardHeader className="pb-2">
+            <CardDescription>Doanh thu hôm nay</CardDescription>
+            <CardTitle className="text-2xl font-bold text-green-600">--</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+
+      {/* Filters & Actions */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl border shadow-sm">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Tìm kiếm theo mã đơn, khách hàng..."
+            className="pl-9 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px] bg-gray-50 border-gray-200">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <SelectValue placeholder="Trạng thái" />
               </div>
-            ) : isError ? (
-              <div className="flex items-center gap-2 p-4 border rounded-lg bg-destructive/10 text-destructive">
-                <AlertCircle className="h-5 w-5" />
-                <p>Không thể tải danh sách đơn hàng</p>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
+              {Object.entries(ORDER_STATUS_MAP).map(([key, config]) => (
+                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Orders Table */}
+      <div className="rounded-xl border shadow-sm bg-white overflow-hidden">
+        {isLoading ? (
+          <div className="p-8 space-y-4">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="flex items-center justify-between">
+                <Skeleton className="h-12 w-full rounded-lg" />
               </div>
-            ) : !data || data.data.length === 0 ? (
-              <p className="text-muted-foreground text-center py-12">
-                {search || status !== 'ALL' ? 'Không tìm thấy đơn hàng nào' : 'Chưa có đơn hàng nào'}
-              </p>
-            ) : (
-              <>
-                {/* Desktop Table */}
-                <div className="hidden lg:block overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium">Mã đơn</th>
-                        <th className="text-left py-3 px-4 font-medium">Sản phẩm</th>
-                        <th className="text-left py-3 px-4 font-medium">Khách hàng</th>
-                        <th className="text-left py-3 px-4 font-medium">Tổng tiền</th>
-                        <th className="text-left py-3 px-4 font-medium">Trạng thái</th>
-                        <th className="text-left py-3 px-4 font-medium">Ngày đặt</th>
-                        <th className="text-left py-3 px-4 font-medium">Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.data.map((order) => (
-                        <tr key={order.id} className="border-b hover:bg-muted/50">
-                          <td className="py-3 px-4">
-                            <div className="font-medium">{order.code}</div>
-                            <div className="text-xs text-muted-foreground">{order.paymentMethod}</div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex -space-x-3 overflow-hidden">
-                              {order.items?.slice(0, 3).map((item: any, idx) => (
-                                <div key={idx} className="w-12 h-12 rounded-lg border-2 border-white bg-muted flex items-center justify-center overflow-hidden shrink-0 shadow-sm relative z-0 hover:z-10 hover:scale-110 transition-transform cursor-pointer">
-                                  {item.variant?.product?.images?.[0] ? (
-                                    <img
-                                      src={item.variant.product.images[0]}
-                                      alt={item.variant?.product?.name}
-                                      className="w-full h-full object-cover"
-                                      title={item.variant?.product?.name}
-                                    />
-                                  ) : (
-                                    <Package className="h-5 w-5 text-muted-foreground" />
-                                  )}
-                                </div>
-                              ))}
-                              {order.items?.length > 3 && (
-                                <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-white bg-muted text-xs font-medium shrink-0 shadow-sm relative z-0">
-                                  +{order.items.length - 3}
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="font-medium">{order.user?.name || order.user?.email}</div>
-                            {order.user?.phone && (
-                              <div className="text-xs text-muted-foreground">{order.user.phone}</div>
-                            )}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="font-medium">{formatCurrency(order.total)}</div>
-                            {order.discount > 0 && (
-                              <div className="text-xs text-muted-foreground">
-                                Giảm: {formatCurrency(order.discount)}
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-3 px-4">
-                            <Badge variant={ORDER_STATUS_MAP[order.status].variant}>
-                              {ORDER_STATUS_MAP[order.status].label}
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-4 text-sm text-muted-foreground">
-                            {formatDateTime(order.createdAt)}
-                          </td>
-                          <td className="py-3 px-4">
-                            {STATUS_TRANSITIONS[order.status].length > 0 && (
-                              <Select
-                                onValueChange={(value) => handleUpdateStatus(order.id, order.code, value as OrderStatus)}
-                                disabled={updateStatus.isPending}
-                              >
-                                <SelectTrigger className="w-[140px] h-8">
-                                  <SelectValue placeholder="Cập nhật..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {STATUS_TRANSITIONS[order.status].map((nextStatus) => (
-                                    <SelectItem key={nextStatus} value={nextStatus}>
-                                      {ORDER_STATUS_MAP[nextStatus].label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            )}
-                          </td>
-                          <td className="py-3 px-4">
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link to={`/admin/orders/${order.id}`}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                Chi tiết
-                              </Link>
-                            </Button>
-                          </td>
+            ))}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-gray-50/50 text-xs uppercase text-gray-500 font-medium">
+                <tr>
+                  <th className="px-6 py-4">Mã đơn</th>
+                  <th className="px-6 py-4">Sản phẩm</th>
+                  <th className="px-6 py-4">Khách hàng</th>
+                  <th className="px-6 py-4 text-right">Tổng tiền</th>
+                  <th className="px-6 py-4 text-center">Trạng thái</th>
+                  <th className="px-6 py-4 text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {data?.orders.length === 0 ? (
+                        <tr>
+                            <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                                <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                                <p>Không tìm thấy đơn hàng nào</p>
+                            </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile Cards */}
-                <div className="lg:hidden space-y-4">
-                  {data.data.map((order) => (
-                    <div key={order.id} className="border rounded-lg p-4 space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="font-medium">{order.code}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {formatDateTime(order.createdAt)}
-                          </div>
-                        </div>
-                        <Badge variant={ORDER_STATUS_MAP[order.status].variant}>
-                          {ORDER_STATUS_MAP[order.status].label}
-                        </Badge>
-                      </div>
-
-                      {/* Product Images Mobile */}
-                      <div className="flex items-center gap-2">
-                        <div className="flex -space-x-3">
-                          {order.items?.slice(0, 4).map((item: any, idx) => (
-                            <div key={idx} className="w-12 h-12 rounded-lg border-2 border-white bg-muted flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
-                              {item.variant?.product?.images?.[0] ? (
-                                <img
-                                  src={item.variant.product.images[0]}
-                                  alt={item.variant?.product?.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <Package className="h-5 w-5 text-muted-foreground" />
-                              )}
-                            </div>
-                          ))}
-                          {order.items?.length > 4 && (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-white bg-muted text-xs font-medium shrink-0 shadow-sm">
-                              +{order.items.length - 4}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-1 text-sm">
-                        <div className="font-medium">{order.user?.name || order.user?.email}</div>
-                        {order.user?.phone && (
-                          <div className="text-muted-foreground">{order.user.phone}</div>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        <span className="font-medium text-lg">{formatCurrency(order.total)}</span>
-                        {STATUS_TRANSITIONS[order.status].length > 0 && (
-                          <Select
-                            onValueChange={(value) => handleUpdateStatus(order.id, order.code, value as OrderStatus)}
-                            disabled={updateStatus.isPending}
-                          >
-                            <SelectTrigger className="w-[140px] h-8">
-                              <SelectValue placeholder="Cập nhật..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {STATUS_TRANSITIONS[order.status].map((nextStatus) => (
-                                <SelectItem key={nextStatus} value={nextStatus}>
-                                  {ORDER_STATUS_MAP[nextStatus].label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
-                      <div className="pt-2 border-t">
-                        <Button variant="outline" size="sm" asChild className="w-full">
-                          <Link to={`/admin/orders/${order.id}`}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Xem chi tiết
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {data.totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6 pt-6 border-t">
-                    <div className="text-sm text-muted-foreground">
-                      Trang {data.page} / {data.totalPages}
-                    </div>
-                    <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -374,13 +217,13 @@ export function AdminOrdersPage() {
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                )}
-              </>
+          </div>
+        )}
+      </>
             )}
-          </CardContent>
-        </Card>
-      </div>
+    </CardContent>
+        </Card >
+      </div >
     </>
   );
 }
