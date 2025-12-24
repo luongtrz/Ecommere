@@ -197,23 +197,15 @@ export function AdminProductFormPage() {
                   <Select
                     value={watch('categoryId')}
                     onValueChange={(value) => setValue('categoryId', value)}
-                    disabled={isLoadingCategories}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={isLoadingCategories ? "Đang tải..." : "Chọn danh mục"} />
+                      <SelectValue placeholder="Chọn danh mục" />
                     </SelectTrigger>
-                      {categories && categories.length > 0 ? (
                     <SelectContent>
-                        categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-categories" disabled>
-                          Không có danh mục nào
-                        </SelectItem>
-                      )}
+                      <SelectItem value="placeholder" disabled>Chọn danh mục</SelectItem>
+                      {/* TODO: Load categories from API */}
+                      <SelectItem value="category1">Danh mục 1</SelectItem>
+                      <SelectItem value="category2">Danh mục 2</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.categoryId && (
