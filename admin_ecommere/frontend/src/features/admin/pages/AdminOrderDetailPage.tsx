@@ -54,7 +54,15 @@ export function AdminOrderDetailPage() {
     });
 
     const updateStatus = useUpdateOrderStatus();
-    const order = ordersData?.orders?.[0];
+
+    // Get order from list response
+    const rawOrder = ordersData?.data?.[0];
+
+    // Parse addressJson if it exists
+    const order = rawOrder ? {
+        ...rawOrder,
+        shippingAddress: rawOrder.addressJson ? JSON.parse(rawOrder.addressJson) : null
+    } : null;
 
     const handleUpdateStatus = async (newStatus: OrderStatus) => {
         if (!order) return;
