@@ -1,12 +1,12 @@
-import { Outlet, Link } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Ticket, 
-  Warehouse,
-  Home
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Ticket,
+  Warehouse
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -17,6 +17,15 @@ const navigation = [
 ];
 
 export function AdminLayout() {
+  const location = useLocation();
+
+  const isActive = (href: string) => {
+    if (href === '/admin') {
+      return location.pathname === '/admin';
+    }
+    return location.pathname.startsWith(href);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -25,18 +34,16 @@ export function AdminLayout() {
           <h1 className="text-xl font-bold text-primary">Admin Panel</h1>
         </div>
         <nav className="p-4 space-y-1">
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-md hover:bg-gray-100"
-          >
-            <Home className="h-5 w-5" />
-            <span>Về trang chủ</span>
-          </Link>
           {navigation.map((item) => (
             <Link
               key={item.name}
               to={item.href}
-              className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 hover:text-primary transition-colors"
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors",
+                isActive(item.href)
+                  ? "bg-primary text-white font-medium"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-primary"
+              )}
             >
               <item.icon className="h-5 w-5" />
               <span>{item.name}</span>
