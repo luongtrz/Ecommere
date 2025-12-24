@@ -1,2 +1,44 @@
-.github/
+# General
+node_modules/
+dist/
+build/
+*.local
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Frontend (Vite/React)
+coverage/
+*.tsbuildinfo
+
+# Backend (NestJS)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+# We usually keep lockfiles, but if you want to ignore them uncomment above. 
+# RECOMMENDED: Do NOT ignore lockfiles. I will leave them commented out.
+
+# Prisma
+/prisma/*.db
+/prisma/*.db-journal
+
+# Gemini/AI
 .gemini/
+
+# Misc
+.github/
+cookies.txt
