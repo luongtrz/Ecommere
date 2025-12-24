@@ -1,9 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
-import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { RequireAuth } from './guards/RequireAuth';
-import { RequireAdmin } from './guards/RequireAdmin';
 
 // Auth Pages
 import { LoginPage } from '@/features/auth/pages/LoginPage';
@@ -27,14 +25,6 @@ import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
 // Orders
 import { OrdersPage } from '@/features/orders/pages/OrdersPage';
 import { OrderDetailPage } from '@/features/orders/pages/OrderDetailPage';
-
-// Admin Pages
-import { DashboardPage } from '@/features/admin/pages/DashboardPage';
-import { AdminProductsPage } from '@/features/admin/pages/AdminProductsPage';
-import { AdminProductFormPage } from '@/features/admin/pages/AdminProductFormPage';
-import { AdminOrdersPage } from '@/features/admin/pages/AdminOrdersPage';
-import { AdminCouponsPage } from '@/features/admin/pages/AdminCouponsPage';
-import { AdminInventoryPage } from '@/features/admin/pages/AdminInventoryPage';
 
 // Error Pages
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -67,17 +57,6 @@ export function AppRouter() {
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:orderId" element={<OrderDetailPage />} />
-        </Route>
-
-        {/* Admin Routes */}
-        <Route path="admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
-          <Route index element={<DashboardPage />} />
-          <Route path="products" element={<AdminProductsPage />} />
-          <Route path="products/new" element={<AdminProductFormPage />} />
-          <Route path="products/:productId/edit" element={<AdminProductFormPage />} />
-          <Route path="orders" element={<AdminOrdersPage />} />
-          <Route path="coupons" element={<AdminCouponsPage />} />
-          <Route path="inventory" element={<AdminInventoryPage />} />
         </Route>
 
         {/* Error Routes */}
