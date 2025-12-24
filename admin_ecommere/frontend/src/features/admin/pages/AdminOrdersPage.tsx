@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { useAdminOrders, useUpdateOrderStatus } from '../hooks/useAdminOrders';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
-import { AlertCircle, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronRight, Search, Eye } from 'lucide-react';
 import type { OrderStatus } from '../api/admin-orders.api';
 import { useToast } from '@/hooks/useToast';
 
@@ -231,6 +232,14 @@ export function AdminOrdersPage() {
                               </Select>
                             )}
                           </td>
+                          <td className="py-3 px-4">
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link to={`/admin/orders/${order.id}`}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Chi tiết
+                              </Link>
+                            </Button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -277,6 +286,14 @@ export function AdminOrdersPage() {
                             </SelectContent>
                           </Select>
                         )}
+                      </div>
+                      <div className="pt-2 border-t">
+                        <Button variant="outline" size="sm" asChild className="w-full">
+                          <Link to={`/admin/orders/${order.id}`}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Xem chi tiết
+                          </Link>
+                        </Button>
                       </div>
                     </div>
                   ))}
