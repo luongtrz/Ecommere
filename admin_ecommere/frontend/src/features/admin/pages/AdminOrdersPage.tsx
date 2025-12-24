@@ -106,6 +106,18 @@ export function AdminOrdersPage() {
     );
   }
 
+  // Parse address for display (safely)
+  const parseAddress = (addressJson: string | null) => {
+    if (!addressJson) return '';
+    try {
+      const addr = JSON.parse(addressJson);
+      return typeof addr === 'object' ? (addr.address || addr.line1 || addressJson) : addressJson;
+    } catch {
+      return addressJson;
+    }
+  };
+
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Page Header */}
@@ -249,7 +261,7 @@ export function AdminOrdersPage() {
                         <div className="font-medium text-gray-900">{order.user?.name || order.user?.email}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">{order.user?.phone || 'Chưa cập nhật SĐT'}</div>
                         <div className="text-xs text-muted-foreground mt-0.5 max-w-[150px] truncate" title={order.address}>
-                          {order.address ? JSON.parse(order.address).address : ''}
+                          {parseAddress(order.address)}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
