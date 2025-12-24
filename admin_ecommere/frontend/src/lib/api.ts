@@ -110,11 +110,15 @@ apiClient.interceptors.response.use(
         processQueue(refreshError, null);
         authToken.remove();
         localStorage.removeItem('user');
-        
+
+        // Show toast notification for session expiry
+        const toastEvent = new CustomEvent('session-expired');
+        window.dispatchEvent(toastEvent);
+
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
-        
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

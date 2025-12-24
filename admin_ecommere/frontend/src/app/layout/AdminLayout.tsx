@@ -4,9 +4,21 @@ import {
   Package,
   ShoppingCart,
   Ticket,
-  Warehouse
+  Warehouse,
+  LogOut,
+  User as UserIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -18,6 +30,7 @@ const navigation = [
 
 export function AdminLayout() {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const isActive = (href: string) => {
     if (href === '/admin') {
@@ -54,8 +67,26 @@ export function AdminLayout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <header className="h-16 bg-white shadow-sm flex items-center px-8">
+        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-8">
           <h2 className="text-lg font-semibold text-gray-800">Quản trị</h2>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <UserIcon className="h-4 w-4" />
+                <span>{user?.name || user?.email}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Tài khoản</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout} className="text-destructive cursor-pointer">
+                <LogOut className="h-4 w-4 mr-2" />
+                Đăng xuất
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
         <main className="flex-1 p-8">
           <Outlet />
