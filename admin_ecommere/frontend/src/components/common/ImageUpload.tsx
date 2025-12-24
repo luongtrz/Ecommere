@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, GripVertical } from 'lucide-react';
 import apiClient from '@/lib/api';
 import { useToast } from '@/hooks/useToast';
 
@@ -12,6 +12,7 @@ interface ImageUploadProps {
 
 export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProps) {
     const [isUploading, setIsUploading] = useState(false);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const toast = useToast();
 
@@ -59,6 +60,31 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
         toast.info('Đã xóa ảnh khỏi danh sách');
     };
 
+    // Drag and drop handlers
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index);
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === index) return;
+
+        const newImages = [...images];
+        const draggedImage = newImages[draggedIndex];
+
+        // Remove from old position
+        newImages.splice(draggedIndex, 1);
+        // Insert at new position
+        newImages.splice(index, 0, draggedImage);
+
+        onChange(newImages);
+        setDraggedIndex(index);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-4">
@@ -96,12 +122,27 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {images.map((url, index) => (
-                        <div key={index} className="relative group aspect-square">
+                        <div
+                            key={`${url}-${index}`}
+                            draggable
+                            onDragStart={() => handleDragStart(index)}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDragEnd={handleDragEnd}
+                            className={`relative group aspect-square cursor-move ${draggedIndex === index ? 'opacity-50' : ''
+                                }`}
+                        >
+                            {/* Drag handle */}
+                            <div className="absolute top-2 left-2 bg-background/80 rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-move z-10">
+                                <GripVertical className="h-4 w-4 text-muted-foreground" />
+                            </div>
+
                             <img
                                 src={url}
                                 alt={`Product ${index + 1}`}
                                 className="w-full h-full object-cover rounded-lg border"
                             />
+
+                            {/* Delete button */}
                             <Button
                                 type="button"
                                 variant="destructive"
@@ -111,6 +152,8 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
                             >
                                 <X className="h-4 w-4" />
                             </Button>
+
+                            {/* Primary image badge */}
                             {index === 0 && (
                                 <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
                                     Ảnh chính
@@ -122,7 +165,8 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
             )}
 
             <p className="text-xs text-muted-foreground">
-                Ảnh đầu tiên sẽ là ảnh chính của sản phẩm. Kéo thả để sắp xếp lại (chưa hỗ trợ).
+                <GripVertical className="h-3 w-3 inline mr-1" />
+                Kéo thả ảnh để sắp xếp lại thứ tự. Ảnh đầu tiên sẽ là ảnh chính của sản phẩm.
             </p>
         </div>
     );
