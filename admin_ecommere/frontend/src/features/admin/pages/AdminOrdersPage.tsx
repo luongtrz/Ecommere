@@ -234,26 +234,36 @@ export function AdminOrdersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex -space-x-4 hover:space-x-1 transition-all">
-                          {order.items?.slice(0, 3).map((item: any, idx) => (
-                            <div key={idx} className="relative w-12 h-12 rounded-lg border-2 border-white shadow-sm overflow-hidden z-0 hover:z-10 hover:scale-110 transition-transform duration-200">
-                              {item.variant?.product?.images?.[0] ? (
-                                <img
-                                  src={item.variant.product.images[0]}
-                                  alt="Product"
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                  <Package className="h-4 w-4 text-gray-400" />
-                                </div>
-                              )}
+                        <div className="space-y-2 max-w-[300px]">
+                          {order.items?.slice(0, 2).map((item: any, idx) => (
+                            <div key={idx} className="flex items-center gap-3">
+                              <div className="relative w-10 h-10 rounded-md border border-gray-100 shadow-sm overflow-hidden shrink-0">
+                                {item.variant?.product?.images?.[0] ? (
+                                  <img
+                                    src={item.variant.product.images[0]}
+                                    alt="Product"
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                    <Package className="h-4 w-4 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate" title={item.nameSnapshot}>
+                                  {item.nameSnapshot}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  x{item.quantity} {item.scentSnapshot && `• ${item.scentSnapshot}`}
+                                </p>
+                              </div>
                             </div>
                           ))}
-                          {order.items?.length > 3 && (
-                            <div className="relative w-12 h-12 rounded-lg border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600 shadow-sm z-0">
-                              +{order.items.length - 3}
-                            </div>
+                          {(order.items?.length || 0) > 2 && (
+                            <p className="text-xs text-muted-foreground pl-1">
+                              +{order.items!.length - 2} sản phẩm khác
+                            </p>
                           )}
                         </div>
                       </td>
