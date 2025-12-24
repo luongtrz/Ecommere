@@ -5,7 +5,6 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { useAddresses } from '@/features/users/hooks/useAddresses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
@@ -13,9 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatters';
 import { PAYMENT_METHODS, SHIPPING_METHODS } from '@/lib/constants';
 import apiClient from '@/lib/api';
-import { ArrowLeft, Truck, CreditCard, Shield, CheckCircle, MapPin, User, Phone, ShoppingBag, Plus } from 'lucide-react';
+import { ArrowLeft, Truck, CreditCard, Shield, CheckCircle, MapPin, Phone, ShoppingBag, Plus } from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
-import type { Address } from '@/features/users/api/users.api';
 
 export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
@@ -174,11 +172,10 @@ export function CheckoutPage() {
                         <RadioGroup value={selectedAddressId} onValueChange={setSelectedAddressId}>
                           {addresses.map((address) => (
                             <div key={address.id} className="relative">
-                              <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                                selectedAddressId === address.id
+                              <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${selectedAddressId === address.id
                                   ? 'border-blue-500 bg-blue-50 shadow-md'
                                   : 'border-gray-200 hover:border-gray-300'
-                              }`}>
+                                }`}>
                                 <div className="flex items-start gap-3">
                                   <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
                                   <Label htmlFor={address.id} className="flex-1 cursor-pointer">
@@ -232,11 +229,10 @@ export function CheckoutPage() {
                     <RadioGroup value={shippingMethod} onValueChange={setShippingMethod} className="space-y-3">
                       {SHIPPING_METHODS.map((method) => (
                         <div key={method.id} className="relative">
-                          <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                            shippingMethod === method.id
+                          <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${shippingMethod === method.id
                               ? 'border-green-500 bg-green-50 shadow-md'
                               : 'border-gray-200 hover:border-gray-300'
-                          }`}>
+                            }`}>
                             <div className="flex items-center space-x-3">
                               <RadioGroupItem value={method.id} id={method.id} className="mt-0.5" />
                               <Label htmlFor={method.id} className="flex-1 cursor-pointer">
@@ -272,11 +268,10 @@ export function CheckoutPage() {
                     <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
                       {PAYMENT_METHODS.map((method) => (
                         <div key={method.id} className="relative">
-                          <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                            paymentMethod === method.id
+                          <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === method.id
                               ? 'border-purple-500 bg-purple-50 shadow-md'
                               : 'border-gray-200 hover:border-gray-300'
-                          }`}>
+                            }`}>
                             <div className="flex items-center space-x-3">
                               <RadioGroupItem value={method.id} id={method.id} className="mt-0.5" />
                               <Label htmlFor={method.id} className="flex-1 cursor-pointer font-medium">

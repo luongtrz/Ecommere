@@ -84,14 +84,16 @@ export function AdminOrdersPage() {
     );
   };
 
-  const parseAddress = (addressJson: string) => {
-    try {
-      const addr = JSON.parse(addressJson);
-      return `${addr.fullName} - ${addr.phone} - ${addr.line1}, ${addr.ward}, ${addr.district}, ${addr.province}`;
-    } catch {
-      return addressJson;
-    }
-  };
+  // Parse address for display (currently not used but may be needed for order details)
+  // const parseAddress = (addressJson: string) => {
+  //   try {
+  //     const addr = JSON.parse(addressJson);
+  //     return `${addr.fullName} - ${addr.phone} - ${addr.line1}, ${addr.ward}, ${addr.district}, ${addr.province}`;
+  //   } catch {
+  //     return addressJson;
+  //   }
+  // };
+
 
   return (
     <>
