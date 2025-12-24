@@ -48,11 +48,18 @@ export function AdminLayout() {
       <aside
         className={cn(
           "bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden flex flex-col",
-          isSidebarOpen ? "w-64" : "w-0"
+          isSidebarOpen ? "w-64" : "w-20"
         )}
       >
-        <div className="flex h-16 items-center px-6 border-b shrink-0">
-          <h1 className="text-xl font-bold text-primary truncate">Admin Panel</h1>
+        <div className={cn(
+          "flex h-16 items-center border-b shrink-0 transition-all duration-300",
+          isSidebarOpen ? "px-6" : "justify-center px-0"
+        )}>
+          {isSidebarOpen ? (
+            <h1 className="text-xl font-bold text-primary truncate">Admin Panel</h1>
+          ) : (
+            <h1 className="text-xl font-bold text-primary truncate">AP</h1>
+          )}
         </div>
         <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
           {navigation.map((item) => (
@@ -63,11 +70,18 @@ export function AdminLayout() {
                 "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors whitespace-nowrap",
                 isActive(item.href)
                   ? "bg-primary text-white font-medium"
-                  : "text-gray-700 hover:bg-gray-100 hover:text-primary"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-primary",
+                !isSidebarOpen && "justify-center px-0"
               )}
+              title={!isSidebarOpen ? item.name : undefined}
             >
               <item.icon className="h-5 w-5 shrink-0" />
-              <span>{item.name}</span>
+              <span className={cn(
+                "transition-all duration-300",
+                !isSidebarOpen && "hidden"
+              )}>
+                {item.name}
+              </span>
             </Link>
           ))}
         </nav>
@@ -85,6 +99,7 @@ export function AdminLayout() {
             >
               <Menu className="h-5 w-5" />
             </Button>
+            {/* Breadcrumb or Page Title usually goes here, logic depends on context but keeping simple for now */}
             <h2 className="text-lg font-semibold text-gray-800">Quản trị</h2>
           </div>
 
