@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { useAdminOrders, useUpdateOrderStatus } from '../hooks/useAdminOrders';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
-import { AlertCircle, ChevronLeft, ChevronRight, Search, Eye } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronRight, Search, Eye, Package } from 'lucide-react';
 import type { OrderStatus } from '../api/admin-orders.api';
 import { useToast } from '@/hooks/useToast';
 
@@ -177,6 +177,7 @@ export function AdminOrdersPage() {
                     <thead>
                       <tr className="border-b">
                         <th className="text-left py-3 px-4 font-medium">Mã đơn</th>
+                        <th className="text-left py-3 px-4 font-medium">Sản phẩm</th>
                         <th className="text-left py-3 px-4 font-medium">Khách hàng</th>
                         <th className="text-left py-3 px-4 font-medium">Tổng tiền</th>
                         <th className="text-left py-3 px-4 font-medium">Trạng thái</th>
@@ -190,6 +191,29 @@ export function AdminOrdersPage() {
                           <td className="py-3 px-4">
                             <div className="font-medium">{order.code}</div>
                             <div className="text-xs text-muted-foreground">{order.paymentMethod}</div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex -space-x-2 overflow-hidden">
+                              {order.items?.slice(0, 3).map((item: any, idx) => (
+                                <div key={idx} className="w-8 h-8 rounded-full border-2 border-white bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                                  {item.variant?.product?.images?.[0] ? (
+                                    <img
+                                      src={item.variant.product.images[0]}
+                                      alt={item.variant?.product?.name}
+                                      className="w-full h-full object-cover"
+                                      title={item.variant?.product?.name}
+                                    />
+                                  ) : (
+                                    <Package className="h-4 w-4 text-muted-foreground" />
+                                  )}
+                                </div>
+                              ))}
+                              {order.items?.length > 3 && (
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-muted text-xs font-medium shrink-0">
+                                  +{order.items.length - 3}
+                                </div>
+                              )}
+                            </div>
                           </td>
                           <td className="py-3 px-4">
                             <div className="font-medium">{order.user?.name || order.user?.email}</div>
@@ -261,6 +285,31 @@ export function AdminOrdersPage() {
                           {ORDER_STATUS_MAP[order.status].label}
                         </Badge>
                       </div>
+
+                      {/* Product Images Mobile */}
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-2">
+                          {order.items?.slice(0, 4).map((item: any, idx) => (
+                            <div key={idx} className="w-8 h-8 rounded-full border-2 border-white bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                              {item.variant?.product?.images?.[0] ? (
+                                <img
+                                  src={item.variant.product.images[0]}
+                                  alt={item.variant?.product?.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Package className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                          ))}
+                          {order.items?.length > 4 && (
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-muted text-xs font-medium shrink-0">
+                              +{order.items.length - 4}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                       <div className="space-y-1 text-sm">
                         <div className="font-medium">{order.user?.name || order.user?.email}</div>
                         {order.user?.phone && (
