@@ -212,7 +212,7 @@ export function AdminOrdersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {data?.orders.length === 0 ? (
+                {!data?.orders?.length ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                       <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -220,7 +220,7 @@ export function AdminOrdersPage() {
                     </td>
                   </tr>
                 ) : (
-                  data?.orders.map((order) => (
+                  data?.orders?.map((order) => (
                     <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
