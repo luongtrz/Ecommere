@@ -4,15 +4,16 @@
  */
 
 import { toast as sonnerToast } from 'sonner';
+import { ReactNode } from 'react';
 
 export function useToast() {
   return {
     // Basic toast methods - backward compatible
-    toast: (message: string) => sonnerToast(message),
-    success: (message: string) => sonnerToast.success(message),
-    error: (message: string) => sonnerToast.error(message),
-    warning: (message: string) => sonnerToast.warning(message),
-    info: (message: string) => sonnerToast.info(message),
+    toast: (message: string | ReactNode) => sonnerToast(message),
+    success: (message: string | ReactNode) => sonnerToast.success(message),
+    error: (message: string | ReactNode) => sonnerToast.error(message),
+    warning: (message: string | ReactNode) => sonnerToast.warning(message),
+    info: (message: string | ReactNode) => sonnerToast.info(message),
 
     // Advanced features from Sonner
     promise: sonnerToast.promise,

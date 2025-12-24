@@ -249,6 +249,9 @@ git commit -m "feat: Phase X - [description]"
   - Chế độ đóng: Hiển thị dạng mini icon (width 80px), ẩn text.
   - Hiệu ứng transition mượt mà.
 
+#### 5. Fixes
+- [x] **TypeScript Error**: Cập nhật hook `useToast` để chấp nhận `ReactNode` (JSX) thay vì chỉ `string`. Fix lỗi `Argument of type 'Element' is not assignable to parameter of type 'string'`.
+
 ### Trạng Thái Codebase
 - Đã git commit đầy đủ các thay đổi.
 - Không còn lỗi runtime crash trên trang Orders.
