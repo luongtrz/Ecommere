@@ -1,4 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import {
   LayoutDashboard,
   Package,
@@ -7,6 +8,7 @@ import {
   Warehouse,
   LogOut,
   User as UserIcon,
+  Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -31,6 +33,7 @@ const navigation = [
 export function AdminLayout() {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const isActive = (href: string) => {
     if (href === '/admin') {
@@ -42,23 +45,28 @@ export function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md">
-        <div className="flex h-16 items-center px-6 border-b">
-          <h1 className="text-xl font-bold text-primary">Admin Panel</h1>
+      <aside
+        className={cn(
+          "bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden flex flex-col",
+          isSidebarOpen ? "w-64" : "w-0"
+        )}
+      >
+        <div className="flex h-16 items-center px-6 border-b shrink-0">
+          <h1 className="text-xl font-bold text-primary truncate">Admin Panel</h1>
         </div>
-        <nav className="p-4 space-y-1">
+        <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
           {navigation.map((item) => (
             <Link
               key={item.name}
               to={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors",
+                "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors whitespace-nowrap",
                 isActive(item.href)
                   ? "bg-primary text-white font-medium"
                   : "text-gray-700 hover:bg-gray-100 hover:text-primary"
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5 shrink-0" />
               <span>{item.name}</span>
             </Link>
           ))}
@@ -66,9 +74,19 @@ export function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-8">
-          <h2 className="text-lg font-semibold text-gray-800">Quản trị</h2>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-4 md:px-8">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="hover:bg-gray-100"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <h2 className="text-lg font-semibold text-gray-800">Quản trị</h2>
+          </div>
 
           {/* User Menu */}
           <DropdownMenu>
