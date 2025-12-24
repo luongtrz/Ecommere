@@ -90,6 +90,14 @@ export class TopProductDto {
   revenue: number;
 }
 
+export class RevenueHistoryDto {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  total: number;
+}
+
 export class DashboardStatsDto {
   @ApiProperty({ type: RevenueStatsDto })
   revenue: RevenueStatsDto;
@@ -108,4 +116,7 @@ export class DashboardStatsDto {
 
   @ApiProperty({ type: [TopProductDto], description: '5 sản phẩm bán chạy nhất' })
   topProducts: TopProductDto[];
+
+  @ApiProperty({ type: [RevenueHistoryDto], description: 'Doanh thu 6 tháng gần nhất' })
+  revenueHistory: RevenueHistoryDto[];
 }
