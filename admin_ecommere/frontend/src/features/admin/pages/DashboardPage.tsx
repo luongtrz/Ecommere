@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { SEO } from '@/lib/seo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, Package, ShoppingCart, Users, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
@@ -5,9 +6,18 @@ import { useDashboardStats } from '../hooks/useDashboardStats';
 import { formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/useToast';
 
 export function DashboardPage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
+  const toast = useToast();
+
+  // Show error toast when data fails to load
+  useEffect(() => {
+    if (isError) {
+      toast.error('❌ Không thể tải dữ liệu thống kê. Vui lòng thử lại sau.');
+    }
+  }, [isError, toast]);
 
   if (isLoading) {
     return (
@@ -40,9 +50,10 @@ export function DashboardPage() {
         <SEO title="Dashboard - Admin" />
         <div>
           <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-          <div className="flex items-center gap-2 p-4 border rounded-lg bg-destructive/10 text-destructive">
-            <AlertCircle className="h-5 w-5" />
-            <p>Không thể tải dữ liệu thống kê. Vui lòng thử lại sau.</p>
+          <div className="flex flex-col items-center justify-center gap-4 p-12 border rounded-lg bg-muted/50">
+            <AlertCircle className="h-12 w-12 text-muted-foreground" />
+            <p className="text-lg text-muted-foreground">Không thể tải dữ liệu thống kê</p>
+            <p className="text-sm text-muted-foreground">Vui lòng thử lại sau hoặc liên hệ quản trị viên</p>
           </div>
         </div>
       </>
@@ -102,7 +113,7 @@ export function DashboardPage() {
       <SEO title="Dashboard - Admin" />
       <div>
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {statCards.map((stat, index) => (
             <Card key={index}>

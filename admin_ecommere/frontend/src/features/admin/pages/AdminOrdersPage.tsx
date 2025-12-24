@@ -16,6 +16,7 @@ import { useAdminOrders, useUpdateOrderStatus } from '../hooks/useAdminOrders';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { AlertCircle, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import type { OrderStatus } from '../api/admin-orders.api';
+import { useToast } from '@/hooks/useToast';
 
 const ORDER_STATUS_MAP: Record<
   string,
@@ -45,6 +46,7 @@ export function AdminOrdersPage() {
   const [status, setStatus] = useState<OrderStatus | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const toast = useToast();
 
   const { data, isLoading, isError, isFetching } = useAdminOrders({
     page,
@@ -65,14 +67,21 @@ export function AdminOrdersPage() {
     setPage(1);
   };
 
-  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
-    if (confirm(`Xác nhận cập nhật trạng thái đơn hàng thành "${ORDER_STATUS_MAP[newStatus].label}"?`)) {
-      try {
-        await updateStatus.mutateAsync({ orderId, status: newStatus });
-      } catch (error) {
-        alert('Không thể cập nhật trạng thái đơn hàng');
+  const handleUpdateStatus = async (orderId: string, orderCode: string, newStatus: OrderStatus) => {
+    const statusLabel = ORDER_STATUS_MAP[newStatus].label;
+
+    toast.promise(
+      updateStatus.mutateAsync({ orderId, status: newStatus }),
+      {
+        loading: `Đang cập nhật trạng thái đơn hàng ${orderCode}...`,
+        success: () => {
+          return `✅ Đơn hàng ${orderCode} đã được cập nhật thành "${statusLabel}"`;
+        },
+        error: (err) => {
+          return `❌ Không thể cập nhật đơn hàng: ${err?.message || 'Lỗi không xác định'}`;
+        },
       }
-    }
+    );
   };
 
   const parseAddress = (addressJson: string) => {
@@ -204,7 +213,7 @@ export function AdminOrdersPage() {
                           <td className="py-3 px-4">
                             {STATUS_TRANSITIONS[order.status].length > 0 && (
                               <Select
-                                onValueChange={(value) => handleUpdateStatus(order.id, value as OrderStatus)}
+                                onValueChange={(value) => handleUpdateStatus(order.id, order.code, value as OrderStatus)}
                                 disabled={updateStatus.isPending}
                               >
                                 <SelectTrigger className="w-[140px] h-8">
@@ -251,7 +260,7 @@ export function AdminOrdersPage() {
                         <span className="font-medium text-lg">{formatCurrency(order.total)}</span>
                         {STATUS_TRANSITIONS[order.status].length > 0 && (
                           <Select
-                            onValueChange={(value) => handleUpdateStatus(order.id, value as OrderStatus)}
+                            onValueChange={(value) => handleUpdateStatus(order.id, order.code, value as OrderStatus)}
                             disabled={updateStatus.isPending}
                           >
                             <SelectTrigger className="w-[140px] h-8">
