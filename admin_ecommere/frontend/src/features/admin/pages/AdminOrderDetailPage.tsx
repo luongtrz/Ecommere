@@ -43,7 +43,8 @@ const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
 
 export function AdminOrderDetailPage() {
     const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
+    const toast = useToast();
     const toast = useToast();
 
     // Fetch orders with filter by ID
@@ -70,9 +71,9 @@ export function AdminOrderDetailPage() {
         toast.promise(
             updateStatus.mutateAsync({ orderId: order.id, status: newStatus }),
             {
-                loading: `Đang cập nhật trạng thái đơn hàng ${order.orderCode}...`,
+                loading: `Đang cập nhật trạng thái đơn hàng ${order.code}...`,
                 success: () => {
-                    return `✅ Đơn hàng ${order.orderCode} đã được cập nhật thành "${ORDER_STATUS_MAP[newStatus].label}"`;
+                    return `✅ Đơn hàng ${order.code} đã được cập nhật thành "${ORDER_STATUS_MAP[newStatus].label}"`;
                 },
                 error: (err) => {
                     return `❌ Không thể cập nhật đơn hàng: ${err?.message || 'Lỗi không xác định'}`;
@@ -111,7 +112,7 @@ export function AdminOrderDetailPage() {
 
     return (
         <>
-            <SEO title={`Đơn hàng ${order.orderCode}`} />
+            <SEO title={`Đơn hàng ${order.code}`} />
 
             {/* Header */}
             <div className="mb-6">
@@ -124,7 +125,7 @@ export function AdminOrderDetailPage() {
 
                 <div className="flex items-start justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2">Đơn hàng #{order.orderCode}</h1>
+                        <h1 className="text-3xl font-bold mb-2">Đơn hàng #{order.code}</h1>
                         <p className="text-sm text-muted-foreground">
                             Đặt ngày {formatDateTime(order.createdAt)}
                         </p>
