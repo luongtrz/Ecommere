@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { useAdminOrders, useUpdateOrderStatus } from '../hooks/useAdminOrders';
+import { useAdminOrder, useUpdateOrderStatus } from '../hooks/useAdminOrders';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { ArrowLeft, Package, User, MapPin, CreditCard, Clock, CheckCircle } from 'lucide-react';
 import type { OrderStatus } from '../api/admin-orders.api';
@@ -45,17 +45,10 @@ export function AdminOrderDetailPage() {
     const { id } = useParams<{ id: string }>();
     const toast = useToast();
 
-    // Fetch orders with filter by ID
-    const { data: ordersData, isLoading } = useAdminOrders({
-        page: 1,
-        limit: 1,
-        search: id // Use order ID as search to get single order
-    });
+    // Fetch single order by ID
+    const { data: rawOrder, isLoading } = useAdminOrder(id || '');
 
     const updateStatus = useUpdateOrderStatus();
-
-    // Get order from list response
-    const rawOrder = ordersData?.data?.[0];
 
     // Parse addressJson if it exists
     const order = rawOrder ? {
@@ -82,26 +75,20 @@ export function AdminOrderDetailPage() {
 
     if (isLoading) {
         return (
-            <>
-                <SEO title="Đang tải..." />
-                <div className="py-12">
-                    <LoadingSpinner />
-                </div>
-            </>
+            <div className="flex justify-center items-center h-screen">
+                <LoadingSpinner size="lg" />
+            </div>
         );
     }
 
     if (!order) {
         return (
-            <>
-                <SEO title="Không tìm thấy đơn hàng" />
-                <div className="text-center py-12">
-                    <h1 className="text-2xl font-bold mb-4">Không tìm thấy đơn hàng</h1>
-                    <Button asChild>
-                        <Link to="/admin/orders">Quay lại danh sách</Link>
-                    </Button>
-                </div>
-            </>
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] gap-4">
+                <h1 className="text-2xl font-bold">Không tìm thấy đơn hàng</h1>
+                <Button asChild>
+                    <Link to="/admin/orders">Quay lại danh sách</Link>
+                </Button>
+            </div>
         );
     }
 
@@ -112,32 +99,34 @@ export function AdminOrderDetailPage() {
         <>
             <SEO title={`Đơn hàng ${order.code}`} />
 
-            {/* Header */}
-            <div className="mb-6">
-                <Button variant="ghost" size="sm" asChild className="mb-4">
-                    <Link to="/admin/orders" className="flex items-center gap-2">
-                        <ArrowLeft className="h-4 w-4" />
-                        Quay lại danh sách
-                    </Link>
-                </Button>
-
-                <div className="flex items-start justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold mb-2">Đơn hàng #{order.code}</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Đặt ngày {formatDateTime(order.createdAt)}
-                        </p>
+            <div className="space-y-4">
+                {/* Header Compact */}
+                <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm border">
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="icon" asChild>
+                            <Link to="/admin/orders">
+                                <ArrowLeft className="h-5 w-5" />
+                            </Link>
+                        </Button>
+                        <div>
+                            <h1 className="text-xl font-bold flex items-center gap-2">
+                                #{order.code}
+                                <span className="text-sm font-normal text-muted-foreground">
+                                    ({formatDateTime(order.createdAt)})
+                                </span>
+                            </h1>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <Badge variant={ORDER_STATUS_MAP[order.status]?.variant} className="text-lg px-4 py-2">
-                            <StatusIcon className="h-4 w-4 mr-2" />
+                    <div className="flex items-center gap-3">
+                        <Badge variant={ORDER_STATUS_MAP[order.status]?.variant} className="px-3 py-1 text-sm">
+                            <StatusIcon className="h-3.5 w-3.5 mr-1.5" />
                             {ORDER_STATUS_MAP[order.status]?.label}
                         </Badge>
 
                         {availableStatuses.length > 0 && (
                             <Select value={order.status} onValueChange={handleUpdateStatus}>
-                                <SelectTrigger className="w-48">
+                                <SelectTrigger className="w-[180px] h-9">
                                     <SelectValue placeholder="Cập nhật trạng thái" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -154,170 +143,174 @@ export function AdminOrderDetailPage() {
                         )}
                     </div>
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Content */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Order Items */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Package className="h-5 w-5" />
-                                Sản phẩm ({order.items?.length || 0})
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {order.items?.map((item: any, index: number) => (
-                                    <div key={index} className="flex gap-4 pb-4 border-b last:border-0">
-                                        <div className="w-20 h-20 bg-muted rounded-lg flex-shrink-0">
-                                            {item.product?.images?.[0] && (
-                                                <img
-                                                    src={item.product.images[0]}
-                                                    alt={item.product?.name}
-                                                    className="w-full h-full object-cover rounded-lg"
-                                                />
-                                            )}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Left Column (Products + Customer) */}
+                    <div className="lg:col-span-2 space-y-4">
+                        {/* Products Compact */}
+                        <Card>
+                            <CardHeader className="py-3 px-4 bg-muted/30">
+                                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                    <Package className="h-4 w-4" />
+                                    Sản phẩm ({order.items?.length || 0})
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="divide-y">
+                                    {order.items?.map((item: any, index: number) => (
+                                        <div key={index} className="flex gap-3 p-3 hover:bg-muted/5">
+                                            <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0 border overflow-hidden">
+                                                {item.variant?.product?.images?.[0] && (
+                                                    <img
+                                                        src={item.variant.product.images[0]}
+                                                        alt={item.variant?.product?.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-medium text-sm truncate" title={item.variant?.product?.name}>
+                                                    {item.variant?.product?.name}
+                                                </h4>
+                                                <p className="text-xs text-muted-foreground mt-0.5">
+                                                    Phân loại: {item.variant?.scent} - {item.variant?.volumeMl}ml
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">SKU: {item.variant?.sku}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-medium text-sm">{formatCurrency(item.unitPrice)}</p>
+                                                <p className="text-xs text-muted-foreground">x{item.quantity}</p>
+                                                <p className="font-medium text-sm mt-0.5 text-primary">
+                                                    {formatCurrency(item.unitPrice * item.quantity)}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-semibold">{item.product?.name}</h4>
-                                            <p className="text-sm text-muted-foreground">
-                                                {item.variant?.scent} - {item.variant?.volumeMl}ml
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">SKU: {item.variant?.sku}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-semibold">{formatCurrency(item.price)}</p>
-                                            <p className="text-sm text-muted-foreground">x{item.quantity}</p>
-                                            <p className="text-sm font-semibold mt-1">
-                                                {formatCurrency(item.price * item.quantity)}
-                                            </p>
-                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Customer & Address Side-by-Side */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Card>
+                                <CardHeader className="py-3 px-4 bg-muted/30">
+                                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                        <User className="h-4 w-4" />
+                                        Khách hàng
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4 space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Tên:</span>
+                                        <span className="font-medium">{order.user?.name || 'N/A'}</span>
                                     </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Email:</span>
+                                        <span className="font-medium truncate ml-2">{order.user?.email || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">SĐT:</span>
+                                        <span className="font-medium">{order.user?.phone || 'N/A'}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-                    {/* Customer Info */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <User className="h-5 w-5" />
-                                Thông tin khách hàng
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Tên khách hàng</p>
-                                <p className="font-semibold">{order.user?.name || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Email</p>
-                                <p className="font-semibold">{order.user?.email || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Số điện thoại</p>
-                                <p className="font-semibold">{order.shippingAddress?.phone || 'N/A'}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            <Card>
+                                <CardHeader className="py-3 px-4 bg-muted/30">
+                                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                        <MapPin className="h-4 w-4" />
+                                        Giao hàng
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4 text-sm space-y-1">
+                                    <p className="font-medium">{order.shippingAddress?.fullName}</p>
+                                    <p>{order.shippingAddress?.phone}</p>
+                                    <p className="text-muted-foreground line-clamp-2">
+                                        {order.shippingAddress?.line1}
+                                        {order.shippingAddress?.line2 && `, ${order.shippingAddress.line2}`},
+                                        {' '}{order.shippingAddress?.ward}, {order.shippingAddress?.district},
+                                        {' '}{order.shippingAddress?.province}
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
 
-                    {/* Shipping Address */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <MapPin className="h-5 w-5" />
-                                Địa chỉ giao hàng
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-1">
-                                <p className="font-semibold">{order.shippingAddress?.fullName}</p>
-                                <p className="text-sm">{order.shippingAddress?.phone}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {order.shippingAddress?.line1}
-                                    {order.shippingAddress?.line2 && `, ${order.shippingAddress.line2}`}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {order.shippingAddress?.ward}, {order.shippingAddress?.district}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {order.shippingAddress?.province}, {order.shippingAddress?.country}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                    {/* Right Column (Payment + Timeline) */}
+                    <div className="space-y-4">
+                        <Card>
+                            <CardHeader className="py-3 px-4 bg-muted/30">
+                                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                    <CreditCard className="h-4 w-4" />
+                                    Thanh toán
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-4 space-y-3 text-sm">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Phương thức</span>
+                                    <Badge variant="outline">{order.paymentMethod}</Badge>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Trạng thái</span>
+                                    <Badge variant="secondary">{order.paymentStatus}</Badge>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Tạm tính</span>
+                                    <span>{formatCurrency(order.subtotal)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Phí vận chuyển</span>
+                                    <span>{formatCurrency(order.shippingFee)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Giảm giá</span>
+                                    <span className="text-red-600">-{formatCurrency(order.discount)}</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between text-base font-bold">
+                                    <span>Tổng cộng</span>
+                                    <span className="text-primary">{formatCurrency(order.total)}</span>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                {/* Sidebar */}
-                <div className="space-y-6">
-                    {/* Payment Summary */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <CreditCard className="h-5 w-5" />
-                                Thanh toán
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            <div className="flex justify-between">
-                                <span className="text-sm text-muted-foreground">Phương thức</span>
-                                <span className="font-semibold">{order.paymentMethod}</span>
-                            </div>
-                            <Separator />
-                            <div className="flex justify-between">
-                                <span className="text-sm text-muted-foreground">Tạm tính</span>
-                                <span>{formatCurrency(order.subtotal)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-sm text-muted-foreground">Phí vận chuyển</span>
-                                <span>{formatCurrency(order.shippingFee)}</span>
-                            </div>
-                            <Separator />
-                            <div className="flex justify-between text-lg font-bold">
-                                <span>Tổng cộng</span>
-                                <span className="text-primary">{formatCurrency(order.total)}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Order Timeline */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Clock className="h-5 w-5" />
-                                Lịch sử đơn hàng
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <div className="flex gap-3">
-                                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-primary"></div>
-                                    <div>
-                                        <p className="font-semibold text-sm">Đơn hàng đã tạo</p>
-                                        <p className="text-xs text-muted-foreground">
+                        <Card>
+                            <CardHeader className="py-3 px-4 bg-muted/30">
+                                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    Timeline
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-4">
+                                <div className="space-y-4 relative pl-2 border-l-2 border-muted ml-1">
+                                    <div className="relative pl-4">
+                                        <div className="absolute -left-[11px] top-1.5 w-2 h-2 rounded-full bg-primary ring-4 ring-white" />
+                                        <p className="font-medium text-xs text-muted-foreground mb-0.5">
                                             {formatDateTime(order.createdAt)}
                                         </p>
+                                        <p className="text-sm font-medium">Đơn hàng được tạo</p>
                                     </div>
-                                </div>
-                                {order.updatedAt !== order.createdAt && (
-                                    <div className="flex gap-3">
-                                        <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-muted-foreground"></div>
-                                        <div>
-                                            <p className="font-semibold text-sm">Cập nhật trạng thái</p>
-                                            <p className="text-xs text-muted-foreground">
+
+                                    {order.updatedAt !== order.createdAt && (
+                                        <div className="relative pl-4">
+                                            <div className="absolute -left-[11px] top-1.5 w-2 h-2 rounded-full bg-primary ring-4 ring-white" />
+                                            <p className="font-medium text-xs text-muted-foreground mb-0.5">
                                                 {formatDateTime(order.updatedAt)}
                                             </p>
+                                            <p className="text-sm font-medium">Cập nhật gần nhất</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Trạng thái: {ORDER_STATUS_MAP[order.status]?.label}
+                                            </p>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
         </>
     );
 }
+```
