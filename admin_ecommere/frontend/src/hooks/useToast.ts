@@ -1,26 +1,22 @@
-// Simple toast hook
-// For production, consider using a library like sonner or react-hot-toast
+/**
+ * Toast notification hook using Sonner library
+ * Provides a clean API for showing toast notifications throughout the app
+ */
 
-type ToastType = 'success' | 'error' | 'warning' | 'info';
+import { toast as sonnerToast } from 'sonner';
 
 export function useToast() {
-  const showToast = (type: ToastType, message: string) => {
-    // For now, using console.log
-    // In production, this would trigger a toast UI component
-    const prefix = type.toUpperCase();
-    console.log(`[${prefix}] ${message}`);
-    
-    // You can also use alert for critical errors
-    if (type === 'error') {
-      alert(message);
-    }
-  };
-
   return {
-    toast: (message: string) => showToast('info', message),
-    success: (message: string) => showToast('success', message),
-    error: (message: string) => showToast('error', message),
-    warning: (message: string) => showToast('warning', message),
-    info: (message: string) => showToast('info', message),
+    // Basic toast methods - backward compatible
+    toast: (message: string) => sonnerToast(message),
+    success: (message: string) => sonnerToast.success(message),
+    error: (message: string) => sonnerToast.error(message),
+    warning: (message: string) => sonnerToast.warning(message),
+    info: (message: string) => sonnerToast.info(message),
+
+    // Advanced features from Sonner
+    promise: sonnerToast.promise,
+    loading: sonnerToast.loading,
+    dismiss: sonnerToast.dismiss,
   };
 }
