@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Loader2, Save } from 'lucide-react';
 import { useAdminProduct, useCreateProduct, useUpdateProduct } from '../hooks/useAdminProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { useToast } from '@/hooks/useToast';
 
 // Form validation schema
@@ -30,6 +31,9 @@ export function AdminProductFormPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const isEditMode = !!id;
+
+  // Images state
+  const [images, setImages] = useState<string[]>([]);
 
   // Fetch product data if editing
   const { data: product, isLoading: isLoadingProduct } = useAdminProduct(id || null);
@@ -62,6 +66,7 @@ export function AdminProductFormPage() {
       setValue('description', product.description);
       setValue('categoryId', product.categoryId);
       setValue('basePrice', product.basePrice);
+      setImages(product.images || []); // Initialize images
     }
   }, [product, isEditMode, setValue]);
 
@@ -73,7 +78,7 @@ export function AdminProductFormPage() {
           id,
           data: {
             ...data,
-            images: product?.images || [],
+            images,
           },
         });
         toast.success(`✅ Sản phẩm "${data.name}" đã được cập nhật thành công!`);
@@ -81,7 +86,7 @@ export function AdminProductFormPage() {
         // Create new product
         await createProduct.mutateAsync({
           ...data,
-          images: [],
+          images,
         });
         toast.success(`✅ Sản phẩm "${data.name}" đã được tạo thành công!`);
       }
@@ -149,7 +154,6 @@ export function AdminProductFormPage() {
                   id="name"
                   placeholder="Nhập tên sản phẩm"
                   {...register('name')}
-                  error={errors.name?.message}
                 />
                 {errors.name && (
                   <p className="text-sm text-destructive">{errors.name.message}</p>
@@ -171,6 +175,14 @@ export function AdminProductFormPage() {
                   <p className="text-sm text-destructive">{errors.description.message}</p>
                 )}
               </div>
+              {/* Product Images */}
+              <div className="space-y-2">
+                <Label>
+                  Hình ảnh sản phẩm
+                </Label>
+                <ImageUpload images={images} onChange={setImages} maxImages={5} />
+              </div>
+
 
               <div className="grid grid-cols-2 gap-4">
                 {/* Category */}
