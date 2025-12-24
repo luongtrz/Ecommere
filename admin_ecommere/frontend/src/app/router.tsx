@@ -1,7 +1,10 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { MainLayout } from './layout/MainLayout';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+
+// Layouts
 import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
+
+// Guards
 import { RequireAuth } from './guards/RequireAuth';
 import { RequireAdmin } from './guards/RequireAdmin';
 
@@ -10,81 +13,58 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { AccountPage } from '@/features/auth/pages/AccountPage';
 
-// User Pages
-import { AddressesPage } from '@/features/users/pages/AddressesPage';
-
-// Catalog Pages
-import { HomePage } from '@/features/catalog/pages/HomePage';
-import { CatalogPage } from '@/features/catalog/pages/CatalogPage';
-import { CategoryPage } from '@/features/catalog/pages/CategoryPage';
-import { ProductDetailPage } from '@/features/catalog/pages/ProductDetailPage';
-import { SearchPage } from '@/features/catalog/pages/SearchPage';
-
-// Cart & Checkout
-import { CartPage } from '@/features/cart/pages/CartPage';
-import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
-
-// Orders
-import { OrdersPage } from '@/features/orders/pages/OrdersPage';
-import { OrderDetailPage } from '@/features/orders/pages/OrderDetailPage';
-
 // Admin Pages
 import { DashboardPage } from '@/features/admin/pages/DashboardPage';
 import { AdminProductsPage } from '@/features/admin/pages/AdminProductsPage';
 import { AdminProductFormPage } from '@/features/admin/pages/AdminProductFormPage';
 import { AdminOrdersPage } from '@/features/admin/pages/AdminOrdersPage';
+import { AdminOrderDetailPage } from '@/features/admin/pages/AdminOrderDetailPage';
 import { AdminCouponsPage } from '@/features/admin/pages/AdminCouponsPage';
 import { AdminInventoryPage } from '@/features/admin/pages/AdminInventoryPage';
 
 // Error Pages
-import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ErrorPage } from '@/pages/ErrorPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 
-export function AppRouter() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="catalog" element={<CatalogPage />} />
-          <Route path="c/:categorySlug" element={<CategoryPage />} />
-          <Route path="p/:productSlug" element={<ProductDetailPage />} />
-          <Route path="search" element={<SearchPage />} />
-          <Route path="cart" element={<CartPage />} />
-        </Route>
-
-        {/* Auth Routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-        </Route>
-
-        {/* Protected User Routes */}
-        <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
-          <Route path="account" element={<AccountPage />} />
-          <Route path="addresses" element={<AddressesPage />} />
-          <Route path="checkout" element={<CheckoutPage />} />
-          <Route path="orders" element={<OrdersPage />} />
-          <Route path="orders/:orderId" element={<OrderDetailPage />} />
-        </Route>
-
-        {/* Admin Routes */}
-        <Route path="admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
-          <Route index element={<DashboardPage />} />
-          <Route path="products" element={<AdminProductsPage />} />
-          <Route path="products/new" element={<AdminProductFormPage />} />
-          <Route path="products/:productId/edit" element={<AdminProductFormPage />} />
-          <Route path="orders" element={<AdminOrdersPage />} />
-          <Route path="coupons" element={<AdminCouponsPage />} />
-          <Route path="inventory" element={<AdminInventoryPage />} />
-        </Route>
-
-        {/* Error Routes */}
-        <Route path="error" element={<ErrorPage />} />
-        <Route path="404" element={<NotFoundPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Navigate to="/admin" replace />,
+  },
+  {
+    path: '/login',
+    element: <AuthLayout />,
+    children: [{ index: true, element: <LoginPage /> }],
+  },
+  {
+    path: '/register',
+    element: <AuthLayout />,
+    children: [{ index: true, element: <RegisterPage /> }],
+  },
+  {
+    path: '/admin',
+    element: (
+      <RequireAuth>
+        <RequireAdmin>
+          <AdminLayout />
+        </RequireAdmin>
+      </RequireAuth>
+    ),
+    errorElement: <ErrorPage />,
+    children: [
+      { index: true, element: <DashboardPage /> },
+      { path: 'products', element: <AdminProductsPage /> },
+      { path: 'products/new', element: <AdminProductFormPage /> },
+      { path: 'products/:id/edit', element: <AdminProductFormPage /> },
+      { path: 'orders', element: <AdminOrdersPage /> },
+      { path: 'orders/:id', element: <AdminOrderDetailPage /> },
+      { path: 'coupons', element: <AdminCouponsPage /> },
+      { path: 'inventory', element: <AdminInventoryPage /> },
+      { path: 'account', element: <AccountPage /> },
+    ],
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
+]);
