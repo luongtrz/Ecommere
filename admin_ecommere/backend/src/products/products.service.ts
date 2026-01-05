@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
+import { CategoriesService } from '@/categories/categories.service';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
 import { CreateVariantDto } from './dtos/create-variant.dto';
@@ -9,7 +10,10 @@ import { ProductFilterDto, ProductSortBy } from './dtos/product-filter.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private categoriesService: CategoriesService,
+  ) { }
 
   async findAll(filterDto: ProductFilterDto) {
     const { page = 1, limit = 12, search, categoryId, categorySlug, sortBy = ProductSortBy.NEWEST, minPrice, maxPrice } = filterDto;
@@ -207,6 +211,9 @@ export class ProductsService {
       throw new BadRequestException('Category not found');
     }
 
+    // Validate that category is a leaf (no children)
+    await this.categoriesService.validateProductAssignment(categoryId);
+
     // Check if slug exists
     const existing = await this.prisma.product.findUnique({
       where: { slug },
@@ -271,6 +278,9 @@ export class ProductsService {
       if (!category) {
         throw new BadRequestException('Category not found');
       }
+
+      // Validate that category is a leaf (no children)
+      await this.categoriesService.validateProductAssignment(updateProductDto.categoryId);
     }
 
     return this.prisma.product.update({
