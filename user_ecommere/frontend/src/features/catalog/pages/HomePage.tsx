@@ -1,21 +1,93 @@
 import { SEO } from '@/lib/seo';
 import { useProducts } from '../hooks/useProducts';
+import { useCategories } from '../hooks/useCategories';
 import { ProductCard } from '@/components/common/ProductCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Truck, Shield, RefreshCw, Sprout } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import type { Category } from '../api/categories.api';
+
+interface CategoryProductsSectionProps {
+  category: Category;
+  onAddToCart: (product: any, variant: any) => void;
+  isAlternate?: boolean;
+}
+
+function CategoryProductsSection({ category, onAddToCart, isAlternate }: CategoryProductsSectionProps) {
+  const { data: productsData, isLoading } = useProducts({
+    categorySlug: category.slug,
+    limit: 8,
+  });
+
+  if (isLoading) {
+    return (
+      <section className={isAlternate ? 'bg-muted/50 py-12' : 'container py-12'}>
+        <div className={isAlternate ? 'container' : ''}>
+          <LoadingSpinner />
+        </div>
+      </section>
+    );
+  }
+
+  if (!productsData?.products || productsData.products.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className={isAlternate ? 'bg-muted/50 py-12' : 'container py-12'}>
+      <div className={isAlternate ? 'container' : ''}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">{category.name}</h2>
+          <Button asChild variant="outline">
+            <Link to={`/category/${category.slug}`}>Xem tất cả</Link>
+          </Button>
+        </div>
+
+        {/* Mobile: Horizontal Scroll, Desktop: Grid */}
+        <div className="md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
+          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 md:hidden">
+            {productsData.products.map((product) => (
+              <div key={product.id} className="flex-none w-64 snap-center">
+                <ProductCard
+                  id={product.id}
+                  name={product.name}
+                  slug={product.slug}
+                  images={product.images}
+                  price={product.basePrice}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Grid - Hidden on mobile */}
+          <div className="hidden md:contents">
+            {productsData.products.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                slug={product.slug}
+                images={product.images}
+                price={product.basePrice}
+                rating={product.rating}
+                reviewCount={product.reviewCount}
+                onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export function HomePage() {
-  const { data: newProducts, isLoading: isLoadingNew } = useProducts({
-    sortBy: 'newest',
-    limit: 8
-  });
-  const { data: bestSelling, isLoading: isLoadingBest } = useProducts({
-    sortBy: 'best_selling',
-    limit: 8
-  });
+  const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { addItem } = useCart();
 
   const handleAddToCart = (product: any, variant: any) => {
@@ -70,67 +142,21 @@ export function HomePage() {
         <div className="absolute bottom-10 right-10 w-32 h-32 bg-yellow-300/20 rounded-full blur-xl"></div>
       </section>
 
-      {/* New Products */}
-      <section className="container py-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Sản phẩm mới nhất</h2>
-          <Button asChild variant="outline">
-            <Link to="/catalog?sort=newest">Xem tất cả</Link>
-          </Button>
-        </div>
-
-        {isLoadingNew ? (
+      {/* Category-based Product Sections */}
+      {isLoadingCategories ? (
+        <div className="container py-12">
           <LoadingSpinner />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {newProducts?.products.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                slug={product.slug}
-                images={product.images}
-                price={product.basePrice}
-                rating={product.rating}
-                reviewCount={product.reviewCount}
-                onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Best Selling */}
-      <section className="bg-muted/50 py-12">
-        <div className="container">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Bán chạy nhất</h2>
-            <Button asChild variant="outline">
-              <Link to="/catalog?sort=best_selling">Xem tất cả</Link>
-            </Button>
-          </div>
-
-          {isLoadingBest ? (
-            <LoadingSpinner />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {bestSelling?.products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  slug={product.slug}
-                  images={product.images}
-                  price={product.basePrice}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                />
-              ))}
-            </div>
-          )}
         </div>
-      </section>
+      ) : (
+        categories?.map((category, index) => (
+          <CategoryProductsSection
+            key={category.id}
+            category={category}
+            onAddToCart={handleAddToCart}
+            isAlternate={index % 2 === 1}
+          />
+        ))
+      )}
 
       {/* Features */}
       <section className="container py-12">
