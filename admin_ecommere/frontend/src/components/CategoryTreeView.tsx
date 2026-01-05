@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Plus, Edit, Trash, FolderTree, FileText } from 'lucide-react';
-import { Category, categoriesApi } from '../api/categories.api';
+import { Category, categoriesApi } from '@/features/admin/api/categories.api';
 import { Button } from '@/components/ui/button';
 
 interface CategoryTreeNodeProps {
