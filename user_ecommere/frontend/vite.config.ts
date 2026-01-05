@@ -13,6 +13,7 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    allowedHosts: ['back-ram-executive-gale.trycloudflare.com'],
   },
   build: {
     outDir: 'dist',

@@ -29,9 +29,9 @@ async function bootstrap() {
   const express = require('express');
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
-  // CORS - Temporarily allow all origins for development
+  // CORS
   app.enableCors({
-    origin: true,
+    origin: configService.get('CORS_ORIGIN'),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
