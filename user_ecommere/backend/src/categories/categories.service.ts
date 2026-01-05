@@ -6,7 +6,7 @@ import { UpdateCategoryDto } from './dtos/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll() {
     const categories = await this.prisma.category.findMany({
@@ -112,7 +112,93 @@ export class CategoriesService {
   async remove(id: string) {
     const category = await this.prisma.category.findUnique({
       where: { id },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    // Use canDelete validation
+    const validation = await this.canDelete(id);
+    if (!validation.canDelete) {
+      throw new BadRequestException(validation.reason);
+    }
+
+    await this.prisma.category.delete({
+      where: { id },
+    });
+
+    return { message: 'Category deleted successfully' };
+  }
+
+  /**
+   * Get hierarchical tree structure of all categories
+   */
+  async getTreeStructure() {
+    // Get all categories
+    const allCategories = await this.prisma.category.findMany({
       include: {
+        children: {
+          include: {
+            children: true, // For deeper nesting if needed
+            _count: {
+              select: { products: true },
+            },
+          },
+        },
+        _count: {
+          select: { products: true },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    // Filter to get only root categories (parentId is null)
+    const rootCategories = allCategories.filter(cat => !cat.parentId);
+
+    // Build tree recursively
+    const buildTree = (categories: any[]): any[] => {
+      return categories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        parentId: cat.parentId,
+        productCount: cat._count.products,
+        children: cat.children ? buildTree(cat.children) : [],
+        isLeaf: !cat.children || cat.children.length === 0,
+      }));
+    };
+
+    return buildTree(rootCategories);
+  }
+
+  /**
+   * Check if category is a leaf (has no children)
+   */
+  async isLeafCategory(id: string): Promise<boolean> {
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+      include: {
+        children: true,
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    return !category.children || category.children.length === 0;
+  }
+
+  /**
+   * Validate if category can be deleted
+   * Rules: No children AND no products
+   */
+  async canDelete(id: string): Promise<{ canDelete: boolean; reason?: string }> {
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+      include: {
+        children: true,
         _count: {
           select: { products: true },
         },
@@ -123,14 +209,35 @@ export class CategoriesService {
       throw new NotFoundException('Category not found');
     }
 
-    if (category._count.products > 0) {
-      throw new BadRequestException('Cannot delete category with products');
+    // Check for children
+    if (category.children && category.children.length > 0) {
+      return {
+        canDelete: false,
+        reason: `Cannot delete category with ${category.children.length} subcategories. Please delete or move subcategories first.`,
+      };
     }
 
-    await this.prisma.category.delete({
-      where: { id },
-    });
+    // Check for products
+    if (category._count.products > 0) {
+      return {
+        canDelete: false,
+        reason: `Cannot delete category with ${category._count.products} products. Please reassign products first.`,
+      };
+    }
 
-    return { message: 'Category deleted successfully' };
+    return { canDelete: true };
+  }
+
+  /**
+   * Validate that products can only be assigned to leaf categories
+   */
+  async validateProductAssignment(categoryId: string): Promise<void> {
+    const isLeaf = await this.isLeafCategory(categoryId);
+
+    if (!isLeaf) {
+      throw new BadRequestException(
+        'Products can only be assigned to leaf categories (categories without subcategories)',
+      );
+    }
   }
 }
