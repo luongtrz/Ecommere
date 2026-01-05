@@ -1,4 +1,4 @@
-import { CategoryTreeView } from '../components/CategoryTreeView';
+import { CategoryTreeView } from '@/components/CategoryTreeView';
 
 export function AdminCategoriesPage() {
     return (
