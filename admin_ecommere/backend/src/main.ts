@@ -21,17 +21,17 @@ async function bootstrap() {
 
   // Security
   app.use(helmet());
-  
+
   // Cookie parser (must be before routes)
   app.use(cookieParser());
 
   // Serve static files (uploads)
   const express = require('express');
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
-  
-  // CORS
+
+  // CORS - Temporarily allow all origins for development
   app.enableCors({
-    origin: configService.get('CORS_ORIGIN'),
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
@@ -71,7 +71,7 @@ async function bootstrap() {
 
   const port = configService.get('PORT') || 4000;
   await app.listen(port);
-  
+
   console.log(`🚀 Server running on http://localhost:${port}`);
   console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
 }

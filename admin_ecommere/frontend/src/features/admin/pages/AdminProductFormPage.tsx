@@ -68,11 +68,16 @@ export function AdminProductFormPage() {
     if (product && isEditMode) {
       setValue('name', product.name);
       setValue('description', product.description);
-      setValue('categoryId', product.categoryId);
       setValue('basePrice', product.basePrice);
       setImages(product.images || []); // Initialize images
+
+      // Only set categoryId if categories are loaded
+      // This ensures the Select component can recognize the value
+      if (categories && categories.length > 0) {
+        setValue('categoryId', product.categoryId);
+      }
     }
-  }, [product, isEditMode, setValue]);
+  }, [product, isEditMode, setValue, categories]);
 
   const onSubmit = async (data: ProductFormData) => {
     try {
@@ -85,18 +90,18 @@ export function AdminProductFormPage() {
             images,
           },
         });
-        toast.success(`✅ Sản phẩm "${data.name}" đã được cập nhật thành công!`);
+        toast.success(`Sản phẩm "${data.name}" đã được cập nhật thành công!`);
       } else {
         // Create new product
         await createProduct.mutateAsync({
           ...data,
           images,
         });
-        toast.success(`✅ Sản phẩm "${data.name}" đã được tạo thành công!`);
+        toast.success(`Sản phẩm "${data.name}" đã được tạo thành công!`);
       }
       navigate('/admin/products');
     } catch (error: any) {
-      toast.error(`❌ Lỗi: ${error?.message || 'Không thể lưu sản phẩm'}`);
+      toast.error(`Lỗi: ${error?.message || 'Không thể lưu sản phẩm'}`);
     }
   };
 
