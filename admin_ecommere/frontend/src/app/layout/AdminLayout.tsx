@@ -9,6 +9,7 @@ import {
   LogOut,
   User as UserIcon,
   Menu,
+  FolderTree,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Đơn hàng', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Mã giảm giá', href: '/admin/coupons', icon: Ticket },
   { name: 'Kho hàng', href: '/admin/inventory', icon: Warehouse },
+  { name: 'Danh mục', href: '/admin/categories', icon: FolderTree },
 ];
 
 export function AdminLayout() {
