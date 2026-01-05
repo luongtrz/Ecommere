@@ -21,6 +21,7 @@ import { AdminOrdersPage } from '@/features/admin/pages/AdminOrdersPage';
 import { AdminOrderDetailPage } from '@/features/admin/pages/AdminOrderDetailPage';
 import { AdminCouponsPage } from '@/features/admin/pages/AdminCouponsPage';
 import { AdminInventoryPage } from '@/features/admin/pages/AdminInventoryPage';
+import { AdminCategoriesPage } from '@/features/admin/pages/AdminCategoriesPage';
 
 
 // Error Pages
@@ -57,6 +58,7 @@ export const router = createBrowserRouter([
       { path: 'products', element: <AdminProductsPage /> },
       { path: 'products/new', element: <AdminProductFormPage /> },
       { path: 'products/:id/edit', element: <AdminProductFormPage /> },
+      { path: 'categories', element: <AdminCategoriesPage /> },
       { path: 'orders', element: <AdminOrdersPage /> },
       { path: 'orders/:id', element: <AdminOrderDetailPage /> },
       { path: 'coupons', element: <AdminCouponsPage /> },
