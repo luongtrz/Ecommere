@@ -11,7 +11,7 @@ import { Role } from '@prisma/client';
 @ApiTags('Categories')
 @Controller('categories')
 export class CategoriesController {
-  constructor(private categoriesService: CategoriesService) {}
+  constructor(private categoriesService: CategoriesService) { }
 
   @Public()
   @Get()
@@ -19,6 +19,14 @@ export class CategoriesController {
   @ApiResponse({ status: 200, type: [CategoryEntity] })
   async findAll() {
     return this.categoriesService.findAll();
+  }
+
+  @Public()
+  @Get('tree')
+  @ApiOperation({ summary: 'Get categories in hierarchical tree structure' })
+  @ApiResponse({ status: 200 })
+  async getTree() {
+    return this.categoriesService.getTreeStructure();
   }
 
   @Public()
