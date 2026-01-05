@@ -41,12 +41,12 @@ function CategoryProductsSection({ category, onAddToCart, isAlternate }: Categor
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">{category.name}</h2>
           <Button asChild variant="outline">
-            <Link to={`/category/${category.slug}`}>Xem tất cả</Link>
+            <Link to={`/c/${category.slug}`}>Xem tất cả</Link>
           </Button>
         </div>
 
         {/* Mobile: Horizontal Scroll, Desktop: Grid */}
-        <div className="md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
+        <div className="md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-5">
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 md:hidden">
             {productsData.products.map((product) => (
               <div key={product.id} className="flex-none w-64 snap-center">
