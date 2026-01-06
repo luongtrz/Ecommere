@@ -48,6 +48,7 @@ export type ProductsResponse = z.infer<typeof productsResponseSchema>;
 export interface ProductFilters {
   page?: number;
   limit?: number;
+  categoryId?: string;
   categorySlug?: string;
   search?: string;
   minPrice?: number;
@@ -60,11 +61,11 @@ export interface ProductFilters {
 export const productsApi = {
   async getAll(filters: ProductFilters = {}): Promise<ProductsResponse> {
     const response = await apiClient.get('/products', { params: filters });
-    
+
     // Backend wraps with TransformInterceptor: { data: <actual_data>, statusCode, timestamp }
     // Then actual_data has structure: { data: [...products], total, page, ... }
     const actualData = response.data.data || response.data;
-    
+
     const mapped = {
       products: actualData.data || [],
       total: actualData.total || 0,
@@ -72,7 +73,7 @@ export const productsApi = {
       limit: actualData.limit || 12,
       totalPages: actualData.totalPages || 1,
     };
-    
+
     return productsResponseSchema.parse(mapped);
   },
 
@@ -86,9 +87,9 @@ export const productsApi = {
     const response = await apiClient.get('/products', {
       params: { search: query, ...filters },
     });
-    
+
     const actualData = response.data.data || response.data;
-    
+
     const mapped = {
       products: actualData.data || [],
       total: actualData.total || 0,
@@ -96,7 +97,7 @@ export const productsApi = {
       limit: actualData.limit || 12,
       totalPages: actualData.totalPages || 1,
     };
-    
+
     return productsResponseSchema.parse(mapped);
   },
 };

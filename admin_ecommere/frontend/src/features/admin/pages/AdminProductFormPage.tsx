@@ -9,10 +9,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Loader2, Save } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ArrowLeft, Loader2, Save, ChevronDown } from 'lucide-react';
 import { useAdminProduct, useCreateProduct, useUpdateProduct } from '../hooks/useAdminProducts';
-import { useCategories } from '../hooks/useCategories';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ImageUpload } from '@/components/common/ImageUpload';
 import { useToast } from '@/hooks/useToast';
@@ -39,9 +46,6 @@ export function AdminProductFormPage() {
   // Fetch product data if editing
   const { data: product, isLoading: isLoadingProduct } = useAdminProduct(id || null);
 
-  // Fetch categories for dropdown
-  const { data: categories, isLoading: isLoadingCategories } = useCategories();
-
   // Mutations
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
@@ -63,6 +67,43 @@ export function AdminProductFormPage() {
     },
   });
 
+  // Fetch categories tree and flatten to leaves only
+  const [categories, setCategories] = useState<any[]>([]); // Flattened for lookup
+  const [categoryTree, setCategoryTree] = useState<any[]>([]); // Tree for dropdown
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const tree = await import('../api/categories.api').then(m => m.categoriesApi.getTree());
+
+        // Flatten tree but only keep leaves
+        const allCategories: any[] = [];
+        const traverse = (nodes: any[], prefix = '') => {
+          nodes.forEach(node => {
+            const currentName = prefix + node.name;
+            const isLeaf = !node.children || node.children.length === 0;
+
+            allCategories.push({
+              ...node,
+              displayName: currentName,
+              isLeaf,
+            });
+
+            if (node.children && node.children.length > 0) {
+              traverse(node.children, currentName + ' > ');
+            }
+          });
+        };
+        traverse(tree);
+        setCategories(allCategories);
+        setCategoryTree(tree);
+      } catch (error) {
+        console.error('Failed to load categories tree', error);
+      }
+    };
+    loadCategories();
+  }, []);
+
   // Fill form when product data is loaded
   useEffect(() => {
     if (product && isEditMode) {
@@ -72,8 +113,7 @@ export function AdminProductFormPage() {
       setImages(product.images || []); // Initialize images
 
       // Only set categoryId if categories are loaded
-      // This ensures the Select component can recognize the value
-      if (categories && categories.length > 0) {
+      if (categories.length > 0) {
         setValue('categoryId', product.categoryId);
       }
     }
@@ -101,7 +141,13 @@ export function AdminProductFormPage() {
       }
       navigate('/admin/products');
     } catch (error: any) {
-      toast.error(`Lỗi: ${error?.message || 'Không thể lưu sản phẩm'}`);
+      // Handle Axios error response
+      const serverMessage = error.response?.data?.message;
+      const errorMessage = Array.isArray(serverMessage)
+        ? serverMessage.join(', ')
+        : serverMessage || error.message || 'Không thể lưu sản phẩm';
+
+      toast.error(`Lỗi: ${errorMessage}`);
     }
   };
 
@@ -245,28 +291,62 @@ export function AdminProductFormPage() {
                     <Label htmlFor="categoryId">
                       Danh mục <span className="text-destructive">*</span>
                     </Label>
-                    <Select
-                      value={watch('categoryId')}
-                      onValueChange={(value) => setValue('categoryId', value)}
-                      disabled={isLoadingCategories}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={isLoadingCategories ? "Đang tải..." : "Chọn danh mục"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories && categories.length > 0 ? (
-                          categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no-categories" disabled>
-                            Không có danh mục nào
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={
+                            `w-full justify-between ${!watch('categoryId') && "text-muted-foreground"
+                            }`
+                          }
+                        >
+                          {watch('categoryId')
+                            ? categories.find((c) => c.id === watch('categoryId'))?.displayName
+                            : (categories.length > 0 ? "Chọn danh mục" : "Đang tải danh mục...")}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-[300px] max-h-[300px] overflow-y-auto" align="start">
+                        {(() => {
+                          const renderMenu = (nodes: any[]) => {
+                            return nodes.map((node) => {
+                              const isLeaf = !node.children || node.children.length === 0;
+
+                              if (isLeaf) {
+                                return (
+                                  <DropdownMenuItem
+                                    key={node.id}
+                                    onClick={() => {
+                                      setValue('categoryId', node.id, { shouldValidate: true });
+                                    }}
+                                    className="cursor-pointer"
+                                  >
+                                    <span className={watch('categoryId') === node.id ? "font-bold text-primary" : ""}>
+                                      {node.name}
+                                    </span>
+                                  </DropdownMenuItem>
+                                );
+                              }
+
+                              return (
+                                <DropdownMenuSub key={node.id}>
+                                  <DropdownMenuSubTrigger className="cursor-pointer font-medium">
+                                    <span>{node.name}</span>
+                                  </DropdownMenuSubTrigger>
+                                  <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                                    {renderMenu(node.children)}
+                                  </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                              );
+                            });
+                          };
+                          return renderMenu(categoryTree);
+                        })()}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
                     {errors.categoryId && (
                       <p className="text-sm text-destructive">{errors.categoryId.message}</p>
                     )}

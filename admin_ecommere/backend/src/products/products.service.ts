@@ -30,14 +30,24 @@ export class ProductsService {
 
     // Handle category filtering
     if (categoryId) {
-      where.categoryId = categoryId;
+      const categoryIds = await this.categoriesService.getDescendantIds(categoryId);
+      if (categoryIds.length > 0) {
+        where.categoryId = { in: categoryIds };
+      } else {
+        where.categoryId = categoryId;
+      }
     } else if (categorySlug) {
       // Find category by slug and use its id
       const category = await this.prisma.category.findUnique({
         where: { slug: categorySlug },
       });
       if (category) {
-        where.categoryId = category.id;
+        const categoryIds = await this.categoriesService.getDescendantIds(category.id);
+        if (categoryIds.length > 0) {
+          where.categoryId = { in: categoryIds };
+        } else {
+          where.categoryId = category.id;
+        }
       } else {
         // If category not found, return empty results
         return {

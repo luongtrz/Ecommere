@@ -163,7 +163,7 @@ export class CategoriesService {
         name: cat.name,
         slug: cat.slug,
         parentId: cat.parentId,
-        productCount: cat._count.products,
+        productCount: cat._count?.products ?? 0,
         children: cat.children ? buildTree(cat.children) : [],
         isLeaf: !cat.children || cat.children.length === 0,
       }));
@@ -239,5 +239,26 @@ export class CategoriesService {
         'Products can only be assigned to leaf categories (categories without subcategories)',
       );
     }
+  }
+  /**
+   * Get all descendant category IDs (recursive)
+   * Used for filtering products by parent category
+   */
+  async getDescendantIds(categoryId: string): Promise<string[]> {
+    const category = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+      include: { children: true },
+    });
+
+    if (!category) return [];
+
+    let ids = [category.id];
+
+    for (const child of category.children) {
+      const childIds = await this.getDescendantIds(child.id);
+      ids = [...ids, ...childIds];
+    }
+
+    return ids;
   }
 }

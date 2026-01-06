@@ -37,6 +37,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 
 import { useDeleteProduct } from '../hooks/useAdminProducts';
@@ -46,6 +49,44 @@ export function AdminProductsPage() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  /* State for category filter */
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [categories, setCategories] = useState<any[]>([]); // Flattened for lookup
+  const [categoryTree, setCategoryTree] = useState<any[]>([]); // Tree for dropdown
+
+  /* Fetch categories */
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const tree = await import('../api/categories.api').then(m => m.categoriesApi.getTree());
+        setCategoryTree(tree);
+
+        // Flatten for name lookup
+        const allCategories: any[] = [];
+        const traverse = (nodes: any[], prefix = '') => {
+          nodes.forEach(node => {
+            const currentName = prefix + node.name;
+            const isLeaf = !node.children || node.children.length === 0;
+            allCategories.push({
+              ...node,
+              displayName: currentName,
+              isLeaf
+            });
+
+            if (node.children?.length > 0) {
+              traverse(node.children, currentName + ' > ');
+            }
+          });
+        };
+        traverse(tree);
+        setCategories(allCategories);
+      } catch (error) {
+        console.error('Failed to load categories', error);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const {
     data,
@@ -58,6 +99,7 @@ export function AdminProductsPage() {
     limit: 20,
     search: debouncedSearch,
     sortBy: 'newest',
+    categoryId, // Pass categoryId to hook
   });
 
   const deleteProduct = useDeleteProduct();
@@ -121,6 +163,49 @@ export function AdminProductsPage() {
     );
   }
 
+  /* Helper to get selected category name */
+  const selectedCategoryName = categories.find(c => c.id === categoryId)?.displayName;
+
+  /* Recursive render function for category menu */
+  const renderCategoryMenu = (nodes: any[]) => {
+    return nodes.map((node) => {
+      const isLeaf = !node.children || node.children.length === 0;
+
+      if (isLeaf) {
+        return (
+          <DropdownMenuItem
+            key={node.id}
+            onClick={() => setCategoryId(node.id)}
+            className="cursor-pointer"
+          >
+            <span className={categoryId === node.id ? "font-bold text-primary" : ""}>
+              {node.name}
+            </span>
+          </DropdownMenuItem>
+        );
+      }
+
+      return (
+        <DropdownMenuSub key={node.id}>
+          <DropdownMenuSubTrigger className="cursor-pointer">
+            <span className={categoryId === node.id ? "font-bold text-primary" : ""}>
+              {node.name}
+            </span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+            <DropdownMenuItem
+              onClick={() => setCategoryId(node.id)}
+              className="cursor-pointer font-medium border-b mb-1"
+            >
+              Xem tất cả {node.name}
+            </DropdownMenuItem>
+            {renderCategoryMenu(node.children)}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+      );
+    });
+  };
+
   return (
     <>
       <SEO title="Quản lý sản phẩm - Admin" />
@@ -172,10 +257,40 @@ export function AdminProductsPage() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">Lọc</span>
-            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className={`gap-2 ${categoryId ? 'bg-primary/10 border-primary text-primary' : ''}`}>
+                  <Filter className="h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {categoryId ? 'Đã lọc' : 'Lọc'}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[300px] max-h-[300px] overflow-y-auto">
+                <DropdownMenuLabel>Lọc theo danh mục</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setCategoryId(undefined)}
+                  className="cursor-pointer"
+                >
+                  <span className={!categoryId ? "font-bold" : ""}>Tất cả danh mục</span>
+                </DropdownMenuItem>
+                {renderCategoryMenu(categoryTree)}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {categoryId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCategoryId(undefined)}
+                className="h-9 px-2 text-muted-foreground hover:text-foreground"
+                title="Xóa bộ lọc"
+              >
+                Xóa: {selectedCategoryName?.split(' > ').pop()} ✕
+              </Button>
+            )}
           </div>
           <Button asChild className="gap-2">
             <Link to="/admin/products/new">
