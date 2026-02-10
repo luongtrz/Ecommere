@@ -129,7 +129,7 @@ export function CatalogPage() {
 
       <div className="min-h-screen bg-gray-50/50">
         {/* Compact Header */}
-        <div className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
+        <div className="bg-white border-b border-gray-100 shadow-sm">
           <div className="container py-4">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               <div>
