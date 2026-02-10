@@ -1,64 +1,122 @@
 import { Link } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { User, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchBox } from './SearchBox';
 import { CartBadge } from './CartBadge';
 import { CategoryNav } from './CategoryNav';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export function Header() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-14 items-center gap-3">
-        <Link to="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold text-primary">Thai Spray</span>
-        </Link>
-
-        <div className="flex-1 max-w-xl mx-auto">
-          <SearchBox />
+    <header className="sticky top-0 z-50 w-full">
+      {/* Top promo bar */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white">
+        <div className="container flex h-8 items-center justify-center text-xs font-medium tracking-wide">
+          Mien phi van chuyen cho don hang tu 500.000d
         </div>
+      </div>
 
-        <nav className="flex items-center gap-3">
-          <Link to="/cart">
-            <CartBadge />
+      {/* Main header */}
+      <div className="bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-glass">
+        <div className="container flex h-16 items-center gap-4">
+          {/* Mobile menu */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72">
+              <div className="flex flex-col gap-4 mt-8">
+                <Link to="/" className="text-lg font-semibold hover:text-primary transition-colors">Trang chu</Link>
+                <Link to="/catalog" className="text-lg font-semibold hover:text-primary transition-colors">San pham</Link>
+                <Link to="/cart" className="text-lg font-semibold hover:text-primary transition-colors">Gio hang</Link>
+                {user ? (
+                  <>
+                    <Link to="/account" className="text-lg font-semibold hover:text-primary transition-colors">Tai khoan</Link>
+                    <Link to="/orders" className="text-lg font-semibold hover:text-primary transition-colors">Don hang</Link>
+                    <button onClick={logout} className="text-lg font-semibold text-left hover:text-red-500 transition-colors">Dang xuat</button>
+                  </>
+                ) : (
+                  <Link to="/login" className="text-lg font-semibold hover:text-primary transition-colors">Dang nhap</Link>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center shadow-md group-hover:shadow-glow transition-shadow duration-300">
+              <span className="text-white font-bold text-sm">TS</span>
+            </div>
+            <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+              Thai Spray
+            </span>
           </Link>
 
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/account">Tài khoản</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/orders">Đơn hàng</Link>
-                </DropdownMenuItem>
-                {user.role === 'ADMIN' && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin">Quản trị</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>Đăng xuất</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button asChild variant="outline">
-              <Link to="/login">Đăng nhập</Link>
-            </Button>
-          )}
-        </nav>
+          {/* Search */}
+          <div className="flex-1 max-w-xl mx-auto hidden md:block">
+            <SearchBox />
+          </div>
+
+          {/* Actions */}
+          <nav className="flex items-center gap-2">
+            <Link to="/cart" className="relative">
+              <CartBadge />
+            </Link>
+
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/5 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
+                      <User className="h-4 w-4 text-white" />
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-white/80 backdrop-blur-2xl border border-white/30 shadow-xl rounded-xl p-1">
+                  <div className="px-3 py-2 border-b mb-1">
+                    <p className="text-sm font-semibold truncate">{user.name || user.email}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                  <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                    <Link to="/account">Tai khoan</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                    <Link to="/orders">Don hang</Link>
+                  </DropdownMenuItem>
+                  {user.role === 'ADMIN' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                        <Link to="/admin">Quan tri</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="rounded-lg cursor-pointer text-red-500 focus:text-red-600">
+                    Dang xuat
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md text-sm px-5">
+                <Link to="/login">Dang nhap</Link>
+              </Button>
+            )}
+          </nav>
+        </div>
+
+        {/* Mobile search */}
+        <div className="md:hidden px-4 pb-3">
+          <SearchBox />
+        </div>
       </div>
+
       <CategoryNav />
     </header>
   );

@@ -16,11 +16,11 @@ export function CategoryNav() {
 
   if (isLoading) {
     return (
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-white/60 backdrop-blur-lg border-b border-gray-100">
         <div className="container">
-          <div className="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 py-3 overflow-x-auto scrollbar-hide">
             {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-8 w-24 rounded-full" />
+              <Skeleton key={i} className="h-9 w-24 rounded-full" />
             ))}
           </div>
         </div>
@@ -29,29 +29,29 @@ export function CategoryNav() {
   }
 
   return (
-    <div className="bg-white border-b shadow-sm sticky top-0 z-40">
+    <div className="bg-white/60 backdrop-blur-lg border-b border-gray-100 shadow-sm">
       <div className="container">
-        <div className="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-1.5 py-3 overflow-x-auto scrollbar-hide">
           <Link
             to="/catalog"
             className={cn(
-              "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200",
+              "px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300",
               isActive('/catalog')
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                : "text-gray-600 hover:text-primary hover:bg-blue-50"
             )}
           >
-            Tất cả sản phẩm
+            Tat ca san pham
           </Link>
           {categories?.map((category) => (
             <Link
               key={category.id}
               to={`/c/${category.slug}`}
               className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200",
+                "px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300",
                 isActive(`/c/${category.slug}`)
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                  : "text-gray-600 hover:text-primary hover:bg-blue-50"
               )}
             >
               {category.name}
