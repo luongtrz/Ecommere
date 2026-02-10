@@ -223,19 +223,6 @@ export function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Simple CTA */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 py-12 text-white">
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h2 className="text-2xl font-bold mb-1">Đăng ký nhận ưu đãi</h2>
-            <p className="text-blue-100 text-sm">Nhận ngay voucher 50k cho đơn hàng đầu tiên.</p>
-          </div>
-          <Button asChild className="bg-white text-blue-600 hover:bg-blue-50 rounded-full px-8 shadow-lg font-bold">
-            <Link to="/register">Đăng ký ngay</Link>
-          </Button>
-        </div>
-      </section>
     </>
   );
 }

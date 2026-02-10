@@ -208,7 +208,7 @@ export function CatalogPage() {
                         <div className="flex items-center justify-between mt-auto">
                           <span className="font-bold text-blue-600">{formatCurrency(product.basePrice)}</span>
                           <Button size="sm" className="h-8 rounded-lg text-xs" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
-                            <ShoppingBag className="h-3 w-3 mr-1.5" /> Them
+                            <ShoppingBag className="h-3 w-3 mr-1.5" /> Thêm
                           </Button>
                         </div>
                       </div>
