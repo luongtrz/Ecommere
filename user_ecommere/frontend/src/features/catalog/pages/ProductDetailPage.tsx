@@ -58,10 +58,10 @@ export function ProductDetailPage() {
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Search className="h-8 w-8 text-gray-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Khong tim thay san pham</h1>
-          <p className="text-gray-500 mb-6">San pham ban tim kiem co the da bi xoa hoac khong ton tai.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy sản phẩm</h1>
+          <p className="text-gray-500 mb-6">Sản phẩm bạn tìm kiếm có thể đã bị xóa hoặc không tồn tại.</p>
           <Button asChild className="rounded-full px-6">
-            <Link to="/catalog">Quay lai danh sach san pham</Link>
+            <Link to="/catalog">Quay lại danh sách sản phẩm</Link>
           </Button>
         </div>
       </div>
@@ -86,7 +86,7 @@ export function ProductDetailPage() {
           <div className="container py-3 flex items-center justify-between">
             <Breadcrumb
               items={[
-                { label: 'San pham', href: '/catalog' },
+                { label: 'Sản phẩm', href: '/catalog' },
                 { label: product.category?.name || '', href: `/c/${product.category?.slug}` },
                 { label: product.name },
               ]}
@@ -95,7 +95,7 @@ export function ProductDetailPage() {
             <Button variant="ghost" size="sm" asChild className="hidden md:flex">
               <Link to={`/c/${product.category?.slug}`} className="gap-2 text-gray-500">
                 <ArrowLeft className="h-4 w-4" />
-                Quay lai
+                Quay lại
               </Link>
             </Button>
           </div>
@@ -147,7 +147,7 @@ export function ProductDetailPage() {
                   <div className="flex items-center gap-1 text-sm text-amber-500 font-medium">
                     <Rating value={product.rating || 0} size="sm" />
                     <span>{product.rating?.toFixed(1)}</span>
-                    <span className="text-gray-400 font-normal">({product.reviewCount} danh gia)</span>
+                    <span className="text-gray-400 font-normal">({product.reviewCount} đánh giá)</span>
                   </div>
                 </div>
 
@@ -167,9 +167,9 @@ export function ProductDetailPage() {
                 {/* Compact Trust Badges */}
                 <div className="grid grid-cols-3 gap-3 mb-6">
                   {[
-                    { icon: Truck, text: 'Mien phi van chuyen', sub: 'Don tu 500k' },
-                    { icon: Shield, text: 'Chinh hang 100%', sub: 'Phat hien gia den gap 10' },
-                    { icon: RefreshCw, text: 'Doi tra 7 ngay', sub: 'Thu tuc don gian' }
+                    { icon: Truck, text: 'Miễn phí vận chuyển', sub: 'Đơn từ 500k' },
+                    { icon: Shield, text: 'Chính hãng 100%', sub: 'Phát hiện giả đền gấp 10' },
+                    { icon: RefreshCw, text: 'Đổi trả 7 ngày', sub: 'Thủ tục đơn giản' }
                   ].map((item, idx) => (
                     <div key={idx} className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 border border-gray-100 text-center">
                       <item.icon className="h-5 w-5 text-blue-600 mb-1.5" />
@@ -183,7 +183,7 @@ export function ProductDetailPage() {
                 <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">Phien ban (Mui/Dung tich):</label>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Phiên bản (Mùi/Dung tích):</label>
                       <Select value={selectedVariantId || product.variants[0]?.id} onValueChange={setSelectedVariantId}>
                         <SelectTrigger className="h-11 rounded-xl bg-gray-50 border-gray-200">
                           <SelectValue />
@@ -192,14 +192,14 @@ export function ProductDetailPage() {
                           {product.variants.map((v) => (
                             <SelectItem key={v.id} value={v.id} disabled={v.stock === 0}>
                               <span className="font-medium">{v.scent}</span> - {v.volumeMl}ml
-                              {v.stock === 0 && <span className="text-red-500 ml-2">(Het hang)</span>}
+                              {v.stock === 0 && <span className="text-red-500 ml-2">(Hết hàng)</span>}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">So luong:</label>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Số lượng:</label>
                       <div className="flex items-center h-11 bg-gray-50 rounded-xl border border-gray-200 px-1 w-fit">
                         <Button variant="ghost" size="icon" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="h-9 w-9 rounded-lg hover:bg-white">
                           <Minus className="h-3 w-3" />
@@ -219,7 +219,7 @@ export function ProductDetailPage() {
                       disabled={!selectedVariant || selectedVariant.stock === 0}
                     >
                       <ShoppingCart className="mr-2 h-5 w-5" />
-                      {selectedVariant?.stock === 0 ? 'Tam het hang' : 'Them vao gio'}
+                      {selectedVariant?.stock === 0 ? 'Tạm hết hàng' : 'Thêm vào giỏ'}
                     </Button>
                     <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-gray-200 hover:text-red-500 hover:border-red-200 hover:bg-red-50">
                       <Heart className="h-5 w-5" />
@@ -234,11 +234,11 @@ export function ProductDetailPage() {
                   <TabsList className="w-full justify-start h-auto p-1 bg-gray-100/50 rounded-xl mb-6">
                     <TabsTrigger value="description" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                       <FileText className="h-4 w-4 mr-2" />
-                      Mo ta chi tiet
+                      Mô tả chi tiết
                     </TabsTrigger>
                     <TabsTrigger value="specs" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                       <Info className="h-4 w-4 mr-2" />
-                      Thong so & Bao quan
+                      Thông số & Bảo quản
                     </TabsTrigger>
                   </TabsList>
 
@@ -252,32 +252,32 @@ export function ProductDetailPage() {
 
                   <TabsContent value="specs" className="mt-0 animate-fade-in">
                     <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                      <h4 className="font-bold text-gray-900 mb-4">Thong tin ky thuat</h4>
+                      <h4 className="font-bold text-gray-900 mb-4">Thông tin kỹ thuật</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                         <div className="flex justify-between border-b border-gray-200 pb-2">
-                          <span className="text-gray-500">Mui huong</span>
+                          <span className="text-gray-500">Mùi hương</span>
                           <span className="font-medium text-gray-900">{selectedVariant?.scent}</span>
                         </div>
                         <div className="flex justify-between border-b border-gray-200 pb-2">
-                          <span className="text-gray-500">Dung tich</span>
+                          <span className="text-gray-500">Dung tích</span>
                           <span className="font-medium text-gray-900">{selectedVariant?.volumeMl}ml</span>
                         </div>
                         <div className="flex justify-between border-b border-gray-200 pb-2">
-                          <span className="text-gray-500">Xuat xu</span>
-                          <span className="font-medium text-gray-900">Thai Lan</span>
+                          <span className="text-gray-500">Xuất xứ</span>
+                          <span className="font-medium text-gray-900">Thái Lan</span>
                         </div>
                         <div className="flex justify-between border-b border-gray-200 pb-2">
-                          <span className="text-gray-500">Thuong hieu</span>
+                          <span className="text-gray-500">Thương hiệu</span>
                           <span className="font-medium text-gray-900">{product.category?.name}</span>
                         </div>
                       </div>
                       <div className="mt-6">
-                        <h4 className="font-bold text-gray-900 mb-2">Huong dan bao quan</h4>
+                        <h4 className="font-bold text-gray-900 mb-2">Hướng dẫn bảo quản</h4>
                         <ul className="list-disc list-inside text-gray-600 space-y-1 text-sm">
-                          <li>Bao quan noi kho rao, thoang mat.</li>
-                          <li>Tranh anh nang truc tiep tu mat troi.</li>
-                          <li>Day nap kin sau khi su dung.</li>
-                          <li>De xa tam tay tre em.</li>
+                          <li>Bảo quản nơi khô ráo, thoáng mát.</li>
+                          <li>Tránh ánh nắng trực tiếp từ mặt trời.</li>
+                          <li>Đậy nắp kín sau khi sử dụng.</li>
+                          <li>Để xa tầm tay trẻ em.</li>
                         </ul>
                       </div>
                     </div>

@@ -17,5 +17,9 @@ export function useCart() {
     clearCart,
     totalPrice: getTotalPrice(),
     totalItems: getTotalItems(),
+    isOpen: useCartStore((state) => state.isOpen),
+    openCart: useCartStore((state) => state.openCart),
+    closeCart: useCartStore((state) => state.closeCart),
+    toggleCart: useCartStore((state) => state.toggleCart),
   };
 }

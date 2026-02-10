@@ -14,16 +14,16 @@ export function CartPage() {
   if (items.length === 0) {
     return (
       <>
-        <SEO title="Gio hang" />
+        <SEO title="Giỏ hàng" />
         <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white flex items-center justify-center p-4">
           <div className="max-w-md w-full animate-fade-in">
             <EmptyState
               icon={<ShoppingBag className="h-20 w-20 text-gray-300" />}
-              title="Gio hang cua ban dang trong"
-              description="Hay kham pha bo suu tap nuoc hoa xit thom cua chung toi"
+              title="Giỏ hàng của bạn đang trống"
+              description="Hãy khám phá bộ sưu tập nước hoa xịt thơm của chúng tôi"
               action={
                 <Button asChild size="lg" className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                  <Link to="/catalog">Bat dau mua sam</Link>
+                  <Link to="/catalog">Bắt đầu mua sắm</Link>
                 </Button>
               }
             />
@@ -35,7 +35,7 @@ export function CartPage() {
 
   return (
     <>
-      <SEO title="Gio hang" />
+      <SEO title="Giỏ hàng" />
       <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white">
         <div className="container py-8">
           {/* Header */}
@@ -44,14 +44,14 @@ export function CartPage() {
               <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
                 <Link to="/catalog" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
                   <ArrowLeft className="h-4 w-4" />
-                  Tiep tuc mua sam
+                  Tiếp tục mua sắm
                 </Link>
               </Button>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Gio hang cua ban</h1>
-                <p className="text-gray-500 mt-1">{items.length} san pham trong gio hang</p>
+                <h1 className="text-3xl font-bold text-gray-900">Giỏ hàng của bạn</h1>
+                <p className="text-gray-500 mt-1">{items.length} sản phẩm trong giỏ hàng</p>
               </div>
               <Badge variant="secondary" className="text-lg px-5 py-2 rounded-full font-bold bg-blue-50 text-blue-600">
                 {formatCurrency(totalPrice)}
@@ -95,7 +95,7 @@ export function CartPage() {
                           {formatCurrency(item.price)}
                         </p>
                         <p className="text-sm text-gray-400 mt-0.5">
-                          Don gia: {formatCurrency(item.price / item.quantity)}
+                          Đơn giá: {formatCurrency(item.price / item.quantity)}
                         </p>
                       </div>
 
@@ -142,27 +142,27 @@ export function CartPage() {
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
-                    Tong don hang
+                    Tổng đơn hàng
                   </h3>
                 </div>
                 <div className="p-5 space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Tam tinh ({items.length} san pham):</span>
+                      <span className="text-gray-500">Tạm tính ({items.length} sản phẩm):</span>
                       <span className="font-medium">{formatCurrency(totalPrice)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500 flex items-center gap-1">
                         <Truck className="h-4 w-4" />
-                        Phi van chuyen:
+                        Phí vận chuyển:
                       </span>
-                      <span className="text-emerald-600 font-medium">Mien phi</span>
+                      <span className="text-emerald-600 font-medium">Miễn phí</span>
                     </div>
                   </div>
 
                   <div className="border-t pt-4">
                     <div className="flex justify-between items-center mb-5">
-                      <span className="text-base font-semibold">Tong cong:</span>
+                      <span className="text-base font-semibold">Tổng cộng:</span>
                       <span className="text-2xl font-bold text-blue-600">
                         {formatCurrency(totalPrice)}
                       </span>
@@ -171,14 +171,14 @@ export function CartPage() {
                     <Button asChild className="w-full mb-3 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20 font-semibold" size="lg">
                       <Link to="/checkout" className="flex items-center justify-center gap-2">
                         <CreditCard className="h-4 w-4" />
-                        Tien hanh thanh toan
+                        Tiến hành thanh toán
                       </Link>
                     </Button>
 
                     <Button asChild variant="outline" className="w-full rounded-xl border-gray-200">
                       <Link to="/catalog" className="flex items-center justify-center gap-2">
                         <ShoppingBag className="h-4 w-4" />
-                        Tiep tuc mua sam
+                        Tiếp tục mua sắm
                       </Link>
                     </Button>
                   </div>
@@ -188,11 +188,11 @@ export function CartPage() {
                     <div className="flex items-center justify-center gap-5 text-xs text-gray-400">
                       <span className="flex items-center gap-1">
                         <Shield className="h-3.5 w-3.5" />
-                        Thanh toan an toan
+                        Thanh toán an toàn
                       </span>
                       <span className="flex items-center gap-1">
                         <Truck className="h-3.5 w-3.5" />
-                        Giao hang tan noi
+                        Giao hàng tận nơi
                       </span>
                     </div>
                   </div>

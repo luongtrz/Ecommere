@@ -32,7 +32,7 @@ function ProductGrid({ categorySlug, onAddToCart }: ProductGridProps) {
   if (!productsData?.products || productsData.products.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
-        Khong co san pham nao trong danh muc nay.
+        Không có sản phẩm nào trong danh mục này.
       </div>
     );
   }
@@ -101,12 +101,12 @@ export function HomePage() {
               </div>
 
               <h1 className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tight leading-[1.1]">
-                Mui huong <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Dinh hinh phong cach</span>
+                Mùi hương <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Định hình phong cách</span>
               </h1>
 
               <p className="text-lg text-gray-600 max-w-md leading-relaxed">
-                Kham pha bo suu tap nuoc hoa xit Thai Lan chinh hang. Thom lau, da dang, gia tot nhat.
+                Khám phá bộ sưu tập nước hoa xịt Thái Lan chính hãng. Thơm lâu, đa dạng, giá tốt nhất.
               </p>
 
               <div className="flex gap-3">
@@ -114,7 +114,7 @@ export function HomePage() {
                   <Link to="/catalog">Mua ngay</Link>
                 </Button>
                 <Button variant="outline" size="lg" onClick={scrollToFeatures} className="rounded-full px-8 h-12">
-                  Tim hieu them
+                  Tìm hiểu thêm
                 </Button>
               </div>
             </div>
@@ -160,7 +160,7 @@ export function HomePage() {
       <section className="py-16 bg-gray-50/50">
         <div className="container">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Bo suu tap noi bat</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Bộ sưu tập nổi bật</h2>
             <div className="h-1 w-12 bg-blue-600 rounded-full mx-auto" />
           </div>
 
@@ -188,7 +188,7 @@ export function HomePage() {
                   <div className="flex justify-center mt-10">
                     <Button asChild variant="outline" className="rounded-full border-blue-200 text-blue-600 hover:bg-blue-50 px-8">
                       <Link to={`/c/${cat.slug}`}>
-                        Xem tat ca {cat.name}
+                        Xem tất cả {cat.name}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
@@ -205,10 +205,10 @@ export function HomePage() {
         <div className="container">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: Truck, title: 'Giao nhanh 2h', desc: 'Noi thanh' },
-              { icon: Shield, title: 'Chinh hang', desc: 'Cam ket 100%' },
-              { icon: RefreshCw, title: 'Doi tra', desc: 'Trong 7 ngay' },
-              { icon: Zap, title: 'Flash Sale', desc: 'Moi tuan' }
+              { icon: Truck, title: 'Giao nhanh 2h', desc: 'Nội thành' },
+              { icon: Shield, title: 'Chính hãng', desc: 'Cam kết 100%' },
+              { icon: RefreshCw, title: 'Đổi trả', desc: 'Trong 7 ngày' },
+              { icon: Zap, title: 'Flash Sale', desc: 'Mỗi tuần' }
             ].map((item, idx) => (
               <div key={idx} className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 bg-gray-50/50">
                 <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-blue-600 shrink-0">
@@ -228,11 +228,11 @@ export function HomePage() {
       <section className="bg-gradient-to-r from-blue-600 to-indigo-600 py-12 text-white">
         <div className="container flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h2 className="text-2xl font-bold mb-1">Dang ky nhan uu dai</h2>
-            <p className="text-blue-100 text-sm">Nhan ngay voucher 50k cho don hang dau tien.</p>
+            <h2 className="text-2xl font-bold mb-1">Đăng ký nhận ưu đãi</h2>
+            <p className="text-blue-100 text-sm">Nhận ngay voucher 50k cho đơn hàng đầu tiên.</p>
           </div>
           <Button asChild className="bg-white text-blue-600 hover:bg-blue-50 rounded-full px-8 shadow-lg font-bold">
-            <Link to="/register">Dang ky ngay</Link>
+            <Link to="/register">Đăng ký ngay</Link>
           </Button>
         </div>
       </section>

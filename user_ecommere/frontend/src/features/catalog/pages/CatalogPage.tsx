@@ -67,7 +67,7 @@ export function CatalogPage() {
 
   return (
     <>
-      <SEO title="San pham" />
+      <SEO title="Sản phẩm" />
 
       <div className="min-h-screen bg-gray-50/50">
         {/* Compact Header */}
@@ -75,8 +75,8 @@ export function CatalogPage() {
           <div className="container py-4">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               <div>
-                <h1 className="text-xl font-bold text-gray-900">San pham</h1>
-                <p className="text-xs text-gray-500 hidden md:block">{data?.total || 0} ket qua tim thay</p>
+                <h1 className="text-xl font-bold text-gray-900">Sản phẩm</h1>
+                <p className="text-xs text-gray-500 hidden md:block">{data?.total || 0} kết quả tìm thấy</p>
               </div>
 
               {/* Compact Toolbar */}
@@ -87,7 +87,7 @@ export function CatalogPage() {
                   <Input
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    placeholder="Tim kiem..."
+                    placeholder="Tìm kiếm..."
                     className="h-9 pl-9 text-sm bg-gray-50 border-gray-200 rounded-lg focus:bg-white transition-all"
                   />
                   {searchQuery && (
@@ -161,9 +161,9 @@ export function CatalogPage() {
             <div className="py-20 flex justify-center"><LoadingSpinner /></div>
           ) : data?.products.length === 0 ? (
             <EmptyState
-              title="Khong tim thay san pham"
-              description="Thu tim kiem voi tu khoa khac hoac xoa bo loc"
-              action={<Button variant="outline" onClick={clearFilters}>Xoa bo loc</Button>}
+              title="Không tìm thấy sản phẩm"
+              description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
+              action={<Button variant="outline" onClick={clearFilters}>Xóa bộ lọc</Button>}
             />
           ) : (
             <div className="space-y-8 animate-fade-in">

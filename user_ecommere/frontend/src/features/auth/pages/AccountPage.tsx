@@ -33,7 +33,7 @@ export function AccountPage() {
 
   return (
     <>
-      <SEO title="Tai khoan" />
+      <SEO title="Tài khoản" />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 pb-12">
         {/* Header Background */}
@@ -60,18 +60,18 @@ export function AccountPage() {
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">{user.name}</h2>
                   <div className="flex justify-center mb-6">
                     <Badge variant="secondary" className={`${getRoleColor(user.role)} px-3 py-1 rounded-full shadow-sm`}>
-                      {user.role === 'ADMIN' ? 'Quan tri vien' : 'Khach hang than thiet'}
+                      {user.role === 'ADMIN' ? 'Quản trị viên' : 'Khách hàng thân thiết'}
                     </Badge>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     <div className="bg-gray-50 rounded-xl p-3">
                       <div className="text-2xl font-bold text-gray-900">0</div>
-                      <div className="text-xs text-gray-500 font-medium">Don hang</div>
+                      <div className="text-xs text-gray-500 font-medium">Đơn hàng</div>
                     </div>
                     <div className="bg-gray-50 rounded-xl p-3">
                       <div className="text-2xl font-bold text-gray-900">0</div>
-                      <div className="text-xs text-gray-500 font-medium">Danh gia</div>
+                      <div className="text-xs text-gray-500 font-medium">Đánh giá</div>
                     </div>
                   </div>
 
@@ -81,7 +81,7 @@ export function AccountPage() {
                     onClick={() => setIsProfileDialogOpen(true)}
                   >
                     <Settings className="h-4 w-4 mr-2" />
-                    Chinh sua ho so
+                    Chỉnh sửa hồ sơ
                   </Button>
                 </CardContent>
               </Card>
@@ -93,10 +93,10 @@ export function AccountPage() {
                 </div>
                 <div className="p-2 space-y-1">
                   {[
-                    { icon: ShoppingBag, label: 'Don hang cua toi', path: '/orders', color: 'text-blue-600 bg-blue-50' },
-                    { icon: MapPin, label: 'So dia chi', path: '/addresses', color: 'text-green-600 bg-green-50' },
-                    { icon: Heart, label: 'Danh sach yeu thich', path: '#', color: 'text-rose-600 bg-rose-50' },
-                    { icon: Shield, label: 'Bao mat tai khoan', path: '#', color: 'text-purple-600 bg-purple-50' },
+                    { icon: ShoppingBag, label: 'Đơn hàng của tôi', path: '/orders', color: 'text-blue-600 bg-blue-50' },
+                    { icon: MapPin, label: 'Sổ địa chỉ', path: '/addresses', color: 'text-green-600 bg-green-50' },
+                    { icon: Heart, label: 'Danh sách yêu thích', path: '/wishlist', color: 'text-rose-600 bg-rose-50' },
+                    { icon: Shield, label: 'Bảo mật tài khoản', path: '#', color: 'text-purple-600 bg-purple-50' },
                   ].map((item, idx) => (
                     <button
                       key={idx}
@@ -121,7 +121,7 @@ export function AccountPage() {
                 className="w-full rounded-xl bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 shadow-none h-12 font-medium"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Dang xuat
+                Đăng xuất
               </Button>
             </div>
 
@@ -131,12 +131,12 @@ export function AccountPage() {
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 flex items-center justify-between relative overflow-hidden group">
                 <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-blue-50 to-transparent opacity-50" />
                 <div className="relative z-10">
-                  <h2 className="text-xl font-bold text-gray-900 mb-1">Xin chao, {user.name}!</h2>
-                  <p className="text-gray-500 text-sm">Chao mung ban quay tro lai Thai Spray Shop.</p>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">Xin chào, {user.name}!</h2>
+                  <p className="text-gray-500 text-sm">Chào mừng bạn quay trở lại Thai Spray Shop.</p>
                 </div>
                 <div className="relative z-10">
                   <Button onClick={() => navigate('/catalog')} className="rounded-xl bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200">
-                    Mua sam ngay
+                    Mua sắm ngay
                   </Button>
                 </div>
               </div>
@@ -146,7 +146,7 @@ export function AccountPage() {
                 <CardHeader className="border-b border-gray-50 bg-white px-6 py-5">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <User className="h-5 w-5 text-blue-600" />
-                    Thong tin ca nhan
+                    Thông tin cá nhân
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -166,8 +166,8 @@ export function AccountPage() {
                         <Phone className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500 mb-1">So dien thoai</p>
-                        <p className="font-semibold text-gray-900">{user.phone || 'Chua cap nhat'}</p>
+                        <p className="text-sm font-medium text-gray-500 mb-1">Số điện thoại</p>
+                        <p className="font-semibold text-gray-900">{user.phone || 'Chưa cập nhật'}</p>
                       </div>
                     </div>
 
@@ -176,9 +176,9 @@ export function AccountPage() {
                         <Calendar className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500 mb-1">Ngay tham gia</p>
+                        <p className="text-sm font-medium text-gray-500 mb-1">Ngày tham gia</p>
                         <p className="font-semibold text-gray-900">
-                          {user.createdAt ? formatDate(user.createdAt) : 'Khong ro'}
+                          {user.createdAt ? formatDate(user.createdAt) : 'Không rõ'}
                         </p>
                       </div>
                     </div>
@@ -188,10 +188,10 @@ export function AccountPage() {
                         <Shield className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500 mb-1">Trang thai</p>
+                        <p className="text-sm font-medium text-gray-500 mb-1">Trạng thái</p>
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-green-500" />
-                          <p className="font-semibold text-gray-900">Dang hoat dong</p>
+                          <p className="font-semibold text-gray-900">Đang hoạt động</p>
                         </div>
                       </div>
                     </div>

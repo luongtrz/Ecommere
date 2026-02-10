@@ -74,27 +74,27 @@ export function OrdersPage() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'PENDING_PAYMENT': return 'Cho thanh toan';
-      case 'PAID': return 'Da thanh toan';
-      case 'PACKING': return 'Dang dong goi';
-      case 'SHIPPED': return 'Dang giao hang';
-      case 'DELIVERED': return 'Giao thanh cong';
-      case 'CANCELLED': return 'Da huy';
-      case 'REFUNDED': return 'Da hoan tien';
+      case 'PENDING_PAYMENT': return 'Chờ thanh toán';
+      case 'PAID': return 'Đã thanh toán';
+      case 'PACKING': return 'Đang đóng gói';
+      case 'SHIPPED': return 'Đang giao hàng';
+      case 'DELIVERED': return 'Giao thành công';
+      case 'CANCELLED': return 'Đã hủy';
+      case 'REFUNDED': return 'Đã hoàn tiền';
       default: return status;
     }
   };
 
   return (
     <>
-      <SEO title="Don hang cua toi" />
+      <SEO title="Đơn hàng của tôi" />
 
       <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white">
         {/* Header Background */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white pb-20 pt-10 px-4">
           <div className="container max-w-6xl">
-            <h1 className="text-3xl font-bold mb-2">Lich su don hang</h1>
-            <p className="text-blue-100 opacity-90">Quan ly va theo doi cac don hang cua ban</p>
+            <h1 className="text-3xl font-bold mb-2">Lịch sử đơn hàng</h1>
+            <p className="text-blue-100 opacity-90">Quản lý và theo dõi các đơn hàng của bạn</p>
           </div>
         </div>
 
@@ -104,14 +104,14 @@ export function OrdersPage() {
               <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <ShoppingBag className="h-10 w-10 text-blue-500" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Chua co don hang nao</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Chưa có đơn hàng nào</h2>
               <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                Ban chua dat don hang nao. Hay bat dau mua sam de co nhung trai nghiem tuyet voi tai Thai Spray Shop!
+                Bạn chưa đặt đơn hàng nào. Hãy bắt đầu mua sắm để có những trải nghiệm tuyệt vời tại Thai Spray Shop!
               </p>
               <Button size="lg" className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20" asChild>
                 <Link to="/catalog" className="flex items-center gap-2">
                   <Plus className="h-5 w-5" />
-                  Bat dau mua sam
+                  Bắt đầu mua sắm
                 </Link>
               </Button>
             </div>
@@ -125,7 +125,7 @@ export function OrdersPage() {
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-gray-900">{orders.length}</div>
-                    <div className="text-sm text-gray-500">Tong don hang</div>
+                    <div className="text-sm text-gray-500">Tổng đơn hàng</div>
                   </div>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
@@ -136,7 +136,7 @@ export function OrdersPage() {
                     <div className="text-2xl font-bold text-gray-900">
                       {orders.filter(o => o.status === 'DELIVERED').length}
                     </div>
-                    <div className="text-sm text-gray-500">Don hang thanh cong</div>
+                    <div className="text-sm text-gray-500">Đơn hàng thành công</div>
                   </div>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
@@ -147,7 +147,7 @@ export function OrdersPage() {
                     <div className="text-2xl font-bold text-gray-900">
                       {orders.filter(o => ['PENDING_PAYMENT', 'PACKING', 'SHIPPED'].includes(o.status)).length}
                     </div>
-                    <div className="text-sm text-gray-500">Don hang dang xu ly</div>
+                    <div className="text-sm text-gray-500">Đơn hàng đang xử lý</div>
                   </div>
                 </div>
               </div>
@@ -187,12 +187,12 @@ export function OrdersPage() {
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                           <div className="flex items-center gap-8 w-full md:w-auto">
                             <div>
-                              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">San pham</div>
+                              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Sản phẩm</div>
                               <div className="text-xl font-bold text-gray-900">{order.items.length}</div>
                             </div>
                             <div className="w-px h-10 bg-gray-200 hidden md:block" />
                             <div>
-                              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Tong tien</div>
+                              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Tổng tiền</div>
                               <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
                                 {formatCurrency(order.total)}
                               </div>
@@ -201,7 +201,7 @@ export function OrdersPage() {
 
                           <Button className="w-full md:w-auto rounded-xl bg-gray-900 hover:bg-black hover:shadow-lg transition-all" asChild>
                             <Link to={`/orders/${order.id}`} className="flex items-center justify-center gap-2">
-                              Xem chi tiet
+                              Xem chi tiết
                               <ArrowRight className="h-4 w-4" />
                             </Link>
                           </Button>
@@ -222,12 +222,12 @@ export function OrdersPage() {
                     <AlertCircle className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Can ho tro don hang?</h3>
-                    <p className="text-sm text-gray-600">Lien he voi chung toi neu ban co bat ky cau hoi nao</p>
+                    <h3 className="font-semibold text-gray-900">Cần hỗ trợ đơn hàng?</h3>
+                    <p className="text-sm text-gray-600">Liên hệ với chúng tôi nếu bạn có bất kỳ câu hỏi nào</p>
                   </div>
                 </div>
                 <Button variant="outline" className="bg-white hover:bg-blue-50 text-blue-600 border-blue-200 rounded-xl" asChild>
-                  <Link to="/support">Lien he ho tro</Link>
+                  <Link to="/support">Liên hệ hỗ trợ</Link>
                 </Button>
               </div>
             </div>

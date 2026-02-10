@@ -25,7 +25,7 @@ export function AddressesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Ban co chac chan muon xoa dia chi nay?')) {
+    if (confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) {
       await deleteAddress.mutateAsync(id);
     }
   };
@@ -48,17 +48,17 @@ export function AddressesPage() {
 
   return (
     <>
-      <SEO title="Quan ly dia chi" />
+      <SEO title="Quản lý địa chỉ" />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="container max-w-5xl py-8 md:py-12">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">So dia chi</h1>
-              <p className="text-gray-600">Quan ly dia chi giao hang cua ban</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Sổ địa chỉ</h1>
+              <p className="text-gray-600">Quản lý địa chỉ giao hàng của bạn</p>
             </div>
             <Button onClick={handleAdd} className="rounded-xl shadow-lg shadow-blue-500/20 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 h-11 px-6">
               <Plus className="h-5 w-5 mr-2" />
-              Them dia chi moi
+              Thêm địa chỉ mới
             </Button>
           </div>
 
@@ -67,13 +67,13 @@ export function AddressesPage() {
               <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <MapPin className="h-10 w-10 text-blue-500" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Chua co dia chi nao</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Chưa có địa chỉ nào</h3>
               <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-                Hay them dia chi giao hang de thuan tien hon khi mua sam tai Thai Spray Shop
+                Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại Thai Spray Shop
               </p>
               <Button onClick={handleAdd} size="lg" className="rounded-xl">
                 <Plus className="h-5 w-5 mr-2" />
-                Them dia chi dau tien
+                Thêm địa chỉ đầu tiên
               </Button>
             </div>
           ) : (
@@ -94,7 +94,7 @@ export function AddressesPage() {
                           {address.isDefault && (
                             <div className="flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full w-fit mt-0.5">
                               <CheckCircle className="h-3 w-3" />
-                              Mac dinh
+                              Mặc định
                             </div>
                           )}
                         </div>

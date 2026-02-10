@@ -44,10 +44,10 @@ export function OrderDetailPage() {
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="h-8 w-8 text-gray-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Khong tim thay don hang</h2>
-          <p className="text-gray-500 mb-6">Don hang ban tim kiem co the khong ton tai hoac da bi xoa.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy đơn hàng</h2>
+          <p className="text-gray-500 mb-6">Đơn hàng bạn tìm kiếm có thể không tồn tại hoặc đã bị xóa.</p>
           <Button className="w-full rounded-xl" asChild>
-            <Link to="/orders">Xem tat ca don hang</Link>
+            <Link to="/orders">Xem tất cả đơn hàng</Link>
           </Button>
         </div>
       </div>
@@ -94,13 +94,13 @@ export function OrderDetailPage() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'PENDING_PAYMENT': return 'Cho thanh toan';
-      case 'PAID': return 'Da thanh toan';
-      case 'PACKING': return 'Dang dong goi';
-      case 'SHIPPED': return 'Dang giao hang';
-      case 'DELIVERED': return 'Giao thanh cong';
-      case 'CANCELLED': return 'Da huy';
-      case 'REFUNDED': return 'Da hoan tien';
+      case 'PENDING_PAYMENT': return 'Chờ thanh toán';
+      case 'PAID': return 'Đã thanh toán';
+      case 'PACKING': return 'Đang đóng gói';
+      case 'SHIPPED': return 'Đang giao hàng';
+      case 'DELIVERED': return 'Giao thành công';
+      case 'CANCELLED': return 'Đã hủy';
+      case 'REFUNDED': return 'Đã hoàn tiền';
       default: return status;
     }
   };
@@ -115,7 +115,7 @@ export function OrderDetailPage() {
 
   return (
     <>
-      <SEO title={`Don hang #${order.orderNumber}`} />
+      <SEO title={`Đơn hàng #${order.orderNumber}`} />
 
       <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white">
         {/* Header Background */}
@@ -124,12 +124,12 @@ export function OrderDetailPage() {
             <Button variant="ghost" size="sm" asChild className="p-0 h-auto text-gray-300 hover:text-white mb-6">
               <Link to="/orders" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Quay lai danh sach don hang
+                Quay lại danh sách đơn hàng
               </Link>
             </Button>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold mb-1">Chi tiet don hang</h1>
+                <h1 className="text-3xl font-bold mb-1">Chi tiết đơn hàng</h1>
                 <div className="flex items-center gap-3 text-gray-300">
                   <span>#{order.orderNumber}</span>
                   <span>•</span>
@@ -153,10 +153,10 @@ export function OrderDetailPage() {
                   <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 rounded-full hidden md:block" />
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
                     {[
-                      { status: 'PENDING_PAYMENT', label: 'Dat hang', icon: Clock },
-                      { status: 'PACKING', label: 'Dong goi', icon: Package },
-                      { status: 'SHIPPED', label: 'Van chuyen', icon: Truck },
-                      { status: 'DELIVERED', label: 'Giao hang', icon: CheckCircle }
+                      { status: 'PENDING_PAYMENT', label: 'Đặt hàng', icon: Clock },
+                      { status: 'PACKING', label: 'Đóng gói', icon: Package },
+                      { status: 'SHIPPED', label: 'Vận chuyển', icon: Truck },
+                      { status: 'DELIVERED', label: 'Giao hàng', icon: CheckCircle }
                     ].map((step, index) => {
                       const isCompleted = index <= currentStepIndex;
                       const isCurrent = index === currentStepIndex;
@@ -175,7 +175,7 @@ export function OrderDetailPage() {
                               {step.label}
                             </div>
                             {isCurrent && (
-                              <div className="text-xs text-blue-600 font-medium">Hien tai</div>
+                              <div className="text-xs text-blue-600 font-medium">Hiện tại</div>
                             )}
                           </div>
                         </div>
@@ -195,7 +195,7 @@ export function OrderDetailPage() {
                 <CardHeader className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-100 py-4">
                   <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
                     <ShoppingBag className="h-5 w-5 text-blue-600" />
-                    San pham ({order.items.length})
+                    Sản phẩm ({order.items.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -210,7 +210,7 @@ export function OrderDetailPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-gray-900 text-base mb-1 truncate">{item.name}</h4>
-                          <div className="text-sm text-gray-500 mb-2">Quantiy: {item.quantity}</div>
+                          <div className="text-sm text-gray-500 mb-2">Số lượng: {item.quantity}</div>
                           <div className="flex items-center justify-between">
                             <div className="text-sm font-medium text-gray-900">
                               {formatCurrency(item.price)}
@@ -232,7 +232,7 @@ export function OrderDetailPage() {
                   <CardHeader className="bg-gradient-to-r from-green-50/50 to-emerald-50/50 border-b border-gray-100 py-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
                       <MapPin className="h-5 w-5 text-green-600" />
-                      Dia chi giao hang
+                      Địa chỉ giao hàng
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
@@ -261,7 +261,7 @@ export function OrderDetailPage() {
                   <CardHeader className="bg-gradient-to-r from-purple-50/50 to-pink-50/50 border-b border-gray-100 py-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
                       <CreditCard className="h-5 w-5 text-purple-600" />
-                      Thanh toan
+                      Thanh toán
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
@@ -270,12 +270,12 @@ export function OrderDetailPage() {
                         <CreditCard className="h-6 w-6" />
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Phuong thuc</div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Phương thức</div>
                         <div className="font-semibold text-gray-900 text-lg">{order.paymentMethod}</div>
                       </div>
                     </div>
                     <Badge variant="secondary" className={`${isCancelled ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'} px-3 py-1`}>
-                      {['PAID', 'DELIVERED'].includes(order.status) ? 'Da thanh toan' : (isCancelled ? 'Da huy' : 'Chua thanh toan')}
+                      {['PAID', 'DELIVERED'].includes(order.status) ? 'Đã thanh toán' : (isCancelled ? 'Đã hủy' : 'Chưa thanh toán')}
                     </Badge>
                   </CardContent>
                 </Card>
@@ -288,7 +288,7 @@ export function OrderDetailPage() {
                 <CardHeader className="bg-gray-900 text-white py-5">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Package className="h-5 w-5 text-blue-400" />
-                    Tom tat chi phi
+                    Tóm tắt chi phí
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -299,7 +299,7 @@ export function OrderDetailPage() {
                         <Calendar className="h-5 w-5" />
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500">Ngay dat hang</div>
+                        <div className="text-xs text-gray-500">Ngày đặt hàng</div>
                         <div className="text-sm font-semibold text-gray-900">{formatDateTime(order.createdAt)}</div>
                       </div>
                     </div>
@@ -308,19 +308,19 @@ export function OrderDetailPage() {
                   {/* Price Breakdown */}
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Tam tinh:</span>
+                      <span className="text-gray-600">Tạm tính:</span>
                       <span className="font-medium text-gray-900">{formatCurrency(order.total - order.shippingFee)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Phi van chuyen:</span>
+                      <span className="text-gray-600">Phí vận chuyển:</span>
                       <span className="font-medium text-green-600">
-                        {order.shippingFee === 0 ? 'Mien phi' : formatCurrency(order.shippingFee)}
+                        {order.shippingFee === 0 ? 'Miễn phí' : formatCurrency(order.shippingFee)}
                       </span>
                     </div>
                   </div>
 
                   <div className="p-4 bg-gray-50 rounded-xl flex justify-between items-center mb-6">
-                    <span className="text-base font-bold text-gray-900">Tong cong:</span>
+                    <span className="text-base font-bold text-gray-900">Tổng cộng:</span>
                     <span className="text-2xl font-bold text-blue-600">
                       {formatCurrency(order.total)}
                     </span>
@@ -328,9 +328,9 @@ export function OrderDetailPage() {
 
                   {/* Support */}
                   <div className="text-center">
-                    <p className="text-sm text-gray-500 mb-3">Gap van de voi don hang nay?</p>
+                    <p className="text-sm text-gray-500 mb-3">Gặp vấn đề với đơn hàng này?</p>
                     <Button variant="outline" className="w-full rounded-xl border-gray-200 hover:bg-gray-50" asChild>
-                      <Link to="/support">Gui yeu cau ho tro</Link>
+                      <Link to="/support">Gửi yêu cầu hỗ trợ</Link>
                     </Button>
                   </div>
                 </CardContent>

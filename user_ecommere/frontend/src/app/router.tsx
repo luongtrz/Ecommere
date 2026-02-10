@@ -20,6 +20,7 @@ import { SearchPage } from '@/features/catalog/pages/SearchPage';
 
 // Cart & Checkout
 import { CartPage } from '@/features/cart/pages/CartPage';
+import { WishlistPage } from '@/features/catalog/pages/WishlistPage';
 import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
 
 // Orders
@@ -42,6 +43,7 @@ export function AppRouter() {
           <Route path="p/:productSlug" element={<ProductDetailPage />} />
           <Route path="search" element={<SearchPage />} />
           <Route path="cart" element={<CartPage />} />
+          <Route path="wishlist" element={<WishlistPage />} />
         </Route>
 
         {/* Auth Routes */}

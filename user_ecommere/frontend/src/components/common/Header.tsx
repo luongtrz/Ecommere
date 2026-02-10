@@ -8,15 +8,19 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
+import { CartDrawer } from '@/features/cart/components/CartDrawer';
+import { useCart } from '@/features/cart/hooks/useCart';
+
 export function Header() {
   const { user, logout } = useAuth();
+  const { openCart } = useCart();
 
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Top promo bar */}
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white">
         <div className="container flex h-8 items-center justify-center text-xs font-medium tracking-wide">
-          Mien phi van chuyen cho don hang tu 500.000d
+          Miễn phí vận chuyển cho đơn hàng từ 500.000đ
         </div>
       </div>
 
@@ -32,17 +36,17 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="w-72">
               <div className="flex flex-col gap-4 mt-8">
-                <Link to="/" className="text-lg font-semibold hover:text-primary transition-colors">Trang chu</Link>
-                <Link to="/catalog" className="text-lg font-semibold hover:text-primary transition-colors">San pham</Link>
-                <Link to="/cart" className="text-lg font-semibold hover:text-primary transition-colors">Gio hang</Link>
+                <Link to="/" className="text-lg font-semibold hover:text-primary transition-colors">Trang chủ</Link>
+                <Link to="/catalog" className="text-lg font-semibold hover:text-primary transition-colors">Sản phẩm</Link>
+                <Link to="/cart" className="text-lg font-semibold hover:text-primary transition-colors">Giỏ hàng</Link>
                 {user ? (
                   <>
-                    <Link to="/account" className="text-lg font-semibold hover:text-primary transition-colors">Tai khoan</Link>
-                    <Link to="/orders" className="text-lg font-semibold hover:text-primary transition-colors">Don hang</Link>
-                    <button onClick={logout} className="text-lg font-semibold text-left hover:text-red-500 transition-colors">Dang xuat</button>
+                    <Link to="/account" className="text-lg font-semibold hover:text-primary transition-colors">Tài khoản</Link>
+                    <Link to="/orders" className="text-lg font-semibold hover:text-primary transition-colors">Đơn hàng</Link>
+                    <button onClick={logout} className="text-lg font-semibold text-left hover:text-red-500 transition-colors">Đăng xuất</button>
                   </>
                 ) : (
-                  <Link to="/login" className="text-lg font-semibold hover:text-primary transition-colors">Dang nhap</Link>
+                  <Link to="/login" className="text-lg font-semibold hover:text-primary transition-colors">Đăng nhập</Link>
                 )}
               </div>
             </SheetContent>
@@ -65,9 +69,11 @@ export function Header() {
 
           {/* Actions */}
           <nav className="flex items-center gap-2">
-            <Link to="/cart" className="relative">
+            <button onClick={openCart} className="relative">
               <CartBadge />
-            </Link>
+            </button>
+
+            <CartDrawer />
 
             {user ? (
               <DropdownMenu>
@@ -84,28 +90,28 @@ export function Header() {
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
                   <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
-                    <Link to="/account">Tai khoan</Link>
+                    <Link to="/account">Tài khoản</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
-                    <Link to="/orders">Don hang</Link>
+                    <Link to="/orders">Đơn hàng</Link>
                   </DropdownMenuItem>
                   {user.role === 'ADMIN' && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
-                        <Link to="/admin">Quan tri</Link>
+                        <Link to="/admin">Quản trị</Link>
                       </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout} className="rounded-lg cursor-pointer text-red-500 focus:text-red-600">
-                    Dang xuat
+                    Đăng xuất
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Button asChild className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md text-sm px-5">
-                <Link to="/login">Dang nhap</Link>
+                <Link to="/login">Đăng nhập</Link>
               </Button>
             )}
           </nav>
