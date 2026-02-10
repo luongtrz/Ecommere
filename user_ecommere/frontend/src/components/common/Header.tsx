@@ -65,9 +65,9 @@ export function Header() {
 
           {/* Actions */}
           <nav className="flex items-center gap-2">
-            <button onClick={openCart} className="relative">
+            <div onClick={openCart} className="relative cursor-pointer">
               <CartBadge />
-            </button>
+            </div>
 
             <CartDrawer />
 
