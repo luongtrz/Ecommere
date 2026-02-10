@@ -9,12 +9,11 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { Breadcrumb } from '@/components/common/Breadcrumb';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
-import { Package, Star, ShoppingBag, Grid3X3, List, Filter } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, ShoppingBag, Grid3X3, List, Filter, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -24,6 +23,7 @@ export function CategoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
+  const searchQuery = searchParams.get('q') || '';
 
   // Filter params
   const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
@@ -36,6 +36,7 @@ export function CategoryPage() {
   const { data: products, isLoading: isProductsLoading } = useProducts({
     categorySlug,
     sortBy: sortBy as any,
+    search: searchQuery || undefined,
     minPrice,
     maxPrice,
     scent,
@@ -46,6 +47,9 @@ export function CategoryPage() {
 
   const updateParams = useCallback((updates: Record<string, string | undefined>) => {
     const newParams = new URLSearchParams(searchParams);
+    if (!('page' in updates)) {
+      newParams.set('page', '1');
+    }
     Object.entries(updates).forEach(([key, value]) => {
       if (value === undefined || value === '') {
         newParams.delete(key);
@@ -57,7 +61,11 @@ export function CategoryPage() {
   }, [searchParams, setSearchParams]);
 
   const handleSortChange = (value: string) => {
-    updateParams({ sort: value });
+    updateParams({ sort: value, page: '1' });
+  };
+
+  const handleSearchChange = (value: string) => {
+    updateParams({ q: value || undefined, page: '1' });
   };
 
   const handleViewToggle = (mode: string) => {
@@ -65,7 +73,7 @@ export function CategoryPage() {
   };
 
   const handleFilterChange = useCallback((filters: Record<string, string | undefined>) => {
-    updateParams(filters);
+    updateParams({ ...filters, page: '1' });
   }, [updateParams]);
 
   const handleAddToCart = (product: any, variant: any) => {
@@ -80,7 +88,11 @@ export function CategoryPage() {
     });
   };
 
-  if (isCategoryLoading || isProductsLoading) {
+  const clearFilters = () => {
+    setSearchParams({ view: viewMode });
+  };
+
+  if (isCategoryLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <LoadingSpinner />
@@ -101,7 +113,7 @@ export function CategoryPage() {
     );
   }
 
-  // Filter sidebar content
+  // Filter sidebar content (ẩn category filter vì đang ở trong 1 danh mục)
   const filterContent = (
     <FilterSidebar
       currentFilters={{
@@ -120,128 +132,102 @@ export function CategoryPage() {
     <>
       <SEO title={category.name} description={category.description} />
 
-      <div className="min-h-screen bg-gray-50">
-        {/* Category Header */}
-        <div className="bg-white border-b">
-          <div className="container py-6">
+      <div className="min-h-screen bg-gray-50/50">
+        {/* Compact Header - giống CatalogPage */}
+        <div className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
+          <div className="container py-4">
+            {/* Breadcrumb nhỏ */}
             <Breadcrumb
               items={[
                 { label: 'Sản phẩm', href: '/catalog' },
                 { label: category.name },
               ]}
-              className="mb-4"
+              className="mb-2"
             />
 
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                    <Package className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">{category.name}</h1>
-                    <Badge variant="secondary" className="mt-1">
-                      {products?.total || 0} sản phẩm
-                    </Badge>
-                  </div>
-                </div>
-                {category.description && (
-                  <p className="text-gray-600 text-lg max-w-2xl">{category.description}</p>
-                )}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">{category.name}</h1>
+                <p className="text-xs text-gray-500 hidden md:block">{products?.total || 0} sản phẩm</p>
               </div>
 
-              {/* Category Stats */}
-              <Card className="lg:w-80">
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <div className="text-2xl font-bold text-blue-600">{products?.total || 0}</div>
-                      <div className="text-sm text-gray-600">Sản phẩm</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-green-600">
-                        {products?.products && products.products.length > 0
-                          ? (products.products.reduce((acc, product) => acc + (product.rating || 0), 0) / products.products.length).toFixed(1)
-                          : '0.0'}
-                      </div>
-                      <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                        <Star className="h-3 w-3 fill-current" />
-                        Đánh giá
-                      </div>
-                    </div>
+              {/* Compact Toolbar - giống CatalogPage */}
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                {/* Search */}
+                <div className="relative flex-1 md:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    placeholder="Tìm kiếm..."
+                    className="h-9 pl-9 text-sm bg-gray-50 border-gray-200 rounded-lg focus:bg-white transition-all"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-gray-200 rounded-full p-0.5">
+                      <X className="h-3 w-3 text-gray-500" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 border-l pl-2 ml-2 border-gray-200">
+                  {/* Sort */}
+                  <Select value={sortBy} onValueChange={handleSortChange}>
+                    <SelectTrigger className="h-9 w-[130px] text-xs border-0 bg-transparent hover:bg-gray-50 font-medium">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRODUCT_SORT_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* View Toggle */}
+                  <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewToggle('grid')}
+                      className={`h-7 w-7 p-0 rounded-md ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-gray-500'}`}
+                    >
+                      <Grid3X3 className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewToggle('list')}
+                      className={`h-7 w-7 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm' : 'text-gray-500'}`}
+                    >
+                      <List className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
+
+                  {/* Mobile Filter Trigger */}
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-9 w-9 p-0 lg:hidden">
+                        <Filter className="h-4 w-4" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-80 overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>Bộ lọc</SheetTitle>
+                      </SheetHeader>
+                      <div className="py-4">
+                        {filterContent}
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Products Section */}
-        <div className="container py-8">
-          {/* Sort Controls */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Sản phẩm trong danh mục
-              </h2>
-              <Badge variant="outline">
-                {products?.products.length || 0} sản phẩm
-              </Badge>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-700 hidden md:inline">Sắp xếp:</span>
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_SORT_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* View Toggle */}
-              <div className="flex items-center gap-2 ml-2">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleViewToggle('grid')}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleViewToggle('list')}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Mobile Filter Trigger */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="lg:hidden">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80 overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>Bộ lọc</SheetTitle>
-                  </SheetHeader>
-                  <div className="py-4">
-                    {filterContent}
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-
-          {/* Main Content with Sidebar */}
+        {/* Main Content with Sidebar - giống CatalogPage */}
+        <div className="container py-6 min-h-[60vh]">
           <div className="flex gap-6">
             {/* Sidebar - Desktop only */}
             <aside className="hidden lg:block w-64 shrink-0">
@@ -252,103 +238,65 @@ export function CategoryPage() {
 
             {/* Products */}
             <div className="flex-1 min-w-0">
-              {products?.products.length === 0 ? (
-                <div className="py-12">
-                  <EmptyState
-                    icon={<Package className="h-16 w-16 text-gray-300" />}
-                    title="Chưa có sản phẩm"
-                    description="Danh mục này chưa có sản phẩm nào. Hãy quay lại sau!"
-                    action={
-                      <Button asChild>
-                        <Link to="/catalog" className="flex items-center gap-2">
-                          <ShoppingBag className="h-4 w-4" />
-                          Xem tất cả sản phẩm
-                        </Link>
-                      </Button>
-                    }
-                  />
-                </div>
+              {isProductsLoading ? (
+                <div className="py-20 flex justify-center"><LoadingSpinner /></div>
+              ) : products?.products.length === 0 ? (
+                <EmptyState
+                  title="Không tìm thấy sản phẩm"
+                  description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
+                  action={<Button variant="outline" onClick={clearFilters}>Xóa bộ lọc</Button>}
+                />
               ) : (
-                <div className={`${viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'
-                  : 'space-y-4'
-                  }`}>
-                  {products?.products.map((product) => (
-                    viewMode === 'grid' ? (
-                      <ProductCard
-                        key={product.id}
-                        id={product.id}
-                        name={product.name}
-                        slug={product.slug}
-                        images={product.images}
-                        price={product.basePrice}
-                        rating={product.rating}
-                        reviewCount={product.reviewCount}
-                        onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                      />
-                    ) : (
-                      <Card key={product.id} className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-                        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                          <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm mx-auto md:mx-0">
-                            <img
-                              src={product.images[0]}
-                              alt={product.name}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                            />
+                <div className="space-y-8 animate-fade-in">
+                  <div className={`${viewMode === 'grid'
+                    ? 'grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6'
+                    : 'space-y-4'
+                    }`}>
+                    {products?.products.map((product) => (
+                      viewMode === 'grid' ? (
+                        <ProductCard
+                          key={product.id}
+                          id={product.id}
+                          name={product.name}
+                          slug={product.slug}
+                          images={product.images}
+                          price={product.basePrice}
+                          rating={product.rating}
+                          reviewCount={product.reviewCount}
+                          onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                        />
+                      ) : (
+                        <div key={product.id} className="flex gap-4 bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all">
+                          <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0">
+                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
                           </div>
-                          <div className="flex-1 min-w-0 text-center md:text-left">
-                            <div className="mb-3">
-                              <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-2 leading-tight">{product.name}</h3>
-                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-3">
-                                <div className="flex items-center gap-1">
-                                  <span className="text-yellow-400 text-base md:text-lg">&#9733;</span>
-                                  <span className="text-sm font-medium text-gray-700">
-                                    {product.rating?.toFixed(1) || '0.0'}
-                                  </span>
-                                  <span className="text-sm text-gray-500">
-                                    ({product.reviewCount || 0} đánh giá)
-                                  </span>
-                                </div>
-                                <Badge variant="outline" className="text-xs">
-                                  {product.variants?.length || 0} biến thể
-                                </Badge>
+                          <div className="flex-1 min-w-0 py-1">
+                            <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                              <div className="flex items-center text-amber-500">
+                                <span className="mr-0.5">&#9733;</span> {product.rating?.toFixed(1)}
                               </div>
-                              {product.description && (
-                                <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-2">
-                                  {product.description}
-                                </p>
-                              )}
-                              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                                {product.variants?.slice(0, 3).map((variant: any, index: number) => (
-                                  <Badge key={index} variant="secondary" className="text-xs">
-                                    {variant.scent} - {variant.volumeMl}ml
-                                  </Badge>
-                                ))}
-                                {product.variants && product.variants.length > 3 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{product.variants.length - 3} nữa
-                                  </Badge>
-                                )}
-                              </div>
+                              <span>|</span>
+                              <span>{product.reviewCount} đánh giá</span>
                             </div>
-                            <div className="text-center md:text-right">
-                              <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
-                                {formatCurrency(product.basePrice)}
-                              </div>
-                              <Button
-                                size="lg"
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md w-full md:w-auto"
-                                onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                              >
-                                <ShoppingBag className="h-4 w-4 mr-2" />
-                                Thêm vào giỏ hàng
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {product.variants.slice(0, 3).map((v: any, i: number) => (
+                                <Badge key={i} variant="secondary" className="text-[10px] h-5 px-1.5 font-normal">
+                                  {v.scent}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="flex items-center justify-between mt-auto">
+                              <span className="font-bold text-blue-600">{formatCurrency(product.basePrice)}</span>
+                              <Button size="sm" className="h-8 rounded-lg text-xs" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
+                                <ShoppingBag className="h-3 w-3 mr-1.5" /> Thêm
                               </Button>
                             </div>
                           </div>
                         </div>
-                      </Card>
-                    )
-                  ))}
+                      )
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
