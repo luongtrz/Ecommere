@@ -7,12 +7,13 @@ import { Breadcrumb } from '@/components/common/Breadcrumb';
 import { Rating } from '@/components/common/Rating';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { useCart } from '@/features/cart/hooks/useCart';
 import { formatCurrency, formatDiscount } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
-import { ShoppingCart, Minus, Plus, Heart, Share2, Truck, Shield, RefreshCw, ArrowLeft, Search } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Heart, Truck, Shield, RefreshCw, ArrowLeft, Search, FileText, Info } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export function ProductDetailPage() {
   const { productSlug } = useParams<{ productSlug: string }>();
@@ -79,60 +80,51 @@ export function ProductDetailPage() {
         image={getImageUrl(product.images[0])}
       />
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white">
-        {/* Product Header */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100">
-          <div className="container py-4">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white pb-20">
+        {/* Product Header - Compact Breadcrumb */}
+        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-40">
+          <div className="container py-3 flex items-center justify-between">
             <Breadcrumb
               items={[
                 { label: 'San pham', href: '/catalog' },
                 { label: product.category?.name || '', href: `/c/${product.category?.slug}` },
                 { label: product.name },
               ]}
-              className="mb-4"
+              className="text-sm"
             />
-
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
-                <Link to={`/c/${product.category?.slug}`} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
-                  <ArrowLeft className="h-4 w-4" />
-                  {product.category?.name}
-                </Link>
-              </Button>
-
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Rating value={product.rating || 0} size="sm" />
-                  <span className="font-medium">{product.rating?.toFixed(1) || '0.0'}</span>
-                  <span>({product.reviewCount || 0} danh gia)</span>
-                </div>
-                <Badge variant="secondary" className="rounded-full">
-                  {selectedVariant?.stock || 0} con lai
-                </Badge>
-              </div>
-            </div>
+            <Button variant="ghost" size="sm" asChild className="hidden md:flex">
+              <Link to={`/c/${product.category?.slug}`} className="gap-2 text-gray-500">
+                <ArrowLeft className="h-4 w-4" />
+                Quay lai
+              </Link>
+            </Button>
           </div>
         </div>
 
-        <div className="container py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Images */}
-            <div className="space-y-4 animate-fade-in">
-              <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+        <div className="container py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            {/* Left Column: Images (5 cols) */}
+            <div className="lg:col-span-5 space-y-4 animate-fade-in">
+              <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 relative group">
                 <img
                   src={getImageUrl(product.images[selectedImage])}
                   alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
+                {hasDiscount && (
+                  <Badge className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm font-bold shadow-lg">
+                    -{formatDiscount(originalPrice, finalPrice)}
+                  </Badge>
+                )}
               </div>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-5 gap-2">
                 {product.images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`aspect-square bg-white rounded-xl overflow-hidden transition-all duration-300 ${selectedImage === index
-                      ? 'ring-2 ring-blue-500 ring-offset-2 shadow-md'
-                      : 'border border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100'
+                    className={`aspect-square bg-white rounded-lg overflow-hidden transition-all duration-200 ${selectedImage === index
+                      ? 'ring-2 ring-blue-500 ring-offset-1'
+                      : 'border border-gray-200 hover:border-gray-300 opacity-80 hover:opacity-100'
                       }`}
                   >
                     <img
@@ -145,193 +137,155 @@ export function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Product Info */}
-            <div className="space-y-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">{product.name}</h1>
+            {/* Right Column: Info & Details (7 cols) */}
+            <div className="lg:col-span-7 space-y-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="secondary" className="rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100">
+                    {product.category?.name}
+                  </Badge>
+                  <div className="flex items-center gap-1 text-sm text-amber-500 font-medium">
+                    <Rating value={product.rating || 0} size="sm" />
+                    <span>{product.rating?.toFixed(1)}</span>
+                    <span className="text-gray-400 font-normal">({product.reviewCount} danh gia)</span>
+                  </div>
+                </div>
 
-                <div className="flex items-baseline gap-4 mb-6">
-                  <span className="text-4xl md:text-5xl font-bold text-blue-600">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4">{product.name}</h1>
+
+                <div className="flex items-end gap-3 mb-6">
+                  <span className="text-4xl font-bold text-blue-600 tracking-tight">
                     {formatCurrency(finalPrice)}
                   </span>
                   {hasDiscount && (
-                    <>
-                      <span className="text-2xl text-gray-400 line-through">
-                        {formatCurrency(originalPrice)}
-                      </span>
-                      <Badge className="bg-red-500 hover:bg-red-500 text-white text-sm px-3 py-1 rounded-lg">
-                        -{formatDiscount(originalPrice, finalPrice)}
-                      </Badge>
-                    </>
+                    <span className="text-xl text-gray-400 line-through mb-1.5">
+                      {formatCurrency(originalPrice)}
+                    </span>
                   )}
                 </div>
 
-                <p className="text-gray-500 text-base leading-relaxed mb-6">
-                  {product.description}
-                </p>
-              </div>
+                {/* Compact Trust Badges */}
+                <div className="grid grid-cols-3 gap-3 mb-6">
+                  {[
+                    { icon: Truck, text: 'Mien phi van chuyen', sub: 'Don tu 500k' },
+                    { icon: Shield, text: 'Chinh hang 100%', sub: 'Phat hien gia den gap 10' },
+                    { icon: RefreshCw, text: 'Doi tra 7 ngay', sub: 'Thu tuc don gian' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 border border-gray-100 text-center">
+                      <item.icon className="h-5 w-5 text-blue-600 mb-1.5" />
+                      <span className="text-xs font-bold text-gray-900">{item.text}</span>
+                      <span className="text-[10px] text-gray-500">{item.sub}</span>
+                    </div>
+                  ))}
+                </div>
 
-              {/* Purchase Options */}
-              <Card className="shadow-sm border border-gray-100 rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5 text-blue-600" />
-                    Thong tin mua hang
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5 p-6">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-3 block">Bien the san pham:</label>
-                    <Select
-                      value={selectedVariantId || product.variants[0]?.id}
-                      onValueChange={setSelectedVariantId}
-                    >
-                      <SelectTrigger className="h-12 rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {product.variants.map((variant) => (
-                          <SelectItem key={variant.id} value={variant.id} disabled={variant.stock === 0}>
-                            <div className="flex items-center justify-between w-full">
-                              <span>{variant.scent} - {variant.volumeMl}ml</span>
-                              {variant.stock === 0 && (
-                                <Badge variant="destructive" className="ml-2">Het hang</Badge>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-3 block">So luong:</label>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          disabled={quantity <= 1}
-                          className="h-9 w-9 rounded-lg"
-                        >
+                {/* Selection & Actions */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Phien ban (Mui/Dung tich):</label>
+                      <Select value={selectedVariantId || product.variants[0]?.id} onValueChange={setSelectedVariantId}>
+                        <SelectTrigger className="h-11 rounded-xl bg-gray-50 border-gray-200">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {product.variants.map((v) => (
+                            <SelectItem key={v.id} value={v.id} disabled={v.stock === 0}>
+                              <span className="font-medium">{v.scent}</span> - {v.volumeMl}ml
+                              {v.stock === 0 && <span className="text-red-500 ml-2">(Het hang)</span>}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">So luong:</label>
+                      <div className="flex items-center h-11 bg-gray-50 rounded-xl border border-gray-200 px-1 w-fit">
+                        <Button variant="ghost" size="icon" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="h-9 w-9 rounded-lg hover:bg-white">
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-12 text-center font-semibold text-lg">{quantity}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setQuantity(Math.min(selectedVariant?.stock || 999, quantity + 1))}
-                          disabled={quantity >= (selectedVariant?.stock || 0)}
-                          className="h-9 w-9 rounded-lg"
-                        >
+                        <span className="w-10 text-center font-semibold">{quantity}</span>
+                        <Button variant="ghost" size="icon" onClick={() => setQuantity(Math.min(selectedVariant?.stock || 999, quantity + 1))} className="h-9 w-9 rounded-lg hover:bg-white">
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
-                      <span className="text-sm text-gray-500">
-                        Con {selectedVariant?.stock || 0} san pham
-                      </span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
 
-              {/* Action Buttons */}
-              <div className="space-y-3">
-                <Button
-                  size="lg"
-                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20 rounded-2xl transition-all"
-                  onClick={handleAddToCart}
-                  disabled={!selectedVariant || selectedVariant.stock === 0}
-                >
-                  <ShoppingCart className="mr-3 h-5 w-5" />
-                  {selectedVariant?.stock === 0 ? 'Het hang' : 'Them vao gio hang'}
-                </Button>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" size="lg" className="h-12 border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-all">
-                    <Heart className="mr-2 h-4 w-4" />
-                    Yeu thich
-                  </Button>
-                  <Button variant="outline" size="lg" className="h-12 border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-200 hover:text-blue-500 transition-all">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Chia se
-                  </Button>
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      className="flex-1 h-12 text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 rounded-xl hover:scale-[1.02] transition-transform"
+                      onClick={handleAddToCart}
+                      disabled={!selectedVariant || selectedVariant.stock === 0}
+                    >
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      {selectedVariant?.stock === 0 ? 'Tam het hang' : 'Them vao gio'}
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-gray-200 hover:text-red-500 hover:border-red-200 hover:bg-red-50">
+                      <Heart className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
-              {/* Trust Badges */}
-              <div className="bg-gray-50 rounded-2xl p-6">
-                <h3 className="text-base font-semibold text-gray-900 mb-5 text-center">Cam ket cua chung toi</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center group">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
-                      <Truck className="h-6 w-6 text-white" />
+              {/* Tabbed Details - Replaces long scroll */}
+              <div className="pt-4">
+                <Tabs defaultValue="description" className="w-full">
+                  <TabsList className="w-full justify-start h-auto p-1 bg-gray-100/50 rounded-xl mb-6">
+                    <TabsTrigger value="description" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Mo ta chi tiet
+                    </TabsTrigger>
+                    <TabsTrigger value="specs" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <Info className="h-4 w-4 mr-2" />
+                      Thong so & Bao quan
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="description" className="mt-0 animate-fade-in">
+                    <div className="prose prose-gray max-w-none prose-p:leading-relaxed prose-headings:font-bold prose-a:text-blue-600">
+                      <div className="text-gray-600 whitespace-pre-line">
+                        {product.description}
+                      </div>
                     </div>
-                    <div className="font-medium text-sm text-gray-900 mb-0.5">Giao hang</div>
-                    <div className="text-xs text-gray-500">Mien phi toan quoc</div>
-                  </div>
-                  <div className="text-center group">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
-                      <Shield className="h-6 w-6 text-white" />
+                  </TabsContent>
+
+                  <TabsContent value="specs" className="mt-0 animate-fade-in">
+                    <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                      <h4 className="font-bold text-gray-900 mb-4">Thong tin ky thuat</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                        <div className="flex justify-between border-b border-gray-200 pb-2">
+                          <span className="text-gray-500">Mui huong</span>
+                          <span className="font-medium text-gray-900">{selectedVariant?.scent}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-200 pb-2">
+                          <span className="text-gray-500">Dung tich</span>
+                          <span className="font-medium text-gray-900">{selectedVariant?.volumeMl}ml</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-200 pb-2">
+                          <span className="text-gray-500">Xuat xu</span>
+                          <span className="font-medium text-gray-900">Thai Lan</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-200 pb-2">
+                          <span className="text-gray-500">Thuong hieu</span>
+                          <span className="font-medium text-gray-900">{product.category?.name}</span>
+                        </div>
+                      </div>
+                      <div className="mt-6">
+                        <h4 className="font-bold text-gray-900 mb-2">Huong dan bao quan</h4>
+                        <ul className="list-disc list-inside text-gray-600 space-y-1 text-sm">
+                          <li>Bao quan noi kho rao, thoang mat.</li>
+                          <li>Tranh anh nang truc tiep tu mat troi.</li>
+                          <li>Day nap kin sau khi su dung.</li>
+                          <li>De xa tam tay tre em.</li>
+                        </ul>
+                      </div>
                     </div>
-                    <div className="font-medium text-sm text-gray-900 mb-0.5">Chinh hang</div>
-                    <div className="text-xs text-gray-500">Dam bao 100%</div>
-                  </div>
-                  <div className="text-center group">
-                    <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-violet-600 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-lg shadow-violet-500/20 group-hover:scale-110 transition-transform duration-300">
-                      <RefreshCw className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="font-medium text-sm text-gray-900 mb-0.5">Doi tra</div>
-                    <div className="text-xs text-gray-500">Trong 7 ngay</div>
-                  </div>
-                </div>
+                  </TabsContent>
+                </Tabs>
               </div>
+
             </div>
-          </div>
-
-          {/* Product Description */}
-          <div className="mt-12 animate-fade-in" style={{ animationDelay: '400ms' }}>
-            <Card className="shadow-sm border border-gray-100 rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50/50">
-                <CardTitle className="text-xl flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">i</span>
-                  </div>
-                  Thong tin chi tiet san pham
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8">
-                <div className="prose prose-gray max-w-none">
-                  <div className="text-gray-600 leading-relaxed whitespace-pre-line text-base">
-                    {product.description}
-                  </div>
-                </div>
-
-                {/* Additional Product Info */}
-                <div className="mt-8 pt-8 border-t border-gray-100">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Thong so ky thuat:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-xl">
-                      <span className="text-gray-500">Dung tich:</span>
-                      <span className="font-medium">{selectedVariant?.volumeMl}ml</span>
-                    </div>
-                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-xl">
-                      <span className="text-gray-500">Mui huong:</span>
-                      <span className="font-medium">{selectedVariant?.scent}</span>
-                    </div>
-                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-xl">
-                      <span className="text-gray-500">Ton kho:</span>
-                      <span className="font-medium">{selectedVariant?.stock} san pham</span>
-                    </div>
-                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-xl">
-                      <span className="text-gray-500">Danh muc:</span>
-                      <span className="font-medium">{product.category?.name}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

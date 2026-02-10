@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Grid3X3, List, SlidersHorizontal, ShoppingBag } from 'lucide-react';
+import { Search, Grid3X3, List, ShoppingBag, X, Filter } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,6 +21,8 @@ export function CatalogPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const searchQuery = searchParams.get('q') || '';
   const viewMode = searchParams.get('view') || 'grid';
+
+
 
   const { data, isLoading } = useProducts({
     page,
@@ -31,15 +34,15 @@ export function CatalogPage() {
   const { addItem } = useCart();
 
   const handlePageChange = (newPage: number) => {
-    setSearchParams({ page: newPage.toString(), sort: sortBy, q: searchQuery });
+    setSearchParams({ page: newPage.toString(), sort: sortBy, q: searchQuery, view: viewMode });
   };
 
   const handleSortChange = (value: string) => {
-    setSearchParams({ page: '1', sort: value, q: searchQuery });
+    setSearchParams({ page: '1', sort: value, q: searchQuery, view: viewMode });
   };
 
   const handleSearchChange = (value: string) => {
-    setSearchParams({ page: '1', sort: sortBy, q: value });
+    setSearchParams({ page: '1', sort: sortBy, q: value, view: viewMode });
   };
 
   const handleAddToCart = (product: any, variant: any) => {
@@ -55,241 +58,158 @@ export function CatalogPage() {
   };
 
   const clearFilters = () => {
-    setSearchParams({});
+    setSearchParams({ view: viewMode });
   };
 
   const handleViewToggle = (mode: string) => {
     setSearchParams({ page: page.toString(), sort: sortBy, q: searchQuery, view: mode });
   };
 
-  const handleFilterClick = () => {
-    alert('Tinh nang bo loc dang duoc phat trien. Hien tai ban co the su dung tim kiem va sap xep.');
-  };
-
   return (
     <>
       <SEO title="San pham" />
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white">
-        {/* Header Section */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100">
-          <div className="container py-8">
-            <div className="mb-6 animate-fade-in">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Bo suu tap san pham</h1>
-              <p className="text-sm text-gray-500">Kham pha cac loai nuoc hoa xit thom chat luong cao</p>
-            </div>
+      <div className="min-h-screen bg-gray-50/50">
+        {/* Compact Header */}
+        <div className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
+          <div className="container py-4">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">San pham</h1>
+                <p className="text-xs text-gray-500 hidden md:block">{data?.total || 0} ket qua tim thay</p>
+              </div>
 
-            {/* Search and Filters */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <div className="flex flex-col lg:flex-row gap-3">
-                {/* Search Input */}
-                <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              {/* Compact Toolbar */}
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                {/* Search - Expandable on mobile potentially, simplified here */}
+                <div className="relative flex-1 md:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                   <Input
-                    placeholder="Tim kiem san pham..."
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    className="pl-10 h-11 text-sm rounded-xl border-gray-200 focus:border-blue-400 focus:ring-blue-100"
+                    placeholder="Tim kiem..."
+                    className="h-9 pl-9 text-sm bg-gray-50 border-gray-200 rounded-lg focus:bg-white transition-all"
                   />
+                  {searchQuery && (
+                    <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-gray-200 rounded-full p-0.5">
+                      <X className="h-3 w-3 text-gray-500" />
+                    </button>
+                  )}
                 </div>
 
-                {/* Sort Dropdown */}
-                <div className="flex items-center gap-2 min-w-[200px]">
-                  <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Sap xep:</span>
+                <div className="flex items-center gap-2 border-l pl-2 ml-2 border-gray-200">
+                  {/* Sort */}
                   <Select value={sortBy} onValueChange={handleSortChange}>
-                    <SelectTrigger className="h-11 text-sm rounded-xl">
+                    <SelectTrigger className="h-9 w-[130px] text-xs border-0 bg-transparent hover:bg-gray-50 font-medium">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {PRODUCT_SORT_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                      {PRODUCT_SORT_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                          {opt.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
 
-                {/* View Toggle & Filters */}
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="h-11 rounded-xl border-gray-200 hover:bg-gray-50" onClick={handleFilterClick}>
-                    <SlidersHorizontal className="h-4 w-4 mr-2" />
-                    Bo loc
-                  </Button>
-                  {(sortBy !== 'newest' || searchQuery) && (
-                    <Button variant="ghost" onClick={clearFilters} className="h-11 text-xs text-gray-500 hover:text-gray-700">
-                      Xoa bo loc
+                  {/* View Toggle */}
+                  <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewToggle('grid')}
+                      className={`h-7 w-7 p-0 rounded-md ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-gray-500'}`}
+                    >
+                      <Grid3X3 className="h-3.5 w-3.5" />
                     </Button>
-                  )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewToggle('list')}
+                      className={`h-7 w-7 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm' : 'text-gray-500'}`}
+                    >
+                      <List className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+
+                  {/* Mobile Filter Trigger */}
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-9 w-9 p-0 md:hidden">
+                        <Filter className="h-4 w-4" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                      <SheetHeader>
+                        <SheetTitle>Bo loc san pham</SheetTitle>
+                      </SheetHeader>
+                      <div className="py-4">
+                        <p className="text-sm text-gray-500">Tinh nang dang phat trien...</p>
+                        <Button variant="outline" className="w-full mt-4" onClick={clearFilters}>Xoa tat ca loc</Button>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
                 </div>
               </div>
-
-              {/* Active Filters */}
-              {(sortBy !== 'newest' || searchQuery) && (
-                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
-                  <span className="text-sm font-medium text-gray-500">Dang loc:</span>
-                  <div className="flex flex-wrap gap-2">
-                    {searchQuery && (
-                      <Badge variant="secondary" className="flex items-center gap-1 rounded-full px-3">
-                        Tim kiem: "{searchQuery}"
-                        <button
-                          onClick={() => handleSearchChange('')}
-                          className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
-                        >
-                          x
-                        </button>
-                      </Badge>
-                    )}
-                    {sortBy !== 'newest' && (
-                      <Badge variant="secondary" className="flex items-center gap-1 rounded-full px-3">
-                        Sap xep: {PRODUCT_SORT_OPTIONS.find(opt => opt.value === sortBy)?.label}
-                        <button
-                          onClick={() => handleSortChange('newest')}
-                          className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
-                        >
-                          x
-                        </button>
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
-        {/* Results Section */}
-        <div className="container py-8">
-          {/* Results Header */}
-          <div className="flex items-center justify-between mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {isLoading ? 'Dang tai...' : `${data?.total || 0} san pham`}
-              </h2>
-              {!isLoading && data?.totalPages && data.totalPages > 1 && (
-                <span className="text-sm text-gray-400">
-                  Trang {page} / {data.totalPages}
-                </span>
-              )}
-            </div>
-
-            {/* View Options */}
-            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleViewToggle('grid')}
-                className={`rounded-lg h-8 w-8 p-0 ${viewMode === 'grid' ? 'bg-white shadow-sm' : ''}`}
-              >
-                <Grid3X3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleViewToggle('list')}
-                className={`rounded-lg h-8 w-8 p-0 ${viewMode === 'list' ? 'bg-white shadow-sm' : ''}`}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Products Grid */}
+        {/* Results */}
+        <div className="container py-6 min-h-[60vh]">
           {isLoading ? (
-            <div className="py-12">
-              <LoadingSpinner />
-            </div>
+            <div className="py-20 flex justify-center"><LoadingSpinner /></div>
           ) : data?.products.length === 0 ? (
             <EmptyState
               title="Khong tim thay san pham"
-              description={searchQuery ? "Khong co san pham nao khop voi tim kiem cua ban" : "Chua co san pham nao trong danh muc nay"}
+              description="Thu tim kiem voi tu khoa khac hoac xoa bo loc"
+              action={<Button variant="outline" onClick={clearFilters}>Xoa bo loc</Button>}
             />
           ) : (
-            <>
+            <div className="space-y-8 animate-fade-in">
               <div className={`${viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5'
-                  : 'space-y-4'
+                ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6'
+                : 'space-y-4'
                 }`}>
-                {data?.products.map((product, index) => (
+                {data?.products.map((product) => (
                   viewMode === 'grid' ? (
-                    <div
+                    <ProductCard
                       key={product.id}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <ProductCard
-                        id={product.id}
-                        name={product.name}
-                        slug={product.slug}
-                        images={product.images}
-                        price={product.basePrice}
-                        rating={product.rating}
-                        reviewCount={product.reviewCount}
-                        onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                      />
-                    </div>
+                      id={product.id}
+                      name={product.name}
+                      slug={product.slug}
+                      images={product.images}
+                      price={product.basePrice}
+                      rating={product.rating}
+                      reviewCount={product.reviewCount}
+                      onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                    />
                   ) : (
-                    <div
-                      key={product.id}
-                      className="bg-white rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-0.5 animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <div className="flex flex-col md:flex-row gap-4 md:gap-5">
-                        <div className="w-20 h-20 md:w-28 md:h-28 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 mx-auto md:mx-0">
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                          />
+                    <div key={product.id} className="flex gap-4 bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all">
+                      <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0">
+                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0 py-1">
+                        <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                          <div className="flex items-center text-amber-500">
+                            <span className="mr-0.5">★</span> {product.rating?.toFixed(1)}
+                          </div>
+                          <span>•</span>
+                          <span>{product.reviewCount} danh gia</span>
                         </div>
-                        <div className="flex-1 min-w-0 text-center md:text-left">
-                          <div className="mb-2">
-                            <h3 className="font-bold text-base md:text-lg text-gray-900 mb-1 leading-tight">{product.name}</h3>
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 mb-2">
-                              <div className="flex items-center gap-1">
-                                <span className="text-amber-400 text-base md:text-lg">*</span>
-                                <span className="text-sm font-medium text-gray-700">
-                                  {product.rating?.toFixed(1) || '0.0'}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  ({product.reviewCount || 0} danh gia)
-                                </span>
-                              </div>
-                              <Badge variant="outline" className="text-xs rounded-full">
-                                {product.variants?.length || 0} bien the
-                              </Badge>
-                            </div>
-                            {product.description && (
-                              <p className="text-gray-500 text-sm leading-relaxed mb-3 line-clamp-2">
-                                {product.description}
-                              </p>
-                            )}
-                            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                              {product.variants?.slice(0, 3).map((variant: any, idx: number) => (
-                                <Badge key={idx} variant="secondary" className="text-xs rounded-full">
-                                  {variant.scent} - {variant.volumeMl}ml
-                                </Badge>
-                              ))}
-                              {product.variants && product.variants.length > 3 && (
-                                <Badge variant="outline" className="text-xs rounded-full">
-                                  +{product.variants.length - 3} nua
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-center md:text-right">
-                            <div className="text-xl md:text-2xl font-bold text-blue-600 mb-3">
-                              {formatCurrency(product.basePrice)}
-                            </div>
-                            <Button
-                              size="default"
-                              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md rounded-xl w-full md:w-auto"
-                              onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                            >
-                              <ShoppingBag className="h-4 w-4 mr-2" />
-                              Them vao gio
-                            </Button>
-                          </div>
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {product.variants.slice(0, 3).map((v, i) => (
+                            <Badge key={i} variant="secondary" className="text-[10px] h-5 px-1.5 font-normal">
+                              {v.scent}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="font-bold text-blue-600">{formatCurrency(product.basePrice)}</span>
+                          <Button size="sm" className="h-8 rounded-lg text-xs" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
+                            <ShoppingBag className="h-3 w-3 mr-1.5" /> Them
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -298,7 +218,7 @@ export function CatalogPage() {
               </div>
 
               {data && data.totalPages > 1 && (
-                <div className="flex justify-center mt-8">
+                <div className="flex justify-center pt-8 border-t border-gray-100">
                   <Pagination
                     currentPage={page}
                     totalPages={data.totalPages}
@@ -306,7 +226,7 @@ export function CatalogPage() {
                   />
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>
