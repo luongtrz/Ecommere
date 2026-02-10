@@ -61,7 +61,7 @@ export function SearchBox() {
   };
 
   return (
-    <div ref={containerRef} className="relative group w-full z-50">
+    <div ref={containerRef} className="relative group w-full z-[100]">
       <form onSubmit={handleSubmit} className="relative">
         <div className={`
           relative flex items-center rounded-xl border transition-all duration-300
@@ -100,7 +100,7 @@ export function SearchBox() {
 
       {/* Dropdown Suggestions */}
       {isFocused && (
-        <div className="absolute top-full left-0 right-0 bg-white rounded-b-xl border border-t-0 border-blue-500 shadow-xl overflow-hidden animate-fade-in origin-top">
+        <div className="absolute top-full left-0 right-0 bg-white rounded-b-xl border border-t-0 border-blue-500 shadow-xl overflow-hidden animate-fade-in origin-top z-[100]">
           <div className="p-2">
             {query.trim() === '' ? (
               <>

@@ -17,13 +17,6 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      {/* Top promo bar */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white">
-        <div className="container flex h-8 items-center justify-center text-xs font-medium tracking-wide">
-          Miễn phí vận chuyển cho đơn hàng từ 500.000đ
-        </div>
-      </div>
-
       {/* Main header */}
       <div className="bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-glass">
         <div className="container flex h-16 items-center gap-4">

@@ -72,7 +72,7 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
             <DialogContent className="max-w-4xl p-0 overflow-hidden gap-0 bg-white border-0 rounded-2xl md:h-auto h-[90vh] flex flex-col md:flex-row">
                 {/* Helper for accessibility if needed */}
                 <VisuallyHidden.Root>
-                    <DialogTitle>{product?.name || 'Product Quick View'}</DialogTitle>
+                    <DialogTitle>{product?.name || 'Xem nhanh sản phẩm'}</DialogTitle>
                     <DialogDescription>Xem nhanh thông tin sản phẩm</DialogDescription>
                 </VisuallyHidden.Root>
 

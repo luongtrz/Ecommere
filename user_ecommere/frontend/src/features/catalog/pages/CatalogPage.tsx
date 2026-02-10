@@ -141,11 +141,11 @@ export function CatalogPage() {
                     </SheetTrigger>
                     <SheetContent>
                       <SheetHeader>
-                        <SheetTitle>Bo loc san pham</SheetTitle>
+                        <SheetTitle>Bộ lọc</SheetTitle>
                       </SheetHeader>
                       <div className="py-4">
-                        <p className="text-sm text-gray-500">Tinh nang dang phat trien...</p>
-                        <Button variant="outline" className="w-full mt-4" onClick={clearFilters}>Xoa tat ca loc</Button>
+                        <p className="text-sm text-gray-500">Tính năng đang phát triển...</p>
+                        <Button variant="outline" className="w-full mt-4" onClick={clearFilters}>Xóa tất cả lọc</Button>
                       </div>
                     </SheetContent>
                   </Sheet>
@@ -196,7 +196,7 @@ export function CatalogPage() {
                             <span className="mr-0.5">★</span> {product.rating?.toFixed(1)}
                           </div>
                           <span>•</span>
-                          <span>{product.reviewCount} danh gia</span>
+                          <span>{product.reviewCount} đánh giá</span>
                         </div>
                         <div className="flex flex-wrap gap-1 mb-3">
                           {product.variants.slice(0, 3).map((v, i) => (

@@ -6,6 +6,7 @@ const categorySchema = z.object({
   name: z.string(),
   slug: z.string(),
   description: z.string().optional(),
+  parentId: z.string().nullable().optional(),
 });
 
 const categoriesResponseSchema = z.array(categorySchema);

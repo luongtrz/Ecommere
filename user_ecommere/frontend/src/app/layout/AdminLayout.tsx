@@ -1,15 +1,15 @@
 import { Outlet, Link } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Ticket, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Ticket,
   Warehouse,
   Home
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Tổng quan', href: '/admin', icon: LayoutDashboard },
   { name: 'Sản phẩm', href: '/admin/products', icon: Package },
   { name: 'Đơn hàng', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Mã giảm giá', href: '/admin/coupons', icon: Ticket },
@@ -22,7 +22,7 @@ export function AdminLayout() {
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-md">
         <div className="flex h-16 items-center px-6 border-b">
-          <h1 className="text-xl font-bold text-primary">Admin Panel</h1>
+          <h1 className="text-xl font-bold text-primary">Trang quản trị</h1>
         </div>
         <nav className="p-4 space-y-1">
           <Link

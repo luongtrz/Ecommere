@@ -83,7 +83,13 @@ export function ProductDetailPage() {
       <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white pb-20">
         {/* Product Header - Compact Breadcrumb */}
         <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-40">
-          <div className="container py-3 flex items-center justify-between">
+          <div className="container py-3 space-y-2">
+            <Button variant="ghost" size="sm" asChild className="hidden md:flex w-fit">
+              <Link to={`/c/${product.category?.slug}`} className="gap-2 text-gray-500">
+                <ArrowLeft className="h-4 w-4" />
+                Quay lại danh sách
+              </Link>
+            </Button>
             <Breadcrumb
               items={[
                 { label: 'Sản phẩm', href: '/catalog' },
@@ -92,12 +98,6 @@ export function ProductDetailPage() {
               ]}
               className="text-sm"
             />
-            <Button variant="ghost" size="sm" asChild className="hidden md:flex">
-              <Link to={`/c/${product.category?.slug}`} className="gap-2 text-gray-500">
-                <ArrowLeft className="h-4 w-4" />
-                Quay lại
-              </Link>
-            </Button>
           </div>
         </div>
 

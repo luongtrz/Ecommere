@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { SEO } from '@/lib/seo';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
@@ -6,20 +6,30 @@ import { ProductCard } from '@/components/common/ProductCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowRight, Truck, Shield, RefreshCw, Star, Zap } from 'lucide-react';
+import { ArrowRight, Truck, Shield, RefreshCw, Star, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-interface ProductGridProps {
-  categorySlug: string;
+interface CategoryProductSectionProps {
+  category: any;
   onAddToCart: (product: any, variant: any) => void;
 }
 
-function ProductGrid({ categorySlug, onAddToCart }: ProductGridProps) {
+function CategoryProductSection({ category, onAddToCart }: CategoryProductSectionProps) {
   const { data: productsData, isLoading } = useProducts({
-    categorySlug,
+    categorySlug: category.slug,
     limit: 8,
   });
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 300;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -30,29 +40,94 @@ function ProductGrid({ categorySlug, onAddToCart }: ProductGridProps) {
   }
 
   if (!productsData?.products || productsData.products.length === 0) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        Không có sản phẩm nào trong danh mục này.
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up">
-      {productsData.products.map((product) => (
-        <ProductCard
-          key={product.id}
-          id={product.id}
-          name={product.name}
-          slug={product.slug}
-          images={product.images}
-          price={product.basePrice}
-          rating={product.rating}
-          reviewCount={product.reviewCount}
-          onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
-        />
-      ))}
-    </div>
+    <section className="py-12 border-b border-gray-100">
+      <div className="container">
+        {/* Category Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">{category.name}</h2>
+            <p className="text-sm text-gray-500 mt-1">Khám phá sản phẩm chất lượng</p>
+          </div>
+          <Button asChild variant="ghost" className="hidden md:flex text-blue-600 hover:text-blue-700">
+            <Link to={`/c/${category.slug}`} className="flex items-center gap-1">
+              Xem tất cả
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+
+        {/* Products - Desktop Grid, Mobile Horizontal Scroll */}
+        <div className="relative">
+          {/* Desktop Grid */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {productsData.products.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                slug={product.slug}
+                images={product.images}
+                price={product.basePrice}
+                rating={product.rating}
+                reviewCount={product.reviewCount}
+                onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+              />
+            ))}
+          </div>
+
+          {/* Mobile Horizontal Scroll */}
+          <div className="md:hidden relative">
+            <div
+              ref={scrollRef}
+              className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+            >
+              {productsData.products.map((product) => (
+                <div key={product.id} className="w-[280px] shrink-0">
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    slug={product.slug}
+                    images={product.images}
+                    price={product.basePrice}
+                    rating={product.rating}
+                    reviewCount={product.reviewCount}
+                    onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile Scroll Arrows */}
+            <button
+              onClick={() => scroll('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md border border-gray-100 text-gray-600 hover:text-blue-600 z-10"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md border border-gray-100 text-gray-600 hover:text-blue-600 z-10"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile View All Button */}
+        <div className="flex justify-center mt-6 md:hidden">
+          <Button asChild variant="outline" className="rounded-full border-blue-200 text-blue-600 hover:bg-blue-50 px-8">
+            <Link to={`/c/${category.slug}`}>
+              Xem tất cả {category.name}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -60,12 +135,9 @@ export function HomePage() {
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { addItem } = useCart();
   const featuresRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<string>('');
 
-  // Set default tab when categories load
-  if (categories && categories.length > 0 && !activeTab) {
-    setActiveTab(categories[0].slug);
-  }
+  // Filter root categories only
+  const rootCategories = categories?.filter(c => !c.parentId) || [];
 
   const handleAddToCart = (product: any, variant: any) => {
     addItem({
@@ -97,7 +169,7 @@ export function HomePage() {
             <div className="space-y-6 animate-fade-in-up">
               <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur border border-blue-100 rounded-full px-3 py-1 shadow-sm">
                 <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                <span className="text-xs font-bold text-blue-900 uppercase tracking-wide">Best Seller 2026</span>
+                <span className="text-xs font-bold text-blue-900 uppercase tracking-wide">Sản phẩm bán chạy 2026</span>
               </div>
 
               <h1 className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tight leading-[1.1]">
@@ -126,7 +198,7 @@ export function HomePage() {
                   <div className="w-32 h-64 bg-gradient-to-b from-gray-100 to-gray-200 rounded-full mx-auto shadow-inner border border-white mb-4 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-tr from-blue-400/20 to-transparent" />
                   </div>
-                  <div className="font-bold text-gray-400 tracking-widest text-sm">PREMIUM</div>
+                  <div className="font-bold text-gray-400 tracking-widest text-sm">CAO CẤP</div>
                 </div>
                 {/* Floating elements */}
                 <div className="absolute top-6 -right-6 bg-white p-3 rounded-xl shadow-lg animate-float-slow">
@@ -156,49 +228,27 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Tabbed Product Showcase */}
-      <section className="py-16 bg-gray-50/50">
-        <div className="container">
-          <div className="text-center mb-10">
+      {/* Category-Based Product Sections */}
+      <div className="bg-gray-50/50">
+        <div className="container py-8">
+          <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Bộ sưu tập nổi bật</h2>
             <div className="h-1 w-12 bg-blue-600 rounded-full mx-auto" />
           </div>
-
-          {isLoadingCategories ? (
-            <div className="flex justify-center"><LoadingSpinner /></div>
-          ) : categories && categories.length > 0 ? (
-            <Tabs defaultValue={categories[0].slug} value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex justify-center mb-8 overflow-x-auto pb-4 scrollbar-hide">
-                <TabsList className="h-auto p-1 bg-white border border-gray-100 rounded-full shadow-sm inline-flex">
-                  {categories.map((cat) => (
-                    <TabsTrigger
-                      key={cat.id}
-                      value={cat.slug}
-                      className="rounded-full px-6 py-2.5 text-sm font-medium data-[state=active]:bg-gray-900 data-[state=active]:text-white transition-all"
-                    >
-                      {cat.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-
-              {categories.map((cat) => (
-                <TabsContent key={cat.id} value={cat.slug} className="mt-0 focus-visible:outline-none">
-                  <ProductGrid categorySlug={cat.slug} onAddToCart={handleAddToCart} />
-                  <div className="flex justify-center mt-10">
-                    <Button asChild variant="outline" className="rounded-full border-blue-200 text-blue-600 hover:bg-blue-50 px-8">
-                      <Link to={`/c/${cat.slug}`}>
-                        Xem tất cả {cat.name}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </TabsContent>
-              ))}
-            </Tabs>
-          ) : null}
         </div>
-      </section>
+
+        {isLoadingCategories ? (
+          <div className="flex justify-center py-12"><LoadingSpinner /></div>
+        ) : (
+          rootCategories.map((category) => (
+            <CategoryProductSection
+              key={category.id}
+              category={category}
+              onAddToCart={handleAddToCart}
+            />
+          ))
+        )}
+      </div>
 
       {/* Condensed Features */}
       <section ref={featuresRef} className="py-12 bg-white border-t border-gray-100">
@@ -226,3 +276,4 @@ export function HomePage() {
     </>
   );
 }
+

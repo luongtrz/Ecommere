@@ -44,7 +44,7 @@ export const addressSchema = z.object({
 
 export const productSchema = z.object({
   name: requiredString('Tên sản phẩm'),
-  slug: requiredString('Slug'),
+  slug: requiredString('Đường dẫn'),
   description: requiredString('Mô tả'),
   categoryId: requiredString('Danh mục'),
   basePrice: positiveNumber('Giá gốc'),
@@ -57,7 +57,7 @@ export const variantSchema = z.object({
   price: positiveNumber('Giá'),
   salePrice: z.number().optional(),
   stock: z.number().min(0, 'Tồn kho không được âm'),
-  sku: requiredString('SKU'),
+  sku: requiredString('Mã SKU'),
 });
 
 export const couponSchema = z.object({

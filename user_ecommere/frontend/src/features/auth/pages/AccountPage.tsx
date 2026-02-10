@@ -89,7 +89,7 @@ export function AccountPage() {
               {/* Quick Menu */}
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                  <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">Menu</h3>
+                  <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">Danh mục</h3>
                 </div>
                 <div className="p-2 space-y-1">
                   {[
