@@ -56,7 +56,7 @@ export function Header() {
           </Link>
 
           {/* Search */}
-          <div className="flex-1 max-w-xl mx-auto hidden md:block relative z-30">
+          <div className="flex-1 max-w-xl mx-auto hidden md:block relative z-50">
             <SearchBox />
           </div>
 
@@ -111,7 +111,7 @@ export function Header() {
         </div>
 
         {/* Mobile search */}
-        <div className="md:hidden px-4 pb-3 relative z-30">
+        <div className="md:hidden px-4 pb-3 relative z-50">
           <SearchBox />
         </div>
       </div>
