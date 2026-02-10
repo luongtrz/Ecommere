@@ -1,4 +1,5 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { useCallback } from 'react';
 import { SEO } from '@/lib/seo';
 import { useCategoryBySlug } from '../hooks/useCategories';
 import { useProducts } from '../hooks/useProducts';
@@ -12,10 +13,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
-import { useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Package, Star, ShoppingBag, Grid3X3, List } from 'lucide-react';
+import { Package, Star, ShoppingBag, Grid3X3, List, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '@/lib/formatters';
+import { FilterSidebar } from '../components/FilterSidebar';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 export function CategoryPage() {
   const { categorySlug } = useParams<{ categorySlug: string }>();
@@ -23,20 +25,48 @@ export function CategoryPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
 
+  // Filter params
+  const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
+  const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
+  const scent = searchParams.get('scent') || undefined;
+  const volumeMl = searchParams.get('volumeMl') || undefined;
+  const brand = searchParams.get('brand') || undefined;
+
   const { data: category, isLoading: isCategoryLoading } = useCategoryBySlug(categorySlug!);
   const { data: products, isLoading: isProductsLoading } = useProducts({
     categorySlug,
     sortBy: sortBy as any,
+    minPrice,
+    maxPrice,
+    scent,
+    volumeMl,
+    brand,
   });
   const { addItem } = useCart();
 
+  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === undefined || value === '') {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
+      }
+    });
+    setSearchParams(newParams);
+  }, [searchParams, setSearchParams]);
+
   const handleSortChange = (value: string) => {
-    setSearchParams({ sort: value });
+    updateParams({ sort: value });
   };
 
   const handleViewToggle = (mode: string) => {
-    setSearchParams({ sort: sortBy, view: mode });
+    updateParams({ view: mode });
   };
+
+  const handleFilterChange = useCallback((filters: Record<string, string | undefined>) => {
+    updateParams(filters);
+  }, [updateParams]);
 
   const handleAddToCart = (product: any, variant: any) => {
     addItem({
@@ -64,12 +94,27 @@ export function CategoryPage() {
         <div className="max-w-md w-full">
           <EmptyState
             title="Không tìm thấy danh mục"
-            description="Danh mục bạn tìm kiếm không tồn tại"
+            description="Danh mục không tồn tại"
           />
         </div>
       </div>
     );
   }
+
+  // Filter sidebar content
+  const filterContent = (
+    <FilterSidebar
+      currentFilters={{
+        minPrice,
+        maxPrice,
+        scent,
+        volumeMl,
+        brand,
+      }}
+      onFilterChange={handleFilterChange}
+      hideCategoryFilter={true}
+    />
+  );
 
   return (
     <>
@@ -86,15 +131,6 @@ export function CategoryPage() {
               ]}
               className="mb-4"
             />
-
-            <div className="flex items-center gap-4 mb-4">
-              <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
-                <Link to="/catalog" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                  <ArrowLeft className="h-4 w-4" />
-                  Quay lại danh sách
-                </Link>
-              </Button>
-            </div>
 
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex-1">
@@ -154,7 +190,7 @@ export function CategoryPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-700">Sắp xếp:</span>
+              <span className="text-sm font-medium text-gray-700 hidden md:inline">Sắp xếp:</span>
               <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
@@ -169,8 +205,7 @@ export function CategoryPage() {
               </Select>
 
               {/* View Toggle */}
-              <div className="flex items-center gap-2 ml-4">
-                <span className="text-sm font-medium text-gray-700 mr-2">Xem:</span>
+              <div className="flex items-center gap-2 ml-2">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'outline'}
                   size="sm"
@@ -186,110 +221,138 @@ export function CategoryPage() {
                   <List className="h-4 w-4" />
                 </Button>
               </div>
+
+              {/* Mobile Filter Trigger */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="lg:hidden">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Bộ lọc</SheetTitle>
+                  </SheetHeader>
+                  <div className="py-4">
+                    {filterContent}
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
 
-          {/* Products Grid */}
-          {products?.products.length === 0 ? (
-            <div className="py-12">
-              <EmptyState
-                icon={<Package className="h-16 w-16 text-gray-300" />}
-                title="Chưa có sản phẩm"
-                description="Danh mục này chưa có sản phẩm nào. Hãy quay lại sau!"
-                action={
-                  <Button asChild>
-                    <Link to="/catalog" className="flex items-center gap-2">
-                      <ShoppingBag className="h-4 w-4" />
-                      Xem tất cả sản phẩm
-                    </Link>
-                  </Button>
-                }
-              />
-            </div>
-          ) : (
-            <div className={`${
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
-                : 'space-y-4'
-            }`}>
-              {products?.products.map((product) => (
-                viewMode === 'grid' ? (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    slug={product.slug}
-                    images={product.images}
-                    price={product.basePrice}
-                    rating={product.rating}
-                    reviewCount={product.reviewCount}
-                    onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+          {/* Main Content with Sidebar */}
+          <div className="flex gap-6">
+            {/* Sidebar - Desktop only */}
+            <aside className="hidden lg:block w-64 shrink-0">
+              <div className="sticky top-20 bg-white rounded-xl border border-gray-100 p-4 shadow-sm overflow-y-auto max-h-[calc(100vh-6rem)]">
+                {filterContent}
+              </div>
+            </aside>
+
+            {/* Products */}
+            <div className="flex-1 min-w-0">
+              {products?.products.length === 0 ? (
+                <div className="py-12">
+                  <EmptyState
+                    icon={<Package className="h-16 w-16 text-gray-300" />}
+                    title="Chưa có sản phẩm"
+                    description="Danh mục này chưa có sản phẩm nào. Hãy quay lại sau!"
+                    action={
+                      <Button asChild>
+                        <Link to="/catalog" className="flex items-center gap-2">
+                          <ShoppingBag className="h-4 w-4" />
+                          Xem tất cả sản phẩm
+                        </Link>
+                      </Button>
+                    }
                   />
-                ) : (
-                  <Card key={product.id} className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-                    <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                      <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm mx-auto md:mx-0">
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0 text-center md:text-left">
-                        <div className="mb-3">
-                          <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-2 leading-tight">{product.name}</h3>
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-3">
-                            <div className="flex items-center gap-1">
-                              <span className="text-yellow-400 text-base md:text-lg">★</span>
-                              <span className="text-sm font-medium text-gray-700">
-                                {product.rating?.toFixed(1) || '0.0'}
-                              </span>
-                              <span className="text-sm text-gray-500">
-                                ({product.reviewCount || 0} đánh giá)
-                              </span>
+                </div>
+              ) : (
+                <div className={`${viewMode === 'grid'
+                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'
+                  : 'space-y-4'
+                  }`}>
+                  {products?.products.map((product) => (
+                    viewMode === 'grid' ? (
+                      <ProductCard
+                        key={product.id}
+                        id={product.id}
+                        name={product.name}
+                        slug={product.slug}
+                        images={product.images}
+                        price={product.basePrice}
+                        rating={product.rating}
+                        reviewCount={product.reviewCount}
+                        onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                      />
+                    ) : (
+                      <Card key={product.id} className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+                        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                          <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm mx-auto md:mx-0">
+                            <img
+                              src={product.images[0]}
+                              alt={product.name}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0 text-center md:text-left">
+                            <div className="mb-3">
+                              <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-2 leading-tight">{product.name}</h3>
+                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-3">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-yellow-400 text-base md:text-lg">&#9733;</span>
+                                  <span className="text-sm font-medium text-gray-700">
+                                    {product.rating?.toFixed(1) || '0.0'}
+                                  </span>
+                                  <span className="text-sm text-gray-500">
+                                    ({product.reviewCount || 0} đánh giá)
+                                  </span>
+                                </div>
+                                <Badge variant="outline" className="text-xs">
+                                  {product.variants?.length || 0} biến thể
+                                </Badge>
+                              </div>
+                              {product.description && (
+                                <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-2">
+                                  {product.description}
+                                </p>
+                              )}
+                              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
+                                {product.variants?.slice(0, 3).map((variant: any, index: number) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {variant.scent} - {variant.volumeMl}ml
+                                  </Badge>
+                                ))}
+                                {product.variants && product.variants.length > 3 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{product.variants.length - 3} nữa
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
-                            <Badge variant="outline" className="text-xs">
-                              {product.variants?.length || 0} biến thể
-                            </Badge>
-                          </div>
-                          {product.description && (
-                            <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-2">
-                              {product.description}
-                            </p>
-                          )}
-                          <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                            {product.variants?.slice(0, 3).map((variant: any, index: number) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {variant.scent} - {variant.volumeMl}ml
-                              </Badge>
-                            ))}
-                            {product.variants && product.variants.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{product.variants.length - 3} nữa
-                              </Badge>
-                            )}
+                            <div className="text-center md:text-right">
+                              <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
+                                {formatCurrency(product.basePrice)}
+                              </div>
+                              <Button
+                                size="lg"
+                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md w-full md:w-auto"
+                                onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                              >
+                                <ShoppingBag className="h-4 w-4 mr-2" />
+                                Thêm vào giỏ hàng
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        <div className="text-center md:text-right">
-                          <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
-                            {formatCurrency(product.basePrice)}
-                          </div>
-                          <Button
-                            size="lg"
-                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md w-full md:w-auto"
-                            onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                          >
-                            <ShoppingBag className="h-4 w-4 mr-2" />
-                            Thêm vào giỏ
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                )
-              ))}
+                      </Card>
+                    )
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </>

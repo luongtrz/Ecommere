@@ -14,7 +14,7 @@ import { Role } from '@prisma/client';
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
-  constructor(private productsService: ProductsService) {}
+  constructor(private productsService: ProductsService) { }
 
   @Public()
   @Get()
@@ -22,6 +22,14 @@ export class ProductsController {
   @ApiResponse({ status: 200, type: [ProductEntity] })
   async findAll(@Query() filterDto: ProductFilterDto) {
     return this.productsService.findAll(filterDto);
+  }
+
+  @Public()
+  @Get('filters')
+  @ApiOperation({ summary: 'Get available filter options (brands, scents, volumes, price range)' })
+  @ApiResponse({ status: 200 })
+  async getFilterOptions() {
+    return this.productsService.getFilterOptions();
   }
 
   @Public()

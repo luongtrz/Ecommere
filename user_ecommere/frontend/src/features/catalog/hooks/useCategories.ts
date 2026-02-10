@@ -16,3 +16,10 @@ export function useCategoryBySlug(slug: string) {
     enabled: !!slug,
   });
 }
+
+export function useCategoryTree() {
+  return useQuery({
+    queryKey: [QUERY_KEYS.CATEGORIES, 'tree'],
+    queryFn: () => categoriesApi.getTree(),
+  });
+}

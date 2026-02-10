@@ -47,4 +47,19 @@ export class ProductFilterDto extends PaginationDto {
   @IsInt()
   @Min(0)
   maxPrice?: number;
+
+  @ApiProperty({ required: false, description: 'Filter by brand (comma-separated for multiple)' })
+  @IsOptional()
+  @IsString()
+  brand?: string;
+
+  @ApiProperty({ required: false, description: 'Filter by scent (comma-separated for multiple)' })
+  @IsOptional()
+  @IsString()
+  scent?: string;
+
+  @ApiProperty({ required: false, description: 'Filter by volume in ml (comma-separated for multiple)' })
+  @IsOptional()
+  @IsString()
+  volumeMl?: string;
 }

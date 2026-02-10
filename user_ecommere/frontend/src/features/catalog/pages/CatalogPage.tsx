@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Grid3X3, List, ShoppingBag, X, Filter } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { FilterSidebar } from '../components/FilterSidebar';
+import { useCallback } from 'react';
 
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,27 +24,55 @@ export function CatalogPage() {
   const searchQuery = searchParams.get('q') || '';
   const viewMode = searchParams.get('view') || 'grid';
 
-
+  // Filter params
+  const categorySlug = searchParams.get('category') || undefined;
+  const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
+  const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
+  const scent = searchParams.get('scent') || undefined;
+  const volumeMl = searchParams.get('volumeMl') || undefined;
+  const brand = searchParams.get('brand') || undefined;
 
   const { data, isLoading } = useProducts({
     page,
     limit: PAGINATION.DEFAULT_LIMIT,
     sortBy: sortBy as any,
     search: searchQuery || undefined,
+    categorySlug,
+    minPrice,
+    maxPrice,
+    scent,
+    volumeMl,
+    brand,
   });
 
   const { addItem } = useCart();
 
+  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
+    const newParams = new URLSearchParams(searchParams);
+    // Reset page khi thay doi filter
+    if (!('page' in updates)) {
+      newParams.set('page', '1');
+    }
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === undefined || value === '') {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
+      }
+    });
+    setSearchParams(newParams);
+  }, [searchParams, setSearchParams]);
+
   const handlePageChange = (newPage: number) => {
-    setSearchParams({ page: newPage.toString(), sort: sortBy, q: searchQuery, view: viewMode });
+    updateParams({ page: newPage.toString() });
   };
 
   const handleSortChange = (value: string) => {
-    setSearchParams({ page: '1', sort: value, q: searchQuery, view: viewMode });
+    updateParams({ sort: value, page: '1' });
   };
 
   const handleSearchChange = (value: string) => {
-    setSearchParams({ page: '1', sort: sortBy, q: value, view: viewMode });
+    updateParams({ q: value || undefined, page: '1' });
   };
 
   const handleAddToCart = (product: any, variant: any) => {
@@ -57,13 +87,41 @@ export function CatalogPage() {
     });
   };
 
+  const handleFilterChange = useCallback((filters: Record<string, string | undefined>) => {
+    // Map categorySlug -> category param for URL
+    const mapped: Record<string, string | undefined> = {};
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key === 'categorySlug') {
+        mapped['category'] = value;
+      } else {
+        mapped[key] = value;
+      }
+    });
+    updateParams({ ...mapped, page: '1' });
+  }, [updateParams]);
+
   const clearFilters = () => {
     setSearchParams({ view: viewMode });
   };
 
   const handleViewToggle = (mode: string) => {
-    setSearchParams({ page: page.toString(), sort: sortBy, q: searchQuery, view: mode });
+    updateParams({ view: mode });
   };
+
+  // Filter sidebar content (dung chung cho desktop va mobile)
+  const filterContent = (
+    <FilterSidebar
+      currentFilters={{
+        categorySlug,
+        minPrice,
+        maxPrice,
+        scent,
+        volumeMl,
+        brand,
+      }}
+      onFilterChange={handleFilterChange}
+    />
+  );
 
   return (
     <>
@@ -81,7 +139,7 @@ export function CatalogPage() {
 
               {/* Compact Toolbar */}
               <div className="flex items-center gap-2 w-full md:w-auto">
-                {/* Search - Expandable on mobile potentially, simplified here */}
+                {/* Search */}
                 <div className="relative flex-1 md:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                   <Input
@@ -135,17 +193,16 @@ export function CatalogPage() {
                   {/* Mobile Filter Trigger */}
                   <Sheet>
                     <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-9 w-9 p-0 md:hidden">
+                      <Button variant="outline" size="sm" className="h-9 w-9 p-0 lg:hidden">
                         <Filter className="h-4 w-4" />
                       </Button>
                     </SheetTrigger>
-                    <SheetContent>
+                    <SheetContent side="left" className="w-80 overflow-y-auto">
                       <SheetHeader>
                         <SheetTitle>Bộ lọc</SheetTitle>
                       </SheetHeader>
                       <div className="py-4">
-                        <p className="text-sm text-gray-500">Tính năng đang phát triển...</p>
-                        <Button variant="outline" className="w-full mt-4" onClick={clearFilters}>Xóa tất cả lọc</Button>
+                        {filterContent}
                       </div>
                     </SheetContent>
                   </Sheet>
@@ -155,79 +212,91 @@ export function CatalogPage() {
           </div>
         </div>
 
-        {/* Results */}
+        {/* Main Content with Sidebar */}
         <div className="container py-6 min-h-[60vh]">
-          {isLoading ? (
-            <div className="py-20 flex justify-center"><LoadingSpinner /></div>
-          ) : data?.products.length === 0 ? (
-            <EmptyState
-              title="Không tìm thấy sản phẩm"
-              description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
-              action={<Button variant="outline" onClick={clearFilters}>Xóa bộ lọc</Button>}
-            />
-          ) : (
-            <div className="space-y-8 animate-fade-in">
-              <div className={`${viewMode === 'grid'
-                ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6'
-                : 'space-y-4'
-                }`}>
-                {data?.products.map((product) => (
-                  viewMode === 'grid' ? (
-                    <ProductCard
-                      key={product.id}
-                      id={product.id}
-                      name={product.name}
-                      slug={product.slug}
-                      images={product.images}
-                      price={product.basePrice}
-                      rating={product.rating}
-                      reviewCount={product.reviewCount}
-                      onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                    />
-                  ) : (
-                    <div key={product.id} className="flex gap-4 bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all">
-                      <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0">
-                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0 py-1">
-                        <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                          <div className="flex items-center text-amber-500">
-                            <span className="mr-0.5">★</span> {product.rating?.toFixed(1)}
-                          </div>
-                          <span>•</span>
-                          <span>{product.reviewCount} đánh giá</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {product.variants.slice(0, 3).map((v, i) => (
-                            <Badge key={i} variant="secondary" className="text-[10px] h-5 px-1.5 font-normal">
-                              {v.scent}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex items-center justify-between mt-auto">
-                          <span className="font-bold text-blue-600">{formatCurrency(product.basePrice)}</span>
-                          <Button size="sm" className="h-8 rounded-lg text-xs" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
-                            <ShoppingBag className="h-3 w-3 mr-1.5" /> Thêm
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                ))}
+          <div className="flex gap-6">
+            {/* Sidebar - Desktop only */}
+            <aside className="hidden lg:block w-64 shrink-0">
+              <div className="sticky top-20 bg-white rounded-xl border border-gray-100 p-4 shadow-sm overflow-y-auto max-h-[calc(100vh-6rem)]">
+                {filterContent}
               </div>
+            </aside>
 
-              {data && data.totalPages > 1 && (
-                <div className="flex justify-center pt-8 border-t border-gray-100">
-                  <Pagination
-                    currentPage={page}
-                    totalPages={data.totalPages}
-                    onPageChange={handlePageChange}
-                  />
+            {/* Products */}
+            <div className="flex-1 min-w-0">
+              {isLoading ? (
+                <div className="py-20 flex justify-center"><LoadingSpinner /></div>
+              ) : data?.products.length === 0 ? (
+                <EmptyState
+                  title="Không tìm thấy sản phẩm"
+                  description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
+                  action={<Button variant="outline" onClick={clearFilters}>Xóa bộ lọc</Button>}
+                />
+              ) : (
+                <div className="space-y-8 animate-fade-in">
+                  <div className={`${viewMode === 'grid'
+                    ? 'grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6'
+                    : 'space-y-4'
+                    }`}>
+                    {data?.products.map((product) => (
+                      viewMode === 'grid' ? (
+                        <ProductCard
+                          key={product.id}
+                          id={product.id}
+                          name={product.name}
+                          slug={product.slug}
+                          images={product.images}
+                          price={product.basePrice}
+                          rating={product.rating}
+                          reviewCount={product.reviewCount}
+                          onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                        />
+                      ) : (
+                        <div key={product.id} className="flex gap-4 bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all">
+                          <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0">
+                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0 py-1">
+                            <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                              <div className="flex items-center text-amber-500">
+                                <span className="mr-0.5">&#9733;</span> {product.rating?.toFixed(1)}
+                              </div>
+                              <span>|</span>
+                              <span>{product.reviewCount} đánh giá</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {product.variants.slice(0, 3).map((v, i) => (
+                                <Badge key={i} variant="secondary" className="text-[10px] h-5 px-1.5 font-normal">
+                                  {v.scent}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="flex items-center justify-between mt-auto">
+                              <span className="font-bold text-blue-600">{formatCurrency(product.basePrice)}</span>
+                              <Button size="sm" className="h-8 rounded-lg text-xs" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
+                                <ShoppingBag className="h-3 w-3 mr-1.5" /> Thêm
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    ))}
+                  </div>
+
+                  {data && data.totalPages > 1 && (
+                    <div className="flex justify-center pt-8 border-t border-gray-100">
+                      <Pagination
+                        currentPage={page}
+                        totalPages={data.totalPages}
+                        onPageChange={handlePageChange}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </>

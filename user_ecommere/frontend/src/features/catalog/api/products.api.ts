@@ -52,19 +52,30 @@ export interface ProductFilters {
   search?: string;
   minPrice?: number;
   maxPrice?: number;
+  brand?: string;
   scent?: string;
-  volumeMl?: number;
+  volumeMl?: string;
   sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'best_selling' | 'rating';
+}
+
+export interface FilterOptions {
+  brands: string[];
+  scents: string[];
+  volumes: number[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
 }
 
 export const productsApi = {
   async getAll(filters: ProductFilters = {}): Promise<ProductsResponse> {
     const response = await apiClient.get('/products', { params: filters });
-    
+
     // Backend wraps with TransformInterceptor: { data: <actual_data>, statusCode, timestamp }
     // Then actual_data has structure: { data: [...products], total, page, ... }
     const actualData = response.data.data || response.data;
-    
+
     const mapped = {
       products: actualData.data || [],
       total: actualData.total || 0,
@@ -72,7 +83,7 @@ export const productsApi = {
       limit: actualData.limit || 12,
       totalPages: actualData.totalPages || 1,
     };
-    
+
     return productsResponseSchema.parse(mapped);
   },
 
@@ -86,9 +97,9 @@ export const productsApi = {
     const response = await apiClient.get('/products', {
       params: { search: query, ...filters },
     });
-    
+
     const actualData = response.data.data || response.data;
-    
+
     const mapped = {
       products: actualData.data || [],
       total: actualData.total || 0,
@@ -96,7 +107,13 @@ export const productsApi = {
       limit: actualData.limit || 12,
       totalPages: actualData.totalPages || 1,
     };
-    
+
     return productsResponseSchema.parse(mapped);
+  },
+
+  async getFilterOptions(): Promise<FilterOptions> {
+    const response = await apiClient.get('/products/filters');
+    const actualData = response.data.data || response.data;
+    return actualData;
   },
 };

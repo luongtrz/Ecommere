@@ -16,7 +16,7 @@ export class ProductsService {
   ) { }
 
   async findAll(filterDto: ProductFilterDto) {
-    const { page = 1, limit = 12, search, categoryId, categorySlug, sortBy = ProductSortBy.NEWEST, minPrice, maxPrice } = filterDto;
+    const { page = 1, limit = 12, search, categoryId, categorySlug, sortBy = ProductSortBy.NEWEST, minPrice, maxPrice, brand, scent, volumeMl } = filterDto;
 
     const where: any = { active: true };
 
@@ -52,13 +52,40 @@ export class ProductsService {
       }
     }
 
-    if (minPrice !== undefined || maxPrice !== undefined) {
+    // Brand filter (comma-separated)
+    if (brand) {
+      const brands = brand.split(',').map(b => b.trim()).filter(Boolean);
+      if (brands.length > 0) {
+        where.brand = { in: brands };
+      }
+    }
+
+    // Variant-level filters: price range, scent, volumeMl
+    const variantConditions: any[] = [];
+
+    if (minPrice !== undefined) {
+      variantConditions.push({ price: { gte: minPrice } });
+    }
+    if (maxPrice !== undefined) {
+      variantConditions.push({ price: { lte: maxPrice } });
+    }
+    if (scent) {
+      const scents = scent.split(',').map(s => s.trim()).filter(Boolean);
+      if (scents.length > 0) {
+        variantConditions.push({ scent: { in: scents } });
+      }
+    }
+    if (volumeMl) {
+      const volumes = volumeMl.split(',').map(v => parseInt(v.trim(), 10)).filter(v => !isNaN(v));
+      if (volumes.length > 0) {
+        variantConditions.push({ volumeMl: { in: volumes } });
+      }
+    }
+
+    if (variantConditions.length > 0) {
       where.variants = {
         some: {
-          AND: [
-            minPrice !== undefined ? { price: { gte: minPrice } } : {},
-            maxPrice !== undefined ? { price: { lte: maxPrice } } : {},
-          ],
+          AND: variantConditions,
         },
       };
     }
@@ -324,6 +351,51 @@ export class ProductsService {
     });
 
     return { message: 'Product deleted successfully' };
+  }
+
+  /**
+   * Get dynamic filter options from existing products data
+   */
+  async getFilterOptions() {
+    const [brands, scents, volumes, priceRange] = await Promise.all([
+      // Get distinct brands
+      this.prisma.product.findMany({
+        where: { active: true, brand: { not: null } },
+        select: { brand: true },
+        distinct: ['brand'],
+        orderBy: { brand: 'asc' },
+      }),
+      // Get distinct scents
+      this.prisma.productVariant.findMany({
+        where: { product: { active: true } },
+        select: { scent: true },
+        distinct: ['scent'],
+        orderBy: { scent: 'asc' },
+      }),
+      // Get distinct volumes
+      this.prisma.productVariant.findMany({
+        where: { product: { active: true } },
+        select: { volumeMl: true },
+        distinct: ['volumeMl'],
+        orderBy: { volumeMl: 'asc' },
+      }),
+      // Get price range
+      this.prisma.productVariant.aggregate({
+        where: { product: { active: true } },
+        _min: { price: true },
+        _max: { price: true },
+      }),
+    ]);
+
+    return {
+      brands: brands.map(b => b.brand).filter(Boolean),
+      scents: scents.map(s => s.scent),
+      volumes: volumes.map(v => v.volumeMl),
+      priceRange: {
+        min: priceRange._min.price || 0,
+        max: priceRange._max.price || 0,
+      },
+    };
   }
 
   // Variant Management

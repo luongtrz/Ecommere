@@ -207,11 +207,10 @@ export function CategoryPage() {
               />
             </div>
           ) : (
-            <div className={`${
-              viewMode === 'grid'
+            <div className={`${viewMode === 'grid'
                 ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
                 : 'space-y-4'
-            }`}>
+              }`}>
               {products?.products.map((product) => (
                 viewMode === 'grid' ? (
                   <ProductCard
