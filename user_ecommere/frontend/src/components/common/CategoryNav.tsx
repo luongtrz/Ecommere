@@ -90,7 +90,7 @@ export function CategoryNav() {
   return (
     <div
       ref={navRef}
-      className="bg-white/90 backdrop-blur-xl border-b border-gray-100 shadow-sm relative z-20 hidden md:block"
+      className="bg-white/90 backdrop-blur-xl border-b border-gray-100 shadow-sm relative z-10 hidden md:block"
       onMouseLeave={() => setActiveCategory(null)}
     >
       <div className="container relative px-8">
