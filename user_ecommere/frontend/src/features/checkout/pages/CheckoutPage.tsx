@@ -5,7 +5,6 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { useAddresses } from '@/features/users/hooks/useAddresses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
@@ -13,9 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatters';
 import { PAYMENT_METHODS, SHIPPING_METHODS } from '@/lib/constants';
 import apiClient from '@/lib/api';
-import { ArrowLeft, Truck, CreditCard, Shield, CheckCircle, MapPin, Phone, ShoppingBag, Plus } from 'lucide-react';
+import { ArrowLeft, Truck, CreditCard, CheckCircle, MapPin, Phone, ShoppingBag, Plus, Shield, Package } from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
-
 
 export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
@@ -46,12 +44,12 @@ export function CheckoutPage() {
     e.preventDefault();
 
     if (!selectedAddress) {
-      alert('Vui lòng chọn địa chỉ giao hàng');
+      alert('Vui long chon dia chi giao hang');
       return;
     }
 
     if (items.length === 0) {
-      alert('Giỏ hàng trống');
+      alert('Gio hang trong');
       return;
     }
 
@@ -75,7 +73,7 @@ export function CheckoutPage() {
       navigate('/orders');
     } catch (error) {
       console.error('Order creation failed:', error);
-      alert('Đặt hàng thất bại. Vui lòng thử lại.');
+      alert('Dat hang that bai. Vui long thu lai.');
     } finally {
       setIsSubmitting(false);
     }
@@ -88,117 +86,118 @@ export function CheckoutPage() {
 
   return (
     <>
-      <SEO title="Thanh toán" />
+      <SEO title="Thanh toan" />
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white">
         {/* Header */}
-        <div className="bg-white border-b shadow-sm">
-          <div className="container py-6">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 shadow-sm sticky top-0 z-40">
+          <div className="container py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
-                  <Link to="/cart" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                    <ArrowLeft className="h-4 w-4" />
-                    Quay lại giỏ hàng
+                <Button variant="ghost" size="sm" asChild className="p-0 h-auto rounded-full hover:bg-gray-100 pr-3">
+                  <Link to="/cart" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                      <ArrowLeft className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium">Quay lai gio hang</span>
                   </Link>
                 </Button>
               </div>
 
-              <div className="text-center">
-                <h1 className="text-2xl font-bold text-gray-900">Thanh toán</h1>
-                <p className="text-sm text-gray-600 mt-1">{items.length} sản phẩm</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-lg px-4 py-2">
-                  {formatCurrency(finalTotal)}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Progress Steps */}
-            <div className="flex items-center justify-center mt-6">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                    <CheckCircle className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="text-sm font-medium text-green-600">Giỏ hàng</span>
-                </div>
-                <div className="w-8 h-0.5 bg-gray-300"></div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">2</span>
-                  </div>
-                  <span className="text-sm font-medium text-blue-600">Thanh toán</span>
-                </div>
-                <div className="w-8 h-0.5 bg-gray-300"></div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="text-gray-600 font-bold text-sm">3</span>
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Hoàn thành</span>
+              <div className="hidden md:flex items-center gap-1">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-sm font-medium border border-green-100">
+                  <Shield className="h-3.5 w-3.5" />
+                  Thanh toan an toan 100%
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="container py-8 max-w-7xl">
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="container py-8 max-w-6xl">
+          {/* Progress Steps */}
+          <div className="flex items-center justify-center mb-10 animate-fade-in">
+            <div className="flex items-center w-full max-w-2xl px-4">
+              <div className="flex flex-col items-center gap-2 relative z-10">
+                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/20">
+                  <CheckCircle className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xs font-semibold text-green-600 uppercase tracking-wide">Gio hang</span>
+              </div>
+              <div className="flex-1 h-1 bg-green-200 -mx-4 rounded-full relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-blue-500" />
+              </div>
+              <div className="flex flex-col items-center gap-2 relative z-10">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 ring-4 ring-white">
+                  <CreditCard className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">Thanh toan</span>
+              </div>
+              <div className="flex-1 h-1 bg-gray-200 -mx-4 rounded-full" />
+              <div className="flex flex-col items-center gap-2 relative z-10">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border-2 border-gray-200">
+                  <Package className="h-5 w-5 text-gray-400" />
+                </div>
+                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Hoan tat</span>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Main Content */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-7 xl:col-span-8 space-y-6">
                 {/* Shipping Information */}
-                <Card className="shadow-lg">
-                  <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg">
-                    <CardTitle className="text-xl flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <MapPin className="h-5 w-5 text-white" />
+                <Card className="shadow-sm border border-gray-100 overflow-hidden rounded-2xl group hover:shadow-md transition-shadow">
+                  <CardHeader className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-100">
+                    <CardTitle className="text-lg flex items-center gap-3 text-gray-800">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-blue-600 border border-blue-100">
+                        <MapPin className="h-5 w-5" />
                       </div>
-                      Địa chỉ giao hàng
+                      Dia chi giao hang
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4 p-6">
+                  <CardContent className="space-y-4 p-6 bg-white">
                     {!addresses || addresses.length === 0 ? (
-                      <div className="text-center py-8">
+                      <div className="text-center py-10 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
                         <MapPin className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                        <p className="text-gray-600 mb-4">Bạn chưa có địa chỉ giao hàng nào</p>
-                        <Button type="button" onClick={() => setIsAddressDialogOpen(true)}>
+                        <p className="text-gray-500 mb-4 font-medium">Ban chua co dia chi giao hang nao</p>
+                        <Button type="button" onClick={() => setIsAddressDialogOpen(true)} className="rounded-xl shadow-lg shadow-blue-500/10">
                           <Plus className="h-4 w-4 mr-2" />
-                          Thêm địa chỉ mới
+                          Them dia chi moi
                         </Button>
                       </div>
                     ) : (
                       <>
-                        <RadioGroup value={selectedAddressId} onValueChange={setSelectedAddressId}>
+                        <RadioGroup value={selectedAddressId} onValueChange={setSelectedAddressId} className="grid grid-cols-1 gap-4">
                           {addresses.map((address) => (
                             <div key={address.id} className="relative">
-                              <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${selectedAddressId === address.id
-                                  ? 'border-blue-500 bg-blue-50 shadow-md'
-                                  : 'border-gray-200 hover:border-gray-300'
-                                }`}>
-                                <div className="flex items-start gap-3">
-                                  <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
-                                  <Label htmlFor={address.id} className="flex-1 cursor-pointer">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="font-semibold text-gray-900">{address.fullName}</span>
-                                      {address.isDefault && (
-                                        <Badge variant="default" className="bg-green-500 text-xs">
-                                          Mặc định
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <p className="text-sm text-gray-600 mb-1">
-                                      <Phone className="h-3 w-3 inline mr-1" />
-                                      {address.phone}
-                                    </p>
-                                    <p className="text-sm text-gray-700">
-                                      {address.line1}, {address.ward}, {address.district}, {address.province}
-                                    </p>
-                                  </Label>
+                              <RadioGroupItem value={address.id} id={address.id} className="peer sr-only" />
+                              <Label
+                                htmlFor={address.id}
+                                className="flex items-start gap-4 p-5 rounded-xl border-2 border-gray-100 cursor-pointer transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/30 peer-checked:shadow-sm hover:border-blue-200 hover:bg-gray-50"
+                              >
+                                <div className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center mt-0.5 peer-checked:border-blue-600 peer-checked:bg-blue-600 transition-colors">
+                                  <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100" />
                                 </div>
-                              </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <span className="font-bold text-gray-900 text-base">{address.fullName}</span>
+                                    {address.isDefault && (
+                                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs py-0.5 px-2 rounded-full">
+                                        Mac dinh
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-gray-600 flex items-center gap-2 mb-1">
+                                    <Phone className="h-3.5 w-3.5 text-gray-400" />
+                                    {address.phone}
+                                  </div>
+                                  <p className="text-sm text-gray-600 leading-relaxed bg-gray-100/50 p-2 rounded-lg">
+                                    {address.line1}, {address.ward}, {address.district}, {address.province}
+                                  </p>
+                                </div>
+                              </Label>
                             </div>
                           ))}
                         </RadioGroup>
@@ -206,11 +205,11 @@ export function CheckoutPage() {
                         <Button
                           type="button"
                           variant="outline"
-                          className="w-full"
+                          className="w-full mt-2 rounded-xl border-dashed border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 h-12"
                           onClick={() => setIsAddressDialogOpen(true)}
                         >
                           <Plus className="h-4 w-4 mr-2" />
-                          Thêm địa chỉ mới
+                          Them dia chi moi
                         </Button>
                       </>
                     )}
@@ -218,38 +217,35 @@ export function CheckoutPage() {
                 </Card>
 
                 {/* Shipping Method */}
-                <Card className="shadow-lg">
-                  <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 rounded-t-lg">
-                    <CardTitle className="text-xl flex items-center gap-3">
-                      <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                        <Truck className="h-5 w-5 text-white" />
+                <Card className="shadow-sm border border-gray-100 overflow-hidden rounded-2xl group hover:shadow-md transition-shadow">
+                  <CardHeader className="bg-gradient-to-r from-green-50/50 to-emerald-50/50 border-b border-gray-100">
+                    <CardTitle className="text-lg flex items-center gap-3 text-gray-800">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-green-600 border border-green-100">
+                        <Truck className="h-5 w-5" />
                       </div>
-                      Phương thức vận chuyển
+                      Phuong thuc van chuyen
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 bg-white">
                     <RadioGroup value={shippingMethod} onValueChange={setShippingMethod} className="space-y-3">
                       {SHIPPING_METHODS.map((method) => (
                         <div key={method.id} className="relative">
-                          <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${shippingMethod === method.id
-                              ? 'border-green-500 bg-green-50 shadow-md'
-                              : 'border-gray-200 hover:border-gray-300'
-                            }`}>
-                            <div className="flex items-center space-x-3">
-                              <RadioGroupItem value={method.id} id={method.id} className="mt-0.5" />
-                              <Label htmlFor={method.id} className="flex-1 cursor-pointer">
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <div className="font-semibold text-gray-900">{method.name}</div>
-                                    <div className="text-sm text-gray-600 mt-1">{method.days}</div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="font-bold text-lg text-green-600">{formatCurrency(method.price)}</div>
-                                  </div>
-                                </div>
-                              </Label>
+                          <RadioGroupItem value={method.id} id={method.id} className="peer sr-only" />
+                          <Label
+                            htmlFor={method.id}
+                            className="flex items-center gap-4 p-4 rounded-xl border-2 border-gray-100 cursor-pointer transition-all peer-checked:border-green-500 peer-checked:bg-green-50/30 peer-checked:shadow-sm hover:border-green-200 hover:bg-gray-50"
+                          >
+                            <div className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center peer-checked:border-green-600 peer-checked:bg-green-600 transition-colors">
+                              <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100" />
                             </div>
-                          </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-900">{method.name}</div>
+                              <div className="text-sm text-gray-500 mt-0.5">{method.days}</div>
+                            </div>
+                            <div className="font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg">
+                              {formatCurrency(method.price)}
+                            </div>
+                          </Label>
                         </div>
                       ))}
                     </RadioGroup>
@@ -257,30 +253,29 @@ export function CheckoutPage() {
                 </Card>
 
                 {/* Payment Method */}
-                <Card className="shadow-lg">
-                  <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-t-lg">
-                    <CardTitle className="text-xl flex items-center gap-3">
-                      <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
-                        <CreditCard className="h-5 w-5 text-white" />
+                <Card className="shadow-sm border border-gray-100 overflow-hidden rounded-2xl group hover:shadow-md transition-shadow">
+                  <CardHeader className="bg-gradient-to-r from-purple-50/50 to-pink-50/50 border-b border-gray-100">
+                    <CardTitle className="text-lg flex items-center gap-3 text-gray-800">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-purple-600 border border-purple-100">
+                        <CreditCard className="h-5 w-5" />
                       </div>
-                      Phương thức thanh toán
+                      Phuong thuc thanh toan
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 bg-white">
                     <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
                       {PAYMENT_METHODS.map((method) => (
                         <div key={method.id} className="relative">
-                          <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === method.id
-                              ? 'border-purple-500 bg-purple-50 shadow-md'
-                              : 'border-gray-200 hover:border-gray-300'
-                            }`}>
-                            <div className="flex items-center space-x-3">
-                              <RadioGroupItem value={method.id} id={method.id} className="mt-0.5" />
-                              <Label htmlFor={method.id} className="flex-1 cursor-pointer font-medium">
-                                {method.name}
-                              </Label>
+                          <RadioGroupItem value={method.id} id={method.id} className="peer sr-only" />
+                          <Label
+                            htmlFor={method.id}
+                            className="flex items-center gap-4 p-4 rounded-xl border-2 border-gray-100 cursor-pointer transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50/30 peer-checked:shadow-sm hover:border-purple-200 hover:bg-gray-50"
+                          >
+                            <div className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center peer-checked:border-purple-600 peer-checked:bg-purple-600 transition-colors">
+                              <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100" />
                             </div>
-                          </div>
+                            <div className="font-medium text-gray-900">{method.name}</div>
+                          </Label>
                         </div>
                       ))}
                     </RadioGroup>
@@ -289,111 +284,85 @@ export function CheckoutPage() {
               </div>
 
               {/* Order Summary Sidebar */}
-              <div className="lg:col-span-1">
-                <Card className="shadow-xl sticky top-24">
-                  <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-t-lg">
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <ShoppingBag className="h-5 w-5 text-blue-600" />
-                      Đơn hàng ({items.length} sản phẩm)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {/* Order Items */}
-                    <div className="space-y-4 mb-6">
-                      {items.slice(0, 3).map((item) => (
-                        <div key={item.variantId} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-10 h-10 object-cover rounded"
-                            />
+              <div className="lg:col-span-5 xl:col-span-4">
+                <div className="sticky top-24 space-y-6">
+                  <Card className="shadow-lg border-0 overflow-hidden rounded-2xl bg-white/80 backdrop-blur-xl ring-1 ring-black/5">
+                    <CardHeader className="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-6">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <ShoppingBag className="h-5 w-5 text-blue-400" />
+                        Don hang ({items.length} san pham)
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      {/* Order Items */}
+                      <div className="space-y-4 mb-6 max-h-[240px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200">
+                        {items.map((item) => (
+                          <div key={item.variantId} className="flex gap-3 py-2">
+                            <div className="w-14 h-14 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm text-gray-900 truncate">{item.name}</div>
+                              <div className="text-xs text-gray-500 mt-0.5">{item.scent} - {item.volumeMl}ml</div>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-xs text-gray-500">x{item.quantity}</span>
+                                <span className="text-sm font-semibold text-gray-900">{formatCurrency(item.price * item.quantity)}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm truncate">{item.name}</div>
-                            <div className="text-xs text-gray-600">{item.scent} - {item.volumeMl}ml</div>
-                            <div className="text-xs text-gray-500">SL: {item.quantity}</div>
+                        ))}
+                      </div>
+
+                      <Separator className="my-4" />
+
+                      {/* Price Breakdown */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-base">
+                          <span className="text-gray-600">Tam tinh:</span>
+                          <span className="font-medium">{formatCurrency(totalPrice)}</span>
+                        </div>
+                        <div className="flex justify-between text-base">
+                          <span className="text-gray-600 flex items-center gap-1.5">
+                            <Truck className="h-4 w-4" />
+                            Phi van chuyen:
+                          </span>
+                          <span className="font-medium text-green-600">
+                            {shippingFee === 0 ? 'Mien phi' : formatCurrency(shippingFee)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Separator className="my-6 bg-gray-200" />
+
+                      <div className="flex justify-between items-end mb-6">
+                        <span className="text-lg font-bold text-gray-900">Tong cong:</span>
+                        <div className="text-right">
+                          <div className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                            {formatCurrency(finalTotal)}
                           </div>
-                          <div className="font-semibold text-sm">{formatCurrency(item.price)}</div>
+                          <div className="text-xs text-gray-400 mt-1">Da bao gom VAT</div>
                         </div>
-                      ))}
-                      {items.length > 3 && (
-                        <div className="text-center text-sm text-gray-500 py-2">
-                          và {items.length - 3} sản phẩm khác...
-                        </div>
-                      )}
-                    </div>
-
-                    <Separator className="my-4" />
-
-                    {/* Price Breakdown */}
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Tạm tính ({items.length} sản phẩm):</span>
-                        <span className="font-medium">{formatCurrency(totalPrice)}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 flex items-center gap-1">
-                          <Truck className="h-3 w-3" />
-                          Phí vận chuyển:
-                        </span>
-                        <span className="font-medium text-green-600">
-                          {shippingFee === 0 ? 'Miễn phí' : formatCurrency(shippingFee)}
-                        </span>
+
+                      <Button
+                        type="submit"
+                        className="w-full h-14 text-lg font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl shadow-blue-500/20 transform hover:-translate-y-0.5 transition-all"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Dang xu ly...' : 'Dat hang ngay'}
+                      </Button>
+
+                      <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+                        <Shield className="h-3 w-3" />
+                        Thong tin duoc bao mat tuyet doi
                       </div>
-                    </div>
-
-                    <Separator className="my-4" />
-
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-lg font-semibold">Tổng cộng:</span>
-                      <span className="text-3xl font-bold text-blue-600">
-                        {formatCurrency(finalTotal)}
-                      </span>
-                    </div>
-
-                    {/* Trust Badges */}
-                    <div className="grid grid-cols-3 gap-3 mb-6 p-4 bg-gray-50 rounded-lg">
-                      <div className="text-center">
-                        <Shield className="h-6 w-6 text-green-600 mx-auto mb-1" />
-                        <div className="text-xs font-medium text-gray-900">Bảo mật</div>
-                      </div>
-                      <div className="text-center">
-                        <Truck className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                        <div className="text-xs font-medium text-gray-900">Giao hàng</div>
-                      </div>
-                      <div className="text-center">
-                        <CheckCircle className="h-6 w-6 text-purple-600 mx-auto mb-1" />
-                        <div className="text-xs font-medium text-gray-900">Đảm bảo</div>
-                      </div>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          Đang xử lý...
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-5 w-5" />
-                          Đặt hàng ngay
-                        </div>
-                      )}
-                    </Button>
-
-                    <p className="text-xs text-gray-500 text-center mt-3">
-                      Bằng việc đặt hàng, bạn đồng ý với{' '}
-                      <Link to="/terms" className="text-blue-600 hover:underline">
-                        điều khoản sử dụng
-                      </Link>
-                    </p>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           </form>

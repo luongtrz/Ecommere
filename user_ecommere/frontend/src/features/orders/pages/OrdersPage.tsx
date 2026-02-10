@@ -15,7 +15,10 @@ import {
   Truck,
   AlertCircle,
   ArrowRight,
-  Plus
+  Plus,
+  ShoppingBag,
+  XCircle,
+  RotateCcw
 } from 'lucide-react';
 
 export function OrdersPage() {
@@ -23,7 +26,7 @@ export function OrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -34,140 +37,198 @@ export function OrdersPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING_PAYMENT':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-amber-100 text-amber-700 border-amber-200 ring-amber-100';
       case 'PAID':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-blue-100 text-blue-700 border-blue-200 ring-blue-100';
       case 'PACKING':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
+        return 'bg-purple-100 text-purple-700 border-purple-200 ring-purple-100';
       case 'SHIPPED':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+        return 'bg-indigo-100 text-indigo-700 border-indigo-200 ring-indigo-100';
       case 'DELIVERED':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-emerald-100 text-emerald-700 border-emerald-200 ring-emerald-100';
       case 'CANCELLED':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-rose-100 text-rose-700 border-rose-200 ring-rose-100';
       case 'REFUNDED':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-700 border-gray-200 ring-gray-100';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-700 border-gray-200 ring-gray-100';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'DELIVERED':
-        return <CheckCircle className="h-4 w-4" />;
+        return <CheckCircle className="h-3.5 w-3.5" />;
       case 'SHIPPED':
-        return <Truck className="h-4 w-4" />;
+        return <Truck className="h-3.5 w-3.5" />;
       case 'PENDING_PAYMENT':
-        return <Clock className="h-4 w-4" />;
+        return <Clock className="h-3.5 w-3.5" />;
+      case 'CANCELLED':
+        return <XCircle className="h-3.5 w-3.5" />;
+      case 'REFUNDED':
+        return <RotateCcw className="h-3.5 w-3.5" />;
       default:
-        return <Package className="h-4 w-4" />;
+        return <Package className="h-3.5 w-3.5" />;
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PENDING_PAYMENT': return 'Cho thanh toan';
+      case 'PAID': return 'Da thanh toan';
+      case 'PACKING': return 'Dang dong goi';
+      case 'SHIPPED': return 'Dang giao hang';
+      case 'DELIVERED': return 'Giao thanh cong';
+      case 'CANCELLED': return 'Da huy';
+      case 'REFUNDED': return 'Da hoan tien';
+      default: return status;
     }
   };
 
   return (
     <>
-      <SEO title="Đơn hàng của tôi" />
+      <SEO title="Don hang cua toi" />
 
-      <div className="min-h-screen bg-gray-50">
-        <div className="container py-8 max-w-6xl">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white">
+        {/* Header Background */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white pb-20 pt-10 px-4">
+          <div className="container max-w-6xl">
+            <h1 className="text-3xl font-bold mb-2">Lich su don hang</h1>
+            <p className="text-blue-100 opacity-90">Quan ly va theo doi cac don hang cua ban</p>
+          </div>
+        </div>
+
+        <div className="container py-8 max-w-6xl -mt-16 px-4">
           {orders.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Package className="h-12 w-12 text-gray-400" />
+            <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100 animate-fade-in">
+              <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <ShoppingBag className="h-10 w-10 text-blue-500" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Chưa có đơn hàng nào</h2>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                Bạn chưa đặt đơn hàng nào. Hãy bắt đầu mua sắm để có những trải nghiệm tuyệt vời!
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Chua co don hang nao</h2>
+              <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                Ban chua dat don hang nao. Hay bat dau mua sam de co nhung trai nghiem tuyet voi tai Thai Spray Shop!
               </p>
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" asChild>
+              <Button size="lg" className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20" asChild>
                 <Link to="/catalog" className="flex items-center gap-2">
                   <Plus className="h-5 w-5" />
-                  Bắt đầu mua sắm
+                  Bat dau mua sam
                 </Link>
               </Button>
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Stats Header */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Package className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900">Lịch sử đơn hàng</h2>
-                      <p className="text-gray-600">Tổng cộng {orders.length} đơn hàng</p>
-                    </div>
+              {/* Stats Bar */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                    <ShoppingBag className="h-6 w-6" />
                   </div>
-                  <Button variant="outline" asChild>
-                    <Link to="/catalog">Tiếp tục mua sắm</Link>
-                  </Button>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">{orders.length}</div>
+                    <div className="text-sm text-gray-500">Tong don hang</div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+                    <CheckCircle className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {orders.filter(o => o.status === 'DELIVERED').length}
+                    </div>
+                    <div className="text-sm text-gray-500">Don hang thanh cong</div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <Clock className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {orders.filter(o => ['PENDING_PAYMENT', 'PACKING', 'SHIPPED'].includes(o.status)).length}
+                    </div>
+                    <div className="text-sm text-gray-500">Don hang dang xu ly</div>
+                  </div>
                 </div>
               </div>
 
               {/* Orders List */}
-              <div className="space-y-4">
-                {orders.map((order) => (
-                  <Card key={order.id} className="shadow-lg hover:shadow-xl transition-shadow duration-200 border-0">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                            <Package className="h-6 w-6 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-bold text-gray-900">#{order.orderNumber}</h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                              <Calendar className="h-4 w-4" />
-                              {formatDateTime(order.createdAt)}
+              <div className="space-y-5">
+                {orders.map((order, index) => (
+                  <Card
+                    key={order.id}
+                    className="shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden rounded-2xl hover:-translate-y-1 animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <CardContent className="p-0">
+                      <div className="p-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                          <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 flex-shrink-0">
+                              <Package className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">#{order.orderNumber}</h3>
+                              <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                                <Calendar className="h-3.5 w-3.5" />
+                                {formatDateTime(order.createdAt)}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <Badge className={`${getStatusColor(order.status)} flex items-center gap-1 px-3 py-1`}>
-                          {getStatusIcon(order.status)}
-                          {order.status}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-900">{order.items.length}</div>
-                            <div className="text-sm text-gray-600">Sản phẩm</div>
-                          </div>
-                          <div className="w-px h-12 bg-gray-200"></div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-600">{formatCurrency(order.total)}</div>
-                            <div className="text-sm text-gray-600">Tổng tiền</div>
-                          </div>
+                          <Badge variant="outline" className={`${getStatusColor(order.status)} flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm`}>
+                            {getStatusIcon(order.status)}
+                            {getStatusLabel(order.status)}
+                          </Badge>
                         </div>
 
-                        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" asChild>
-                          <Link to={`/orders/${order.id}`} className="flex items-center gap-2">
-                            Xem chi tiết
-                            <ArrowRight className="h-4 w-4" />
-                          </Link>
-                        </Button>
+                        {/* Divider */}
+                        <div className="h-px bg-gray-100 my-4" />
+
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                          <div className="flex items-center gap-8 w-full md:w-auto">
+                            <div>
+                              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">San pham</div>
+                              <div className="text-xl font-bold text-gray-900">{order.items.length}</div>
+                            </div>
+                            <div className="w-px h-10 bg-gray-200 hidden md:block" />
+                            <div>
+                              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Tong tien</div>
+                              <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                                {formatCurrency(order.total)}
+                              </div>
+                            </div>
+                          </div>
+
+                          <Button className="w-full md:w-auto rounded-xl bg-gray-900 hover:bg-black hover:shadow-lg transition-all" asChild>
+                            <Link to={`/orders/${order.id}`} className="flex items-center justify-center gap-2">
+                              Xem chi tiet
+                              <ArrowRight className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
+
+                      {/* Footer strip for visual appeal */}
+                      <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 opacity-80" />
                     </CardContent>
                   </Card>
                 ))}
               </div>
 
-              {/* Help Section */}
-              <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6">
-                <div className="text-center">
-                  <AlertCircle className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Cần hỗ trợ?</h3>
-                  <p className="text-gray-600 mb-4">
-                    Nếu bạn có câu hỏi về đơn hàng, hãy liên hệ với chúng tôi
-                  </p>
-                  <Button variant="outline" asChild>
-                    <Link to="/support">Liên hệ hỗ trợ</Link>
-                  </Button>
+              {/* Support Section */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-600">
+                    <AlertCircle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Can ho tro don hang?</h3>
+                    <p className="text-sm text-gray-600">Lien he voi chung toi neu ban co bat ky cau hoi nao</p>
+                  </div>
                 </div>
+                <Button variant="outline" className="bg-white hover:bg-blue-50 text-blue-600 border-blue-200 rounded-xl" asChild>
+                  <Link to="/support">Lien he ho tro</Link>
+                </Button>
               </div>
             </div>
           )}

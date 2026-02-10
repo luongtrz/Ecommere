@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { SEO } from '@/lib/seo';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
@@ -5,91 +6,58 @@ import { ProductCard } from '@/components/common/ProductCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Truck, Shield, RefreshCw, Sparkles } from 'lucide-react';
+import { ArrowRight, Truck, Shield, RefreshCw, Star, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Category } from '../api/categories.api';
 
 interface CategoryProductsSectionProps {
   category: Category;
   onAddToCart: (product: any, variant: any) => void;
-  isAlternate?: boolean;
   index: number;
 }
 
-function CategoryProductsSection({ category, onAddToCart, isAlternate, index }: CategoryProductsSectionProps) {
+function CategoryProductsSection({ category, onAddToCart, index }: CategoryProductsSectionProps) {
   const { data: productsData, isLoading } = useProducts({
     categorySlug: category.slug,
     limit: 8,
   });
 
-  if (isLoading) {
-    return (
-      <section className={isAlternate ? 'bg-gray-50/80 py-12' : 'py-12'}>
-        <div className="container">
-          <LoadingSpinner />
-        </div>
-      </section>
-    );
-  }
-
-  if (!productsData?.products || productsData.products.length === 0) {
-    return null;
-  }
+  if (isLoading) return null;
+  if (!productsData?.products || productsData.products.length === 0) return null;
 
   return (
-    <section
-      className={`${isAlternate ? 'bg-gray-50/80' : ''} py-12 animate-fade-in`}
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
+    <section className="py-20 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
       <div className="container">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{category.name}</h2>
-            <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mt-2" />
+            <div className="flex items-center gap-2 mb-2">
+              <span className="h-px w-8 bg-blue-600"></span>
+              <span className="text-blue-600 font-bold uppercase tracking-wider text-sm">Bo suu tap</span>
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 leading-tight">{category.name}</h2>
           </div>
-          <Button asChild variant="outline" className="rounded-full border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all group">
-            <Link to={`/c/${category.slug}`}>
+          <Button asChild variant="ghost" className="rounded-full text-gray-900 group hover:bg-gray-100 px-6">
+            <Link to={`/c/${category.slug}`} className="flex items-center gap-2">
               Xem tat ca
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
         </div>
 
-        {/* Mobile: Horizontal Scroll, Desktop: Grid */}
-        <div className="md:grid md:grid-cols-2 md:gap-5 lg:grid-cols-5">
-          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 md:hidden">
-            {productsData.products.map((product) => (
-              <div key={product.id} className="flex-none w-64 snap-center">
-                <ProductCard
-                  id={product.id}
-                  name={product.name}
-                  slug={product.slug}
-                  images={product.images}
-                  price={product.basePrice}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop Grid */}
-          <div className="hidden md:contents">
-            {productsData.products.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                slug={product.slug}
-                images={product.images}
-                price={product.basePrice}
-                rating={product.rating}
-                reviewCount={product.reviewCount}
-                onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
-              />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {productsData.products.map((product) => (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              slug={product.slug}
+              images={product.images}
+              price={product.basePrice}
+              rating={product.rating}
+              reviewCount={product.reviewCount}
+              onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+            />
+          ))}
         </div>
       </div>
     </section>
@@ -99,6 +67,7 @@ function CategoryProductsSection({ category, onAddToCart, isAlternate, index }: 
 export function HomePage() {
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { addItem } = useCart();
+  const featuresRef = useRef<HTMLDivElement>(null);
 
   const handleAddToCart = (product: any, variant: any) => {
     addItem({
@@ -112,119 +81,200 @@ export function HomePage() {
     });
   };
 
+  const scrollToFeatures = () => {
+    featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <>
       <SEO />
 
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white">
-        {/* Animated background blobs */}
-        <div className="absolute top-0 -left-10 w-72 h-72 bg-blue-400/30 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-20 right-0 w-96 h-96 bg-violet-400/20 rounded-full blur-3xl animate-blob" style={{ animationDelay: '2s' }} />
-        <div className="absolute -bottom-20 left-1/3 w-80 h-80 bg-indigo-300/20 rounded-full blur-3xl animate-blob" style={{ animationDelay: '4s' }} />
+      {/* Modern Hero Section */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
+        {/* Background Elements */}
+        <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-blue-50 to-transparent -z-10" />
+        <div className="absolute -top-20 -right-20 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-[100px] animate-blob" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-400/10 rounded-full blur-[100px] animate-blob" style={{ animationDelay: '2s' }} />
 
-        <div className="relative container py-16 md:py-24">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6 border border-white/20">
-              <Sparkles className="h-4 w-4 text-amber-300" />
-              <span className="text-sm font-medium">Thai Spray Shop - Chat luong so 1</span>
+        <div className="container relative z-10 pt-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+
+            {/* Text Content */}
+            <div className="space-y-8 animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-4 py-1.5 shadow-sm">
+                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                <span className="text-sm font-semibold text-blue-900 tracking-wide">Thuong hieu duoc yeu thich nhat 2026</span>
+              </div>
+
+              <h1 className="text-5xl lg:text-7xl font-black text-gray-900 leading-[1.1] tracking-tight">
+                Kham pha <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600">The gioi mui huong</span>
+                <br /> Dang cap
+              </h1>
+
+              <p className="text-lg text-gray-600 leading-relaxed max-w-lg">
+                Tu tin the hien ca tinh voi bo suu tap nuoc hoa xit Thai Lan chinh hang.
+                Luu huong lau dai, mui huong da dang, phong cach thoi thuong.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button asChild size="lg" className="h-14 px-8 rounded-full text-lg shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300 bg-gradient-to-r from-blue-600 to-indigo-600 border-0">
+                  <Link to="/catalog">
+                    Mua sam ngay
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button variant="outline" size="lg" onClick={scrollToFeatures} className="h-14 px-8 rounded-full text-lg border-2 hover:bg-gray-50 text-gray-700">
+                  Tim hieu them
+                </Button>
+              </div>
+
+              <div className="pt-8 flex items-center gap-8 text-sm font-medium text-gray-500">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  100% Chinh hang
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  Giao hang nhanh 2h
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-purple-500" />
+                  Doi tra mien phi
+                </div>
+              </div>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight tracking-tight animate-fade-in">
-              Nuoc Hoa Xit
-              <span className="block bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-300 bg-clip-text text-transparent mt-2">
-                Thai Lan Chinh Hang
-              </span>
-            </h1>
+            {/* Visual Content - 3D Floating Elements Placeholder */}
+            <div className="relative h-[600px] hidden lg:block perspective-1000">
+              <div className="absolute inset-0 flex items-center justify-center animate-float">
+                {/* Main Image Container with Glass Effect */}
+                <div className="w-[450px] h-[550px] bg-white/40 backdrop-blur-2xl rounded-[40px] border border-white/50 shadow-2xl shadow-blue-200/50 flex items-center justify-center relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-            <p className="text-lg md:text-xl text-blue-100/90 mb-8 max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '200ms' }}>
-              Kham pha bo suu tap nuoc hoa xit thom da dang mui huong,
-              chat luong cao cap voi gia tot nhat thi truong
-            </p>
+                  {/* Abstract Shapes representing Products */}
+                  <div className="relative z-10 text-center">
+                    <div className="w-48 h-80 bg-gradient-to-b from-gray-100 to-gray-200 rounded-full mx-auto shadow-inner border border-white flex items-center justify-center mb-6 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-blue-200/50 to-transparent" />
+                      <span className="text-gray-400 font-bold text-xl rotate-90">PREMIUM SPRAY</span>
+                    </div>
+                    <div className="inline-block px-6 py-2 bg-white rounded-full shadow-lg text-blue-900 font-bold text-lg">
+                      New Collection 2026
+                    </div>
+                  </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '400ms' }}>
-              <Button asChild size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-base px-8 h-12 rounded-full shadow-lg hover:shadow-xl transition-all font-semibold">
-                <Link to="/catalog">
-                  Kham pha ngay
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 text-base px-8 h-12 rounded-full font-medium transition-all">
-                <Link to="/search">
-                  Tim kiem san pham
-                </Link>
-              </Button>
+                  {/* Floating Cards */}
+                  <div className="absolute top-10 -right-10 bg-white p-4 rounded-2xl shadow-xl animate-float-slow z-20">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <Star className="h-5 w-5 text-yellow-600 fill-yellow-600" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-900">4.9/5.0</div>
+                        <div className="text-xs text-gray-500">Rating</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="absolute bottom-20 -left-8 bg-white p-4 rounded-2xl shadow-xl animate-float z-20" style={{ animationDelay: '1.5s' }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <Zap className="h-5 w-5 text-green-600 fill-green-600" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-900">Ban chay</div>
+                        <div className="text-xs text-gray-500">Tuan nay</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 mt-14 pt-8 border-t border-white/10 max-w-lg mx-auto animate-fade-in" style={{ animationDelay: '600ms' }}>
-              <div>
-                <div className="text-2xl md:text-3xl font-bold">500+</div>
-                <div className="text-sm text-blue-200 mt-1">San pham</div>
-              </div>
-              <div>
-                <div className="text-2xl md:text-3xl font-bold">10K+</div>
-                <div className="text-sm text-blue-200 mt-1">Khach hang</div>
-              </div>
-              <div>
-                <div className="text-2xl md:text-3xl font-bold">4.9</div>
-                <div className="text-sm text-blue-200 mt-1">Danh gia</div>
-              </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Marquee Section */}
+      <section className="py-10 border-y border-gray-100 bg-gray-50/50 overflow-hidden">
+        <div className="container relative">
+          <div className="flex w-full overflow-hidden mask-linear-fade">
+            <div className="flex gap-12 sm:gap-24 animate-marquee whitespace-nowrap items-center text-gray-300 font-black text-4xl uppercase tracking-tighter opacity-30 select-none">
+              <span>Thai Spray</span>
+              <span>Premium Quality</span>
+              <span>Authentic</span>
+              <span>Fast Delivery</span>
+              <span>Best Price</span>
+              <span>Thai Spray</span>
+              <span>Premium Quality</span>
+              <span>Authentic</span>
+              <span>Fast Delivery</span>
+              <span>Best Price</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Category-based Product Sections */}
-      {isLoadingCategories ? (
-        <div className="container py-12">
-          <LoadingSpinner />
-        </div>
-      ) : (
-        categories?.map((category, index) => (
-          <CategoryProductsSection
-            key={category.id}
-            category={category}
-            onAddToCart={handleAddToCart}
-            isAlternate={index % 2 === 1}
-            index={index}
-          />
-        ))
-      )}
-
-      {/* Features */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+      {/* Features Section */}
+      <section ref={featuresRef} className="py-24 bg-white relative">
         <div className="container">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Tai sao chon chung toi?</h2>
-            <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mx-auto" />
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Chat luong lam nen thuong hieu</h2>
+            <p className="text-gray-600 text-lg">Chung toi cam ket mang den nhung san pham chat luong nhat tu Thai Lan den tan tay ban.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
-                <Truck className="h-7 w-7 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { icon: Truck, title: 'Giao hang sieu toc', desc: 'Nhan hang trong 2h tai noi thanh. Mien phi ship cho don tu 500k.', color: 'blue' },
+              { icon: Shield, title: 'Bao hanh chinh hang', desc: 'Den gap 10 lan neu phat hien hang gia. Bao hanh doi tra 30 ngay.', color: 'emerald' },
+              { icon: RefreshCw, title: 'Ho tro tan tam', desc: 'Doi ngu tu van vien chuyen nghiep, ho tro 24/7 moi thac mac cua ban.', color: 'violet' }
+            ].map((feature, idx) => (
+              <div key={idx} className="group p-8 rounded-3xl bg-gray-50 hover:bg-white border border-gray-100 hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 hover:-translate-y-2">
+                <div className={`w-14 h-14 rounded-2xl bg-${feature.color}-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <feature.icon className={`h-7 w-7 text-${feature.color}-600`} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-500 leading-relaxed">{feature.desc}</p>
               </div>
-              <h3 className="font-bold text-lg text-gray-900 mb-2">Giao hang nhanh</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">Giao hang toan quoc trong 1-3 ngay. Mien phi cho don tu 500.000d.</p>
-            </div>
-
-            <div className="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
-              <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
-                <Shield className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="font-bold text-lg text-gray-900 mb-2">Chinh hang 100%</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">Cam ket san pham chinh hang, nguon goc ro rang tu Thai Lan.</p>
-            </div>
-
-            <div className="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
-              <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-violet-500/20 group-hover:scale-110 transition-transform duration-300">
-                <RefreshCw className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="font-bold text-lg text-gray-900 mb-2">Doi tra de dang</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">Doi tra trong 7 ngay neu co loi. Hoan tien 100% neu khong hai long.</p>
-            </div>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* Product Categories */}
+      <div className="bg-gray-50/30 pb-24 border-t border-gray-100">
+        {isLoadingCategories ? (
+          <div className="container py-20 flex justify-center">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          categories?.map((category, index) => (
+            <CategoryProductsSection
+              key={category.id}
+              category={category}
+              onAddToCart={handleAddToCart}
+              index={index}
+            />
+          ))
+        )}
+      </div>
+
+      {/* CTA Section */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gray-900" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-purple-600/20" />
+
+        <div className="container relative z-10 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">San sang trai nghiem?</h2>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-10">
+            Hang ngan khach hang da tin tuong va lua chon Thai Spray Shop. Con ban thi sao?
+          </p>
+          <Button asChild size="lg" className="h-16 px-10 rounded-full text-lg font-bold bg-white text-gray-900 hover:bg-gray-100 hover:scale-105 transition-all shadow-2xl">
+            <Link to="/register">
+              Tham gia ngay hom nay
+            </Link>
+          </Button>
         </div>
       </section>
     </>
