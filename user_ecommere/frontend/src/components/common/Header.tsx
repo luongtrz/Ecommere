@@ -19,44 +19,47 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full">
       {/* Main header */}
       <div className="bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-glass relative z-[60]">
-        <div className="container flex h-16 items-center gap-4">
-          {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72">
-              <div className="flex flex-col gap-4 mt-8">
-                <Link to="/" className="text-lg font-semibold hover:text-primary transition-colors">Trang chủ</Link>
-                <Link to="/catalog" className="text-lg font-semibold hover:text-primary transition-colors">Sản phẩm</Link>
-                <Link to="/cart" className="text-lg font-semibold hover:text-primary transition-colors">Giỏ hàng</Link>
-                {user ? (
-                  <>
-                    <Link to="/account" className="text-lg font-semibold hover:text-primary transition-colors">Tài khoản</Link>
-                    <Link to="/orders" className="text-lg font-semibold hover:text-primary transition-colors">Đơn hàng</Link>
-                    <button onClick={logout} className="text-lg font-semibold text-left hover:text-red-500 transition-colors">Đăng xuất</button>
-                  </>
-                ) : (
-                  <Link to="/login" className="text-lg font-semibold hover:text-primary transition-colors">Đăng nhập</Link>
-                )}
+        <div className="container flex h-16 items-center justify-between">
+          {/* Left: Menu + Logo */}
+          <div className="flex items-center gap-2">
+            {/* Mobile menu */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden shrink-0">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72">
+                <div className="flex flex-col gap-4 mt-8">
+                  <Link to="/" className="text-lg font-semibold hover:text-primary transition-colors">Trang chủ</Link>
+                  <Link to="/catalog" className="text-lg font-semibold hover:text-primary transition-colors">Sản phẩm</Link>
+                  <Link to="/cart" className="text-lg font-semibold hover:text-primary transition-colors">Giỏ hàng</Link>
+                  {user ? (
+                    <>
+                      <Link to="/account" className="text-lg font-semibold hover:text-primary transition-colors">Tài khoản</Link>
+                      <Link to="/orders" className="text-lg font-semibold hover:text-primary transition-colors">Đơn hàng</Link>
+                      <button onClick={logout} className="text-lg font-semibold text-left hover:text-red-500 transition-colors">Đăng xuất</button>
+                    </>
+                  ) : (
+                    <Link to="/login" className="text-lg font-semibold hover:text-primary transition-colors">Đăng nhập</Link>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center shadow-md group-hover:shadow-glow transition-shadow duration-300">
+                <span className="text-white font-bold text-sm">TS</span>
               </div>
-            </SheetContent>
-          </Sheet>
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+                Thai Spray
+              </span>
+            </Link>
+          </div>
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center shadow-md group-hover:shadow-glow transition-shadow duration-300">
-              <span className="text-white font-bold text-sm">TS</span>
-            </div>
-            <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-              Thai Spray
-            </span>
-          </Link>
-
-          {/* Search */}
-          <div className="flex-1 max-w-xl mx-auto hidden md:block relative z-50">
+          {/* Center: Search (desktop only) */}
+          <div className="flex-1 max-w-xl mx-4 hidden md:block relative z-50">
             <SearchBox />
           </div>
 
