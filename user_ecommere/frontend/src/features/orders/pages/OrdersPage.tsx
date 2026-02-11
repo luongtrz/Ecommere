@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
-import { useOrders } from '../hooks/useOrders';
+import { useOrders, useCancelOrder } from '../hooks/useOrders';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,18 @@ import {
 
 export function OrdersPage() {
   const { data, isLoading } = useOrders();
+  const cancelOrder = useCancelOrder();
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  const handleCancel = async (orderId: string) => {
+    try {
+      await cancelOrder.mutateAsync(orderId);
+      setCancellingId(null);
+    } catch (error) {
+      console.error('Cancel order failed:', error);
+      alert('Hủy đơn hàng thất bại. Vui lòng thử lại.');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -199,12 +212,46 @@ export function OrdersPage() {
                             </div>
                           </div>
 
-                          <Button className="w-full md:w-auto rounded-xl bg-gray-900 hover:bg-black hover:shadow-lg transition-all" asChild>
-                            <Link to={`/orders/${order.id}`} className="flex items-center justify-center gap-2">
-                              Xem chi tiết
-                              <ArrowRight className="h-4 w-4" />
-                            </Link>
-                          </Button>
+                          <div className="flex gap-3 w-full md:w-auto">
+                            {['PENDING_PAYMENT', 'PAID'].includes(order.status) && (
+                              cancellingId === order.id ? (
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="rounded-lg border-gray-200"
+                                    onClick={() => setCancellingId(null)}
+                                    disabled={cancelOrder.isPending}
+                                  >
+                                    Không
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="rounded-lg bg-red-600 hover:bg-red-700 text-white"
+                                    onClick={() => handleCancel(order.id)}
+                                    disabled={cancelOrder.isPending}
+                                  >
+                                    {cancelOrder.isPending ? 'Đang hủy...' : 'Xác nhận hủy'}
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  className="rounded-xl border-red-200 text-red-600 hover:bg-red-50"
+                                  onClick={() => setCancellingId(order.id)}
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Hủy
+                                </Button>
+                              )
+                            )}
+                            <Button className="w-full md:w-auto rounded-xl bg-gray-900 hover:bg-black hover:shadow-lg transition-all" asChild>
+                              <Link to={`/orders/${order.id}`} className="flex items-center justify-center gap-2">
+                                Xem chi tiết
+                                <ArrowRight className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </div>
                         </div>
                       </div>
 

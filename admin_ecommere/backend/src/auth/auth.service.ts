@@ -33,7 +33,7 @@ export class AuthService {
   async register(registerDto: RegisterDto, response: Response) {
     const { phone, password, name, email } = registerDto;
 
-    const existingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findFirst({
       where: { phone },
     });
 
@@ -81,7 +81,7 @@ export class AuthService {
   async login(loginDto: LoginDto, response: Response) {
     const { phone, password } = loginDto;
 
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: { phone },
     });
 

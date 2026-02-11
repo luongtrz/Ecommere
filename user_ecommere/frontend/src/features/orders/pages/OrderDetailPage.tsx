@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
-import { useOrderDetail } from '../hooks/useOrders';
+import { useOrderDetail, useCancelOrder } from '../hooks/useOrders';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,21 @@ import {
 export function OrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const { data: order, isLoading } = useOrderDetail(orderId!);
+  const cancelOrder = useCancelOrder();
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  const canCancel = order && ['PENDING_PAYMENT', 'PAID'].includes(order.status);
+
+  const handleCancelOrder = async () => {
+    if (!orderId) return;
+    try {
+      await cancelOrder.mutateAsync(orderId);
+      setShowCancelConfirm(false);
+    } catch (error) {
+      console.error('Cancel order failed:', error);
+      alert('Hủy đơn hàng thất bại. Vui lòng thử lại.');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -325,6 +341,46 @@ export function OrderDetailPage() {
                       {formatCurrency(order.total)}
                     </span>
                   </div>
+
+                  {/* Cancel Order */}
+                  {canCancel && !showCancelConfirm && (
+                    <div className="mb-4">
+                      <Button
+                        variant="outline"
+                        className="w-full rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all"
+                        onClick={() => setShowCancelConfirm(true)}
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Hủy đơn hàng
+                      </Button>
+                    </div>
+                  )}
+
+                  {showCancelConfirm && (
+                    <div className="mb-4 p-4 bg-red-50 rounded-xl border border-red-200 space-y-3">
+                      <p className="text-sm font-semibold text-red-800">Bạn chắc chắn muốn hủy đơn hàng này?</p>
+                      <p className="text-xs text-red-600">Hành động này không thể hoàn tác. Sản phẩm sẽ được hoàn lại kho.</p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 rounded-lg border-gray-200"
+                          onClick={() => setShowCancelConfirm(false)}
+                          disabled={cancelOrder.isPending}
+                        >
+                          Không
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 text-white"
+                          onClick={handleCancelOrder}
+                          disabled={cancelOrder.isPending}
+                        >
+                          {cancelOrder.isPending ? 'Đang hủy...' : 'Xác nhận hủy'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Support */}
                   <div className="text-center">

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '../api/orders.api';
 import { QUERY_KEYS } from '@/lib/constants';
 
@@ -14,5 +14,18 @@ export function useOrderDetail(orderId: string) {
     queryKey: [QUERY_KEYS.ORDER_DETAIL, orderId],
     queryFn: () => ordersApi.getById(orderId),
     enabled: !!orderId,
+  });
+}
+
+export function useCancelOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (orderId: string) => ordersApi.cancel(orderId),
+    onSuccess: (_data, orderId) => {
+      // Invalidate both the order list and the specific order detail
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAIL, orderId] });
+    },
   });
 }
