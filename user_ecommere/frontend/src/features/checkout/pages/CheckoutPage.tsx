@@ -115,7 +115,7 @@ export function CheckoutPage() {
             <div className="w-32 flex justify-end">
               <div className="flex items-center gap-2 text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full border border-green-100">
                 <Shield className="h-3.5 w-3.5" />
-                Bảo mật 100%
+                An toàn
               </div>
             </div>
           </div>
@@ -240,36 +240,44 @@ export function CheckoutPage() {
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {PAYMENT_METHODS.map((method) => (
-                        <div
-                          key={method.id}
-                          onClick={() => setPaymentMethod(method.id)}
-                          className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center text-center gap-4 ${paymentMethod === method.id
-                            ? 'border-purple-600 bg-white shadow-xl shadow-purple-50 scale-[1.02]'
-                            : 'border-transparent bg-white shadow-sm hover:border-purple-100 hover:scale-[1.01]'
-                            }`}
-                        >
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${paymentMethod === method.id ? 'bg-purple-100 text-purple-600' : 'bg-gray-50 text-gray-400'
-                            }`}>
-                            {method.id === 'COD' ? <Truck className="h-7 w-7" /> : <CreditCard className="h-7 w-7" />}
-                          </div>
+                      {PAYMENT_METHODS.map((method) => {
+                        const isCOD = method.id === 'COD';
+                        return (
+                          <div
+                            key={method.id}
+                            onClick={() => isCOD && setPaymentMethod(method.id)}
+                            className={`relative p-6 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-4 ${paymentMethod === method.id
+                                ? 'border-purple-600 bg-white shadow-xl shadow-purple-50 scale-[1.02] cursor-pointer'
+                                : isCOD
+                                  ? 'border-transparent bg-white shadow-sm hover:border-purple-100 hover:scale-[1.01] cursor-pointer'
+                                  : 'border-transparent bg-gray-50 opacity-50 cursor-not-allowed grayscale'
+                              }`}
+                          >
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${paymentMethod === method.id ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-400'
+                              }`}>
+                              {method.id === 'COD' ? <Truck className="h-7 w-7" /> : <CreditCard className="h-7 w-7" />}
+                            </div>
 
-                          <div>
-                            <div className={`font-bold text-lg mb-1 ${paymentMethod === method.id ? 'text-purple-700' : 'text-gray-900'}`}>
-                              {method.name}
+                            <div>
+                              <div className={`font-bold text-lg mb-1 ${paymentMethod === method.id ? 'text-purple-700' : 'text-gray-900'}`}>
+                                {method.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {method.id === 'COD'
+                                  ? 'Thanh toán khi nhận hàng'
+                                  : <span className="text-red-500 font-medium text-xs bg-red-50 px-2 py-1 rounded-full">Đang bảo trì</span>
+                                }
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {method.id === 'COD' ? 'Thanh toán khi nhận hàng' : 'Thanh toán qua cổng VNPAY'}
-                            </div>
-                          </div>
 
-                          {paymentMethod === method.id && (
-                            <div className="absolute top-4 right-4">
-                              <CheckCircle2 className="h-6 w-6 text-purple-600" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                            {paymentMethod === method.id && (
+                              <div className="absolute top-4 right-4">
+                                <CheckCircle2 className="h-6 w-6 text-purple-600" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
