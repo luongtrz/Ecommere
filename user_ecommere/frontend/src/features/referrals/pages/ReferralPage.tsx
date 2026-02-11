@@ -41,8 +41,8 @@ export function ReferralPage() {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'Thai Spray - Moi ban be',
-                    text: `Dang ky tai Thai Spray va nhan uu dai! Dung ma gioi thieu cua toi: ${info?.referralCode}`,
+                    title: 'Thai Spray - Mời bạn bè',
+                    text: `Đăng ký tại Thai Spray và nhận ưu đãi! Dùng mã giới thiệu của tôi: ${info?.referralCode}`,
                     url: referralLink,
                 });
             } catch {
@@ -67,15 +67,15 @@ export function ReferralPage() {
 
     return (
         <>
-            <SEO title="Moi ban be - Thai Spray" />
+            <SEO title="Mời bạn bè - Thai Spray" />
             <div className="container py-6 md:py-8 max-w-4xl">
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                        Moi ban be - Nhan uu dai
+                        Mời bạn bè - Nhận ưu đãi
                     </h1>
                     <p className="text-muted-foreground mt-2">
-                        Chia se ma gioi thieu cua ban va nhan ma giam gia khi ban be dang ky thanh cong
+                        Chia sẻ mã giới thiệu của bạn và nhận mã giảm giá khi bạn bè đăng ký thành công
                     </p>
                 </div>
 
@@ -87,7 +87,7 @@ export function ReferralPage() {
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                             <div>
                                 <p className="text-sm text-white/80 mb-2 font-medium">
-                                    Ma gioi thieu cua ban
+                                    Mã giới thiệu của bạn
                                 </p>
                                 <div className="flex items-center gap-3">
                                     <span className="text-3xl md:text-4xl font-bold tracking-widest font-mono">
@@ -102,7 +102,7 @@ export function ReferralPage() {
                                     onClick={() => handleCopy(info?.referralCode || '')}
                                 >
                                     <Copy className="mr-2 h-4 w-4" />
-                                    {copied ? 'Da sao chep!' : 'Sao chep ma'}
+                                    {copied ? 'Đã sao chép!' : 'Sao chép mã'}
                                 </Button>
                                 <Button
                                     variant="secondary"
@@ -110,14 +110,14 @@ export function ReferralPage() {
                                     onClick={handleShare}
                                 >
                                     <Share2 className="mr-2 h-4 w-4" />
-                                    Chia se
+                                    Chia sẻ
                                 </Button>
                             </div>
                         </div>
 
                         {/* Referral link */}
                         <div className="mt-6 p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-                            <p className="text-xs text-white/70 mb-1">Link gioi thieu</p>
+                            <p className="text-xs text-white/70 mb-1">Link giới thiệu</p>
                             <div className="flex items-center gap-2">
                                 <p className="text-sm font-mono truncate flex-1">{referralLink}</p>
                                 <button
@@ -141,7 +141,7 @@ export function ReferralPage() {
                                 </div>
                                 <div>
                                     <p className="text-2xl font-bold">{info?.totalReferrals || 0}</p>
-                                    <p className="text-xs text-muted-foreground">Ban be da moi</p>
+                                    <p className="text-xs text-muted-foreground">Bạn bè đã mời</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -154,7 +154,7 @@ export function ReferralPage() {
                                 </div>
                                 <div>
                                     <p className="text-2xl font-bold">{info?.totalCouponsEarned || 0}</p>
-                                    <p className="text-xs text-muted-foreground">Ma giam gia da nhan</p>
+                                    <p className="text-xs text-muted-foreground">Mã giảm giá đã nhận</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -164,7 +164,7 @@ export function ReferralPage() {
                 {/* Coupons from referral */}
                 <Card className="mb-6 border-0 shadow-md">
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">Ma giam gia tu gioi thieu</CardTitle>
+                        <CardTitle className="text-lg">Mã giảm giá từ giới thiệu</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {couponsLoading ? (
@@ -177,7 +177,7 @@ export function ReferralPage() {
                             <div className="text-center py-8">
                                 <Gift className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
                                 <p className="text-muted-foreground text-sm">
-                                    Chua co ma giam gia nao. Hay moi ban be de nhan uu dai!
+                                    Chưa có mã giảm giá nào. Hãy mời bạn bè để nhận ưu đãi!
                                 </p>
                             </div>
                         ) : (
@@ -197,23 +197,23 @@ export function ReferralPage() {
                                                 <p className="font-mono font-bold text-sm">{coupon.code}</p>
                                                 <p className="text-xs text-muted-foreground mt-0.5">
                                                     {coupon.type === 'PERCENT'
-                                                        ? `Giam ${coupon.value}%`
+                                                        ? `Giảm ${coupon.value}%`
                                                         : coupon.type === 'FIXED'
-                                                            ? `Giam ${formatCurrency(coupon.value)}`
-                                                            : 'Mien phi van chuyen'}
+                                                            ? `Giảm ${formatCurrency(coupon.value)}`
+                                                            : 'Miễn phí vận chuyển'}
                                                     {coupon.maxDiscount
-                                                        ? ` (toi da ${formatCurrency(coupon.maxDiscount)})`
+                                                        ? ` (tối đa ${formatCurrency(coupon.maxDiscount)})`
                                                         : ''}
                                                 </p>
                                             </div>
                                             <div className="text-right">
                                                 {isExpired ? (
-                                                    <Badge variant="secondary" className="text-xs">Het han</Badge>
+                                                    <Badge variant="secondary" className="text-xs">Hết hạn</Badge>
                                                 ) : isUsed ? (
-                                                    <Badge variant="secondary" className="text-xs">Da dung</Badge>
+                                                    <Badge variant="secondary" className="text-xs">Đã dùng</Badge>
                                                 ) : (
                                                     <Badge className="bg-green-100 text-green-700 text-xs border-0">
-                                                        Con hieu luc
+                                                        Còn hiệu lực
                                                     </Badge>
                                                 )}
                                                 {coupon.validUntil && (
@@ -233,7 +233,7 @@ export function ReferralPage() {
                 {/* Referral list */}
                 <Card className="border-0 shadow-md">
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">Ban be da moi</CardTitle>
+                        <CardTitle className="text-lg">Bạn bè đã mời</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {referralsLoading ? (
@@ -246,7 +246,7 @@ export function ReferralPage() {
                             <div className="text-center py-8">
                                 <Users className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
                                 <p className="text-muted-foreground text-sm">
-                                    Chua co ban be nao duoc gioi thieu
+                                    Chưa có bạn bè nào được giới thiệu
                                 </p>
                             </div>
                         ) : (
@@ -289,7 +289,7 @@ export function ReferralPage() {
                                             disabled={page <= 1}
                                             onClick={() => setPage((p) => p - 1)}
                                         >
-                                            Truoc
+                                            Trước
                                         </Button>
                                         <span className="flex items-center text-sm text-muted-foreground px-3">
                                             {page} / {referrals.totalPages}
@@ -300,7 +300,7 @@ export function ReferralPage() {
                                             disabled={page >= referrals.totalPages}
                                             onClick={() => setPage((p) => p + 1)}
                                         >
-                                            Tiep
+                                            Tiếp
                                         </Button>
                                     </div>
                                 )}
