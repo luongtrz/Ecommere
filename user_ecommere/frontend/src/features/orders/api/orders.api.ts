@@ -22,6 +22,8 @@ const orderSchema = z.object({
     name: item.nameSnapshot,
     price: item.unitPrice,
     quantity: item.quantity,
+    image: item.variant?.product?.images?.[0] || null,
+    productName: item.variant?.product?.name || item.nameSnapshot,
   })),
 }));
 

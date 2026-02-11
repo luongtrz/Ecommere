@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatters';
 import { PAYMENT_METHODS, SHIPPING_METHODS } from '@/lib/constants';
 import apiClient from '@/lib/api';
-import { ArrowLeft, Truck, CreditCard, MapPin, ShoppingBag, Plus, Shield, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
+import { ArrowLeft, Truck, CreditCard, MapPin, Shield, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
 import { CheckoutSteps } from '../components/CheckoutSteps';
 import confetti from 'canvas-confetti';
@@ -54,10 +54,13 @@ export function CheckoutPage() {
     setStep(prev => prev - 1);
   };
 
+
   const handleSubmit = async () => {
     if (!selectedAddress) return;
 
     setIsSubmitting(true);
+    let orderCreated = false;
+
     try {
       const orderData = {
         addressId: selectedAddress.id,
@@ -72,23 +75,29 @@ export function CheckoutPage() {
       };
 
       await apiClient.post('/orders/checkout', orderData);
-
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-
-      setTimeout(() => {
-        clearCart();
-        navigate('/orders');
-      }, 1000);
-
+      orderCreated = true;
     } catch (error) {
       console.error('Order creation failed:', error);
       alert('Đặt hàng thất bại. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
+    }
+
+    if (orderCreated) {
+      try {
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } catch (_) {
+        // Ignore confetti errors
+      }
+
+      setTimeout(() => {
+        clearCart();
+        navigate('/orders');
+      }, 1000);
     }
   };
 

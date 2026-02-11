@@ -197,18 +197,40 @@ export function OrdersPage() {
                         {/* Divider */}
                         <div className="h-px bg-gray-100 my-4" />
 
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                          <div className="flex items-center gap-8 w-full md:w-auto">
-                            <div>
-                              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Sản phẩm</div>
-                              <div className="text-xl font-bold text-gray-900">{order.items.length}</div>
-                            </div>
-                            <div className="w-px h-10 bg-gray-200 hidden md:block" />
-                            <div>
-                              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Tổng tiền</div>
-                              <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                                {formatCurrency(order.total)}
+                        {/* Product List */}
+                        <div className="mb-4">
+                          <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Sản phẩm ({order.items.length})</div>
+                          <div className="flex gap-2 overflow-x-auto pb-2">
+                            {order.items.slice(0, 3).map((item: any, idx: number) => (
+                              <div key={idx} className="flex-shrink-0 flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-100">
+                                <div className="w-12 h-12 bg-white rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                                  {item.image ? (
+                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                                      <Package className="h-6 w-6" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-sm font-medium text-gray-900 truncate max-w-[150px]">{item.name}</div>
+                                  <div className="text-xs text-gray-500">x{item.quantity}</div>
+                                </div>
                               </div>
+                            ))}
+                            {order.items.length > 3 && (
+                              <div className="flex-shrink-0 flex items-center justify-center w-12 h-16 bg-gray-50 rounded-lg border border-gray-200 text-xs text-gray-500 font-medium">
+                                +{order.items.length - 3}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                          <div>
+                            <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Tổng tiền</div>
+                            <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                              {formatCurrency(order.total)}
                             </div>
                           </div>
 
