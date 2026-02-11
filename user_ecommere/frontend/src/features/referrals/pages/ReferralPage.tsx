@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { SEO } from '@/lib/seo';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Share2, Users, Gift } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Copy, Share2, Users, Gift, Ticket, History } from 'lucide-react';
 import { useReferralInfo, useMyReferrals, useReferralCoupons } from '../hooks/useReferral';
 import { formatCurrency } from '@/lib/formatters';
 
@@ -68,246 +69,249 @@ export function ReferralPage() {
     return (
         <>
             <SEO title="Mời bạn bè - Thai Spray" />
-            <div className="container py-6 md:py-8 max-w-4xl">
+            <div className="container py-4 max-w-6xl h-[calc(100vh-64px)] overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                <div className="mb-4 shrink-0">
+                    <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
                         Mời bạn bè - Nhận ưu đãi
                     </h1>
-                    <p className="text-muted-foreground mt-2">
-                        Chia sẻ mã giới thiệu của bạn và nhận mã giảm giá khi bạn bè đăng ký thành công
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Chia sẻ mã giới thiệu để nhận quà cho cả hai
                     </p>
                 </div>
 
-                {/* Referral Code Card */}
-                <Card className="mb-6 border-0 shadow-lg bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
-                    <CardContent className="p-6 md:p-8 relative z-10">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                            <div>
-                                <p className="text-sm text-white/80 mb-2 font-medium">
-                                    Mã giới thiệu của bạn
-                                </p>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-3xl md:text-4xl font-bold tracking-widest font-mono">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-h-0 pb-4">
+                    {/* Left Column: Info & Stats */}
+                    <div className="lg:col-span-4 flex flex-col gap-4 h-full overflow-y-auto pr-1">
+                        {/* Referral Code Card */}
+                        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white overflow-hidden relative shrink-0">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3" />
+                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/4" />
+                            <CardContent className="p-5 relative z-10">
+                                <p className="text-xs text-white/80 mb-1 font-medium">Mã giới thiệu của bạn</p>
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-3xl font-bold tracking-widest font-mono">
                                         {info?.referralCode || '---'}
                                     </span>
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm h-8"
+                                        onClick={() => handleCopy(info?.referralCode || '')}
+                                    >
+                                        <Copy className="mr-2 h-3 w-3" />
+                                        {copied ? 'Đã chép' : 'Sao chép'}
+                                    </Button>
                                 </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <Button
-                                    variant="secondary"
-                                    className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
-                                    onClick={() => handleCopy(info?.referralCode || '')}
-                                >
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    {copied ? 'Đã sao chép!' : 'Sao chép mã'}
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
-                                    onClick={handleShare}
-                                >
-                                    <Share2 className="mr-2 h-4 w-4" />
-                                    Chia sẻ
-                                </Button>
-                            </div>
-                        </div>
 
-                        {/* Referral link */}
-                        <div className="mt-6 p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-                            <p className="text-xs text-white/70 mb-1">Link giới thiệu</p>
-                            <div className="flex items-center gap-2">
-                                <p className="text-sm font-mono truncate flex-1">{referralLink}</p>
-                                <button
-                                    onClick={() => handleCopy(referralLink)}
-                                    className="shrink-0 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-                                >
-                                    <Copy className="h-3.5 w-3.5" />
-                                </button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                    <Card className="border-0 shadow-md bg-white/80 backdrop-blur-xl">
-                        <CardContent className="p-5">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                                    <Users className="h-5 w-5 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-bold">{info?.totalReferrals || 0}</p>
-                                    <p className="text-xs text-muted-foreground">Bạn bè đã mời</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="border-0 shadow-md bg-white/80 backdrop-blur-xl">
-                        <CardContent className="p-5">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                                    <Gift className="h-5 w-5 text-green-600" />
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-bold">{info?.totalCouponsEarned || 0}</p>
-                                    <p className="text-xs text-muted-foreground">Mã giảm giá đã nhận</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Coupons from referral */}
-                <Card className="mb-6 border-0 shadow-md">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">Mã giảm giá từ giới thiệu</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {couponsLoading ? (
-                            <div className="animate-pulse space-y-3">
-                                {[1, 2].map((i) => (
-                                    <div key={i} className="h-16 bg-gray-100 rounded-lg" />
-                                ))}
-                            </div>
-                        ) : !coupons || coupons.length === 0 ? (
-                            <div className="text-center py-8">
-                                <Gift className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-                                <p className="text-muted-foreground text-sm">
-                                    Chưa có mã giảm giá nào. Hãy mời bạn bè để nhận ưu đãi!
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {coupons.map((coupon) => {
-                                    const isExpired = coupon.validUntil && new Date(coupon.validUntil) < new Date();
-                                    const isUsed = coupon.usedCount >= (coupon.maxUses || Infinity);
-                                    return (
-                                        <div
-                                            key={coupon.code}
-                                            className={`flex items-center justify-between p-4 rounded-xl border ${isExpired || isUsed
-                                                ? 'bg-gray-50 border-gray-200 opacity-60'
-                                                : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100'
-                                                }`}
+                                <div className="p-2.5 bg-white/10 rounded-lg backdrop-blur-sm">
+                                    <p className="text-[10px] text-white/70 mb-1">Link giới thiệu</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-xs font-mono truncate flex-1">{referralLink}</p>
+                                        <button
+                                            onClick={() => handleCopy(referralLink)}
+                                            className="shrink-0 p-1 rounded hover:bg-white/10 transition-colors"
                                         >
-                                            <div>
-                                                <p className="font-mono font-bold text-sm">{coupon.code}</p>
-                                                <p className="text-xs text-muted-foreground mt-0.5">
-                                                    {coupon.type === 'PERCENT'
-                                                        ? `Giảm ${coupon.value}%`
-                                                        : coupon.type === 'FIXED'
-                                                            ? `Giảm ${formatCurrency(coupon.value)}`
-                                                            : 'Miễn phí vận chuyển'}
-                                                    {coupon.maxDiscount
-                                                        ? ` (tối đa ${formatCurrency(coupon.maxDiscount)})`
-                                                        : ''}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                {isExpired ? (
-                                                    <Badge variant="secondary" className="text-xs">Hết hạn</Badge>
-                                                ) : isUsed ? (
-                                                    <Badge variant="secondary" className="text-xs">Đã dùng</Badge>
-                                                ) : (
-                                                    <Badge className="bg-green-100 text-green-700 text-xs border-0">
-                                                        Còn hiệu lực
-                                                    </Badge>
-                                                )}
-                                                {coupon.validUntil && (
-                                                    <p className="text-[10px] text-muted-foreground mt-1">
-                                                        HSD: {new Date(coupon.validUntil).toLocaleDateString('vi-VN')}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* Referral list */}
-                <Card className="border-0 shadow-md">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">Bạn bè đã mời</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {referralsLoading ? (
-                            <div className="animate-pulse space-y-3">
-                                {[1, 2, 3].map((i) => (
-                                    <div key={i} className="h-12 bg-gray-100 rounded-lg" />
-                                ))}
-                            </div>
-                        ) : !referrals || referrals.data.length === 0 ? (
-                            <div className="text-center py-8">
-                                <Users className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-                                <p className="text-muted-foreground text-sm">
-                                    Chưa có bạn bè nào được giới thiệu
-                                </p>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="space-y-2">
-                                    {referrals.data.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                                            <Copy className="h-3 w-3" />
+                                        </button>
+                                        <button
+                                            onClick={handleShare}
+                                            className="shrink-0 p-1 rounded hover:bg-white/10 transition-colors"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
-                                                    {(item.refereeName || '?').charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-medium">{item.refereeName}</p>
-                                                    <p className="text-xs text-muted-foreground">{item.refereeEmail}</p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-xs text-muted-foreground">
-                                                    {new Date(item.createdAt).toLocaleDateString('vi-VN')}
-                                                </p>
-                                                {item.couponCode && (
-                                                    <Badge variant="outline" className="text-[10px] mt-0.5">
-                                                        {item.couponCode}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Pagination */}
-                                {referrals.totalPages > 1 && (
-                                    <div className="flex justify-center gap-2 mt-4">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={page <= 1}
-                                            onClick={() => setPage((p) => p - 1)}
-                                        >
-                                            Trước
-                                        </Button>
-                                        <span className="flex items-center text-sm text-muted-foreground px-3">
-                                            {page} / {referrals.totalPages}
-                                        </span>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={page >= referrals.totalPages}
-                                            onClick={() => setPage((p) => p + 1)}
-                                        >
-                                            Tiếp
-                                        </Button>
+                                            <Share2 className="h-3 w-3" />
+                                        </button>
                                     </div>
-                                )}
-                            </>
-                        )}
-                    </CardContent>
-                </Card>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Stats - Compact Grid */}
+                        <div className="grid grid-cols-2 gap-3 shrink-0">
+                            <Card className="border shadow-sm">
+                                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                                        <Users className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    <p className="text-xl font-bold leading-none">{info?.totalReferrals || 0}</p>
+                                    <p className="text-[10px] text-muted-foreground mt-1">Bạn bè đã mời</p>
+                                </CardContent>
+                            </Card>
+                            <Card className="border shadow-sm">
+                                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mb-2">
+                                        <Gift className="h-4 w-4 text-green-600" />
+                                    </div>
+                                    <p className="text-xl font-bold leading-none">{info?.totalCouponsEarned || 0}</p>
+                                    <p className="text-[10px] text-muted-foreground mt-1">Mã đã nhận</p>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Tabs */}
+                    <div className="lg:col-span-8 flex flex-col h-full min-h-0">
+                        <Tabs defaultValue="coupons" className="h-full flex flex-col">
+                            <TabsList className="grid w-full grid-cols-2 mb-2 shrink-0">
+                                <TabsTrigger value="coupons" className="flex items-center gap-2">
+                                    <Ticket className="h-4 w-4" />
+                                    Mã ưu đãi
+                                </TabsTrigger>
+                                <TabsTrigger value="referrals" className="flex items-center gap-2">
+                                    <History className="h-4 w-4" />
+                                    Lịch sử mời
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="coupons" className="flex-1 min-h-0 mt-0">
+                                <Card className="h-full border shadow-sm flex flex-col">
+                                    <CardContent className="p-0 flex-1 overflow-y-auto">
+                                        {couponsLoading ? (
+                                            <div className="p-4 space-y-3">
+                                                {[1, 2].map((i) => (
+                                                    <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse" />
+                                                ))}
+                                            </div>
+                                        ) : !coupons || coupons.length === 0 ? (
+                                            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+                                                <Gift className="h-12 w-12 text-muted-foreground/20 mb-3" />
+                                                <p className="text-muted-foreground text-sm">
+                                                    Chưa có mã giảm giá nào. Hãy mời bạn bè để nhận ưu đãi!
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y">
+                                                {coupons.map((coupon) => {
+                                                    const isExpired = coupon.validUntil && new Date(coupon.validUntil) < new Date();
+                                                    const isUsed = coupon.usedCount >= (coupon.maxUses || Infinity);
+                                                    return (
+                                                        <div
+                                                            key={coupon.code}
+                                                            className={`flex items-center justify-between p-4 hover:bg-slate-50 transition-colors ${isExpired || isUsed ? 'opacity-60 grayscale' : ''}`}
+                                                        >
+                                                            <div className="flex items-start gap-3">
+                                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isExpired || isUsed ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600'}`}>
+                                                                    <Ticket className="h-5 w-5" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-mono font-bold text-sm text-blue-700">{coupon.code}</p>
+                                                                    <p className="text-xs text-secondary-foreground font-medium mt-0.5">
+                                                                        {coupon.type === 'PERCENT'
+                                                                            ? `Giảm ${coupon.value}%`
+                                                                            : coupon.type === 'FIXED'
+                                                                                ? `Giảm ${formatCurrency(coupon.value)}`
+                                                                                : 'Miễn phí vận chuyển'}
+                                                                    </p>
+                                                                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                                                                        {coupon.maxDiscount ? `Tối đa ${formatCurrency(coupon.maxDiscount)}` : ''}
+                                                                        {coupon.validUntil && ` • HSD: ${new Date(coupon.validUntil).toLocaleDateString('vi-VN')}`}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right shrink-0 ml-2">
+                                                                {isExpired ? (
+                                                                    <Badge variant="secondary" className="text-[10px]">Hết hạn</Badge>
+                                                                ) : isUsed ? (
+                                                                    <Badge variant="secondary" className="text-[10px]">Đã dùng</Badge>
+                                                                ) : (
+                                                                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleCopy(coupon.code)}>
+                                                                        Sao chép
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="referrals" className="flex-1 min-h-0 mt-0">
+                                <Card className="h-full border shadow-sm flex flex-col">
+                                    <CardContent className="p-0 flex-1 overflow-y-auto">
+                                        {referralsLoading ? (
+                                            <div className="p-4 space-y-3">
+                                                {[1, 2, 3].map((i) => (
+                                                    <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />
+                                                ))}
+                                            </div>
+                                        ) : !referrals || referrals.data.length === 0 ? (
+                                            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+                                                <Users className="h-12 w-12 text-muted-foreground/20 mb-3" />
+                                                <p className="text-muted-foreground text-sm">
+                                                    Chưa có bạn bè nào được giới thiệu
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y">
+                                                <div className="bg-muted/50 p-2 text-[10px] font-medium text-muted-foreground grid grid-cols-12 gap-2">
+                                                    <div className="col-span-6 pl-2">Người được mời</div>
+                                                    <div className="col-span-3 text-right">Ngày tham gia</div>
+                                                    <div className="col-span-3 text-right pr-2">Trạng thái</div>
+                                                </div>
+                                                {referrals.data.map((item) => (
+                                                    <div key={item.id} className="p-3 hover:bg-slate-50 transition-colors grid grid-cols-12 gap-2 items-center">
+                                                        <div className="col-span-6 flex items-center gap-3 overflow-hidden">
+                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                                                                {(item.refereeName || '?').charAt(0).toUpperCase()}
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="text-sm font-medium truncate">{item.refereeName}</p>
+                                                                <p className="text-xs text-muted-foreground truncate">{item.refereeEmail}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-span-3 text-right text-xs text-muted-foreground">
+                                                            {new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                                                        </div>
+                                                        <div className="col-span-3 text-right">
+                                                            {item.couponCode ? (
+                                                                <Badge variant="outline" className="text-[10px] border-green-200 bg-green-50 text-green-700">
+                                                                    Đã nhận quà
+                                                                </Badge>
+                                                            ) : (
+                                                                <Badge variant="outline" className="text-[10px]">
+                                                                    Đang chờ
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </CardContent>
+
+                                    {/* Pagination Footer */}
+                                    {referrals && referrals.totalPages > 1 && (
+                                        <div className="p-2 border-t flex justify-center gap-2 bg-slate-50">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled={page <= 1}
+                                                onClick={() => setPage((p) => p - 1)}
+                                                className="h-7 text-xs"
+                                            >
+                                                Trước
+                                            </Button>
+                                            <span className="flex items-center text-xs text-muted-foreground px-2">
+                                                {page} / {referrals.totalPages}
+                                            </span>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled={page >= referrals.totalPages}
+                                                onClick={() => setPage((p) => p + 1)}
+                                                className="h-7 text-xs"
+                                            >
+                                                Tiếp
+                                            </Button>
+                                        </div>
+                                    )}
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+                </div>
             </div>
         </>
     );
