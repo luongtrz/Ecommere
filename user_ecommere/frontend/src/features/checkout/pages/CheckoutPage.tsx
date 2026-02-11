@@ -165,8 +165,8 @@ export function CheckoutPage() {
                               key={addr.id}
                               onClick={() => setSelectedAddressId(addr.id)}
                               className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 group ${selectedAddressId === addr.id
-                                  ? 'border-blue-600 bg-white shadow-lg shadow-blue-100'
-                                  : 'border-transparent bg-white shadow-sm hover:border-blue-100 hover:shadow-md'
+                                ? 'border-blue-600 bg-white shadow-lg shadow-blue-100'
+                                : 'border-transparent bg-white shadow-sm hover:border-blue-100 hover:shadow-md'
                                 }`}
                             >
                               <div className="flex justify-between items-start mb-2">
@@ -206,8 +206,8 @@ export function CheckoutPage() {
                             key={method.id}
                             onClick={() => setShippingMethod(method.id)}
                             className={`flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all ${shippingMethod === method.id
-                                ? 'border-green-500 bg-white shadow-lg shadow-green-50'
-                                : 'border-transparent bg-white shadow-sm hover:border-green-100'
+                              ? 'border-green-500 bg-white shadow-lg shadow-green-50'
+                              : 'border-transparent bg-white shadow-sm hover:border-green-100'
                               }`}
                           >
                             <div className="flex items-center gap-4">
@@ -245,13 +245,13 @@ export function CheckoutPage() {
                           key={method.id}
                           onClick={() => setPaymentMethod(method.id)}
                           className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center text-center gap-4 ${paymentMethod === method.id
-                              ? 'border-purple-600 bg-white shadow-xl shadow-purple-50 scale-[1.02]'
-                              : 'border-transparent bg-white shadow-sm hover:border-purple-100 hover:scale-[1.01]'
+                            ? 'border-purple-600 bg-white shadow-xl shadow-purple-50 scale-[1.02]'
+                            : 'border-transparent bg-white shadow-sm hover:border-purple-100 hover:scale-[1.01]'
                             }`}
                         >
                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${paymentMethod === method.id ? 'bg-purple-100 text-purple-600' : 'bg-gray-50 text-gray-400'
                             }`}>
-                            {method.id === 'cod' ? <Truck className="h-7 w-7" /> : <CreditCard className="h-7 w-7" />}
+                            {method.id === 'COD' ? <Truck className="h-7 w-7" /> : <CreditCard className="h-7 w-7" />}
                           </div>
 
                           <div>
@@ -259,7 +259,7 @@ export function CheckoutPage() {
                               {method.name}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {method.id === 'cod' ? 'Thanh toán khi nhận hàng' : 'Thanh toán qua cổng VNPAY'}
+                              {method.id === 'COD' ? 'Thanh toán khi nhận hàng' : 'Thanh toán qua cổng VNPAY'}
                             </div>
                           </div>
 
@@ -334,8 +334,8 @@ export function CheckoutPage() {
                     onClick={step < 3 ? handleNextStep : handleSubmit}
                     disabled={step === 1 && !selectedAddress || isSubmitting}
                     className={`h-12 flex-1 rounded-xl text-base font-bold shadow-lg transition-all hover:scale-[1.01] ${step < 3
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-500/25'
-                        : 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-500/25'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-500/25'
+                      : 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-500/25'
                       }`}
                   >
                     {step < 3 ? (
@@ -398,11 +398,6 @@ export function CheckoutPage() {
                       </span>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-center gap-2 text-gray-400 text-xs">
-                  <Shield className="h-3 w-3" />
-                  <span>Thông tin được mã hóa an toàn 256-bit</span>
                 </div>
               </div>
             </div>
