@@ -70,7 +70,7 @@ export function OrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -90,34 +90,58 @@ export function OrdersPage() {
     <>
       <SEO title="Đơn hàng của tôi" />
 
-      <div className="min-h-screen bg-gray-50/30 pb-20">
-        {/* Header Section with Gradient Background */}
-        <div className="bg-white border-b border-gray-100">
-          <div className="container max-w-5xl py-12 px-4">
-            <h1 className="text-4xl font-serif font-bold text-gray-900 mb-3 tracking-tight">Đơn hàng của tôi</h1>
-            <p className="text-gray-500 text-lg">Quản lý và theo dõi lịch sử mua sắm của bạn</p>
+      <div className="bg-gray-50/30 pb-10 min-h-[calc(100vh-4rem)]">
+        {/* Header Section Compact */}
+        <div className="bg-white border-b border-gray-100 shadow-sm">
+          <div className="container max-w-5xl py-6 px-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Đơn hàng của tôi</h1>
+                <p className="text-gray-500 text-sm">Quản lý và theo dõi đơn hàng</p>
+              </div>
 
-            {/* Stats Overview */}
-            {allOrders.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
-                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Tổng đơn</div>
-                  <div className="text-2xl font-bold text-gray-900">{allOrders.length}</div>
+              {/* Tabs moved to Header for compactness */}
+              {allOrders.length > 0 && (
+                <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-lg self-start md:self-center overflow-x-auto max-w-full">
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
+                        activeTab === tab.id
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-500 hover:text-gray-900 hover:bg-gray-200/50"
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
-                <div className="bg-amber-50/50 rounded-2xl p-4 border border-amber-100/50">
-                  <div className="text-amber-600 text-xs font-medium uppercase tracking-wider mb-1">Đang xử lý</div>
-                  <div className="text-2xl font-bold text-amber-700">
+              )}
+            </div>
+
+            {/* Stats Overview Compact */}
+            {allOrders.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
+                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">Tổng đơn</div>
+                  <div className="text-xl font-bold text-gray-900">{allOrders.length}</div>
+                </div>
+                <div className="bg-amber-50/50 rounded-xl p-3 border border-amber-100/50 flex items-center justify-between">
+                  <div className="text-amber-600 text-xs font-medium uppercase tracking-wider">Đang xử lý</div>
+                  <div className="text-xl font-bold text-amber-700">
                     {allOrders.filter(o => ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'].includes(o.status)).length}
                   </div>
                 </div>
-                <div className="bg-emerald-50/50 rounded-2xl p-4 border border-emerald-100/50">
-                  <div className="text-emerald-600 text-xs font-medium uppercase tracking-wider mb-1">Hoàn thành</div>
-                  <div className="text-2xl font-bold text-emerald-700">
+                <div className="bg-emerald-50/50 rounded-xl p-3 border border-emerald-100/50 flex items-center justify-between">
+                  <div className="text-emerald-600 text-xs font-medium uppercase tracking-wider">Hoàn thành</div>
+                  <div className="text-xl font-bold text-emerald-700">
                     {allOrders.filter(o => o.status === 'DELIVERED').length}
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Tổng chi tiêu</div>
+                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
+                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">Chi tiêu</div>
                   <div className="text-lg font-bold text-gray-900 truncate">
                     {formatCurrency(allOrders.filter(o => o.status !== 'CANCELED').reduce((acc, curr) => acc + curr.total, 0))}
                   </div>
@@ -128,50 +152,29 @@ export function OrdersPage() {
         </div>
 
         {/* Main Content */}
-        <div className="container max-w-5xl px-4 mt-8">
-
-          {/* Tabs Navigation */}
-          {allOrders.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 mb-8 bg-white p-1 rounded-xl border border-gray-100 shadow-sm w-fit">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                    activeTab === tab.id
-                      ? "bg-gray-900 text-white shadow-md transform scale-[1.02]"
-                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          )}
-
+        <div className="container max-w-5xl px-4 mt-6">
           {/* Orders List */}
           {filteredOrders.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-gray-100 p-16 text-center shadow-sm animate-in fade-in zoom-in-95 duration-500">
-              <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <ShoppingBag className="h-10 w-10 text-gray-300" />
+            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShoppingBag className="h-8 w-8 text-gray-300" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {activeTab === 'ALL' ? 'Bạn chưa có đơn hàng nào' : 'Không tìm thấy đơn hàng'}
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                {activeTab === 'ALL' ? 'Chưa có đơn hàng' : 'Không có đơn hàng'}
               </h3>
-              <p className="text-gray-500 mb-8 max-w-md mx-auto">
+              <p className="text-gray-500 mb-6 text-sm">
                 {activeTab === 'ALL'
-                  ? 'Hãy khám phá các sản phẩm tuyệt vời của chúng tôi và đặt hàng ngay hôm nay!'
-                  : 'Chưa có đơn hàng nào trong trạng thái này.'}
+                  ? 'Hãy đặt hàng ngay hôm nay!'
+                  : 'Không tìm thấy đơn hàng trong mục này.'}
               </p>
               {activeTab === 'ALL' && (
-                <Button size="lg" className="rounded-full bg-gray-900 hover:bg-black px-8" asChild>
+                <Button size="sm" className="rounded-full bg-gray-900 hover:bg-black px-6" asChild>
                   <Link to="/catalog">Khám phá ngay</Link>
                 </Button>
               )}
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {filteredOrders.map((order, index) => {
                 const status = getStatusConfig(order.status);
                 const StatusIcon = status.icon;
@@ -180,55 +183,48 @@ export function OrdersPage() {
                 return (
                   <div
                     key={order.id}
-                    className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards"
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <Card className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 bg-white rounded-2xl group hover:-translate-y-1">
-                      {/* Order Header */}
-                      <div className="px-6 py-4 border-b border-gray-50 bg-gray-50/30 flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm">
-                            <Package className="w-5 h-5 text-gray-700" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-gray-900 text-lg">#{order.orderNumber}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <Calendar className="w-3.5 h-3.5" />
-                              <span>{formatDateTime(order.createdAt)}</span>
-                            </div>
+                    <Card className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 bg-white rounded-xl group">
+                      {/* Compact Header */}
+                      <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-900 text-base">#{order.orderNumber}</span>
+                          <span className="text-gray-300">|</span>
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Calendar className="w-3 h-3" />
+                            <span>{formatDateTime(order.createdAt)}</span>
                           </div>
                         </div>
-                        <Badge className={cn("px-3 py-1.5 rounded-full border shadow-sm flex items-center gap-1.5", status.color)}>
-                          <StatusIcon className="w-3.5 h-3.5" />
+                        <Badge className={cn("px-2 py-1 rounded-md border shadow-sm flex items-center gap-1 text-xs font-normal", status.color)}>
+                          <StatusIcon className="w-3 h-3" />
                           {status.label}
                         </Badge>
                       </div>
 
-                      {/* Order Body - Product List & Info */}
-                      <div className="p-6">
-                        {/* Horizontal Scrollable Product List */}
-                        <div className="mb-6">
-                          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                      {/* Compact Body */}
+                      <div className="p-4">
+                        {/* Horizontal List */}
+                        <div className="mb-4">
+                          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                             {order.items.map((item: any, idx: number) => (
-                              <div key={idx} className="flex-shrink-0 w-[280px] flex gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
-                                <div className="w-16 h-16 rounded-lg bg-white overflow-hidden flex-shrink-0 border border-gray-200">
+                              <div key={idx} className="flex-shrink-0 w-[220px] flex gap-3 p-2 rounded-lg bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
+                                <div className="w-12 h-12 rounded-md bg-white overflow-hidden flex-shrink-0 border border-gray-200">
                                   {item.image ? (
                                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                      <Package className="w-6 h-6" />
+                                      <Package className="w-5 h-5" />
                                     </div>
                                   )}
                                 </div>
-                                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                  <h4 className="font-medium text-gray-900 text-sm truncate w-full" title={item.productName || item.name}>
+                                <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+                                  <h4 className="font-medium text-gray-900 text-xs truncate w-full" title={item.productName || item.name}>
                                     {item.productName || item.name}
                                   </h4>
-                                  <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
-                                    <span>SL: x{item.quantity}</span>
-                                    {/* Only show line total if needed, or keep minimal */}
+                                  <div className="text-xs text-gray-500">
+                                    x{item.quantity}
                                   </div>
                                 </div>
                               </div>
@@ -236,54 +232,52 @@ export function OrdersPage() {
                           </div>
                         </div>
 
-                        <div className="h-px bg-gray-100 w-full mb-6" />
-
-                        {/* Footer Actions */}
-                        <div className="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-4">
-                          <div>
-                            <div className="text-sm text-gray-500 mb-1">Tổng tiền thanh toán</div>
-                            <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500">Tổng tiền:</span>
+                            <span className="text-base font-bold text-gray-900">
                               {formatCurrency(order.total)}
-                            </div>
+                            </span>
                           </div>
 
-                          <div className="flex items-center gap-3 w-full sm:w-auto">
+                          <div className="flex items-center gap-2">
                             {canCancel && (
                               cancellingId === order.id ? (
-                                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                                <div className="flex items-center gap-2">
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                    className="h-8 px-3 text-xs text-gray-600"
                                     onClick={() => setCancellingId(null)}
                                     disabled={cancelOrder.isPending}
                                   >
-                                    Hủy bỏ
+                                    Hủy
                                   </Button>
                                   <Button
                                     size="sm"
-                                    className="rounded-full bg-red-600 hover:bg-red-700 text-white border-0 shadow-sm"
+                                    className="h-8 px-3 bg-red-600 hover:bg-red-700 text-white text-xs"
                                     onClick={() => handleCancel(order.id)}
                                     disabled={cancelOrder.isPending}
                                   >
-                                    {cancelOrder.isPending ? 'Đang xử lý...' : 'Xác nhận hủy'}
+                                    {cancelOrder.isPending ? '...' : 'Xác nhận'}
                                   </Button>
                                 </div>
                               ) : (
                                 <Button
-                                  variant="outline"
-                                  className="rounded-full border-gray-200 text-gray-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 px-3 text-xs text-gray-500 hover:text-red-600 hover:bg-red-50"
                                   onClick={() => setCancellingId(order.id)}
                                 >
-                                  Hủy đơn hàng
+                                  Hủy đơn
                                 </Button>
                               )
                             )}
 
-                            <Button className="rounded-full bg-gray-900 hover:bg-black text-white px-6 shadow-md hover:shadow-lg transition-all" asChild>
-                              <Link to={`/orders/${order.id}`} className="flex items-center gap-2">
-                                Xem chi tiết
-                                <ArrowRight className="w-4 h-4" />
+                            <Button size="sm" className="h-8 px-4 rounded-full bg-gray-900 hover:bg-black text-white text-xs shadow-sm" asChild>
+                              <Link to={`/orders/${order.id}`} className="flex items-center gap-1">
+                                Chi tiết
+                                <ArrowRight className="w-3 h-3" />
                               </Link>
                             </Button>
                           </div>
