@@ -197,7 +197,7 @@ export function OrdersPage() {
                             <span>{formatDateTime(order.createdAt)}</span>
                           </div>
                         </div>
-                        <Badge className={cn("px-2 py-1 rounded-md border shadow-sm flex items-center gap-1 text-xs font-normal", status.color)}>
+                        <Badge variant="outline" className={cn("px-2 py-1 rounded-md border shadow-sm flex items-center gap-1 text-xs font-normal pointer-events-none", status.color)}>
                           <StatusIcon className="w-3 h-3" />
                           {status.label}
                         </Badge>

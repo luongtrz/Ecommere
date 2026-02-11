@@ -9,6 +9,12 @@ import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/lib/formatters';
 import { ChevronDown, ChevronRight, X, RotateCcw, SlidersHorizontal } from 'lucide-react';
 import type { CategoryTreeNode } from '../api/categories.api';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion"
 
 interface FilterSidebarProps {
     currentFilters: {
@@ -175,6 +181,9 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
         });
     }, [onFilterChange]);
 
+    // Default open values for accordion
+    const defaultOpenValues = ['category', 'price', 'scent', 'volume', 'brand'];
+
     return (
         <div className="space-y-1">
             {/* Header */}
@@ -203,165 +212,178 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
 
             <Separator />
 
-            {/* Category Filter */}
-            {!hideCategoryFilter && categoryTree && categoryTree.length > 0 && (
-                <div className="py-3">
-                    <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-2">Danh mục</h3>
-                    <div className="space-y-0.5 max-h-60 overflow-y-auto">
-                        {categoryTree.map((node) => (
-                            <CategoryTreeItem
-                                key={node.id}
-                                node={node}
-                                selectedSlug={currentFilters.categorySlug}
-                                onSelect={handleCategorySelect}
+            <Accordion type="multiple" defaultValue={defaultOpenValues} className="w-full">
+                {/* Category Filter */}
+                {!hideCategoryFilter && categoryTree && categoryTree.length > 0 && (
+                    <AccordionItem value="category" className="border-b-0">
+                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                            Danh mục
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="space-y-0.5 max-h-60 overflow-y-auto pl-1">
+                                {categoryTree.map((node) => (
+                                    <CategoryTreeItem
+                                        key={node.id}
+                                        node={node}
+                                        selectedSlug={currentFilters.categorySlug}
+                                        onSelect={handleCategorySelect}
+                                    />
+                                ))}
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                )}
+
+                {/* Price Range Filter */}
+                <AccordionItem value="price" className="border-b-0">
+                    <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        Khoảng giá
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        {/* Preset ranges */}
+                        <div className="space-y-1.5 mb-3">
+                            {PRICE_RANGES.map((range, idx) => {
+                                const isActive = currentFilters.minPrice === range.min &&
+                                    (range.max === undefined ? !currentFilters.maxPrice : currentFilters.maxPrice === range.max);
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handlePricePreset(range.min, range.max)}
+                                        className={`w-full text-left text-xs py-1.5 px-2 rounded-md transition-colors ${isActive
+                                            ? 'bg-blue-50 text-blue-700 font-medium'
+                                            : 'text-gray-600 hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        {range.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Custom price range */}
+                        <div className="flex items-center gap-2">
+                            <Input
+                                type="number"
+                                placeholder="Từ"
+                                value={minPriceInput}
+                                onChange={(e) => setMinPriceInput(e.target.value)}
+                                className="h-8 text-xs"
                             />
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {!hideCategoryFilter && <Separator />}
-
-            {/* Price Range Filter */}
-            <div className="py-3">
-                <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-2">Khoảng giá</h3>
-
-                {/* Preset ranges */}
-                <div className="space-y-1.5 mb-3">
-                    {PRICE_RANGES.map((range, idx) => {
-                        const isActive = currentFilters.minPrice === range.min &&
-                            (range.max === undefined ? !currentFilters.maxPrice : currentFilters.maxPrice === range.max);
-                        return (
-                            <button
-                                key={idx}
-                                onClick={() => handlePricePreset(range.min, range.max)}
-                                className={`w-full text-left text-xs py-1.5 px-2 rounded-md transition-colors ${isActive
-                                    ? 'bg-blue-50 text-blue-700 font-medium'
-                                    : 'text-gray-600 hover:bg-gray-100'
-                                    }`}
+                            <span className="text-gray-400 text-xs shrink-0">-</span>
+                            <Input
+                                type="number"
+                                placeholder="Đến"
+                                value={maxPriceInput}
+                                onChange={(e) => setMaxPriceInput(e.target.value)}
+                                className="h-8 text-xs"
+                            />
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-2 text-xs shrink-0"
+                                onClick={handlePriceApply}
                             >
-                                {range.label}
-                            </button>
-                        );
-                    })}
-                </div>
+                                Áp dụng
+                            </Button>
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
 
-                {/* Custom price range */}
-                <div className="flex items-center gap-2">
-                    <Input
-                        type="number"
-                        placeholder="Từ"
-                        value={minPriceInput}
-                        onChange={(e) => setMinPriceInput(e.target.value)}
-                        className="h-8 text-xs"
-                    />
-                    <span className="text-gray-400 text-xs shrink-0">-</span>
-                    <Input
-                        type="number"
-                        placeholder="Đến"
-                        value={maxPriceInput}
-                        onChange={(e) => setMaxPriceInput(e.target.value)}
-                        className="h-8 text-xs"
-                    />
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 px-2 text-xs shrink-0"
-                        onClick={handlePriceApply}
-                    >
-                        Áp dụng
-                    </Button>
-                </div>
-            </div>
+                {/* Scent Filter */}
+                {filterOptions && filterOptions.scents.length > 0 && (
+                    <AccordionItem value="scent" className="border-b-0">
+                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                            Hương
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {filterOptions.scents.map((scentName) => {
+                                    const isChecked = selectedScents.includes(scentName);
+                                    return (
+                                        <label
+                                            key={scentName}
+                                            className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 py-0.5 px-1 rounded"
+                                        >
+                                            <Checkbox
+                                                checked={isChecked}
+                                                onCheckedChange={() => toggleArrayFilter('scent', scentName, selectedScents)}
+                                                className="h-3.5 w-3.5"
+                                            />
+                                            <span className={`text-xs ${isChecked ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                                                {scentName}
+                                            </span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                )}
 
-            <Separator />
+                {/* Volume Filter */}
+                {filterOptions && filterOptions.volumes.length > 0 && (
+                    <AccordionItem value="volume" className="border-b-0">
+                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                            Dung tích
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="flex flex-wrap gap-1.5">
+                                {filterOptions.volumes.map((vol) => {
+                                    const isSelected = selectedVolumes.includes(vol);
+                                    return (
+                                        <button
+                                            key={vol}
+                                            onClick={() => toggleArrayFilter('volumeMl', vol.toString(), selectedVolumes.map(String))}
+                                            className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${isSelected
+                                                ? 'bg-blue-600 text-white border-blue-600'
+                                                : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                                                }`}
+                                        >
+                                            {vol}ml
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                )}
 
-            {/* Scent Filter */}
-            {filterOptions && filterOptions.scents.length > 0 && (
-                <div className="py-3">
-                    <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-2">Hương</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {filterOptions.scents.map((scentName) => {
-                            const isChecked = selectedScents.includes(scentName);
-                            return (
-                                <label
-                                    key={scentName}
-                                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 py-0.5 px-1 rounded"
-                                >
-                                    <Checkbox
-                                        checked={isChecked}
-                                        onCheckedChange={() => toggleArrayFilter('scent', scentName, selectedScents)}
-                                        className="h-3.5 w-3.5"
-                                    />
-                                    <span className={`text-xs ${isChecked ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
-                                        {scentName}
-                                    </span>
-                                </label>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-
-            {filterOptions && filterOptions.scents.length > 0 && <Separator />}
-
-            {/* Volume Filter */}
-            {filterOptions && filterOptions.volumes.length > 0 && (
-                <div className="py-3">
-                    <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-2">Dung tích</h3>
-                    <div className="flex flex-wrap gap-1.5">
-                        {filterOptions.volumes.map((vol) => {
-                            const isSelected = selectedVolumes.includes(vol);
-                            return (
-                                <button
-                                    key={vol}
-                                    onClick={() => toggleArrayFilter('volumeMl', vol.toString(), selectedVolumes.map(String))}
-                                    className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${isSelected
-                                        ? 'bg-blue-600 text-white border-blue-600'
-                                        : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
-                                        }`}
-                                >
-                                    {vol}ml
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-
-            {filterOptions && filterOptions.volumes.length > 0 && <Separator />}
-
-            {/* Brand Filter */}
-            {filterOptions && filterOptions.brands.length > 0 && (
-                <div className="py-3">
-                    <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-2">Thương hiệu</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {filterOptions.brands.map((brandName) => {
-                            const isChecked = selectedBrands.includes(brandName);
-                            return (
-                                <label
-                                    key={brandName}
-                                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 py-0.5 px-1 rounded"
-                                >
-                                    <Checkbox
-                                        checked={isChecked}
-                                        onCheckedChange={() => toggleArrayFilter('brand', brandName, selectedBrands)}
-                                        className="h-3.5 w-3.5"
-                                    />
-                                    <span className={`text-xs ${isChecked ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
-                                        {brandName}
-                                    </span>
-                                </label>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
+                {/* Brand Filter */}
+                {filterOptions && filterOptions.brands.length > 0 && (
+                    <AccordionItem value="brand" className="border-b-0">
+                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                            Thương hiệu
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {filterOptions.brands.map((brandName) => {
+                                    const isChecked = selectedBrands.includes(brandName);
+                                    return (
+                                        <label
+                                            key={brandName}
+                                            className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 py-0.5 px-1 rounded"
+                                        >
+                                            <Checkbox
+                                                checked={isChecked}
+                                                onCheckedChange={() => toggleArrayFilter('brand', brandName, selectedBrands)}
+                                                className="h-3.5 w-3.5"
+                                            />
+                                            <span className={`text-xs ${isChecked ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                                                {brandName}
+                                            </span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                )}
+            </Accordion>
 
             {/* Active Filters Tags */}
             {activeFilterCount > 0 && (
                 <>
-                    <Separator />
+                    <Separator className="mt-2" />
                     <div className="py-3">
                         <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-2">Đang lọc</h3>
                         <div className="flex flex-wrap gap-1.5">

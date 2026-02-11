@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useAddresses } from '@/features/users/hooks/useAddresses';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';

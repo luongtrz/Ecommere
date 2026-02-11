@@ -133,9 +133,20 @@ export function CatalogPage() {
         <div className="bg-white border-b border-gray-100 shadow-sm">
           <div className="container py-4">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Sản phẩm</h1>
-                <p className="text-xs text-gray-500 hidden md:block">{data?.total || 0} kết quả tìm thấy</p>
+              <div className="flex items-center gap-4">
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">Sản phẩm</h1>
+                  <p className="text-xs text-gray-500 hidden md:block">{data?.total || 0} kết quả tìm thấy</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`hidden lg:flex items-center gap-2 h-9 ${showFilters ? 'bg-secondary border-gray-200' : 'border-dashed'}`}
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="text-xs font-medium">{showFilters ? 'Ẩn bộ lọc' : 'Bộ lọc'}</span>
+                </Button>
               </div>
 
               {/* Compact Toolbar */}
@@ -192,15 +203,7 @@ export function CatalogPage() {
                   </div>
 
                   {/* Desktop Filter Toggle */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`hidden lg:flex items-center gap-2 h-9 ${showFilters ? 'bg-secondary' : 'border-dashed'}`}
-                  >
-                    <Filter className="h-4 w-4" />
-                    <span className="text-xs font-medium">{showFilters ? 'Ẩn bộ lọc' : 'Bộ lọc'}</span>
-                  </Button>
+
 
                   {/* Mobile Filter Trigger */}
                   <Sheet>
@@ -249,7 +252,7 @@ export function CatalogPage() {
               ) : (
                 <div className="space-y-8 animate-fade-in">
                   <div className={`${viewMode === 'grid'
-                    ? 'grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6'
+                    ? `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${!showFilters ? 'xl:grid-cols-5' : ''} gap-4 md:gap-6`
                     : 'space-y-4'
                     }`}>
                     {data?.products.map((product) => (
