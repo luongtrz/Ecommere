@@ -8,7 +8,7 @@ import { OrderFilterDto } from './dtos/order-filter.dto';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async checkout(userId: string, checkoutDto: CheckoutDto) {
     const {
@@ -557,6 +557,24 @@ export class OrdersService {
         status: OrderStatus.CANCELED,
         paymentStatus: PaymentStatus.FAILED,
       },
+      include: {
+        items: {
+          include: {
+            variant: {
+              include: {
+                product: {
+                  select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    images: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -580,7 +598,7 @@ export class OrdersService {
     });
 
     const sequence = (todayOrderCount + 1).toString().padStart(4, '0');
-    
+
     // Add random suffix to prevent race condition
     const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
 

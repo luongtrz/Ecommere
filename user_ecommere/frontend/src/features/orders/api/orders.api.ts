@@ -51,7 +51,6 @@ export const ordersApi = {
 
   async cancel(id: string) {
     const response = await apiClient.patch(`/orders/my/${id}/cancel`);
-    const actualData = response.data.data || response.data;
-    return orderSchema.parse(actualData);
+    return response.data.data || response.data;
   },
 };
