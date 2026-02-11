@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
+import { useState, useCallback } from 'react';
 import { SEO } from '@/lib/seo';
 import { useProducts } from '../hooks/useProducts';
 import { ProductCard } from '@/components/common/ProductCard';
@@ -15,10 +16,10 @@ import { Input } from '@/components/ui/input';
 import { Search, Grid3X3, List, ShoppingBag, X, Filter } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { FilterSidebar } from '../components/FilterSidebar';
-import { useCallback } from 'react';
 
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [showFilters, setShowFilters] = useState(true);
   const page = parseInt(searchParams.get('page') || '1');
   const sortBy = searchParams.get('sort') || 'newest';
   const searchQuery = searchParams.get('q') || '';
@@ -190,6 +191,17 @@ export function CatalogPage() {
                     </Button>
                   </div>
 
+                  {/* Desktop Filter Toggle */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`hidden lg:flex items-center gap-2 h-9 ${showFilters ? 'bg-secondary' : 'border-dashed'}`}
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span className="text-xs font-medium">{showFilters ? 'Ẩn bộ lọc' : 'Bộ lọc'}</span>
+                  </Button>
+
                   {/* Mobile Filter Trigger */}
                   <Sheet>
                     <SheetTrigger asChild>
@@ -216,11 +228,13 @@ export function CatalogPage() {
         <div className="container py-6 min-h-[60vh]">
           <div className="flex gap-6">
             {/* Sidebar - Desktop only */}
-            <aside className="hidden lg:block w-64 shrink-0">
-              <div className="sticky top-20 bg-white rounded-xl border border-gray-100 p-4 shadow-sm overflow-y-auto max-h-[calc(100vh-6rem)]">
-                {filterContent}
-              </div>
-            </aside>
+            {showFilters && (
+              <aside className="hidden lg:block w-64 shrink-0 animate-in slide-in-from-left-2 duration-300 fade-in">
+                <div className="sticky top-20 bg-white rounded-xl border border-gray-100 p-4 shadow-sm overflow-y-auto max-h-[calc(100vh-6rem)]">
+                  {filterContent}
+                </div>
+              </aside>
+            )}
 
             {/* Products */}
             <div className="flex-1 min-w-0">
