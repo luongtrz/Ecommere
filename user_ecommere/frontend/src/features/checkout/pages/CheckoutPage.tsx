@@ -92,8 +92,14 @@ export function CheckoutPage() {
     }
   };
 
+  // Redirect if cart is empty
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate('/cart', { replace: true });
+    }
+  }, [items, navigate]);
+
   if (items.length === 0) {
-    navigate('/cart');
     return null;
   }
 
@@ -247,10 +253,10 @@ export function CheckoutPage() {
                             key={method.id}
                             onClick={() => isCOD && setPaymentMethod(method.id)}
                             className={`relative p-6 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-4 ${paymentMethod === method.id
-                                ? 'border-purple-600 bg-white shadow-xl shadow-purple-50 scale-[1.02] cursor-pointer'
-                                : isCOD
-                                  ? 'border-transparent bg-white shadow-sm hover:border-purple-100 hover:scale-[1.01] cursor-pointer'
-                                  : 'border-transparent bg-gray-50 opacity-50 cursor-not-allowed grayscale'
+                              ? 'border-purple-600 bg-white shadow-xl shadow-purple-50 scale-[1.02] cursor-pointer'
+                              : isCOD
+                                ? 'border-transparent bg-white shadow-sm hover:border-purple-100 hover:scale-[1.01] cursor-pointer'
+                                : 'border-transparent bg-gray-50 opacity-50 cursor-not-allowed grayscale'
                               }`}
                           >
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${paymentMethod === method.id ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-400'
