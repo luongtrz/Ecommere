@@ -23,4 +23,9 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @ApiProperty({ example: 'REF-ABC123', required: false, description: 'Ma gioi thieu tu ban be' })
+  @IsOptional()
+  @IsString()
+  referralCode?: string;
 }

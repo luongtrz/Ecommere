@@ -1,9 +1,10 @@
-import { Injectable, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException, Logger, Inject, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { PrismaService } from '@/prisma/prisma.service';
 import { HashUtil } from '@/common/utils/hash.util';
+import { ReferralsService } from '@/referrals/referrals.service';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { AuthTokensEntity } from './entities/auth-tokens.entity';
@@ -19,7 +20,7 @@ import {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  
+
   // Grace period for token reuse (30 seconds)
   // Allows duplicate refresh requests during F5/network delays
   private readonly TOKEN_REUSE_GRACE_PERIOD = 30 * 1000; // 30 seconds
@@ -28,10 +29,11 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+    private referralsService: ReferralsService,
+  ) { }
 
   async register(registerDto: RegisterDto, response: Response) {
-    const { email, password, name, phone } = registerDto;
+    const { email, password, name, phone, referralCode } = registerDto;
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -62,6 +64,17 @@ export class AuthService {
     });
 
     this.logger.log(`New user registered: ${email}`);
+
+    // Xu ly referral code neu co
+    if (referralCode) {
+      try {
+        await this.referralsService.processReferral(referralCode, user.id);
+        this.logger.log(`Referral processed for new user ${email} with code ${referralCode}`);
+      } catch (error) {
+        this.logger.warn(`Failed to process referral for ${email}: ${error.message}`);
+        // Khong throw loi - referral that bai khong nen anh huong dang ky
+      }
+    }
 
     // Generate tokens with rotation
     const tokens = await this.generateTokensWithRotation(
@@ -199,7 +212,7 @@ export class AuthService {
       // Outside grace period - this is suspicious
       this.logger.warn(
         `Token reuse OUTSIDE grace period (${Math.round(timeSinceReplaced / 1000)}s)! ` +
-          `Revoking family: ${payload.family} for user: ${payload.sub}`,
+        `Revoking family: ${payload.family} for user: ${payload.sub}`,
       );
 
       await this.prisma.refreshToken.updateMany({
@@ -255,11 +268,11 @@ export class AuthService {
 
     // Mock: In production, generate token and send email
     const resetToken = `mock-reset-token-${user.id}-${Date.now()}`;
-    
+
     this.logger.log(`Password reset requested for: ${email}`);
     this.logger.log(`Mock reset token: ${resetToken}`);
 
-    return { 
+    return {
       message: 'If email exists, reset link will be sent',
       // In dev mode, return token for testing
       ...(this.configService.get('NODE_ENV') === 'development' && { resetToken }),
@@ -338,8 +351,8 @@ export class AuthService {
 
     // Generate refresh token (long-lived, in HTTP-only cookie)
     // Add unique jti (JWT ID) to prevent duplicate tokens
-    const refreshPayload = { 
-      sub: userId, 
+    const refreshPayload = {
+      sub: userId,
       family: tokenFamily,
       jti: generateTokenFamily(), // Unique identifier for this specific token
     };

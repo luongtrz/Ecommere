@@ -51,9 +51,15 @@ model User {
   role         Role      @default(CUSTOMER)
   name         String?
   phone        String?
+  referralCode String?   @unique
+  referredById String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   
+  referredBy    User?    @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals     User[]   @relation("UserReferrals")
+  referrerReferrals Referral[] @relation("ReferrerReferrals")
+  refereeReferral   Referral?  @relation("RefereeReferral")
   addresses     Address[]
   cart          Cart?
   orders        Order[]
@@ -288,4 +294,37 @@ model StockMovement {
   
   @@index([variantId])
   @@map("stock_movements")
+}
+
+model ReferralConfig {
+  id                    String      @id @default(cuid())
+  active                Boolean     @default(true)
+  referrerCouponType    CouponType  @default(PERCENT)
+  referrerCouponValue   Int         @default(10)
+  referrerMaxDiscount   Int?
+  refereeCouponType     CouponType  @default(PERCENT)
+  refereeCouponValue    Int         @default(5)
+  refereeMaxDiscount    Int?
+  minOrderForCoupon     Int?
+  couponValidDays       Int         @default(30)
+  maxReferralsPerUser   Int?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@map("referral_configs")
+}
+
+model Referral {
+  id                  String   @id @default(cuid())
+  referrerId          String
+  refereeId           String   @unique
+  referrerCouponCode  String?
+  refereeCouponCode   String?
+  createdAt           DateTime @default(now())
+
+  referrer User @relation("ReferrerReferrals", fields: [referrerId], references: [id])
+  referee  User @relation("RefereeReferral", fields: [refereeId], references: [id])
+
+  @@index([referrerId])
+  @@map("referrals")
 }

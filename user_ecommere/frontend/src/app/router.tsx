@@ -27,6 +27,9 @@ import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
 import { OrdersPage } from '@/features/orders/pages/OrdersPage';
 import { OrderDetailPage } from '@/features/orders/pages/OrderDetailPage';
 
+// Referrals
+import { ReferralPage } from '@/features/referrals/pages/ReferralPage';
+
 // Error Pages
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ErrorPage } from '@/pages/ErrorPage';
@@ -59,6 +62,7 @@ export function AppRouter() {
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:orderId" element={<OrderDetailPage />} />
+          <Route path="referral" element={<ReferralPage />} />
         </Route>
 
         {/* Error Routes */}

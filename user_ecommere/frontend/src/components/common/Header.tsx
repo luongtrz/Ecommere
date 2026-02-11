@@ -38,6 +38,7 @@ export function Header() {
                     <>
                       <Link to="/account" className="text-lg font-semibold hover:text-primary transition-colors">Tài khoản</Link>
                       <Link to="/orders" className="text-lg font-semibold hover:text-primary transition-colors">Đơn hàng</Link>
+                      <Link to="/referral" className="text-lg font-semibold hover:text-primary transition-colors">Mời bạn bè</Link>
                       <button onClick={logout} className="text-lg font-semibold text-left hover:text-red-500 transition-colors">Đăng xuất</button>
                     </>
                   ) : (
@@ -90,6 +91,9 @@ export function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
                     <Link to="/orders">Đơn hàng</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                    <Link to="/referral">Mời bạn bè</Link>
                   </DropdownMenuItem>
                   {user.role === 'ADMIN' && (
                     <>

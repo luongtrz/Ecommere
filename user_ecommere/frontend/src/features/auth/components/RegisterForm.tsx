@@ -8,9 +8,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 interface RegisterFormProps {
   onSubmit: (data: RegisterInput) => void;
   isLoading?: boolean;
+  defaultReferralCode?: string;
 }
 
-export function RegisterForm({ onSubmit, isLoading }: RegisterFormProps) {
+export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: RegisterFormProps) {
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -18,6 +19,7 @@ export function RegisterForm({ onSubmit, isLoading }: RegisterFormProps) {
       email: '',
       password: '',
       confirmPassword: '',
+      referralCode: defaultReferralCode || '',
     },
   });
 
@@ -57,7 +59,7 @@ export function RegisterForm({ onSubmit, isLoading }: RegisterFormProps) {
             <FormItem>
               <FormLabel>Mật khẩu</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password" placeholder="--------" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -70,7 +72,20 @@ export function RegisterForm({ onSubmit, isLoading }: RegisterFormProps) {
             <FormItem>
               <FormLabel>Xác nhận mật khẩu</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password" placeholder="--------" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="referralCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Mã giới thiệu (không bắt buộc)</FormLabel>
+              <FormControl>
+                <Input placeholder="REF-XXXXXX" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

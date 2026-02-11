@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { RegisterForm } from '../components/RegisterForm';
 import { useAuth } from '../hooks/useAuth';
@@ -7,6 +7,8 @@ import { UserPlus } from 'lucide-react';
 
 export function RegisterPage() {
   const { register, isRegisterLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('ref') || '';
 
   return (
     <>
@@ -31,6 +33,18 @@ export function RegisterPage() {
             </p>
           </div>
 
+          {/* Referral notice */}
+          {referralCode && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 text-center animate-fade-in">
+              <p className="text-sm font-medium text-blue-700">
+                Bạn đã được mời bởi một người bạn!
+              </p>
+              <p className="text-xs text-blue-500 mt-1">
+                Mã giới thiệu: <span className="font-mono font-bold">{referralCode}</span>
+              </p>
+            </div>
+          )}
+
           {/* Register Card */}
           <Card className="shadow-xl border-0 bg-white/70 backdrop-blur-xl rounded-2xl animate-fade-in" style={{ animationDelay: '200ms' }}>
             <CardHeader className="space-y-1 pb-4">
@@ -45,7 +59,11 @@ export function RegisterPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <RegisterForm onSubmit={(data) => register(data)} isLoading={isRegisterLoading} />
+              <RegisterForm
+                onSubmit={(data) => register(data)}
+                isLoading={isRegisterLoading}
+                defaultReferralCode={referralCode}
+              />
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">

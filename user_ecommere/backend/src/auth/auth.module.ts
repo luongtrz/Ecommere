@@ -10,10 +10,12 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CsrfGuard } from '@/common/guards/csrf.guard';
+import { ReferralsModule } from '@/referrals/referrals.module';
 
 @Module({
   imports: [
     PassportModule,
+    ReferralsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -45,4 +47,4 @@ import { CsrfGuard } from '@/common/guards/csrf.guard';
   ],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

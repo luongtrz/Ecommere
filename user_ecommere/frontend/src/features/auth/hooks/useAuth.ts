@@ -34,8 +34,8 @@ export function useAuth() {
   });
 
   const registerMutation = useMutation({
-    mutationFn: ({ name, email, password }: { name: string; email: string; password: string }) =>
-      authApi.register(name, email, password),
+    mutationFn: ({ name, email, password, referralCode }: { name: string; email: string; password: string; referralCode?: string }) =>
+      authApi.register(name, email, password, referralCode),
     onSuccess: (data) => {
       queryClient.setQueryData([QUERY_KEYS.USER], data.user);
       toast.success(`Đăng ký thành công! Chào mừng ${data.user.name}!`);
