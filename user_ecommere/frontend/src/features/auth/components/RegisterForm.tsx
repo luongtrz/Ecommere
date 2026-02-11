@@ -16,6 +16,7 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
+      phone: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -31,9 +32,22 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Họ tên</FormLabel>
+              <FormLabel>Họ và tên</FormLabel>
               <FormControl>
                 <Input placeholder="Nguyễn Văn A" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Số điện thoại</FormLabel>
+              <FormControl>
+                <Input type="tel" placeholder="0912345678" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -44,7 +58,7 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email (không bắt buộc)</FormLabel>
               <FormControl>
                 <Input type="email" placeholder="email@example.com" {...field} />
               </FormControl>

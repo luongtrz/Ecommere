@@ -1,15 +1,15 @@
 import { z } from 'zod';
 
+export const phoneSchema = z
+  .string()
+  .regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ');
+
 export const emailSchema = z.string().email('Email không hợp lệ');
 
 export const passwordSchema = z
   .string()
   .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
   .max(50, 'Mật khẩu không được quá 50 ký tự');
-
-export const phoneSchema = z
-  .string()
-  .regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ');
 
 export const requiredString = (fieldName: string) =>
   z.string().min(1, `${fieldName} là bắt buộc`);
@@ -18,13 +18,14 @@ export const positiveNumber = (fieldName: string) =>
   z.number().positive(`${fieldName} phải là số dương`);
 
 export const loginSchema = z.object({
-  email: emailSchema,
+  phone: phoneSchema,
   password: passwordSchema,
 });
 
 export const registerSchema = z.object({
   name: requiredString('Tên'),
-  email: emailSchema,
+  phone: phoneSchema,
+  email: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
   password: passwordSchema,
   confirmPassword: z.string(),
   referralCode: z.string().optional(),

@@ -19,7 +19,7 @@ import {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  
+
   // Grace period for token reuse (30 seconds)
   // Allows duplicate refresh requests during F5/network delays
   private readonly TOKEN_REUSE_GRACE_PERIOD = 30 * 1000; // 30 seconds
@@ -28,27 +28,27 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async register(registerDto: RegisterDto, response: Response) {
-    const { email, password, name, phone } = registerDto;
+    const { phone, password, name, email } = registerDto;
 
     const existingUser = await this.prisma.user.findUnique({
-      where: { email },
+      where: { phone },
     });
 
     if (existingUser) {
-      throw new BadRequestException('Email already registered');
+      throw new BadRequestException('Số điện thoại đã được đăng ký');
     }
 
     const passwordHash = await HashUtil.hash(password);
 
     const user = await this.prisma.user.create({
       data: {
-        email,
+        phone,
         passwordHash,
         name,
-        phone,
+        email,
         role: 'CUSTOMER',
       },
       select: {
@@ -61,12 +61,12 @@ export class AuthService {
       },
     });
 
-    this.logger.log(`New user registered: ${email}`);
+    this.logger.log(`New user registered: ${phone}`);
 
     // Generate tokens with rotation
     const tokens = await this.generateTokensWithRotation(
       user.id,
-      user.email,
+      user.phone,
       user.role,
       response,
     );
@@ -79,10 +79,10 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto, response: Response) {
-    const { email, password } = loginDto;
+    const { phone, password } = loginDto;
 
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: { phone },
     });
 
     if (!user) {
@@ -95,12 +95,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    this.logger.log(`User logged in: ${email}`);
+    this.logger.log(`User logged in: ${phone}`);
 
     // Generate tokens with rotation
     const tokens = await this.generateTokensWithRotation(
       user.id,
-      user.email,
+      user.phone,
       user.role,
       response,
     );
@@ -112,7 +112,7 @@ export class AuthService {
         role: user.role,
         name: user.name,
         phone: user.phone,
-        createdAt: user.createdAt, // Add createdAt for frontend
+        createdAt: user.createdAt,
       },
       accessToken: tokens.accessToken,
       expiresIn: tokens.expiresIn,
@@ -169,7 +169,7 @@ export class AuthService {
       // Grace period: Allow reuse within 30 seconds (F5 spam, network delay)
       if (timeSinceReplaced < this.TOKEN_REUSE_GRACE_PERIOD) {
         this.logger.debug(
-          `Token reuse within grace period (${Math.round(timeSinceReplaced / 1000)}s) - allowing for user: ${tokenRecord.user.email}`,
+          `Token reuse within grace period (${Math.round(timeSinceReplaced / 1000)}s) - allowing for user: ${tokenRecord.user.phone}`,
         );
 
         // Find and return the new token that was already issued
@@ -183,7 +183,7 @@ export class AuthService {
           // For now, just generate new tokens again (acceptable within grace period)
           const tokens = await this.generateTokensWithRotation(
             newTokenRecord.userId,
-            newTokenRecord.user.email,
+            newTokenRecord.user.phone,
             newTokenRecord.user.role,
             response,
             payload.family,
@@ -199,7 +199,7 @@ export class AuthService {
       // Outside grace period - this is suspicious
       this.logger.warn(
         `Token reuse OUTSIDE grace period (${Math.round(timeSinceReplaced / 1000)}s)! ` +
-          `Revoking family: ${payload.family} for user: ${payload.sub}`,
+        `Revoking family: ${payload.family} for user: ${payload.sub}`,
       );
 
       await this.prisma.refreshToken.updateMany({
@@ -223,7 +223,7 @@ export class AuthService {
     // 6. Generate new tokens with rotation
     const tokens = await this.generateTokensWithRotation(
       tokenRecord.userId,
-      tokenRecord.user.email,
+      tokenRecord.user.phone,
       tokenRecord.user.role,
       response,
       payload.family, // Preserve token family
@@ -235,7 +235,7 @@ export class AuthService {
       data: { replacedBy: tokens.refreshTokenId },
     });
 
-    this.logger.log(`Token refreshed for user: ${tokenRecord.user.email}`);
+    this.logger.log(`Token refreshed for user: ${tokenRecord.user.phone}`);
 
     return {
       accessToken: tokens.accessToken,
@@ -255,11 +255,11 @@ export class AuthService {
 
     // Mock: In production, generate token and send email
     const resetToken = `mock-reset-token-${user.id}-${Date.now()}`;
-    
+
     this.logger.log(`Password reset requested for: ${email}`);
     this.logger.log(`Mock reset token: ${resetToken}`);
 
-    return { 
+    return {
       message: 'If email exists, reset link will be sent',
       // In dev mode, return token for testing
       ...(this.configService.get('NODE_ENV') === 'development' && { resetToken }),
@@ -296,8 +296,8 @@ export class AuthService {
     return { message: 'Password reset successful' };
   }
 
-  private generateTokens(userId: string, email: string, role: string): AuthTokensEntity {
-    const payload = { sub: userId, email, role };
+  private generateTokens(userId: string, phone: string, role: string): AuthTokensEntity {
+    const payload = { sub: userId, phone, role };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
@@ -321,7 +321,7 @@ export class AuthService {
    */
   private async generateTokensWithRotation(
     userId: string,
-    email: string,
+    phone: string,
     role: string,
     response: Response,
     existingFamily?: string,
@@ -330,7 +330,7 @@ export class AuthService {
     const tokenFamily = existingFamily || generateTokenFamily();
 
     // Generate access token (short-lived, in memory)
-    const accessPayload = { sub: userId, email, role };
+    const accessPayload = { sub: userId, phone, role };
     const accessToken = this.jwtService.sign(accessPayload, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
       expiresIn: this.configService.get('TOKEN_EXPIRES_IN'),
@@ -338,8 +338,8 @@ export class AuthService {
 
     // Generate refresh token (long-lived, in HTTP-only cookie)
     // Add unique jti (JWT ID) to prevent duplicate tokens
-    const refreshPayload = { 
-      sub: userId, 
+    const refreshPayload = {
+      sub: userId,
       family: tokenFamily,
       jti: generateTokenFamily(), // Unique identifier for this specific token
     };

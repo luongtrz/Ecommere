@@ -41,7 +41,7 @@ export function LoginPage() {
                 </div>
               </div>
               <CardDescription className="text-center text-gray-500">
-                Đăng nhập để tiếp tục mua sắm và quản lý đơn hàng
+                Đăng nhập bằng số điện thoại để tiếp tục mua sắm và quản lý đơn hàng
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

@@ -14,7 +14,7 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      phone: '',
       password: '',
     },
   });
@@ -24,12 +24,12 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="email"
+          name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Số điện thoại</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="email@example.com" {...field} />
+                <Input type="tel" placeholder="0912345678" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -42,7 +42,7 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
             <FormItem>
               <FormLabel>Mật khẩu</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password" placeholder="--------" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -20,29 +20,29 @@ export function useAuth() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      authApi.login(email, password),
+    mutationFn: ({ phone, password }: { phone: string; password: string }) =>
+      authApi.login(phone, password),
     onSuccess: (data) => {
       queryClient.setQueryData([QUERY_KEYS.USER], data.user);
       toast.success(`Chào mừng trở lại, ${data.user.name}!`);
       navigate('/');
     },
     onError: (error: AxiosError<any>) => {
-      const message = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.';
+      const message = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại số điện thoại và mật khẩu.';
       toast.error(message);
     },
   });
 
   const registerMutation = useMutation({
-    mutationFn: ({ name, email, password }: { name: string; email: string; password: string }) =>
-      authApi.register(name, email, password),
+    mutationFn: ({ name, phone, password, email }: { name: string; phone: string; password: string; email?: string }) =>
+      authApi.register(name, phone, password, email),
     onSuccess: (data) => {
       queryClient.setQueryData([QUERY_KEYS.USER], data.user);
       toast.success(`Đăng ký thành công! Chào mừng ${data.user.name}!`);
       navigate('/');
     },
     onError: (error: AxiosError<any>) => {
-      const message = error.response?.data?.message || 'Đăng ký thất bại. Email có thể đã được sử dụng.';
+      const message = error.response?.data?.message || 'Đăng ký thất bại. Số điện thoại có thể đã được sử dụng.';
       toast.error(message);
     },
   });

@@ -3,10 +3,10 @@ import { z } from 'zod';
 
 const userSchema = z.object({
   id: z.string(),
-  email: z.string().email(),
+  email: z.string().nullable().optional(),
   name: z.string(),
   role: z.enum(['CUSTOMER', 'ADMIN']),
-  phone: z.string().nullable().optional(),
+  phone: z.string(),
   createdAt: z.string().optional(),
 });
 
@@ -22,9 +22,9 @@ export type User = z.infer<typeof userSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
 export const authApi = {
-  async login(email: string, password: string): Promise<LoginResponse> {
+  async login(phone: string, password: string): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post('/auth/login', { email, password });
+      const response = await apiClient.post('/auth/login', { phone, password });
       // Backend wraps with TransformInterceptor
       const actualData = response.data.data || response.data;
 
@@ -32,7 +32,6 @@ export const authApi = {
 
       const parsed = loginResponseSchema.parse(actualData);
 
-      // ⚠️ ONLY store access token in memory (NO refreshToken - it's in HTTP-only cookie)
       authToken.set(parsed.accessToken);
 
       // Store non-sensitive user data
@@ -45,9 +44,9 @@ export const authApi = {
     }
   },
 
-  async register(name: string, email: string, password: string, referralCode?: string): Promise<LoginResponse> {
+  async register(name: string, phone: string, password: string, email?: string, referralCode?: string): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post('/auth/register', { name, email, password, referralCode });
+      const response = await apiClient.post('/auth/register', { name, phone, password, email, referralCode });
       // Backend wraps with TransformInterceptor
       const actualData = response.data.data || response.data;
 
@@ -55,7 +54,6 @@ export const authApi = {
 
       const parsed = registerResponseSchema.parse(actualData);
 
-      // ⚠️ ONLY store access token in memory (NO refreshToken - it's in HTTP-only cookie)
       authToken.set(parsed.accessToken);
 
       // Store non-sensitive user data
