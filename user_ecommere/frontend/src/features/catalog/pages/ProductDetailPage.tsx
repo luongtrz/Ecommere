@@ -130,6 +130,7 @@ export function ProductDetailPage() {
                     <img
                       src={getImageUrl(image)}
                       alt={`${product.name} ${index + 1}`}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -214,14 +215,14 @@ export function ProductDetailPage() {
 
                   <div className="flex gap-3 pt-2">
                     <Button
-                      className="flex-1 h-12 text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 rounded-xl hover:scale-[1.02] transition-transform"
+                      className="flex-1 h-11"
                       onClick={handleAddToCart}
                       disabled={!selectedVariant || selectedVariant.stock === 0}
                     >
-                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      <ShoppingCart className="mr-2 h-4 w-4" />
                       {selectedVariant?.stock === 0 ? 'Tạm hết hàng' : 'Thêm vào giỏ'}
                     </Button>
-                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-gray-200 hover:text-red-500 hover:border-red-200 hover:bg-red-50">
+                    <Button variant="outline" size="icon" className="h-11 w-11 hover:text-red-500">
                       <Heart className="h-5 w-5" />
                     </Button>
                   </div>

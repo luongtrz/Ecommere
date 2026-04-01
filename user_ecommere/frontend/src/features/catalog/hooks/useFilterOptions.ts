@@ -6,6 +6,6 @@ export function useFilterOptions() {
     return useQuery({
         queryKey: [QUERY_KEYS.PRODUCTS, 'filter-options'],
         queryFn: () => productsApi.getFilterOptions(),
-        staleTime: 5 * 60 * 1000, // cache 5 phut
+        staleTime: 30 * 60 * 1000, // 30 minutes - filter options rarely change
     });
 }

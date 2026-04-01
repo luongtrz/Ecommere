@@ -15,18 +15,13 @@ export function CategoryNav() {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  // Filter root categories (no parentId)
   const rootCategories = categories?.filter(c => !c.parentId) || [];
-
-  // Get subcategories for active category
   const subCategories = activeCategory
     ? categories?.filter(c => c.parentId === activeCategory.id) || []
     : [];
 
   const isActive = (path: string) => {
-    if (path === '/catalog') {
-      return location.pathname === '/catalog';
-    }
+    if (path === '/catalog') return location.pathname === '/catalog';
     return location.pathname.startsWith(path);
   };
 
@@ -53,15 +48,10 @@ export function CategoryNav() {
   }, []);
 
   const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const { current } = scrollContainerRef;
-      const scrollAmount = 300;
-      if (direction === 'left') {
-        current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-      } else {
-        current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      }
-    }
+    scrollContainerRef.current?.scrollBy({
+      left: direction === 'left' ? -300 : 300,
+      behavior: 'smooth',
+    });
   };
 
   const handleMouseEnter = (category: any, e: React.MouseEvent) => {
@@ -75,11 +65,11 @@ export function CategoryNav() {
 
   if (isLoading) {
     return (
-      <div className="bg-white/60 backdrop-blur-lg border-b border-gray-100 hidden md:block">
+      <div className="bg-white border-b hidden md:block">
         <div className="container">
-          <div className="flex gap-8 py-4">
+          <div className="flex gap-6 py-3">
             {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-6 w-24 rounded-full" />
+              <Skeleton key={i} className="h-5 w-20" />
             ))}
           </div>
         </div>
@@ -90,15 +80,14 @@ export function CategoryNav() {
   return (
     <div
       ref={navRef}
-      className="bg-white/90 backdrop-blur-xl border-b border-gray-100 shadow-sm relative z-10 hidden md:block"
+      className="bg-white border-b relative z-10 hidden md:block"
       onMouseLeave={() => setActiveCategory(null)}
     >
-      <div className="container relative px-8">
-        {/* Scroll Arrows */}
+      <div className="container relative">
         {showLeftArrow && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md border border-gray-100 text-gray-600 hover:text-blue-600 hover:border-blue-200 transition-all"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center bg-white border rounded-md text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -107,7 +96,7 @@ export function CategoryNav() {
         {showRightArrow && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md border border-gray-100 text-gray-600 hover:text-blue-600 hover:border-blue-200 transition-all"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center bg-white border rounded-md text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -115,29 +104,30 @@ export function CategoryNav() {
 
         <ul
           ref={scrollContainerRef}
-          className="flex items-center gap-8 overflow-x-auto scrollbar-hide py-4 scroll-smooth"
+          className="flex items-center gap-6 overflow-x-auto scrollbar-hide py-3 scroll-smooth"
         >
           <li className="shrink-0">
             <Link
               to="/catalog"
               className={cn(
-                "text-sm font-semibold transition-colors hover:text-blue-600 uppercase tracking-wide whitespace-nowrap",
-                isActive('/catalog') ? "text-blue-600" : "text-gray-600"
+                "text-sm font-medium transition-colors whitespace-nowrap",
+                isActive('/catalog') ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
               onMouseEnter={() => setActiveCategory(null)}
             >
-              Tất cả sản phẩm
+              Tất cả
             </Link>
           </li>
 
-          {/* Root Categories */}
           {rootCategories.map((category) => (
             <li key={category.id} className="shrink-0">
               <Link
                 to={`/c/${category.slug}`}
                 className={cn(
-                  "text-sm font-semibold transition-colors hover:text-blue-600 uppercase tracking-wide flex items-center gap-1 whitespace-nowrap",
-                  isActive(`/c/${category.slug}`) || activeCategory?.id === category.id ? "text-blue-600" : "text-gray-600"
+                  "text-sm font-medium transition-colors whitespace-nowrap",
+                  isActive(`/c/${category.slug}`) || activeCategory?.id === category.id
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
                 onMouseEnter={(e) => handleMouseEnter(category, e)}
               >
@@ -148,40 +138,40 @@ export function CategoryNav() {
         </ul>
       </div>
 
-      {/* Simplified Dropdown Panel */}
+      {/* Dropdown */}
       <div
         style={{ left: menuPosition }}
         className={cn(
-          "absolute top-full bg-white border border-gray-100 shadow-xl rounded-b-xl rounded-r-xl transition-all duration-200 min-w-[240px] z-10",
+          "absolute top-full bg-white border rounded-lg shadow-lg transition-all duration-150 min-w-[200px] z-10",
           activeCategory
             ? "opacity-100 visible translate-y-0"
-            : "opacity-0 invisible -translate-y-2 pointer-events-none"
+            : "opacity-0 invisible -translate-y-1 pointer-events-none"
         )}
       >
         {activeCategory && (
-          <div className="py-2">
+          <div className="py-1">
             {subCategories.length > 0 ? (
-              <div className="flex flex-col">
+              <>
                 {subCategories.map((sub) => (
                   <Link
                     key={sub.id}
                     to={`/c/${sub.slug}`}
-                    className="text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 transition-colors"
+                    className="block text-sm text-muted-foreground hover:text-foreground hover:bg-muted px-3 py-2 transition-colors"
                   >
                     {sub.name}
                   </Link>
                 ))}
-                <div className="border-t border-gray-50 mt-1 pt-1">
+                <div className="border-t mt-1 pt-1">
                   <Link
                     to={`/c/${activeCategory.slug}`}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-700 px-4 py-2 flex items-center gap-1 hover:bg-gray-50"
+                    className="block text-sm font-medium text-primary hover:bg-muted px-3 py-2 transition-colors"
                   >
-                    Xem tất cả <ChevronRight className="h-3.5 w-3.5" />
+                    Xem tất cả
                   </Link>
                 </div>
-              </div>
+              </>
             ) : (
-              <div className="px-4 py-3 text-sm text-gray-500">
+              <div className="px-3 py-2 text-sm text-muted-foreground">
                 Chưa có danh mục con
               </div>
             )}

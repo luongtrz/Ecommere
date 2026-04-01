@@ -6,6 +6,7 @@ export function useAddresses() {
   return useQuery({
     queryKey: ['addresses'],
     queryFn: () => usersApi.getAddresses(),
+    staleTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 

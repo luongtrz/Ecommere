@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { usersApi } from '../api/users.api';
 import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -15,7 +15,6 @@ interface ProfileFormDialogProps {
 
 export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps) {
   const { user, refreshUser } = useAuth();
-  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -35,9 +34,7 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
   const updateProfile = useMutation({
     mutationFn: (data: { name?: string; phone?: string }) => usersApi.updateProfile(data),
     onSuccess: async () => {
-      // Refresh user data
       await refreshUser();
-      queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success('Cập nhật thông tin thành công');
       onOpenChange(false);
     },

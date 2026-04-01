@@ -205,40 +205,27 @@ export class ReviewsService {
   }
 
   async getProductStats(productId: string) {
-    const reviews = await this.prisma.review.findMany({
-      where: { productId },
-      select: { rating: true },
-    });
+    const [aggregate, distribution] = await Promise.all([
+      this.prisma.review.aggregate({
+        where: { productId },
+        _avg: { rating: true },
+        _count: { rating: true },
+      }),
+      this.prisma.review.groupBy({
+        by: ['rating'],
+        where: { productId },
+        _count: { rating: true },
+      }),
+    ]);
 
-    if (reviews.length === 0) {
-      return {
-        totalReviews: 0,
-        averageRating: 0,
-        ratingDistribution: {
-          5: 0,
-          4: 0,
-          3: 0,
-          2: 0,
-          1: 0,
-        },
-      };
+    const ratingDistribution: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    for (const row of distribution) {
+      ratingDistribution[row.rating] = row._count.rating;
     }
 
-    const totalReviews = reviews.length;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    const averageRating = parseFloat((sum / totalReviews).toFixed(2));
-
-    const ratingDistribution = {
-      5: reviews.filter(r => r.rating === 5).length,
-      4: reviews.filter(r => r.rating === 4).length,
-      3: reviews.filter(r => r.rating === 3).length,
-      2: reviews.filter(r => r.rating === 2).length,
-      1: reviews.filter(r => r.rating === 1).length,
-    };
-
     return {
-      totalReviews,
-      averageRating,
+      totalReviews: aggregate._count.rating,
+      averageRating: parseFloat((aggregate._avg.rating || 0).toFixed(2)),
       ratingDistribution,
     };
   }

@@ -8,6 +8,7 @@ export function useAdminOrders(filter: AdminOrdersFilter = {}) {
   return useQuery({
     queryKey: ['admin', 'orders', filter],
     queryFn: () => getAdminOrders(filter),
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
@@ -19,6 +20,7 @@ export function useAdminOrder(orderId: string) {
     queryKey: ['admin', 'orders', orderId],
     queryFn: () => getAdminOrderById(orderId),
     enabled: !!orderId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 

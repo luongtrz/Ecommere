@@ -1,13 +1,15 @@
 import { useSearchParams } from 'react-router-dom';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { SEO } from '@/lib/seo';
 import { useProducts } from '../hooks/useProducts';
+import { useDebounce } from '@/hooks/useDebounce';
 import { ProductCard } from '@/components/common/ProductCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Pagination } from '@/components/common/Pagination';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { formatCurrency } from '@/lib/formatters';
+import { getImageUrl } from '@/lib/utils';
 import { PAGINATION, PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -24,6 +26,10 @@ export function CatalogPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const searchQuery = searchParams.get('q') || '';
   const viewMode = searchParams.get('view') || 'grid';
+
+  // Debounced search: local state for input, debounce before updating URL
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const debouncedSearch = useDebounce(searchInput, 400);
 
   // Filter params
   const categorySlug = searchParams.get('category') || undefined;
@@ -64,6 +70,13 @@ export function CatalogPage() {
     setSearchParams(newParams);
   }, [searchParams, setSearchParams]);
 
+  // Apply debounced search to URL params
+  useEffect(() => {
+    if (debouncedSearch !== searchQuery) {
+      updateParams({ q: debouncedSearch || undefined, page: '1' });
+    }
+  }, [debouncedSearch, searchQuery, updateParams]);
+
   const handlePageChange = (newPage: number) => {
     updateParams({ page: newPage.toString() });
   };
@@ -73,7 +86,7 @@ export function CatalogPage() {
   };
 
   const handleSearchChange = (value: string) => {
-    updateParams({ q: value || undefined, page: '1' });
+    setSearchInput(value);
   };
 
   const handleAddToCart = (product: any, variant: any) => {
@@ -155,12 +168,12 @@ export function CatalogPage() {
                 <div className="relative flex-1 md:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                   <Input
-                    value={searchQuery}
+                    value={searchInput}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder="Tìm kiếm..."
                     className="h-9 pl-9 text-sm bg-gray-50 border-gray-200 rounded-lg focus:bg-white transition-all"
                   />
-                  {searchQuery && (
+                  {searchInput && (
                     <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-gray-200 rounded-full p-0.5">
                       <X className="h-3 w-3 text-gray-500" />
                     </button>
@@ -271,7 +284,7 @@ export function CatalogPage() {
                       ) : (
                         <div key={product.id} className="flex gap-4 bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all">
                           <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0">
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                            <img src={getImageUrl(product.images[0], { width: 200 })} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
                           </div>
                           <div className="flex-1 min-w-0 py-1">
                             <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>

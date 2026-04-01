@@ -253,6 +253,7 @@ export function AdminOrdersPage() {
                                   <img
                                     src={item.variant.product.images[0]}
                                     alt="Product"
+                                    loading="lazy"
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (

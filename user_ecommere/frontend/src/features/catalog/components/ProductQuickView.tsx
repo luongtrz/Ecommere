@@ -173,12 +173,12 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                                 <Button
                                     onClick={handleAddToCart}
                                     disabled={!selectedVariant || selectedVariant.stock === 0}
-                                    className="w-full h-12 text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 rounded-xl hover:scale-[1.02] transition-transform"
+                                    className="w-full h-11"
                                 >
-                                    <ShoppingCart className="mr-2 h-5 w-5" />
+                                    <ShoppingCart className="mr-2 h-4 w-4" />
                                     {selectedVariant?.stock === 0 ? 'Tạm hết hàng' : 'Thêm vào giỏ'}
                                 </Button>
-                                <Button variant="outline" asChild className="w-full h-11 border-gray-200 rounded-xl hover:bg-gray-50">
+                                <Button variant="outline" asChild className="w-full h-10">
                                     <Link to={`/p/${slug}`} onClick={() => onOpenChange(false)}>
                                         Xem chi tiết sản phẩm
                                     </Link>

@@ -17,55 +17,50 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      {/* Main header */}
-      <div className="bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-glass relative z-[60]">
-        <div className="container flex h-16 items-center justify-between">
+      <div className="bg-white border-b">
+        <div className="container flex h-14 items-center justify-between">
           {/* Left: Menu + Logo */}
-          <div className="flex items-center gap-2">
-            {/* Mobile menu */}
+          <div className="flex items-center gap-3">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden shrink-0">
+                <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-72">
                 <div className="flex flex-col gap-4 mt-8">
-                  <Link to="/" className="text-lg font-semibold hover:text-primary transition-colors">Trang chủ</Link>
-                  <Link to="/catalog" className="text-lg font-semibold hover:text-primary transition-colors">Sản phẩm</Link>
-                  <Link to="/cart" className="text-lg font-semibold hover:text-primary transition-colors">Giỏ hàng</Link>
+                  <Link to="/" className="text-base font-medium hover:text-primary transition-colors">Trang chủ</Link>
+                  <Link to="/catalog" className="text-base font-medium hover:text-primary transition-colors">Sản phẩm</Link>
+                  <Link to="/cart" className="text-base font-medium hover:text-primary transition-colors">Giỏ hàng</Link>
                   {user ? (
                     <>
-                      <Link to="/account" className="text-lg font-semibold hover:text-primary transition-colors">Tài khoản</Link>
-                      <Link to="/orders" className="text-lg font-semibold hover:text-primary transition-colors">Đơn hàng</Link>
-                      <Link to="/referral" className="text-lg font-semibold hover:text-primary transition-colors">Mời bạn bè</Link>
-                      <button onClick={logout} className="text-lg font-semibold text-left hover:text-red-500 transition-colors">Đăng xuất</button>
+                      <Link to="/account" className="text-base font-medium hover:text-primary transition-colors">Tài khoản</Link>
+                      <Link to="/orders" className="text-base font-medium hover:text-primary transition-colors">Đơn hàng</Link>
+                      <Link to="/referral" className="text-base font-medium hover:text-primary transition-colors">Mời bạn bè</Link>
+                      <button onClick={logout} className="text-base font-medium text-left text-destructive hover:text-destructive/80 transition-colors">Đăng xuất</button>
                     </>
                   ) : (
-                    <Link to="/login" className="text-lg font-semibold hover:text-primary transition-colors">Đăng nhập</Link>
+                    <Link to="/login" className="text-base font-medium hover:text-primary transition-colors">Đăng nhập</Link>
                   )}
                 </div>
               </SheetContent>
             </Sheet>
 
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center shadow-md group-hover:shadow-glow transition-shadow duration-300">
-                <span className="text-white font-bold text-sm">TS</span>
+            <Link to="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+                <span className="text-white font-bold text-xs">TS</span>
               </div>
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-                Thai Spray
-              </span>
+              <span className="text-lg font-bold text-foreground">Thai Spray</span>
             </Link>
           </div>
 
-          {/* Center: Search (desktop only) */}
-          <div className="flex-1 max-w-xl mx-4 hidden md:block relative z-50">
+          {/* Center: Search */}
+          <div className="flex-1 max-w-md mx-6 hidden md:block">
             <SearchBox />
           </div>
 
-          {/* Actions */}
-          <nav className="flex items-center gap-2">
+          {/* Right: Actions */}
+          <nav className="flex items-center gap-1">
             <div onClick={openCart} className="relative cursor-pointer">
               <CartBadge />
             </div>
@@ -75,42 +70,34 @@ export function Header() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/5 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center">
+                      <User className="h-3.5 w-3.5 text-primary-foreground" />
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-white/80 backdrop-blur-2xl border border-white/30 shadow-xl rounded-xl p-1">
+                <DropdownMenuContent align="end" className="w-48">
                   <div className="px-3 py-2 border-b mb-1">
-                    <p className="text-sm font-semibold truncate">{user.name || user.email}</p>
+                    <p className="text-sm font-medium truncate">{user.name || user.email}</p>
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
-                  <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                  <DropdownMenuItem asChild className="cursor-pointer">
                     <Link to="/account">Tài khoản</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                  <DropdownMenuItem asChild className="cursor-pointer">
                     <Link to="/orders">Đơn hàng</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                  <DropdownMenuItem asChild className="cursor-pointer">
                     <Link to="/referral">Mời bạn bè</Link>
                   </DropdownMenuItem>
-                  {user.role === 'ADMIN' && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
-                        <Link to="/admin">Quản trị</Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="rounded-lg cursor-pointer text-red-500 focus:text-red-600">
+                  <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive">
                     Đăng xuất
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md text-sm px-5">
+              <Button asChild size="sm" className="ml-2">
                 <Link to="/login">Đăng nhập</Link>
               </Button>
             )}
@@ -118,7 +105,7 @@ export function Header() {
         </div>
 
         {/* Mobile search */}
-        <div className="md:hidden px-4 pb-3 relative z-50">
+        <div className="md:hidden px-4 pb-3">
           <SearchBox />
         </div>
       </div>

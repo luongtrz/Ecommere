@@ -1,42 +1,35 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { RequireAuth } from './guards/RequireAuth';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
-// Auth Pages
-import { LoginPage } from '@/features/auth/pages/LoginPage';
-import { RegisterPage } from '@/features/auth/pages/RegisterPage';
-import { AccountPage } from '@/features/auth/pages/AccountPage';
-
-// User Pages
-import { AddressesPage } from '@/features/users/pages/AddressesPage';
-
-// Catalog Pages
-import { HomePage } from '@/features/catalog/pages/HomePage';
-import { CatalogPage } from '@/features/catalog/pages/CatalogPage';
-import { CategoryPage } from '@/features/catalog/pages/CategoryPage';
-import { ProductDetailPage } from '@/features/catalog/pages/ProductDetailPage';
-import { SearchPage } from '@/features/catalog/pages/SearchPage';
-
-// Cart & Checkout
-import { CartPage } from '@/features/cart/pages/CartPage';
-import { WishlistPage } from '@/features/catalog/pages/WishlistPage';
-import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
-
-// Orders
-import { OrdersPage } from '@/features/orders/pages/OrdersPage';
-import { OrderDetailPage } from '@/features/orders/pages/OrderDetailPage';
-
-// Referrals
-import { ReferralPage } from '@/features/referrals/pages/ReferralPage';
-
-// Error Pages
-import { NotFoundPage } from '@/pages/NotFoundPage';
-import { ErrorPage } from '@/pages/ErrorPage';
+// Lazy load all pages
+const HomePage = lazy(() => import('@/features/catalog/pages/HomePage').then(m => ({ default: m.HomePage })));
+const CatalogPage = lazy(() => import('@/features/catalog/pages/CatalogPage').then(m => ({ default: m.CatalogPage })));
+const CategoryPage = lazy(() => import('@/features/catalog/pages/CategoryPage').then(m => ({ default: m.CategoryPage })));
+const ProductDetailPage = lazy(() => import('@/features/catalog/pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
+const SearchPage = lazy(() => import('@/features/catalog/pages/SearchPage').then(m => ({ default: m.SearchPage })));
+const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import('@/features/auth/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const AccountPage = lazy(() => import('@/features/auth/pages/AccountPage').then(m => ({ default: m.AccountPage })));
+const AddressesPage = lazy(() => import('@/features/users/pages/AddressesPage').then(m => ({ default: m.AddressesPage })));
+const CartPage = lazy(() => import('@/features/cart/pages/CartPage').then(m => ({ default: m.CartPage })));
+const WishlistPage = lazy(() => import('@/features/catalog/pages/WishlistPage').then(m => ({ default: m.WishlistPage })));
+const CheckoutPage = lazy(() => import('@/features/checkout/pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
+const OrdersPage = lazy(() => import('@/features/orders/pages/OrdersPage').then(m => ({ default: m.OrdersPage })));
+const OrderDetailPage = lazy(() => import('@/features/orders/pages/OrderDetailPage').then(m => ({ default: m.OrderDetailPage })));
+const ReferralPage = lazy(() => import('@/features/referrals/pages/ReferralPage').then(m => ({ default: m.ReferralPage })));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+const ErrorPage = lazy(() => import('@/pages/ErrorPage').then(m => ({ default: m.ErrorPage })));
 
 export function AppRouter() {
+  const fallback = <div className="min-h-screen flex items-center justify-center"><LoadingSpinner /></div>;
+
   return (
     <BrowserRouter>
+      <Suspense fallback={fallback}>
       <Routes>
         {/* Public Routes */}
         <Route element={<MainLayout />}>
@@ -70,6 +63,7 @@ export function AppRouter() {
         <Route path="404" element={<NotFoundPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

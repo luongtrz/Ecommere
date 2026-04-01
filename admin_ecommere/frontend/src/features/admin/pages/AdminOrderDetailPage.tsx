@@ -164,6 +164,7 @@ export function AdminOrderDetailPage() {
                                                     <img
                                                         src={item.variant.product.images[0]}
                                                         alt={item.variant?.product?.name}
+                                                        loading="lazy"
                                                         className="w-full h-full object-cover"
                                                     />
                                                 )}

@@ -6,6 +6,7 @@ export function useOrders(page = 1, limit = 10) {
   return useQuery({
     queryKey: [QUERY_KEYS.ORDERS, page, limit],
     queryFn: () => ordersApi.getAll(page, limit),
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
@@ -14,5 +15,6 @@ export function useOrderDetail(orderId: string) {
     queryKey: [QUERY_KEYS.ORDER_DETAIL, orderId],
     queryFn: () => ordersApi.getById(orderId),
     enabled: !!orderId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }

@@ -342,6 +342,7 @@ export function AdminProductsPage() {
                               <img
                                 src={product.images[0] || 'https://placehold.co/100x100?text=No+Image'}
                                 alt={product.name}
+                                loading="lazy"
                                 className="w-full h-full object-cover"
                               />
                             </div>

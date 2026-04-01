@@ -125,24 +125,30 @@ export class ProductsService {
         include: {
           category: true,
           variants: true,
-          reviews: {
-            select: { rating: true },
-          },
+          _count: { select: { reviews: true } },
         },
       }),
       this.prisma.product.count({ where }),
     ]);
 
-    const productsWithStats = products.map(product => {
-      const ratings = product.reviews.map(r => r.rating);
-      const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+    // Batch-fetch average ratings for all products in one query
+    const productIds = products.map(p => p.id);
+    const ratingAggregates = productIds.length > 0
+      ? await this.prisma.review.groupBy({
+          by: ['productId'],
+          where: { productId: { in: productIds } },
+          _avg: { rating: true },
+        })
+      : [];
+    const ratingMap = new Map(
+      ratingAggregates.map(r => [r.productId, r._avg.rating || 0]),
+    );
 
-      return {
-        ...product,
-        averageRating: parseFloat(averageRating.toFixed(2)),
-        reviewCount: ratings.length,
-      };
-    });
+    const productsWithStats = products.map(product => ({
+      ...product,
+      averageRating: parseFloat((ratingMap.get(product.id) || 0).toFixed(2)),
+      reviewCount: product._count.reviews,
+    }));
 
     return {
       data: productsWithStats,
@@ -156,37 +162,37 @@ export class ProductsService {
   }
 
   async findOne(id: string) {
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-      include: {
-        category: true,
-        variants: true,
-        reviews: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
+    const [product, reviewAggregate] = await Promise.all([
+      this.prisma.product.findUnique({
+        where: { id },
+        include: {
+          category: true,
+          variants: true,
+          reviews: {
+            include: {
+              user: { select: { id: true, name: true, email: true } },
             },
+            orderBy: { createdAt: 'desc' },
+            take: 20, // Paginate reviews - load first 20
           },
-          orderBy: { createdAt: 'desc' },
+          _count: { select: { reviews: true } },
         },
-      },
-    });
+      }),
+      this.prisma.review.aggregate({
+        where: { productId: id },
+        _avg: { rating: true },
+        _count: { rating: true },
+      }),
+    ]);
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
-    const ratings = product.reviews.map(r => r.rating);
-    const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
-
     return {
       ...product,
-      averageRating: parseFloat(averageRating.toFixed(2)),
-      reviewCount: ratings.length,
+      averageRating: parseFloat((reviewAggregate._avg.rating || 0).toFixed(2)),
+      reviewCount: reviewAggregate._count.rating,
     };
   }
 
@@ -198,16 +204,12 @@ export class ProductsService {
         variants: true,
         reviews: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
+            user: { select: { id: true, name: true, email: true } },
           },
           orderBy: { createdAt: 'desc' },
+          take: 20, // Paginate reviews - load first 20
         },
+        _count: { select: { reviews: true } },
       },
     });
 
@@ -215,13 +217,16 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    const ratings = product.reviews.map(r => r.rating);
-    const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+    const reviewAggregate = await this.prisma.review.aggregate({
+      where: { productId: product.id },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
 
     return {
       ...product,
-      averageRating: parseFloat(averageRating.toFixed(2)),
-      reviewCount: ratings.length,
+      averageRating: parseFloat((reviewAggregate._avg.rating || 0).toFixed(2)),
+      reviewCount: reviewAggregate._count.rating,
     };
   }
 

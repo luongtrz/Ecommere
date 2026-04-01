@@ -58,13 +58,11 @@ export function DashboardPage() {
 
   const statCards = [
     {
-      title: 'Tổng doanh thu',
+      title: 'Doanh thu tháng',
       value: formatCurrency(stats.revenue.monthlyRevenue),
       icon: DollarSign,
       change: stats.revenue.monthlyChange,
       desc: 'so với tháng trước',
-      color: 'text-emerald-500',
-      bg: 'bg-emerald-500/10',
     },
     {
       title: 'Đơn hàng mới',
@@ -72,17 +70,13 @@ export function DashboardPage() {
       icon: ShoppingCart,
       change: stats.orders.monthlyChange,
       desc: 'so với tháng trước',
-      color: 'text-blue-500',
-      bg: 'bg-blue-500/10',
     },
     {
       title: 'Sản phẩm',
       value: stats.products.totalProducts.toString(),
       icon: Package,
-      change: undefined, // No change metric for total products usually
-      desc: `${stats.products.newProductsThisMonth} sản phẩm mới`,
-      color: 'text-violet-500',
-      bg: 'bg-violet-500/10',
+      change: undefined,
+      desc: `${stats.products.newProductsThisMonth} mới tháng này`,
     },
     {
       title: 'Khách hàng',
@@ -90,8 +84,6 @@ export function DashboardPage() {
       icon: Users,
       change: stats.customers.monthlyChange,
       desc: 'so với tháng trước',
-      color: 'text-orange-500',
-      bg: 'bg-orange-500/10',
     },
   ];
 
@@ -140,9 +132,7 @@ export function DashboardPage() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
-                <div className={`p-2 rounded-full ${stat.bg}`}>
-                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                </div>
+                <stat.icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
@@ -268,7 +258,7 @@ export function DashboardPage() {
                     <div className="flex items-center space-x-4">
                       <div className="relative h-12 w-12 rounded overflow-hidden bg-muted border">
                         {product.imageUrl ? (
-                          <img src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
+                          <img src={product.imageUrl} alt={product.name} loading="lazy" className="object-cover w-full h-full" />
                         ) : (
                           <Package className="h-6 w-6 m-auto text-muted-foreground" />
                         )}
