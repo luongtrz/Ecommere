@@ -7,10 +7,26 @@ import { ConfigService } from '@nestjs/config';
 import { SendChatbotMessageDto } from './dtos/send-chatbot-message.dto';
 
 type ChatRole = 'system' | 'user' | 'assistant';
+type ChatbotProvider = 'gemini' | 'openai-compatible';
 
 interface ProviderChatMessage {
   role: ChatRole;
   content: string;
+}
+
+interface OpenAiContentPart {
+  type?: string;
+  text?: string;
+}
+
+interface GeminiContentPart {
+  text?: string;
+  thought?: boolean;
+}
+
+interface GeminiContent {
+  role?: 'user' | 'model';
+  parts?: GeminiContentPart[];
 }
 
 interface ProviderErrorResponse {
@@ -21,11 +37,20 @@ interface ProviderErrorResponse {
 
 interface ProviderSuccessResponse {
   model?: string;
+  modelVersion?: string;
   usage?: Record<string, number>;
+  usageMetadata?: Record<string, number>;
+  promptFeedback?: {
+    blockReason?: string;
+  };
   choices?: Array<{
     message?: {
-      content?: string | Array<{ type?: string; text?: string }>;
+      content?: string | OpenAiContentPart[];
     };
+  }>;
+  candidates?: Array<{
+    finishReason?: string;
+    content?: GeminiContent;
   }>;
 }
 
@@ -36,11 +61,124 @@ export class ChatbotService {
   async sendMessage(dto: SendChatbotMessageDto) {
     const config = this.getProviderConfig();
 
-    const history = dto.history.slice(-config.historyLimit).map((message) => ({
-      role: message.role,
-      content: message.content.trim(),
+    const history = dto.history
+      .slice(-config.historyLimit)
+      .map((message) => ({
+        role: message.role,
+        content: message.content.trim(),
+      }))
+      .filter((message) => message.content.length > 0);
+    const prompt = dto.prompt.trim();
+
+    if (config.provider === 'gemini') {
+      return this.sendGeminiMessage(config, history, prompt);
+    }
+
+    return this.sendOpenAiCompatibleMessage(config, history, prompt);
+  }
+
+  private getProviderConfig() {
+    const rawProvider = this.configService.get<string>('CHATBOT_PROVIDER');
+    const providerUrl = this.configService.get<string>('CHATBOT_PROVIDER_URL');
+    const apiKey = this.configService.get<string>('CHATBOT_API_KEY');
+    const model = this.configService.get<string>('CHATBOT_MODEL');
+
+    const provider: ChatbotProvider =
+      rawProvider === 'openai-compatible'
+        ? 'openai-compatible'
+        : rawProvider === 'gemini'
+          ? 'gemini'
+          : providerUrl?.includes('generativelanguage.googleapis.com')
+            ? 'gemini'
+            : 'openai-compatible';
+
+    if (!apiKey || !model) {
+      throw new ServiceUnavailableException(
+        'Chatbot provider is not configured. Please set CHATBOT_API_KEY and CHATBOT_MODEL.',
+      );
+    }
+
+    const resolvedProviderUrl =
+      provider === 'gemini'
+        ? providerUrl ||
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
+        : providerUrl;
+
+    if (!resolvedProviderUrl) {
+      throw new ServiceUnavailableException(
+        'Chatbot provider is not configured. Please set CHATBOT_PROVIDER_URL or use CHATBOT_PROVIDER=gemini.',
+      );
+    }
+
+    return {
+      provider,
+      providerUrl: resolvedProviderUrl,
+      apiKey,
+      model,
+      systemPrompt:
+        this.configService.get<string>('CHATBOT_SYSTEM_PROMPT') ||
+        'Bạn là trợ lý bán hàng cho Thai Spray. Luôn trả lời bằng tiếng Việt có dấu, ngắn gọn, tự nhiên, tập trung tư vấn sản phẩm, đơn hàng và cách sử dụng. Chỉ trả lời nội dung cuối cùng cho khách hàng. Không lặp lại yêu cầu, không giải thích hệ thống, không nêu giả định, không liệt kê suy luận nội bộ, không dùng tiếng Anh nếu không được yêu cầu.',
+      timeoutMs: this.configService.get<number>('CHATBOT_TIMEOUT_MS') || 30000,
+      temperature: this.configService.get<number>('CHATBOT_TEMPERATURE') || 0.4,
+      maxTokens: this.configService.get<number>('CHATBOT_MAX_TOKENS') || 500,
+      historyLimit: this.configService.get<number>('CHATBOT_HISTORY_LIMIT') || 10,
+    };
+  }
+
+  private async sendGeminiMessage(
+    config: ReturnType<ChatbotService['getProviderConfig']>,
+    history: ProviderChatMessage[],
+    prompt: string,
+  ) {
+    const contents = [...history, { role: 'user' as const, content: prompt }].map((message) => ({
+      role: message.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: message.content }],
     }));
 
+    const parsedBody = await this.sendProviderRequest(config, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': config.apiKey,
+      },
+      body: {
+        system_instruction: {
+          parts: [{ text: config.systemPrompt }],
+        },
+        contents,
+        generationConfig: {
+          temperature: config.temperature,
+          maxOutputTokens: config.maxTokens,
+          responseMimeType: 'text/plain',
+          thinkingConfig: {
+            thinkingLevel: 'minimal',
+          },
+        },
+      },
+    });
+
+    const assistantMessage = this.extractGeminiAssistantMessage(parsedBody);
+
+    if (!assistantMessage) {
+      const finishReason = parsedBody?.candidates?.[0]?.finishReason;
+      const blockReason = parsedBody?.promptFeedback?.blockReason;
+
+      throw new BadGatewayException(
+        blockReason || finishReason || 'Gemini provider returned an empty response.',
+      );
+    }
+
+    return {
+      message: assistantMessage,
+      model: parsedBody?.modelVersion || config.model,
+      usage: parsedBody?.usageMetadata || null,
+    };
+  }
+
+  private async sendOpenAiCompatibleMessage(
+    config: ReturnType<ChatbotService['getProviderConfig']>,
+    history: ProviderChatMessage[],
+    prompt: string,
+  ) {
     const messages: ProviderChatMessage[] = [
       {
         role: 'system',
@@ -49,44 +187,24 @@ export class ChatbotService {
       ...history,
       {
         role: 'user',
-        content: dto.prompt.trim(),
+        content: prompt,
       },
     ];
 
-    let response: globalThis.Response;
+    const parsedBody = await this.sendProviderRequest(config, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: {
+        model: config.model,
+        messages,
+        temperature: config.temperature,
+        max_tokens: config.maxTokens,
+      },
+    });
 
-    try {
-      response = await fetch(config.providerUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: config.model,
-          messages,
-          temperature: config.temperature,
-          max_tokens: config.maxTokens,
-        }),
-        signal: AbortSignal.timeout(config.timeoutMs),
-      });
-    } catch (error) {
-      throw new BadGatewayException(this.getNetworkErrorMessage(error));
-    }
-
-    const rawBody = await response.text();
-    const parsedBody = this.safeParseResponse(rawBody);
-
-    if (!response.ok) {
-      const providerMessage =
-        parsedBody?.error?.message ||
-        rawBody ||
-        'Chatbot provider request failed.';
-
-      throw new BadGatewayException(providerMessage);
-    }
-
-    const assistantMessage = this.extractAssistantMessage(parsedBody);
+    const assistantMessage = this.extractOpenAiAssistantMessage(parsedBody);
 
     if (!assistantMessage) {
       throw new BadGatewayException('Chatbot provider returned an empty response.');
@@ -99,32 +217,42 @@ export class ChatbotService {
     };
   }
 
-  private getProviderConfig() {
-    const providerUrl = this.configService.get<string>('CHATBOT_PROVIDER_URL');
-    const apiKey = this.configService.get<string>('CHATBOT_API_KEY');
-    const model = this.configService.get<string>('CHATBOT_MODEL');
+  private async sendProviderRequest(
+    config: ReturnType<ChatbotService['getProviderConfig']>,
+    request: {
+      headers: Record<string, string>;
+      body: Record<string, unknown>;
+    },
+  ) {
+    let response: globalThis.Response;
 
-    if (!providerUrl || !apiKey || !model) {
-      throw new ServiceUnavailableException(
-        'Chatbot provider is not configured. Please set CHATBOT_PROVIDER_URL, CHATBOT_API_KEY, and CHATBOT_MODEL.',
-      );
+    try {
+      response = await fetch(config.providerUrl, {
+        method: 'POST',
+        headers: request.headers,
+        body: JSON.stringify(request.body),
+        signal: AbortSignal.timeout(config.timeoutMs),
+      });
+    } catch (error) {
+      throw new BadGatewayException(this.getNetworkErrorMessage(error));
     }
 
-    return {
-      providerUrl,
-      apiKey,
-      model,
-      systemPrompt:
-        this.configService.get<string>('CHATBOT_SYSTEM_PROMPT') ||
-        'Bạn là trợ lý bán hàng cho Thai Spray. Trả lời bằng tiếng Việt, ngắn gọn, hữu ích, ưu tiên tư vấn sản phẩm, đơn hàng và cách sử dụng.',
-      timeoutMs: this.configService.get<number>('CHATBOT_TIMEOUT_MS') || 30000,
-      temperature: this.configService.get<number>('CHATBOT_TEMPERATURE') || 0.7,
-      maxTokens: this.configService.get<number>('CHATBOT_MAX_TOKENS') || 500,
-      historyLimit: this.configService.get<number>('CHATBOT_HISTORY_LIMIT') || 10,
-    };
+    const rawBody = await response.text();
+    const parsedBody = this.safeParseResponse(rawBody);
+
+    if (!response.ok) {
+      const providerMessage =
+        parsedBody?.error?.message || rawBody || 'Chatbot provider request failed.';
+
+      throw new BadGatewayException(providerMessage);
+    }
+
+    return parsedBody;
   }
 
-  private safeParseResponse(rawBody: string): (ProviderSuccessResponse & ProviderErrorResponse) | null {
+  private safeParseResponse(
+    rawBody: string,
+  ): (ProviderSuccessResponse & ProviderErrorResponse) | null {
     if (!rawBody) {
       return null;
     }
@@ -136,7 +264,7 @@ export class ChatbotService {
     }
   }
 
-  private extractAssistantMessage(
+  private extractOpenAiAssistantMessage(
     body: (ProviderSuccessResponse & ProviderErrorResponse) | null,
   ): string | null {
     const content = body?.choices?.[0]?.message?.content;
@@ -155,6 +283,23 @@ export class ChatbotService {
     }
 
     return null;
+  }
+
+  private extractGeminiAssistantMessage(
+    body: (ProviderSuccessResponse & ProviderErrorResponse) | null,
+  ): string | null {
+    const parts = body?.candidates?.[0]?.content?.parts;
+
+    if (!Array.isArray(parts)) {
+      return null;
+    }
+
+    const text = parts
+      .filter((part) => !part.thought).map((part) => part.text || '')
+      .join('')
+      .trim();
+
+    return text || null;
   }
 
   private getNetworkErrorMessage(error: unknown) {

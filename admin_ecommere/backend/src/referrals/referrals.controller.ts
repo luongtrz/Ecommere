@@ -14,7 +14,7 @@ export class ReferralsController {
     @Get('config')
     @Roles(Role.ADMIN)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Lay cau hinh referral' })
+    @ApiOperation({ summary: 'Lấy cấu hình referral' })
     async getConfig() {
         return this.referralsService.getConfig();
     }
@@ -22,7 +22,7 @@ export class ReferralsController {
     @Put('config')
     @Roles(Role.ADMIN)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Cap nhat cau hinh referral' })
+    @ApiOperation({ summary: 'Cập nhật cấu hình referral' })
     async updateConfig(@Body() dto: UpdateReferralConfigDto) {
         return this.referralsService.updateConfig(dto);
     }
@@ -30,7 +30,7 @@ export class ReferralsController {
     @Get('stats')
     @Roles(Role.ADMIN)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Thong ke referral' })
+    @ApiOperation({ summary: 'Thống kê referral' })
     async getStats() {
         return this.referralsService.getStats();
     }
@@ -38,7 +38,7 @@ export class ReferralsController {
     @Get('list')
     @Roles(Role.ADMIN)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Danh sach tat ca referrals' })
+    @ApiOperation({ summary: 'Danh sách tất cả referrals' })
     async getAllReferrals(@Query() paginationDto: PaginationDto) {
         return this.referralsService.getAllReferrals(paginationDto);
     }

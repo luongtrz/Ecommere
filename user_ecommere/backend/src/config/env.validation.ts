@@ -7,6 +7,11 @@ enum Environment {
   Test = 'test',
 }
 
+enum ChatbotProvider {
+  Gemini = 'gemini',
+  OpenAiCompatible = 'openai-compatible',
+}
+
 class EnvironmentVariables {
   @IsEnum(Environment)
   NODE_ENV: Environment = Environment.Development;
@@ -46,6 +51,10 @@ class EnvironmentVariables {
 
   @IsNumber()
   MAX_PAGE_SIZE: number = 100;
+
+  @IsOptional()
+  @IsEnum(ChatbotProvider)
+  CHATBOT_PROVIDER?: ChatbotProvider;
 
   @IsOptional()
   @IsString()

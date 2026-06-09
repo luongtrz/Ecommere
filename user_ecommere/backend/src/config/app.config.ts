@@ -20,14 +20,15 @@ export default registerAs('app', () => ({
     maxPageSize: parseInt(process.env.MAX_PAGE_SIZE, 10) || 100,
   },
   chatbot: {
+    provider: process.env.CHATBOT_PROVIDER || 'gemini',
     providerUrl: process.env.CHATBOT_PROVIDER_URL,
     apiKey: process.env.CHATBOT_API_KEY,
     model: process.env.CHATBOT_MODEL,
     systemPrompt:
       process.env.CHATBOT_SYSTEM_PROMPT ||
-      'Bạn là trợ lý bán hàng cho Thai Spray. Trả lời bằng tiếng Việt, ngắn gọn, hữu ích, ưu tiên tư vấn sản phẩm, đơn hàng và cách sử dụng.',
+      'Bạn là trợ lý bán hàng cho Thai Spray. Luôn trả lời bằng tiếng Việt có dấu, ngắn gọn, tự nhiên, tập trung tư vấn sản phẩm, đơn hàng và cách sử dụng. Chỉ trả lời nội dung cuối cùng cho khách hàng. Không lặp lại yêu cầu, không giải thích hệ thống, không nêu giả định, không liệt kê suy luận nội bộ, không dùng tiếng Anh nếu không được yêu cầu.',
     timeoutMs: parseInt(process.env.CHATBOT_TIMEOUT_MS, 10) || 30000,
-    temperature: parseFloat(process.env.CHATBOT_TEMPERATURE || '0.7'),
+    temperature: parseFloat(process.env.CHATBOT_TEMPERATURE || '0.4'),
     maxTokens: parseInt(process.env.CHATBOT_MAX_TOKENS, 10) || 500,
     historyLimit: parseInt(process.env.CHATBOT_HISTORY_LIMIT, 10) || 10,
   },
