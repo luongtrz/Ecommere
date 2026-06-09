@@ -1,0 +1,27 @@
+{
+  email noreply@thaispray.shop
+}
+
+admin-ecommere.luongtrz.me {
+  encode gzip zstd
+
+  @api path /api/*
+  reverse_proxy @api admin-backend:4000
+
+  @uploads path /uploads/*
+  reverse_proxy @uploads admin-backend:4000
+
+  reverse_proxy admin-frontend:80
+}
+
+ecommere.luongtrz.me, luongtrz.me {
+  encode gzip zstd
+
+  @api path /api/*
+  reverse_proxy @api backend:4000
+
+  @uploads path /uploads/*
+  reverse_proxy @uploads backend:4000
+
+  reverse_proxy frontend:80
+}

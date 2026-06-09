@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api`,
@@ -111,7 +111,6 @@ apiClient.interceptors.response.use(
         authToken.remove();
         localStorage.removeItem('user');
 
-        // Show toast notification for session expiry
         const toastEvent = new CustomEvent('session-expired');
         window.dispatchEvent(toastEvent);
 
