@@ -7,7 +7,6 @@
 .github/
 .vscode/
 .env
-.env.example
 
 # Logs
 logs
@@ -52,3 +51,4 @@ lerna-debug.log*
 
 # Prisma
 /prisma/migrations
+!.env.example

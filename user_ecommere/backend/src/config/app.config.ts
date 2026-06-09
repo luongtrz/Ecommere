@@ -19,4 +19,16 @@ export default registerAs('app', () => ({
     defaultPageSize: parseInt(process.env.DEFAULT_PAGE_SIZE, 10) || 20,
     maxPageSize: parseInt(process.env.MAX_PAGE_SIZE, 10) || 100,
   },
+  chatbot: {
+    providerUrl: process.env.CHATBOT_PROVIDER_URL,
+    apiKey: process.env.CHATBOT_API_KEY,
+    model: process.env.CHATBOT_MODEL,
+    systemPrompt:
+      process.env.CHATBOT_SYSTEM_PROMPT ||
+      'Ban la tro ly ban hang cho Thai Spray. Tra loi bang tieng Viet, ngan gon, huu ich, uu tien tu van san pham, don hang va cach su dung.',
+    timeoutMs: parseInt(process.env.CHATBOT_TIMEOUT_MS, 10) || 30000,
+    temperature: parseFloat(process.env.CHATBOT_TEMPERATURE || '0.7'),
+    maxTokens: parseInt(process.env.CHATBOT_MAX_TOKENS, 10) || 500,
+    historyLimit: parseInt(process.env.CHATBOT_HISTORY_LIMIT, 10) || 10,
+  },
 }));

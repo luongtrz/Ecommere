@@ -15,6 +15,7 @@ A complete NestJS + Prisma + PostgreSQL backend for a Thai spray products e-comm
 - Profile management (name, phone, email)
 - Address management (multiple addresses, default address)
 - User-specific data isolation
+- Chatbot proxy endpoint for product and order consultation via external AI provider
 
 ### 📦 Product Management
 - Complete CRUD for products & variants
@@ -342,6 +343,16 @@ UPLOAD_DIR="./uploads"
 # Rate Limiting
 RATE_LIMIT_TTL=60
 RATE_LIMIT_MAX=100
+
+# Chatbot provider
+CHATBOT_PROVIDER_URL="https://your-provider.example.com/v1/chat/completions"
+CHATBOT_API_KEY="replace-with-provider-key"
+CHATBOT_MODEL="gpt-4o-mini"
+CHATBOT_SYSTEM_PROMPT="Ban la tro ly ban hang cho Thai Spray. Tra loi bang tieng Viet, ngan gon, huu ich, uu tien tu van san pham, don hang va cach su dung."
+CHATBOT_TIMEOUT_MS=30000
+CHATBOT_TEMPERATURE=0.7
+CHATBOT_MAX_TOKENS=500
+CHATBOT_HISTORY_LIMIT=10
 ```
 
 ## 🎯 Key Features Explained
