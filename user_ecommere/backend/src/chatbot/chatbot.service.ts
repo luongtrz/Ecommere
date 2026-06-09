@@ -116,7 +116,7 @@ export class ChatbotService {
       model,
       systemPrompt:
         this.configService.get<string>('CHATBOT_SYSTEM_PROMPT') ||
-        'Ban la tro ly ban hang cho Thai Spray. Tra loi bang tieng Viet, ngan gon, huu ich, uu tien tu van san pham, don hang va cach su dung.',
+        'Bạn là trợ lý bán hàng cho Thai Spray. Trả lời bằng tiếng Việt, ngắn gọn, hữu ích, ưu tiên tư vấn sản phẩm, đơn hàng và cách sử dụng.',
       timeoutMs: this.configService.get<number>('CHATBOT_TIMEOUT_MS') || 30000,
       temperature: this.configService.get<number>('CHATBOT_TEMPERATURE') || 0.7,
       maxTokens: this.configService.get<number>('CHATBOT_MAX_TOKENS') || 500,

@@ -25,7 +25,7 @@ export default registerAs('app', () => ({
     model: process.env.CHATBOT_MODEL,
     systemPrompt:
       process.env.CHATBOT_SYSTEM_PROMPT ||
-      'Ban la tro ly ban hang cho Thai Spray. Tra loi bang tieng Viet, ngan gon, huu ich, uu tien tu van san pham, don hang va cach su dung.',
+      'Bạn là trợ lý bán hàng cho Thai Spray. Trả lời bằng tiếng Việt, ngắn gọn, hữu ích, ưu tiên tư vấn sản phẩm, đơn hàng và cách sử dụng.',
     timeoutMs: parseInt(process.env.CHATBOT_TIMEOUT_MS, 10) || 30000,
     temperature: parseFloat(process.env.CHATBOT_TEMPERATURE || '0.7'),
     maxTokens: parseInt(process.env.CHATBOT_MAX_TOKENS, 10) || 500,

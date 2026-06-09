@@ -19,12 +19,12 @@ interface ChatMessage {
 const STORAGE_KEY = 'thai-spray-chatbot-messages';
 const HISTORY_LIMIT = 10;
 const SUGGESTIONS = [
-  'Tu van mui xit phong cho phong khach',
-  'Nen chon dung tich nao cho gia dinh?',
-  'Huong dan su dung de mui ben hon',
+  'Tư vấn mùi xịt phòng cho phòng khách',
+  'Nên chọn dung tích nào cho gia đình?',
+  'Hướng dẫn sử dụng để mùi bền hơn',
 ];
 const WELCOME_MESSAGE =
-  'Xin chao, toi la tro ly Thai Spray. Ban co the hoi ve san pham, mui huong, cach dung hoac don hang.';
+  'Xin chào, tôi là trợ lý Thai Spray. Bạn có thể hỏi về sản phẩm, mùi hương, cách dùng hoặc đơn hàng.';
 
 function createChatMessage(role: ChatbotRole, content: string): ChatMessage {
   return {
@@ -57,7 +57,7 @@ function getErrorMessage(error: unknown) {
       normalizeMessage(error.response?.data?.message) ||
       normalizeMessage(error.response?.data?.error) ||
       error.message ||
-      'Khong the ket noi chatbot luc nay.'
+      'Không thể kết nối chatbot lúc này.'
     );
   }
 
@@ -65,7 +65,7 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'Khong the ket noi chatbot luc nay.';
+  return 'Không thể kết nối chatbot lúc này.';
 }
 
 export function ChatbotWidget() {
@@ -143,8 +143,8 @@ export function ChatbotWidget() {
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Tu van cung Thai Spray</p>
-                <p className="mt-1 text-xs text-white/70">Chatbot se goi qua backend va giu API key o server.</p>
+                <p className="text-sm font-semibold">Tư vấn cùng Thai Spray</p>
+                <p className="mt-1 text-xs text-white/70">Chatbot sẽ gọi qua backend và giữ API key ở server.</p>
               </div>
             </div>
 
@@ -191,7 +191,7 @@ export function ChatbotWidget() {
 
             {messages.length <= 1 ? (
               <div className="space-y-2">
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Goi y nhanh</p>
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Gợi ý nhanh</p>
                 <div className="flex flex-wrap gap-2">
                   {SUGGESTIONS.map((suggestion) => (
                     <button
@@ -211,7 +211,7 @@ export function ChatbotWidget() {
               <div className="flex justify-start">
                 <div className="flex items-center gap-2 rounded-3xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Dang phan hoi...
+                  Đang phản hồi...
                 </div>
               </div>
             ) : null}
@@ -231,12 +231,12 @@ export function ChatbotWidget() {
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={handleComposerKeyDown}
-                placeholder="Nhap cau hoi cua ban..."
+                placeholder="Nhập câu hỏi của bạn..."
                 className="min-h-[96px] resize-none border-0 px-2 py-2 shadow-none focus-visible:ring-0"
                 maxLength={4000}
               />
               <div className="flex items-center justify-between gap-3 px-2 pb-1 pt-2">
-                <p className="text-xs text-muted-foreground">Enter de gui, Shift+Enter de xuong dong</p>
+                <p className="text-xs text-muted-foreground">Enter để gửi, Shift+Enter để xuống dòng</p>
                 <Button
                   onClick={handleSubmit}
                   disabled={!draft.trim() || mutation.isPending}
@@ -247,7 +247,7 @@ export function ChatbotWidget() {
                   ) : (
                     <SendHorizonal className="mr-2 h-4 w-4" />
                   )}
-                  Gui
+                  Gửi
                 </Button>
               </div>
             </div>
