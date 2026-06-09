@@ -1,0 +1,74 @@
+name: thaispray-stack
+
+services:
+  edge:
+    image: caddy:2
+    container_name: thaispray-edge
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend
+      - admin-frontend
+      - admin-backend
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - thaispray-net
+
+  backend:
+    build:
+      context: ./user_ecommere/backend
+    container_name: thaispray-user-backend
+    restart: unless-stopped
+    env_file:
+      - ./user_ecommere/backend/.env
+    volumes:
+      - ./user_ecommere/backend/uploads:/app/uploads
+    networks:
+      - thaispray-net
+
+  frontend:
+    build:
+      context: ./user_ecommere/frontend
+      args:
+        VITE_API_BASE_URL: ""
+    container_name: thaispray-user-frontend
+    restart: unless-stopped
+    networks:
+      - thaispray-net
+
+  admin-backend:
+    build:
+      context: ./admin_ecommere/backend
+    container_name: thaispray-admin-backend
+    restart: unless-stopped
+    env_file:
+      - ./admin_ecommere/backend/.env
+    volumes:
+      - ./admin_ecommere/backend/uploads:/app/uploads
+    networks:
+      - thaispray-net
+
+  admin-frontend:
+    build:
+      context: ./admin_ecommere/frontend
+      args:
+        VITE_API_BASE_URL: ""
+    container_name: thaispray-admin-frontend
+    restart: unless-stopped
+    networks:
+      - thaispray-net
+
+networks:
+  thaispray-net:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
