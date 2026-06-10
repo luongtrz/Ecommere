@@ -80,14 +80,14 @@ export function CategoryNav() {
   return (
     <div
       ref={navRef}
-      className="bg-white border-b relative z-10 hidden md:block"
+      className="bg-background/85 backdrop-blur-xl border-b border-white/40 relative z-10 hidden md:block"
       onMouseLeave={() => setActiveCategory(null)}
     >
       <div className="container relative">
         {showLeftArrow && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center bg-white border rounded-md text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center bg-white/90 border border-white/80 rounded-full text-muted-foreground hover:text-foreground shadow-sm transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -96,7 +96,7 @@ export function CategoryNav() {
         {showRightArrow && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center bg-white border rounded-md text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center bg-white/90 border border-white/80 rounded-full text-muted-foreground hover:text-foreground shadow-sm transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -104,14 +104,14 @@ export function CategoryNav() {
 
         <ul
           ref={scrollContainerRef}
-          className="flex items-center gap-6 overflow-x-auto scrollbar-hide py-3 scroll-smooth"
+          className="flex items-center gap-7 overflow-x-auto scrollbar-hide py-3 scroll-smooth"
         >
           <li className="shrink-0">
             <Link
               to="/catalog"
               className={cn(
-                "text-sm font-medium transition-colors whitespace-nowrap",
-                isActive('/catalog') ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                "text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap",
+                isActive('/catalog') ? "text-primary" : "text-muted-foreground hover:text-primary"
               )}
               onMouseEnter={() => setActiveCategory(null)}
             >
@@ -124,10 +124,10 @@ export function CategoryNav() {
               <Link
                 to={`/c/${category.slug}`}
                 className={cn(
-                  "text-sm font-medium transition-colors whitespace-nowrap",
+                  "text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap",
                   isActive(`/c/${category.slug}`) || activeCategory?.id === category.id
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary"
                 )}
                 onMouseEnter={(e) => handleMouseEnter(category, e)}
               >
@@ -142,36 +142,36 @@ export function CategoryNav() {
       <div
         style={{ left: menuPosition }}
         className={cn(
-          "absolute top-full bg-white border rounded-lg shadow-lg transition-all duration-150 min-w-[200px] z-10",
+          "absolute top-full border border-white/60 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl transition-all duration-150 min-w-[210px] z-10 p-1.5 mt-1",
           activeCategory
             ? "opacity-100 visible translate-y-0"
             : "opacity-0 invisible -translate-y-1 pointer-events-none"
         )}
       >
         {activeCategory && (
-          <div className="py-1">
+          <div className="flex flex-col gap-0.5">
             {subCategories.length > 0 ? (
               <>
                 {subCategories.map((sub) => (
                   <Link
                     key={sub.id}
                     to={`/c/${sub.slug}`}
-                    className="block text-sm text-muted-foreground hover:text-foreground hover:bg-muted px-3 py-2 transition-colors"
+                    className="block text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-xl px-3.5 py-2 transition-colors font-medium"
                   >
                     {sub.name}
                   </Link>
                 ))}
-                <div className="border-t mt-1 pt-1">
+                <div className="border-t border-dashed border-gray-100 mt-1 pt-1.5">
                   <Link
                     to={`/c/${activeCategory.slug}`}
-                    className="block text-sm font-medium text-primary hover:bg-muted px-3 py-2 transition-colors"
+                    className="block text-sm font-semibold text-primary hover:bg-secondary/60 rounded-xl px-3.5 py-2 transition-colors"
                   >
                     Xem tất cả
                   </Link>
                 </div>
               </>
             ) : (
-              <div className="px-3 py-2 text-sm text-muted-foreground">
+              <div className="px-3.5 py-2.5 text-xs text-muted-foreground">
                 Chưa có danh mục con
               </div>
             )}

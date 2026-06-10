@@ -42,20 +42,20 @@ export function Header() {
         </div>
       </div>
 
-      <div className="border-b border-white/50 bg-background/80 backdrop-blur-xl">
-        <div className="container py-3">
-          <div className="glass-panel flex items-center gap-3 rounded-[1.75rem] px-3 py-3 md:px-5">
+      <div className="border-b border-white/40 bg-background/85 backdrop-blur-xl shadow-sm">
+        <div className="container py-3.5 md:py-4">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full md:hidden">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full md:hidden hover:bg-secondary/60">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[86vw] max-w-sm border-white/70 bg-white/95">
                   <div className="mt-6 flex flex-col gap-6">
                     <Link to="/" className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-foreground text-sm font-bold text-white">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 font-serif text-sm font-extrabold text-secondary shadow-lg shadow-primary/20">
                         TS
                       </div>
                       <div>
@@ -90,8 +90,8 @@ export function Header() {
                             <Link to="/orders" className="rounded-2xl px-4 py-3 transition hover:bg-secondary">Theo dõi đơn hàng</Link>
                             <Link to="/referral" className="rounded-2xl px-4 py-3 transition hover:bg-secondary">Mời bạn bè</Link>
                             <button
-                              onClick={logout}
-                              className="rounded-2xl px-4 py-3 text-left text-destructive transition hover:bg-destructive/5"
+                               onClick={logout}
+                               className="rounded-2xl px-4 py-3 text-left text-destructive transition hover:bg-destructive/5"
                             >
                               Đăng xuất
                             </button>
@@ -105,22 +105,22 @@ export function Header() {
                 </SheetContent>
               </Sheet>
 
-              <Link to="/" className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-foreground text-sm font-bold text-white shadow-lg shadow-primary/20">
+              <Link to="/" className="flex items-center gap-3 group">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-emerald-950 font-serif text-sm font-extrabold text-secondary shadow-lg shadow-primary/25 transition duration-300 group-hover:scale-105">
                   TS
                 </div>
                 <div className="hidden min-w-0 sm:block">
-                  <p className="font-semibold leading-none text-foreground">Thai Spray</p>
+                  <p className="font-semibold leading-none text-foreground transition duration-300 group-hover:text-primary">Thai Spray</p>
                   <p className="mt-1 text-xs text-muted-foreground">Mùi hương tinh gọn, hiện đại, dễ sống cùng.</p>
                 </div>
               </Link>
             </div>
 
-            <div className="hidden flex-1 md:block">
+            <div className="hidden flex-1 max-w-md mx-auto md:block">
               <SearchBox />
             </div>
 
-            <nav className="ml-auto flex items-center gap-2">
+            <nav className="flex items-center gap-2">
               <Button
                 asChild
                 variant="ghost"
