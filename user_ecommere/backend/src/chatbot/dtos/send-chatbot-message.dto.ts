@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   IsArray,
   IsIn,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
@@ -30,6 +31,7 @@ export class SendChatbotMessageDto {
     description: 'Current user prompt to send to the chatbot provider',
   })
   @IsString()
+  @IsNotEmpty()
   @MaxLength(4000)
   prompt: string;
 

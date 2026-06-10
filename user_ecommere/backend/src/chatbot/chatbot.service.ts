@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  BadRequestException,
   Injectable,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -67,6 +68,10 @@ export class ChatbotService {
   async sendMessage(dto: SendChatbotMessageDto) {
     const config = this.getProviderConfig();
     const prompt = dto.prompt.trim();
+
+    if (!prompt) {
+      throw new BadRequestException('Prompt must not be empty.');
+    }
     const sessionId = dto.sessionId?.trim() || null;
 
     const storedHistory = sessionId

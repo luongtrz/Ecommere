@@ -27,6 +27,14 @@ export class ChatbotRetrievalService {
     },
   ): Promise<RetrievalResult> {
     const trimmedQuery = query.trim();
+
+    if (!trimmedQuery) {
+      return {
+        hasResults: false,
+        context: '',
+        sources: [],
+      };
+    }
     const normalizedQuery = this.normalize(trimmedQuery);
     const tokens = this.extractTokens(trimmedQuery);
     const categoryIds = await this.findRelevantCategoryIds(trimmedQuery, tokens);
