@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { Bot, Loader2, SendHorizonal, Sparkles, Trash2, X } from 'lucide-react';
+import { Bot, Loader2, SendHorizonal, Sparkles, Trash2, X, ArrowUpRight } from 'lucide-react';
 import { toast } from 'sonner';
-import { chatbotApi, type ChatbotRole } from '../api/chatbot.api';
+import { chatbotApi, type ChatbotRole, type ChatbotSource } from '../api/chatbot.api';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { useProductDetail } from '@/features/catalog/hooks/useProductDetail';
+import { formatCurrency } from '@/lib/formatters';
 
 interface ChatMessage {
   id: string;
   role: ChatbotRole;
   content: string;
   createdAt: string;
+  sources?: ChatbotSource[];
 }
 
 const STORAGE_KEY = 'thai-spray-chatbot-messages';
@@ -30,13 +33,42 @@ const LEGACY_MESSAGE_REWRITES: Record<string, string> = {
     WELCOME_MESSAGE,
 };
 
-function createChatMessage(role: ChatbotRole, content: string): ChatMessage {
+function createChatMessage(role: ChatbotRole, content: string, sources?: ChatbotSource[]): ChatMessage {
   return {
     id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     role,
     content,
     createdAt: new Date().toISOString(),
+    sources,
   };
+}
+
+function ChatbotSourceItem({ source }: { source: ChatbotSource }) {
+  const { data: product, isLoading } = useProductDetail(source.slug);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground animate-pulse bg-slate-100/50 border border-slate-200 px-2.5 py-1 rounded-xl">
+        <div className="h-2 w-2 rounded-full bg-slate-400 animate-ping" />
+        <span>{source.name}</span>
+      </div>
+    );
+  }
+
+  const price = product?.variants?.[0]?.salePrice || product?.variants?.[0]?.price || product?.basePrice || 0;
+
+  return (
+    <a
+      href={`/p/${source.slug}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-emerald-700 hover:underline transition group bg-secondary/50 hover:bg-secondary px-2.5 py-1 rounded-xl w-fit border border-primary/5 shadow-sm active:scale-95"
+    >
+      <span className="truncate max-w-[220px]">{source.name}</span>
+      {price > 0 && <span className="text-foreground/80 font-medium ml-1">({formatCurrency(price)})</span>}
+      <ArrowUpRight className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
+    </a>
+  );
 }
 
 function createSessionId() {
@@ -137,7 +169,7 @@ export function ChatbotWidget() {
       if (data.sessionId && data.sessionId !== sessionId) {
         setSessionId(data.sessionId);
       }
-      setMessages((current) => [...current, createChatMessage('assistant', data.message)]);
+      setMessages((current) => [...current, createChatMessage('assistant', data.message, data.sources)]);
     },
     onError: (error) => {
       const message = getErrorMessage(error);
@@ -186,7 +218,7 @@ export function ChatbotWidget() {
   return (
     <>
       {isOpen ? (
-        <div className="fixed bottom-20 right-3 z-50 flex h-[min(70vh,580px)] w-[calc(100vw-1.5rem)] max-w-[380px] flex-col overflow-hidden rounded-[28px] border border-border bg-background shadow-2xl md:bottom-6 md:right-6">
+        <div className="fixed bottom-20 right-3 z-50 flex h-[min(80vh,700px)] w-[calc(100vw-2rem)] max-w-[460px] flex-col overflow-hidden rounded-[28px] border border-border bg-background shadow-2xl md:bottom-6 md:right-6">
           <div className="flex items-start justify-between gap-3 border-b bg-foreground px-4 py-4 text-white">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
@@ -234,7 +266,18 @@ export function ChatbotWidget() {
                       : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'
                   )}
                 >
-                  {message.content}
+                  <div className="whitespace-pre-line">{message.content}</div>
+
+                  {message.role === 'assistant' && message.sources && message.sources.length > 0 && (
+                    <div className="mt-3 border-t border-dashed border-slate-200 pt-2.5">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Sản phẩm liên quan:</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {message.sources.map((source) => (
+                          <ChatbotSourceItem key={source.id} source={source} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
