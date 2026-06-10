@@ -25,6 +25,10 @@ const SUGGESTIONS = [
 ];
 const WELCOME_MESSAGE =
   'Xin chào, tôi là trợ lý Thai Spray. Bạn có thể hỏi về sản phẩm, mùi hương, cách dùng hoặc đơn hàng.';
+const LEGACY_MESSAGE_REWRITES: Record<string, string> = {
+  'Xin chao, toi la tro ly Thai Spray. Ban co the hoi ve san pham, mui huong, cach dung hoac don hang.':
+    WELCOME_MESSAGE,
+};
 
 function createChatMessage(role: ChatbotRole, content: string): ChatMessage {
   return {
@@ -74,6 +78,28 @@ export function ChatbotWidget() {
   const [lastError, setLastError] = useState<string | null>(null);
   const [messages, setMessages] = useLocalStorage<ChatMessage[]>(STORAGE_KEY, getInitialMessages());
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setMessages((current) => {
+      let hasChanges = false;
+
+      const nextMessages = current.map((message) => {
+        const nextContent = LEGACY_MESSAGE_REWRITES[message.content];
+
+        if (!nextContent) {
+          return message;
+        }
+
+        hasChanges = true;
+        return {
+          ...message,
+          content: nextContent,
+        };
+      });
+
+      return hasChanges ? nextMessages : current;
+    });
+  }, [setMessages]);
 
   useEffect(() => {
     if (messages.length === 0) {
