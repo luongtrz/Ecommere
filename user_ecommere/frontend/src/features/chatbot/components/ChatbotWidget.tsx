@@ -17,14 +17,18 @@ interface ChatMessage {
 }
 
 const STORAGE_KEY = 'thai-spray-chatbot-messages';
-const HISTORY_LIMIT = 10;
+const SESSION_STORAGE_KEY = 'thai-spray-chatbot-session-id';
 const SUGGESTIONS = [
-  'Tu van mui xit phong cho phong khach',
-  'Nen chon dung tich nao cho gia dinh?',
-  'Huong dan su dung de mui ben hon',
+  'Tư vấn mùi xịt phòng cho phòng khách',
+  'Nên chọn dung tích nào cho gia đình?',
+  'Hướng dẫn sử dụng để mùi bền hơn',
 ];
 const WELCOME_MESSAGE =
-  'Xin chao, toi la tro ly Thai Spray. Ban co the hoi ve san pham, mui huong, cach dung hoac don hang.';
+  'Xin chào, tôi là trợ lý Thai Spray. Bạn có thể hỏi về sản phẩm, mùi hương, cách dùng hoặc đơn hàng.';
+const LEGACY_MESSAGE_REWRITES: Record<string, string> = {
+  'Xin chao, toi la tro ly Thai Spray. Ban co the hoi ve san pham, mui huong, cach dung hoac don hang.':
+    WELCOME_MESSAGE,
+};
 
 function createChatMessage(role: ChatbotRole, content: string): ChatMessage {
   return {
@@ -33,6 +37,14 @@ function createChatMessage(role: ChatbotRole, content: string): ChatMessage {
     content,
     createdAt: new Date().toISOString(),
   };
+}
+
+function createSessionId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `chat_${crypto.randomUUID()}`;
+  }
+
+  return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function getInitialMessages(): ChatMessage[] {
@@ -57,7 +69,7 @@ function getErrorMessage(error: unknown) {
       normalizeMessage(error.response?.data?.message) ||
       normalizeMessage(error.response?.data?.error) ||
       error.message ||
-      'Khong the ket noi chatbot luc nay.'
+      'Không thể kết nối chatbot lúc này.'
     );
   }
 
@@ -65,7 +77,7 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'Khong the ket noi chatbot luc nay.';
+  return 'Không thể kết nối chatbot lúc này.';
 }
 
 export function ChatbotWidget() {
@@ -73,13 +85,42 @@ export function ChatbotWidget() {
   const [draft, setDraft] = useState('');
   const [lastError, setLastError] = useState<string | null>(null);
   const [messages, setMessages] = useLocalStorage<ChatMessage[]>(STORAGE_KEY, getInitialMessages());
+  const [sessionId, setSessionId] = useLocalStorage<string>(SESSION_STORAGE_KEY, createSessionId());
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setMessages((current) => {
+      let hasChanges = false;
+
+      const nextMessages = current.map((message) => {
+        const nextContent = LEGACY_MESSAGE_REWRITES[message.content];
+
+        if (!nextContent) {
+          return message;
+        }
+
+        hasChanges = true;
+        return {
+          ...message,
+          content: nextContent,
+        };
+      });
+
+      return hasChanges ? nextMessages : current;
+    });
+  }, [setMessages]);
 
   useEffect(() => {
     if (messages.length === 0) {
       setMessages(getInitialMessages());
     }
   }, [messages.length, setMessages]);
+
+  useEffect(() => {
+    if (!sessionId) {
+      setSessionId(createSessionId());
+    }
+  }, [sessionId, setSessionId]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -93,6 +134,9 @@ export function ChatbotWidget() {
     mutationFn: chatbotApi.sendMessage,
     onSuccess: (data) => {
       setLastError(null);
+      if (data.sessionId && data.sessionId !== sessionId) {
+        setSessionId(data.sessionId);
+      }
       setMessages((current) => [...current, createChatMessage('assistant', data.message)]);
     },
     onError: (error) => {
@@ -105,19 +149,14 @@ export function ChatbotWidget() {
   const handleSubmit = () => {
     const prompt = draft.trim();
 
-    if (!prompt || mutation.isPending) {
+    if (!prompt || mutation.isPending || !sessionId) {
       return;
     }
-
-    const history = messages.slice(-HISTORY_LIMIT).map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
 
     setLastError(null);
     setDraft('');
     setMessages((current) => [...current, createChatMessage('user', prompt)]);
-    mutation.mutate({ prompt, history });
+    mutation.mutate({ prompt, sessionId });
   };
 
   const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -128,9 +167,20 @@ export function ChatbotWidget() {
   };
 
   const handleReset = () => {
+    const previousSessionId = sessionId;
+    const nextSessionId = createSessionId();
+
     setLastError(null);
     setDraft('');
     setMessages(getInitialMessages());
+    setSessionId(nextSessionId);
+
+    if (previousSessionId) {
+      void chatbotApi.clearHistory(previousSessionId).catch(() => {
+        // The new session id is already active on the client, so failing to delete
+        // the old Redis history only affects TTL cleanup on the server.
+      });
+    }
   };
 
   return (
@@ -143,8 +193,8 @@ export function ChatbotWidget() {
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Tu van cung Thai Spray</p>
-                <p className="mt-1 text-xs text-white/70">Chatbot se goi qua backend va giu API key o server.</p>
+                <p className="text-sm font-semibold">Tư vấn cùng Thai Spray</p>
+                <p className="mt-1 text-xs text-white/70">Chatbot sẽ gọi qua backend, lấy dữ liệu sản phẩm từ DB và giữ API key ở server.</p>
               </div>
             </div>
 
@@ -191,7 +241,7 @@ export function ChatbotWidget() {
 
             {messages.length <= 1 ? (
               <div className="space-y-2">
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Goi y nhanh</p>
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Gợi ý nhanh</p>
                 <div className="flex flex-wrap gap-2">
                   {SUGGESTIONS.map((suggestion) => (
                     <button
@@ -211,7 +261,7 @@ export function ChatbotWidget() {
               <div className="flex justify-start">
                 <div className="flex items-center gap-2 rounded-3xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Dang phan hoi...
+                  Đang phản hồi...
                 </div>
               </div>
             ) : null}
@@ -231,15 +281,15 @@ export function ChatbotWidget() {
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={handleComposerKeyDown}
-                placeholder="Nhap cau hoi cua ban..."
+                placeholder="Nhập câu hỏi của bạn..."
                 className="min-h-[96px] resize-none border-0 px-2 py-2 shadow-none focus-visible:ring-0"
                 maxLength={4000}
               />
               <div className="flex items-center justify-between gap-3 px-2 pb-1 pt-2">
-                <p className="text-xs text-muted-foreground">Enter de gui, Shift+Enter de xuong dong</p>
+                <p className="text-xs text-muted-foreground">Enter để gửi, Shift+Enter để xuống dòng</p>
                 <Button
                   onClick={handleSubmit}
-                  disabled={!draft.trim() || mutation.isPending}
+                  disabled={!draft.trim() || mutation.isPending || !sessionId}
                   className="rounded-full px-4"
                 >
                   {mutation.isPending ? (
@@ -247,7 +297,7 @@ export function ChatbotWidget() {
                   ) : (
                     <SendHorizonal className="mr-2 h-4 w-4" />
                   )}
-                  Gui
+                  Gửi
                 </Button>
               </div>
             </div>

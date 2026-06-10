@@ -11,14 +11,14 @@ export class ReferralsService {
     constructor(private prisma: PrismaService) { }
 
     /**
-     * Lay cau hinh referral hien tai
+     * Lấy cấu hình referral hiện tại
      */
     async getConfig() {
         let config = await this.prisma.referralConfig.findFirst({
             orderBy: { updatedAt: 'desc' },
         });
 
-        // Tao cau hinh mac dinh neu chua co
+        // Tạo cấu hình mặc định nếu chưa có
         if (!config) {
             config = await this.prisma.referralConfig.create({
                 data: {
@@ -36,7 +36,7 @@ export class ReferralsService {
     }
 
     /**
-     * Cap nhat cau hinh referral
+     * Cập nhật cấu hình referral
      */
     async updateConfig(dto: UpdateReferralConfigDto) {
         const existing = await this.prisma.referralConfig.findFirst({
@@ -44,7 +44,7 @@ export class ReferralsService {
         });
 
         if (!existing) {
-            // Tao moi neu chua co
+            // Tạo mới nếu chưa có
             return this.prisma.referralConfig.create({
                 data: {
                     active: dto.active ?? true,
@@ -68,7 +68,7 @@ export class ReferralsService {
     }
 
     /**
-     * Thong ke referral
+     * Thống kê referral
      */
     async getStats() {
         const [totalReferrals, totalCouponsCreated, activeConfig] = await Promise.all([
@@ -92,7 +92,7 @@ export class ReferralsService {
             take: 10,
         });
 
-        // Lay thong tin user cho top referrers
+        // Lấy thông tin user cho top referrers
         const topReferrerUsers = await Promise.all(
             topReferrers.map(async (r) => {
                 const user = await this.prisma.user.findUnique({
@@ -115,7 +115,7 @@ export class ReferralsService {
     }
 
     /**
-     * Danh sach tat ca referrals (phan trang)
+     * Danh sách tất cả referrals (phân trang)
      */
     async getAllReferrals(paginationDto: PaginationDto) {
         const { page = 1, limit = 20 } = paginationDto;

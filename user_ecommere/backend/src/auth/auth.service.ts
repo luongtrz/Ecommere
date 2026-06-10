@@ -65,14 +65,14 @@ export class AuthService {
 
     this.logger.log(`New user registered: ${phone}`);
 
-    // Xu ly referral code neu co
+    // Xử lý referral code nếu có
     if (referralCode) {
       try {
         await this.referralsService.processReferral(referralCode, user.id);
         this.logger.log(`Referral processed for new user ${phone} with code ${referralCode}`);
       } catch (error) {
         this.logger.warn(`Failed to process referral for ${phone}: ${error.message}`);
-        // Khong throw loi - referral that bai khong nen anh huong dang ky
+        // Không throw lỗi - referral thất bại không nên ảnh hưởng đăng ký
       }
     }
 

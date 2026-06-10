@@ -121,7 +121,7 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
         return currentFilters.brand.split(',').map(b => b.trim()).filter(Boolean);
     }, [currentFilters.brand]);
 
-    // Dem so luong filter dang active
+    // Đếm số lượng filter đang active
     const activeFilterCount = useMemo(() => {
         let count = 0;
         if (currentFilters.categorySlug) count++;

@@ -10,7 +10,7 @@ export class ReferralsService {
     constructor(private prisma: PrismaService) { }
 
     /**
-     * Lay thong tin referral cua user hien tai
+     * Lấy thông tin referral của user hiện tại
      */
     async getMyReferralInfo(userId: string) {
         const user = await this.prisma.user.findUnique({
@@ -26,18 +26,18 @@ export class ReferralsService {
             throw new BadRequestException('User not found');
         }
 
-        // Tao referral code neu chua co
+        // Tạo referral code nếu chưa có
         let referralCode = user.referralCode;
         if (!referralCode) {
             referralCode = await this.generateReferralCode(userId);
         }
 
-        // Dem so luong referral
+        // Đếm số lượng referral
         const totalReferrals = await this.prisma.referral.count({
             where: { referrerId: userId },
         });
 
-        // Dem so coupon da nhan tu referral
+        // Đếm số coupon đã nhận từ referral
         const referralRecords = await this.prisma.referral.findMany({
             where: { referrerId: userId },
             select: { referrerCouponCode: true },
@@ -55,7 +55,7 @@ export class ReferralsService {
     }
 
     /**
-     * Danh sach ban be da moi (phan trang)
+     * Danh sách bạn bè đã mời (phân trang)
      */
     async getMyReferrals(userId: string, paginationDto: PaginationDto) {
         const { page = 1, limit = 20 } = paginationDto;
@@ -96,7 +96,7 @@ export class ReferralsService {
     }
 
     /**
-     * Danh sach coupon da nhan tu referral
+     * Danh sách coupon đã nhận từ referral
      */
     async getMyCouponsFromReferral(userId: string) {
         const referrals = await this.prisma.referral.findMany({
@@ -121,34 +121,34 @@ export class ReferralsService {
     }
 
     /**
-     * Xu ly khi user moi dang ky bang ma gioi thieu
+     * Xử lý khi user mới đăng ký bằng mã giới thiệu
      */
     async processReferral(referralCode: string, newUserId: string) {
-        // Tim nguoi gioi thieu
+        // Tìm người giới thiệu
         const referrer = await this.prisma.user.findUnique({
             where: { referralCode },
         });
 
         if (!referrer) {
             this.logger.warn(`Referral code not found: ${referralCode}`);
-            return null; // Khong throw loi, chi bo qua
+            return null; // Không throw lỗi, chỉ bỏ qua
         }
 
-        // Khong cho tu gioi thieu chinh minh
+        // Không cho tự giới thiệu chính mình
         if (referrer.id === newUserId) {
             return null;
         }
 
-        // Kiem tra da co referral chua
+        // Kiểm tra đã có referral chưa
         const existingReferral = await this.prisma.referral.findUnique({
             where: { refereeId: newUserId },
         });
 
         if (existingReferral) {
-            return null; // Da duoc gioi thieu roi
+            return null; // Đã được giới thiệu rồi
         }
 
-        // Lay cau hinh referral
+        // Lấy cấu hình referral
         const config = await this.prisma.referralConfig.findFirst({
             where: { active: true },
             orderBy: { updatedAt: 'desc' },
@@ -159,7 +159,7 @@ export class ReferralsService {
             return null;
         }
 
-        // Kiem tra gioi han referral
+        // Kiểm tra giới hạn referral
         if (config.maxReferralsPerUser) {
             const currentCount = await this.prisma.referral.count({
                 where: { referrerId: referrer.id },
@@ -170,7 +170,7 @@ export class ReferralsService {
             }
         }
 
-        // Tao coupon cho nguoi gioi thieu
+        // Tạo coupon cho người giới thiệu
         const referrerCouponCode = await this.createReferralCoupon(
             `REF-ER-${Date.now().toString(36).toUpperCase()}`,
             config.referrerCouponType,
@@ -180,7 +180,7 @@ export class ReferralsService {
             config.couponValidDays,
         );
 
-        // Tao coupon cho nguoi duoc gioi thieu
+        // Tạo coupon cho người được giới thiệu
         const refereeCouponCode = await this.createReferralCoupon(
             `REF-EE-${Date.now().toString(36).toUpperCase()}`,
             config.refereeCouponType,
@@ -190,7 +190,7 @@ export class ReferralsService {
             config.couponValidDays,
         );
 
-        // Tao record referral
+        // Tạo record referral
         const referral = await this.prisma.referral.create({
             data: {
                 referrerId: referrer.id,
@@ -200,7 +200,7 @@ export class ReferralsService {
             },
         });
 
-        // Cap nhat referredById cho user moi
+        // Cập nhật referredById cho user mới
         await this.prisma.user.update({
             where: { id: newUserId },
             data: { referredById: referrer.id },
@@ -214,14 +214,14 @@ export class ReferralsService {
     }
 
     /**
-     * Tao ma gioi thieu cho user
+     * Tạo mã giới thiệu cho user
      */
     async generateReferralCode(userId: string): Promise<string> {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let code: string;
         let exists = true;
 
-        // Dam bao code la duy nhat
+        // Đảm bảo code là duy nhất
         while (exists) {
             let random = '';
             for (let i = 0; i < 6; i++) {
@@ -243,7 +243,7 @@ export class ReferralsService {
     }
 
     /**
-     * Tao coupon cho referral
+     * Tạo coupon cho referral
      */
     private async createReferralCoupon(
         code: string,

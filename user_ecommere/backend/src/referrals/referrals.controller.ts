@@ -11,14 +11,14 @@ export class ReferralsController {
 
     @Get('me')
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Lay thong tin referral cua user hien tai' })
+    @ApiOperation({ summary: 'Lấy thông tin referral của user hiện tại' })
     async getMyReferralInfo(@CurrentUser('id') userId: string) {
         return this.referralsService.getMyReferralInfo(userId);
     }
 
     @Get('my-referrals')
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Danh sach ban be da moi' })
+    @ApiOperation({ summary: 'Danh sách bạn bè đã mời' })
     async getMyReferrals(
         @CurrentUser('id') userId: string,
         @Query() paginationDto: PaginationDto,
@@ -28,7 +28,7 @@ export class ReferralsController {
 
     @Get('my-coupons')
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Danh sach coupon tu referral' })
+    @ApiOperation({ summary: 'Danh sách coupon từ referral' })
     async getMyCouponsFromReferral(@CurrentUser('id') userId: string) {
         return this.referralsService.getMyCouponsFromReferral(userId);
     }

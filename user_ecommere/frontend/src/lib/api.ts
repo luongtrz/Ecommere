@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api`,
@@ -110,11 +110,11 @@ apiClient.interceptors.response.use(
         processQueue(refreshError, null);
         authToken.remove();
         localStorage.removeItem('user');
-        
+
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
-        
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
