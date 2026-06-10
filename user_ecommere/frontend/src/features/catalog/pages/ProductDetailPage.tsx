@@ -123,7 +123,7 @@ export function ProductDetailPage() {
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={`aspect-square bg-white rounded-lg overflow-hidden transition-all duration-200 ${selectedImage === index
-                      ? 'ring-2 ring-blue-500 ring-offset-1'
+                      ? 'ring-2 ring-primary ring-offset-1'
                       : 'border border-gray-200 hover:border-gray-300 opacity-80 hover:opacity-100'
                       }`}
                   >
@@ -142,7 +142,7 @@ export function ProductDetailPage() {
             <div className="lg:col-span-7 space-y-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary" className="rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100">
+                  <Badge variant="secondary" className="rounded-full bg-secondary text-primary hover:bg-accent/40">
                     {product.category?.name}
                   </Badge>
                   <div className="flex items-center gap-1 text-sm text-amber-500 font-medium">
@@ -155,7 +155,7 @@ export function ProductDetailPage() {
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4">{product.name}</h1>
 
                 <div className="flex items-end gap-3 mb-6">
-                  <span className="text-4xl font-bold text-blue-600 tracking-tight">
+                  <span className="text-4xl font-bold text-primary tracking-tight">
                     {formatCurrency(finalPrice)}
                   </span>
                   {hasDiscount && (
@@ -173,7 +173,7 @@ export function ProductDetailPage() {
                     { icon: RefreshCw, text: 'Đổi trả 7 ngày', sub: 'Thủ tục đơn giản' }
                   ].map((item, idx) => (
                     <div key={idx} className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 border border-gray-100 text-center">
-                      <item.icon className="h-5 w-5 text-blue-600 mb-1.5" />
+                      <item.icon className="h-5 w-5 text-primary mb-1.5" />
                       <span className="text-xs font-bold text-gray-900">{item.text}</span>
                       <span className="text-[10px] text-gray-500">{item.sub}</span>
                     </div>
@@ -244,7 +244,7 @@ export function ProductDetailPage() {
                   </TabsList>
 
                   <TabsContent value="description" className="mt-0 animate-fade-in">
-                    <div className="prose prose-gray max-w-none prose-p:leading-relaxed prose-headings:font-bold prose-a:text-blue-600">
+                    <div className="prose prose-gray max-w-none prose-p:leading-relaxed prose-headings:font-bold prose-a:text-primary">
                       <div className="text-gray-600 whitespace-pre-line">
                         {product.description}
                       </div>

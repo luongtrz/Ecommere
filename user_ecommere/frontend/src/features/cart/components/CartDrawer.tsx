@@ -95,7 +95,7 @@ export function CartDrawer() {
                                 Phí vận chuyển sẽ được tính tại trang thanh toán.
                             </p>
                             <div className="space-y-3">
-                                <Button className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 text-base font-bold" onClick={closeCart} asChild>
+                                <Button className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 shadow-lg shadow-primary/10 text-base font-bold" onClick={closeCart} asChild>
                                     <Link to="/checkout">
                                         Thanh toán ngay <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>

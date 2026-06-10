@@ -55,11 +55,11 @@ export function WishlistPage() {
                                     </Link>
                                     <CardContent className="p-4 flex-1">
                                         <Link to={`/p/${item.slug}`}>
-                                            <h3 className="text-sm font-semibold line-clamp-2 text-gray-900 group-hover:text-blue-600 transition-colors mb-2 min-h-[2.5rem]">
+                                            <h3 className="text-sm font-semibold line-clamp-2 text-gray-900 group-hover:text-primary transition-colors mb-2 min-h-[2.5rem]">
                                                 {item.name}
                                             </h3>
                                         </Link>
-                                        <div className="font-bold text-blue-600">{formatCurrency(item.price)}</div>
+                                        <div className="font-bold text-primary">{formatCurrency(item.price)}</div>
                                     </CardContent>
                                     <CardFooter className="p-4 pt-0">
                                         <Button asChild className="w-full rounded-xl bg-gray-900 hover:bg-black text-xs h-9">

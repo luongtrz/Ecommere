@@ -29,7 +29,7 @@ const getStatusConfig = (status: string) => {
     case 'PENDING_PAYMENT':
       return { label: 'Chờ thanh toán', color: 'text-amber-600 bg-amber-50 border-amber-200', icon: Clock };
     case 'PAID':
-      return { label: 'Đã thanh toán', color: 'text-blue-600 bg-blue-50 border-blue-200', icon: CheckCircle2 };
+      return { label: 'Đã thanh toán', color: 'text-teal-700 bg-teal-50 border-teal-200', icon: CheckCircle2 };
     case 'PACKING':
       return { label: 'Đang đóng gói', color: 'text-purple-600 bg-purple-50 border-purple-200', icon: Package };
     case 'SHIPPED':

@@ -156,10 +156,10 @@ export function CheckoutPage() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                          <MapPin className="h-5 w-5 text-blue-600" />
+                          <MapPin className="h-5 w-5 text-primary" />
                           Địa chỉ giao hàng
                         </h2>
-                        <Button variant="ghost" size="sm" onClick={() => setIsAddressDialogOpen(true)} className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                        <Button variant="ghost" size="sm" onClick={() => setIsAddressDialogOpen(true)} className="text-primary hover:text-primary/80 hover:bg-secondary/40">
                           + Thêm mới
                         </Button>
                       </div>
@@ -179,16 +179,16 @@ export function CheckoutPage() {
                               key={addr.id}
                               onClick={() => setSelectedAddressId(addr.id)}
                               className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 group ${selectedAddressId === addr.id
-                                ? 'border-blue-600 bg-white shadow-lg shadow-blue-100'
-                                : 'border-transparent bg-white shadow-sm hover:border-blue-100 hover:shadow-md'
+                                ? 'border-primary bg-white shadow-lg shadow-primary/5'
+                                : 'border-transparent bg-white shadow-sm hover:border-primary/20 hover:shadow-md'
                                 }`}
                             >
                               <div className="flex justify-between items-start mb-2">
                                 <div className="font-bold text-gray-900">{addr.fullName}</div>
                                 {selectedAddressId === addr.id ? (
-                                  <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                                  <CheckCircle2 className="h-5 w-5 text-primary" />
                                 ) : (
-                                  <Circle className="h-5 w-5 text-gray-200 group-hover:text-blue-300" />
+                                  <Circle className="h-5 w-5 text-gray-200 group-hover:text-primary/40" />
                                 )}
                               </div>
                               <div className="text-sm text-gray-500 mb-3">{addr.phone}</div>
@@ -356,7 +356,7 @@ export function CheckoutPage() {
                     onClick={step < 3 ? handleNextStep : handleSubmit}
                     disabled={step === 1 && !selectedAddress || isSubmitting}
                     className={`h-12 flex-1 rounded-xl text-base font-bold shadow-lg transition-all hover:scale-[1.01] ${step < 3
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-500/25'
+                      ? 'bg-primary text-primary-foreground shadow-primary/10'
                       : 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-500/25'
                       }`}
                   >
@@ -415,7 +415,7 @@ export function CheckoutPage() {
                     <Separator className="my-2 bg-gray-200" />
                     <div className="flex justify-between items-baseline">
                       <span className="text-base font-bold text-gray-900">Tổng thanh toán</span>
-                      <span className="text-2xl font-playfair font-bold text-blue-600">
+                      <span className="text-2xl font-playfair font-bold text-primary">
                         {formatCurrency(finalTotal)}
                       </span>
                     </div>

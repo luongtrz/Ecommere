@@ -78,7 +78,7 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
 
                 {isLoading || !product ? (
                     <div className="flex-1 flex items-center justify-center p-12 min-h-[400px]">
-                        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                 ) : (
                     <>
@@ -101,7 +101,7 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                                     <button
                                         key={idx}
                                         onClick={() => setSelectedImage(idx)}
-                                        className={`w-16 h-16 rounded-lg border-2 overflow-hidden flex-shrink-0 ${selectedImage === idx ? 'border-blue-500' : 'border-transparent hover:border-gray-300'
+                                        className={`w-16 h-16 rounded-lg border-2 overflow-hidden flex-shrink-0 ${selectedImage === idx ? 'border-primary' : 'border-transparent hover:border-border'
                                             }`}
                                     >
                                         <img src={getImageUrl(img)} className="w-full h-full object-cover" />
@@ -113,7 +113,7 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                         {/* Right: Details */}
                         <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col overflow-y-auto max-h-[90vh] md:max-h-auto">
                             <div className="mb-1 flex justify-between items-center">
-                                <span className="text-sm font-medium text-blue-600">{product.category?.name}</span>
+                                <span className="text-sm font-medium text-primary">{product.category?.name}</span>
                                 <Button variant="ghost" size="icon" onClick={handleToggleWishlist} className={`hover:bg-rose-50 ${isWishlisted ? 'text-rose-500' : 'text-gray-400 hover:text-rose-500'}`}>
                                     <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-rose-500' : ''}`} />
                                 </Button>
@@ -121,7 +121,7 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h2>
 
                             <div className="flex items-baseline gap-3 mb-4">
-                                <span className="text-2xl font-bold text-blue-600">{formatCurrency(finalPrice)}</span>
+                                <span className="text-2xl font-bold text-foreground">{formatCurrency(finalPrice)}</span>
                                 {hasDiscount && (
                                     <span className="text-lg text-gray-400 line-through">{formatCurrency(originalPrice)}</span>
                                 )}

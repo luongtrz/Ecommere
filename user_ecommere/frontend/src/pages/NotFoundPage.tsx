@@ -10,7 +10,7 @@ export function NotFoundPage() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="bg-gradient-to-r from-gray-600 via-blue-600 to-gray-800 text-white">
+        <div className="bg-gradient-to-r from-primary to-primary/80 text-white">
           <div className="container py-12">
             <div className="text-center">
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -26,7 +26,7 @@ export function NotFoundPage() {
 
         <div className="container py-16 max-w-4xl">
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="w-32 h-32 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-8">
+            <div className="w-32 h-32 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-8">
               <span className="text-6xl font-bold text-white">404</span>
             </div>
 
@@ -40,7 +40,7 @@ export function NotFoundPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/10"
                 asChild
               >
                 <Link to="/" className="flex items-center gap-2">
@@ -68,8 +68,8 @@ export function NotFoundPage() {
                   to="/catalog"
                   className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <ShoppingBag className="h-5 w-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                    <ShoppingBag className="h-5 w-5 text-primary" />
                   </div>
                   <div className="text-left">
                     <div className="font-medium text-gray-900">Sản phẩm</div>

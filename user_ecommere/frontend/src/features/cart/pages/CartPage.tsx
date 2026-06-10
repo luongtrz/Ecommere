@@ -22,7 +22,7 @@ export function CartPage() {
               title="Giỏ hàng của bạn đang trống"
               description="Hãy khám phá bộ sưu tập nước hoa xịt thơm của chúng tôi"
               action={
-                <Button asChild size="lg" className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                <Button asChild size="lg" className="w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 shadow-lg shadow-primary/10">
                   <Link to="/catalog">Bắt đầu mua sắm</Link>
                 </Button>
               }
@@ -53,7 +53,7 @@ export function CartPage() {
                 <h1 className="text-3xl font-bold text-gray-900">Giỏ hàng của bạn</h1>
                 <p className="text-gray-500 mt-1">{items.length} sản phẩm trong giỏ hàng</p>
               </div>
-              <Badge variant="secondary" className="text-lg px-5 py-2 rounded-full font-bold bg-blue-50 text-blue-600">
+              <Badge variant="secondary" className="text-lg px-5 py-2 rounded-full font-bold bg-secondary text-primary">
                 {formatCurrency(totalPrice)}
               </Badge>
             </div>
@@ -76,7 +76,7 @@ export function CartPage() {
                           alt={item.name}
                           className="w-24 h-24 object-cover rounded-xl shadow-sm"
                         />
-                        <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
+                        <Badge className="absolute -top-2 -right-2 bg-primary text-primary-foreground shadow-md">
                           {item.quantity}
                         </Badge>
                       </div>
@@ -91,7 +91,7 @@ export function CartPage() {
                             {item.volumeMl}ml
                           </Badge>
                         </div>
-                        <p className="text-xl font-bold text-blue-600">
+                        <p className="text-xl font-bold text-primary">
                           {formatCurrency(item.price)}
                         </p>
                         <p className="text-sm text-gray-400 mt-0.5">
@@ -139,7 +139,7 @@ export function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 sticky top-32 overflow-hidden animate-fade-in" style={{ animationDelay: '200ms' }}>
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5">
+                <div className="bg-primary p-5 text-primary-foreground">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
                     Tổng đơn hàng
@@ -163,12 +163,12 @@ export function CartPage() {
                   <div className="border-t pt-4">
                     <div className="flex justify-between items-center mb-5">
                       <span className="text-base font-semibold">Tổng cộng:</span>
-                      <span className="text-2xl font-bold text-blue-600">
+                      <span className="text-2xl font-bold text-primary">
                         {formatCurrency(totalPrice)}
                       </span>
                     </div>
 
-                    <Button asChild className="w-full mb-3 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20 font-semibold" size="lg">
+                    <Button asChild className="w-full mb-3 h-12 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/10 font-semibold" size="lg">
                       <Link to="/checkout" className="flex items-center justify-center gap-2">
                         <CreditCard className="h-4 w-4" />
                         Tiến hành thanh toán

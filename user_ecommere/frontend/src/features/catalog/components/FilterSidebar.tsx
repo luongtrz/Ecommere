@@ -54,7 +54,7 @@ function CategoryTreeItem({
                     }
                     onSelect(node.slug);
                 }}
-                className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-md text-sm transition-colors hover:bg-gray-100 ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-md text-sm transition-colors hover:bg-secondary/40 ${isSelected ? 'bg-secondary text-primary font-semibold' : 'text-foreground/80'
                     }`}
                 style={{ paddingLeft: `${depth * 16 + 8}px` }}
             >
@@ -192,7 +192,7 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                     <SlidersHorizontal className="h-4 w-4 text-gray-600" />
                     <span className="font-semibold text-gray-900 text-sm">Bộ lọc</span>
                     {activeFilterCount > 0 && (
-                        <Badge variant="default" className="h-5 px-1.5 text-[10px] bg-blue-600">
+                        <Badge variant="default" className="h-5 px-1.5 text-[10px] bg-primary">
                             {activeFilterCount}
                         </Badge>
                     )}
@@ -250,8 +250,8 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                         key={idx}
                                         onClick={() => handlePricePreset(range.min, range.max)}
                                         className={`w-full text-left text-xs py-1.5 px-2 rounded-md transition-colors ${isActive
-                                            ? 'bg-blue-50 text-blue-700 font-medium'
-                                            : 'text-gray-600 hover:bg-gray-100'
+                                            ? 'bg-secondary text-primary font-semibold'
+                                            : 'text-muted-foreground hover:bg-secondary/35'
                                             }`}
                                     >
                                         {range.label}
@@ -335,8 +335,8 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                             key={vol}
                                             onClick={() => toggleArrayFilter('volumeMl', vol.toString(), selectedVolumes.map(String))}
                                             className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${isSelected
-                                                ? 'bg-blue-600 text-white border-blue-600'
-                                                : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                                                ? 'bg-primary text-primary-foreground border-primary'
+                                                : 'bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-primary'
                                                 }`}
                                         >
                                             {vol}ml

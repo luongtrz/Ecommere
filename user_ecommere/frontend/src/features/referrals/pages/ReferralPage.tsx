@@ -72,7 +72,7 @@ export function ReferralPage() {
             <div className="container py-4 max-w-6xl h-[calc(100vh-64px)] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="mb-4 shrink-0">
-                    <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                    <h1 className="text-xl md:text-2xl font-bold text-primary">
                         Mời bạn bè - Nhận ưu đãi
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -84,7 +84,7 @@ export function ReferralPage() {
                     {/* Left Column: Info & Stats */}
                     <div className="lg:col-span-4 flex flex-col gap-4 h-full overflow-y-auto pr-1">
                         {/* Referral Code Card */}
-                        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white overflow-hidden relative shrink-0">
+                        <Card className="border-0 shadow-lg bg-primary text-primary-foreground overflow-hidden relative shrink-0">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3" />
                             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/4" />
                             <CardContent className="p-5 relative z-10">
@@ -129,8 +129,8 @@ export function ReferralPage() {
                         <div className="grid grid-cols-2 gap-3 shrink-0">
                             <Card className="border shadow-sm">
                                 <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mb-2">
-                                        <Users className="h-4 w-4 text-blue-600" />
+                                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mb-2">
+                                        <Users className="h-4 w-4 text-primary" />
                                     </div>
                                     <p className="text-xl font-bold leading-none">{info?.totalReferrals || 0}</p>
                                     <p className="text-[10px] text-muted-foreground mt-1">Bạn bè đã mời</p>
@@ -189,11 +189,11 @@ export function ReferralPage() {
                                                             className={`flex items-center justify-between p-4 hover:bg-slate-50 transition-colors ${isExpired || isUsed ? 'opacity-60 grayscale' : ''}`}
                                                         >
                                                             <div className="flex items-start gap-3">
-                                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isExpired || isUsed ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600'}`}>
+                                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isExpired || isUsed ? 'bg-gray-100 text-gray-400' : 'bg-secondary text-primary'}`}>
                                                                     <Ticket className="h-5 w-5" />
                                                                 </div>
                                                                 <div>
-                                                                    <p className="font-mono font-bold text-sm text-blue-700">{coupon.code}</p>
+                                                                    <p className="font-mono font-bold text-sm text-primary">{coupon.code}</p>
                                                                     <p className="text-xs text-secondary-foreground font-medium mt-0.5">
                                                                         {coupon.type === 'PERCENT'
                                                                             ? `Giảm ${coupon.value}%`
