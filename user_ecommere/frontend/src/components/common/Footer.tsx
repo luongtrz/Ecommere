@@ -1,71 +1,99 @@
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Mail, MapPin, Phone, Sparkles } from 'lucide-react';
+
+const shoppingLinks = [
+  { to: '/catalog', label: 'Toàn bộ sản phẩm' },
+  { to: '/catalog?sort=best_selling', label: 'Bán chạy nhất' },
+  { to: '/search?q=x%E1%BB%8Bt%20ph%C3%B2ng', label: 'Xịt phòng được yêu thích' },
+];
+
+const policyLinks = [
+  { to: '/policy/shipping', label: 'Chính sách vận chuyển' },
+  { to: '/policy/return', label: 'Đổi trả và hoàn tiền' },
+  { to: '/policy/privacy', label: 'Bảo mật thông tin' },
+];
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/40">
-      <div className="container py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-foreground flex items-center justify-center">
-                <span className="text-white font-bold text-[10px]">TS</span>
+    <footer className="mt-12 border-t border-white/60 bg-foreground text-white">
+      <div className="container py-12">
+        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr_1fr]">
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-sm font-bold text-foreground">
+                TS
               </div>
-              <span className="font-bold text-foreground">Thai Spray</span>
+              <div>
+                <p className="text-lg font-semibold">Thai Spray</p>
+                <p className="text-sm text-white/65">Hương thơm tinh tế cho nhà ở và nhịp sống hiện đại.</p>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Chai xịt Thái Lan chính hãng. Đa dạng mùi hương, chất lượng 100%.
+            <p className="max-w-xl text-sm leading-7 text-white/72">
+              Chúng tôi chọn những dòng xịt thơm, body mist và hương phòng dễ dùng mỗi ngày, mùi sạch,
+              gọn và không tạo cảm giác nồng gắt.
             </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/80">
+                <Sparkles className="h-4 w-4" />
+                Tư vấn mùi theo không gian sử dụng
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/80">
+                <Sparkles className="h-4 w-4" />
+                Đề xuất theo ngân sách và dung tích
+              </span>
+            </div>
           </div>
 
-          {/* Links */}
-          <div>
-            <h4 className="font-medium text-foreground mb-3 text-sm">Liên kết</h4>
-            <ul className="space-y-2">
-              <li><Link to="/catalog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Sản phẩm</Link></li>
-              <li><Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Giới thiệu</Link></li>
-              <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Liên hệ</Link></li>
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <h4 className="mb-4 text-base font-semibold">Mua sắm</h4>
+            <ul className="space-y-3 text-sm text-white/72">
+              {shoppingLinks.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="transition hover:text-white">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <h4 className="mb-4 mt-8 text-base font-semibold">Chính sách</h4>
+            <ul className="space-y-3 text-sm text-white/72">
+              {policyLinks.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="transition hover:text-white">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Policies */}
-          <div>
-            <h4 className="font-medium text-foreground mb-3 text-sm">Chính sách</h4>
-            <ul className="space-y-2">
-              <li><Link to="/policy/shipping" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Vận chuyển</Link></li>
-              <li><Link to="/policy/return" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Đổi trả</Link></li>
-              <li><Link to="/policy/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Bảo mật</Link></li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="font-medium text-foreground mb-3 text-sm">Liên hệ</h4>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-3.5 w-3.5 shrink-0" />
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <h4 className="mb-4 text-base font-semibold">Liên hệ</h4>
+            <ul className="space-y-4 text-sm text-white/72">
+              <li className="flex items-start gap-3">
+                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-white" />
                 <span>0123 456 789</span>
               </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-3.5 w-3.5 shrink-0" />
-                <span>contact@thaispray.com</span>
+              <li className="flex items-start gap-3">
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                <span>noreply@thaispray.shop</span>
               </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5 shrink-0" />
-                <span>TP. Hồ Chí Minh</span>
+              <li className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                <span>TP. Hồ Chí Minh, giao nhanh nội thành và hỗ trợ tư vấn online toàn quốc.</span>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      <div className="border-t">
-        <div className="container py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-muted-foreground">&copy; 2026 Thai Spray Shop</p>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <Link to="/policy/privacy" className="hover:text-foreground transition-colors">Bảo mật</Link>
-            <Link to="/policy/terms" className="hover:text-foreground transition-colors">Điều khoản</Link>
+      <div className="border-t border-white/10">
+        <div className="container flex flex-col gap-2 py-4 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
+          <p>&copy; 2026 Thai Spray. Không gian sống có mùi hương riêng.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/policy/privacy" className="transition hover:text-white">Bảo mật</Link>
+            <Link to="/policy/terms" className="transition hover:text-white">Điều khoản</Link>
           </div>
         </div>
       </div>

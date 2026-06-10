@@ -1,13 +1,14 @@
+import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Heart, ShoppingCart, Sparkles, Star } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Star, Heart } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
-import { memo, useState } from 'react';
 import { ProductQuickView } from '@/features/catalog/components/ProductQuickView';
 import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { usePrefetchProduct } from '@/features/catalog/hooks/useProductDetail';
+import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   id: string;
@@ -33,98 +34,114 @@ export const ProductCard = memo(function ProductCard({
   onAddToCart,
 }: ProductCardProps) {
   const finalPrice = salePrice || price;
-  const hasDiscount = salePrice && salePrice < price;
-
+  const hasDiscount = Boolean(salePrice && salePrice < price);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { toggleItem, isInWishlist } = useWishlist();
   const prefetchProduct = usePrefetchProduct();
   const isWishlisted = isInWishlist(id);
+  const discountPercent = hasDiscount && salePrice ? Math.max(1, Math.round(((price - salePrice) / price) * 100)) : 0;
 
   return (
     <>
       <Card
-        className="group overflow-hidden border hover:shadow-md transition-shadow duration-200 flex flex-col h-full bg-white"
+        className="group h-full overflow-hidden rounded-[1.65rem] border-white/60 bg-white/88 shadow-[0_18px_50px_-36px_rgba(24,46,37,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-36px_rgba(24,46,37,0.42)]"
         onMouseEnter={() => prefetchProduct(slug)}
       >
         <div className="relative overflow-hidden">
           <Link to={`/p/${slug}`}>
-            <div className="aspect-square overflow-hidden bg-muted">
+            <div className="aspect-square overflow-hidden bg-[linear-gradient(145deg,rgba(255,237,222,0.9),rgba(229,243,236,0.95))]">
               <img
-                src={getImageUrl(images[0], { width: 400 })}
+                src={getImageUrl(images[0], { width: 500 })}
                 alt={name}
                 loading="lazy"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                decoding="async"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
               />
             </div>
           </Link>
 
-          {/* Wishlist */}
+          <div className="absolute left-3 top-3 flex items-center gap-2">
+            {hasDiscount ? (
+              <span className="rounded-full bg-foreground px-3 py-1 text-[11px] font-semibold text-white">
+                Giảm {discountPercent}%
+              </span>
+            ) : (
+              <span className="rounded-full bg-white/85 px-3 py-1 text-[11px] font-semibold text-foreground backdrop-blur">
+                Gợi ý bởi Thai Spray
+              </span>
+            )}
+          </div>
+
           <button
-            onClick={(e) => {
-              e.preventDefault();
+            onClick={(event) => {
+              event.preventDefault();
               toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
             }}
-            className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-10 ${isWishlisted ? 'bg-red-50 text-red-500' : 'bg-white/90 text-muted-foreground hover:text-red-500'}`}
+            className={cn(
+              'absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur transition',
+              isWishlisted
+                ? 'bg-red-50 text-red-500'
+                : 'bg-white/88 text-muted-foreground hover:bg-white hover:text-red-500',
+            )}
           >
-            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-red-500' : ''}`} />
+            <Heart className={cn('h-4 w-4', isWishlisted && 'fill-red-500')} />
           </button>
 
-          {/* Sale badge */}
-          {hasDiscount && (
-            <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded">
-              Sale
-            </span>
-          )}
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={() => setIsQuickViewOpen(true)}
+              className="pointer-events-auto w-full rounded-full bg-foreground px-4 py-2 text-sm font-medium text-white shadow-lg shadow-black/10"
+            >
+              Xem nhanh
+            </button>
+          </div>
         </div>
 
-        <CardContent className="p-3 flex-1 flex flex-col">
+        <CardContent className="flex flex-1 flex-col p-4">
+          <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5" />
+            Mùi hương nổi bật
+          </div>
+
           <Link to={`/p/${slug}`}>
-            <h3 className="text-sm font-medium line-clamp-2 text-foreground mb-1.5 min-h-[2.5rem] leading-snug">
+            <h3 className="min-h-[3.3rem] text-base font-semibold leading-6 text-foreground transition group-hover:text-primary">
               {name}
             </h3>
           </Link>
 
-          {/* Rating */}
-          {reviewCount > 0 && (
-            <div className="flex items-center gap-1 mb-1.5">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              <span className="text-xs text-muted-foreground">{rating.toFixed(1)} ({reviewCount})</span>
+          {reviewCount > 0 ? (
+            <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+              <span>{rating.toFixed(1)}</span>
+              <span>·</span>
+              <span>{reviewCount} đánh giá</span>
             </div>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">Phù hợp cho nhịp sống hằng ngày và không gian gọn gàng.</p>
           )}
 
-          {/* Price */}
-          <div className="flex items-baseline gap-2 mt-auto">
-            <span className="text-base font-semibold text-foreground">
-              {formatCurrency(finalPrice)}
-            </span>
-            {hasDiscount && (
-              <span className="text-xs text-muted-foreground line-through">
-                {formatCurrency(price)}
-              </span>
-            )}
+          <div className="mt-auto pt-5">
+            <div className="flex items-end gap-2">
+              <span className="text-lg font-bold text-foreground">{formatCurrency(finalPrice)}</span>
+              {hasDiscount ? (
+                <span className="pb-0.5 text-sm text-muted-foreground line-through">{formatCurrency(price)}</span>
+              ) : null}
+            </div>
           </div>
         </CardContent>
 
-        <CardFooter className="p-3 pt-0">
-          <Button
-            onClick={onAddToCart}
-            variant="outline"
-            className="w-full h-9 text-xs"
-            size="sm"
-          >
-            <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+        <CardFooter className="p-4 pt-0">
+          <Button onClick={onAddToCart} className="h-11 w-full rounded-full" size="sm">
+            <ShoppingCart className="mr-2 h-4 w-4" />
             Thêm vào giỏ
           </Button>
         </CardFooter>
       </Card>
 
-      {isQuickViewOpen && (
-        <ProductQuickView
-          slug={slug}
-          open={isQuickViewOpen}
-          onOpenChange={setIsQuickViewOpen}
-        />
-      )}
+      {isQuickViewOpen ? (
+        <ProductQuickView slug={slug} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+      ) : null}
     </>
   );
 });

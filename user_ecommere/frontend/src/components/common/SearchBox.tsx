@@ -1,29 +1,35 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, X, History, TrendingUp, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useDeferredValue, useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, History, Search, Sparkles, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Mock popular products for suggestions
+const RECENT_SEARCHES_KEY = 'recentSearches';
 const POPULAR_PRODUCTS = [
-  { id: '1', name: 'Nước hoa Body Mist (combo 3 chai)', slug: 'nuoc-hoa-body-mist-combo-3-chai' },
-  { id: '2', name: 'Tinh dầu thơm phòng', slug: 'tinh-dau-thom-phong' },
-  { id: '3', name: 'Xịt thơm quần áo', slug: 'xit-thom-quan-ao' },
+  { id: '1', name: 'Body mist hương sạch cho hằng ngày', slug: 'nuoc-hoa-body-mist-combo-3-chai' },
+  { id: '2', name: 'Xịt phòng cho phòng khách và phòng ngủ', slug: 'tinh-dau-thom-phong' },
+  { id: '3', name: 'Xịt thơm quần áo giữ mùi nhẹ và gọn', slug: 'xit-thom-quan-ao' },
 ];
+const POPULAR_KEYWORDS = ['Body mist', 'Xịt phòng', 'Phòng khách', 'Quà tặng'];
 
-const POPULAR_KEYWORDS = ['Body mist', 'Tinh dầu', 'Quà tặng', 'Xịt thơm'];
+function readRecentSearches() {
+  try {
+    const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+    return saved ? (JSON.parse(saved) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
 
 export function SearchBox() {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const deferredQuery = useDeferredValue(query.trim());
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('recentSearches');
-    if (saved) {
-      setRecentSearches(JSON.parse(saved));
-    }
+    setRecentSearches(readRecentSearches());
 
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -35,142 +41,166 @@ export function SearchBox() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearch = (searchTerm: string) => {
-    if (!searchTerm.trim()) return;
-
-    // Save to history
-    const newRecent = [searchTerm, ...recentSearches.filter(s => s !== searchTerm)].slice(0, 5);
-    setRecentSearches(newRecent);
-    localStorage.setItem('recentSearches', JSON.stringify(newRecent));
-
-    setIsFocused(false);
-    setQuery(searchTerm); // Update input to show what was clicked
-    navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+  const saveRecentSearch = (searchTerm: string) => {
+    const nextRecent = [searchTerm, ...recentSearches.filter((item) => item !== searchTerm)].slice(0, 5);
+    setRecentSearches(nextRecent);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(nextRecent));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (searchTerm: string) => {
+    const trimmed = searchTerm.trim();
+
+    if (!trimmed) {
+      return;
+    }
+
+    saveRecentSearch(trimmed);
+    setIsFocused(false);
+    setQuery(trimmed);
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     handleSearch(query);
   };
 
-  const removeRecent = (e: React.MouseEvent, term: string) => {
-    e.stopPropagation();
-    const newRecent = recentSearches.filter(s => s !== term);
-    setRecentSearches(newRecent);
-    localStorage.setItem('recentSearches', JSON.stringify(newRecent));
+  const removeRecent = (event: React.MouseEvent, term: string) => {
+    event.stopPropagation();
+    const nextRecent = recentSearches.filter((item) => item !== term);
+    setRecentSearches(nextRecent);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(nextRecent));
   };
 
+  const showingSuggestions = isFocused;
+
   return (
-    <div ref={containerRef} className="relative group w-full z-[100]">
+    <div ref={containerRef} className="relative z-[70] w-full">
       <form onSubmit={handleSubmit} className="relative">
-        <div className={`
-          relative flex items-center rounded-xl border transition-all duration-300
-          ${isFocused
-            ? 'border-blue-500 shadow-lg shadow-blue-500/10 bg-white ring-2 ring-blue-100 rounded-b-none border-b-0'
-            : 'border-gray-200 bg-gray-50/80 hover:bg-white hover:border-gray-300'
-          }
-        `}>
-          <Search className={`
-            absolute left-3.5 h-4 w-4 transition-colors duration-200
-            ${isFocused ? 'text-blue-500' : 'text-gray-400'}
-          `} />
+        <div
+          className={cn(
+            'flex items-center rounded-[1.35rem] border px-3 py-2 transition duration-200',
+            showingSuggestions
+              ? 'border-primary/25 bg-white shadow-[0_20px_50px_-32px_rgba(24,46,37,0.35)]'
+              : 'border-white/60 bg-white/75 backdrop-blur',
+          )}
+        >
+          <Search className="ml-1 h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             type="search"
-            placeholder="Tìm kiếm sản phẩm, danh mục..."
+            placeholder="Tìm mùi hương, sản phẩm, dung tích..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(event) => setQuery(event.target.value)}
             onFocus={() => setIsFocused(true)}
-            className="
-              w-full py-2.5 pl-10 pr-10 bg-transparent text-sm
-              placeholder:text-gray-400
-              focus:outline-none
-            "
+            className="w-full bg-transparent px-3 py-1.5 text-sm outline-none placeholder:text-muted-foreground"
           />
-          {query && (
+          {query ? (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="absolute right-3 text-gray-400 hover:text-gray-600"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
-          )}
+          ) : null}
         </div>
       </form>
 
-      {/* Dropdown Suggestions */}
-      {isFocused && (
-        <div className="absolute top-full left-0 right-0 bg-white rounded-b-xl border border-t-0 border-blue-500 shadow-xl overflow-hidden animate-fade-in origin-top z-[100]">
-          <div className="p-2">
-            {query.trim() === '' ? (
-              <>
-                {recentSearches.length > 0 && (
-                  <div className="mb-4 px-2">
-                    <h3 className="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">
-                      <History className="h-3 w-3" />
-                      Tìm kiếm gần đây
-                    </h3>
-                    <div className="space-y-1">
-                      {recentSearches.map((term, idx) => (
-                        <div key={idx} className="flex items-center justify-between group/item hover:bg-gray-50 rounded-lg px-2 py-1.5 cursor-pointer" onClick={() => handleSearch(term)}>
-                          <span className="text-sm text-gray-700">{term}</span>
-                          <button onClick={(e) => removeRecent(e, term)} className="opacity-0 group-hover/item:opacity-100 text-gray-400 hover:text-red-400">
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
+      {showingSuggestions ? (
+        <div className="glass-panel absolute left-0 right-0 top-[calc(100%+0.6rem)] overflow-hidden rounded-[1.5rem]">
+          <div className="grid gap-0 md:grid-cols-[1.1fr_0.9fr]">
+            <div className="p-4">
+              {deferredQuery ? (
+                <div className="space-y-2">
+                  <button
+                    onClick={() => handleSearch(deferredQuery)}
+                    className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm transition hover:bg-secondary"
+                  >
+                    <Search className="h-4 w-4 text-primary" />
+                    <span className="flex-1">
+                      Tìm kiếm cho <strong className="text-foreground">“{deferredQuery}”</strong>
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                  <p className="px-4 text-xs text-muted-foreground">
+                    Mẹo: nhập mùi hương, không gian sử dụng hoặc khoảng giá để tìm nhanh hơn.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {recentSearches.length > 0 ? (
+                    <div className="mb-5">
+                      <p className="mb-3 flex items-center gap-2 px-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        <History className="h-3.5 w-3.5" />
+                        Tìm gần đây
+                      </p>
+                      <div className="space-y-1">
+                        {recentSearches.map((term) => (
+                          <div
+                            key={term}
+                            onClick={() => handleSearch(term)}
+                            className="group flex cursor-pointer items-center justify-between rounded-2xl px-4 py-3 transition hover:bg-secondary"
+                          >
+                            <span className="text-sm text-foreground">{term}</span>
+                            <button
+                              onClick={(event) => removeRecent(event, term)}
+                              className="rounded-full p-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:bg-white hover:text-foreground"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div>
+                    <p className="mb-3 flex items-center gap-2 px-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Gợi ý nhanh
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {POPULAR_KEYWORDS.map((keyword) => (
+                        <button
+                          key={keyword}
+                          onClick={() => handleSearch(keyword)}
+                          className="rounded-full border border-border bg-white px-4 py-2 text-sm text-foreground transition hover:border-primary/30 hover:bg-secondary"
+                        >
+                          {keyword}
+                        </button>
                       ))}
                     </div>
                   </div>
-                )}
+                </>
+              )}
+            </div>
 
-                <div className="px-2 pb-2">
-                  <h3 className="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3" />
-                    Xu hướng tìm kiếm
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {POPULAR_KEYWORDS.map((keyword, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleSearch(keyword)}
-                        className="px-3 py-1.5 bg-gray-50 hover:bg-blue-50 text-gray-600 hover:text-blue-600 text-sm rounded-lg border border-gray-100 transition-colors"
-                      >
-                        {keyword}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="px-2 pb-2">
-                <button onClick={() => handleSearch(query)} className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-2">
-                  <Search className="h-4 w-4" />
-                  Tìm kiếm cho "{query}"
-                </button>
-                {/* Mock product suggestions matching query could go here */}
+            <div className="border-t border-border/70 bg-secondary/60 p-4 md:border-l md:border-t-0">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Lựa chọn được xem nhiều
+              </p>
+              <div className="space-y-2">
+                {POPULAR_PRODUCTS.map((product) => (
+                  <Link
+                    key={product.id}
+                    to={`/p/${product.slug}`}
+                    className="group flex items-center gap-3 rounded-2xl bg-white px-3 py-3 transition hover:translate-x-1 hover:shadow-lg"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(145deg,rgba(255,230,206,1),rgba(194,234,216,1))] text-sm font-bold text-foreground">
+                      TS
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary">{product.name}</p>
+                      <p className="text-xs text-muted-foreground">Xem chi tiết và chọn dung tích phù hợp</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" />
+                  </Link>
+                ))}
               </div>
-            )}
-          </div>
-
-          <div className="bg-gray-50 p-3 border-t">
-            <h4 className="text-xs font-semibold text-gray-500 mb-2">Sản phẩm nổi bật</h4>
-            <div className="space-y-2">
-              {POPULAR_PRODUCTS.map(prod => (
-                <Link to={`/p/${prod.slug}`} key={prod.id} className="flex items-center gap-3 hover:bg-white p-2 rounded-lg transition-colors group">
-                  <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden">
-                    {/* Placeholder image since we don't have real URLs here easily */}
-                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">{prod.name}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-gray-400 -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                </Link>
-              ))}
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
