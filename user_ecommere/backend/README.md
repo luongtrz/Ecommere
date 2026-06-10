@@ -344,6 +344,9 @@ UPLOAD_DIR="./uploads"
 RATE_LIMIT_TTL=60
 RATE_LIMIT_MAX=100
 
+# Redis
+REDIS_URL="redis://redis:6379"
+
 # Chatbot provider
 CHATBOT_PROVIDER="gemini"
 CHATBOT_PROVIDER_URL="https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent"
@@ -354,9 +357,20 @@ CHATBOT_TIMEOUT_MS=30000
 CHATBOT_TEMPERATURE=0.4
 CHATBOT_MAX_TOKENS=500
 CHATBOT_HISTORY_LIMIT=10
+CHATBOT_REDIS_TTL_SECONDS=604800
+CHATBOT_RAG_PRODUCT_LIMIT=4
+CHATBOT_RAG_VARIANT_LIMIT=3
+CHATBOT_RAG_CANDIDATE_LIMIT=12
 ```
 
 Nếu dùng `CHATBOT_PROVIDER="gemini"`, backend sẽ gọi trực tiếp Gemini API theo chuẩn `generateContent`. Với `gemma-4-31b-it`, service gửi `thinkingLevel: "minimal"` và tự bỏ `thought` parts để frontend chỉ nhận câu trả lời cuối cùng.
+
+Chatbot hiện dùng flow RAG theo DB sản phẩm:
+- frontend gửi `sessionId + prompt`
+- backend lấy history gần nhất từ Redis, không lưu lịch sử vào DB
+- backend retrieve và rank sản phẩm/biến thể từ PostgreSQL qua Prisma
+- chỉ inject context catalog ngắn gọn của top kết quả vào prompt trước khi gọi model
+- nếu không có dữ liệu phù hợp trong DB, chatbot sẽ nói rõ chưa tìm thấy thay vì bịa thông tin
 
 ## 🎯 Key Features Explained
 

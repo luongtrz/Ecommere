@@ -19,6 +19,9 @@ export default registerAs('app', () => ({
     defaultPageSize: parseInt(process.env.DEFAULT_PAGE_SIZE, 10) || 20,
     maxPageSize: parseInt(process.env.MAX_PAGE_SIZE, 10) || 100,
   },
+  redis: {
+    url: process.env.REDIS_URL,
+  },
   chatbot: {
     provider: process.env.CHATBOT_PROVIDER || 'gemini',
     providerUrl: process.env.CHATBOT_PROVIDER_URL,
@@ -31,5 +34,9 @@ export default registerAs('app', () => ({
     temperature: parseFloat(process.env.CHATBOT_TEMPERATURE || '0.4'),
     maxTokens: parseInt(process.env.CHATBOT_MAX_TOKENS, 10) || 500,
     historyLimit: parseInt(process.env.CHATBOT_HISTORY_LIMIT, 10) || 10,
+    redisTtlSeconds: parseInt(process.env.CHATBOT_REDIS_TTL_SECONDS || '604800', 10) || 604800,
+    ragProductLimit: parseInt(process.env.CHATBOT_RAG_PRODUCT_LIMIT || '4', 10) || 4,
+    ragVariantLimit: parseInt(process.env.CHATBOT_RAG_VARIANT_LIMIT || '3', 10) || 3,
+    ragCandidateLimit: parseInt(process.env.CHATBOT_RAG_CANDIDATE_LIMIT || '12', 10) || 12,
   },
 }));

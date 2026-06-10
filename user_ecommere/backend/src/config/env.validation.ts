@@ -53,6 +53,13 @@ class EnvironmentVariables {
   MAX_PAGE_SIZE: number = 100;
 
   @IsOptional()
+  @IsString()
+  REDIS_URL?: string;
+
+  @IsNumber()
+  CHATBOT_REDIS_TTL_SECONDS: number = 604800;
+
+  @IsOptional()
   @IsEnum(ChatbotProvider)
   CHATBOT_PROVIDER?: ChatbotProvider;
 
@@ -76,13 +83,22 @@ class EnvironmentVariables {
   CHATBOT_TIMEOUT_MS: number = 30000;
 
   @IsNumber()
-  CHATBOT_TEMPERATURE: number = 0.7;
+  CHATBOT_TEMPERATURE: number = 0.4;
 
   @IsNumber()
   CHATBOT_MAX_TOKENS: number = 500;
 
   @IsNumber()
   CHATBOT_HISTORY_LIMIT: number = 10;
+
+  @IsNumber()
+  CHATBOT_RAG_PRODUCT_LIMIT: number = 4;
+
+  @IsNumber()
+  CHATBOT_RAG_VARIANT_LIMIT: number = 3;
+
+  @IsNumber()
+  CHATBOT_RAG_CANDIDATE_LIMIT: number = 12;
 }
 
 export function validate(config: Record<string, unknown>) {

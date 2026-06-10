@@ -17,7 +17,7 @@ interface ChatMessage {
 }
 
 const STORAGE_KEY = 'thai-spray-chatbot-messages';
-const HISTORY_LIMIT = 10;
+const SESSION_STORAGE_KEY = 'thai-spray-chatbot-session-id';
 const SUGGESTIONS = [
   'Tư vấn mùi xịt phòng cho phòng khách',
   'Nên chọn dung tích nào cho gia đình?',
@@ -37,6 +37,14 @@ function createChatMessage(role: ChatbotRole, content: string): ChatMessage {
     content,
     createdAt: new Date().toISOString(),
   };
+}
+
+function createSessionId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `chat_${crypto.randomUUID()}`;
+  }
+
+  return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function getInitialMessages(): ChatMessage[] {
@@ -77,6 +85,7 @@ export function ChatbotWidget() {
   const [draft, setDraft] = useState('');
   const [lastError, setLastError] = useState<string | null>(null);
   const [messages, setMessages] = useLocalStorage<ChatMessage[]>(STORAGE_KEY, getInitialMessages());
+  const [sessionId, setSessionId] = useLocalStorage<string>(SESSION_STORAGE_KEY, createSessionId());
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -108,6 +117,12 @@ export function ChatbotWidget() {
   }, [messages.length, setMessages]);
 
   useEffect(() => {
+    if (!sessionId) {
+      setSessionId(createSessionId());
+    }
+  }, [sessionId, setSessionId]);
+
+  useEffect(() => {
     if (!isOpen) {
       return;
     }
@@ -119,6 +134,9 @@ export function ChatbotWidget() {
     mutationFn: chatbotApi.sendMessage,
     onSuccess: (data) => {
       setLastError(null);
+      if (data.sessionId && data.sessionId !== sessionId) {
+        setSessionId(data.sessionId);
+      }
       setMessages((current) => [...current, createChatMessage('assistant', data.message)]);
     },
     onError: (error) => {
@@ -131,19 +149,14 @@ export function ChatbotWidget() {
   const handleSubmit = () => {
     const prompt = draft.trim();
 
-    if (!prompt || mutation.isPending) {
+    if (!prompt || mutation.isPending || !sessionId) {
       return;
     }
-
-    const history = messages.slice(-HISTORY_LIMIT).map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
 
     setLastError(null);
     setDraft('');
     setMessages((current) => [...current, createChatMessage('user', prompt)]);
-    mutation.mutate({ prompt, history });
+    mutation.mutate({ prompt, sessionId });
   };
 
   const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -154,9 +167,20 @@ export function ChatbotWidget() {
   };
 
   const handleReset = () => {
+    const previousSessionId = sessionId;
+    const nextSessionId = createSessionId();
+
     setLastError(null);
     setDraft('');
     setMessages(getInitialMessages());
+    setSessionId(nextSessionId);
+
+    if (previousSessionId) {
+      void chatbotApi.clearHistory(previousSessionId).catch(() => {
+        // The new session id is already active on the client, so failing to delete
+        // the old Redis history only affects TTL cleanup on the server.
+      });
+    }
   };
 
   return (
@@ -170,7 +194,7 @@ export function ChatbotWidget() {
               </div>
               <div>
                 <p className="text-sm font-semibold">Tư vấn cùng Thai Spray</p>
-                <p className="mt-1 text-xs text-white/70">Chatbot sẽ gọi qua backend và giữ API key ở server.</p>
+                <p className="mt-1 text-xs text-white/70">Chatbot sẽ gọi qua backend, lấy dữ liệu sản phẩm từ DB và giữ API key ở server.</p>
               </div>
             </div>
 
@@ -265,7 +289,7 @@ export function ChatbotWidget() {
                 <p className="text-xs text-muted-foreground">Enter để gửi, Shift+Enter để xuống dòng</p>
                 <Button
                   onClick={handleSubmit}
-                  disabled={!draft.trim() || mutation.isPending}
+                  disabled={!draft.trim() || mutation.isPending || !sessionId}
                   className="rounded-full px-4"
                 >
                   {mutation.isPending ? (

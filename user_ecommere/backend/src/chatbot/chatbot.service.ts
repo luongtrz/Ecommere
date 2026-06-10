@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SendChatbotMessageDto } from './dtos/send-chatbot-message.dto';
+import { ChatbotHistoryService } from './chatbot-history.service';
+import { ChatbotRetrievalService } from './chatbot-retrieval.service';
 
 type ChatRole = 'system' | 'user' | 'assistant';
 type ChatbotProvider = 'gemini' | 'openai-compatible';
@@ -56,25 +58,77 @@ interface ProviderSuccessResponse {
 
 @Injectable()
 export class ChatbotService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly chatbotHistoryService: ChatbotHistoryService,
+    private readonly chatbotRetrievalService: ChatbotRetrievalService,
+  ) {}
 
   async sendMessage(dto: SendChatbotMessageDto) {
     const config = this.getProviderConfig();
+    const prompt = dto.prompt.trim();
+    const sessionId = dto.sessionId?.trim() || null;
 
-    const history = dto.history
+    const storedHistory = sessionId
+      ? await this.chatbotHistoryService.getRecentHistory(sessionId, config.historyLimit)
+      : [];
+
+    const fallbackHistory = dto.history
       .slice(-config.historyLimit)
       .map((message) => ({
         role: message.role,
         content: message.content.trim(),
       }))
       .filter((message) => message.content.length > 0);
-    const prompt = dto.prompt.trim();
 
-    if (config.provider === 'gemini') {
-      return this.sendGeminiMessage(config, history, prompt);
+    const history = (storedHistory.length > 0 ? storedHistory : fallbackHistory).map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
+
+    const retrievalQuery = this.buildRetrievalQuery(prompt, history);
+
+    const retrieval = await this.chatbotRetrievalService.buildCatalogContext(retrievalQuery, {
+      productLimit: config.ragProductLimit,
+      variantLimit: config.ragVariantLimit,
+      candidateLimit: config.ragCandidateLimit,
+    });
+
+    const groundedPrompt = this.buildGroundedPrompt(prompt, retrieval.context, retrieval.hasResults);
+
+    const response =
+      config.provider === 'gemini'
+        ? await this.sendGeminiMessage(config, history, groundedPrompt)
+        : await this.sendOpenAiCompatibleMessage(config, history, groundedPrompt);
+
+    if (sessionId) {
+      await this.chatbotHistoryService.appendMessages(
+        sessionId,
+        [
+          {
+            role: 'user',
+            content: prompt,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            role: 'assistant',
+            content: response.message,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        config.historyLimit * 2,
+      );
     }
 
-    return this.sendOpenAiCompatibleMessage(config, history, prompt);
+    return {
+      ...response,
+      sessionId,
+      sources: retrieval.sources,
+    };
+  }
+
+  async clearHistory(sessionId: string) {
+    return this.chatbotHistoryService.clearHistory(sessionId.trim());
   }
 
   private getProviderConfig() {
@@ -122,6 +176,9 @@ export class ChatbotService {
       temperature: this.configService.get<number>('CHATBOT_TEMPERATURE') || 0.4,
       maxTokens: this.configService.get<number>('CHATBOT_MAX_TOKENS') || 500,
       historyLimit: this.configService.get<number>('CHATBOT_HISTORY_LIMIT') || 10,
+      ragProductLimit: this.configService.get<number>('CHATBOT_RAG_PRODUCT_LIMIT') || 4,
+      ragVariantLimit: this.configService.get<number>('CHATBOT_RAG_VARIANT_LIMIT') || 3,
+      ragCandidateLimit: this.configService.get<number>('CHATBOT_RAG_CANDIDATE_LIMIT') || 12,
     };
   }
 
@@ -217,6 +274,45 @@ export class ChatbotService {
     };
   }
 
+  private buildRetrievalQuery(prompt: string, history: ProviderChatMessage[]) {
+    const recentHistory = history
+      .slice(-4)
+      .map((message) => `${message.role}: ${message.content}`)
+      .join('\n')
+      .slice(-1200);
+
+    return recentHistory ? `${recentHistory}\nuser: ${prompt}` : prompt;
+  }
+
+  private buildGroundedPrompt(prompt: string, catalogContext: string, hasResults: boolean) {
+    if (!hasResults) {
+      return [
+        `Câu hỏi khách hàng: ${prompt}`,
+        '',
+        'Kết quả truy xuất catalog từ DB: không tìm thấy sản phẩm hoặc biến thể phù hợp.',
+        '',
+        'Quy tắc trả lời bắt buộc:',
+        '- Chỉ được trả lời theo dữ liệu truy xuất từ DB.',
+        '- Nếu chưa có dữ liệu phù hợp, hãy nói rõ hiện chưa tìm thấy sản phẩm phù hợp trong catalog hiện tại.',
+        '- Hãy mời khách nói rõ thêm về nhu cầu, mùi hương, dung tích, khu vực sử dụng hoặc ngân sách.',
+        '- Không bịa tên sản phẩm, mùi hương, dung tích, giá, tồn kho hay chính sách ngoài dữ liệu truy xuất.',
+      ].join('\n');
+    }
+
+    return [
+      `Câu hỏi khách hàng: ${prompt}`,
+      '',
+      'Dữ liệu catalog truy xuất trực tiếp từ DB:',
+      catalogContext,
+      '',
+      'Quy tắc trả lời bắt buộc:',
+      '- Chỉ dùng dữ liệu catalog truy xuất ở trên khi nêu tên sản phẩm, mùi hương, dung tích, giá, SKU và tồn kho.',
+      '- Nếu dữ liệu truy xuất chưa đủ để trả lời chắc chắn, hãy nói rõ chưa có đủ dữ liệu thay vì tự suy đoán.',
+      '- Không bịa thông tin ngoài dữ liệu truy xuất.',
+      '- Khi phù hợp, hãy gợi ý ngắn gọn 1-3 sản phẩm liên quan nhất trước.',
+    ].join('\n');
+  }
+
   private async sendProviderRequest(
     config: ReturnType<ChatbotService['getProviderConfig']>,
     request: {
@@ -295,7 +391,8 @@ export class ChatbotService {
     }
 
     const text = parts
-      .filter((part) => !part.thought).map((part) => part.text || '')
+      .filter((part) => !part.thought)
+      .map((part) => part.text || '')
       .join('')
       .trim();
 
