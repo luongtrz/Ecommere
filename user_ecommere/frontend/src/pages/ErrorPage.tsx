@@ -40,7 +40,7 @@ export function ErrorPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/10"
                 asChild
               >
                 <Link to="/" className="flex items-center gap-2">
@@ -70,7 +70,7 @@ export function ErrorPage() {
                 Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của chúng tôi
               </p>
               <Button variant="ghost" asChild>
-                <Link to="/support" className="text-blue-600 hover:text-blue-700">
+                <Link to="/support" className="text-primary hover:text-primary/90">
                   Liên hệ hỗ trợ
                 </Link>
               </Button>
@@ -81,8 +81,8 @@ export function ErrorPage() {
           <div className="mt-8 text-center">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Home className="h-6 w-6 text-blue-600" />
+                <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Home className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Về trang chủ</h3>
                 <p className="text-sm text-gray-600">Quay lại trang chủ để tiếp tục mua sắm</p>

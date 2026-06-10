@@ -132,9 +132,9 @@ export function CategoryPage() {
     <>
       <SEO title={category.name} description={category.description} />
 
-      <div className="min-h-screen bg-gray-50/50">
+      <div className="min-h-screen">
         {/* Compact Header - giống CatalogPage */}
-        <div className="bg-white border-b border-gray-100 shadow-sm">
+        <div className="border-b border-white/30 bg-white/30 backdrop-blur-md">
           <div className="container py-4">
             {/* Breadcrumb nhỏ */}
             <Breadcrumb
@@ -142,42 +142,42 @@ export function CategoryPage() {
                 { label: 'Sản phẩm', href: '/catalog' },
                 { label: category.name },
               ]}
-              className="mb-2"
+              className="mb-3"
             />
 
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               <div>
-                <h1 className="text-xl font-bold text-gray-900">{category.name}</h1>
-                <p className="text-xs text-gray-500 hidden md:block">{products?.total || 0} sản phẩm</p>
+                <h1 className="text-xl font-bold text-foreground">{category.name}</h1>
+                <p className="text-xs text-muted-foreground hidden md:block">{products?.total || 0} sản phẩm</p>
               </div>
 
               {/* Compact Toolbar - giống CatalogPage */}
               <div className="flex items-center gap-2 w-full md:w-auto">
                 {/* Search */}
                 <div className="relative flex-1 md:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder="Tìm kiếm..."
-                    className="h-9 pl-9 text-sm bg-gray-50 border-gray-200 rounded-lg focus:bg-white transition-all"
+                    className="h-9 pl-9 text-sm bg-white/60 border-white/80 rounded-xl focus:bg-white transition-all"
                   />
                   {searchQuery && (
-                    <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-gray-200 rounded-full p-0.5">
-                      <X className="h-3 w-3 text-gray-500" />
+                    <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-secondary rounded-full p-0.5">
+                      <X className="h-3 w-3 text-muted-foreground" />
                     </button>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 border-l pl-2 ml-2 border-gray-200">
+                <div className="flex items-center gap-2 border-l pl-2 ml-2 border-white/40">
                   {/* Sort */}
                   <Select value={sortBy} onValueChange={handleSortChange}>
-                    <SelectTrigger className="h-9 w-[130px] text-xs border-0 bg-transparent hover:bg-gray-50 font-medium">
+                    <SelectTrigger className="h-9 w-[130px] text-xs border-0 bg-transparent hover:bg-secondary/40 font-semibold text-foreground rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl border-white/70 bg-white/95">
                       {PRODUCT_SORT_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs rounded-lg">
                           {opt.label}
                         </SelectItem>
                       ))}
@@ -185,12 +185,12 @@ export function CategoryPage() {
                   </Select>
 
                   {/* View Toggle */}
-                  <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
+                  <div className="flex bg-secondary/55 rounded-xl p-0.5 border border-white/40">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleViewToggle('grid')}
-                      className={`h-7 w-7 p-0 rounded-md ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-gray-500'}`}
+                      className={`h-7 w-7 p-0 rounded-lg ${viewMode === 'grid' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground'}`}
                     >
                       <Grid3X3 className="h-3.5 w-3.5" />
                     </Button>
@@ -198,7 +198,7 @@ export function CategoryPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleViewToggle('list')}
-                      className={`h-7 w-7 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm' : 'text-gray-500'}`}
+                      className={`h-7 w-7 p-0 rounded-lg ${viewMode === 'list' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground'}`}
                     >
                       <List className="h-3.5 w-3.5" />
                     </Button>
@@ -207,13 +207,13 @@ export function CategoryPage() {
                   {/* Mobile Filter Trigger */}
                   <Sheet>
                     <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-9 w-9 p-0 lg:hidden">
+                      <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-xl lg:hidden border-white/80 bg-white/30">
                         <Filter className="h-4 w-4" />
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-80 overflow-y-auto">
+                    <SheetContent side="left" className="w-80 overflow-y-auto border-white/70 bg-white/95">
                       <SheetHeader>
-                        <SheetTitle>Bộ lọc</SheetTitle>
+                        <SheetTitle className="text-foreground">Bộ lọc</SheetTitle>
                       </SheetHeader>
                       <div className="py-4">
                         {filterContent}
@@ -231,7 +231,7 @@ export function CategoryPage() {
           <div className="flex gap-6">
             {/* Sidebar - Desktop only */}
             <aside className="hidden lg:block w-64 shrink-0">
-              <div className="sticky top-20 bg-white rounded-xl border border-gray-100 p-4 shadow-sm overflow-y-auto max-h-[calc(100vh-6rem)]">
+              <div className="sticky top-24 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/60 p-4 shadow-sm overflow-y-auto max-h-[calc(100vh-8rem)]">
                 {filterContent}
               </div>
             </aside>
@@ -244,7 +244,7 @@ export function CategoryPage() {
                 <EmptyState
                   title="Không tìm thấy sản phẩm"
                   description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
-                  action={<Button variant="outline" onClick={clearFilters}>Xóa bộ lọc</Button>}
+                  action={<Button variant="outline" className="rounded-full" onClick={clearFilters}>Xóa bộ lọc</Button>}
                 />
               ) : (
                 <div className="space-y-8 animate-fade-in">
@@ -266,30 +266,32 @@ export function CategoryPage() {
                           onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                         />
                       ) : (
-                        <div key={product.id} className="flex gap-4 bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all">
-                          <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0">
+                        <div key={product.id} className="flex gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-[1.65rem] border border-white/60 hover:shadow-lg transition-all duration-300">
+                          <div className="w-24 h-24 bg-white/50 border border-white/40 rounded-xl overflow-hidden shrink-0">
                             <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
                           </div>
-                          <div className="flex-1 min-w-0 py-1">
-                            <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
-                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                              <div className="flex items-center text-amber-500">
-                                <span className="mr-0.5">&#9733;</span> {product.rating?.toFixed(1)}
+                          <div className="flex-1 min-w-0 py-1 flex flex-col justify-between">
+                            <div>
+                              <h3 className="font-bold text-foreground truncate text-base">{product.name}</h3>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                                <div className="flex items-center text-amber-500 font-semibold">
+                                  <span className="mr-0.5">&#9733;</span> {product.rating?.toFixed(1)}
+                                </div>
+                                <span>|</span>
+                                <span>{product.reviewCount} đánh giá</span>
                               </div>
-                              <span>|</span>
-                              <span>{product.reviewCount} đánh giá</span>
+                              <div className="flex flex-wrap gap-1 mb-3">
+                                {product.variants.slice(0, 3).map((v: any, i: number) => (
+                                  <Badge key={i} variant="secondary" className="text-[10px] h-5 px-2 font-normal rounded-full">
+                                    {v.scent}
+                                  </Badge>
+                                ))}
+                              </div>
                             </div>
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {product.variants.slice(0, 3).map((v: any, i: number) => (
-                                <Badge key={i} variant="secondary" className="text-[10px] h-5 px-1.5 font-normal">
-                                  {v.scent}
-                                </Badge>
-                              ))}
-                            </div>
-                            <div className="flex items-center justify-between mt-auto">
-                              <span className="font-bold text-blue-600">{formatCurrency(product.basePrice)}</span>
-                              <Button size="sm" className="h-8 rounded-lg text-xs" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
-                                <ShoppingBag className="h-3 w-3 mr-1.5" /> Thêm
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-primary text-base">{formatCurrency(product.basePrice)}</span>
+                              <Button size="sm" className="h-9 rounded-full text-xs transition-all duration-300 active:scale-95" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
+                                <ShoppingBag className="h-3.5 w-3.5 mr-1.5" /> Thêm vào giỏ
                               </Button>
                             </div>
                           </div>

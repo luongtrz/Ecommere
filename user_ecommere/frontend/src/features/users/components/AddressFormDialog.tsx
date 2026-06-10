@@ -77,7 +77,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto sm:rounded-2xl border-0 shadow-2xl">
         <DialogHeader className="pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+            <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-primary">
               <MapPin className="h-5 w-5" />
             </div>
             <DialogTitle className="text-xl font-bold text-gray-900">{isEdit ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}</DialogTitle>
@@ -91,7 +91,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
               <Input
                 id="fullName"
                 required
-                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-blue-500 transition-all"
+                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 placeholder="Nguyễn Văn A"
@@ -104,7 +104,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 id="phone"
                 required
                 type="tel"
-                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-blue-500 transition-all"
+                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="0912345678"
@@ -117,7 +117,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
             <Input
               id="line1"
               required
-              className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-blue-500 transition-all"
+              className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
               value={formData.line1}
               onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
               placeholder="Số nhà, tên đường..."
@@ -130,7 +130,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
               <Input
                 id="province"
                 required
-                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-blue-500 transition-all"
+                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.province}
                 onChange={(e) => setFormData({ ...formData, province: e.target.value })}
                 placeholder="Hồ Chí Minh"
@@ -142,7 +142,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
               <Input
                 id="district"
                 required
-                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-blue-500 transition-all"
+                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.district}
                 onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                 placeholder="Quận 1"
@@ -154,7 +154,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
               <Input
                 id="ward"
                 required
-                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-blue-500 transition-all"
+                className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.ward}
                 onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
                 placeholder="Bến Nghé"
@@ -169,7 +169,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
               onCheckedChange={(checked) =>
                 setFormData({ ...formData, isDefault: checked as boolean })
               }
-              className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="w-5 h-5 rounded-md border-gray-300 text-primary focus:ring-primary"
             />
             <Label htmlFor="isDefault" className="cursor-pointer text-gray-700 font-medium">
               Đặt làm địa chỉ mặc định
@@ -182,7 +182,7 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
             </Button>
             <Button
               type="submit"
-              className="h-11 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20"
+              className="h-11 px-6 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 shadow-lg shadow-primary/10"
               disabled={createAddress.isPending || updateAddress.isPending}
             >
               {isEdit ? 'Cập nhật' : 'Thêm địa chỉ'}

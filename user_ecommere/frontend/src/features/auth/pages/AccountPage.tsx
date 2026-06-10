@@ -38,7 +38,7 @@ export function AccountPage() {
         {/* Header */}
         <div className="mb-4 shrink-0 flex items-center justify-between">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-xl md:text-2xl font-bold text-primary">
               Tài khoản của tôi
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
@@ -61,7 +61,7 @@ export function AccountPage() {
             {/* Quick Profile */}
             <Card className="shadow-sm border border-gray-100 overflow-hidden shrink-0">
               <CardContent className="p-4 flex items-center gap-4">
-                <div className="h-16 w-16 bg-gradient-to-br from-blue-500 to-violet-600 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md shrink-0">
+                <div className="h-16 w-16 bg-gradient-to-br from-primary to-accent text-white rounded-full flex items-center justify-center text-xl font-bold shadow-md shrink-0">
                   {getInitials(user.name)}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -88,10 +88,10 @@ export function AccountPage() {
               </CardHeader>
               <CardContent className="p-2 space-y-1 flex-1 overflow-y-auto">
                 {[
-                  { icon: ShoppingBag, label: 'Đơn hàng của tôi', path: '/orders', color: 'text-blue-600 bg-blue-50' },
+                  { icon: ShoppingBag, label: 'Đơn hàng của tôi', path: '/orders', color: 'text-primary bg-secondary' },
                   { icon: MapPin, label: 'Sổ địa chỉ', path: '/addresses', color: 'text-green-600 bg-green-50' },
                   { icon: Heart, label: 'Danh sách yêu thích', path: '/wishlist', color: 'text-rose-600 bg-rose-50' },
-                  { icon: Shield, label: 'Bảo mật tài khoản', path: '#', color: 'text-purple-600 bg-purple-50' },
+                  { icon: Shield, label: 'Bảo mật tài khoản', path: '#', color: 'text-primary bg-secondary' },
                 ].map((item, idx) => (
                   <button
                     key={idx}
@@ -116,14 +116,14 @@ export function AccountPage() {
             <Card className="shadow-sm border border-gray-100 h-full flex flex-col">
               <CardHeader className="py-4 px-6 border-b bg-gray-50/30 shrink-0">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <User className="h-5 w-5 text-blue-600" />
+                  <User className="h-5 w-5 text-primary" />
                   Thông tin cá nhân
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 overflow-y-auto">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:border-blue-100 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                  <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:border-primary/20 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary shrink-0">
                       <Mail className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">

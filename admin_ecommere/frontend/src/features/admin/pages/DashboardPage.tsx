@@ -89,7 +89,7 @@ export function DashboardPage() {
       icon: DollarSign,
       change: stats.revenue.monthlyChange,
       description: 'so với tháng trước',
-      accent: 'from-emerald-500/15 to-emerald-50',
+      accent: 'from-emerald-600/10 to-secondary/40',
     },
     {
       title: 'Đơn hàng mới',
@@ -97,7 +97,7 @@ export function DashboardPage() {
       icon: ShoppingCart,
       change: stats.orders.monthlyChange,
       description: `${stats.orders.pendingOrders} đơn đang chờ xử lý`,
-      accent: 'from-blue-500/15 to-blue-50',
+      accent: 'from-primary/10 to-secondary/40',
     },
     {
       title: 'Sản phẩm hoạt động',
@@ -105,7 +105,7 @@ export function DashboardPage() {
       icon: Package,
       change: undefined,
       description: `${stats.products.lowStockProducts} sản phẩm sắp hết hàng`,
-      accent: 'from-amber-500/15 to-amber-50',
+      accent: 'from-amber-600/10 to-secondary/40',
     },
     {
       title: 'Khách hàng mới',
@@ -113,7 +113,7 @@ export function DashboardPage() {
       icon: Users,
       change: stats.customers.monthlyChange,
       description: `${stats.customers.totalCustomers} tài khoản toàn hệ thống`,
-      accent: 'from-violet-500/15 to-violet-50',
+      accent: 'from-purple-600/10 to-secondary/40',
     },
   ];
 
@@ -139,19 +139,19 @@ export function DashboardPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="rounded-full px-6">
+                <Button asChild variant="outline" className="rounded-full px-6 bg-white/45 border-white/60">
                   <Link to="/admin/products">Cập nhật sản phẩm</Link>
                 </Button>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(14,165,233,0.12),rgba(255,255,255,0.92))] p-5">
+              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(38,92,66,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5">
                 <p className="text-sm text-muted-foreground">Doanh thu toàn hệ thống</p>
                 <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(stats.revenue.totalRevenue)}</p>
                 <p className="mt-2 text-sm text-muted-foreground">Tổng doanh thu đã ghi nhận từ trước đến nay.</p>
               </div>
-              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(16,185,129,0.12),rgba(255,255,255,0.92))] p-5">
+              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(197,160,89,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5">
                 <p className="text-sm text-muted-foreground">Tốc độ giao dịch gần nhất</p>
                 <p className="mt-2 text-3xl font-bold text-foreground">{stats.orders.shippingOrders}</p>
                 <p className="mt-2 text-sm text-muted-foreground">Đơn đang giao vận ở thời điểm hiện tại.</p>
@@ -162,14 +162,14 @@ export function DashboardPage() {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {statCards.map((card) => (
-            <Card key={card.title} className={`overflow-hidden rounded-[1.75rem] border-white/70 bg-gradient-to-br ${card.accent} shadow-[0_20px_60px_-44px_rgba(15,23,42,0.35)]`}>
+            <Card key={card.title} className={`overflow-hidden rounded-[1.75rem] border-white/65 bg-gradient-to-br ${card.accent} shadow-[0_20px_60px_-44px_rgba(24,46,37,0.25)]`}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
                   <div className="mt-3 text-2xl font-bold text-foreground">{card.value}</div>
                 </div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/90 text-foreground shadow-sm">
-                  <card.icon className="h-5 w-5" />
+                  <card.icon className="h-5 w-5 text-primary" />
                 </div>
               </CardHeader>
               <CardContent>
@@ -199,11 +199,11 @@ export function DashboardPage() {
                   <AreaChart data={stats.revenueHistory} margin={{ left: 6, right: 6, top: 10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0.02} />
+                        <stop offset="5%" stopColor="#265c42" stopOpacity={0.28} />
+                        <stop offset="95%" stopColor="#265c42" stopOpacity={0.02} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#dbe4f0" />
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e0e8e3" />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} stroke="#64748b" />
                     <YAxis
                       tickLine={false}
@@ -216,14 +216,15 @@ export function DashboardPage() {
                       formatter={(value) => formatCurrency(Number(value ?? 0))}
                       contentStyle={{
                         borderRadius: '16px',
-                        border: '1px solid rgba(219, 228, 240, 0.9)',
-                        boxShadow: '0 18px 50px -30px rgba(15, 23, 42, 0.35)',
+                        border: '1px solid rgba(255, 255, 255, 0.8)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                        boxShadow: '0 18px 50px -30px rgba(24, 46, 37, 0.25)',
                       }}
                     />
                     <Area
                       type="monotone"
                       dataKey="total"
-                      stroke="#2563eb"
+                      stroke="#265c42"
                       strokeWidth={3}
                       fill="url(#dashboardRevenue)"
                     />

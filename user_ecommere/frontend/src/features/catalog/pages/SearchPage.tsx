@@ -143,7 +143,7 @@ export function SearchPage() {
                     {!isLoading && data?.total === 0 && (
                       <div className="text-sm text-gray-500">
                         Thử tìm với từ khóa khác hoặc{' '}
-                        <Link to="/catalog" className="text-blue-600 hover:underline">
+                        <Link to="/catalog" className="text-primary hover:underline">
                           xem tất cả sản phẩm
                         </Link>
                       </div>
@@ -262,7 +262,7 @@ export function SearchPage() {
                       onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                     />
                   ) : (
-                    <Card key={product.id} className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+                    <Card key={product.id} className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary">
                       <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                         <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm mx-auto md:mx-0">
                           <img
@@ -307,12 +307,12 @@ export function SearchPage() {
                             </div>
                           </div>
                           <div className="text-center md:text-right">
-                            <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
+                            <div className="text-2xl md:text-3xl font-bold text-primary mb-2">
                               {formatCurrency(product.basePrice)}
                             </div>
                             <Button
                               size="lg"
-                              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md w-full md:w-auto"
+                              className="bg-primary hover:bg-primary/95 text-primary-foreground shadow-md w-full md:w-auto"
                               onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                             >
                               <ShoppingBag className="h-4 w-4 mr-2" />

@@ -75,7 +75,7 @@ export function OrderDetailPage() {
       case 'PENDING_PAYMENT':
         return 'bg-amber-100 text-amber-700 border-amber-200 ring-amber-100';
       case 'PAID':
-        return 'bg-blue-100 text-blue-700 border-blue-200 ring-blue-100';
+        return 'bg-teal-50 text-teal-700 border-teal-200 ring-teal-100';
       case 'PACKING':
         return 'bg-purple-100 text-purple-700 border-purple-200 ring-purple-100';
       case 'SHIPPED':
@@ -181,7 +181,7 @@ export function OrderDetailPage() {
                       return (
                         <div key={step.status} className="flex md:flex-col items-center gap-4 md:gap-3 md:text-center">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm border-2 transition-all duration-300 ${isCompleted
-                            ? 'bg-blue-600 border-blue-600 text-white shadow-blue-200'
+                            ? 'bg-primary border-primary text-primary-foreground shadow-primary/20'
                             : 'bg-white border-gray-200 text-gray-300'
                             }`}>
                             <Icon className="h-5 w-5" />
@@ -191,7 +191,7 @@ export function OrderDetailPage() {
                               {step.label}
                             </div>
                             {isCurrent && (
-                              <div className="text-xs text-blue-600 font-medium">Hiện tại</div>
+                              <div className="text-xs text-primary font-medium">Hiện tại</div>
                             )}
                           </div>
                         </div>
@@ -208,9 +208,9 @@ export function OrderDetailPage() {
             <div className="lg:col-span-2 space-y-6">
               {/* Order Items */}
               <Card className="shadow-md border border-gray-100 overflow-hidden rounded-2xl animate-fade-in" style={{ animationDelay: '100ms' }}>
-                <CardHeader className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-100 py-4">
+                <CardHeader className="bg-secondary/40 border-b border-gray-100 py-4">
                   <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
-                    <ShoppingBag className="h-5 w-5 text-blue-600" />
+                    <ShoppingBag className="h-5 w-5 text-primary" />
                     Sản phẩm ({order.items.length})
                   </CardTitle>
                 </CardHeader>
@@ -231,7 +231,7 @@ export function OrderDetailPage() {
                             <div className="text-sm font-medium text-gray-900">
                               {formatCurrency(item.price)}
                             </div>
-                            <div className="font-bold text-blue-600 text-base">
+                            <div className="font-bold text-primary text-base">
                               {formatCurrency(item.price * item.quantity)}
                             </div>
                           </div>
@@ -303,7 +303,7 @@ export function OrderDetailPage() {
               <Card className="shadow-lg border-0 sticky top-24 overflow-hidden rounded-2xl bg-white animate-fade-in" style={{ animationDelay: '400ms' }}>
                 <CardHeader className="bg-gray-900 text-white py-5">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Package className="h-5 w-5 text-blue-400" />
+                    <Package className="h-5 w-5 text-primary-foreground/85" />
                     Tóm tắt chi phí
                   </CardTitle>
                 </CardHeader>
@@ -311,7 +311,7 @@ export function OrderDetailPage() {
                   {/* Order Info */}
                   <div className="mb-6 pb-6 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+                      <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-primary">
                         <Calendar className="h-5 w-5" />
                       </div>
                       <div>
@@ -337,7 +337,7 @@ export function OrderDetailPage() {
 
                   <div className="p-4 bg-gray-50 rounded-xl flex justify-between items-center mb-6">
                     <span className="text-base font-bold text-gray-900">Tổng cộng:</span>
-                    <span className="text-2xl font-bold text-blue-600">
+                    <span className="text-2xl font-bold text-primary">
                       {formatCurrency(order.total)}
                     </span>
                   </div>
