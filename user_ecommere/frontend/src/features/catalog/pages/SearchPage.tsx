@@ -1,4 +1,5 @@
 import { useSearchParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { SEO } from '@/lib/seo';
 import { useProductSearch } from '../hooks/useProducts';
 import { ProductCard } from '@/components/common/ProductCard';
@@ -6,13 +7,14 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, ArrowLeft, SlidersHorizontal, Package, TrendingUp, Grid3X3, List, ShoppingBag } from 'lucide-react';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { formatCurrency } from '@/lib/formatters';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,25 +22,41 @@ export function SearchPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
 
+  const [searchInput, setSearchInput] = useState(query);
+  const debouncedSearch = useDebounce(searchInput, 400);
+
   const { data, isLoading } = useProductSearch(query);
   const { addItem } = useCart();
 
-  const handleSearchChange = (newQuery: string) => {
-    if (newQuery.trim()) {
-      setSearchParams({ q: newQuery.trim(), sort: sortBy, view: viewMode });
+  useEffect(() => {
+    setSearchInput(query);
+  }, [query]);
+
+  useEffect(() => {
+    if (debouncedSearch !== query) {
+      if (debouncedSearch.trim()) {
+        setSearchParams({ q: debouncedSearch.trim(), sort: sortBy, view: viewMode });
+      } else {
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete('q');
+        setSearchParams(nextParams);
+      }
     }
-  };
+  }, [debouncedSearch, query, sortBy, viewMode, setSearchParams, searchParams]);
 
   const handleSortChange = (value: string) => {
-    setSearchParams({ q: query, sort: value, view: viewMode });
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('sort', value);
+    setSearchParams(nextParams);
   };
 
   const handleViewToggle = (mode: string) => {
-    setSearchParams({ q: query, sort: sortBy, view: mode });
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('view', mode);
+    setSearchParams(nextParams);
   };
 
   const handleFilterClick = () => {
-    // TODO: Implement filter modal/sidebar
     alert('Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.');
   };
 
@@ -55,6 +73,7 @@ export function SearchPage() {
   };
 
   const clearSearch = () => {
+    setSearchInput('');
     setSearchParams({});
   };
 
@@ -62,13 +81,13 @@ export function SearchPage() {
     <>
       <SEO title={`Tìm kiếm: ${query}`} />
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen">
         {/* Search Header */}
-        <div className="bg-white border-b shadow-sm">
+        <div className="border-b border-white/30 bg-white/30 backdrop-blur-md">
           <div className="container py-6">
-            <div className="flex items-center gap-4 mb-6">
-              <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
-                <Link to="/catalog" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+            <div className="flex items-center gap-4 mb-4">
+              <Button variant="ghost" size="sm" asChild className="rounded-full hover:bg-secondary/60">
+                <Link to="/catalog" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
                   <ArrowLeft className="h-4 w-4" />
                   Quay lại danh sách
                 </Link>
@@ -76,53 +95,47 @@ export function SearchPage() {
             </div>
 
             {/* Search Input */}
-            <Card className="shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                    <Input
-                      placeholder="Tìm kiếm sản phẩm..."
-                      value={query}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      className="pl-12 h-12 text-base"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleSearchChange((e.target as HTMLInputElement).value);
-                        }
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Sắp xếp:</span>
-                      <Select value={sortBy} onValueChange={handleSortChange}>
-                        <SelectTrigger className="w-[180px] h-12">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PRODUCT_SORT_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Button variant="outline" size="lg" className="h-12" onClick={handleFilterClick}>
-                      <SlidersHorizontal className="h-4 w-4 mr-2" />
-                      Bộ lọc
-                    </Button>
-
-                    {query && (
-                      <Button variant="ghost" onClick={clearSearch} className="h-12 text-gray-500 hover:text-gray-700">
-                        Xóa tìm kiếm
-                      </Button>
-                    )}
-                  </div>
+            <div className="section-shell p-4 md:p-6 bg-white/60 backdrop-blur-sm">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Tìm kiếm sản phẩm..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="pl-11 h-12 text-sm bg-white/70 border-white/80 rounded-2xl focus:bg-white focus:ring-primary/20 transition-all"
+                  />
                 </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap uppercase tracking-[0.12em]">Sắp xếp:</span>
+                    <Select value={sortBy} onValueChange={handleSortChange}>
+                      <SelectTrigger className="w-[160px] h-12 rounded-2xl bg-white/70 border-white/80 text-xs font-semibold text-foreground">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl border-white/70 bg-white/95">
+                        {PRODUCT_SORT_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value} className="text-xs rounded-xl">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button variant="outline" size="lg" className="h-12 rounded-2xl border-white/80 bg-white/40 hover:bg-white/70 text-xs font-semibold text-foreground" onClick={handleFilterClick}>
+                    <SlidersHorizontal className="h-4 w-4 mr-2" />
+                    Bộ lọc
+                  </Button>
+
+                  {searchInput && (
+                    <Button variant="ghost" onClick={clearSearch} className="h-12 text-xs font-semibold text-destructive hover:bg-destructive/5 rounded-2xl">
+                      Xóa tìm kiếm
+                    </Button>
+                  )}
+                </div>
+              </div>
 
                 {/* Search Info */}
                 {query && (
@@ -150,10 +163,9 @@ export function SearchPage() {
                     )}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
-        </div>
 
         {/* Results Section */}
         <div className="container py-8">
@@ -200,7 +212,7 @@ export function SearchPage() {
                       key={suggestion}
                       variant="outline"
                       className="justify-start h-auto py-3 px-4 text-left"
-                      onClick={() => handleSearchChange(suggestion)}
+                      onClick={() => setSearchInput(suggestion)}
                     >
                       <Search className="h-4 w-4 mr-2 flex-shrink-0" />
                       <span className="truncate">{suggestion}</span>

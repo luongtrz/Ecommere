@@ -195,15 +195,15 @@ export function HomePage() {
       <SEO />
 
       <div className="container space-y-8 py-6 md:space-y-10 md:py-8">
-        <section className="section-shell relative overflow-hidden px-6 py-10 md:px-10 md:py-14">
+        <section className="section-shell relative overflow-hidden px-6 py-10 md:px-10 md:py-14 bg-white/50 backdrop-blur-md">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,225,194,0.75),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(185,225,208,0.65),transparent_30%)]" />
-          <div className="relative grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-center">
             <div>
-              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5" />
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground shadow-sm">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
                 Hương thơm cho không gian sống hiện đại
               </p>
-              <h1 className="max-w-3xl text-balance text-4xl font-semibold leading-[1.05] text-foreground md:text-6xl">
+              <h1 className="max-w-3xl text-balance text-4xl font-semibold leading-[1.05] text-foreground md:text-6xl font-serif">
                 Chọn mùi hương khiến nhà ở, xe hơi và quà tặng của bạn trông có gu hơn.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
@@ -211,45 +211,60 @@ export function HomePage() {
                 mùi bán chạy, hỏi chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay trên catalog.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="h-12 rounded-full px-6">
+                <Button asChild size="lg" className="h-12 rounded-full px-6 transition-transform duration-300 hover:scale-[1.02] shadow-lg shadow-primary/20">
                   <Link to="/catalog">
-                    Khám phá toàn bộ bộ sưu tập
+                    Khám phá bộ sưu tập
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-12 rounded-full px-6">
+                <Button asChild variant="outline" size="lg" className="h-12 rounded-full px-6 border-white/80 bg-white/40 hover:bg-white/70 transition-transform duration-300 hover:scale-[1.02] shadow-sm">
                   <Link to="/catalog?sort=best_selling">Xem nhóm bán chạy nhất</Link>
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-              <div className="glass-panel rounded-[1.75rem] p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Điểm mạnh của shop</p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  {HIGHLIGHTS.map((item) => (
-                    <div key={item.label} className="rounded-[1.35rem] bg-white/75 p-4">
-                      <p className="text-2xl font-bold text-foreground">{item.value}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{item.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="glass-panel rounded-[1.75rem] p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Gợi ý bắt đầu nhanh</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {['Xịt phòng khách', 'Body mist nhẹ', 'Quà tặng', 'Mùi sạch cho xe'].map((item) => (
-                    <Link
-                      key={item}
-                      to={`/search?q=${encodeURIComponent(item)}`}
-                      className="rounded-full border border-border bg-white px-4 py-2 text-sm text-foreground transition hover:border-primary/25 hover:bg-secondary"
-                    >
-                      {item}
-                    </Link>
-                  ))}
-                </div>
+            <div className="relative aspect-square w-full max-w-[400px] mx-auto lg:max-w-none rounded-[2rem] overflow-hidden shadow-2xl border border-white/60 group animate-scale-in">
+              <img
+                src="/hero-fragrance.png"
+                alt="Thai Spray Luxury Fragrance"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/80">Premium Scent Collection</p>
+                <h3 className="text-lg font-bold mt-1 font-serif leading-tight">Mùi hương tinh tế cho nhịp sống hiện đại</h3>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="grid gap-6 md:grid-cols-2">
+          <div className="section-shell p-6 bg-white/60 backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Điểm mạnh của shop</p>
+            <div className="grid gap-3 grid-cols-3">
+              {HIGHLIGHTS.map((item) => (
+                <div key={item.label} className="rounded-2xl bg-white/80 border border-white/50 p-4 shadow-sm text-center hover:scale-[1.02] transition-all duration-300">
+                  <p className="text-2xl font-bold text-primary">{item.value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground font-semibold leading-tight">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="section-shell p-6 bg-white/60 backdrop-blur-sm flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Gợi ý bắt đầu nhanh</p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {['Xịt phòng khách', 'Body mist nhẹ', 'Quà tặng', 'Mùi sạch cho xe'].map((item) => (
+                  <Link
+                    key={item}
+                    to={`/search?q=${encodeURIComponent(item)}`}
+                    className="rounded-full border border-white/60 bg-white/80 px-4 py-2 text-xs font-bold text-foreground transition-all duration-300 hover:scale-[1.02] hover:border-primary/25 hover:bg-secondary shadow-sm"
+                  >
+                    {item}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-4">Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.</p>
           </div>
         </section>
 

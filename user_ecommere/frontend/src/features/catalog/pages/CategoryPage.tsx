@@ -1,5 +1,5 @@
 import { useParams, useSearchParams } from 'react-router-dom';
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { SEO } from '@/lib/seo';
 import { useCategoryBySlug } from '../hooks/useCategories';
 import { useProducts } from '../hooks/useProducts';
@@ -17,6 +17,7 @@ import { Search, ShoppingBag, Grid3X3, List, Filter, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export function CategoryPage() {
   const { categorySlug } = useParams<{ categorySlug: string }>();
@@ -24,6 +25,10 @@ export function CategoryPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
   const searchQuery = searchParams.get('q') || '';
+
+  // Debounced search: local state for input, debounce before updating URL
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const debouncedSearch = useDebounce(searchInput, 400);
 
   // Filter params
   const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
@@ -60,12 +65,24 @@ export function CategoryPage() {
     setSearchParams(newParams);
   }, [searchParams, setSearchParams]);
 
+  // Apply debounced search to URL params
+  useEffect(() => {
+    if (debouncedSearch !== searchQuery) {
+      updateParams({ q: debouncedSearch || undefined, page: '1' });
+    }
+  }, [debouncedSearch, searchQuery, updateParams]);
+
+  // Keep input in sync with URL changes
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
+
   const handleSortChange = (value: string) => {
     updateParams({ sort: value, page: '1' });
   };
 
   const handleSearchChange = (value: string) => {
-    updateParams({ q: value || undefined, page: '1' });
+    setSearchInput(value);
   };
 
   const handleViewToggle = (mode: string) => {
@@ -157,12 +174,12 @@ export function CategoryPage() {
                 <div className="relative flex-1 md:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
-                    value={searchQuery}
+                    value={searchInput}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder="Tìm kiếm..."
                     className="h-9 pl-9 text-sm bg-white/60 border-white/80 rounded-xl focus:bg-white transition-all"
                   />
-                  {searchQuery && (
+                  {searchInput && (
                     <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-secondary rounded-full p-0.5">
                       <X className="h-3 w-3 text-muted-foreground" />
                     </button>
