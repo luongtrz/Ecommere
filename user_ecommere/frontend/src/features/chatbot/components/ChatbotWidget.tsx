@@ -7,7 +7,7 @@ import { chatbotApi, type ChatbotRole, type ChatbotSource } from '../api/chatbot
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { useProductDetail } from '@/features/catalog/hooks/useProductDetail';
 import { formatCurrency } from '@/lib/formatters';
 
@@ -27,9 +27,11 @@ const SUGGESTIONS = [
   'Hướng dẫn sử dụng để mùi bền hơn',
 ];
 const WELCOME_MESSAGE =
-  'Xin chào, tôi là trợ lý Thai Spray. Bạn có thể hỏi về sản phẩm, mùi hương, cách dùng hoặc đơn hàng.';
+  'Xin chào! Tôi là chuyên gia tư vấn mùi hương của Thai Spray. Tôi có thể gợi ý mùi hương cho phòng khách, phòng ngủ, xe hơi hoặc quà tặng phù hợp nhất cho bạn.';
 const LEGACY_MESSAGE_REWRITES: Record<string, string> = {
   'Xin chao, toi la tro ly Thai Spray. Ban co the hoi ve san pham, mui huong, cach dung hoac don hang.':
+    WELCOME_MESSAGE,
+  'Xin chào, tôi là trợ lý Thai Spray. Bạn có thể hỏi về sản phẩm, mùi hương, cách dùng hoặc đơn hàng.':
     WELCOME_MESSAGE,
 };
 
@@ -48,25 +50,46 @@ function ChatbotSourceItem({ source }: { source: ChatbotSource }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground animate-pulse bg-slate-100/50 border border-slate-200 px-2.5 py-1 rounded-xl">
-        <div className="h-2 w-2 rounded-full bg-slate-400 animate-ping" />
-        <span>{source.name}</span>
+      <div className="flex items-center gap-2 p-2 rounded-2xl border border-slate-100 bg-white/60 animate-pulse w-full max-w-[210px] shrink-0">
+        <div className="h-10 w-10 rounded-xl bg-slate-200 shrink-0" />
+        <div className="flex-1 space-y-1.5 min-w-0">
+          <div className="h-3 bg-slate-200 rounded w-5/6" />
+          <div className="h-2.5 bg-slate-200 rounded w-1/2" />
+        </div>
       </div>
     );
   }
 
   const price = product?.variants?.[0]?.salePrice || product?.variants?.[0]?.price || product?.basePrice || 0;
+  const image = product?.images?.[0] || '';
 
   return (
     <a
       href={`/p/${source.slug}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-emerald-700 hover:underline transition group bg-secondary/50 hover:bg-secondary px-2.5 py-1 rounded-xl w-fit border border-primary/5 shadow-sm active:scale-95"
+      className="flex items-center gap-2.5 p-2 rounded-2xl border border-slate-100 bg-white hover:bg-secondary/40 hover:border-primary/20 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 group w-full max-w-[210px] shrink-0 shadow-sm active:scale-95"
     >
-      <span className="truncate max-w-[220px]">{source.name}</span>
-      {price > 0 && <span className="text-foreground/80 font-medium ml-1">({formatCurrency(price)})</span>}
-      <ArrowUpRight className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
+      <div className="h-10 w-10 rounded-xl overflow-hidden bg-secondary/30 border border-slate-100 shrink-0">
+        {image ? (
+          <img
+            src={getImageUrl(image, { width: 100 })}
+            alt={source.name}
+            className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
+          />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center font-bold text-[10px] text-muted-foreground">TS</div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-bold text-foreground leading-snug truncate group-hover:text-primary transition-colors">
+          {source.name}
+        </p>
+        <p className="text-[10px] font-bold text-primary mt-0.5">
+          {price > 0 ? formatCurrency(price) : 'Xem chi tiết'}
+        </p>
+      </div>
+      <ArrowUpRight className="h-3 w-3 text-muted-foreground opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all shrink-0 mr-0.5" />
     </a>
   );
 }
@@ -209,8 +232,7 @@ export function ChatbotWidget() {
 
     if (previousSessionId) {
       void chatbotApi.clearHistory(previousSessionId).catch(() => {
-        // The new session id is already active on the client, so failing to delete
-        // the old Redis history only affects TTL cleanup on the server.
+        // TTL cleanup fallback
       });
     }
   };
@@ -218,32 +240,34 @@ export function ChatbotWidget() {
   return (
     <>
       {isOpen ? (
-        <div className="fixed bottom-20 right-3 z-50 flex h-[min(80vh,700px)] w-[calc(100vw-2rem)] max-w-[460px] flex-col overflow-hidden rounded-[28px] border border-border bg-background shadow-2xl md:bottom-6 md:right-6">
-          <div className="flex items-start justify-between gap-3 border-b bg-foreground px-4 py-4 text-white">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-                <Sparkles className="h-5 w-5" />
+        <div className="fixed bottom-20 right-3 z-50 flex h-[min(80vh,700px)] w-[calc(100vw-2rem)] max-w-[460px] flex-col overflow-hidden rounded-[28px] border border-white/60 bg-white/90 backdrop-blur-2xl shadow-[0_24px_80px_rgba(24,46,37,0.25)] animate-in slide-in-from-bottom-4 duration-300 md:bottom-6 md:right-6">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-950 via-primary to-emerald-900 px-5 py-4 text-white shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 backdrop-blur border border-white/10 shadow-inner">
+                <Sparkles className="h-5 w-5 text-amber-300 animate-pulse" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Tư vấn cùng Thai Spray</p>
-                <p className="mt-1 text-xs text-white/70">Chatbot sẽ gọi qua backend, lấy dữ liệu sản phẩm từ DB và giữ API key ở server.</p>
+                <p className="text-sm font-bold tracking-wide">Chuyên gia Mùi hương</p>
+                <p className="text-[11px] text-white/80 mt-0.5 font-medium">Tư vấn mùi thơm cho nhà ở & xe hơi</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10 hover:text-white"
+                className="h-8 w-8 text-white hover:bg-white/10 rounded-xl"
                 onClick={handleReset}
+                title="Làm mới hội thoại"
                 type="button"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 opacity-80 hover:opacity-100" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10 hover:text-white"
+                className="h-8 w-8 text-white hover:bg-white/10 rounded-xl"
                 onClick={() => setIsOpen(false)}
                 type="button"
               >
@@ -252,46 +276,57 @@ export function ChatbotWidget() {
             </div>
           </div>
 
-          <div className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-slate-50 to-white px-4 py-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn('flex', message.role === 'user' ? 'justify-end' : 'justify-start')}
-              >
+          {/* Chat area */}
+          <div className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-slate-50/50 to-white/70 px-4 py-4 scrollbar-hide">
+            {messages.map((message) => {
+              const isUser = message.role === 'user';
+              return (
                 <div
-                  className={cn(
-                    'max-w-[85%] rounded-3xl px-4 py-3 text-sm leading-6 shadow-sm',
-                    message.role === 'user'
-                      ? 'rounded-br-md bg-primary text-primary-foreground'
-                      : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'
-                  )}
+                  key={message.id}
+                  className={cn('flex items-start gap-2.5 w-full', isUser ? 'justify-end' : 'justify-start')}
                 >
-                  <div className="whitespace-pre-line">{message.content}</div>
-
-                  {message.role === 'assistant' && message.sources && message.sources.length > 0 && (
-                    <div className="mt-3 border-t border-dashed border-slate-200 pt-2.5">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Sản phẩm liên quan:</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {message.sources.map((source) => (
-                          <ChatbotSourceItem key={source.id} source={source} />
-                        ))}
-                      </div>
+                  {!isUser && (
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
+                      <Bot className="h-4 w-4" />
                     </div>
                   )}
+                  <div
+                    className={cn(
+                      'max-w-[80%] rounded-[1.5rem] px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300',
+                      isUser
+                        ? 'rounded-tr-[0.25rem] bg-gradient-to-tr from-primary to-emerald-950 text-white font-medium'
+                        : 'rounded-tl-[0.25rem] border border-slate-100/90 bg-white text-slate-800'
+                    )}
+                  >
+                    <div className="whitespace-pre-line text-sm">{message.content}</div>
+
+                    {message.role === 'assistant' && message.sources && message.sources.length > 0 && (
+                      <div className="mt-3 border-t border-dashed border-slate-150 pt-2.5">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
+                          <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10" /> Sản phẩm được đề xuất:
+                        </p>
+                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+                          {message.sources.map((source) => (
+                            <ChatbotSourceItem key={source.id} source={source} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {messages.length <= 1 ? (
-              <div className="space-y-2">
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Gợi ý nhanh</p>
+              <div className="space-y-2.5 px-1 pt-2">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Gợi ý nhanh</p>
                 <div className="flex flex-wrap gap-2">
                   {SUGGESTIONS.map((suggestion) => (
                     <button
                       key={suggestion}
                       type="button"
                       onClick={() => setDraft(suggestion)}
-                      className="rounded-full border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 transition hover:border-primary hover:text-primary"
+                      className="rounded-full border border-slate-200 bg-white/80 hover:bg-primary hover:text-white hover:border-primary px-4 py-2 text-left text-xs font-semibold text-slate-700 transition duration-300 shadow-sm active:scale-95"
                     >
                       {suggestion}
                     </button>
@@ -301,10 +336,13 @@ export function ChatbotWidget() {
             ) : null}
 
             {mutation.isPending ? (
-              <div className="flex justify-start">
-                <div className="flex items-center gap-2 rounded-3xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Đang phản hồi...
+              <div className="flex justify-start items-start gap-2.5">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
+                  <Bot className="h-4 w-4 animate-bounce" />
+                </div>
+                <div className="flex items-center gap-2 rounded-[1.5rem] rounded-tl-[0.25rem] border border-slate-100 bg-white px-4 py-3 text-xs font-medium text-slate-500 shadow-sm">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                  Đang pha chế mùi hương...
                 </div>
               </div>
             ) : null}
@@ -318,32 +356,33 @@ export function ChatbotWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="border-t bg-background p-4">
-            <div className="rounded-3xl border border-border bg-white p-2 shadow-sm">
+          {/* Composer Input Area */}
+          <div className="border-t bg-white/80 backdrop-blur p-4">
+            <div className="rounded-[24px] border border-slate-200 bg-white p-1.5 shadow-sm focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/5 transition-all flex items-end gap-2">
               <Textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={handleComposerKeyDown}
                 placeholder="Nhập câu hỏi của bạn..."
-                className="min-h-[96px] resize-none border-0 px-2 py-2 shadow-none focus-visible:ring-0"
+                className="min-h-[40px] max-h-[120px] resize-none border-0 px-3 py-2 shadow-none focus-visible:ring-0 focus:outline-none w-full text-sm placeholder:text-slate-400"
                 maxLength={4000}
               />
-              <div className="flex items-center justify-between gap-3 px-2 pb-1 pt-2">
-                <p className="text-xs text-muted-foreground">Enter để gửi, Shift+Enter để xuống dòng</p>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!draft.trim() || mutation.isPending || !sessionId}
-                  className="rounded-full px-4"
-                >
-                  {mutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <SendHorizonal className="mr-2 h-4 w-4" />
-                  )}
-                  Gửi
-                </Button>
-              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={!draft.trim() || mutation.isPending || !sessionId}
+                size="icon"
+                className="h-9 w-9 rounded-full shrink-0 shadow-md transition-all duration-300 hover:scale-105 active:scale-95 bg-primary hover:bg-emerald-950 text-white p-0 flex items-center justify-center"
+              >
+                {mutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <SendHorizonal className="h-4 w-4" />
+                )}
+              </Button>
             </div>
+            <p className="text-[10px] text-muted-foreground text-center mt-2">
+              Nhấn Enter để gửi · Shift+Enter để xuống dòng
+            </p>
           </div>
         </div>
       ) : null}
@@ -353,12 +392,12 @@ export function ChatbotWidget() {
           type="button"
           size="icon"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 right-3 z-50 h-14 w-14 rounded-full shadow-xl md:bottom-6 md:right-6"
+          className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-emerald-950 text-white shadow-[0_8px_30px_rgba(24,46,37,0.4)] transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center border border-white/20 md:bottom-6 md:right-6 animate-bounce"
         >
           <div className="relative flex items-center justify-center">
             <Bot className="h-6 w-6" />
             <span className="absolute -right-7 -top-6 hidden rounded-full bg-foreground px-2 py-1 text-[10px] font-semibold text-white sm:block">
-              Chat
+              Tư vấn
             </span>
           </div>
         </Button>
