@@ -22,7 +22,7 @@ export function RequireAdmin({ children }: RequireAdminProps) {
   }
 
   if (user.role !== 'ADMIN') {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

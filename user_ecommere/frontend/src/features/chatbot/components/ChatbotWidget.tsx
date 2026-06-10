@@ -50,7 +50,7 @@ function ChatbotSourceItem({ source }: { source: ChatbotSource }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 p-2 rounded-2xl border border-slate-100 bg-white/60 animate-pulse w-full max-w-[210px] shrink-0">
+      <div className="flex items-center gap-2 p-2 rounded-2xl border border-slate-100 bg-white/60 animate-pulse w-full">
         <div className="h-10 w-10 rounded-xl bg-slate-200 shrink-0" />
         <div className="flex-1 space-y-1.5 min-w-0">
           <div className="h-3 bg-slate-200 rounded w-5/6" />
@@ -68,7 +68,7 @@ function ChatbotSourceItem({ source }: { source: ChatbotSource }) {
       href={`/p/${source.slug}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2.5 p-2 rounded-2xl border border-slate-100 bg-white hover:bg-secondary/40 hover:border-primary/20 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 group w-full max-w-[210px] shrink-0 shadow-sm active:scale-95"
+      className="flex items-center gap-2.5 p-2 rounded-2xl border border-slate-100 bg-white hover:bg-secondary/40 hover:border-primary/20 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 group w-full shadow-sm active:scale-[0.99]"
     >
       <div className="h-10 w-10 rounded-xl overflow-hidden bg-secondary/30 border border-slate-100 shrink-0">
         {image ? (
@@ -305,7 +305,7 @@ export function ChatbotWidget() {
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
                           <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10" /> Sản phẩm được đề xuất:
                         </p>
-                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+                        <div className="flex flex-col gap-2">
                           {message.sources.map((source) => (
                             <ChatbotSourceItem key={source.id} source={source} />
                           ))}

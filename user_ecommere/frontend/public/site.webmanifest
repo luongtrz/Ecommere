@@ -1,0 +1,17 @@
+{
+  "name": "Thai Spray",
+  "short_name": "Thai Spray",
+  "description": "Cửa hàng Thai Spray",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf7f1",
+  "theme_color": "#18352b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
