@@ -94,10 +94,10 @@ export const ProductCard = memo(function ProductCard({
               toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
             }}
             className={cn(
-              'absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur transition duration-300 active:scale-90',
+              'absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 active:scale-90 shadow-sm',
               isWishlisted
-                ? 'bg-red-50 text-red-500'
-                : 'bg-white/88 text-muted-foreground hover:bg-white hover:text-red-500',
+                ? 'bg-red-50/90 text-red-500 shadow-md shadow-red-500/10 hover:scale-105 hover:bg-red-50'
+                : 'bg-white/75 text-muted-foreground hover:bg-white hover:text-red-500 hover:scale-105 hover:shadow-md hover:shadow-black/5',
             )}
           >
             <Heart className={cn('h-4 w-4 transition-transform duration-300', isWishlisted && 'fill-red-500 scale-110')} />
@@ -107,7 +107,7 @@ export const ProductCard = memo(function ProductCard({
             <button
               type="button"
               onClick={() => setIsQuickViewOpen(true)}
-              className="pointer-events-auto w-full rounded-full bg-foreground hover:bg-foreground/90 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-black/10 transition duration-200 active:scale-95"
+              className="pointer-events-auto w-full rounded-full bg-white/90 hover:bg-white text-foreground backdrop-blur-md px-4 py-2.5 text-sm font-semibold shadow-lg shadow-black/5 transition duration-300 active:scale-95 border border-white/20"
             >
               Xem nhanh
             </button>

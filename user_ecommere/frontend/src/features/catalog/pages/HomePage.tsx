@@ -117,18 +117,19 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
       {!isLoading && productsData?.products?.length ? (
         <>
           <div className="hidden gap-5 md:grid md:grid-cols-2 xl:grid-cols-4">
-            {productsData.products.slice(0, 4).map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                slug={product.slug}
-                images={product.images}
-                price={product.basePrice}
-                rating={product.rating}
-                reviewCount={product.reviewCount}
-                onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
-              />
+            {productsData.products.slice(0, 4).map((product, idx) => (
+              <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${idx * 80}ms` }}>
+                <ProductCard
+                  id={product.id}
+                  name={product.name}
+                  slug={product.slug}
+                  images={product.images}
+                  price={product.basePrice}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                />
+              </div>
             ))}
           </div>
 
@@ -300,18 +301,19 @@ export function HomePage() {
             <HomeSectionSkeleton />
           ) : (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {curatedProducts?.products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  slug={product.slug}
-                  images={product.images}
-                  price={product.basePrice}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                />
+              {curatedProducts?.products.map((product, index) => (
+                <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 80}ms` }}>
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    slug={product.slug}
+                    images={product.images}
+                    price={product.basePrice}
+                    rating={product.rating}
+                    reviewCount={product.reviewCount}
+                    onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                  />
+                </div>
               ))}
             </div>
           )}
