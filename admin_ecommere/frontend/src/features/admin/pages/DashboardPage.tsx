@@ -89,7 +89,8 @@ export function DashboardPage() {
       icon: DollarSign,
       change: stats.revenue.monthlyChange,
       description: 'so với tháng trước',
-      accent: 'from-emerald-600/10 to-secondary/40',
+      borderClass: 'border-l-4 border-l-emerald-500 border-t border-r border-b border-white/60',
+      iconClass: 'bg-emerald-50 text-emerald-600 shadow-sm shadow-emerald-600/10',
     },
     {
       title: 'Đơn hàng mới',
@@ -97,7 +98,8 @@ export function DashboardPage() {
       icon: ShoppingCart,
       change: stats.orders.monthlyChange,
       description: `${stats.orders.pendingOrders} đơn đang chờ xử lý`,
-      accent: 'from-primary/10 to-secondary/40',
+      borderClass: 'border-l-4 border-l-blue-500 border-t border-r border-b border-white/60',
+      iconClass: 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-600/10',
     },
     {
       title: 'Sản phẩm hoạt động',
@@ -105,7 +107,8 @@ export function DashboardPage() {
       icon: Package,
       change: undefined,
       description: `${stats.products.lowStockProducts} sản phẩm sắp hết hàng`,
-      accent: 'from-amber-600/10 to-secondary/40',
+      borderClass: 'border-l-4 border-l-amber-500 border-t border-r border-b border-white/60',
+      iconClass: 'bg-amber-50 text-amber-600 shadow-sm shadow-amber-600/10',
     },
     {
       title: 'Khách hàng mới',
@@ -113,7 +116,8 @@ export function DashboardPage() {
       icon: Users,
       change: stats.customers.monthlyChange,
       description: `${stats.customers.totalCustomers} tài khoản toàn hệ thống`,
-      accent: 'from-purple-600/10 to-secondary/40',
+      borderClass: 'border-l-4 border-l-purple-500 border-t border-r border-b border-white/60',
+      iconClass: 'bg-purple-50 text-purple-600 shadow-sm shadow-purple-600/10',
     },
   ];
 
@@ -133,25 +137,25 @@ export function DashboardPage() {
                 Theo dõi thay đổi theo tháng, đơn hàng cần chú ý và nhóm sản phẩm kéo doanh thu tốt nhất để quyết định nhanh hơn.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Button asChild className="rounded-full px-6">
+                <Button asChild className="rounded-full px-6 transition-transform duration-300 hover:scale-[1.02] shadow-lg shadow-primary/10">
                   <Link to="/admin/orders">
                     Xử lý đơn hàng
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="rounded-full px-6 bg-white/45 border-white/60">
+                <Button asChild variant="outline" className="rounded-full px-6 bg-white/45 border-white/60 transition-transform duration-300 hover:scale-[1.02] shadow-sm">
                   <Link to="/admin/products">Cập nhật sản phẩm</Link>
                 </Button>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(38,92,66,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5">
+              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(38,92,66,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5 transition-transform duration-300 hover:scale-[1.01]">
                 <p className="text-sm text-muted-foreground">Doanh thu toàn hệ thống</p>
                 <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(stats.revenue.totalRevenue)}</p>
                 <p className="mt-2 text-sm text-muted-foreground">Tổng doanh thu đã ghi nhận từ trước đến nay.</p>
               </div>
-              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(197,160,89,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5">
+              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(197,160,89,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5 transition-transform duration-300 hover:scale-[1.01]">
                 <p className="text-sm text-muted-foreground">Tốc độ giao dịch gần nhất</p>
                 <p className="mt-2 text-3xl font-bold text-foreground">{stats.orders.shippingOrders}</p>
                 <p className="mt-2 text-sm text-muted-foreground">Đơn đang giao vận ở thời điểm hiện tại.</p>
@@ -162,25 +166,25 @@ export function DashboardPage() {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {statCards.map((card) => (
-            <Card key={card.title} className={`overflow-hidden rounded-[1.75rem] border-white/65 bg-gradient-to-br ${card.accent} shadow-[0_20px_60px_-44px_rgba(24,46,37,0.25)]`}>
+            <Card key={card.title} className={cn("overflow-hidden rounded-[1.75rem] bg-white/70 backdrop-blur-md shadow-[0_18px_50px_-30px_rgba(15,23,42,0.15)] hover:shadow-[0_24px_65px_-24px_rgba(15,23,42,0.22)] hover:-translate-y-1 transition-all duration-300", card.borderClass)}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div>
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
-                  <div className="mt-3 text-2xl font-bold text-foreground">{card.value}</div>
+                  <CardTitle className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{card.title}</CardTitle>
+                  <div className="mt-3 text-2xl font-bold text-foreground font-serif tracking-tight">{card.value}</div>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/90 text-foreground shadow-sm">
-                  <card.icon className="h-5 w-5 text-primary" />
+                <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", card.iconClass)}>
+                  <card.icon className="h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                   {card.change !== undefined ? (
-                    <span className={cn('inline-flex items-center gap-1 font-semibold', card.change >= 0 ? 'text-emerald-600' : 'text-rose-600')}>
-                      {card.change >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                    <span className={cn('inline-flex items-center gap-1 font-bold text-xs rounded-full px-2 py-0.5', card.change >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600')}>
+                      {card.change >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
                       {Math.abs(card.change).toFixed(1)}%
                     </span>
                   ) : null}
-                  <span>{card.description}</span>
+                  <span className="text-xs text-muted-foreground/90 font-medium">{card.description}</span>
                 </div>
               </CardContent>
             </Card>
@@ -199,8 +203,8 @@ export function DashboardPage() {
                   <AreaChart data={stats.revenueHistory} margin={{ left: 6, right: 6, top: 10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#265c42" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="#265c42" stopOpacity={0.02} />
+                        <stop offset="5%" stopColor="#0c54a3" stopOpacity={0.28} />
+                        <stop offset="95%" stopColor="#0c54a3" stopOpacity={0.02} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e0e8e3" />
@@ -224,7 +228,7 @@ export function DashboardPage() {
                     <Area
                       type="monotone"
                       dataKey="total"
-                      stroke="#265c42"
+                      stroke="#0c54a3"
                       strokeWidth={3}
                       fill="url(#dashboardRevenue)"
                     />

@@ -87,7 +87,7 @@ export function AdminLayout() {
           </div>
         </div>
 
-        <nav className="flex-1 space-y-2 overflow-y-auto p-4">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto p-4 scrollbar-hide">
           {navigation.map((item) => {
             const active = isActive(item.href);
             return (
@@ -96,16 +96,23 @@ export function AdminLayout() {
                 to={item.href}
                 onClick={() => setIsSidebarOpen(false)}
                 className={cn(
-                  'flex items-start gap-3 rounded-[1.35rem] px-4 py-3 transition',
-                  active ? 'bg-white text-slate-950 shadow-lg' : 'text-white/72 hover:bg-white/8 hover:text-white',
+                  'group flex items-start gap-3 rounded-[1.35rem] px-4 py-3 transition duration-300 border-l-4',
+                  active
+                    ? 'bg-white/10 text-white border-primary shadow-[0_0_15px_rgba(255,255,255,0.05)]'
+                    : 'text-white/70 hover:bg-white/5 hover:text-white border-transparent',
                 )}
               >
-                <div className={cn('mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl', active ? 'bg-slate-100' : 'bg-white/10')}>
+                <div
+                  className={cn(
+                    'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition duration-300',
+                    active ? 'bg-primary text-white shadow-md shadow-primary/20 scale-105' : 'bg-white/5 group-hover:bg-white/10 group-hover:text-white'
+                  )}
+                >
                   <item.icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold">{item.name}</p>
-                  <p className={cn('mt-1 text-sm', active ? 'text-slate-500' : 'text-white/50')}>{item.description}</p>
+                  <p className="font-semibold text-sm leading-snug">{item.name}</p>
+                  <p className={cn('mt-0.5 text-xs transition duration-300', active ? 'text-white/60' : 'text-white/40 group-hover:text-white/50')}>{item.description}</p>
                 </div>
               </Link>
             );
