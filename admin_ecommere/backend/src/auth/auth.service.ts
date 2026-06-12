@@ -95,6 +95,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (user.role !== 'ADMIN') {
+      throw new UnauthorizedException('Tài khoản không có quyền quản trị');
+    }
+
     this.logger.log(`User logged in: ${phone}`);
 
     // Generate tokens with rotation
