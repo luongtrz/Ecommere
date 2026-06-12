@@ -89,8 +89,8 @@ export function DashboardPage() {
       icon: DollarSign,
       change: stats.revenue.monthlyChange,
       description: 'so với tháng trước',
-      borderClass: 'border-l-4 border-l-emerald-500 border-t border-r border-b border-white/60',
-      iconClass: 'bg-emerald-50 text-emerald-600 shadow-sm shadow-emerald-600/10',
+      borderClass: 'border-l-4 border-l-emerald-500/80 border-t border-r border-b border-white/80',
+      iconClass: 'bg-emerald-50/80 text-emerald-600 border border-emerald-100/50 shadow-inner',
     },
     {
       title: 'Đơn hàng mới',
@@ -98,8 +98,8 @@ export function DashboardPage() {
       icon: ShoppingCart,
       change: stats.orders.monthlyChange,
       description: `${stats.orders.pendingOrders} đơn đang chờ xử lý`,
-      borderClass: 'border-l-4 border-l-blue-500 border-t border-r border-b border-white/60',
-      iconClass: 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-600/10',
+      borderClass: 'border-l-4 border-l-blue-500/80 border-t border-r border-b border-white/80',
+      iconClass: 'bg-blue-50/80 text-blue-600 border border-blue-100/50 shadow-inner',
     },
     {
       title: 'Sản phẩm hoạt động',
@@ -107,8 +107,8 @@ export function DashboardPage() {
       icon: Package,
       change: undefined,
       description: `${stats.products.lowStockProducts} sản phẩm sắp hết hàng`,
-      borderClass: 'border-l-4 border-l-amber-500 border-t border-r border-b border-white/60',
-      iconClass: 'bg-amber-50 text-amber-600 shadow-sm shadow-amber-600/10',
+      borderClass: 'border-l-4 border-l-amber-500/80 border-t border-r border-b border-white/80',
+      iconClass: 'bg-amber-50/80 text-amber-600 border border-amber-100/50 shadow-inner',
     },
     {
       title: 'Khách hàng mới',
@@ -116,8 +116,8 @@ export function DashboardPage() {
       icon: Users,
       change: stats.customers.monthlyChange,
       description: `${stats.customers.totalCustomers} tài khoản toàn hệ thống`,
-      borderClass: 'border-l-4 border-l-purple-500 border-t border-r border-b border-white/60',
-      iconClass: 'bg-purple-50 text-purple-600 shadow-sm shadow-purple-600/10',
+      borderClass: 'border-l-4 border-l-purple-500/80 border-t border-r border-b border-white/80',
+      iconClass: 'bg-purple-50/80 text-purple-600 border border-purple-100/50 shadow-inner',
     },
   ];
 
@@ -166,13 +166,13 @@ export function DashboardPage() {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {statCards.map((card) => (
-            <Card key={card.title} className={cn("overflow-hidden rounded-[1.75rem] bg-white/70 backdrop-blur-md shadow-[0_18px_50px_-30px_rgba(15,23,42,0.15)] hover:shadow-[0_24px_65px_-24px_rgba(15,23,42,0.22)] hover:-translate-y-1 transition-all duration-300", card.borderClass)}>
+            <Card key={card.title} className={cn("overflow-hidden rounded-[1.75rem] bg-white/90 border border-white/85 shadow-[0_10px_35px_rgba(0,0,0,0.02)] admin-glow hover:-translate-y-1 transition-all duration-300", card.borderClass)}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{card.title}</CardTitle>
                   <div className="mt-3 text-2xl font-bold text-foreground font-serif tracking-tight">{card.value}</div>
                 </div>
-                <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", card.iconClass)}>
+                <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl border border-white/40", card.iconClass)}>
                   <card.icon className="h-5 w-5" />
                 </div>
               </CardHeader>
@@ -261,7 +261,7 @@ export function DashboardPage() {
                     <Link
                       key={order.id}
                       to={`/admin/orders/${order.id}`}
-                      className="block rounded-[1.35rem] border border-border/70 bg-white/80 px-4 py-4 transition hover:-translate-y-0.5 hover:shadow-lg"
+                      className="block rounded-[1.35rem] border border-white/85 bg-white/95 px-4 py-4 shadow-[0_4px_15px_rgba(0,0,0,0.01)] admin-glow hover:-translate-y-0.5 transition-all duration-300"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>

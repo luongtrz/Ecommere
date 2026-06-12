@@ -110,8 +110,10 @@ export function CategoryNav() {
             <Link
               to="/catalog"
               className={cn(
-                "text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap",
-                isActive('/catalog') ? "text-primary" : "text-muted-foreground hover:text-primary"
+                "relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:transition-transform after:duration-300",
+                isActive('/catalog') 
+                  ? "text-primary after:scale-x-100" 
+                  : "text-muted-foreground hover:text-primary after:scale-x-0 hover:after:scale-x-100"
               )}
               onMouseEnter={() => setActiveCategory(null)}
             >
@@ -124,10 +126,10 @@ export function CategoryNav() {
               <Link
                 to={`/c/${category.slug}`}
                 className={cn(
-                  "text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap",
+                  "relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:transition-transform after:duration-300",
                   isActive(`/c/${category.slug}`) || activeCategory?.id === category.id
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-primary"
+                    ? "text-primary after:scale-x-100"
+                    : "text-muted-foreground hover:text-primary after:scale-x-0 hover:after:scale-x-100"
                 )}
                 onMouseEnter={(e) => handleMouseEnter(category, e)}
               >

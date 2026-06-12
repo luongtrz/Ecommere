@@ -243,7 +243,7 @@ export function HomePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Điểm mạnh của shop</p>
             <div className="grid gap-3 grid-cols-3">
               {HIGHLIGHTS.map((item) => (
-                <div key={item.label} className="rounded-2xl bg-white/80 border border-white/50 p-4 shadow-sm text-center hover:scale-[1.02] transition-all duration-300">
+                <div key={item.label} className="rounded-2xl bg-white/90 border border-white/85 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)] text-center hover-glow hover:-translate-y-0.5 transition-all duration-300">
                   <p className="text-2xl font-bold text-primary">{item.value}</p>
                   <p className="mt-1 text-xs text-muted-foreground font-semibold leading-tight">{item.label}</p>
                 </div>
