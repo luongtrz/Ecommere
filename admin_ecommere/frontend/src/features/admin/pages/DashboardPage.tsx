@@ -150,15 +150,17 @@ export function DashboardPage() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(38,92,66,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5 transition-transform duration-300 hover:scale-[1.01]">
-                <p className="text-sm text-muted-foreground">Doanh thu toàn hệ thống</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(stats.revenue.totalRevenue)}</p>
-                <p className="mt-2 text-sm text-muted-foreground">Tổng doanh thu đã ghi nhận từ trước đến nay.</p>
+              <div className="relative overflow-hidden rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(12,84,163,0.06),rgba(255,255,255,0.8))] border border-white/80 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-transform duration-300 hover:scale-[1.01] hover:shadow-[0_12px_30px_rgba(12,84,163,0.08)] group">
+                <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
+                <p className="text-sm font-semibold text-muted-foreground tracking-wide">Doanh thu toàn hệ thống</p>
+                <p className="mt-2 text-3xl font-extrabold text-foreground tracking-tight">{formatCurrency(stats.revenue.totalRevenue)}</p>
+                <p className="mt-2 text-xs text-muted-foreground/80 leading-relaxed">Tổng doanh thu đã ghi nhận từ trước đến nay trên hệ thống.</p>
               </div>
-              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(197,160,89,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5 transition-transform duration-300 hover:scale-[1.01]">
-                <p className="text-sm text-muted-foreground">Tốc độ giao dịch gần nhất</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">{stats.orders.shippingOrders}</p>
-                <p className="mt-2 text-sm text-muted-foreground">Đơn đang giao vận ở thời điểm hiện tại.</p>
+              <div className="relative overflow-hidden rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(16,185,129,0.06),rgba(255,255,255,0.8))] border border-white/80 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-transform duration-300 hover:scale-[1.01] hover:shadow-[0_12px_30px_rgba(16,185,129,0.08)] group">
+                <div className="absolute top-0 right-0 h-24 w-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
+                <p className="text-sm font-semibold text-muted-foreground tracking-wide">Tốc độ giao dịch gần nhất</p>
+                <p className="mt-2 text-3xl font-extrabold text-foreground tracking-tight">{stats.orders.shippingOrders} đơn</p>
+                <p className="mt-2 text-xs text-muted-foreground/80 leading-relaxed">Tổng số đơn hàng đang trong trạng thái giao vận thực tế.</p>
               </div>
             </div>
           </div>

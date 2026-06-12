@@ -234,6 +234,10 @@ export function HomePage() {
                 <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/80">Premium Scent Collection</p>
                 <h3 className="text-lg font-bold mt-1 font-serif leading-tight">Mùi hương tinh tế cho nhịp sống hiện đại</h3>
               </div>
+              <div className="absolute top-4 left-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-md px-4 py-2 text-white shadow-lg animate-bounce [animation-duration:3s]">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-white/80">Khuyên dùng</p>
+                <p className="text-xs font-extrabold mt-0.5 tracking-wide">Woody & Fresh</p>
+              </div>
             </div>
           </div>
         </section>
