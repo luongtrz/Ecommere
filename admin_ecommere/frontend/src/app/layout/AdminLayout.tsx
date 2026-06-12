@@ -55,7 +55,7 @@ export function AdminLayout() {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[88vw] max-w-sm flex-col border-r border-white/60 bg-slate-950 text-white shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:w-[320px] lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-[88vw] max-w-sm flex-col border-r border-white/10 sidebar-glass text-white shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:w-[320px] lg:translate-x-0',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
@@ -80,10 +80,10 @@ export function AdminLayout() {
             </Button>
           </div>
 
-          <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 text-sm text-white/70">
+          <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.01)_100%)] p-4 text-sm text-white/70 shadow-inner">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">Phiên quản trị</p>
-            <p className="mt-3 font-semibold text-white">{user?.name || user?.email}</p>
-            <p className="mt-1 text-sm text-white/55">Theo dõi chỉ số quan trọng và xử lý công việc trong một luồng gọn.</p>
+            <p className="mt-3 font-semibold text-white tracking-wide">{user?.name || user?.email}</p>
+            <p className="mt-1 text-xs text-white/50 leading-relaxed">Theo dõi chỉ số quan trọng và xử lý công việc trong một luồng gọn.</p>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export function AdminLayout() {
                 className={cn(
                   'group flex items-start gap-3 rounded-[1.35rem] px-4 py-3 transition duration-300 border-l-4',
                   active
-                    ? 'bg-white/10 text-white border-primary shadow-[0_0_15px_rgba(255,255,255,0.05)]'
+                    ? 'bg-[linear-gradient(90deg,rgba(12,84,163,0.18)_0%,rgba(12,84,163,0.04)_100%)] text-white border-primary shadow-[0_0_20px_rgba(12,84,163,0.08)]'
                     : 'text-white/70 hover:bg-white/5 hover:text-white border-transparent',
                 )}
               >

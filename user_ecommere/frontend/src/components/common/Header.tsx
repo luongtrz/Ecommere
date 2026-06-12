@@ -42,8 +42,8 @@ export function Header() {
         </div>
       </div>
 
-      <div className="border-b border-white/40 bg-background/85 backdrop-blur-xl shadow-sm">
-        <div className="container py-3.5 md:py-4">
+      <div className="border-b border-white/40 bg-white/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.02)] transition-all duration-300 md:mx-auto md:max-w-7xl md:mt-3 md:rounded-[2rem] md:border md:border-white/80 md:bg-white/75 md:shadow-[0_12px_40px_-12px_rgba(24,46,37,0.06)]">
+        <div className="container py-2.5 md:py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Sheet>

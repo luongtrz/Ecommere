@@ -79,10 +79,10 @@ export function SearchBox() {
       <form onSubmit={handleSubmit} className="relative">
         <div
           className={cn(
-            'flex items-center rounded-[1.35rem] border px-3 py-2 transition duration-200',
+            'flex items-center rounded-full border px-4 py-1.5 transition duration-300',
             showingSuggestions
-              ? 'border-primary/25 bg-white shadow-[0_20px_50px_-32px_rgba(24,46,37,0.35)]'
-              : 'border-white/60 bg-white/75 backdrop-blur',
+              ? 'border-primary/30 bg-white shadow-[0_12px_40px_-12px_rgba(24,46,37,0.12)]'
+              : 'border-white/80 bg-white/75 backdrop-blur hover:border-primary/20 hover:bg-white',
           )}
         >
           <Search className="ml-1 h-4 w-4 shrink-0 text-muted-foreground" />

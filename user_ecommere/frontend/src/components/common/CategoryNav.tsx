@@ -80,7 +80,7 @@ export function CategoryNav() {
   return (
     <div
       ref={navRef}
-      className="bg-background/85 backdrop-blur-xl border-b border-white/40 relative z-10 hidden md:block"
+      className="bg-white/70 backdrop-blur-xl border-b border-white/40 relative z-10 hidden md:block md:mx-auto md:max-w-7xl md:mt-2 md:rounded-[1.5rem] md:border md:border-white/80 md:bg-white/75 md:shadow-[0_8px_30px_-12px_rgba(24,46,37,0.04)]"
       onMouseLeave={() => setActiveCategory(null)}
     >
       <div className="container relative">
@@ -110,8 +110,10 @@ export function CategoryNav() {
             <Link
               to="/catalog"
               className={cn(
-                "text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap",
-                isActive('/catalog') ? "text-primary" : "text-muted-foreground hover:text-primary"
+                "relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:transition-transform after:duration-300",
+                isActive('/catalog') 
+                  ? "text-primary after:scale-x-100" 
+                  : "text-muted-foreground hover:text-primary after:scale-x-0 hover:after:scale-x-100"
               )}
               onMouseEnter={() => setActiveCategory(null)}
             >
@@ -124,10 +126,10 @@ export function CategoryNav() {
               <Link
                 to={`/c/${category.slug}`}
                 className={cn(
-                  "text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap",
+                  "relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:transition-transform after:duration-300",
                   isActive(`/c/${category.slug}`) || activeCategory?.id === category.id
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-primary"
+                    ? "text-primary after:scale-x-100"
+                    : "text-muted-foreground hover:text-primary after:scale-x-0 hover:after:scale-x-100"
                 )}
                 onMouseEnter={(e) => handleMouseEnter(category, e)}
               >

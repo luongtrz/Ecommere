@@ -89,8 +89,8 @@ export function DashboardPage() {
       icon: DollarSign,
       change: stats.revenue.monthlyChange,
       description: 'so với tháng trước',
-      borderClass: 'border-l-4 border-l-emerald-500 border-t border-r border-b border-white/60',
-      iconClass: 'bg-emerald-50 text-emerald-600 shadow-sm shadow-emerald-600/10',
+      borderClass: 'border-l-4 border-l-emerald-500/80 border-t border-r border-b border-white/80',
+      iconClass: 'bg-emerald-50/80 text-emerald-600 border border-emerald-100/50 shadow-inner',
     },
     {
       title: 'Đơn hàng mới',
@@ -98,8 +98,8 @@ export function DashboardPage() {
       icon: ShoppingCart,
       change: stats.orders.monthlyChange,
       description: `${stats.orders.pendingOrders} đơn đang chờ xử lý`,
-      borderClass: 'border-l-4 border-l-blue-500 border-t border-r border-b border-white/60',
-      iconClass: 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-600/10',
+      borderClass: 'border-l-4 border-l-blue-500/80 border-t border-r border-b border-white/80',
+      iconClass: 'bg-blue-50/80 text-blue-600 border border-blue-100/50 shadow-inner',
     },
     {
       title: 'Sản phẩm hoạt động',
@@ -107,8 +107,8 @@ export function DashboardPage() {
       icon: Package,
       change: undefined,
       description: `${stats.products.lowStockProducts} sản phẩm sắp hết hàng`,
-      borderClass: 'border-l-4 border-l-amber-500 border-t border-r border-b border-white/60',
-      iconClass: 'bg-amber-50 text-amber-600 shadow-sm shadow-amber-600/10',
+      borderClass: 'border-l-4 border-l-amber-500/80 border-t border-r border-b border-white/80',
+      iconClass: 'bg-amber-50/80 text-amber-600 border border-amber-100/50 shadow-inner',
     },
     {
       title: 'Khách hàng mới',
@@ -116,8 +116,8 @@ export function DashboardPage() {
       icon: Users,
       change: stats.customers.monthlyChange,
       description: `${stats.customers.totalCustomers} tài khoản toàn hệ thống`,
-      borderClass: 'border-l-4 border-l-purple-500 border-t border-r border-b border-white/60',
-      iconClass: 'bg-purple-50 text-purple-600 shadow-sm shadow-purple-600/10',
+      borderClass: 'border-l-4 border-l-purple-500/80 border-t border-r border-b border-white/80',
+      iconClass: 'bg-purple-50/80 text-purple-600 border border-purple-100/50 shadow-inner',
     },
   ];
 
@@ -150,15 +150,17 @@ export function DashboardPage() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(38,92,66,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5 transition-transform duration-300 hover:scale-[1.01]">
-                <p className="text-sm text-muted-foreground">Doanh thu toàn hệ thống</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(stats.revenue.totalRevenue)}</p>
-                <p className="mt-2 text-sm text-muted-foreground">Tổng doanh thu đã ghi nhận từ trước đến nay.</p>
+              <div className="relative overflow-hidden rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(12,84,163,0.06),rgba(255,255,255,0.8))] border border-white/80 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-transform duration-300 hover:scale-[1.01] hover:shadow-[0_12px_30px_rgba(12,84,163,0.08)] group">
+                <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
+                <p className="text-sm font-semibold text-muted-foreground tracking-wide">Doanh thu toàn hệ thống</p>
+                <p className="mt-2 text-3xl font-extrabold text-foreground tracking-tight">{formatCurrency(stats.revenue.totalRevenue)}</p>
+                <p className="mt-2 text-xs text-muted-foreground/80 leading-relaxed">Tổng doanh thu đã ghi nhận từ trước đến nay trên hệ thống.</p>
               </div>
-              <div className="rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(197,160,89,0.08),rgba(255,255,255,0.72))] border border-white/45 p-5 transition-transform duration-300 hover:scale-[1.01]">
-                <p className="text-sm text-muted-foreground">Tốc độ giao dịch gần nhất</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">{stats.orders.shippingOrders}</p>
-                <p className="mt-2 text-sm text-muted-foreground">Đơn đang giao vận ở thời điểm hiện tại.</p>
+              <div className="relative overflow-hidden rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(16,185,129,0.06),rgba(255,255,255,0.8))] border border-white/80 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-transform duration-300 hover:scale-[1.01] hover:shadow-[0_12px_30px_rgba(16,185,129,0.08)] group">
+                <div className="absolute top-0 right-0 h-24 w-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
+                <p className="text-sm font-semibold text-muted-foreground tracking-wide">Tốc độ giao dịch gần nhất</p>
+                <p className="mt-2 text-3xl font-extrabold text-foreground tracking-tight">{stats.orders.shippingOrders} đơn</p>
+                <p className="mt-2 text-xs text-muted-foreground/80 leading-relaxed">Tổng số đơn hàng đang trong trạng thái giao vận thực tế.</p>
               </div>
             </div>
           </div>
@@ -166,13 +168,13 @@ export function DashboardPage() {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {statCards.map((card) => (
-            <Card key={card.title} className={cn("overflow-hidden rounded-[1.75rem] bg-white/70 backdrop-blur-md shadow-[0_18px_50px_-30px_rgba(15,23,42,0.15)] hover:shadow-[0_24px_65px_-24px_rgba(15,23,42,0.22)] hover:-translate-y-1 transition-all duration-300", card.borderClass)}>
+            <Card key={card.title} className={cn("overflow-hidden rounded-[1.75rem] bg-white/90 border border-white/85 shadow-[0_10px_35px_rgba(0,0,0,0.02)] admin-glow hover:-translate-y-1 transition-all duration-300", card.borderClass)}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{card.title}</CardTitle>
                   <div className="mt-3 text-2xl font-bold text-foreground font-serif tracking-tight">{card.value}</div>
                 </div>
-                <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", card.iconClass)}>
+                <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl border border-white/40", card.iconClass)}>
                   <card.icon className="h-5 w-5" />
                 </div>
               </CardHeader>
@@ -192,10 +194,10 @@ export function DashboardPage() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-          <Card className="admin-surface border-0">
+          <Card className="admin-surface border-0 shadow-[0_12px_45px_-16px_rgba(15,23,42,0.08)]">
             <CardHeader>
-              <CardTitle>Tín hiệu doanh thu</CardTitle>
-              <CardDescription>Xu hướng doanh thu 7 kỳ gần nhất dựa trên dữ liệu hệ thống.</CardDescription>
+              <CardTitle className="text-lg font-bold tracking-wide text-foreground">Tín hiệu doanh thu</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground/80 font-medium">Xu hướng doanh thu 7 kỳ gần nhất dựa trên dữ liệu hệ thống.</CardDescription>
             </CardHeader>
             <CardContent className="pl-0 pr-2 md:pl-2">
               <div className="h-[360px]">
@@ -204,33 +206,35 @@ export function DashboardPage() {
                     <defs>
                       <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#0c54a3" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="#0c54a3" stopOpacity={0.02} />
+                        <stop offset="95%" stopColor="#0c54a3" stopOpacity={0.01} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e0e8e3" />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} stroke="#64748b" />
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} stroke="#64748b" dy={8} />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      fontSize={12}
+                      fontSize={11}
                       stroke="#64748b"
                       tickFormatter={(value) => formatCompactCurrency(Number(value))}
+                      dx={-8}
                     />
                     <Tooltip
                       formatter={(value) => formatCurrency(Number(value ?? 0))}
                       contentStyle={{
                         borderRadius: '16px',
-                        border: '1px solid rgba(255, 255, 255, 0.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.9)',
                         backgroundColor: 'rgba(255, 255, 255, 0.96)',
-                        boxShadow: '0 18px 50px -30px rgba(24, 46, 37, 0.25)',
+                        boxShadow: '0 18px 50px -30px rgba(15, 23, 42, 0.25)',
                       }}
                     />
                     <Area
                       type="monotone"
                       dataKey="total"
                       stroke="#0c54a3"
-                      strokeWidth={3}
+                      strokeWidth={4}
                       fill="url(#dashboardRevenue)"
+                      activeDot={{ r: 6, strokeWidth: 0, fill: '#0c54a3' }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -238,13 +242,13 @@ export function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="admin-surface border-0">
+          <Card className="admin-surface border-0 shadow-[0_12px_45px_-16px_rgba(15,23,42,0.08)]">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Đơn gần đây</CardTitle>
-                <CardDescription>{stats.recentOrders.length} đơn mới nhất cần theo dõi.</CardDescription>
+                <CardTitle className="text-lg font-bold tracking-wide text-foreground">Đơn gần đây</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground/80 font-medium">{stats.recentOrders.length} đơn mới nhất cần theo dõi.</CardDescription>
               </div>
-              <Button variant="ghost" size="icon" asChild className="rounded-full">
+              <Button variant="ghost" size="icon" asChild className="rounded-full hover:bg-secondary">
                 <Link to="/admin/orders">
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -261,16 +265,21 @@ export function DashboardPage() {
                     <Link
                       key={order.id}
                       to={`/admin/orders/${order.id}`}
-                      className="block rounded-[1.35rem] border border-border/70 bg-white/80 px-4 py-4 transition hover:-translate-y-0.5 hover:shadow-lg"
+                      className="block rounded-[1.5rem] border border-white/80 bg-white/90 px-4.5 py-4 shadow-[0_4px_15px_rgba(0,0,0,0.01)] admin-glow hover:-translate-y-0.5 transition-all duration-300"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-foreground">{order.orderNumber}</p>
-                          <p className="mt-1 text-sm text-muted-foreground">{order.customerName}</p>
-                          <p className="mt-2 text-xs text-muted-foreground">{formatDateTime(order.createdAt)}</p>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary/10 to-primary/5 border border-primary/10 font-bold text-sm text-primary shadow-sm">
+                            {order.customerName ? order.customerName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'KH'}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-sm text-foreground tracking-wide">{order.orderNumber}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground font-semibold truncate max-w-[150px]">{order.customerName}</p>
+                            <p className="mt-1 text-[10px] text-muted-foreground/80 font-medium">{formatDateTime(order.createdAt)}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-foreground">{formatCurrency(order.totalAmount)}</p>
+                        <div className="text-right shrink-0">
+                          <p className="font-extrabold text-sm text-foreground tracking-tight">{formatCurrency(order.totalAmount)}</p>
                           <div className="mt-2 flex justify-end">{getStatusBadge(order.status)}</div>
                         </div>
                       </div>
