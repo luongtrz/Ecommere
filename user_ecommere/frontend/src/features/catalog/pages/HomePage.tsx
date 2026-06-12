@@ -196,15 +196,15 @@ export function HomePage() {
       <SEO />
 
       <div className="container space-y-8 py-6 md:space-y-10 md:py-8">
-        <section className="section-shell relative overflow-hidden px-6 py-12 md:px-12 md:py-16 bg-white/40 backdrop-blur-xl border border-white/80 shadow-[0_32px_80px_-40px_rgba(24,46,37,0.2)]">
+        <section className="section-shell relative overflow-hidden px-6 py-12 md:px-12 md:py-20 bg-white/80 backdrop-blur-xl border border-black/[0.02] shadow-luxury">
           {/* Animated Ambient Blobs */}
-          <div className="absolute top-[-20%] left-[-10%] h-[350px] w-[350px] rounded-full bg-emerald-300/18 blur-[80px] animate-float-orb pointer-events-none" />
-          <div className="absolute bottom-[-15%] right-[-5%] h-[400px] w-[400px] rounded-full bg-amber-200/22 blur-[90px] animate-float-orb [animation-delay:-5s] pointer-events-none" />
+          <div className="absolute top-[-20%] left-[-10%] h-[350px] w-[350px] rounded-full bg-amber-300/12 blur-[80px] animate-float-orb pointer-events-none" />
+          <div className="absolute bottom-[-15%] right-[-5%] h-[400px] w-[400px] rounded-full bg-neutral-400/10 blur-[90px] animate-float-orb [animation-delay:-5s] pointer-events-none" />
           
           <div className="relative grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
-              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-white/90 px-4.5 py-2 text-xs font-bold uppercase tracking-[0.24em] text-primary shadow-sm hover:scale-[1.01] transition-transform duration-300">
-                <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10 animate-pulse" />
+              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-white/80 px-4.5 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary shadow-sm hover:scale-[1.01] transition-transform duration-300 backdrop-blur-md">
+                <Sparkles className="h-3.5 w-3.5 text-accent-foreground/75 fill-accent/10 animate-pulse" />
                 Hương thơm cho không gian sống hiện đại
               </p>
               <h1 className="max-w-3xl text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-7xl font-serif">
@@ -215,19 +215,19 @@ export function HomePage() {
                 mùi bán chạy, hỏi chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay trên catalog.
               </p>
               <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
-                <Button asChild size="lg" className="h-13 rounded-full px-8 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 shadow-xl shadow-primary/25 hover:shadow-primary/35 bg-primary">
+                <Button asChild size="lg" className="h-13 rounded-full px-8 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 shadow-xl shadow-primary/15 hover:shadow-primary/25 bg-primary font-bold uppercase tracking-wider text-xs">
                   <Link to="/catalog">
                     Khám phá bộ sưu tập
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-13 rounded-full px-8 border-white/80 bg-white/50 hover:bg-white/80 hover:-translate-y-0.5 hover:scale-[1.03] transition-all duration-300 shadow-md">
+                <Button asChild variant="outline" size="lg" className="h-13 rounded-full px-8 border-black/[0.05] bg-white/60 hover:bg-white/95 hover:-translate-y-0.5 hover:scale-[1.03] transition-all duration-300 shadow-sm font-bold uppercase tracking-wider text-xs">
                   <Link to="/catalog?sort=best_selling">Xem nhóm bán chạy nhất</Link>
                 </Button>
               </div>
             </div>
-
-            <div className="relative aspect-square w-full max-w-[400px] mx-auto lg:max-w-none rounded-[2.2rem] border border-white/70 shadow-2xl group animate-scale-in">
+ 
+            <div className="relative aspect-square w-full max-w-[400px] mx-auto lg:max-w-none rounded-[2.2rem] border border-black/[0.02] shadow-luxury group animate-scale-in">
               <div className="h-full w-full overflow-hidden rounded-[2.2rem] bg-gradient-to-tr from-secondary/50 to-white/30 border border-white/40">
                 <img
                   src="/hero-fragrance.png"
@@ -245,7 +245,7 @@ export function HomePage() {
               </div>
               
               {/* Scent notes overlay */}
-              <div className="absolute -bottom-4 -left-4 glass-premium p-4.5 rounded-[1.5rem] max-w-[210px] border border-white/80 shadow-2xl hidden sm:block hover:scale-105 duration-300">
+              <div className="absolute -bottom-4 -left-4 glass-premium p-4.5 rounded-[1.6rem] max-w-[210px] border border-black/[0.02] shadow-luxury hidden sm:block hover:scale-105 duration-300">
                 <p className="text-[9px] font-extrabold uppercase tracking-widest text-primary">Olfactory Notes</p>
                 <div className="flex flex-col gap-2 mt-2.5">
                   <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
@@ -265,13 +265,13 @@ export function HomePage() {
             </div>
           </div>
         </section>
-
+ 
         <section className="grid gap-6 md:grid-cols-2">
           <div className="section-shell p-6 bg-white/60 backdrop-blur-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Điểm mạnh của shop</p>
             <div className="grid gap-3 grid-cols-3">
               {HIGHLIGHTS.map((item) => (
-                <div key={item.label} className="rounded-2xl bg-white/90 border border-white/85 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)] text-center hover-glow hover:-translate-y-0.5 transition-all duration-300">
+                <div key={item.label} className="rounded-2xl bg-white/90 border border-black/[0.02] p-4 shadow-luxury text-center hover-glow hover:-translate-y-0.5 transition-all duration-300">
                   <p className="text-2xl font-bold text-primary">{item.value}</p>
                   <p className="mt-1 text-xs text-muted-foreground font-semibold leading-tight">{item.label}</p>
                 </div>
