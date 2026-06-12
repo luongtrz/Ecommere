@@ -59,7 +59,7 @@ export const ProductCard = memo(function ProductCard({
   return (
     <>
       <Card
-        className="group h-full overflow-hidden rounded-[1.8rem] border border-black/[0.03] bg-white/90 shadow-luxury hover:shadow-luxury-glow hover:-translate-y-2 duration-500 ease-out transition-all"
+        className="group flex flex-col h-full overflow-hidden rounded-[1.8rem] border border-black/[0.03] bg-white/90 shadow-luxury hover:shadow-luxury-glow hover:-translate-y-2 duration-500 ease-out transition-all"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
