@@ -38,7 +38,11 @@ export function Header() {
           <div className="hidden items-center gap-4 text-white/70 md:flex">
             <span>Giao nhanh nội thành</span>
             <span>Đổi trả 7 ngày</span>
-       <div className="border-b border-black/[0.02] bg-white/80 backdrop-blur-2xl transition-all duration-300 md:mx-auto md:max-w-7xl md:mt-4 md:rounded-[2.2rem] md:border md:border-black/[0.02] md:bg-white/85 md:shadow-luxury">
+          </div>
+        </div>
+      </div>
+
+      <div className="border-b border-black/[0.02] bg-white/80 backdrop-blur-2xl transition-all duration-300 md:mx-auto md:max-w-7xl md:mt-4 md:rounded-[2.2rem] md:border md:border-black/[0.02] md:bg-white/85 md:shadow-luxury">
         <div className="container py-2.5 md:py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
