@@ -38,11 +38,7 @@ export function Header() {
           <div className="hidden items-center gap-4 text-white/70 md:flex">
             <span>Giao nhanh nội thành</span>
             <span>Đổi trả 7 ngày</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-b border-white/40 bg-white/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.02)] transition-all duration-300 md:mx-auto md:max-w-7xl md:mt-3 md:rounded-[2rem] md:border md:border-white/80 md:bg-white/75 md:shadow-[0_12px_40px_-12px_rgba(24,46,37,0.06)]">
+       <div className="border-b border-black/[0.02] bg-white/80 backdrop-blur-2xl transition-all duration-300 md:mx-auto md:max-w-7xl md:mt-4 md:rounded-[2.2rem] md:border md:border-black/[0.02] md:bg-white/85 md:shadow-luxury">
         <div className="container py-2.5 md:py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -55,7 +51,7 @@ export function Header() {
                 <SheetContent side="left" className="w-[86vw] max-w-sm border-white/70 bg-white/95">
                   <div className="mt-6 flex flex-col gap-6">
                     <Link to="/" className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 font-serif text-sm font-extrabold text-secondary shadow-lg shadow-primary/20">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent font-serif text-sm font-extrabold text-white shadow-lg shadow-primary/10">
                         TS
                       </div>
                       <div>
@@ -63,7 +59,7 @@ export function Header() {
                         <p className="text-sm text-muted-foreground">Không gian có gu, hương thơm có dấu ấn.</p>
                       </div>
                     </Link>
-
+ 
                     <div className="section-shell p-4">
                       <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                         Điều hướng nhanh
@@ -80,7 +76,7 @@ export function Header() {
                         ))}
                       </div>
                     </div>
-
+ 
                     <div className="section-shell p-4 text-sm text-muted-foreground">
                       <p className="mb-2 font-semibold text-foreground">Tài khoản</p>
                       <div className="flex flex-col gap-2">
@@ -93,7 +89,7 @@ export function Header() {
                                onClick={logout}
                                className="rounded-2xl px-4 py-3 text-left text-destructive transition hover:bg-destructive/5"
                             >
-                              Đăng xuất
+                               Đăng xuất
                             </button>
                           </>
                         ) : (
@@ -104,9 +100,9 @@ export function Header() {
                   </div>
                 </SheetContent>
               </Sheet>
-
+ 
               <Link to="/" className="flex items-center gap-3 group">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-emerald-950 font-serif text-sm font-extrabold text-secondary shadow-lg shadow-primary/25 transition duration-300 group-hover:scale-105">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent font-serif text-sm font-extrabold text-white shadow-lg shadow-primary/10 transition duration-300 group-hover:scale-105 border border-white/10">
                   TS
                 </div>
                 <div className="hidden min-w-0 sm:block">
@@ -115,6 +111,7 @@ export function Header() {
                 </div>
               </Link>
             </div>
+
 
             <div className="hidden flex-1 max-w-md mx-auto md:block">
               <SearchBox />
