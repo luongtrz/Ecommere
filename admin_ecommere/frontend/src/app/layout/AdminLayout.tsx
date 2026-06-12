@@ -59,15 +59,15 @@ export function AdminLayout() {
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="border-b border-white/10 p-6">
+        <div className="border-b border-white/5 p-6">
           <div className="flex items-start justify-between gap-3">
             <Link to="/admin" className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-sm font-bold text-slate-950">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-indigo-400 text-sm font-bold text-white shadow-lg shadow-primary/25 border border-white/10">
                 TS
               </div>
               <div>
-                <p className="text-lg font-semibold">Thai Spray Admin</p>
-                <p className="text-sm text-white/60">Điều phối nội dung, đơn hàng và doanh thu.</p>
+                <p className="text-lg font-semibold text-white">Thai Spray Admin</p>
+                <p className="text-sm text-white/50">Điều phối nội dung, đơn hàng và doanh thu.</p>
               </div>
             </Link>
             <Button
@@ -79,14 +79,14 @@ export function AdminLayout() {
               <X className="h-4 w-4" />
             </Button>
           </div>
-
-          <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.01)_100%)] p-4 text-sm text-white/70 shadow-inner">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">Phiên quản trị</p>
+ 
+          <div className="mt-6 rounded-[1.5rem] border border-white/5 bg-[linear-gradient(135deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.005)_100%)] p-4 text-sm text-slate-300 shadow-inner">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">Phiên quản trị</p>
             <p className="mt-3 font-semibold text-white tracking-wide">{user?.name || user?.email}</p>
-            <p className="mt-1 text-xs text-white/50 leading-relaxed">Theo dõi chỉ số quan trọng và xử lý công việc trong một luồng gọn.</p>
+            <p className="mt-1 text-xs text-white/40 leading-relaxed">Theo dõi chỉ số quan trọng và xử lý công việc trong một luồng gọn.</p>
           </div>
         </div>
-
+ 
         <nav className="flex-1 space-y-1.5 overflow-y-auto p-4 scrollbar-hide">
           {navigation.map((item) => {
             const active = isActive(item.href);
@@ -98,7 +98,7 @@ export function AdminLayout() {
                 className={cn(
                   'group flex items-start gap-3 rounded-[1.35rem] px-4 py-3 transition duration-300 border-l-4',
                   active
-                    ? 'bg-[linear-gradient(90deg,rgba(12,84,163,0.18)_0%,rgba(12,84,163,0.04)_100%)] text-white border-primary shadow-[0_0_20px_rgba(12,84,163,0.08)]'
+                    ? 'bg-[linear-gradient(90deg,rgba(124,58,237,0.15)_0%,rgba(124,58,237,0.03)_100%)] text-white border-primary shadow-[0_0_20px_rgba(124,58,237,0.1)]'
                     : 'text-white/70 hover:bg-white/5 hover:text-white border-transparent',
                 )}
               >
@@ -119,7 +119,7 @@ export function AdminLayout() {
           })}
         </nav>
       </aside>
-
+ 
       <div className="flex min-h-screen flex-1 flex-col px-3 pb-3 pt-3 md:px-4 lg:pl-4 lg:pr-6">
         <header className="admin-surface sticky top-3 z-30 mb-4 flex min-h-[76px] items-center justify-between px-4 py-3 md:px-6">
           <div className="flex items-center gap-3">
@@ -136,7 +136,7 @@ export function AdminLayout() {
               <h1 className="text-lg font-semibold text-foreground md:text-2xl">Bảng điều khiển Thai Spray</h1>
             </div>
           </div>
-
+ 
           <div className="flex items-center gap-2 md:gap-3">
             <div className="hidden rounded-full border border-border bg-secondary/70 px-4 py-2 text-sm text-muted-foreground md:block">
               Dữ liệu đồng bộ theo phiên gần nhất
@@ -153,12 +153,12 @@ export function AdminLayout() {
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 rounded-2xl border-white/70 bg-white/95 p-2 shadow-2xl">
+              <DropdownMenuContent align="end" className="w-52 rounded-2xl border-slate-800 bg-slate-950/95 p-2 shadow-2xl text-slate-200">
                 <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Tài khoản
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="cursor-pointer rounded-xl px-3 py-2.5 text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={logout} className="cursor-pointer rounded-xl px-3 py-2.5 text-destructive focus:text-destructive hover:bg-white/5">
                   <LogOut className="mr-2 h-4 w-4" />
                   Đăng xuất
                 </DropdownMenuItem>
