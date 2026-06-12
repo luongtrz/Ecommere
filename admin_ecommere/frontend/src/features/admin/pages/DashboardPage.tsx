@@ -194,10 +194,10 @@ export function DashboardPage() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-          <Card className="admin-surface border-0">
+          <Card className="admin-surface border-0 shadow-[0_12px_45px_-16px_rgba(15,23,42,0.08)]">
             <CardHeader>
-              <CardTitle>Tín hiệu doanh thu</CardTitle>
-              <CardDescription>Xu hướng doanh thu 7 kỳ gần nhất dựa trên dữ liệu hệ thống.</CardDescription>
+              <CardTitle className="text-lg font-bold tracking-wide text-foreground">Tín hiệu doanh thu</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground/80 font-medium">Xu hướng doanh thu 7 kỳ gần nhất dựa trên dữ liệu hệ thống.</CardDescription>
             </CardHeader>
             <CardContent className="pl-0 pr-2 md:pl-2">
               <div className="h-[360px]">
@@ -206,33 +206,35 @@ export function DashboardPage() {
                     <defs>
                       <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#0c54a3" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="#0c54a3" stopOpacity={0.02} />
+                        <stop offset="95%" stopColor="#0c54a3" stopOpacity={0.01} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e0e8e3" />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} stroke="#64748b" />
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} stroke="#64748b" dy={8} />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      fontSize={12}
+                      fontSize={11}
                       stroke="#64748b"
                       tickFormatter={(value) => formatCompactCurrency(Number(value))}
+                      dx={-8}
                     />
                     <Tooltip
                       formatter={(value) => formatCurrency(Number(value ?? 0))}
                       contentStyle={{
                         borderRadius: '16px',
-                        border: '1px solid rgba(255, 255, 255, 0.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.9)',
                         backgroundColor: 'rgba(255, 255, 255, 0.96)',
-                        boxShadow: '0 18px 50px -30px rgba(24, 46, 37, 0.25)',
+                        boxShadow: '0 18px 50px -30px rgba(15, 23, 42, 0.25)',
                       }}
                     />
                     <Area
                       type="monotone"
                       dataKey="total"
                       stroke="#0c54a3"
-                      strokeWidth={3}
+                      strokeWidth={4}
                       fill="url(#dashboardRevenue)"
+                      activeDot={{ r: 6, strokeWidth: 0, fill: '#0c54a3' }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -240,13 +242,13 @@ export function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="admin-surface border-0">
+          <Card className="admin-surface border-0 shadow-[0_12px_45px_-16px_rgba(15,23,42,0.08)]">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Đơn gần đây</CardTitle>
-                <CardDescription>{stats.recentOrders.length} đơn mới nhất cần theo dõi.</CardDescription>
+                <CardTitle className="text-lg font-bold tracking-wide text-foreground">Đơn gần đây</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground/80 font-medium">{stats.recentOrders.length} đơn mới nhất cần theo dõi.</CardDescription>
               </div>
-              <Button variant="ghost" size="icon" asChild className="rounded-full">
+              <Button variant="ghost" size="icon" asChild className="rounded-full hover:bg-secondary">
                 <Link to="/admin/orders">
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -263,16 +265,21 @@ export function DashboardPage() {
                     <Link
                       key={order.id}
                       to={`/admin/orders/${order.id}`}
-                      className="block rounded-[1.35rem] border border-white/85 bg-white/95 px-4 py-4 shadow-[0_4px_15px_rgba(0,0,0,0.01)] admin-glow hover:-translate-y-0.5 transition-all duration-300"
+                      className="block rounded-[1.5rem] border border-white/80 bg-white/90 px-4.5 py-4 shadow-[0_4px_15px_rgba(0,0,0,0.01)] admin-glow hover:-translate-y-0.5 transition-all duration-300"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-foreground">{order.orderNumber}</p>
-                          <p className="mt-1 text-sm text-muted-foreground">{order.customerName}</p>
-                          <p className="mt-2 text-xs text-muted-foreground">{formatDateTime(order.createdAt)}</p>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary/10 to-primary/5 border border-primary/10 font-bold text-sm text-primary shadow-sm">
+                            {order.customerName ? order.customerName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'KH'}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-sm text-foreground tracking-wide">{order.orderNumber}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground font-semibold truncate max-w-[150px]">{order.customerName}</p>
+                            <p className="mt-1 text-[10px] text-muted-foreground/80 font-medium">{formatDateTime(order.createdAt)}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-foreground">{formatCurrency(order.totalAmount)}</p>
+                        <div className="text-right shrink-0">
+                          <p className="font-extrabold text-sm text-foreground tracking-tight">{formatCurrency(order.totalAmount)}</p>
                           <div className="mt-2 flex justify-end">{getStatusBadge(order.status)}</div>
                         </div>
                       </div>

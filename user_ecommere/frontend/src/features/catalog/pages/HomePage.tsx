@@ -196,47 +196,71 @@ export function HomePage() {
       <SEO />
 
       <div className="container space-y-8 py-6 md:space-y-10 md:py-8">
-        <section className="section-shell relative overflow-hidden px-6 py-10 md:px-10 md:py-14 bg-white/50 backdrop-blur-md">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,225,194,0.75),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(185,225,208,0.65),transparent_30%)]" />
-          <div className="relative grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-center">
+        <section className="section-shell relative overflow-hidden px-6 py-12 md:px-12 md:py-16 bg-white/40 backdrop-blur-xl border border-white/80 shadow-[0_32px_80px_-40px_rgba(24,46,37,0.2)]">
+          {/* Animated Ambient Blobs */}
+          <div className="absolute top-[-20%] left-[-10%] h-[350px] w-[350px] rounded-full bg-emerald-300/18 blur-[80px] animate-float-orb pointer-events-none" />
+          <div className="absolute bottom-[-15%] right-[-5%] h-[400px] w-[400px] rounded-full bg-amber-200/22 blur-[90px] animate-float-orb [animation-delay:-5s] pointer-events-none" />
+          
+          <div className="relative grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
-              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground shadow-sm">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-white/90 px-4.5 py-2 text-xs font-bold uppercase tracking-[0.24em] text-primary shadow-sm hover:scale-[1.01] transition-transform duration-300">
+                <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10 animate-pulse" />
                 Hương thơm cho không gian sống hiện đại
               </p>
-              <h1 className="max-w-3xl text-balance text-4xl font-semibold leading-[1.05] text-foreground md:text-6xl font-serif">
-                Chọn mùi hương khiến nhà ở, xe hơi và quà tặng của bạn trông có gu hơn.
+              <h1 className="max-w-3xl text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-7xl font-serif">
+                Chọn mùi hương khiến không gian của bạn <span className="text-gradient-emerald">trông có gu hơn</span>.
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-                Thai Spray tập trung vào những lựa chọn dễ dùng, mùi sạch, gọn và không gắt. Bạn có thể bắt đầu từ
+              <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg font-medium">
+                Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết, gọn và không gắt. Bạn có thể bắt đầu từ
                 mùi bán chạy, hỏi chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay trên catalog.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="h-12 rounded-full px-6 transition-transform duration-300 hover:scale-[1.02] shadow-lg shadow-primary/20">
+              <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
+                <Button asChild size="lg" className="h-13 rounded-full px-8 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 shadow-xl shadow-primary/25 hover:shadow-primary/35 bg-primary">
                   <Link to="/catalog">
                     Khám phá bộ sưu tập
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-12 rounded-full px-6 border-white/80 bg-white/40 hover:bg-white/70 transition-transform duration-300 hover:scale-[1.02] shadow-sm">
+                <Button asChild variant="outline" size="lg" className="h-13 rounded-full px-8 border-white/80 bg-white/50 hover:bg-white/80 hover:-translate-y-0.5 hover:scale-[1.03] transition-all duration-300 shadow-md">
                   <Link to="/catalog?sort=best_selling">Xem nhóm bán chạy nhất</Link>
                 </Button>
               </div>
             </div>
 
-            <div className="relative aspect-square w-full max-w-[400px] mx-auto lg:max-w-none rounded-[2rem] overflow-hidden shadow-2xl border border-white/60 group animate-scale-in">
-              <img
-                src="/hero-fragrance.png"
-                alt="Thai Spray Luxury Fragrance"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
+            <div className="relative aspect-square w-full max-w-[400px] mx-auto lg:max-w-none rounded-[2.2rem] border border-white/70 shadow-2xl group animate-scale-in">
+              <div className="h-full w-full overflow-hidden rounded-[2.2rem] bg-gradient-to-tr from-secondary/50 to-white/30 border border-white/40">
+                <img
+                  src="/hero-fragrance.png"
+                  alt="Thai Spray Luxury Fragrance"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.2s] ease-out"
+                />
+              </div>
+              <div className="absolute inset-0 rounded-[2.2rem] bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
                 <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/80">Premium Scent Collection</p>
                 <h3 className="text-lg font-bold mt-1 font-serif leading-tight">Mùi hương tinh tế cho nhịp sống hiện đại</h3>
               </div>
-              <div className="absolute top-4 left-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-md px-4 py-2 text-white shadow-lg animate-bounce [animation-duration:3s]">
+              <div className="absolute top-4 right-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-md px-4 py-2.5 text-white shadow-lg animate-bounce [animation-duration:4s]">
                 <p className="text-[9px] font-bold uppercase tracking-wider text-white/80">Khuyên dùng</p>
                 <p className="text-xs font-extrabold mt-0.5 tracking-wide">Woody & Fresh</p>
+              </div>
+              
+              {/* Scent notes overlay */}
+              <div className="absolute -bottom-4 -left-4 glass-premium p-4.5 rounded-[1.5rem] max-w-[210px] border border-white/80 shadow-2xl hidden sm:block hover:scale-105 duration-300">
+                <p className="text-[9px] font-extrabold uppercase tracking-widest text-primary">Olfactory Notes</p>
+                <div className="flex flex-col gap-2 mt-2.5">
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
+                    <span className="h-2 w-2 rounded-full bg-emerald-600 shadow-sm" />
+                    <span>Gỗ thông rừng</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
+                    <span className="h-2 w-2 rounded-full bg-amber-400 shadow-sm" />
+                    <span>Xô thơm quýt</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
+                    <span className="h-2 w-2 rounded-full bg-blue-400 shadow-sm" />
+                    <span>Bạc hà lạnh</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
