@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    --background: 38 33% 97%;
-    --foreground: 156 24% 13%;
+    --background: 30 15% 98%; /* Luxurious warm silk white */
+    --foreground: 20 20% 12%; /* Deep elegant charcoal */
     --card: 0 0% 100%;
-    --card-foreground: 156 24% 13%;
+    --card-foreground: 20 20% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 156 24% 13%;
-    --primary: 154 42% 25%;
-    --primary-foreground: 48 100% 97%;
-    --secondary: 36 40% 92%;
-    --secondary-foreground: 156 24% 13%;
-    --muted: 36 33% 93%;
-    --muted-foreground: 160 10% 37%;
-    --accent: 30 65% 88%;
-    --accent-foreground: 156 24% 13%;
-    --destructive: 0 75% 54%;
+    --popover-foreground: 20 20% 12%;
+    --primary: 24 25% 12%; /* Luxury obsidian bronze */
+    --primary-foreground: 36 45% 97%;
+    --secondary: 30 12% 94%;
+    --secondary-foreground: 20 20% 12%;
+    --muted: 30 8% 93%;
+    --muted-foreground: 20 10% 45%;
+    --accent: 36 32% 75%; /* Champagne gold */
+    --accent-foreground: 20 20% 12%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 36 22% 85%;
-    --input: 36 22% 85%;
-    --ring: 154 42% 25%;
-    --radius: 1rem;
+    --border: 30 10% 90%; /* Soft border */
+    --input: 30 10% 90%;
+    --ring: 24 25% 12%;
+    --radius: 1.25rem;
   }
 
   * {
@@ -41,9 +41,9 @@
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-feature-settings: 'ss01', 'cv11';
     background-image:
-      radial-gradient(circle at top left, rgba(255, 227, 193, 0.55), transparent 30%),
-      radial-gradient(circle at top right, rgba(177, 227, 202, 0.4), transparent 28%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 250, 245, 0.94));
+      radial-gradient(circle at top left, rgba(197, 160, 107, 0.12), transparent 35%),
+      radial-gradient(circle at top right, rgba(120, 140, 130, 0.08), transparent 30%),
+      linear-gradient(180deg, rgba(252, 251, 249, 0.98), rgba(246, 244, 238, 0.98));
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -62,11 +62,11 @@
 
 @layer components {
   .glass-panel {
-    @apply border border-white/80 bg-white/80 shadow-[0_12px_40px_-12px_rgba(24,46,37,0.12)] backdrop-blur-xl transition-all duration-300;
+    @apply border border-white/90 bg-white/85 shadow-[0_20px_48px_-16px_rgba(20,20,20,0.04)] backdrop-blur-2xl transition-all duration-300;
   }
 
   .section-shell {
-    @apply rounded-[2rem] border border-white/80 bg-white/75 shadow-[0_20px_50px_-20px_rgba(24,46,37,0.15)] backdrop-blur transition-all duration-300;
+    @apply rounded-[2.2rem] border border-white/90 bg-white/80 shadow-[0_24px_64px_-24px_rgba(20,20,20,0.06)] backdrop-blur transition-all duration-300;
   }
 
   .section-title {
@@ -93,16 +93,16 @@
   }
   
   .hover-glow:hover {
-    box-shadow: 0 20px 40px -15px rgba(24, 46, 37, 0.12), 0 0 20px -2px rgba(38, 92, 66, 0.06);
-    border-color: rgba(38, 92, 66, 0.15);
+    box-shadow: 0 20px 40px -15px rgba(20, 20, 20, 0.06), 0 0 20px -2px rgba(197, 160, 107, 0.04);
+    border-color: rgba(197, 160, 107, 0.15);
   }
 
   .glass-premium {
-    @apply border border-white/90 bg-white/70 backdrop-blur-2xl shadow-[0_16px_50px_-16px_rgba(24,46,37,0.1)] transition-all duration-300;
+    @apply border border-white/95 bg-white/75 backdrop-blur-2xl shadow-[0_20px_60px_-20px_rgba(20,20,20,0.05)] transition-all duration-300;
   }
 
   .text-gradient-emerald {
-    @apply bg-gradient-to-r from-primary via-emerald-800 to-emerald-950 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary via-amber-700 to-amber-950 bg-clip-text text-transparent;
   }
 }
 
