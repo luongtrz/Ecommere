@@ -6,7 +6,7 @@ export const adminProductsApi = {
      * Get product by ID (for admin edit)
      */
     async getById(id: string): Promise<Product> {
-        const response = await apiClient.get(`/products/${id}`);
+        const response = await apiClient.get(`/products/admin/${id}`);
         const actualData = response.data.data || response.data;
         return actualData.data || actualData;
     },

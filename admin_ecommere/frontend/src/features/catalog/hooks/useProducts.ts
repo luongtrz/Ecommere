@@ -28,3 +28,14 @@ export function useInfiniteProducts(filters: ProductFilters = {}) {
     initialPageParam: 1,
   });
 }
+
+export function useInfiniteAdminProducts(filters: ProductFilters = {}) {
+  return useInfiniteQuery({
+    queryKey: [QUERY_KEYS.ADMIN_PRODUCTS, 'infinite', filters],
+    queryFn: ({ pageParam = 1 }) => productsApi.getAllAdmin({ ...filters, page: pageParam as number, limit: 20 }),
+    getNextPageParam: (lastPage: ProductsResponse) => {
+      return lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
+}

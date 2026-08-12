@@ -18,7 +18,7 @@ import {
   Tags,
   Loader2
 } from 'lucide-react';
-import { useInfiniteProducts } from '@/features/catalog/hooks/useProducts';
+import { useInfiniteAdminProducts } from '@/features/catalog/hooks/useProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { formatCurrency } from '@/lib/formatters';
 import { Badge } from '@/components/ui/badge';
@@ -95,7 +95,7 @@ export function AdminProductsPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useInfiniteProducts({
+  } = useInfiniteAdminProducts({
     limit: 20,
     search: debouncedSearch,
     sortBy: 'newest',

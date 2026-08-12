@@ -97,7 +97,7 @@ describe('ProductsService', () => {
       expect(result.hasNextPage).toBe(false);
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: {},
+          where: { active: true },
           skip: 0,
           take: 12,
         }),
@@ -183,7 +183,7 @@ describe('ProductsService', () => {
       expect(result.reviewCount).toBe(2);
       expect(mockPrismaService.product.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: '1' },
+          where: { id: '1', active: true },
         }),
       );
     });

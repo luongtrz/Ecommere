@@ -15,10 +15,10 @@ export class ProductsService {
     private categoriesService: CategoriesService,
   ) { }
 
-  async findAll(filterDto: ProductFilterDto) {
+  async findAll(filterDto: ProductFilterDto, includeInactive = false) {
     const { page = 1, limit = 12, search, categoryId, categorySlug, sortBy = ProductSortBy.NEWEST, minPrice, maxPrice } = filterDto;
 
-    const where: any = {};
+    const where: any = includeInactive ? {} : { active: true };
 
     if (search) {
       where.OR = [
@@ -144,10 +144,10 @@ export class ProductsService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, includeInactive = false) {
     const [product, reviewAggregate] = await Promise.all([
       this.prisma.product.findUnique({
-        where: { id },
+        where: includeInactive ? { id } : { id, active: true },
         include: {
           category: true,
           variants: true,

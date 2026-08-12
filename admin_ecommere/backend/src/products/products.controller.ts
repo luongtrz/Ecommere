@@ -24,12 +24,30 @@ export class ProductsController {
     return this.productsService.findAll(filterDto);
   }
 
+  @Get('admin')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get all products including inactive products (Admin only)' })
+  @ApiResponse({ status: 200, type: [ProductEntity] })
+  async findAllForAdmin(@Query() filterDto: ProductFilterDto) {
+    return this.productsService.findAll(filterDto, true);
+  }
+
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
   @ApiResponse({ status: 200, type: ProductEntity })
   async findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
+  }
+
+  @Get('admin/:id')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get any product by ID (Admin only)' })
+  @ApiResponse({ status: 200, type: ProductEntity })
+  async findOneForAdmin(@Param('id') id: string) {
+    return this.productsService.findOne(id, true);
   }
 
   @Public()
