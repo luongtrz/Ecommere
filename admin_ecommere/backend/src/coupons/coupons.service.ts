@@ -141,18 +141,35 @@ export class CouponsService {
       throw new NotFoundException('Coupon not found');
     }
 
-    // Check if coupon has been used in any orders
-    const orderCount = await this.prisma.order.count({
-      where: { couponCode: code.toUpperCase() },
-    });
+    const normalizedCode = code.toUpperCase();
+    const [orderCount, cartCount] = await Promise.all([
+      this.prisma.order.count({
+        where: { couponCode: normalizedCode },
+      }),
+      this.prisma.cart.count({
+        where: { couponId: normalizedCode },
+      }),
+    ]);
 
     if (orderCount > 0) {
       throw new BadRequestException('Cannot delete coupon that has been used in orders');
     }
 
-    await this.prisma.coupon.delete({
-      where: { code: code.toUpperCase() },
-    });
+    if (cartCount > 0) {
+      throw new BadRequestException('Cannot delete coupon currently applied to carts');
+    }
+
+    try {
+      await this.prisma.coupon.delete({
+        where: { code: normalizedCode },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+        throw new BadRequestException('Cannot delete coupon currently referenced by another record');
+      }
+
+      throw error;
+    }
 
     return { message: 'Coupon deleted successfully' };
   }
