@@ -80,7 +80,6 @@ export class ReviewsService {
             select: {
               id: true,
               name: true,
-              email: true,
             },
           },
         },

@@ -164,13 +164,13 @@ export class ProductsService {
   async findOne(id: string) {
     const [product, reviewAggregate] = await Promise.all([
       this.prisma.product.findUnique({
-        where: { id },
+        where: { id, active: true },
         include: {
           category: true,
           variants: true,
           reviews: {
             include: {
-              user: { select: { id: true, name: true, email: true } },
+              user: { select: { id: true, name: true } },
             },
             orderBy: { createdAt: 'desc' },
             take: 20, // Paginate reviews - load first 20
@@ -198,13 +198,13 @@ export class ProductsService {
 
   async findBySlug(slug: string) {
     const product = await this.prisma.product.findUnique({
-      where: { slug },
+      where: { slug, active: true },
       include: {
         category: true,
         variants: true,
         reviews: {
           include: {
-            user: { select: { id: true, name: true, email: true } },
+            user: { select: { id: true, name: true } },
           },
           orderBy: { createdAt: 'desc' },
           take: 20, // Paginate reviews - load first 20
