@@ -217,6 +217,10 @@ export class ProductsService {
     const { name, description, brand, images, categoryId, basePrice, active = true, variants } = createProductDto;
     const slug = SlugifyUtil.generate(name);
 
+    for (const variant of variants) {
+      this.validateVariantPricing(variant.price, variant.salePrice);
+    }
+
     // Check if category exists
     const category = await this.prisma.category.findUnique({
       where: { id: categoryId },
