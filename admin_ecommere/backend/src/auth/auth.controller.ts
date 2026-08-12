@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, Req, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Res, Req, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -51,7 +51,7 @@ export class AuthController {
   ) {
     const refreshToken = request.cookies['refreshToken'];
     if (!refreshToken) {
-      throw new Error('Refresh token not found in cookies');
+      throw new UnauthorizedException('Refresh token not found in cookies');
     }
     return this.authService.refresh(refreshToken, response);
   }
