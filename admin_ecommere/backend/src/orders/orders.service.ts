@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
@@ -672,8 +673,9 @@ export class OrdersService {
 
     const sequence = (todayOrderCount + 1).toString().padStart(4, '0');
 
-    // Add random suffix to prevent race condition
-    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+    // The daily count is only a display sequence; use a collision-resistant
+    // suffix because concurrent checkouts can observe the same count.
+    const random = randomBytes(4).toString('hex').toUpperCase();
 
     return `ORD${year}${month}${day}${sequence}${random}`;
   }
