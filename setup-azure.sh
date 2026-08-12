@@ -16,6 +16,7 @@ readonly REQUIRED_VARS=(
   DATABASE_URL
   JWT_ACCESS_SECRET
   JWT_REFRESH_SECRET
+  NODE_ENV
   CORS_ORIGIN
   CLOUDINARY_CLOUD_NAME
   CLOUDINARY_API_KEY
@@ -44,6 +45,9 @@ for env_file in "${ENV_FILES[@]}"; do
   if grep -Eiq 'replace[-_ ]?with|change[-_ ]?in[-_ ]?production|example[-_ ]?password|demo[-_ ]?password' "$env_file"; then
     fail "placeholder or demo credentials found in ${env_file#"$APP_ROOT/"}"
   fi
+
+  grep -Eq '^NODE_ENV=("production"|production)$' "$env_file" || \
+    fail "NODE_ENV must be production in ${env_file#"$APP_ROOT/"}"
 done
 
 docker compose -f "$COMPOSE_FILE" config --quiet
