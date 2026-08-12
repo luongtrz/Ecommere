@@ -67,6 +67,7 @@ CORS_ORIGIN="http://localhost:5174"
 **Frontend** (`.env`):
 ```bash
 VITE_API_BASE_URL=http://localhost:4001
+VITE_STORE_URL=http://localhost:5173
 ```
 
 ### Run Development

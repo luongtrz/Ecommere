@@ -45,6 +45,8 @@ import {
 import { useDeleteProduct } from '../hooks/useAdminProducts';
 import { useToast } from '@/hooks/useToast';
 
+const STORE_URL = (import.meta.env.VITE_STORE_URL || 'http://localhost:5173').replace(/\/$/, '');
+
 export function AdminProductsPage() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -401,9 +403,9 @@ export function AdminProductsPage() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
                                 <DropdownMenuItem asChild>
-                                  <Link to={`/p/${product.slug}`} target="_blank" className="cursor-pointer">
+                                  <a href={`${STORE_URL}/p/${product.slug}`} target="_blank" rel="noreferrer" className="cursor-pointer">
                                     <Eye className="mr-2 h-4 w-4" /> Xem chi tiết
-                                  </Link>
+                                  </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                   <Link to={`/admin/products/${product.id}/edit`} className="cursor-pointer">
