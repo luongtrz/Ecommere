@@ -33,6 +33,7 @@ export function useSessionRestore() {
       } catch (error) {
         // Refresh failed → session expired
         console.log('❌ Session expired, please login again');
+        authToken.remove();
         useCartStore.getState().clearCart();
         localStorage.removeItem('user');
         setIsAuthenticated(false);

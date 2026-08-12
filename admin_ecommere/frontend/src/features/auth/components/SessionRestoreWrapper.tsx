@@ -21,8 +21,12 @@ export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) 
         authToken.set(actualData.accessToken);
       } catch (error) {
         console.log('Session expired');
+        authToken.remove();
         useCartStore.getState().clearCart();
         localStorage.removeItem('user');
+        if (window.location.pathname !== '/login') {
+          window.location.replace('/login');
+        }
       }
     };
 
