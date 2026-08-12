@@ -33,10 +33,10 @@ const ORDER_STATUS_MAP: Record<
 
 const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
     PENDING_PAYMENT: ['PAID', 'CANCELED'],
-    PAID: ['PACKING', 'CANCELED', 'REFUNDED'],
-    PACKING: ['SHIPPED', 'REFUNDED'],
-    SHIPPED: ['DELIVERED', 'REFUNDED'],
-    DELIVERED: [],
+    PAID: ['PACKING', 'CANCELED'],
+    PACKING: ['SHIPPED', 'CANCELED'],
+    SHIPPED: ['DELIVERED'],
+    DELIVERED: ['REFUNDED'],
     CANCELED: [],
     REFUNDED: [],
 };
