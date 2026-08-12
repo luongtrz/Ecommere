@@ -25,7 +25,7 @@ export function SearchPage() {
   const [searchInput, setSearchInput] = useState(query);
   const debouncedSearch = useDebounce(searchInput, 400);
 
-  const { data, isLoading } = useProductSearch(query);
+  const { data, isLoading } = useProductSearch(query, { sortBy: sortBy as any });
   const { addItem } = useCart();
 
   useEffect(() => {

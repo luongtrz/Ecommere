@@ -20,7 +20,7 @@ export function SearchPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
 
-  const { data, isLoading } = useProductSearch(query);
+  const { data, isLoading } = useProductSearch(query, { sortBy: sortBy as any });
   const { addItem } = useCart();
 
   const handleSearchChange = (newQuery: string) => {
