@@ -6,10 +6,10 @@ admin-ecommere.luongtrz.me {
   encode gzip zstd
 
   @api path /api/*
-  reverse_proxy @api admin-backend:4000
+  reverse_proxy @api admin-backend:4001
 
   @uploads path /uploads/*
-  reverse_proxy @uploads admin-backend:4000
+  reverse_proxy @uploads admin-backend:4001
 
   reverse_proxy admin-frontend:80
 }
