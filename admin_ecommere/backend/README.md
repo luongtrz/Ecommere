@@ -214,9 +214,9 @@ npm run build
 npm run start:prod
 ```
 
-Server runs at: `http://localhost:4000`
+Server runs at: `http://localhost:4001`
 
-Swagger documentation: `http://localhost:4000/api`
+Swagger documentation: `http://localhost:4001/api`
 
 ## 📚 API Documentation
 
@@ -224,7 +224,7 @@ Swagger documentation: `http://localhost:4000/api`
 
 Access interactive API documentation at:
 ```
-http://localhost:4000/api
+http://localhost:4001/api
 ```
 
 ### Authentication
@@ -330,11 +330,11 @@ TOKEN_EXPIRES_IN="15m"
 REFRESH_EXPIRES_IN="7d"
 
 # Server
-PORT=4000
+PORT=4001
 NODE_ENV="development"
 
 # CORS
-CORS_ORIGIN="http://localhost:5173"
+CORS_ORIGIN="http://localhost:5174"
 
 # Uploads
 UPLOAD_DIR="./uploads"
