@@ -1,5 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsArray, IsObject, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsObject,
+  IsNumber,
+  IsInt,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+
+export class CheckoutItemDto {
+  @ApiProperty({ example: 'variant-id' })
+  @IsString()
+  variantId!: string;
+
+  @ApiProperty({ example: 1, minimum: 1 })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  quantity!: number;
+
+  // Kept for backwards compatibility with existing clients. The API always
+  // recalculates the price from the current product variant.
+  @ApiProperty({ example: 100000, required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  price?: number;
+}
 
 export class CheckoutDto {
   @ApiProperty({ example: 'address-id', required: false })
@@ -39,10 +69,12 @@ export class CheckoutDto {
   line1?: string;
 
   // Additional fields from frontend payload
-  @ApiProperty({ example: [{ variantId: 'variant-id', quantity: 1, price: 100000 }], required: false })
+  @ApiProperty({ type: [CheckoutItemDto], required: false })
   @IsOptional()
   @IsArray()
-  items?: { variantId: string; quantity: number; price: number }[];
+  @ValidateNested({ each: true })
+  @Type(() => CheckoutItemDto)
+  items?: CheckoutItemDto[];
 
   @ApiProperty({ example: 'COD', required: false })
   @IsOptional()

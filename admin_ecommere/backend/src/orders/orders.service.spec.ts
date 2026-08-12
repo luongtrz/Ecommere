@@ -27,6 +27,7 @@ describe('OrdersService', () => {
     productVariant: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
     coupon: {
       update: jest.fn(),
@@ -136,6 +137,7 @@ describe('OrdersService', () => {
       });
       mockPrismaService.order.create.mockResolvedValue(mockOrder);
       mockPrismaService.order.count.mockResolvedValue(0);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({ stock: 8 });
 
       const result = await service.checkout('user1', { addressId: 'addr1' });
 
@@ -349,6 +351,7 @@ describe('OrdersService', () => {
         return callback(mockPrismaService);
       });
       mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
+      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
       mockPrismaService.order.update.mockResolvedValue(cancelledOrder);
 
       const result = await service.cancelOrder('user1', 'order1');

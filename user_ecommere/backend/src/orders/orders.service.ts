@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
-import { OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
+import { CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
 import { CheckoutDto } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
@@ -64,6 +64,10 @@ export class OrdersService {
     } else if (items && items.length > 0) {
       // Use items from DTO
       for (const item of items) {
+        if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+          throw new BadRequestException('Quantity must be a positive integer');
+        }
+
         const variant = await this.prisma.productVariant.findUnique({
           where: { id: item.variantId },
           include: { product: true },
@@ -92,6 +96,26 @@ export class OrdersService {
       }
     } else {
       throw new BadRequestException('Cart is empty or no items provided');
+    }
+
+    // Cart quantities and product availability can change after the cart was
+    // created, so validate them again immediately before pricing the order.
+    for (const item of itemsToUse) {
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+        throw new BadRequestException('Quantity must be a positive integer');
+      }
+
+      if (!item.variant?.product?.active) {
+        throw new BadRequestException(
+          `Product is no longer available: ${item.variant?.product?.name ?? 'Unknown product'}`,
+        );
+      }
+
+      if (item.variant.stock < item.quantity) {
+        throw new BadRequestException(
+          `Insufficient stock for ${item.variant.product.name} - ${item.variant.scent}. Only ${item.variant.stock} available.`,
+        );
+      }
     }
 
     // Handle address - either use existing or create new
@@ -155,6 +179,10 @@ export class OrdersService {
     if (coupon) {
       // Validate coupon (date, usage limits)
       const now = new Date();
+      if (!coupon.active) {
+        throw new BadRequestException('Coupon is inactive');
+      }
+
       if (coupon.validFrom && coupon.validFrom > now) {
         throw new BadRequestException('Coupon is not yet valid');
       }
@@ -184,16 +212,23 @@ export class OrdersService {
         throw new BadRequestException(`Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`);
       }
 
-      discount = MoneyUtil.calculateDiscount(
-        subtotal,
-        coupon.type,
-        coupon.value,
-        coupon.maxDiscount,
-      );
+      discount = coupon.type === CouponType.FREESHIP
+        ? 0
+        : MoneyUtil.calculateDiscount(
+            subtotal,
+            coupon.type,
+            coupon.value,
+            coupon.maxDiscount,
+          );
     }
 
-    // Calculate shipping fee
-    const shippingFee = checkoutDto.shippingFee || this.calculateShippingFee(address);
+    // Shipping is calculated on the server. Client-provided totals and fees
+    // are display values only and must not affect the amount charged.
+    const calculatedShippingFee = this.calculateShippingFee(address);
+    const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
+    if (coupon?.type === CouponType.FREESHIP) {
+      discount = calculatedShippingFee;
+    }
 
     const orderTotal = subtotal - discount + shippingFee;
 
@@ -244,13 +279,31 @@ export class OrdersService {
 
       // Reserve stock for each item
       for (const item of itemsToUse) {
-        const previousStock = item.variant.stock;
-        const newStock = previousStock - item.quantity;
-
-        await tx.productVariant.update({
-          where: { id: item.variantId },
-          data: { stock: newStock },
+        const stockUpdate = await tx.productVariant.updateMany({
+          where: {
+            id: item.variantId,
+            stock: { gte: item.quantity },
+          },
+          data: { stock: { decrement: item.quantity } },
         });
+
+        if (stockUpdate.count !== 1) {
+          throw new BadRequestException(
+            `Insufficient stock for ${item.variant.product.name} - ${item.variant.scent}.`,
+          );
+        }
+
+        const updatedVariant = await tx.productVariant.findUnique({
+          where: { id: item.variantId },
+          select: { stock: true },
+        });
+
+        if (!updatedVariant) {
+          throw new NotFoundException(`Product variant not found: ${item.variantId}`);
+        }
+
+        const newStock = updatedVariant.stock;
+        const previousStock = newStock + item.quantity;
 
         await tx.stockMovement.create({
           data: {
@@ -650,13 +703,13 @@ export class OrdersService {
         });
 
         if (variant) {
-          const previousStock = variant.stock;
-          const newStock = previousStock + item.quantity;
-
-          await tx.productVariant.update({
+          const updatedVariant = await tx.productVariant.update({
             where: { id: item.variantId },
-            data: { stock: newStock },
+            data: { stock: { increment: item.quantity } },
           });
+
+          const newStock = updatedVariant.stock;
+          const previousStock = newStock - item.quantity;
 
           await tx.stockMovement.create({
             data: {
