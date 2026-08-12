@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { StockMovementType } from '@prisma/client';
+import { Prisma, StockMovementType } from '@prisma/client';
 import { StockAdjustmentDto } from './dtos/stock-adjustment.dto';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 
@@ -11,40 +11,69 @@ export class InventoryService {
   async adjustStock(adjustmentDto: StockAdjustmentDto, userId: string) {
     const { variantId, type, quantity, notes } = adjustmentDto;
 
-    const variant = await this.prisma.productVariant.findUnique({
-      where: { id: variantId },
-    });
-
-    if (!variant) {
-      throw new NotFoundException('Product variant not found');
+    if (type !== StockMovementType.ADJUST && quantity < 1) {
+      throw new BadRequestException('Quantity must be greater than zero for stock in/out');
     }
 
-    const previousStock = variant.stock;
-    let newStock = previousStock;
-
-    switch (type) {
-      case StockMovementType.IN:
-        newStock = previousStock + quantity;
-        break;
-      case StockMovementType.OUT:
-        if (previousStock < quantity) {
-          throw new BadRequestException('Insufficient stock for this operation');
-        }
-        newStock = previousStock - quantity;
-        break;
-      case StockMovementType.ADJUST:
-        // For ADJUST, quantity represents the target stock level
-        newStock = quantity;
-        break;
-    }
-
-    // Update variant stock and create movement record in a transaction
-    const [updatedVariant, movement] = await this.prisma.$transaction([
-      this.prisma.productVariant.update({
+    return this.prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.findUnique({
         where: { id: variantId },
-        data: { stock: newStock },
-      }),
-      this.prisma.stockMovement.create({
+      });
+
+      if (!variant) {
+        throw new NotFoundException('Product variant not found');
+      }
+
+      let updatedVariant;
+      let previousStock: number;
+      let newStock: number;
+
+      switch (type) {
+        case StockMovementType.IN:
+          updatedVariant = await tx.productVariant.update({
+            where: { id: variantId },
+            data: { stock: { increment: quantity } },
+          });
+          newStock = updatedVariant.stock;
+          previousStock = newStock - quantity;
+          break;
+        case StockMovementType.OUT: {
+          const stockUpdate = await tx.productVariant.updateMany({
+            where: {
+              id: variantId,
+              stock: { gte: quantity },
+            },
+            data: { stock: { decrement: quantity } },
+          });
+
+          if (stockUpdate.count !== 1) {
+            throw new BadRequestException('Insufficient stock for this operation');
+          }
+
+          updatedVariant = await tx.productVariant.findUnique({
+            where: { id: variantId },
+          });
+
+          if (!updatedVariant) {
+            throw new NotFoundException('Product variant not found');
+          }
+
+          newStock = updatedVariant.stock;
+          previousStock = newStock + quantity;
+          break;
+        }
+        case StockMovementType.ADJUST:
+          // For ADJUST, quantity represents the target stock level.
+          updatedVariant = await tx.productVariant.update({
+            where: { id: variantId },
+            data: { stock: quantity },
+          });
+          previousStock = variant.stock;
+          newStock = updatedVariant.stock;
+          break;
+      }
+
+      const movement = await tx.stockMovement.create({
         data: {
           variantId,
           type,
@@ -53,13 +82,15 @@ export class InventoryService {
           newStock,
           notes,
         },
-      }),
-    ]);
+      });
 
-    return {
-      ...movement,
-      variant: updatedVariant,
-    };
+      return {
+        ...movement,
+        variant: updatedVariant,
+      };
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    });
   }
 
   async getStockHistory(variantId: string, paginationDto: PaginationDto) {
@@ -183,71 +214,80 @@ export class InventoryService {
 
   // Internal method used by orders service
   async reserveStock(variantId: string, quantity: number, orderId: string) {
-    const variant = await this.prisma.productVariant.findUnique({
-      where: { id: variantId },
-    });
-
-    if (!variant) {
-      throw new NotFoundException('Product variant not found');
-    }
-
-    if (variant.stock < quantity) {
-      throw new BadRequestException(`Insufficient stock for variant ${variant.sku}`);
-    }
-
-    const previousStock = variant.stock;
-    const newStock = previousStock - quantity;
-
-    const [updatedVariant, movement] = await this.prisma.$transaction([
-      this.prisma.productVariant.update({
+    return this.prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.findUnique({
         where: { id: variantId },
-        data: { stock: newStock },
-      }),
-      this.prisma.stockMovement.create({
+      });
+
+      if (!variant) {
+        throw new NotFoundException('Product variant not found');
+      }
+
+      const stockUpdate = await tx.productVariant.updateMany({
+        where: {
+          id: variantId,
+          stock: { gte: quantity },
+        },
+        data: { stock: { decrement: quantity } },
+      });
+
+      if (stockUpdate.count !== 1) {
+        throw new BadRequestException(`Insufficient stock for variant ${variant.sku}`);
+      }
+
+      const updatedVariant = await tx.productVariant.findUnique({
+        where: { id: variantId },
+      });
+
+      if (!updatedVariant) {
+        throw new NotFoundException('Product variant not found');
+      }
+
+      const newStock = updatedVariant.stock;
+      await tx.stockMovement.create({
         data: {
           variantId,
           type: StockMovementType.OUT,
           quantity,
-          previousStock,
+          previousStock: newStock + quantity,
           newStock,
           notes: `Reserved for order ${orderId}`,
         },
-      }),
-    ]);
+      });
 
-    return updatedVariant;
+      return updatedVariant;
+    });
   }
 
   // Internal method used by orders service (for cancellations/refunds)
   async restoreStock(variantId: string, quantity: number, orderId: string, reason: string) {
-    const variant = await this.prisma.productVariant.findUnique({
-      where: { id: variantId },
-    });
-
-    if (!variant) {
-      throw new NotFoundException('Product variant not found');
-    }
-
-    const previousStock = variant.stock;
-    const newStock = previousStock + quantity;
-
-    const [updatedVariant, movement] = await this.prisma.$transaction([
-      this.prisma.productVariant.update({
+    return this.prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.findUnique({
         where: { id: variantId },
-        data: { stock: newStock },
-      }),
-      this.prisma.stockMovement.create({
+      });
+
+      if (!variant) {
+        throw new NotFoundException('Product variant not found');
+      }
+
+      const updatedVariant = await tx.productVariant.update({
+        where: { id: variantId },
+        data: { stock: { increment: quantity } },
+      });
+
+      const newStock = updatedVariant.stock;
+      await tx.stockMovement.create({
         data: {
           variantId,
           type: StockMovementType.IN,
           quantity,
-          previousStock,
+          previousStock: newStock - quantity,
           newStock,
           notes: `${reason} - Order ${orderId}`,
         },
-      }),
-    ]);
+      });
 
-    return updatedVariant;
+      return updatedVariant;
+    });
   }
 }
