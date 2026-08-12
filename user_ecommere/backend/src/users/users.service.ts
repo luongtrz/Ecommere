@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { CreateAddressDto } from './dtos/create-address.dto';
@@ -30,21 +31,27 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, updateUserDto: UpdateUserDto) {
-    const user = await this.prisma.user.update({
-      where: { id: userId },
-      data: updateUserDto,
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        name: true,
-        phone: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: updateUserDto,
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          name: true,
+          phone: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Số điện thoại đã được đăng ký');
+      }
 
-    return user;
+      throw error;
+    }
   }
 
   async getAddresses(userId: string) {
