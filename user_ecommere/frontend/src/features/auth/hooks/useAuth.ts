@@ -66,6 +66,7 @@ export function useAuth() {
     try {
       const updatedUser = await authApi.getProfile();
       queryClient.setQueryData([QUERY_KEYS.USER], updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     } catch (error) {
       console.error('Failed to refresh user:', error);
