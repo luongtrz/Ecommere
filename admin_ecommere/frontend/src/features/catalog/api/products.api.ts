@@ -9,6 +9,7 @@ const variantSchema = z.object({
   salePrice: z.number().optional().nullable(),
   stock: z.number(),
   sku: z.string(),
+  barcode: z.string().optional().nullable(),
 });
 
 const productSchema = z.object({

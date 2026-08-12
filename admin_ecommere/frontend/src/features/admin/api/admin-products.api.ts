@@ -56,5 +56,5 @@ export interface CreateVariantDto {
     price: number;
     salePrice?: number | null;
     stock: number;
-    sku: string;
+    barcode?: string;
 }
