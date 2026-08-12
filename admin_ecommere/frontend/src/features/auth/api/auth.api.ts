@@ -61,7 +61,12 @@ export const authApi = {
 
   async register(name: string, phone: string, password: string, email?: string): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post('/auth/register', { name, phone, password, email });
+      const response = await apiClient.post('/auth/register', {
+        name,
+        phone,
+        password,
+        ...(email ? { email } : {}),
+      });
       // Backend wraps with TransformInterceptor
       const actualData = response.data.data || response.data;
 
