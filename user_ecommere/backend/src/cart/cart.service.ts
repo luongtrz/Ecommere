@@ -123,7 +123,7 @@ export class CartService {
           cartId: cart.id,
           variantId,
           quantity,
-          priceSnapshot: variant.salePrice || variant.price,
+          priceSnapshot: variant.salePrice ?? variant.price,
         },
       });
     }
@@ -254,7 +254,7 @@ export class CartService {
     let subtotal = 0;
 
     const items = cart.items.map((item: any) => {
-      const price = item.variant.salePrice || item.variant.price;
+      const price = item.variant.salePrice ?? item.variant.price;
       const itemTotal = price * item.quantity;
       subtotal += itemTotal;
 

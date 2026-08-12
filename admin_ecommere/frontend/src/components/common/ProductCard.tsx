@@ -29,8 +29,8 @@ export function ProductCard({
   reviewCount = 0,
   onAddToCart,
 }: ProductCardProps) {
-  const finalPrice = salePrice || price;
-  const hasDiscount = salePrice && salePrice < price;
+  const finalPrice = salePrice ?? price;
+  const hasDiscount = salePrice != null && salePrice < price;
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full">

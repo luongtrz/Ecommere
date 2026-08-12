@@ -34,7 +34,7 @@ export function ProductDetailPage() {
       variantId: selectedVariant.id,
       name: product.name,
       image: product.images[0],
-      price: selectedVariant.salePrice || selectedVariant.price,
+      price: selectedVariant.salePrice ?? selectedVariant.price,
       quantity,
       scent: selectedVariant.scent,
       volumeMl: selectedVariant.volumeMl,
@@ -68,9 +68,9 @@ export function ProductDetailPage() {
     );
   }
 
-  const finalPrice = selectedVariant?.salePrice || selectedVariant?.price || 0;
-  const originalPrice = selectedVariant?.price || 0;
-  const hasDiscount = selectedVariant?.salePrice && selectedVariant.salePrice < originalPrice;
+  const finalPrice = selectedVariant?.salePrice ?? selectedVariant?.price ?? 0;
+  const originalPrice = selectedVariant?.price ?? 0;
+  const hasDiscount = selectedVariant?.salePrice != null && selectedVariant.salePrice < originalPrice;
 
   return (
     <>

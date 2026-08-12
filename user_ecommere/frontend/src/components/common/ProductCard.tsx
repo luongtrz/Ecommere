@@ -33,13 +33,13 @@ export const ProductCard = memo(function ProductCard({
   reviewCount = 0,
   onAddToCart,
 }: ProductCardProps) {
-  const finalPrice = salePrice || price;
-  const hasDiscount = Boolean(salePrice && salePrice < price);
+  const finalPrice = salePrice ?? price;
+  const hasDiscount = salePrice != null && salePrice < price;
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { toggleItem, isInWishlist } = useWishlist();
   const prefetchProduct = usePrefetchProduct();
   const isWishlisted = isInWishlist(id);
-  const discountPercent = hasDiscount && salePrice ? Math.max(1, Math.round(((price - salePrice) / price) * 100)) : 0;
+  const discountPercent = hasDiscount && salePrice != null ? Math.max(1, Math.round(((price - salePrice) / price) * 100)) : 0;
   const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = useCallback(() => {

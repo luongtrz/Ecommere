@@ -60,7 +60,7 @@ function ChatbotSourceItem({ source }: { source: ChatbotSource }) {
     );
   }
 
-  const price = product?.variants?.[0]?.salePrice || product?.variants?.[0]?.price || product?.basePrice || 0;
+  const price = product?.variants?.[0]?.salePrice ?? product?.variants?.[0]?.price ?? product?.basePrice ?? 0;
   const image = product?.images?.[0] || '';
 
   return (

@@ -43,7 +43,7 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
             variantId: selectedVariant.id,
             name: product.name,
             image: product.images[0],
-            price: selectedVariant.salePrice || selectedVariant.price,
+            price: selectedVariant.salePrice ?? selectedVariant.price,
             quantity,
             scent: selectedVariant.scent,
             volumeMl: selectedVariant.volumeMl,
@@ -59,13 +59,13 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
             name: product.name,
             slug: product.slug,
             image: product.images[0],
-            price: product.variants[0]?.salePrice || product.variants[0]?.price || 0,
+            price: product.variants[0]?.salePrice ?? product.variants[0]?.price ?? 0,
         });
     }
 
-    const finalPrice = selectedVariant?.salePrice || selectedVariant?.price || 0;
-    const originalPrice = selectedVariant?.price || 0;
-    const hasDiscount = selectedVariant?.salePrice && selectedVariant.salePrice < originalPrice;
+    const finalPrice = selectedVariant?.salePrice ?? selectedVariant?.price ?? 0;
+    const originalPrice = selectedVariant?.price ?? 0;
+    const hasDiscount = selectedVariant?.salePrice != null && selectedVariant.salePrice < originalPrice;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
