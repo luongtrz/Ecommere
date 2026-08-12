@@ -67,10 +67,20 @@ export class ProductsService {
     const variantConditions: any[] = [];
 
     if (minPrice !== undefined) {
-      variantConditions.push({ price: { gte: minPrice } });
+      variantConditions.push({
+        OR: [
+          { salePrice: { gte: minPrice } },
+          { salePrice: null, price: { gte: minPrice } },
+        ],
+      });
     }
     if (maxPrice !== undefined) {
-      variantConditions.push({ price: { lte: maxPrice } });
+      variantConditions.push({
+        OR: [
+          { salePrice: { lte: maxPrice } },
+          { salePrice: null, price: { lte: maxPrice } },
+        ],
+      });
     }
     if (scent) {
       const scents = scent.split(',').map(s => s.trim()).filter(Boolean);

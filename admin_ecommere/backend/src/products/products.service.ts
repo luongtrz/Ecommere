@@ -64,12 +64,29 @@ export class ProductsService {
     }
 
     if (minPrice !== undefined || maxPrice !== undefined) {
+      const priceConditions: any[] = [];
+
+      if (minPrice !== undefined) {
+        priceConditions.push({
+          OR: [
+            { salePrice: { gte: minPrice } },
+            { salePrice: null, price: { gte: minPrice } },
+          ],
+        });
+      }
+
+      if (maxPrice !== undefined) {
+        priceConditions.push({
+          OR: [
+            { salePrice: { lte: maxPrice } },
+            { salePrice: null, price: { lte: maxPrice } },
+          ],
+        });
+      }
+
       where.variants = {
         some: {
-          AND: [
-            minPrice !== undefined ? { price: { gte: minPrice } } : {},
-            maxPrice !== undefined ? { price: { lte: maxPrice } } : {},
-          ],
+          AND: priceConditions,
         },
       };
     }
