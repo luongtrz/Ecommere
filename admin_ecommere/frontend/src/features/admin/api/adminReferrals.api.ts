@@ -26,7 +26,7 @@ const referralStatsSchema = z.object({
         user: z.object({
             id: z.string(),
             name: z.string().nullable(),
-            email: z.string(),
+            email: z.string().nullable().optional(),
             referralCode: z.string().nullable(),
         }).nullable(),
         referralCount: z.number(),
@@ -43,13 +43,13 @@ const referralListItemSchema = z.object({
     referrer: z.object({
         id: z.string(),
         name: z.string().nullable(),
-        email: z.string(),
+        email: z.string().nullable().optional(),
         referralCode: z.string().nullable(),
     }),
     referee: z.object({
         id: z.string(),
         name: z.string().nullable(),
-        email: z.string(),
+        email: z.string().nullable().optional(),
         createdAt: z.string(),
     }),
 });

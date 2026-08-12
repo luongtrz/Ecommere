@@ -10,8 +10,8 @@ const referralInfoSchema = z.object({
 
 const referralItemSchema = z.object({
     id: z.string(),
-    refereeName: z.string(),
-    refereeEmail: z.string(),
+    refereeName: z.string().nullable().optional().transform((value) => value ?? 'Khách hàng'),
+    refereeEmail: z.string().nullable().optional(),
     couponCode: z.string().nullable(),
     createdAt: z.string(),
 });
