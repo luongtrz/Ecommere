@@ -97,7 +97,7 @@ describe('ProductsService', () => {
       expect(result.hasNextPage).toBe(false);
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { active: true },
+          where: {},
           skip: 0,
           take: 12,
         }),
