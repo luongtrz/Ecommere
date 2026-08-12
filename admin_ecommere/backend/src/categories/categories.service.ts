@@ -166,17 +166,9 @@ export class CategoriesService {
    * Get hierarchical tree structure of all categories
    */
   async getTreeStructure() {
-    // Get all categories
+    // Load all categories once so arbitrarily deep hierarchies are preserved.
     const allCategories = await this.prisma.category.findMany({
       include: {
-        children: {
-          include: {
-            children: true, // For deeper nesting if needed
-            _count: {
-              select: { products: true },
-            },
-          },
-        },
         _count: {
           select: { products: true },
         },
@@ -184,8 +176,29 @@ export class CategoriesService {
       orderBy: { name: 'asc' },
     });
 
-    // Filter to get only root categories (parentId is null)
-    const rootCategories = allCategories.filter(cat => !cat.parentId);
+    const nodes = new Map<string, any>();
+    for (const category of allCategories) {
+      nodes.set(category.id, {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        parentId: category.parentId,
+        productCount: category._count.products,
+        children: [],
+      });
+    }
+
+    const rootCategories: any[] = [];
+    for (const category of allCategories) {
+      const node = nodes.get(category.id);
+      const parent = category.parentId ? nodes.get(category.parentId) : undefined;
+
+      if (parent) {
+        parent.children.push(node);
+      } else {
+        rootCategories.push(node);
+      }
+    }
 
     // Build tree recursively
     const buildTree = (categories: any[]): any[] => {
@@ -194,7 +207,7 @@ export class CategoriesService {
         name: cat.name,
         slug: cat.slug,
         parentId: cat.parentId,
-        productCount: cat._count?.products ?? 0,
+        productCount: cat.productCount,
         children: cat.children ? buildTree(cat.children) : [],
         isLeaf: !cat.children || cat.children.length === 0,
       }));
