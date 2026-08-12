@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
 import { CategoriesService } from '@/categories/categories.service';
@@ -312,35 +312,41 @@ export class ProductsService {
     }
 
     // Create product with variants
-    const product = await this.prisma.product.create({
-      data: {
-        name,
-        slug,
-        description,
-        brand,
-        images,
-        categoryId,
-        basePrice,
-        active,
-        variants: {
-          create: variants.map((variant, index) => ({
-            sku: `${slug.toUpperCase()}-${variant.scent.substring(0, 3).toUpperCase()}-${variant.volumeMl}ML`,
-            scent: variant.scent,
-            volumeMl: variant.volumeMl,
-            price: variant.price,
-            salePrice: variant.salePrice,
-            stock: variant.stock,
-            barcode: variant.barcode,
-          })),
+    try {
+      return await this.prisma.product.create({
+        data: {
+          name,
+          slug,
+          description,
+          brand,
+          images,
+          categoryId,
+          basePrice,
+          active,
+          variants: {
+            create: variants.map((variant) => ({
+              sku: `${slug.toUpperCase()}-${variant.scent.substring(0, 3).toUpperCase()}-${variant.volumeMl}ML`,
+              scent: variant.scent,
+              volumeMl: variant.volumeMl,
+              price: variant.price,
+              salePrice: variant.salePrice,
+              stock: variant.stock,
+              barcode: variant.barcode,
+            })),
+          },
         },
-      },
-      include: {
-        variants: true,
-        category: true,
-      },
-    });
+        include: {
+          variants: true,
+          category: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Product name or variant SKU already exists');
+      }
 
-    return product;
+      throw error;
+    }
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
@@ -371,14 +377,22 @@ export class ProductsService {
       await this.categoriesService.validateProductAssignment(updateProductDto.categoryId);
     }
 
-    return this.prisma.product.update({
-      where: { id },
-      data,
-      include: {
-        variants: true,
-        category: true,
-      },
-    });
+    try {
+      return await this.prisma.product.update({
+        where: { id },
+        data,
+        include: {
+          variants: true,
+          category: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Product name already exists');
+      }
+
+      throw error;
+    }
   }
 
   async remove(id: string) {
@@ -473,18 +487,26 @@ export class ProductsService {
 
     const sku = `${product.slug.toUpperCase()}-${createVariantDto.scent.substring(0, 3).toUpperCase()}-${createVariantDto.volumeMl}ML`;
 
-    return this.prisma.productVariant.create({
-      data: {
-        productId,
-        sku,
-        scent: createVariantDto.scent,
-        volumeMl: createVariantDto.volumeMl,
-        price: createVariantDto.price,
-        salePrice: createVariantDto.salePrice,
-        stock: createVariantDto.stock,
-        barcode: createVariantDto.barcode,
-      },
-    });
+    try {
+      return await this.prisma.productVariant.create({
+        data: {
+          productId,
+          sku,
+          scent: createVariantDto.scent,
+          volumeMl: createVariantDto.volumeMl,
+          price: createVariantDto.price,
+          salePrice: createVariantDto.salePrice,
+          stock: createVariantDto.stock,
+          barcode: createVariantDto.barcode,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Variant SKU already exists');
+      }
+
+      throw error;
+    }
   }
 
   async updateVariant(variantId: string, updateVariantDto: UpdateVariantDto) {
@@ -510,10 +532,18 @@ export class ProductsService {
       data.sku = `${variant.product.slug.toUpperCase()}-${scent.substring(0, 3).toUpperCase()}-${volumeMl}ML`;
     }
 
-    return this.prisma.productVariant.update({
-      where: { id: variantId },
-      data,
-    });
+    try {
+      return await this.prisma.productVariant.update({
+        where: { id: variantId },
+        data,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Variant SKU already exists');
+      }
+
+      throw error;
+    }
   }
 
   async removeVariant(variantId: string) {
