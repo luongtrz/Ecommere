@@ -28,6 +28,9 @@ async function main() {
   await prisma.cartItem.deleteMany();
   await prisma.cart.deleteMany();
   await prisma.review.deleteMany();
+  await prisma.referral.deleteMany();
+  await prisma.refreshToken.deleteMany();
+  await prisma.referralConfig.deleteMany();
   await prisma.productVariant.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
