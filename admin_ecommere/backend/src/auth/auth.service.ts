@@ -260,8 +260,9 @@ export class AuthService {
     });
 
     const isProduction = this.configService.get('NODE_ENV') === 'production';
-    setRefreshTokenCookie(response, tokens.refreshToken, isProduction);
-    setCsrfTokenCookie(response, tokens.csrfToken, isProduction);
+    const cookieMaxAge = Math.max(tokens.refreshTokenExpiresAt.getTime() - Date.now(), 0);
+    setRefreshTokenCookie(response, tokens.refreshToken, isProduction, cookieMaxAge);
+    setCsrfTokenCookie(response, tokens.csrfToken, isProduction, cookieMaxAge);
 
     this.logger.log(`Token refreshed for user: ${tokenRecord.user.phone}`);
 
@@ -403,6 +404,12 @@ export class AuthService {
       expiresIn: this.configService.get('REFRESH_EXPIRES_IN'),
     });
 
+    const decodedRefreshToken = this.jwtService.decode(refreshToken) as { exp?: number } | null;
+    if (!decodedRefreshToken?.exp) {
+      throw new Error('Refresh token expiry is not configured');
+    }
+    const refreshTokenExpiresAt = new Date(decodedRefreshToken.exp * 1000);
+
     // Hash refresh token for database storage
     const tokenHash = hashToken(refreshToken);
 
@@ -414,7 +421,7 @@ export class AuthService {
           userId,
           tokenFamily,
           tokenHash,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          expiresAt: refreshTokenExpiresAt,
         },
       });
     } catch (error) {
@@ -427,8 +434,9 @@ export class AuthService {
     const csrfToken = generateCsrfToken();
 
     if (setCookies) {
-      setRefreshTokenCookie(response, refreshToken, isProduction);
-      setCsrfTokenCookie(response, csrfToken, isProduction);
+      const cookieMaxAge = Math.max(refreshTokenExpiresAt.getTime() - Date.now(), 0);
+      setRefreshTokenCookie(response, refreshToken, isProduction, cookieMaxAge);
+      setCsrfTokenCookie(response, csrfToken, isProduction, cookieMaxAge);
     }
 
     return {
@@ -436,6 +444,7 @@ export class AuthService {
       refreshToken,
       refreshTokenId: refreshTokenRecord.id,
       csrfToken,
+      refreshTokenExpiresAt,
       expiresIn: this.configService.get('TOKEN_EXPIRES_IN'),
     };
   }
