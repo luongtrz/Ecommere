@@ -18,7 +18,7 @@ export class ProductsService {
   async findAll(filterDto: ProductFilterDto) {
     const { page = 1, limit = 12, search, categoryId, categorySlug, sortBy = ProductSortBy.NEWEST, minPrice, maxPrice } = filterDto;
 
-    const where: any = { active: true };
+    const where: any = {};
 
     if (search) {
       where.OR = [
