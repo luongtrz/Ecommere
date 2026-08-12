@@ -28,8 +28,6 @@ export const authApi = {
       // Backend wraps with TransformInterceptor
       const actualData = response.data.data || response.data;
 
-      console.log('Login response actualData:', actualData);
-
       const parsed = loginResponseSchema.parse(actualData);
 
       authToken.set(parsed.accessToken);
@@ -49,8 +47,6 @@ export const authApi = {
       const response = await apiClient.post('/auth/register', { name, phone, password, email, referralCode });
       // Backend wraps with TransformInterceptor
       const actualData = response.data.data || response.data;
-
-      console.log('Register response actualData:', actualData);
 
       const parsed = registerResponseSchema.parse(actualData);
 

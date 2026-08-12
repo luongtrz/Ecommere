@@ -229,6 +229,19 @@ export class CartService {
       throw new NotFoundException('Coupon not found');
     }
 
+    const now = new Date();
+    if (!coupon.active) {
+      throw new BadRequestException('Coupon is inactive');
+    }
+
+    if (coupon.validFrom && coupon.validFrom > now) {
+      throw new BadRequestException('Coupon is not yet valid');
+    }
+
+    if (coupon.validUntil && coupon.validUntil < now) {
+      throw new BadRequestException('Coupon has expired');
+    }
+
     await this.prisma.cart.update({
       where: { id: cart.id },
       data: { couponId: coupon.code },
@@ -254,7 +267,13 @@ export class CartService {
 
     let discount = 0;
 
-    if (cart.coupon) {
+    const now = new Date();
+    if (
+      cart.coupon &&
+      cart.coupon.active &&
+      (!cart.coupon.validFrom || cart.coupon.validFrom <= now) &&
+      (!cart.coupon.validUntil || cart.coupon.validUntil >= now)
+    ) {
       discount = MoneyUtil.calculateDiscount(
         subtotal,
         cart.coupon.type,

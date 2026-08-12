@@ -9,7 +9,7 @@ export class LoginDto {
   })
   phone: string;
 
-  @ApiProperty({ example: 'Admin@123' })
+  @ApiProperty({ example: 'StrongPassword@123' })
   @IsString()
   @MinLength(6)
   password: string;

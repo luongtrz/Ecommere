@@ -94,9 +94,11 @@ export class CouponsService {
     }
 
     const { type, value, validFrom, validUntil } = updateCouponDto;
+    const effectiveType = type ?? coupon.type;
+    const effectiveValue = value ?? coupon.value;
 
     // Validate percentage value
-    if (type === CouponType.PERCENT && value !== undefined && (value < 0 || value > 100)) {
+    if (effectiveType === CouponType.PERCENT && (effectiveValue < 0 || effectiveValue > 100)) {
       throw new BadRequestException('Percentage value must be between 0 and 100');
     }
 
@@ -147,6 +149,13 @@ export class CouponsService {
       return {
         valid: false,
         message: 'Coupon not found',
+      };
+    }
+
+    if (!coupon.active) {
+      return {
+        valid: false,
+        message: 'Coupon is inactive',
       };
     }
 

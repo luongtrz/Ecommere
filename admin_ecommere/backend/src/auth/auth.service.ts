@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
@@ -19,6 +20,7 @@ import {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly PASSWORD_RESET_TTL_MS = 15 * 60 * 1000;
 
   // Grace period for token reuse (30 seconds)
   // Allows duplicate refresh requests during F5/network delays
@@ -257,11 +259,17 @@ export class AuthService {
       return { message: 'If email exists, reset link will be sent' };
     }
 
-    // Mock: In production, generate token and send email
-    const resetToken = `mock-reset-token-${user.id}-${Date.now()}`;
+    const resetToken = randomBytes(32).toString('hex');
 
-    this.logger.log(`Password reset requested for: ${email}`);
-    this.logger.log(`Mock reset token: ${resetToken}`);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetTokenHash: hashToken(resetToken),
+        passwordResetExpiresAt: new Date(Date.now() + this.PASSWORD_RESET_TTL_MS),
+      },
+    });
+
+    this.logger.log(`Password reset requested for user ${user.id}`);
 
     return {
       message: 'If email exists, reset link will be sent',
@@ -271,31 +279,50 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    // Mock validation - in production, verify token from database/redis
-    if (!token.startsWith('mock-reset-token-')) {
-      throw new BadRequestException('Invalid or expired reset token');
-    }
+    const tokenHash = hashToken(token);
+    const now = new Date();
 
-    // Extract userId from mock token
-    const parts = token.split('-');
-    const userId = parts[3];
+    const user = await this.prisma.$transaction(async (tx) => {
+      const resetUser = await tx.user.findFirst({
+        where: {
+          passwordResetTokenHash: tokenHash,
+          passwordResetExpiresAt: { gt: now },
+        },
+        select: { id: true },
+      });
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+      if (!resetUser) {
+        throw new BadRequestException('Invalid or expired reset token');
+      }
+
+      const passwordHash = await HashUtil.hash(newPassword);
+
+      const consumedToken = await tx.user.updateMany({
+        where: {
+          id: resetUser.id,
+          passwordResetTokenHash: tokenHash,
+          passwordResetExpiresAt: { gt: now },
+        },
+        data: {
+          passwordHash,
+          passwordResetTokenHash: null,
+          passwordResetExpiresAt: null,
+        },
+      });
+
+      if (consumedToken.count !== 1) {
+        throw new BadRequestException('Invalid or expired reset token');
+      }
+
+      await tx.refreshToken.updateMany({
+        where: { userId: resetUser.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+
+      return resetUser;
     });
 
-    if (!user) {
-      throw new BadRequestException('Invalid or expired reset token');
-    }
-
-    const passwordHash = await HashUtil.hash(newPassword);
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash },
-    });
-
-    this.logger.log(`Password reset successful for user: ${user.email}`);
+    this.logger.log(`Password reset successful for user ${user.id}`);
 
     return { message: 'Password reset successful' };
   }
@@ -428,4 +455,3 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 }
-

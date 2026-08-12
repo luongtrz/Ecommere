@@ -1,4 +1,11 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import { OrderStatus, PaymentStatus } from '@prisma/client';
 import { StripeAdapter } from './adapters/stripe.adapter';
@@ -11,9 +18,18 @@ export class PaymentsService {
     private prisma: PrismaService,
     private stripeAdapter: StripeAdapter,
     private momoAdapter: MoMoAdapter,
+    private configService: ConfigService,
   ) {}
 
+  private ensurePaymentProviderConfigured() {
+    if (this.configService.get('NODE_ENV') === 'production') {
+      throw new ServiceUnavailableException('Payment provider is not configured');
+    }
+  }
+
   async createPayment(userId: string, orderId: string, method: PaymentMethod) {
+    this.ensurePaymentProviderConfigured();
+
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
     });
@@ -45,6 +61,8 @@ export class PaymentsService {
   }
 
   async verifyPayment(paymentId: string, method: PaymentMethod) {
+    this.ensurePaymentProviderConfigured();
+
     const provider = method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
 
     const verification = await provider.verifyPayment(paymentId);
@@ -56,20 +74,16 @@ export class PaymentsService {
   }
 
   async processPaymentWebhook(provider: string, payload: any) {
-    // Mock webhook processing
-    // In production, this would:
-    // 1. Verify webhook signature
-    // 2. Parse payload
-    // 3. Update order status
-    // 4. Send confirmation email
-
-    return {
-      success: true,
-      message: `Mock webhook processed for ${provider}`,
-    };
+    // Webhooks must be implemented per provider with signature verification
+    // before this endpoint can safely accept external requests.
+    throw new UnauthorizedException(
+      `Webhook verification is not configured for ${provider}`,
+    );
   }
 
   async refundPayment(orderId: string, method: PaymentMethod) {
+    this.ensurePaymentProviderConfigured();
+
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
     });

@@ -413,6 +413,8 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
+    this.validateVariantPricing(createVariantDto.price, createVariantDto.salePrice);
+
     const sku = `${product.slug.toUpperCase()}-${createVariantDto.scent.substring(0, 3).toUpperCase()}-${createVariantDto.volumeMl}ML`;
 
     return this.prisma.productVariant.create({
@@ -438,6 +440,11 @@ export class ProductsService {
     if (!variant) {
       throw new NotFoundException('Variant not found');
     }
+
+    this.validateVariantPricing(
+      updateVariantDto.price ?? variant.price,
+      updateVariantDto.salePrice !== undefined ? updateVariantDto.salePrice : variant.salePrice,
+    );
 
     const data: any = { ...updateVariantDto };
 
@@ -480,5 +487,11 @@ export class ProductsService {
     });
 
     return { message: 'Variant deleted successfully' };
+  }
+
+  private validateVariantPricing(price: number, salePrice?: number | null) {
+    if (salePrice != null && salePrice > price) {
+      throw new BadRequestException('Sale price cannot exceed the regular price');
+    }
   }
 }
