@@ -16,7 +16,18 @@ const orderSchema = z.object({
 }).transform(data => ({
   ...data,
   orderNumber: data.code || data.orderNumber,
-  shippingAddress: data.addressJson ? JSON.parse(data.addressJson) : data.shippingAddress,
+  shippingAddress: (() => {
+    const address = data.addressJson ? JSON.parse(data.addressJson) : data.shippingAddress;
+
+    if (!address) {
+      return address;
+    }
+
+    return {
+      ...address,
+      address: address.address ?? address.line1,
+    };
+  })(),
   items: data.items.map((item: any) => ({
     ...item,
     name: item.nameSnapshot,
