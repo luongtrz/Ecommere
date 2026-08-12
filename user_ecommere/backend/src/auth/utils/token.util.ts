@@ -35,7 +35,8 @@ export function getCookieOptions(
     httpOnly: true, // Cannot be accessed by JavaScript
     secure: isProduction, // HTTPS only in production
     sameSite: 'lax' as const, // CSRF protection
-    path: '/api/auth/refresh', // Only send to refresh endpoint
+    // Logout also needs the token to revoke the current token family.
+    path: '/api/auth',
     maxAge,
   };
 }
@@ -83,6 +84,6 @@ export function setCsrfTokenCookie(
  * Clear authentication cookies
  */
 export function clearAuthCookies(response: Response) {
-  response.clearCookie('refreshToken', { path: '/api/auth/refresh' });
+  response.clearCookie('refreshToken', { path: '/api/auth' });
   response.clearCookie('csrf_token');
 }
