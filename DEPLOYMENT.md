@@ -31,7 +31,15 @@ cp admin_ecommere/backend/.env.example admin_ecommere/backend/.env
 ./setup-azure.sh
 ```
 
-`setup-azure.sh` validates required secrets and starts the Compose stack. It does not provision PostgreSQL, generate credentials, seed data, or print environment files.
+`setup-azure.sh` validates required secrets, builds the images, synchronizes the
+Prisma schema once, and starts the Compose stack. The schema sync is explicit
+and runs before the application containers start; backend restarts do not mutate
+the production schema. It does not provision PostgreSQL, generate credentials,
+seed data, or print environment files.
+
+This repository currently does not commit Prisma migration directories, so the
+setup step uses `prisma db push`. Review schema changes before running it against
+production and do not use the destructive seed there.
 
 ## Local seed data
 
