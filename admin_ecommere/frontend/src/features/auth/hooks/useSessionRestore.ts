@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import apiClient, { authToken } from '@/lib/api';
+import { useCartStore } from '@/features/cart/store/cartStore';
 
 /**
  * Hook to restore session on app initialization
@@ -32,6 +33,7 @@ export function useSessionRestore() {
       } catch (error) {
         // Refresh failed → session expired
         console.log('❌ Session expired, please login again');
+        useCartStore.getState().clearCart();
         localStorage.removeItem('user');
         setIsAuthenticated(false);
       } finally {

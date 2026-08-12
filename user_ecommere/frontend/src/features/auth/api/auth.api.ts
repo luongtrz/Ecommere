@@ -1,5 +1,21 @@
 import apiClient, { authToken } from '@/lib/api';
+import { useCartStore } from '@/features/cart/store/cartStore';
 import { z } from 'zod';
+
+function clearCartIfAccountChanged(nextUserId: string) {
+  const previousUser = localStorage.getItem('user');
+  if (!previousUser) return;
+
+  try {
+    const previousUserId = (JSON.parse(previousUser) as { id?: unknown }).id;
+    if (previousUserId !== nextUserId) {
+      useCartStore.getState().clearCart();
+    }
+  } catch {
+    // A malformed persisted user must not leave an unknown account's cart behind.
+    useCartStore.getState().clearCart();
+  }
+}
 
 const userSchema = z.object({
   id: z.string(),
@@ -31,6 +47,7 @@ export const authApi = {
       const parsed = loginResponseSchema.parse(actualData);
 
       authToken.set(parsed.accessToken);
+      clearCartIfAccountChanged(parsed.user.id);
 
       // Store non-sensitive user data
       localStorage.setItem('user', JSON.stringify(parsed.user));
@@ -51,6 +68,7 @@ export const authApi = {
       const parsed = registerResponseSchema.parse(actualData);
 
       authToken.set(parsed.accessToken);
+      clearCartIfAccountChanged(parsed.user.id);
 
       // Store non-sensitive user data
       localStorage.setItem('user', JSON.stringify(parsed.user));
@@ -78,6 +96,7 @@ export const authApi = {
     } finally {
       // Clear memory token
       authToken.remove();
+      useCartStore.getState().clearCart();
       localStorage.removeItem('user');
       // Cookies will be cleared by backend
     }

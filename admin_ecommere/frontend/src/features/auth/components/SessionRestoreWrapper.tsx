@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import apiClient, { authToken } from '@/lib/api';
+import { useCartStore } from '@/features/cart/store/cartStore';
 
 interface SessionRestoreWrapperProps {
   children: ReactNode;
@@ -20,6 +21,7 @@ export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) 
         authToken.set(actualData.accessToken);
       } catch (error) {
         console.log('Session expired');
+        useCartStore.getState().clearCart();
         localStorage.removeItem('user');
       }
     };
