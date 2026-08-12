@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsString, IsInt, IsOptional, IsBoolean, IsArray, Min } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsOptional,
+  IsBoolean,
+  IsArray,
+  ArrayMinSize,
+  ValidateNested,
+  Min,
+} from 'class-validator';
 
 export class CreateVariantDto {
   @ApiProperty({ example: 'Lavender' })
@@ -74,6 +83,8 @@ export class CreateProductDto {
 
   @ApiProperty({ type: [CreateVariantDto] })
   @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
   @Type(() => CreateVariantDto)
   variants: CreateVariantDto[];
 }
