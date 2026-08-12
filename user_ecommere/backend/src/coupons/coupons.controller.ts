@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dtos/create-coupon.dto';
@@ -70,7 +70,16 @@ export class CouponsController {
     @CurrentUser('id') userId: string,
     @Query('orderTotal') orderTotal?: string,
   ) {
-    const total = orderTotal ? parseInt(orderTotal, 10) : 0;
+    const normalizedOrderTotal = orderTotal?.trim();
+    const total = normalizedOrderTotal === undefined ? 0 : Number(normalizedOrderTotal);
+
+    if (
+      normalizedOrderTotal !== undefined &&
+      (normalizedOrderTotal === '' || !Number.isSafeInteger(total) || total < 0)
+    ) {
+      throw new BadRequestException('orderTotal must be a non-negative integer');
+    }
+
     return this.couponsService.validateCoupon(validateCouponDto.code, userId, total);
   }
 }
