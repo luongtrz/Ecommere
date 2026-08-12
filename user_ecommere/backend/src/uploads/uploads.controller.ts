@@ -1,32 +1,45 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
-  Post,
   Delete,
-  UseInterceptors,
+  Post,
+  Query,
   UploadedFile,
   UploadedFiles,
-  Query,
-  Body,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { UploadsService } from './uploads.service';
-import { FileUploadResponseDto } from './dtos/file-upload-response.dto';
-import { Roles } from '@/common/decorators/roles.decorator';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Role } from '@prisma/client';
+import { FileUploadResponseDto } from './dtos/file-upload-response.dto';
+import { UploadsService } from './uploads.service';
+import { Roles } from '@/common/decorators/roles.decorator';
 
-// Use memory storage for Cloudinary upload
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]);
+
 const multerOptions = {
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-    if (allowedMimeTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only images are allowed.'), false);
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_request: unknown, file: Express.Multer.File, callback: (error: Error | null, acceptFile: boolean) => void) => {
+    if (ALLOWED_MIME_TYPES.has(file.mimetype)) {
+      callback(null, true);
+      return;
     }
+
+    callback(new BadRequestException('Invalid file type. Only images are allowed.'), false);
   },
 };
 
@@ -34,7 +47,7 @@ const multerOptions = {
 @ApiBearerAuth('JWT-auth')
 @Controller('uploads')
 export class UploadsController {
-  constructor(private uploadsService: UploadsService) {}
+  constructor(private readonly uploadsService: UploadsService) {}
 
   @Post('single')
   @Roles(Role.ADMIN)
@@ -44,12 +57,7 @@ export class UploadsController {
   @ApiBody({
     schema: {
       type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
+      properties: { file: { type: 'string', format: 'binary' } },
     },
   })
   @ApiResponse({ status: 201, type: FileUploadResponseDto })
@@ -57,7 +65,11 @@ export class UploadsController {
     @UploadedFile() file: Express.Multer.File,
     @Query('folder') folder?: string,
   ) {
-    return this.uploadsService.uploadFile(file, folder || 'products');
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
+    return this.uploadsService.uploadFile(file, folder);
   }
 
   @Post('multiple')
@@ -71,10 +83,7 @@ export class UploadsController {
       properties: {
         files: {
           type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
+          items: { type: 'string', format: 'binary' },
         },
       },
     },
@@ -84,7 +93,11 @@ export class UploadsController {
     @UploadedFiles() files: Express.Multer.File[],
     @Query('folder') folder?: string,
   ) {
-    return this.uploadsService.uploadMultipleFiles(files, folder || 'products');
+    if (!files?.length) {
+      throw new BadRequestException('No files provided');
+    }
+
+    return this.uploadsService.uploadMultipleFiles(files, folder);
   }
 
   @Delete()
