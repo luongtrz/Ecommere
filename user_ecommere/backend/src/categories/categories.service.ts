@@ -255,6 +255,29 @@ export class CategoriesService {
     }
   }
 
+  /**
+   * Get all descendant category IDs (recursive)
+   * Used for filtering products by parent category.
+   */
+  async getDescendantIds(categoryId: string): Promise<string[]> {
+    const category = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+      include: { children: true },
+    });
+
+    if (!category) {
+      return [];
+    }
+
+    let ids = [category.id];
+
+    for (const child of category.children) {
+      ids = [...ids, ...(await this.getDescendantIds(child.id))];
+    }
+
+    return ids;
+  }
+
   private async validateParentCategory(parentId?: string | null, categoryId?: string) {
     if (!parentId) {
       return;

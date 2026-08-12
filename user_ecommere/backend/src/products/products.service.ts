@@ -31,14 +31,16 @@ export class ProductsService {
 
     // Handle category filtering
     if (categoryId) {
-      where.categoryId = categoryId;
+      const categoryIds = await this.categoriesService.getDescendantIds(categoryId);
+      where.categoryId = categoryIds.length > 0 ? { in: categoryIds } : categoryId;
     } else if (categorySlug) {
       // Find category by slug and use its id
       const category = await this.prisma.category.findUnique({
         where: { slug: categorySlug },
       });
       if (category) {
-        where.categoryId = category.id;
+        const categoryIds = await this.categoriesService.getDescendantIds(category.id);
+        where.categoryId = categoryIds.length > 0 ? { in: categoryIds } : category.id;
       } else {
         // If category not found, return empty results
         return {
