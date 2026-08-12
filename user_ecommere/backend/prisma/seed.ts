@@ -4,6 +4,21 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  if (process.env.SEED_DATABASE !== 'true') {
+    throw new Error(
+      'Refusing to run the destructive seed. Set SEED_DATABASE=true and provide SEED_ADMIN_PASSWORD and SEED_USER_PASSWORD explicitly.',
+    );
+  }
+
+  const adminPasswordValue = process.env.SEED_ADMIN_PASSWORD;
+  const userPasswordValue = process.env.SEED_USER_PASSWORD;
+
+  if (!adminPasswordValue || !userPasswordValue) {
+    throw new Error(
+      'SEED_ADMIN_PASSWORD and SEED_USER_PASSWORD are required when seeding the database.',
+    );
+  }
+
   console.log('🌱 Starting seed...');
 
   // Clear existing data
@@ -23,8 +38,8 @@ async function main() {
   console.log('✅ Cleared existing data');
 
   // Create Users
-  const adminPassword = await bcrypt.hash('Admin@123', 10);
-  const userPassword = await bcrypt.hash('User@123', 10);
+  const adminPassword = await bcrypt.hash(adminPasswordValue, 10);
+  const userPassword = await bcrypt.hash(userPasswordValue, 10);
 
   const admin = await prisma.user.create({
     data: {

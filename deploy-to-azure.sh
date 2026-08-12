@@ -1,72 +1,40 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Deploy Thai Spray Shop to Azure VM
-# Usage: ./deploy-to-azure.sh
+# Sync the repository to a remote host.
+# Required variables: REMOTE_USER, REMOTE_HOST, SSH_KEY
+# Optional variables: REMOTE_PATH (default: /home/$REMOTE_USER/thaispray), SSH_PORT
 
-set -e
+set -Eeuo pipefail
 
-echo "🚀 Deploying Thai Spray Shop to Azure VM..."
+readonly APP_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+: "${REMOTE_USER:?Set REMOTE_USER before deploying}"
+: "${REMOTE_HOST:?Set REMOTE_HOST before deploying}"
+: "${SSH_KEY:?Set SSH_KEY to the local private key path before deploying}"
+readonly REMOTE_PATH="${REMOTE_PATH:-/home/${REMOTE_USER}/thaispray}"
+readonly SSH_PORT="${SSH_PORT:-22}"
 
-# Configuration
-REMOTE_USER="luongazure"
-REMOTE_HOST="20.2.66.240"
-REMOTE_PATH="~/shopeeThai"
-SSH_KEY="C:/Users/ADMIN/.ssh/id_rsa_azure_luong"
+cd "$APP_ROOT"
 
-# Files and folders to exclude
-EXCLUDE_PATTERNS=(
-  ".git"
-  "node_modules"
-  "dist"
-  "build"
-  ".next"
-  "coverage"
-  ".vscode"
-  ".idea"
-  "*.log"
-  ".env.local"
-  ".env.development.local"
-  ".env.test.local"
-  ".env.production.local"
-  "uploads/*"
-  "backend/uploads/*"
-  "frontend/dist"
-  "frontend/node_modules"
-  "backend/node_modules"
-  "backend/dist"
-  ".DS_Store"
-  "*.swp"
-  "*.swo"
-  ".cache"
-  "tmp"
-  "temp"
-)
+rsync -avz --progress --delete \
+  -e "ssh -i ${SSH_KEY} -p ${SSH_PORT}" \
+  --exclude='.git' \
+  --exclude='node_modules' \
+  --exclude='dist' \
+  --exclude='build' \
+  --exclude='coverage' \
+  --exclude='.vscode' \
+  --exclude='.idea' \
+  --exclude='*.log' \
+  --exclude='.env' \
+  --exclude='.env.*' \
+  --exclude='uploads/*' \
+  --exclude='**/uploads/*' \
+  --exclude='*.swp' \
+  --exclude='*.swo' \
+  --exclude='.cache' \
+  --exclude='tmp' \
+  --exclude='temp' \
+  ./ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/"
 
-# Build rsync exclude flags
-EXCLUDE_FLAGS=""
-for pattern in "${EXCLUDE_PATTERNS[@]}"; do
-  EXCLUDE_FLAGS="$EXCLUDE_FLAGS --exclude='$pattern'"
-done
-
-echo "📦 Syncing files to Azure VM..."
-echo "   Source: $(pwd)"
-echo "   Destination: $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH"
-echo ""
-
-# Use rsync to sync files (more efficient than scp)
-rsync -avz --progress \
-  -e "ssh -i $SSH_KEY -p 22" \
-  --delete \
-  ${EXCLUDE_FLAGS} \
-  ./ \
-  "$REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/"
-
-echo ""
-echo "✅ Files synced successfully!"
-echo ""
-echo "📝 Next steps on Azure VM:"
-echo "   1. SSH into VM: ssh -i $SSH_KEY $REMOTE_USER@$REMOTE_HOST"
-echo "   2. cd $REMOTE_PATH"
-echo "   3. Run setup: ./setup-azure.sh"
-echo ""
-echo "🎉 Deployment complete!"
+printf '%s\n' "Files synced to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}"
+printf '%s\n' 'Create the production .env files on the remote host, then run ./setup-azure.sh there.'

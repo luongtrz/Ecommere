@@ -70,6 +70,5 @@ Key models: User (roles: ADMIN/CUSTOMER), Product -> ProductVariant (scent, volu
 Prices are stored as integers (VND, no decimals). Product variants hold the actual purchasable SKUs with stock tracking.
 
 ### Deployment
-- Azure VM at `20.2.66.240`, managed with PM2
-- Deploy via `./deploy-to-azure.sh` (rsync)
-- Setup via `./setup-azure.sh` on the VM
+- Deploy via `./deploy-to-azure.sh` (rsync; target details are supplied through environment variables)
+- Setup via `./setup-azure.sh` on a Docker host after production `.env` files are provisioned

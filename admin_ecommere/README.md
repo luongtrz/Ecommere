@@ -96,12 +96,11 @@ Access admin panel: http://localhost:5174
 - `npm run build` - Build for production  
 - `npm run preview` - Preview production build
 
-## 🔐 Default Login
+## 🔐 Local seed login
 
-```
-Email: admin@shop.local
-Password: Admin@123
-```
+The destructive Prisma seed requires explicit `SEED_ADMIN_PASSWORD` and
+`SEED_USER_PASSWORD` values. Choose local-only credentials when running it;
+there are no production default credentials.
 
 ## 🗄️ Database
 
