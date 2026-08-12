@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
 import { AddToCartDto } from './dtos/add-to-cart.dto';
@@ -9,8 +10,10 @@ export class CartService {
   constructor(private prisma: PrismaService) {}
 
   async getCart(userId: string) {
-    let cart = await this.prisma.cart.findUnique({
+    const cart = await this.prisma.cart.upsert({
       where: { userId },
+      create: { userId },
+      update: {},
       include: {
         items: {
           include: {
@@ -31,32 +34,6 @@ export class CartService {
         coupon: true,
       },
     });
-
-    // Create cart if it doesn't exist
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: { userId },
-        include: {
-          items: {
-            include: {
-              variant: {
-                include: {
-                  product: {
-                    select: {
-                      id: true,
-                      name: true,
-                      slug: true,
-                      images: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          coupon: true,
-        },
-      });
-    }
 
     return this.calculateCartTotals(cart);
   }
@@ -82,16 +59,12 @@ export class CartService {
       throw new BadRequestException(`Only ${variant.stock} units available in stock`);
     }
 
-    // Get or create cart
-    let cart = await this.prisma.cart.findUnique({
+    // Get or create cart atomically so concurrent tabs cannot race on userId.
+    const cart = await this.prisma.cart.upsert({
       where: { userId },
+      create: { userId },
+      update: {},
     });
-
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: { userId },
-      });
-    }
 
     // Check if item already exists in cart
     const existingItem = await this.prisma.cartItem.findFirst({
@@ -113,11 +86,6 @@ export class CartService {
         data: { quantity: newQuantity },
       });
     } else {
-      // Get variant price for snapshot
-      const variant = await this.prisma.productVariant.findUnique({
-        where: { id: variantId },
-      });
-
       await this.prisma.cartItem.create({
         data: {
           cartId: cart.id,
@@ -240,6 +208,30 @@ export class CartService {
 
     if (coupon.validUntil && coupon.validUntil < now) {
       throw new BadRequestException('Coupon has expired');
+    }
+
+    const currentCart = await this.getCart(userId);
+
+    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+      throw new BadRequestException('Coupon has reached maximum usage limit');
+    }
+
+    if (coupon.maxUsesPerUser) {
+      const userUsageCount = await this.prisma.order.count({
+        where: {
+          userId,
+          couponCode: coupon.code,
+          status: { not: OrderStatus.CANCELED },
+        },
+      });
+
+      if (userUsageCount >= coupon.maxUsesPerUser) {
+        throw new BadRequestException('You have already used this coupon the maximum number of times');
+      }
+    }
+
+    if (coupon.minOrder != null && currentCart.subtotal < coupon.minOrder) {
+      throw new BadRequestException(`Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`);
     }
 
     await this.prisma.cart.update({
