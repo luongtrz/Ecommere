@@ -18,6 +18,17 @@ ecommere/
 
 ## 🚀 Quick Start
 
+To start both applications together from the repository root, configure the
+backend `.env` files and run:
+
+```bash
+./start-dev.sh
+```
+
+The script starts the user app on ports 4000/5173 and the admin app on
+4001/5174. The individual commands below remain available for running one
+application at a time.
+
 ### Admin Panel
 
 ```bash
