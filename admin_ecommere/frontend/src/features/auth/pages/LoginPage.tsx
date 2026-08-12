@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { LoginForm } from '../components/LoginForm';
 import { useAuth } from '../hooks/useAuth';
@@ -26,23 +25,6 @@ export function LoginPage() {
             <CardContent className="pt-6 space-y-4">
               <LoginForm onSubmit={(data) => login(data)} isLoading={isLoginLoading} />
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    Chưa có tài khoản?
-                  </span>
-                </div>
-              </div>
-
-              <Link
-                to="/register"
-                className="block text-center text-sm font-medium text-primary hover:underline"
-              >
-                Đăng ký ngay
-              </Link>
             </CardContent>
           </Card>
         </div>

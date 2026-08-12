@@ -9,7 +9,6 @@ import { RequireAdmin } from './guards/RequireAdmin';
 
 // Lazy load all pages
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import('@/features/auth/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const AccountPage = lazy(() => import('@/features/auth/pages/AccountPage').then(m => ({ default: m.AccountPage })));
 const DashboardPage = lazy(() => import('@/features/admin/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const AdminProductsPage = lazy(() => import('@/features/admin/pages/AdminProductsPage').then(m => ({ default: m.AdminProductsPage })));
@@ -31,11 +30,6 @@ export const router = createBrowserRouter([
     path: '/login',
     element: <AuthLayout />,
     children: [{ index: true, element: <LoginPage /> }],
-  },
-  {
-    path: '/register',
-    element: <AuthLayout />,
-    children: [{ index: true, element: <RegisterPage /> }],
   },
   {
     path: '/admin',
