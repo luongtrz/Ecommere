@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
 import { AddToCartDto } from './dtos/add-to-cart.dto';
@@ -41,60 +41,54 @@ export class CartService {
   async addToCart(userId: string, addToCartDto: AddToCartDto) {
     const { variantId, quantity } = addToCartDto;
 
-    // Check if variant exists and has enough stock
-    const variant = await this.prisma.productVariant.findUnique({
-      where: { id: variantId },
-      include: { product: true },
-    });
+    await this.runSerializableTransaction(async (tx) => {
+      const variant = await tx.productVariant.findUnique({
+        where: { id: variantId },
+        include: { product: true },
+      });
 
-    if (!variant) {
-      throw new NotFoundException('Product variant not found');
-    }
+      if (!variant) {
+        throw new NotFoundException('Product variant not found');
+      }
 
-    if (!variant.product.active) {
-      throw new BadRequestException('Product is not available');
-    }
+      if (!variant.product.active) {
+        throw new BadRequestException('Product is not available');
+      }
 
-    if (variant.stock < quantity) {
-      throw new BadRequestException(`Only ${variant.stock} units available in stock`);
-    }
+      const cart = await tx.cart.upsert({
+        where: { userId },
+        create: { userId },
+        update: {},
+      });
 
-    // Get or create cart atomically so concurrent tabs cannot race on userId.
-    const cart = await this.prisma.cart.upsert({
-      where: { userId },
-      create: { userId },
-      update: {},
-    });
-
-    // Check if item already exists in cart
-    const existingItem = await this.prisma.cartItem.findFirst({
-      where: {
-        cartId: cart.id,
-        variantId,
-      },
-    });
-
-    if (existingItem) {
-      const newQuantity = existingItem.quantity + quantity;
+      const existingItem = await tx.cartItem.findFirst({
+        where: {
+          cartId: cart.id,
+          variantId,
+        },
+      });
+      const newQuantity = (existingItem?.quantity ?? 0) + quantity;
 
       if (variant.stock < newQuantity) {
         throw new BadRequestException(`Only ${variant.stock} units available in stock`);
       }
 
-      await this.prisma.cartItem.update({
-        where: { id: existingItem.id },
-        data: { quantity: newQuantity },
-      });
-    } else {
-      await this.prisma.cartItem.create({
-        data: {
-          cartId: cart.id,
-          variantId,
-          quantity,
-          priceSnapshot: variant.salePrice ?? variant.price,
-        },
-      });
-    }
+      if (existingItem) {
+        await tx.cartItem.update({
+          where: { id: existingItem.id },
+          data: { quantity: newQuantity },
+        });
+      } else {
+        await tx.cartItem.create({
+          data: {
+            cartId: cart.id,
+            variantId,
+            quantity,
+            priceSnapshot: variant.salePrice ?? variant.price,
+          },
+        });
+      }
+    });
 
     return this.getCart(userId);
   }
@@ -316,5 +310,29 @@ export class CartService {
     }
 
     return cart;
+  }
+
+  private async runSerializableTransaction<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(operation, {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          (error.code === 'P2002' || error.code === 'P2034') &&
+          attempt < 2
+        ) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new BadRequestException('Cart update could not be completed; please retry');
   }
 }
