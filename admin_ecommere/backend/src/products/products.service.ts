@@ -181,7 +181,7 @@ export class ProductsService {
 
   async findBySlug(slug: string) {
     const product = await this.prisma.product.findUnique({
-      where: { slug },
+      where: { slug, active: true },
       include: {
         category: true,
         variants: true,
