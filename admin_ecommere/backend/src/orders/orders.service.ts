@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
 import { CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
-import { CheckoutDto } from './dtos/checkout.dto';
+import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
 
@@ -21,7 +21,6 @@ export class OrdersService {
       line1,
       items,
       paymentMethod,
-      shippingAddress,
       shippingMethod,
       total,
     } = checkoutDto;
@@ -47,22 +46,8 @@ export class OrdersService {
     let couponCode: string | null = null;
     let cartId: string | null = null;
 
-    if (cart && cart.items.length > 0) {
-      // Use cart items
-      itemsToUse = cart.items;
-      cartId = cart.id;
-
-      // Load coupon if cart has one
-      if (cart.couponId) {
-        const coupon = await this.prisma.coupon.findUnique({
-          where: { code: cart.couponId },
-        });
-        if (coupon) {
-          couponCode = coupon.code;
-        }
-      }
-    } else if (items && items.length > 0) {
-      // Use items from DTO
+    if (items && items.length > 0) {
+      // Explicit checkout items are authoritative for clients using a local cart.
       for (const item of items) {
         if (!Number.isInteger(item.quantity) || item.quantity < 1) {
           throw new BadRequestException('Quantity must be a positive integer');
@@ -93,6 +78,19 @@ export class OrdersService {
           variantId: item.variantId,
           priceSnapshot: item.price,
         });
+      }
+    } else if (cart && cart.items.length > 0) {
+      // Fall back to the server-side cart for API clients that do not send items.
+      itemsToUse = cart.items;
+      cartId = cart.id;
+
+      if (cart.couponId) {
+        const coupon = await this.prisma.coupon.findUnique({
+          where: { code: cart.couponId },
+        });
+        if (coupon) {
+          couponCode = coupon.code;
+        }
       }
     } else {
       throw new BadRequestException('Cart is empty or no items provided');
@@ -150,7 +148,7 @@ export class OrdersService {
     // Calculate order totals
     let subtotal = 0;
     const orderItems = itemsToUse.map((item) => {
-      const price = item.variant.salePrice || item.variant.price;
+      const price = item.variant.salePrice ?? item.variant.price;
       const itemTotal = price * item.quantity;
       subtotal += itemTotal;
 
@@ -224,7 +222,10 @@ export class OrdersService {
 
     // Shipping is calculated on the server. Client-provided totals and fees
     // are display values only and must not affect the amount charged.
-    const calculatedShippingFee = this.calculateShippingFee(address);
+    const calculatedShippingFee = this.calculateShippingFee(
+      address,
+      shippingMethod ?? ShippingMethod.STANDARD,
+    );
     const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
     if (coupon?.type === CouponType.FREESHIP) {
       discount = calculatedShippingFee;
@@ -677,7 +678,7 @@ export class OrdersService {
     return `ORD${year}${month}${day}${sequence}${random}`;
   }
 
-  private calculateShippingFee(address: any): number {
+  private calculateShippingFee(address: any, shippingMethod: ShippingMethod): number {
     // Mock shipping calculation - flat rate based on province
     // In real implementation, this would integrate with shipping provider API
     const provinceLowerCase = address.province.toLowerCase();
@@ -692,8 +693,8 @@ export class OrdersService {
       return 0;
     }
 
-    // Standard shipping for other provinces
-    return 50000; // 50 THB
+    // Match the shipping options exposed by both frontends.
+    return shippingMethod === ShippingMethod.EXPRESS ? 50000 : 30000;
   }
 
   private validateStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus) {

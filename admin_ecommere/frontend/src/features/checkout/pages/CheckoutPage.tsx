@@ -34,11 +34,14 @@ export function CheckoutPage() {
   const [shippingMethod, setShippingMethod] = useState<string>(SHIPPING_METHODS[0].id);
   const [paymentMethod, setPaymentMethod] = useState<string>(PAYMENT_METHODS[0].id);
 
-  const selectedShipping = SHIPPING_METHODS.find(m => m.id === shippingMethod);
-  const shippingFee = selectedShipping?.price || 0;
-  const finalTotal = totalPrice + shippingFee;
-
   const selectedAddress = addresses?.find(addr => addr.id === selectedAddressId);
+  const selectedShipping = SHIPPING_METHODS.find(m => m.id === shippingMethod);
+  const isLocalShipping = selectedAddress?.province?.toLowerCase().includes('bangkok') ||
+    selectedAddress?.province?.toLowerCase().includes('กรุงเทพ') ||
+    selectedAddress?.province?.toLowerCase().includes('nonthaburi') ||
+    selectedAddress?.province?.toLowerCase().includes('นนทบุรี');
+  const shippingFee = isLocalShipping ? 0 : (selectedShipping?.price || 0);
+  const finalTotal = totalPrice + shippingFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +67,7 @@ export function CheckoutPage() {
           price: item.price,
         })),
         paymentMethod,
+        shippingMethod,
         shippingFee,
         total: finalTotal,
       };

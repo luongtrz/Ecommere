@@ -9,7 +9,13 @@ import {
   IsInt,
   Min,
   ValidateNested,
+  IsEnum,
 } from 'class-validator';
+
+export enum ShippingMethod {
+  STANDARD = 'STANDARD',
+  EXPRESS = 'EXPRESS',
+}
 
 export class CheckoutItemDto {
   @ApiProperty({ example: 'variant-id' })
@@ -88,8 +94,8 @@ export class CheckoutDto {
 
   @ApiProperty({ example: 'STANDARD', required: false })
   @IsOptional()
-  @IsString()
-  shippingMethod?: string;
+  @IsEnum(ShippingMethod)
+  shippingMethod?: ShippingMethod;
 
   @ApiProperty({ example: 50000, required: false })
   @IsOptional()
