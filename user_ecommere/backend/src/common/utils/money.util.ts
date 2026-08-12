@@ -58,14 +58,16 @@ export class MoneyUtil {
   ): number {
     if (couponType === 'PERCENT') {
       const discount = Math.round((orderTotal * couponValue) / 100);
-      if (maxDiscount && discount > maxDiscount) {
+      if (maxDiscount != null && discount > maxDiscount) {
         return maxDiscount;
       }
       return discount;
     } else if (couponType === 'FIXED') {
       return Math.min(couponValue, orderTotal);
     } else if (couponType === 'FREESHIP') {
-      return couponValue;
+      // Shipping discounts are applied to the shipping fee by checkout logic,
+      // never to the merchandise subtotal.
+      return 0;
     }
     return 0;
   }
