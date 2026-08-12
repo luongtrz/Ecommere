@@ -2,8 +2,8 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('app', () => ({
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT, 10) || 4000,
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  port: parseInt(process.env.PORT, 10) || 4001,
+  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5174',
   uploadDir: process.env.UPLOAD_DIR || './uploads',
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET,

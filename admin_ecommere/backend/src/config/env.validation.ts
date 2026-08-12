@@ -12,7 +12,7 @@ class EnvironmentVariables {
   NODE_ENV: Environment = Environment.Development;
 
   @IsNumber()
-  PORT: number = 4000;
+  PORT: number = 4001;
 
   @IsString()
   DATABASE_URL: string;
@@ -30,7 +30,7 @@ class EnvironmentVariables {
   REFRESH_EXPIRES_IN: string = '7d';
 
   @IsString()
-  CORS_ORIGIN: string = 'http://localhost:5173';
+  CORS_ORIGIN: string = 'http://localhost:5174';
 
   @IsString()
   UPLOAD_DIR: string = './uploads';

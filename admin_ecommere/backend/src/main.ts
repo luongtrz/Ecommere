@@ -82,7 +82,7 @@ async function bootstrap() {
   // Swagger
   setupSwagger(app);
 
-  const port = configService.get('PORT') || 4000;
+  const port = configService.get('PORT') || 4001;
   await app.listen(port);
 
   console.log(`🚀 Server running on http://localhost:${port}`);
