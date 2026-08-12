@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
 import { CategoriesService } from '@/categories/categories.service';
@@ -94,25 +95,74 @@ export class ProductsService {
         orderBy = { name: 'desc' };
         break;
       case ProductSortBy.BEST_SELLING:
-        // Sort by total quantity sold (sum of orderItems quantity)
-        orderBy = { createdAt: 'desc' }; // Default to newest for now
+        orderBy = { createdAt: 'desc' };
+        break;
+      case ProductSortBy.RATING:
+        orderBy = { createdAt: 'desc' };
         break;
     }
 
-    const [products, total] = await Promise.all([
-      this.prisma.product.findMany({
+    let products: any[];
+    let total: number;
+
+    if (sortBy === ProductSortBy.BEST_SELLING || sortBy === ProductSortBy.RATING) {
+      const productsForRanking = await this.prisma.product.findMany({
         where,
-        orderBy,
-        skip: (page - 1) * limit,
-        take: limit,
         include: {
           category: true,
           variants: true,
+          orderItems: {
+            where: { order: { status: OrderStatus.DELIVERED } },
+            select: { quantity: true },
+          },
+          reviews: { select: { rating: true } },
           _count: { select: { reviews: true } },
         },
-      }),
-      this.prisma.product.count({ where }),
-    ]);
+      });
+
+      const rankedProducts = productsForRanking
+        .map((product) => {
+          const soldQuantity = product.orderItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          );
+          const averageRating = product.reviews.length > 0
+            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
+            : 0;
+          const catalogProduct: any = { ...product };
+          delete catalogProduct.orderItems;
+          delete catalogProduct.reviews;
+
+          return { product: catalogProduct, soldQuantity, averageRating };
+        })
+        .sort((left, right) => {
+          const scoreDifference = sortBy === ProductSortBy.BEST_SELLING
+            ? right.soldQuantity - left.soldQuantity
+            : right.averageRating - left.averageRating;
+
+          return scoreDifference || right.product.createdAt.getTime() - left.product.createdAt.getTime();
+        });
+
+      products = rankedProducts
+        .slice((page - 1) * limit, page * limit)
+        .map(({ product }) => product);
+      total = productsForRanking.length;
+    } else {
+      [products, total] = await Promise.all([
+        this.prisma.product.findMany({
+          where,
+          orderBy,
+          skip: (page - 1) * limit,
+          take: limit,
+          include: {
+            category: true,
+            variants: true,
+            _count: { select: { reviews: true } },
+          },
+        }),
+        this.prisma.product.count({ where }),
+      ]);
+    }
 
     // Batch-fetch average ratings in one query
     const productIds = products.map(p => p.id);
