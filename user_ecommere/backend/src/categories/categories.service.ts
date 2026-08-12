@@ -70,6 +70,8 @@ export class CategoriesService {
     const { name, parentId } = createCategoryDto;
     const slug = SlugifyUtil.generate(name);
 
+    await this.validateParentCategory(parentId);
+
     // Check if slug exists
     const existing = await this.prisma.category.findUnique({
       where: { slug },
@@ -101,6 +103,18 @@ export class CategoriesService {
 
     if (updateCategoryDto.name && updateCategoryDto.name !== category.name) {
       data.slug = SlugifyUtil.generate(updateCategoryDto.name);
+
+      const existingSlug = await this.prisma.category.findUnique({
+        where: { slug: data.slug },
+      });
+
+      if (existingSlug && existingSlug.id !== id) {
+        throw new BadRequestException('Category with this name already exists');
+      }
+    }
+
+    if (updateCategoryDto.parentId !== undefined) {
+      await this.validateParentCategory(updateCategoryDto.parentId, id);
     }
 
     return this.prisma.category.update({
@@ -238,6 +252,37 @@ export class CategoriesService {
       throw new BadRequestException(
         'Products can only be assigned to leaf categories (categories without subcategories)',
       );
+    }
+  }
+
+  private async validateParentCategory(parentId?: string | null, categoryId?: string) {
+    if (!parentId) {
+      return;
+    }
+
+    const visited = new Set<string>();
+    let currentId: string | null = parentId;
+
+    while (currentId) {
+      if (visited.has(currentId)) {
+        throw new BadRequestException('Category hierarchy contains a cycle');
+      }
+      visited.add(currentId);
+
+      const parent = await this.prisma.category.findUnique({
+        where: { id: currentId },
+        select: { id: true, parentId: true },
+      });
+
+      if (!parent) {
+        throw new BadRequestException('Parent category not found');
+      }
+
+      if (parent.id === categoryId) {
+        throw new BadRequestException('Category cannot be nested under itself or its descendant');
+      }
+
+      currentId = parent.parentId;
     }
   }
 }
