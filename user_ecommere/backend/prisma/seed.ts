@@ -527,6 +527,11 @@ async function main() {
   console.log('✅ Created products with variants:', shopeeProducts.length);
 
   // Create Coupons
+  const couponValidFrom = new Date();
+  couponValidFrom.setDate(couponValidFrom.getDate() - 1);
+  const couponValidUntil = new Date();
+  couponValidUntil.setFullYear(couponValidUntil.getFullYear() + 1);
+
   const coupons = await Promise.all([
     prisma.coupon.create({
       data: {
@@ -535,8 +540,8 @@ async function main() {
         value: 10,
         minOrder: 200000,
         maxDiscount: 50000,
-        validFrom: new Date('2024-01-01'),
-        validUntil: new Date('2025-12-31'),
+        validFrom: couponValidFrom,
+        validUntil: couponValidUntil,
         maxUses: 1000,
       },
     }),
@@ -546,8 +551,8 @@ async function main() {
         type: 'FIXED',
         value: 20000,
         minOrder: 150000,
-        validFrom: new Date('2024-01-01'),
-        validUntil: new Date('2025-12-31'),
+        validFrom: couponValidFrom,
+        validUntil: couponValidUntil,
         maxUses: 500,
       },
     }),
@@ -557,8 +562,8 @@ async function main() {
         type: 'FREESHIP',
         value: 30000,
         minOrder: 300000,
-        validFrom: new Date('2024-01-01'),
-        validUntil: new Date('2025-12-31'),
+        validFrom: couponValidFrom,
+        validUntil: couponValidUntil,
       },
     }),
   ]);
