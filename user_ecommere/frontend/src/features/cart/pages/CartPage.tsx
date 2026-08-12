@@ -95,7 +95,7 @@ export function CartPage() {
                           {formatCurrency(item.price)}
                         </p>
                         <p className="text-sm text-gray-400 mt-0.5">
-                          Đơn giá: {formatCurrency(item.price / item.quantity)}
+                          Đơn giá: {formatCurrency(item.price)}
                         </p>
                       </div>
 
