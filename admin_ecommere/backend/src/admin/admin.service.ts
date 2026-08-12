@@ -298,7 +298,7 @@ export class AdminService {
     return orders.map((order) => ({
       id: order.id,
       orderNumber: order.code,
-      customerName: order.user.name || order.user.email,
+      customerName: order.user.name || order.user.email || 'Khách hàng',
       totalAmount: order.total,
       status: order.status,
       createdAt: order.createdAt,
