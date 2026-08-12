@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
 import { CreateCategoryDto } from './dtos/create-category.dto';
@@ -81,13 +82,21 @@ export class CategoriesService {
       throw new BadRequestException('Category with this name already exists');
     }
 
-    return this.prisma.category.create({
-      data: {
-        name,
-        slug,
-        parentId,
-      },
-    });
+    try {
+      return await this.prisma.category.create({
+        data: {
+          name,
+          slug,
+          parentId,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Category with this name already exists');
+      }
+
+      throw error;
+    }
   }
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
@@ -117,10 +126,18 @@ export class CategoriesService {
       await this.validateParentCategory(updateCategoryDto.parentId, id);
     }
 
-    return this.prisma.category.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await this.prisma.category.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Category with this name already exists');
+      }
+
+      throw error;
+    }
   }
 
   async remove(id: string) {
