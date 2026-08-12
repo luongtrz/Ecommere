@@ -82,7 +82,7 @@ export function OrderDetailPage() {
         return 'bg-indigo-100 text-indigo-700 border-indigo-200 ring-indigo-100';
       case 'DELIVERED':
         return 'bg-emerald-100 text-emerald-700 border-emerald-200 ring-emerald-100';
-      case 'CANCELLED':
+      case 'CANCELED':
         return 'bg-rose-100 text-rose-700 border-rose-200 ring-rose-100';
       case 'REFUNDED':
         return 'bg-gray-100 text-gray-700 border-gray-200 ring-gray-100';
@@ -99,7 +99,7 @@ export function OrderDetailPage() {
         return <Truck className="h-3.5 w-3.5" />;
       case 'PENDING_PAYMENT':
         return <Clock className="h-3.5 w-3.5" />;
-      case 'CANCELLED':
+      case 'CANCELED':
         return <XCircle className="h-3.5 w-3.5" />;
       case 'REFUNDED':
         return <RotateCcw className="h-3.5 w-3.5" />;
@@ -115,7 +115,7 @@ export function OrderDetailPage() {
       case 'PACKING': return 'Đang đóng gói';
       case 'SHIPPED': return 'Đang giao hàng';
       case 'DELIVERED': return 'Giao thành công';
-      case 'CANCELLED': return 'Đã hủy';
+      case 'CANCELED': return 'Đã hủy';
       case 'REFUNDED': return 'Đã hoàn tiền';
       default: return status;
     }
@@ -124,10 +124,10 @@ export function OrderDetailPage() {
   // Status steps for timeline
   const steps = ['PENDING_PAYMENT', 'PACKING', 'SHIPPED', 'DELIVERED'];
   const currentStepIndex = steps.indexOf(order.status) === -1
-    ? (order.status === 'PAID' ? 0 : (['CANCELLED', 'REFUNDED'].includes(order.status) ? -1 : 0))
+    ? (order.status === 'PAID' ? 0 : (['CANCELED', 'REFUNDED'].includes(order.status) ? -1 : 0))
     : steps.indexOf(order.status);
 
-  const isCancelled = ['CANCELLED', 'REFUNDED'].includes(order.status);
+  const isCancelled = ['CANCELED', 'REFUNDED'].includes(order.status);
 
   return (
     <>
