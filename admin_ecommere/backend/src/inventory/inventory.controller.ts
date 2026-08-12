@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import { StockAdjustmentDto } from './dtos/stock-adjustment.dto';
@@ -44,7 +44,13 @@ export class InventoryController {
   @ApiQuery({ name: 'threshold', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200 })
   async getLowStockVariants(@Query('threshold') threshold?: number) {
-    return this.inventoryService.getLowStockVariants(threshold ? parseInt(threshold.toString(), 10) : 10);
+    const normalizedThreshold = threshold === undefined ? 10 : Number(threshold);
+
+    if (!Number.isInteger(normalizedThreshold) || normalizedThreshold < 0) {
+      throw new BadRequestException('Threshold must be a non-negative integer');
+    }
+
+    return this.inventoryService.getLowStockVariants(normalizedThreshold);
   }
 
   @Get('stock-levels')
