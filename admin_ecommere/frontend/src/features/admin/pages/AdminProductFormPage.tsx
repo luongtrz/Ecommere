@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ const productFormSchema = z.object({
   description: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
   categoryId: z.string().min(1, 'Vui lòng chọn danh mục'),
   basePrice: z.number().min(0, 'Giá phải lớn hơn 0'),
+  active: z.boolean(),
 });
 
 type ProductFormData = z.infer<typeof productFormSchema>;
@@ -64,6 +66,7 @@ export function AdminProductFormPage() {
       description: '',
       categoryId: '',
       basePrice: 0,
+      active: true,
     },
   });
 
@@ -110,6 +113,7 @@ export function AdminProductFormPage() {
       setValue('name', product.name);
       setValue('description', product.description);
       setValue('basePrice', product.basePrice);
+      setValue('active', product.active);
       setImages(product.images || []); // Initialize images
 
       // Only set categoryId if categories are loaded
@@ -367,6 +371,21 @@ export function AdminProductFormPage() {
                       <p className="text-sm text-destructive">{errors.basePrice.message}</p>
                     )}
                   </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between rounded-lg border p-4">
+                  <div>
+                    <Label htmlFor="active">Hiển thị sản phẩm</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Sản phẩm tắt sẽ không xuất hiện trong catalog công khai.
+                    </p>
+                  </div>
+                  <Switch
+                    id="active"
+                    checked={watch('active')}
+                    onCheckedChange={(checked) => setValue('active', checked, { shouldDirty: true })}
+                    aria-label="Hiển thị sản phẩm"
+                  />
                 </div>
               </CardContent>
             </Card>

@@ -44,6 +44,7 @@ export interface CreateProductDto {
     categoryId: string;
     images: string[];
     basePrice: number;
+    active?: boolean;
     variants?: CreateVariantDto[];
 }
 

@@ -25,6 +25,7 @@ const productSchema = z.object({
   }).optional(),
   variants: z.array(variantSchema),
   basePrice: z.number(),
+  active: z.boolean(),
   averageRating: z.number().optional(), // Backend returns averageRating
   reviewCount: z.number().optional(),
   createdAt: z.string(),
