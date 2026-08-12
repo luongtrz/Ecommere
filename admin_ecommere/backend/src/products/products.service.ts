@@ -153,7 +153,7 @@ export class ProductsService {
           variants: true,
           reviews: {
             include: {
-              user: { select: { id: true, name: true, email: true } },
+              user: { select: { id: true, name: true } },
             },
             orderBy: { createdAt: 'desc' },
             take: 20,
@@ -187,7 +187,7 @@ export class ProductsService {
         variants: true,
         reviews: {
           include: {
-            user: { select: { id: true, name: true, email: true } },
+            user: { select: { id: true, name: true } },
           },
           orderBy: { createdAt: 'desc' },
           take: 20,
