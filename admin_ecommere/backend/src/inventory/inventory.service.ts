@@ -15,7 +15,7 @@ export class InventoryService {
       throw new BadRequestException('Quantity must be greater than zero for stock in/out');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    return this.runSerializableTransaction(async (tx) => {
       const variant = await tx.productVariant.findUnique({
         where: { id: variantId },
       });
@@ -88,8 +88,6 @@ export class InventoryService {
         ...movement,
         variant: updatedVariant,
       };
-    }, {
-      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     });
   }
 
@@ -289,5 +287,29 @@ export class InventoryService {
 
       return updatedVariant;
     });
+  }
+
+  private async runSerializableTransaction<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(operation, {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2034' &&
+          attempt < 2
+        ) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new BadRequestException('Stock adjustment could not be completed; please retry');
   }
 }
