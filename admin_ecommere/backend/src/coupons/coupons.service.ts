@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
 import { CouponType, OrderStatus } from '@prisma/client';
@@ -69,19 +70,27 @@ export class CouponsService {
       throw new BadRequestException('Coupon code already exists');
     }
 
-    return this.prisma.coupon.create({
-      data: {
-        code: codeUpper,
-        type,
-        value,
-        minOrder,
-        maxDiscount,
-        validFrom,
-        validUntil,
-        maxUses,
-        maxUsesPerUser,
-      },
-    });
+    try {
+      return await this.prisma.coupon.create({
+        data: {
+          code: codeUpper,
+          type,
+          value,
+          minOrder,
+          maxDiscount,
+          validFrom,
+          validUntil,
+          maxUses,
+          maxUsesPerUser,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Coupon code already exists');
+      }
+
+      throw error;
+    }
   }
 
   async update(code: string, updateCouponDto: UpdateCouponDto) {
@@ -109,10 +118,18 @@ export class CouponsService {
       throw new BadRequestException('validFrom must be before validUntil');
     }
 
-    return this.prisma.coupon.update({
-      where: { code: code.toUpperCase() },
-      data: updateCouponDto,
-    });
+    try {
+      return await this.prisma.coupon.update({
+        where: { code: code.toUpperCase() },
+        data: updateCouponDto,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Coupon code already exists');
+      }
+
+      throw error;
+    }
   }
 
   async remove(code: string) {
