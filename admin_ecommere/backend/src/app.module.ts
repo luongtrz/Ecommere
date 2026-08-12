@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule } from './config/config.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -21,12 +21,16 @@ import { ReferralsModule } from './referrals/referrals.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000,
-        limit: 100,
-      },
-    ]),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => [
+        {
+          ttl: (configService.get<number>('RATE_LIMIT_TTL') || 60) * 1000,
+          limit: configService.get<number>('RATE_LIMIT_MAX') || 100,
+        },
+      ],
+    }),
     AppConfigModule,
     PrismaModule,
     AuthModule,
