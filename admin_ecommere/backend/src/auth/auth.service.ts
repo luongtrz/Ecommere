@@ -3,6 +3,7 @@ import { randomBytes } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { HashUtil } from '@/common/utils/hash.util';
 import { LoginDto } from './dtos/login.dto';
@@ -45,23 +46,32 @@ export class AuthService {
 
     const passwordHash = await HashUtil.hash(password);
 
-    const user = await this.prisma.user.create({
-      data: {
-        phone,
-        passwordHash,
-        name,
-        email,
-        role: 'CUSTOMER',
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        name: true,
-        phone: true,
-        createdAt: true,
-      },
-    });
+    let user;
+    try {
+      user = await this.prisma.user.create({
+        data: {
+          phone,
+          passwordHash,
+          name,
+          email,
+          role: 'CUSTOMER',
+        },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          name: true,
+          phone: true,
+          createdAt: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Số điện thoại đã được đăng ký');
+      }
+
+      throw error;
+    }
 
     this.logger.log(`New user registered: ${phone}`);
 
