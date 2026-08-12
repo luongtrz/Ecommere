@@ -168,6 +168,10 @@ export class AuthService {
       );
     }
 
+    if (tokenRecord.userId !== payload.sub || tokenRecord.tokenFamily !== payload.family) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
     // Handle token already replaced (used before)
     if (tokenRecord.replacedBy) {
       const timeSinceReplaced = Date.now() - tokenRecord.updatedAt.getTime();
@@ -226,20 +230,38 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token expired');
     }
 
-    // 6. Generate new tokens with rotation
-    const tokens = await this.generateTokensWithRotation(
-      tokenRecord.userId,
-      tokenRecord.user.phone,
-      tokenRecord.user.role,
-      response,
-      payload.family, // Preserve token family
-    );
+    // 6. Generate and claim the replacement atomically. The old token is
+    // conditionally updated so concurrent refresh requests cannot both win.
+    const tokens = await this.prisma.$transaction(async (tx) => {
+      const generatedTokens = await this.generateTokensWithRotation(
+        tokenRecord.userId,
+        tokenRecord.user.phone,
+        tokenRecord.user.role,
+        response,
+        payload.family, // Preserve token family
+        tx,
+        false,
+      );
 
-    // 7. Mark old token as replaced
-    await this.prisma.refreshToken.update({
-      where: { id: tokenRecord.id },
-      data: { replacedBy: tokens.refreshTokenId },
+      const replacement = await tx.refreshToken.updateMany({
+        where: {
+          id: tokenRecord.id,
+          replacedBy: null,
+          revokedAt: null,
+        },
+        data: { replacedBy: generatedTokens.refreshTokenId },
+      });
+
+      if (replacement.count !== 1) {
+        throw new UnauthorizedException('Refresh token already used');
+      }
+
+      return generatedTokens;
     });
+
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
+    setRefreshTokenCookie(response, tokens.refreshToken, isProduction);
+    setCsrfTokenCookie(response, tokens.csrfToken, isProduction);
 
     this.logger.log(`Token refreshed for user: ${tokenRecord.user.phone}`);
 
@@ -356,6 +378,8 @@ export class AuthService {
     role: string,
     response: Response,
     existingFamily?: string,
+    transactionClient: any = this.prisma,
+    setCookies = true,
   ) {
     const isProduction = this.configService.get('NODE_ENV') === 'production';
     const tokenFamily = existingFamily || generateTokenFamily();
@@ -385,7 +409,7 @@ export class AuthService {
     // Save refresh token to database (with retry on hash collision - rare)
     let refreshTokenRecord;
     try {
-      refreshTokenRecord = await this.prisma.refreshToken.create({
+      refreshTokenRecord = await transactionClient.refreshToken.create({
         data: {
           userId,
           tokenFamily,
@@ -399,16 +423,19 @@ export class AuthService {
       throw new Error('Failed to generate unique token. Please try again.');
     }
 
-    // Set refresh token in HTTP-only cookie
-    setRefreshTokenCookie(response, refreshToken, isProduction);
-
     // Generate and set CSRF token
     const csrfToken = generateCsrfToken();
-    setCsrfTokenCookie(response, csrfToken, isProduction);
+
+    if (setCookies) {
+      setRefreshTokenCookie(response, refreshToken, isProduction);
+      setCsrfTokenCookie(response, csrfToken, isProduction);
+    }
 
     return {
       accessToken,
+      refreshToken,
       refreshTokenId: refreshTokenRecord.id,
+      csrfToken,
       expiresIn: this.configService.get('TOKEN_EXPIRES_IN'),
     };
   }
