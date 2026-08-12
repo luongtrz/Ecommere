@@ -413,6 +413,7 @@ export class ProductsService {
           include: {
             cartItems: true,
             orderItems: true,
+            stockMovements: true,
           },
         },
       },
@@ -422,13 +423,13 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    // Check if any variant has cart items or order items
-    const hasCartOrders = product.variants?.some(
-      v => v.cartItems.length > 0 || v.orderItems.length > 0
+    // Preserve variants that have historical or active references.
+    const hasReferences = product.variants?.some(
+      v => v.cartItems.length > 0 || v.orderItems.length > 0 || v.stockMovements.length > 0
     ) || false;
 
-    if (hasCartOrders) {
-      throw new BadRequestException('Cannot delete product with existing cart items or orders');
+    if (hasReferences) {
+      throw new BadRequestException('Cannot delete product with existing carts, orders, or stock history');
     }
 
     await this.prisma.product.delete({
@@ -571,6 +572,7 @@ export class ProductsService {
           select: {
             cartItems: true,
             orderItems: true,
+            stockMovements: true,
           },
         },
       },
@@ -584,8 +586,12 @@ export class ProductsService {
       throw new BadRequestException('Cannot delete the last variant of a product');
     }
 
-    if (variant._count.cartItems > 0 || variant._count.orderItems > 0) {
-      throw new BadRequestException('Cannot delete a variant referenced by carts or orders');
+    if (
+      variant._count.cartItems > 0 ||
+      variant._count.orderItems > 0 ||
+      variant._count.stockMovements > 0
+    ) {
+      throw new BadRequestException('Cannot delete a variant referenced by carts, orders, or stock history');
     }
 
     await this.prisma.productVariant.delete({
