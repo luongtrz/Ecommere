@@ -205,11 +205,11 @@ export class AdminService {
       },
     });
 
-    // Sản phẩm sắp hết hàng (kiểm tra variants có stock < 10)
+    // Sản phẩm sắp hết hàng (đồng bộ với ngưỡng mặc định của inventory endpoint)
     const lowStockVariants = await this.prisma.productVariant.findMany({
       where: {
         stock: {
-          lt: 10,
+          lte: 10,
         },
         product: {
           active: true,
