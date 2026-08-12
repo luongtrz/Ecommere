@@ -46,6 +46,7 @@ export class OrdersService {
     let itemsToUse: any[] = [];
     let couponCode: string | null = null;
     let cartId: string | null = null;
+    let cartItemIds: string[] = [];
 
     if (items && items.length > 0) {
       // Explicit checkout items are authoritative for clients using a local cart.
@@ -84,6 +85,7 @@ export class OrdersService {
       // Fall back to the server-side cart for API clients that do not send items.
       itemsToUse = cart.items;
       cartId = cart.id;
+      cartItemIds = cart.items.map((item) => item.id);
 
       if (cart.couponId) {
         const coupon = await this.prisma.coupon.findUnique({
@@ -355,7 +357,10 @@ export class OrdersService {
       // Clear cart if it was used
       if (cartId) {
         await tx.cartItem.deleteMany({
-          where: { cartId },
+          where: {
+            cartId,
+            id: { in: cartItemIds },
+          },
         });
 
         await tx.cart.update({
