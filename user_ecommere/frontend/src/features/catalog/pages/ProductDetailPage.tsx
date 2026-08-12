@@ -134,7 +134,7 @@ export function ProductDetailPage() {
                 />
                 {hasDiscount && (
                   <Badge className="absolute top-4 right-4 bg-primary text-secondary hover:bg-primary/90 px-3.5 py-1.5 text-xs font-bold shadow-lg rounded-full">
-                    -{formatDiscount(originalPrice, finalPrice)}
+                    {formatDiscount(originalPrice, finalPrice)}
                   </Badge>
                 )}
               </div>

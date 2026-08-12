@@ -161,7 +161,7 @@ export function ProductDetailPage() {
                         {formatCurrency(originalPrice)}
                       </span>
                       <Badge variant="destructive" className="text-lg px-4 py-2">
-                        -{formatDiscount(originalPrice, finalPrice)}
+                        {formatDiscount(originalPrice, finalPrice)}
                       </Badge>
                     </>
                   )}
