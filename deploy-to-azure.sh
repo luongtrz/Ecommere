@@ -26,7 +26,11 @@ rsync -avz --progress --delete \
   --exclude='.idea' \
   --exclude='*.log' \
   --exclude='.env' \
-  --exclude='.env.*' \
+  --exclude='**/.env' \
+  --exclude='.env.local' \
+  --exclude='**/.env.local' \
+  --exclude='.env.*.local' \
+  --exclude='**/.env.*.local' \
   --exclude='uploads/*' \
   --exclude='**/uploads/*' \
   --exclude='*.swp' \
