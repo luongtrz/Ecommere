@@ -319,10 +319,20 @@ export class OrdersService {
 
       // Increment coupon usage count
       if (couponCode && coupon) {
-        await tx.coupon.update({
-          where: { code: couponCode },
+        const couponUsage = await tx.coupon.updateMany({
+          where: coupon.maxUses
+            ? {
+                code: couponCode,
+                active: true,
+                usedCount: { lt: coupon.maxUses },
+              }
+            : { code: couponCode, active: true },
           data: { usedCount: { increment: 1 } },
         });
+
+        if (couponUsage.count !== 1) {
+          throw new BadRequestException('Coupon is no longer available');
+        }
       }
 
       // Clear cart if it was used
@@ -436,7 +446,8 @@ export class OrdersService {
 
     if (search) {
       where.OR = [
-        { orderNumber: { contains: search, mode: 'insensitive' } },
+        { id: { contains: search, mode: 'insensitive' } },
+        { code: { contains: search, mode: 'insensitive' } },
         { user: { email: { contains: search, mode: 'insensitive' } } },
         { user: { name: { contains: search, mode: 'insensitive' } } },
       ];
@@ -535,15 +546,6 @@ export class OrdersService {
     // Validate status transitions
     this.validateStatusTransition(order.status, status);
 
-    // Handle stock restoration for cancelled/refunded orders
-    if (
-      (status === OrderStatus.CANCELED || status === OrderStatus.REFUNDED) &&
-      order.status !== OrderStatus.CANCELED &&
-      order.status !== OrderStatus.REFUNDED
-    ) {
-      await this.restoreStockForOrder(order);
-    }
-
     // Update payment status based on order status
     let paymentStatus = order.paymentStatus;
     if (status === OrderStatus.PAID || status === OrderStatus.PACKING || status === OrderStatus.SHIPPED) {
@@ -552,30 +554,47 @@ export class OrdersService {
       paymentStatus = PaymentStatus.REFUNDED;
     }
 
-    return this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status,
-        paymentStatus,
-      },
-      include: {
-        items: {
-          include: {
-            variant: {
-              include: {
-                product: true,
+    return this.prisma.$transaction(async (tx) => {
+      const statusUpdate = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          status: order.status,
+        },
+        data: {
+          status,
+          paymentStatus,
+        },
+      });
+
+      if (statusUpdate.count !== 1) {
+        throw new BadRequestException('Order status changed; please retry');
+      }
+
+      if (status === OrderStatus.CANCELED || status === OrderStatus.REFUNDED) {
+        await this.restoreStockForOrder(order, tx);
+      }
+
+      return tx.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: {
+            include: {
+              variant: {
+                include: {
+                  product: true,
+                },
               },
             },
           },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
+      });
     });
   }
 
@@ -601,33 +620,48 @@ export class OrdersService {
       throw new BadRequestException('Order cannot be cancelled at this stage');
     }
 
-    // Restore stock
-    await this.restoreStockForOrder(order);
+    return this.prisma.$transaction(async (tx) => {
+      const statusUpdate = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          userId,
+          status: {
+            in: [OrderStatus.PENDING_PAYMENT, OrderStatus.PAID],
+          },
+        },
+        data: {
+          status: OrderStatus.CANCELED,
+          paymentStatus: PaymentStatus.FAILED,
+        },
+      });
 
-    return this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: OrderStatus.CANCELED,
-        paymentStatus: PaymentStatus.FAILED,
-      },
-      include: {
-        items: {
-          include: {
-            variant: {
-              include: {
-                product: {
-                  select: {
-                    id: true,
-                    name: true,
-                    slug: true,
-                    images: true,
+      if (statusUpdate.count !== 1) {
+        throw new BadRequestException('Order cannot be cancelled at this stage');
+      }
+
+      await this.restoreStockForOrder(order, tx);
+
+      return tx.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: {
+            include: {
+              variant: {
+                include: {
+                  product: {
+                    select: {
+                      id: true,
+                      name: true,
+                      slug: true,
+                      images: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
+      });
     });
   }
 
@@ -695,8 +729,8 @@ export class OrdersService {
     }
   }
 
-  private async restoreStockForOrder(order: any) {
-    await this.prisma.$transaction(async (tx) => {
+  private async restoreStockForOrder(order: any, transactionClient?: any) {
+    const restore = async (tx: any) => {
       for (const item of order.items) {
         const variant = await tx.productVariant.findUnique({
           where: { id: item.variantId },
@@ -723,6 +757,12 @@ export class OrdersService {
           });
         }
       }
-    });
+    };
+
+    if (transactionClient) {
+      return restore(transactionClient);
+    }
+
+    return this.prisma.$transaction(restore);
   }
 }
