@@ -567,6 +567,12 @@ export class ProductsService {
             },
           },
         },
+        _count: {
+          select: {
+            cartItems: true,
+            orderItems: true,
+          },
+        },
       },
     });
 
@@ -576,6 +582,10 @@ export class ProductsService {
 
     if (variant.product._count.variants <= 1) {
       throw new BadRequestException('Cannot delete the last variant of a product');
+    }
+
+    if (variant._count.cartItems > 0 || variant._count.orderItems > 0) {
+      throw new BadRequestException('Cannot delete a variant referenced by carts or orders');
     }
 
     await this.prisma.productVariant.delete({
