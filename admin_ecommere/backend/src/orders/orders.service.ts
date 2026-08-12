@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
-import { CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
+import { Prisma, CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
 import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
@@ -238,7 +238,20 @@ export class OrdersService {
     const code = await this.generateOrderNumber();
 
     // Create order in transaction
-    const order = await this.prisma.$transaction(async (tx) => {
+    const order = await this.runSerializableTransaction(async (tx) => {
+      if (couponCode && coupon && coupon.maxUsesPerUser) {
+        const userUsageCount = await tx.order.count({
+          where: {
+            userId,
+            couponCode,
+          },
+        });
+
+        if (userUsageCount >= coupon.maxUsesPerUser) {
+          throw new BadRequestException('You have already used this coupon the maximum number of times');
+        }
+      }
+
       // Create order
       const newOrder = await tx.order.create({
         data: {
@@ -752,5 +765,29 @@ export class OrdersService {
     }
 
     return this.prisma.$transaction(restore);
+  }
+
+  private async runSerializableTransaction<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(operation, {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2034' &&
+          attempt < 2
+        ) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new BadRequestException('Checkout could not be completed; please retry');
   }
 }
