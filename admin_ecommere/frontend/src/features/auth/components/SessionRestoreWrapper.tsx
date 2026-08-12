@@ -5,6 +5,8 @@ interface SessionRestoreWrapperProps {
   children: ReactNode;
 }
 
+let sessionRestorePromise: Promise<void> | null = null;
+
 export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) {
   useEffect(() => {
     // Chỉ restore token nếu có user trong localStorage
@@ -22,7 +24,13 @@ export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) 
       }
     };
 
-    restoreSession();
+    if (!sessionRestorePromise) {
+      sessionRestorePromise = restoreSession().finally(() => {
+        sessionRestorePromise = null;
+      });
+    }
+
+    void sessionRestorePromise;
   }, []);
 
   return <>{children}</>;
