@@ -52,7 +52,7 @@ export function CartDrawer() {
                                         <div className="flex flex-1 flex-col">
                                             <div>
                                                 <div className="flex justify-between text-base font-medium text-gray-900">
-                                                    <h3 className="line-clamp-1 mr-2"><a href="#">{item.name}</a></h3>
+                                                    <h3 className="line-clamp-1 mr-2">{item.name}</h3>
                                                     <p className="ml-4">{formatCurrency(item.price * item.quantity)}</p>
                                                 </div>
                                                 <div className="mt-1 text-xs text-gray-500 flex gap-2">
