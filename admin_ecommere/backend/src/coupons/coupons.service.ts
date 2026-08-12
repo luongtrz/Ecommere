@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
-import { CouponType } from '@prisma/client';
+import { CouponType, OrderStatus } from '@prisma/client';
 import { CreateCouponDto } from './dtos/create-coupon.dto';
 import { UpdateCouponDto } from './dtos/update-coupon.dto';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
@@ -189,6 +189,7 @@ export class CouponsService {
         where: {
           userId,
           couponCode: coupon.code,
+          status: { not: OrderStatus.CANCELED },
         },
       });
 
