@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import { CategoriesService } from '@/categories/categories.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ProductSortBy } from './dtos/product-filter.dto';
@@ -26,6 +27,13 @@ describe('ProductsService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    review: {
+      groupBy: jest.fn().mockResolvedValue([]),
+      aggregate: jest.fn().mockResolvedValue({
+        _avg: { rating: null },
+        _count: { rating: 0 },
+      }),
+    },
   };
 
   beforeEach(async () => {
@@ -35,6 +43,13 @@ describe('ProductsService', () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: CategoriesService,
+          useValue: {
+            validateProductAssignment: jest.fn().mockResolvedValue(undefined),
+            getDescendantIds: jest.fn().mockResolvedValue([]),
+          },
         },
       ],
     }).compile();
@@ -65,6 +80,7 @@ describe('ProductsService', () => {
           category: { id: 'cat1', name: 'Room Spray' },
           variants: [],
           reviews: [],
+          _count: { reviews: 0 },
         },
       ];
 
@@ -154,6 +170,10 @@ describe('ProductsService', () => {
       };
 
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
+      mockPrismaService.review.aggregate.mockResolvedValue({
+        _avg: { rating: 4.5 },
+        _count: { rating: 2 },
+      });
 
       const result = await service.findOne('1');
 
