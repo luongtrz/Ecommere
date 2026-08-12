@@ -198,6 +198,7 @@ export class OrdersService {
           where: {
             userId,
             couponCode: coupon.code,
+            status: { not: OrderStatus.CANCELED },
           },
         });
 
@@ -244,6 +245,7 @@ export class OrdersService {
           where: {
             userId,
             couponCode,
+            status: { not: OrderStatus.CANCELED },
           },
         });
 
@@ -589,6 +591,10 @@ export class OrdersService {
         await this.restoreStockForOrder(order, tx);
       }
 
+      if (status === OrderStatus.CANCELED && order.status === OrderStatus.PENDING_PAYMENT) {
+        await this.releaseCouponUsage(order, tx);
+      }
+
       return tx.order.findUnique({
         where: { id: orderId },
         include: {
@@ -655,6 +661,10 @@ export class OrdersService {
       }
 
       await this.restoreStockForOrder(order, tx);
+
+      if (order.status === OrderStatus.PENDING_PAYMENT) {
+        await this.releaseCouponUsage(order, tx);
+      }
 
       return tx.order.findUnique({
         where: { id: orderId },
@@ -780,6 +790,20 @@ export class OrdersService {
     }
 
     return this.prisma.$transaction(restore);
+  }
+
+  private async releaseCouponUsage(order: any, transactionClient: any) {
+    if (!order.couponCode) {
+      return;
+    }
+
+    await transactionClient.coupon.updateMany({
+      where: {
+        code: order.couponCode,
+        usedCount: { gt: 0 },
+      },
+      data: { usedCount: { decrement: 1 } },
+    });
   }
 
   private async runSerializableTransaction<T>(
