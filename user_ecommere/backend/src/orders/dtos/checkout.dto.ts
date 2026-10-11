@@ -10,6 +10,7 @@ import {
   Min,
   ValidateNested,
   IsEnum,
+  MaxLength,
 } from 'class-validator';
 
 export enum ShippingMethod {
@@ -106,4 +107,10 @@ export class CheckoutDto {
   @IsOptional()
   @IsNumber()
   total?: number;
+
+  @ApiProperty({ example: 'Vui lòng giao giờ hành chính', required: false, maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  notes?: string;
 }

@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
 import { Prisma, CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
@@ -24,6 +24,7 @@ export class OrdersService {
       paymentMethod,
       shippingMethod,
       total,
+      notes,
     } = checkoutDto;
 
     // Get user's cart
@@ -279,6 +280,7 @@ export class OrdersService {
             ward: address.ward,
             line1: address.line1,
           }),
+          notes,
           items: {
             create: orderItems,
           },
@@ -376,12 +378,21 @@ export class OrdersService {
   }
 
   async getMyOrders(userId: string, filterDto: OrderFilterDto) {
-    const { page = 1, limit = 10, status } = filterDto;
+    const { page = 1, limit = 10, status, search } = filterDto;
 
     const where: any = { userId };
 
     if (status) {
       where.status = status;
+    }
+
+    if (search) {
+      where.OR = [
+        { id: { contains: search, mode: 'insensitive' } },
+        { code: { contains: search, mode: 'insensitive' } },
+        { user: { email: { contains: search, mode: 'insensitive' } } },
+        { user: { name: { contains: search, mode: 'insensitive' } } },
+      ];
     }
 
     const [orders, total] = await Promise.all([
@@ -451,7 +462,7 @@ export class OrdersService {
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new ForbiddenException('Unauthorized');
     }
 
     return order;
