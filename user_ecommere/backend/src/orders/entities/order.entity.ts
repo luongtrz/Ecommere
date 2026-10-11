@@ -15,10 +15,10 @@ export class OrderItemEntity {
   quantity: number;
 
   @ApiProperty()
-  price: number;
+  unitPrice: number;
 
   @ApiProperty()
-  total: number;
+  lineTotal: number;
 
   @ApiProperty()
   createdAt: Date;
@@ -36,7 +36,7 @@ export class OrderEntity {
   id: string;
 
   @ApiProperty()
-  orderNumber: string;
+  code: string;
 
   @ApiProperty()
   userId: string;

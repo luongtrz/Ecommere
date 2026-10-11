@@ -39,7 +39,7 @@ export class PaginatedResponseDto<T> {
   hasNextPage: boolean;
 
   @ApiProperty()
-  hasPrevPage: boolean;
+  hasPreviousPage: boolean;
 
   constructor(data: T[], total: number, page: number, limit: number) {
     this.data = data;
@@ -48,6 +48,6 @@ export class PaginatedResponseDto<T> {
     this.limit = limit;
     this.totalPages = Math.ceil(total / limit);
     this.hasNextPage = page < this.totalPages;
-    this.hasPrevPage = page > 1;
+    this.hasPreviousPage = page > 1;
   }
 }
