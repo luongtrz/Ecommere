@@ -18,7 +18,11 @@ export class ChatbotHistoryService {
 
   constructor(private readonly configService: ConfigService) {}
 
-  async getRecentHistory(sessionId: string, limit: number) {
+  async getRecentHistory(
+    userId: string,
+    sessionId: string,
+    limit: number,
+  ): Promise<ChatHistoryMessage[]> {
     const redis = await this.getClient();
 
     if (!redis) {
@@ -26,7 +30,11 @@ export class ChatbotHistoryService {
     }
 
     try {
-      const rawMessages = await redis.lRange(this.buildKey(sessionId), -limit, -1);
+      const rawMessages = await redis.lRange(
+        this.buildKey(userId, sessionId),
+        -limit,
+        -1,
+      );
 
       return rawMessages
         .map((rawMessage) => this.safeParseMessage(rawMessage))
@@ -37,7 +45,12 @@ export class ChatbotHistoryService {
     }
   }
 
-  async appendMessages(sessionId: string, messages: ChatHistoryMessage[], limit: number) {
+  async appendMessages(
+    userId: string,
+    sessionId: string,
+    messages: ChatHistoryMessage[],
+    limit: number,
+  ): Promise<void> {
     if (messages.length === 0) {
       return;
     }
@@ -48,7 +61,7 @@ export class ChatbotHistoryService {
       return;
     }
 
-    const key = this.buildKey(sessionId);
+    const key = this.buildKey(userId, sessionId);
     const ttlSeconds = this.configService.get<number>('CHATBOT_REDIS_TTL_SECONDS') || 604800;
 
     try {
@@ -62,7 +75,10 @@ export class ChatbotHistoryService {
     }
   }
 
-  async clearHistory(sessionId: string) {
+  async clearHistory(
+    userId: string,
+    sessionId: string,
+  ): Promise<{ cleared: boolean; sessionId: string }> {
     const redis = await this.getClient();
 
     if (!redis) {
@@ -70,7 +86,7 @@ export class ChatbotHistoryService {
     }
 
     try {
-      await redis.del(this.buildKey(sessionId));
+      await redis.del(this.buildKey(userId, sessionId));
       return { cleared: true, sessionId };
     } catch (error) {
       this.logger.warn(`Unable to clear chatbot history in Redis: ${this.getErrorMessage(error)}`);
@@ -119,11 +135,11 @@ export class ChatbotHistoryService {
     return this.connectPromise;
   }
 
-  private buildKey(sessionId: string) {
-    return `chatbot:history:${sessionId}`;
+  private buildKey(userId: string, sessionId: string): string {
+    return `chatbot:history:${userId}:${sessionId}`;
   }
 
-  private safeParseMessage(rawMessage: string) {
+  private safeParseMessage(rawMessage: string): ChatHistoryMessage | null {
     try {
       const parsed = JSON.parse(rawMessage) as ChatHistoryMessage;
 

@@ -65,7 +65,7 @@ export class ChatbotService {
     private readonly chatbotRetrievalService: ChatbotRetrievalService,
   ) {}
 
-  async sendMessage(dto: SendChatbotMessageDto) {
+  async sendMessage(userId: string, dto: SendChatbotMessageDto) {
     const config = this.getProviderConfig();
     const prompt = dto.prompt.trim();
 
@@ -73,20 +73,13 @@ export class ChatbotService {
       throw new BadRequestException('Prompt must not be empty.');
     }
     const sessionId = dto.sessionId?.trim() || null;
+    const historyWindow = config.historyLimit * 2;
 
     const storedHistory = sessionId
-      ? await this.chatbotHistoryService.getRecentHistory(sessionId, config.historyLimit)
+      ? await this.chatbotHistoryService.getRecentHistory(userId, sessionId, historyWindow)
       : [];
 
-    const fallbackHistory = dto.history
-      .slice(-config.historyLimit)
-      .map((message) => ({
-        role: message.role,
-        content: message.content.trim(),
-      }))
-      .filter((message) => message.content.length > 0);
-
-    const history = (storedHistory.length > 0 ? storedHistory : fallbackHistory).map((message) => ({
+    const history = storedHistory.map((message) => ({
       role: message.role,
       content: message.content,
     }));
@@ -108,6 +101,7 @@ export class ChatbotService {
 
     if (sessionId) {
       await this.chatbotHistoryService.appendMessages(
+        userId,
         sessionId,
         [
           {
@@ -121,7 +115,7 @@ export class ChatbotService {
             createdAt: new Date().toISOString(),
           },
         ],
-        config.historyLimit * 2,
+        historyWindow,
       );
     }
 
@@ -132,8 +126,8 @@ export class ChatbotService {
     };
   }
 
-  async clearHistory(sessionId: string) {
-    return this.chatbotHistoryService.clearHistory(sessionId.trim());
+  async clearHistory(userId: string, sessionId: string) {
+    return this.chatbotHistoryService.clearHistory(userId, sessionId.trim());
   }
 
   private getProviderConfig() {
