@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { OrderStatus, Prisma } from '@prisma/client';
 import { CreateReviewDto } from './dtos/create-review.dto';
@@ -54,7 +54,6 @@ export class ReviewsService {
             select: {
               id: true,
               name: true,
-              email: true,
             },
           },
         },
@@ -150,7 +149,7 @@ export class ReviewsService {
     }
 
     if (review.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new ForbiddenException('Unauthorized');
     }
 
     return this.prisma.review.update({
@@ -161,7 +160,6 @@ export class ReviewsService {
           select: {
             id: true,
             name: true,
-            email: true,
           },
         },
         product: {
@@ -185,7 +183,7 @@ export class ReviewsService {
     }
 
     if (review.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new ForbiddenException('Unauthorized');
     }
 
     await this.prisma.review.delete({
