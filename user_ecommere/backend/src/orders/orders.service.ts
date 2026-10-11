@@ -25,6 +25,7 @@ export class OrdersService {
       shippingMethod,
       total,
       notes,
+      couponCode: inputCouponCode,
     } = checkoutDto;
 
     // Get user's cart
@@ -81,6 +82,15 @@ export class OrdersService {
           variantId: item.variantId,
           priceSnapshot: item.price,
         });
+      }
+
+      if (inputCouponCode && inputCouponCode.trim().length > 0) {
+        couponCode = inputCouponCode.trim();
+      }
+
+      if (cart) {
+        cartId = cart.id;
+        cartItemIds = cart.items.map((item) => item.id);
       }
     } else if (cart && cart.items.length > 0) {
       // Fall back to the server-side cart for API clients that do not send items.
@@ -176,6 +186,15 @@ export class OrdersService {
       coupon = await this.prisma.coupon.findUnique({
         where: { code: couponCode },
       });
+      if (!coupon) {
+        coupon = await this.prisma.coupon.findUnique({
+          where: { code: couponCode.toUpperCase() },
+        });
+      }
+      if (!coupon) {
+        throw new BadRequestException('Coupon not found');
+      }
+      couponCode = coupon.code;
     }
 
     if (coupon) {
@@ -361,7 +380,7 @@ export class OrdersService {
         await tx.cartItem.deleteMany({
           where: {
             cartId,
-            id: { in: cartItemIds },
+            ...(cartItemIds.length > 0 ? { id: { in: cartItemIds } } : {}),
           },
         });
 
@@ -658,6 +677,11 @@ export class OrdersService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      const nextPaymentStatus =
+        order.status === OrderStatus.PAID
+          ? PaymentStatus.REFUNDED
+          : PaymentStatus.FAILED;
+
       const statusUpdate = await tx.order.updateMany({
         where: {
           id: orderId,
@@ -668,7 +692,7 @@ export class OrdersService {
         },
         data: {
           status: OrderStatus.CANCELED,
-          paymentStatus: PaymentStatus.FAILED,
+          paymentStatus: nextPaymentStatus,
         },
       });
 
@@ -678,9 +702,7 @@ export class OrdersService {
 
       await this.restoreStockForOrder(order, tx);
 
-      if (order.status === OrderStatus.PENDING_PAYMENT) {
-        await this.releaseCouponUsage(order, tx);
-      }
+      await this.releaseCouponUsage(order, tx);
 
       return tx.order.findUnique({
         where: { id: orderId },

@@ -108,6 +108,12 @@ export class CheckoutDto {
   @IsNumber()
   total?: number;
 
+  @ApiProperty({ example: 'SUMMER2024', required: false, maxLength: 50 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  couponCode?: string;
+
   @ApiProperty({ example: 'Vui lòng giao giờ hành chính', required: false, maxLength: 500 })
   @IsOptional()
   @IsString()
