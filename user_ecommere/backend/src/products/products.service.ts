@@ -123,59 +123,79 @@ export class ProductsService {
       case ProductSortBy.NAME_DESC:
         orderBy = { name: 'desc' };
         break;
-      case ProductSortBy.BEST_SELLING:
-        orderBy = { createdAt: 'desc' };
-        break;
-      case ProductSortBy.RATING:
-        orderBy = { createdAt: 'desc' };
-        break;
     }
 
     let products: any[];
     let total: number;
 
     if (sortBy === ProductSortBy.BEST_SELLING || sortBy === ProductSortBy.RATING) {
-      const productsForRanking = await this.prisma.product.findMany({
+      const candidateProducts = await this.prisma.product.findMany({
         where,
-        include: {
-          category: true,
-          variants: true,
-          orderItems: {
-            where: { order: { status: OrderStatus.DELIVERED } },
-            select: { quantity: true },
-          },
-          reviews: { select: { rating: true } },
-          _count: { select: { reviews: true } },
-        },
+        select: { id: true, createdAt: true },
       });
+      total = candidateProducts.length;
+      const candidateIds = candidateProducts.map(p => p.id);
 
-      const rankedProducts = productsForRanking
-        .map((product) => {
-          const soldQuantity = product.orderItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          );
-          const averageRating = product.reviews.length > 0
-            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
-            : 0;
-          const catalogProduct: any = { ...product };
-          delete catalogProduct.orderItems;
-          delete catalogProduct.reviews;
+      if (sortBy === ProductSortBy.BEST_SELLING) {
+        const salesAggregates = candidateIds.length > 0
+          ? await this.prisma.orderItem.groupBy({
+              by: ['productId'],
+              where: {
+                productId: { in: candidateIds },
+                order: { status: OrderStatus.DELIVERED },
+              },
+              _sum: { quantity: true },
+            })
+          : [];
+        const salesMap = new Map<string, number>(
+          salesAggregates.map(s => [s.productId, s._sum.quantity || 0]),
+        );
 
-          return { product: catalogProduct, soldQuantity, averageRating };
-        })
-        .sort((left, right) => {
-          const scoreDifference = sortBy === ProductSortBy.BEST_SELLING
-            ? right.soldQuantity - left.soldQuantity
-            : right.averageRating - left.averageRating;
+        candidateProducts.sort((left, right) => {
+          const scoreDifference = (salesMap.get(right.id) || 0) - (salesMap.get(left.id) || 0);
+          return scoreDifference || new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+        });
+      } else {
+        const ratingRankingAggregates = candidateIds.length > 0
+          ? await this.prisma.review.groupBy({
+              by: ['productId'],
+              where: { productId: { in: candidateIds } },
+              _avg: { rating: true },
+            })
+          : [];
+        const ratingScoreMap = new Map<string, number>(
+          ratingRankingAggregates.map(r => [r.productId, r._avg.rating || 0]),
+        );
 
-          return scoreDifference || right.product.createdAt.getTime() - left.product.createdAt.getTime();
+        candidateProducts.sort((left, right) => {
+          const scoreDifference = (ratingScoreMap.get(right.id) || 0) - (ratingScoreMap.get(left.id) || 0);
+          return scoreDifference || new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+        });
+      }
+
+      const pageCandidateIds = candidateProducts
+        .slice((page - 1) * limit, page * limit)
+        .map(p => p.id);
+
+      if (pageCandidateIds.length > 0) {
+        const pageProducts = await this.prisma.product.findMany({
+          where: { id: { in: pageCandidateIds } },
+          skip: 0,
+          take: limit,
+          include: {
+            category: true,
+            variants: true,
+            _count: { select: { reviews: true } },
+          },
         });
 
-      products = rankedProducts
-        .slice((page - 1) * limit, page * limit)
-        .map(({ product }) => product);
-      total = productsForRanking.length;
+        const productMap = new Map(pageProducts.map(p => [p.id, p]));
+        products = pageCandidateIds
+          .map(id => productMap.get(id))
+          .filter(Boolean);
+      } else {
+        products = [];
+      }
     } else {
       [products, total] = await Promise.all([
         this.prisma.product.findMany({
@@ -443,7 +463,7 @@ export class ProductsService {
    * Get dynamic filter options from existing products data
    */
   async getFilterOptions() {
-    const [brands, scents, volumes, priceRange] = await Promise.all([
+    const [brands, scents, volumes, variants] = await Promise.all([
       // Get distinct brands
       this.prisma.product.findMany({
         where: { active: true, brand: { not: null } },
@@ -465,21 +485,38 @@ export class ProductsService {
         distinct: ['volumeMl'],
         orderBy: { volumeMl: 'asc' },
       }),
-      // Get price range
-      this.prisma.productVariant.aggregate({
+      // Get variants for price range
+      this.prisma.productVariant.findMany({
         where: { product: { active: true } },
-        _min: { price: true },
-        _max: { price: true },
+        select: { price: true, salePrice: true },
       }),
     ]);
+
+    let minPrice = 0;
+    let maxPrice = 0;
+
+    if (variants.length > 0) {
+      minPrice = Infinity;
+      maxPrice = -Infinity;
+      for (const variant of variants) {
+        const effectivePrice =
+          variant.salePrice != null && variant.salePrice < variant.price
+            ? variant.salePrice
+            : variant.price;
+        if (effectivePrice < minPrice) minPrice = effectivePrice;
+        if (effectivePrice > maxPrice) maxPrice = effectivePrice;
+      }
+      if (minPrice === Infinity) minPrice = 0;
+      if (maxPrice === -Infinity) maxPrice = 0;
+    }
 
     return {
       brands: brands.map(b => b.brand).filter(Boolean),
       scents: scents.map(s => s.scent),
       volumes: volumes.map(v => v.volumeMl),
       priceRange: {
-        min: priceRange._min.price || 0,
-        max: priceRange._max.price || 0,
+        min: minPrice,
+        max: maxPrice,
       },
     };
   }
