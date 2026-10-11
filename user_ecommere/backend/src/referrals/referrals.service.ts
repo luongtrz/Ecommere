@@ -82,13 +82,16 @@ export class ReferralsService {
         ]);
 
         return {
-            data: referrals.map((r) => ({
-                id: r.id,
-                refereeName: r.referee.name || r.referee.email,
-                refereeEmail: r.referee.email,
-                couponCode: r.referrerCouponCode,
-                createdAt: r.createdAt,
-            })),
+            data: referrals.map((r) => {
+                const maskedEmail = this.maskEmail(r.referee.email);
+                return {
+                    id: r.id,
+                    refereeName: r.referee.name || maskedEmail,
+                    refereeEmail: maskedEmail,
+                    couponCode: r.referrerCouponCode,
+                    createdAt: r.createdAt,
+                };
+            }),
             total,
             page,
             limit,
@@ -100,25 +103,48 @@ export class ReferralsService {
      * Danh sách coupon đã nhận từ referral
      */
     async getMyCouponsFromReferral(userId: string) {
-        const referrals = await this.prisma.referral.findMany({
-            where: { referrerId: userId },
-            select: { referrerCouponCode: true },
-        });
+        const [referrals, refereeReferral] = await Promise.all([
+            this.prisma.referral.findMany({
+                where: { referrerId: userId },
+                select: { referrerCouponCode: true },
+            }),
+            this.prisma.referral.findUnique({
+                where: { refereeId: userId },
+                select: { refereeCouponCode: true },
+            }),
+        ]);
 
-        const couponCodes = referrals
-            .map((r) => r.referrerCouponCode)
-            .filter(Boolean) as string[];
+        const couponCodes = Array.from(
+            new Set(
+                [
+                    ...referrals.map((r) => r.referrerCouponCode),
+                    refereeReferral?.refereeCouponCode,
+                ].filter(Boolean) as string[],
+            ),
+        );
 
         if (couponCodes.length === 0) {
             return { data: [] };
         }
 
+        const now = new Date();
         const coupons = await this.prisma.coupon.findMany({
-            where: { code: { in: couponCodes } },
+            where: {
+                code: { in: couponCodes },
+                active: true,
+                validUntil: { gte: now },
+            },
             orderBy: { createdAt: 'desc' },
         });
 
-        return { data: coupons };
+        const activeCoupons = coupons.filter(
+            (c) =>
+                c.active &&
+                (!c.validUntil || new Date(c.validUntil) >= now) &&
+                (c.maxUses === null || c.usedCount < c.maxUses),
+        );
+
+        return { data: activeCoupons };
     }
 
     /**
@@ -330,5 +356,25 @@ export class ReferralsService {
 
     private isSerializationConflict(error: unknown) {
         return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034';
+    }
+
+    private maskEmail(email: string | null | undefined): string | null {
+        if (!email) {
+            return null;
+        }
+
+        const trimmed = email.trim();
+        if (!trimmed) {
+            return null;
+        }
+
+        const atIndex = trimmed.indexOf('@');
+        if (atIndex === -1) {
+            return trimmed;
+        }
+
+        const firstChar = atIndex > 0 ? trimmed.charAt(0) : '';
+        const domain = trimmed.slice(atIndex);
+        return `${firstChar}***${domain}`;
     }
 }
