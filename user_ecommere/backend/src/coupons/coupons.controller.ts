@@ -1,9 +1,8 @@
 import { BadRequestException, Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dtos/create-coupon.dto';
 import { UpdateCouponDto } from './dtos/update-coupon.dto';
-import { ValidateCouponDto } from './dtos/validate-coupon.dto';
 import { CouponEntity, CouponValidationEntity } from './entities/coupon.entity';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 import { Public } from '@/common/decorators/public.decorator';
@@ -23,6 +22,35 @@ export class CouponsController {
   @ApiResponse({ status: 200, type: [CouponEntity] })
   async findAll(@Query() paginationDto: PaginationDto) {
     return this.couponsService.findAll(paginationDto);
+  }
+
+  @Get('validate')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Validate coupon code (Authenticated)' })
+  @ApiQuery({ name: 'code', required: true, type: String })
+  @ApiQuery({ name: 'orderTotal', required: false, type: String })
+  @ApiResponse({ status: 200, type: CouponValidationEntity })
+  async validateCoupon(
+    @Query('code') code: string,
+    @CurrentUser('id') userId: string,
+    @Query('orderTotal') orderTotal?: string,
+  ) {
+    const normalizedCode = code?.trim();
+    if (!normalizedCode) {
+      throw new BadRequestException('code is required');
+    }
+
+    const normalizedOrderTotal = orderTotal?.trim();
+    const total = normalizedOrderTotal === undefined ? 0 : Number(normalizedOrderTotal);
+
+    if (
+      normalizedOrderTotal !== undefined &&
+      (normalizedOrderTotal === '' || !Number.isSafeInteger(total) || total < 0)
+    ) {
+      throw new BadRequestException('orderTotal must be a non-negative integer');
+    }
+
+    return this.couponsService.validateCoupon(normalizedCode, userId, total);
   }
 
   @Get(':code')
@@ -59,27 +87,5 @@ export class CouponsController {
   @ApiResponse({ status: 200 })
   async remove(@Param('code') code: string) {
     return this.couponsService.remove(code);
-  }
-
-  @Post('validate')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Validate coupon code (Authenticated)' })
-  @ApiResponse({ status: 200, type: CouponValidationEntity })
-  async validateCoupon(
-    @Body() validateCouponDto: ValidateCouponDto,
-    @CurrentUser('id') userId: string,
-    @Query('orderTotal') orderTotal?: string,
-  ) {
-    const normalizedOrderTotal = orderTotal?.trim();
-    const total = normalizedOrderTotal === undefined ? 0 : Number(normalizedOrderTotal);
-
-    if (
-      normalizedOrderTotal !== undefined &&
-      (normalizedOrderTotal === '' || !Number.isSafeInteger(total) || total < 0)
-    ) {
-      throw new BadRequestException('orderTotal must be a non-negative integer');
-    }
-
-    return this.couponsService.validateCoupon(validateCouponDto.code, userId, total);
   }
 }

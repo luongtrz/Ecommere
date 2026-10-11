@@ -132,7 +132,10 @@ export class ReferralsService {
             where: {
                 code: { in: couponCodes },
                 active: true,
-                validUntil: { gte: now },
+                OR: [
+                    { validUntil: null },
+                    { validUntil: { gte: now } },
+                ],
             },
             orderBy: { createdAt: 'desc' },
         });
