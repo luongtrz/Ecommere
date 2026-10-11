@@ -23,10 +23,15 @@ export class PaymentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Verify payment status (Mock)' })
   @ApiResponse({ status: 200 })
-  async verifyPayment(@Body() verifyPaymentDto: VerifyPaymentDto) {
+  async verifyPayment(
+    @CurrentUser('id') userId: string,
+    @Body() verifyPaymentDto: VerifyPaymentDto,
+  ) {
     return this.paymentsService.verifyPayment(
+      userId,
       verifyPaymentDto.paymentId,
       verifyPaymentDto.method,
+      verifyPaymentDto.orderId,
     );
   }
 
