@@ -7,6 +7,11 @@ import {
   ShipmentResult,
   TrackingInfo,
 } from './interfaces/shipping-provider.interface';
+import {
+  calculateShippingFee,
+  getEstimatedDeliveryDays,
+  ShippingMethod,
+} from './shipping-fee';
 
 @Injectable()
 export class ShippingService implements ShippingProvider {
@@ -14,30 +19,13 @@ export class ShippingService implements ShippingProvider {
     return 'Mock Shipping Service';
   }
 
-  async calculateFee(origin: Address, destination: Address, weight: number): Promise<ShippingFee> {
-    // Mock calculation based on province
-    const destProvinceLower = destination.province.toLowerCase();
-
-    let fee = 50000; // Default 50k VND
-    let estimatedDays = 3;
-
-    // Free shipping for Bangkok and surrounding areas
-    if (
-      destProvinceLower.includes('bangkok') ||
-      destProvinceLower.includes('กรุงเทพ') ||
-      destProvinceLower.includes('nonthaburi') ||
-      destProvinceLower.includes('นนทบุรี') ||
-      destProvinceLower.includes('samut prakan') ||
-      destProvinceLower.includes('สมุทรปราการ')
-    ) {
-      fee = 0;
-      estimatedDays = 1;
-    }
-
-    // Add weight surcharge (mock)
-    if (weight > 5) {
-      fee += Math.ceil((weight - 5) / 5) * 10000; // 10k per 5kg
-    }
+  async calculateFee(
+    origin: Address,
+    destination: Address,
+    method: ShippingMethod = ShippingMethod.STANDARD,
+  ): Promise<ShippingFee> {
+    const fee = calculateShippingFee(destination.province, method);
+    const estimatedDays = getEstimatedDeliveryDays(destination.province);
 
     return {
       fee,

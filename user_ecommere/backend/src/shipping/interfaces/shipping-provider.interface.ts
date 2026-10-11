@@ -1,6 +1,12 @@
+import { ShippingMethod } from '../shipping-fee';
+
 export interface ShippingProvider {
   getName(): string;
-  calculateFee(origin: Address, destination: Address, weight: number): Promise<ShippingFee>;
+  calculateFee(
+    origin: Address,
+    destination: Address,
+    method?: ShippingMethod,
+  ): Promise<ShippingFee>;
   createShipment(orderId: string, details: ShipmentDetails): Promise<ShipmentResult>;
   trackShipment(trackingNumber: string): Promise<TrackingInfo>;
 }

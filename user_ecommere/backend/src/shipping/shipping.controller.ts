@@ -3,6 +3,9 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { ShippingService } from './shipping.service';
 import { Public } from '@/common/decorators/public.decorator';
 
+import { CalculateShippingFeeDto } from './dtos/calculate-shipping-fee.dto';
+import { ShippingMethod } from './shipping-fee';
+
 @ApiTags('Shipping')
 @Controller('shipping')
 export class ShippingController {
@@ -11,10 +14,15 @@ export class ShippingController {
   @Public()
   @Get('calculate-fee')
   @ApiOperation({ summary: 'Calculate shipping fee (Mock)' })
-  @ApiQuery({ name: 'province', example: 'Bangkok' })
-  @ApiQuery({ name: 'weight', example: 1, required: false })
+  @ApiQuery({ name: 'province', example: 'Bangkok', required: false })
+  @ApiQuery({
+    name: 'method',
+    enum: ShippingMethod,
+    example: ShippingMethod.STANDARD,
+    required: false,
+  })
   @ApiResponse({ status: 200 })
-  async calculateFee(@Query('province') province: string, @Query('weight') weight?: number) {
+  async calculateFee(@Query() query: CalculateShippingFeeDto) {
     const mockOrigin = {
       province: 'Bangkok',
       district: 'Chatuchak',
@@ -23,13 +31,15 @@ export class ShippingController {
     };
 
     const destination = {
-      province: province || 'Bangkok',
+      province: query?.province || 'Bangkok',
       district: 'Unknown',
       ward: 'Unknown',
       line1: 'Customer address',
     };
 
-    return this.shippingService.calculateFee(mockOrigin, destination, weight ? parseFloat(weight.toString()) : 1);
+    const method = query?.method ?? ShippingMethod.STANDARD;
+
+    return this.shippingService.calculateFee(mockOrigin, destination, method);
   }
 
   @Public()
