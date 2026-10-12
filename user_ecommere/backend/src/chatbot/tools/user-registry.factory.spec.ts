@@ -13,6 +13,7 @@ describe('buildUserToolRegistry', () => {
     reviews: {} as any,
     coupons: {} as any,
     prisma: {} as any,
+    cart: {} as any,
   });
 
   let registry: ToolRegistry;
