@@ -7,11 +7,6 @@ enum Environment {
   Test = 'test',
 }
 
-enum ChatbotProvider {
-  Gemini = 'gemini',
-  OpenAiCompatible = 'openai-compatible',
-}
-
 class EnvironmentVariables {
   @IsEnum(Environment)
   NODE_ENV: Environment = Environment.Development;
@@ -51,45 +46,6 @@ class EnvironmentVariables {
 
   @IsNumber()
   MAX_PAGE_SIZE: number = 100;
-
-  @IsOptional()
-  @IsString()
-  REDIS_URL?: string;
-
-  @IsNumber()
-  CHATBOT_REDIS_TTL_SECONDS: number = 604800;
-
-  @IsOptional()
-  @IsEnum(ChatbotProvider)
-  CHATBOT_PROVIDER?: ChatbotProvider;
-
-  @IsOptional()
-  @IsString()
-  CHATBOT_PROVIDER_URL?: string;
-
-  @IsOptional()
-  @IsString()
-  CHATBOT_API_KEY?: string;
-
-  @IsOptional()
-  @IsString()
-  CHATBOT_MODEL?: string;
-
-  @IsOptional()
-  @IsString()
-  CHATBOT_SYSTEM_PROMPT?: string;
-
-  @IsNumber()
-  CHATBOT_TIMEOUT_MS: number = 30000;
-
-  @IsNumber()
-  CHATBOT_TEMPERATURE: number = 0.4;
-
-  @IsNumber()
-  CHATBOT_MAX_TOKENS: number = 500;
-
-  @IsNumber()
-  CHATBOT_HISTORY_LIMIT: number = 10;
 
   @IsNumber()
   CHATBOT_RAG_PRODUCT_LIMIT: number = 4;
