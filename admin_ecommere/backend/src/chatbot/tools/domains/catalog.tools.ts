@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
 import type { ProductsService } from '../../../products/products.service';
 import type { CategoriesService } from '../../../categories/categories.service';
+import type { CreateProductDto, CreateVariantDto } from '../../../products/dtos/create-product.dto';
+import type { CreateCategoryDto } from '../../../categories/dtos/create-category.dto';
 
 export type AdminCatalogToolDeps = {
   products: ProductsService;
@@ -206,7 +208,7 @@ export function createAdminCatalogTools(
     auth: 'admin',
     risk: 'WRITE',
     handler: async (
-      args: z.infer<typeof createProductSchema>,
+      args: CreateProductDto,
       _ctx: ToolContext,
     ) => {
       return deps.products.create(args);
@@ -273,7 +275,7 @@ export function createAdminCatalogTools(
     auth: 'admin',
     risk: 'WRITE',
     handler: async (
-      args: z.infer<typeof createVariantSchema>,
+      args: CreateVariantDto & { productId: string },
       _ctx: ToolContext,
     ) => {
       const { productId, ...dto } = args;
@@ -403,7 +405,7 @@ export function createAdminCatalogTools(
     auth: 'admin',
     risk: 'WRITE',
     handler: async (
-      args: z.infer<typeof createCategorySchema>,
+      args: CreateCategoryDto,
       _ctx: ToolContext,
     ) => {
       return deps.categories.create(args);
