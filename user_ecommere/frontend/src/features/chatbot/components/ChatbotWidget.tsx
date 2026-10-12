@@ -52,7 +52,7 @@ function ChatbotSourceItem({ source }: { source: ChatSource }) {
 }
 
 export function ChatbotWidget() {
-  const { open, setOpen, messages } = useChatStore();
+  const { open, setOpen, messages, ownerId, claimOwner } = useChatStore();
   const { isStreaming, send, decide, newThread } = useChatAgent();
   const { user } = useAuth();
 
@@ -60,21 +60,20 @@ export function ChatbotWidget() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
   const wasOpenRef = useRef(open);
-  const prevUserIdRef = useRef<string | null | undefined>(undefined);
 
-  // When signed-in user changes (log in or log out), call newThread() once
+  // Sync conversation ownership with signed-in user
   useEffect(() => {
     if (user === undefined) return;
-    const currentUserId = user ? user.id : null;
-    if (prevUserIdRef.current === undefined) {
-      prevUserIdRef.current = currentUserId;
-      return;
-    }
-    if (prevUserIdRef.current !== currentUserId) {
-      prevUserIdRef.current = currentUserId;
+    const id = user ? user.id : null;
+    if (useChatStore.getState().ownerId !== id) {
       newThread();
+      claimOwner(id);
     }
-  }, [user, newThread]);
+  }, [user, newThread, claimOwner]);
+
+  const currentUserId = user ? user.id : null;
+  const isOwnerMatch = user !== undefined && ownerId === currentUserId;
+  const visibleMessages = isOwnerMatch ? messages : [];
 
   // Escape closes the panel
   useEffect(() => {
@@ -100,7 +99,7 @@ export function ChatbotWidget() {
   useEffect(() => {
     if (!open) return;
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [open, messages, isStreaming]);
+  }, [open, visibleMessages, isStreaming]);
 
   const handleSubmit = () => {
     const prompt = draft.trim();
@@ -180,7 +179,7 @@ export function ChatbotWidget() {
             </div>
 
             {/* Message list */}
-            {messages.map((message) => {
+            {visibleMessages.map((message) => {
               const isUser = message.role === 'user';
               if (!isUser) {
                 const hasAssistantContent =
@@ -234,7 +233,7 @@ export function ChatbotWidget() {
                           <ConfirmActionCard
                             calls={message.confirm.calls}
                             decided={message.confirm.decided}
-                            onDecide={(approve) => decide(message.id, approve)}
+                            onSubmit={(decisions) => decide(message.id, decisions)}
                           />
                         )}
 
@@ -269,7 +268,7 @@ export function ChatbotWidget() {
             })}
 
             {/* Quick suggestions when no conversation yet */}
-            {messages.length === 0 ? (
+            {visibleMessages.length === 0 ? (
               <div className="space-y-2.5 px-1 pt-2">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Gợi ý nhanh</p>
                 <div className="flex flex-wrap gap-2">
@@ -293,7 +292,7 @@ export function ChatbotWidget() {
             ) : null}
 
             {/* Streaming indicator */}
-            {isStreaming ? (
+            {isOwnerMatch && isStreaming ? (
               <div className="flex justify-start items-start gap-2.5">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
                   <Bot className="h-4 w-4 animate-bounce" />
