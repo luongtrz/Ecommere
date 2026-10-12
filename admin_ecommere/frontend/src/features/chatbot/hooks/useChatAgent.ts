@@ -70,7 +70,7 @@ function generateUuid(): string {
 export function useChatAgent(): {
   isStreaming: boolean;
   send: (prompt: string) => Promise<void>;
-  decide: (messageId: string, approve: boolean) => Promise<void>;
+  decide: (messageId: string, decisions: AgentDecision[]) => Promise<void>;
   cancel: () => void;
   newThread: () => void;
 } {
@@ -370,7 +370,7 @@ export function useChatAgent(): {
   );
 
   const decide = useCallback(
-    async (messageId: string, approve: boolean): Promise<void> => {
+    async (messageId: string, decisions: AgentDecision[]): Promise<void> => {
       if (isStreamingRef.current) {
         return;
       }
@@ -380,6 +380,29 @@ export function useChatAgent(): {
         .messages.find((m) => m.id === messageId);
       const calls = message?.confirm?.calls;
       if (!calls || calls.length === 0 || message?.confirm?.decided) {
+        return;
+      }
+
+      if (!Array.isArray(decisions) || decisions.length !== calls.length) {
+        return;
+      }
+
+      const callIdSet = new Set(calls.map((c) => c.id));
+      const seenDecisionCallIds = new Set<string>();
+
+      for (const d of decisions) {
+        if (
+          !d ||
+          typeof d.callId !== 'string' ||
+          !callIdSet.has(d.callId) ||
+          seenDecisionCallIds.has(d.callId)
+        ) {
+          return;
+        }
+        seenDecisionCallIds.add(d.callId);
+      }
+
+      if (seenDecisionCallIds.size !== callIdSet.size) {
         return;
       }
 
@@ -394,11 +417,6 @@ export function useChatAgent(): {
           decided: true,
         },
       });
-
-      const decisions: AgentDecision[] = calls.map((c) => ({
-        callId: c.id,
-        approve,
-      }));
 
       const controller = new AbortController();
       abortControllerRef.current = controller;

@@ -4,9 +4,11 @@ import type { StateStorage } from 'zustand/middleware';
 import type { ChatMessage } from '../types';
 
 export interface ChatState {
+  ownerId: string | null;
   threadId: string | null;
   messages: ChatMessage[];
   open: boolean;
+  claimOwner: (ownerId: string | null) => void;
   setThreadId: (id: string | null) => void;
   setOpen: (open: boolean) => void;
   appendMessage: (m: ChatMessage) => void;
@@ -14,7 +16,7 @@ export interface ChatState {
   reset: () => void;
 }
 
-export type ChatPersistedState = Pick<ChatState, 'threadId' | 'messages'>;
+export type ChatPersistedState = Pick<ChatState, 'ownerId' | 'threadId' | 'messages'>;
 
 function getLocalStorage(): Storage | null {
   try {
@@ -67,10 +69,18 @@ const safeLocalStorage: StateStorage = {
 
 export const useChatStore = create<ChatState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
+      ownerId: null,
       threadId: null,
       messages: [],
       open: false,
+
+      claimOwner: (ownerId: string | null) => {
+        if (get().ownerId === ownerId) {
+          return;
+        }
+        set({ ownerId, threadId: null, messages: [] });
+      },
 
       setThreadId: (id: string | null) => {
         set({ threadId: id });
@@ -100,6 +110,7 @@ export const useChatStore = create<ChatState>()(
       name: 'thai-spray-admin-chat',
       storage: createJSONStorage(() => safeLocalStorage),
       partialize: (state): ChatPersistedState => ({
+        ownerId: state.ownerId,
         threadId: state.threadId,
         messages: state.messages.slice(-30),
       }),

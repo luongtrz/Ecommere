@@ -20,6 +20,7 @@ import { ToolCallCard } from '../components/ToolCallCard';
 import { ConfirmActionCard } from '../components/ConfirmActionCard';
 import { ChatMarkdown } from '../components/ChatMarkdown';
 
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { SEO } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -170,9 +171,26 @@ export function AdminChatbotPage() {
   const { isStreaming, send, decide, cancel, newThread } = useChatAgent();
   const threadId = useChatStore((s) => s.threadId);
   const messages = useChatStore((s) => s.messages);
+  const ownerId = useChatStore((s) => s.ownerId);
+  const claimOwner = useChatStore((s) => s.claimOwner);
   const reset = useChatStore((s) => s.reset);
   const setThreadId = useChatStore((s) => s.setThreadId);
   const appendMessage = useChatStore((s) => s.appendMessage);
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user === undefined) return;
+    const id = user ? user.id : null;
+    if (useChatStore.getState().ownerId !== id) {
+      newThread();
+      claimOwner(id);
+    }
+  }, [user, newThread, claimOwner]);
+
+  const currentAdminId = user ? user.id : null;
+  const isOwnerMatch = user !== undefined && ownerId === currentAdminId;
+  const visibleMessages = isOwnerMatch ? messages : [];
 
   const {
     data: threads = [],
@@ -184,7 +202,7 @@ export function AdminChatbotPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isStreaming]);
+  }, [visibleMessages, isStreaming]);
 
   const startNewConversation = () => {
     transcriptRequestIdRef.current += 1;
@@ -342,7 +360,7 @@ export function AdminChatbotPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 <p className="text-xs text-muted-foreground">Đang tải cuộc trò chuyện…</p>
               </div>
-            ) : messages.length === 0 ? (
+            ) : visibleMessages.length === 0 ? (
               /* Empty state */
               <div className="flex flex-1 flex-col items-center justify-center p-6 text-center max-w-lg mx-auto">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3 shadow-sm">
@@ -396,7 +414,7 @@ export function AdminChatbotPage() {
                   </Alert>
                 )}
 
-                {messages.map((message) => {
+                {visibleMessages.map((message) => {
                   if (message.role === 'user') {
                     return (
                       <div key={message.id} className="flex justify-end">
@@ -430,7 +448,7 @@ export function AdminChatbotPage() {
                             <ConfirmActionCard
                               calls={message.confirm.calls}
                               decided={message.confirm.decided}
-                              onDecide={(approve) => decide(message.id, approve)}
+                              onSubmit={(decisions) => decide(message.id, decisions)}
                             />
                           </div>
                         )}
@@ -448,7 +466,7 @@ export function AdminChatbotPage() {
                 })}
 
                 {/* Streaming indicator */}
-                {isStreaming && (
+                {isOwnerMatch && isStreaming && (
                   <div className="flex items-center justify-between gap-2 rounded-xl bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground w-fit">
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { ChatConfirmCall } from '../types';
@@ -31,25 +32,52 @@ function renderRiskBadge(risk: ChatConfirmCall['risk']) {
   }
 }
 
+export interface ConfirmActionCardProps {
+  calls: ChatConfirmCall[];
+  decided?: boolean;
+  onSubmit: (decisions: Array<{ callId: string; approve: boolean }>) => void;
+}
+
 export function ConfirmActionCard({
   calls,
   decided,
-  onDecide,
+  onSubmit,
 }: {
   calls: ChatConfirmCall[];
   decided?: boolean;
-  onDecide: (approve: boolean) => void;
+  onSubmit: (decisions: Array<{ callId: string; approve: boolean }>) => void;
 }) {
   const isDecided = Boolean(decided);
+  const [choices, setChoices] = useState<Record<string, boolean>>({});
 
-  const handleConfirm = () => {
+  const handleChoice = (callId: string, approve: boolean) => {
     if (isDecided) return;
-    onDecide(true);
+    setChoices((prev) => ({
+      ...prev,
+      [callId]: approve,
+    }));
   };
 
-  const handleReject = () => {
+  const handleBulk = (approve: boolean) => {
     if (isDecided) return;
-    onDecide(false);
+    const next: Record<string, boolean> = {};
+    for (const call of calls) {
+      next[call.id] = approve;
+    }
+    setChoices(next);
+  };
+
+  const allChosen =
+    calls.length > 0 &&
+    calls.every((call) => typeof choices[call.id] === 'boolean');
+
+  const handleSubmit = () => {
+    if (isDecided || !allChosen) return;
+    const decisions = calls.map((call) => ({
+      callId: call.id,
+      approve: Boolean(choices[call.id]),
+    }));
+    onSubmit(decisions);
   };
 
   return (
@@ -62,42 +90,75 @@ export function ConfirmActionCard({
         {calls.map((call, index) => (
           <div
             key={call.id || index}
-            className="flex items-center justify-between gap-2"
+            className="flex flex-col gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 sm:flex-row sm:items-center sm:justify-between"
           >
-            <span className="font-medium text-foreground flex-1 break-words">
-              {call.summary}
-            </span>
-            {renderRiskBadge(call.risk)}
+            <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+              <span className="font-medium text-foreground flex-1 break-words">
+                {call.summary}
+              </span>
+              {renderRiskBadge(call.risk)}
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0 justify-end">
+              <Button
+                type="button"
+                variant={choices[call.id] === true ? 'default' : 'outline'}
+                size="sm"
+                aria-pressed={choices[call.id] === true}
+                disabled={isDecided}
+                onClick={() => handleChoice(call.id, true)}
+              >
+                Xác nhận
+              </Button>
+              <Button
+                type="button"
+                variant={choices[call.id] === false ? 'destructive' : 'outline'}
+                size="sm"
+                aria-pressed={choices[call.id] === false}
+                disabled={isDecided}
+                onClick={() => handleChoice(call.id, false)}
+              >
+                Từ chối
+              </Button>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-border">
-        {isDecided ? (
-          <span className="text-xs font-medium text-muted-foreground">
-            Đã phản hồi
-          </span>
-        ) : (
-          <span />
-        )}
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border">
+        <div className="flex items-center gap-1.5">
           <Button
             type="button"
-            variant="default"
+            variant="outline"
             size="sm"
             disabled={isDecided}
-            onClick={handleConfirm}
+            onClick={() => handleBulk(true)}
           >
-            Xác nhận
+            Xác nhận tất cả
           </Button>
           <Button
             type="button"
             variant="outline"
             size="sm"
             disabled={isDecided}
-            onClick={handleReject}
+            onClick={() => handleBulk(false)}
           >
-            Từ chối
+            Từ chối tất cả
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          {isDecided ? (
+            <span className="text-xs font-medium text-muted-foreground">
+              Đã phản hồi
+            </span>
+          ) : null}
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            disabled={isDecided || !allChosen}
+            onClick={handleSubmit}
+          >
+            Gửi quyết định
           </Button>
         </div>
       </div>
