@@ -11,5 +11,6 @@ import { PrismaModule } from '@/prisma/prisma.module';
   imports: [PrismaModule],
   providers: [AdminService, ReportsService, CustomersService],
   controllers: [AdminController, ReportsController, CustomersController],
+  exports: [AdminService, ReportsService, CustomersService],
 })
 export class AdminModule {}
