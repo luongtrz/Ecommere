@@ -99,6 +99,46 @@ class EnvironmentVariables {
 
   @IsNumber()
   CHATBOT_RAG_CANDIDATE_LIMIT: number = 12;
+
+  @IsOptional()
+  @IsString()
+  OPENAI_API_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  OPENAI_BASE_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  AGENT_MODEL?: string;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_TEMPERATURE?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_MAX_OUTPUT_TOKENS?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_TIMEOUT_MS?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_MAX_STEPS?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_MAX_TOOL_CALLS_PER_TURN?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_HISTORY_MAX_MESSAGES?: number;
+
+  @IsOptional()
+  @IsString()
+  AGENT_CHECKPOINT_SCHEMA?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
