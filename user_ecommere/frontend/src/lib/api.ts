@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { useCartStore } from '@/features/cart/store/cartStore';
+import { useChatStore } from '@/features/chatbot/store/chatStore';
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
@@ -111,6 +112,7 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         authToken.remove();
+        useChatStore.getState().reset();
         useCartStore.getState().clearCart();
         localStorage.removeItem('user');
 

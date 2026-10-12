@@ -4,6 +4,7 @@ import { authApi, type User } from '../api/auth.api';
 import { QUERY_KEYS } from '@/lib/constants';
 import { useToast } from '@/hooks/useToast';
 import { AxiosError } from 'axios';
+import { useChatStore } from '@/features/chatbot/store/chatStore';
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -50,12 +51,14 @@ export function useAuth() {
   const logout = async () => {
     try {
       await authApi.logout();
+      useChatStore.getState().reset();
       queryClient.setQueryData([QUERY_KEYS.USER], null);
       queryClient.clear();
       toast.info('Đã đăng xuất thành công');
       navigate('/login');
     } catch (error) {
       // Even if logout fails, clear local state
+      useChatStore.getState().reset();
       queryClient.setQueryData([QUERY_KEYS.USER], null);
       queryClient.clear();
       navigate('/login');
