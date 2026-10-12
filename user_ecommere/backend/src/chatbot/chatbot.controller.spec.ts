@@ -26,6 +26,10 @@ interface FakeResponse {
   status: jest.Mock;
   json: jest.Mock;
   end: jest.Mock;
+  on: jest.Mock;
+  removeListener: jest.Mock;
+  emit: (event: string) => void;
+  writableFinished: boolean;
 }
 
 function createFakeResponse(): FakeResponse {
@@ -52,7 +56,23 @@ function createFakeResponse(): FakeResponse {
     res.body = body;
     return res;
   });
-  res.end = jest.fn(() => res);
+  const listeners: Record<string, Array<() => void>> = {};
+  res.on = jest.fn((event: string, cb: () => void) => {
+    (listeners[event] ??= []).push(cb);
+    return res;
+  });
+  res.removeListener = jest.fn((event: string, cb: () => void) => {
+    listeners[event] = (listeners[event] ?? []).filter((f) => f !== cb);
+    return res;
+  });
+  res.emit = (event: string) => {
+    (listeners[event] ?? []).forEach((f) => f());
+  };
+  res.writableFinished = false;
+  res.end = jest.fn(() => {
+    res.writableFinished = true;
+    return res;
+  });
   return res;
 }
 
@@ -175,7 +195,7 @@ describe('ChatbotController', () => {
         }),
       );
       expect(res.setHeader).toHaveBeenCalledWith(
-        'content-type',
+        'Content-Type',
         'text/event-stream; charset=utf-8',
       );
       expect(res.write).toHaveBeenCalled();
@@ -286,7 +306,7 @@ describe('ChatbotController', () => {
       );
     });
 
-    it('aborts runner when req emits close', async () => {
+    it('aborts runner when the response closes before it finishes', async () => {
       let runSignal: AbortSignal | undefined;
       mockThreads.create.mockResolvedValue({ id: 'stream-abort-thread' });
       mockRunner.run.mockImplementation(
@@ -306,11 +326,35 @@ describe('ChatbotController', () => {
       const streamPromise = controller.stream(req as any, res as any, {
         prompt: 'Hi',
       });
-      req.emit('close');
+      // Let the thread be created and the turn start before the client leaves.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      res.emit('close');
       await streamPromise;
 
       expect(runSignal?.aborted).toBe(true);
       expect(res.end).toHaveBeenCalled();
+    });
+
+    it('does not abort when the request body is read and only the request emits close', async () => {
+      let runSignal: AbortSignal | undefined;
+      mockThreads.create.mockResolvedValue({ id: 'stream-keep-thread' });
+      mockRunner.run.mockImplementation(
+        async (params: { signal?: AbortSignal; sink: any }) => {
+          runSignal = params.signal;
+          return new Promise((resolve) => setTimeout(resolve, 20));
+        },
+      );
+
+      const req = createFakeRequest(undefined);
+      const res = createFakeResponse();
+
+      const streamPromise = controller.stream(req as any, res as any, {
+        prompt: 'Hi',
+      });
+      req.emit('close');
+      await streamPromise;
+
+      expect(runSignal?.aborted).toBe(false);
     });
 
     it('stream route sends error event when runner rejects unexpectedly', async () => {
