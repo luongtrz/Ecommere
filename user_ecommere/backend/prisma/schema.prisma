@@ -344,13 +344,14 @@ enum AgentApp {
 }
 
 model AgentThread {
-  id          String   @id @default(cuid())
-  userId      String?
-  app         AgentApp
-  title       String?
-  totalTokens Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userId         String?
+  sessionKeyHash String?
+  app            AgentApp
+  title          String?
+  totalTokens    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([userId, app, updatedAt])
   @@map("agent_threads")

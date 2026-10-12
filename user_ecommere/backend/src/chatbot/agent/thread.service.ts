@@ -6,6 +6,7 @@ import { AgentThread } from '@prisma/client';
 export interface AgentActor {
   userId: string | null;
   app: 'USER' | 'ADMIN';
+  sessionKeyHash?: string | null;
 }
 
 @Injectable()
@@ -18,6 +19,7 @@ export class ThreadService {
       data: {
         id,
         userId: actor.userId,
+        sessionKeyHash: actor.sessionKeyHash ?? null,
         app: actor.app,
       },
     });
@@ -29,8 +31,23 @@ export class ThreadService {
       where: { id: threadId },
     });
 
-    if (!thread || thread.app !== actor.app || thread.userId !== actor.userId) {
+    if (!thread || thread.app !== actor.app) {
       throw new NotFoundException('Không tìm thấy cuộc trò chuyện');
+    }
+
+    if (thread.userId !== null) {
+      if (actor.userId !== thread.userId) {
+        throw new NotFoundException('Không tìm thấy cuộc trò chuyện');
+      }
+    } else {
+      if (
+        actor.userId !== null ||
+        !actor.sessionKeyHash ||
+        !thread.sessionKeyHash ||
+        actor.sessionKeyHash !== thread.sessionKeyHash
+      ) {
+        throw new NotFoundException('Không tìm thấy cuộc trò chuyện');
+      }
     }
 
     return thread;
