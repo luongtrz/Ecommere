@@ -488,4 +488,148 @@ describe('OrdersService', () => {
       });
     });
   });
+
+  describe('previewCheckout', () => {
+    const mockAddress = {
+      id: 'addr1',
+      userId: 'user1',
+      fullName: 'John Doe',
+      phone: '0812345678',
+      province: 'Bangkok',
+      district: 'Chatuchak',
+      ward: 'Lat Yao',
+      line1: '123 Test St.',
+      line2: null,
+      isDefault: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('should return preview data with server prices, subtotal, shipping fee, and delivery address without writing to database', async () => {
+      mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: 90000,
+        stock: 10,
+        product: {
+          id: 'prod1',
+          name: 'Lavender Spray',
+          active: true,
+        },
+      });
+
+      const result = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 2 }],
+      });
+
+      expect(result.address).toEqual(mockAddress);
+      expect(result.deliveryAddress).toBe('123 Test St., Lat Yao, Chatuchak, Bangkok');
+      expect(result.itemCount).toBe(1);
+      expect(result.subtotal).toBe(180000);
+      expect(result.shippingFee).toBe(0);
+      expect(result.everyItemPriced).toBe(true);
+
+      // Verify read-only behavior: no writes or stock reservations
+      expect(mockPrismaService.order.create).not.toHaveBeenCalled();
+      expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+      expect(mockPrismaService.productVariant.update).not.toHaveBeenCalled();
+      expect(mockPrismaService.stockMovement.create).not.toHaveBeenCalled();
+    });
+
+    it('should return null address and 0 shipping fee when address belongs to a different user (foreign address)', async () => {
+      const foreignAddress = { ...mockAddress, userId: 'user2' };
+      mockPrismaService.address.findUnique.mockResolvedValue(foreignAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: null,
+        product: { id: 'prod1', name: 'Lavender Spray', active: true },
+      });
+
+      const result = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+      });
+
+      expect(result.address).toBeNull();
+      expect(result.deliveryAddress).toBeNull();
+      expect(result.shippingFee).toBe(0);
+    });
+
+    it('should return everyItemPriced false when product variant is not found or product is inactive', async () => {
+      mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: null,
+        product: { id: 'prod1', name: 'Inactive Spray', active: false },
+      });
+
+      const result = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+      });
+
+      expect(result.everyItemPriced).toBe(false);
+      expect(result.subtotal).toBe(0);
+    });
+
+    it('should compute shipping fee for non-free province with STANDARD and EXPRESS', async () => {
+      const chiangMaiAddress = { ...mockAddress, province: 'Chiang Mai' };
+      mockPrismaService.address.findUnique.mockResolvedValue(chiangMaiAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: null,
+        product: { id: 'prod1', name: 'Spray', active: true },
+      });
+
+      const standardResult = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+        shippingMethod: ShippingMethod.STANDARD,
+      });
+      expect(standardResult.shippingFee).toBe(30000);
+
+      const expressResult = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+        shippingMethod: ShippingMethod.EXPRESS,
+      });
+      expect(expressResult.shippingFee).toBe(50000);
+    });
+
+    it('should fall back to server cart if items are not provided', async () => {
+      const mockCart = {
+        id: 'cart1',
+        userId: 'user1',
+        items: [
+          {
+            id: 'item1',
+            cartId: 'cart1',
+            variantId: 'var1',
+            quantity: 2,
+          },
+        ],
+      };
+      mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
+      mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: null,
+        product: { id: 'prod1', name: 'Spray', active: true },
+      });
+
+      const result = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+      });
+
+      expect(result.itemCount).toBe(1);
+      expect(result.subtotal).toBe(200000);
+      expect(result.everyItemPriced).toBe(true);
+    });
+  });
 });

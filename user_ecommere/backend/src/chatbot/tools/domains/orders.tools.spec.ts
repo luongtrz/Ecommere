@@ -1,6 +1,7 @@
 import { createOrdersTools, OrdersToolDeps, ORDER_STATUSES } from './orders.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import type { OrdersService } from '../../../orders/orders.service';
+import { MoneyUtil } from '../../../common/utils/money.util';
 
 describe('Orders Tools', () => {
   let mockOrdersService: {
@@ -8,6 +9,7 @@ describe('Orders Tools', () => {
     getMyOrders: jest.Mock;
     getMyOrderById: jest.Mock;
     cancelOrder: jest.Mock;
+    previewCheckout: jest.Mock;
   };
   let tools: AgentToolDef[];
   let listTool: AgentToolDef;
@@ -45,6 +47,7 @@ describe('Orders Tools', () => {
       getMyOrders: jest.fn(),
       getMyOrderById: jest.fn(),
       cancelOrder: jest.fn(),
+      previewCheckout: jest.fn(),
     };
 
     const deps: OrdersToolDeps = {
@@ -434,6 +437,128 @@ describe('Orders Tools', () => {
       expect(checkoutTool.summarize({})).toBe(
         'Đặt đơn từ giỏ hàng hiện tại, giao hàng tiêu chuẩn',
       );
+    });
+
+    describe('preview()', () => {
+      const mockAddress = {
+        id: 'addr-001',
+        userId: 'user-123',
+        fullName: 'Nguyễn Văn A',
+        phone: '0901234567',
+        province: 'Hà Nội',
+        district: 'Cầu Giấy',
+        ward: 'Dịch Vọng',
+        line1: '123 Đường Cầu Giấy',
+      };
+
+      it('shows the address, the item count and an estimated subtotal computed from server prices (not from client price hints)', async () => {
+        mockOrdersService.previewCheckout.mockResolvedValue({
+          address: mockAddress,
+          deliveryAddress: '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+          itemCount: 1,
+          subtotal: 160000,
+          shippingFee: 30000,
+          everyItemPriced: true,
+        });
+
+        // validCustomerCtx has client price hints: price: 50000, total: 100000
+        const text = await checkoutTool.preview!(
+          { addressId: 'addr-001', shippingMethod: 'STANDARD' },
+          validCustomerCtx,
+        );
+
+        expect(mockOrdersService.previewCheckout).toHaveBeenCalledTimes(1);
+        const [userIdArg, inputArg] = mockOrdersService.previewCheckout.mock.calls[0];
+        expect(userIdArg).toBe('user-123');
+        expect(inputArg.addressId).toBe('addr-001');
+        expect(inputArg.shippingMethod).toBe('STANDARD');
+
+        // Stripped of client price hints
+        expect(inputArg.items).toEqual([{ variantId: 'var-1', quantity: 2 }]);
+        expect(inputArg.items[0]).not.toHaveProperty('price');
+        expect(inputArg.items[0]).not.toHaveProperty('total');
+
+        expect(text).toBeDefined();
+        expect(text).toContain('123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội');
+        expect(text).toContain('1 sản phẩm');
+        expect(text).toContain(MoneyUtil.format(160000));
+        expect(text).not.toContain(MoneyUtil.format(100000));
+        expect(text).toContain(MoneyUtil.format(30000));
+        expect(text).toContain('tạm tính, giá chốt khi đặt đơn');
+        expect(text).toContain(' · ');
+      });
+
+      it('returns undefined when the delivery address does not belong to the user (foreign address)', async () => {
+        mockOrdersService.previewCheckout.mockResolvedValue({
+          address: null,
+          deliveryAddress: null,
+          itemCount: 1,
+          subtotal: 160000,
+          shippingFee: 0,
+          everyItemPriced: true,
+        });
+
+        const result = await checkoutTool.preview!(
+          { addressId: 'foreign-addr' },
+          validCustomerCtx,
+        );
+
+        expect(result).toBeUndefined();
+      });
+
+      it('returns text without total when a cart item is missing or inactive', async () => {
+        mockOrdersService.previewCheckout.mockResolvedValue({
+          address: mockAddress,
+          deliveryAddress: '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+          itemCount: 1,
+          subtotal: 0,
+          shippingFee: 30000,
+          everyItemPriced: false,
+        });
+
+        const text = await checkoutTool.preview!(
+          { addressId: 'addr-001' },
+          validCustomerCtx,
+        );
+
+        expect(text).toBeDefined();
+        expect(text).toContain('123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội');
+        expect(text).toContain('1 sản phẩm');
+        expect(text).toContain('một số sản phẩm không thể tính giá');
+        expect(text).not.toContain('tiền hàng');
+        expect(text).toContain(MoneyUtil.format(30000));
+        expect(text).toContain('tạm tính, giá chốt khi đặt đơn');
+      });
+
+      it('includes note for coupon code that it will be applied when order is placed', async () => {
+        mockOrdersService.previewCheckout.mockResolvedValue({
+          address: mockAddress,
+          deliveryAddress: '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+          itemCount: 1,
+          subtotal: 160000,
+          shippingFee: 30000,
+          everyItemPriced: true,
+        });
+
+        const text = await checkoutTool.preview!(
+          { addressId: 'addr-001', couponCode: 'DISCOUNT10' } as any,
+          validCustomerCtx,
+        );
+
+        expect(text).toContain('mã giảm giá DISCOUNT10 sẽ được áp dụng khi đặt đơn');
+      });
+
+      it('returns undefined when unauthenticated, cart is empty or missing addressId', async () => {
+        expect(
+          await checkoutTool.preview!({ addressId: 'addr-001' }, unauthenticatedCtx),
+        ).toBeUndefined();
+        expect(await checkoutTool.preview!({}, validCustomerCtx)).toBeUndefined();
+
+        const emptyCtx = { ...validCustomerCtx, clientContext: { cart: [] } };
+        expect(
+          await checkoutTool.preview!({ addressId: 'addr-001' }, emptyCtx),
+        ).toBeUndefined();
+      });
     });
   });
 });

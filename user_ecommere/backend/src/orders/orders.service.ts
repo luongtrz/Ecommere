@@ -149,11 +149,15 @@ export class OrdersService {
     }
 
     // Calculate order totals
-    let subtotal = 0;
+    const { subtotal, shippingFee: calculatedShippingFee } = this.calculateSubtotalAndShipping(
+      itemsToUse,
+      address,
+      shippingMethod,
+    );
+
     const orderItems = itemsToUse.map((item) => {
-      const price = item.variant.salePrice ?? item.variant.price;
+      const price = this.getItemPrice(item.variant);
       const itemTotal = price * item.quantity;
-      subtotal += itemTotal;
 
       return {
         variantId: item.variantId,
@@ -226,10 +230,6 @@ export class OrdersService {
 
     // Shipping is calculated on the server. Client-provided totals and fees
     // are display values only and must not affect the amount charged.
-    const calculatedShippingFee = this.calculateShippingFee(
-      address,
-      shippingMethod ?? ShippingMethod.STANDARD,
-    );
     const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
     if (coupon?.type === CouponType.FREESHIP) {
       discount = calculatedShippingFee;
@@ -373,6 +373,103 @@ export class OrdersService {
     });
 
     return order;
+  }
+
+  async previewCheckout(
+    userId: string,
+    input: {
+      addressId?: string;
+      items?: Array<{ variantId: string; quantity: number }>;
+      shippingMethod?: ShippingMethod | string;
+    } = {},
+  ) {
+    const { addressId, items, shippingMethod } = input;
+
+    // Check delivery address (only when it belongs to userId)
+    let address: any = null;
+    if (addressId) {
+      const foundAddress = await this.prisma.address.findUnique({
+        where: { id: addressId },
+      });
+      if (foundAddress && foundAddress.userId === userId) {
+        address = foundAddress;
+      }
+    }
+
+    // Determine items to use
+    let itemsToUse: Array<{ variantId: string; quantity: number }> = [];
+    if (items && items.length > 0) {
+      itemsToUse = items;
+    } else {
+      const cart = await this.prisma.cart.findUnique({
+        where: { userId },
+        include: {
+          items: true,
+        },
+      });
+      if (cart && cart.items.length > 0) {
+        itemsToUse = cart.items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        }));
+      }
+    }
+
+    const itemCount = itemsToUse.length;
+    let everyItemPriced = itemsToUse.length > 0;
+    const itemsToPrice: Array<{
+      variant: { price: number; salePrice?: number | null };
+      quantity: number;
+    }> = [];
+
+    for (const item of itemsToUse) {
+      if (!item.variantId || !Number.isInteger(item.quantity) || item.quantity < 1) {
+        everyItemPriced = false;
+        continue;
+      }
+
+      const variant = await this.prisma.productVariant.findUnique({
+        where: { id: item.variantId },
+        include: { product: true },
+      });
+
+      if (!variant || !variant.product || !variant.product.active) {
+        everyItemPriced = false;
+        continue;
+      }
+
+      itemsToPrice.push({
+        variant,
+        quantity: item.quantity,
+      });
+    }
+
+    const selectedShippingMethod =
+      shippingMethod === 'EXPRESS' || shippingMethod === ShippingMethod.EXPRESS
+        ? ShippingMethod.EXPRESS
+        : ShippingMethod.STANDARD;
+
+    const { subtotal, shippingFee } = this.calculateSubtotalAndShipping(
+      itemsToPrice,
+      address,
+      selectedShippingMethod,
+    );
+
+    const deliveryAddress = address
+      ? [address.line1, address.ward, address.district, address.province]
+          .filter((p: any) => typeof p === 'string' && p.trim().length > 0)
+          .join(', ')
+      : null;
+
+    return {
+      address,
+      deliveryAddress,
+      itemCount,
+      subtotal,
+      shippingFee,
+      everyItemPriced,
+      canPriceAll: everyItemPriced,
+    };
   }
 
   async getMyOrders(userId: string, filterDto: OrderFilterDto) {
@@ -743,6 +840,26 @@ export class OrdersService {
     const random = randomBytes(4).toString('hex').toUpperCase();
 
     return `ORD${year}${month}${day}${sequence}${random}`;
+  }
+
+  private getItemPrice(variant: { price: number; salePrice?: number | null }): number {
+    return variant.salePrice ?? variant.price;
+  }
+
+  private calculateSubtotalAndShipping(
+    items: Array<{ variant: { price: number; salePrice?: number | null }; quantity: number }>,
+    address?: any,
+    shippingMethod?: ShippingMethod,
+  ): { subtotal: number; shippingFee: number } {
+    let subtotal = 0;
+    for (const item of items) {
+      const price = this.getItemPrice(item.variant);
+      subtotal += price * item.quantity;
+    }
+    const shippingFee = address
+      ? this.calculateShippingFee(address, shippingMethod ?? ShippingMethod.STANDARD)
+      : 0;
+    return { subtotal, shippingFee };
   }
 
   private calculateShippingFee(address: any, shippingMethod: ShippingMethod): number {

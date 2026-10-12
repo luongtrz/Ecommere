@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
 import type { OrdersService } from '../../../orders/orders.service';
+import { MoneyUtil } from '../../../common/utils/money.util';
 
 export const ORDER_STATUSES = [
   'PENDING_PAYMENT',
@@ -145,6 +146,77 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
     summarize: (args: any) => {
       const method = args?.shippingMethod === 'EXPRESS' ? 'nhanh' : 'tiêu chuẩn';
       return `Đặt đơn từ giỏ hàng hiện tại, giao hàng ${method}`;
+    },
+    preview: async (args: any, ctx: ToolContext) => {
+      if (!ctx.userId || !args?.addressId) {
+        return undefined;
+      }
+
+      const rawCart = ctx.clientContext?.cart;
+      const cartItems = Array.isArray(rawCart)
+        ? rawCart
+        : rawCart && typeof rawCart === 'object' && Array.isArray((rawCart as any).items)
+          ? (rawCart as any).items
+          : null;
+
+      if (!cartItems || cartItems.length === 0) {
+        return undefined;
+      }
+
+      const items = cartItems.map((item: any) => ({
+        variantId: item.variantId,
+        quantity: item.quantity,
+      }));
+
+      const previewData = await deps.orders.previewCheckout(ctx.userId, {
+        addressId: args.addressId,
+        shippingMethod: args.shippingMethod,
+        items,
+      });
+
+      if (!previewData || !previewData.address) {
+        return undefined;
+      }
+
+      const addressText =
+        previewData.deliveryAddress ||
+        [
+          previewData.address.line1,
+          previewData.address.ward,
+          previewData.address.district,
+          previewData.address.province,
+        ]
+          .filter((p: any) => typeof p === 'string' && p.trim().length > 0)
+          .join(', ');
+
+      const parts: string[] = [];
+
+      // 1. Full delivery address of args.addressId
+      parts.push(addressText);
+
+      // 2. Number of products
+      parts.push(`${previewData.itemCount} sản phẩm`);
+
+      // 3. Estimated subtotal from server prices, or notice if some items cannot be priced
+      if (previewData.everyItemPriced) {
+        parts.push(`tiền hàng ${MoneyUtil.format(previewData.subtotal)}`);
+      } else {
+        parts.push('một số sản phẩm không thể tính giá');
+      }
+
+      // 4. Shipping fee
+      parts.push(`phí vận chuyển ${MoneyUtil.format(previewData.shippingFee)}`);
+
+      // Optional note if args has a coupon code
+      const couponCode = args?.couponCode || (args as any)?.coupon;
+      if (couponCode && typeof couponCode === 'string' && couponCode.trim().length > 0) {
+        parts.push(`mã giảm giá ${couponCode.trim()} sẽ được áp dụng khi đặt đơn`);
+      }
+
+      // 5. Note
+      parts.push('tạm tính, giá chốt khi đặt đơn');
+
+      return parts.join(' · ');
     },
     project: (result: any) => {
       if (!result || typeof result !== 'object') {
