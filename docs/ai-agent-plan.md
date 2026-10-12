@@ -319,3 +319,26 @@ T5.1 xóa `chatbot.service.ts`/`chatbot-history.service.ts`, `CHATBOT_*` env, c�
 - Quyết định về service Redis trong compose.yaml.
 - Hai frontend chưa có cấu hình ESLint, nên chưa chạy được npm run lint; chỉ có tsc và build.
 - Các lỗ hổng có sẵn ở mục 10 vẫn chưa sửa trong nhánh này.
+
+### Thay đổi sau rà soát bảo mật
+
+Sau khi rà soát ranh giới bảo mật, các điểm dưới đây đã được đối chiếu và xác nhận trực tiếp trên mã nguồn; trong đó một số điểm chưa nằm trong kế hoạch đã duyệt, và một số điểm kế hoạch đã yêu cầu nhưng lần triển khai đầu tiên chưa có.
+
+**Đã sửa**
+
+- Trust proxy: `main.ts` của cả hai backend tin cậy một proxy hop (Caddy). Lý do: nếu không có cấu hình này, `req.ip` là địa chỉ của Caddy cho mọi client, nên cơ chế throttle theo IP sẽ tính gộp tất cả khách truy cập lại với nhau; điều này chỉ đúng chừng nào các cổng backend được giữ riêng tư trong mạng Docker (`DEPLOYMENT.md`).
+- Ảnh trong câu trả lời: `ChatMarkdown` của hai ứng dụng hiển thị alt text thay cho ảnh, nên trình duyệt không tải URL nào từ nội dung của model.
+- Resume: thao tác resume bị từ chối với mã 409 trừ khi thread đang chờ đúng các lệnh gọi được gửi quyết định. Lý do: điều này đã được yêu cầu ở mục 4.3 nhưng bị thiếu trong lần triển khai đầu tiên.
+- Xóa thread: các checkpoint LangGraph của thread được xóa cùng với thread. Lý do: dọn dẹp các checkpoint đã lưu; các dòng `AgentToolLog` hiện vẫn được giữ lại (xem các mục cần quyết định bên dưới).
+- Hội thoại thuộc về người dùng: chat store ghi nhận người sở hữu (`ownerId`), cuộc trò chuyện được xóa khi người dùng đăng nhập thay đổi, và tin nhắn đã lưu bị ẩn cho đến khi biết người dùng và khớp người sở hữu. Lý do: trước thay đổi này, cuộc trò chuyện vẫn lưu lại trong `localStorage` sau khi đăng xuất.
+- Quyết định theo từng thao tác: thẻ xác nhận cung cấp lựa chọn riêng cho từng lệnh gọi. Lý do: lựa chọn đơn lẻ trước đây áp dụng đồng ý hoặc từ chối cho toàn bộ nhóm thao tác.
+
+**Chưa làm, cần quyết định**
+
+- Nâng rủi ro của thao tác ghi cá nhân của khách (`update_my_profile`, `create_address`, `update_address`, `create_review`, `update_review`) lên mức cần xác nhận. Lý do: hiện chúng không cần xác nhận, nên nội dung từ đánh giá sản phẩm có thể làm đổi số điện thoại hoặc thêm địa chỉ mặc định mà khách không thấy.
+- Hiển thị địa chỉ và tổng tiền trong thẻ xác nhận checkout. Lý do: thẻ hiện chỉ có một câu tóm tắt, nên khách xác nhận mà không thấy đơn sẽ giao đi đâu.
+- Giới hạn chi phí cho khách vãng lai (yêu cầu đăng nhập, hoặc ngân sách token theo ngày). Lý do: hiện mỗi khách có thể bắt đầu nhiều lượt chat, và chi phí OpenAI không có trần.
+- Thời gian lưu `AgentToolLog`. Lý do: các dòng này chứa địa chỉ và kết quả công cụ rút gọn; việc xóa theo thread hay theo số ngày cần quyết định.
+- Thẻ xác nhận của admin chỉ hiển thị id. Lý do: để duyệt có hiểu biết, cần hiển thị tên và chi tiết, mà điều đó cần một bước xem trước phía máy chủ.
+- Content-Security-Policy cho frontend (Caddy hoặc nginx). Lý do: đây là lớp bảo vệ thứ hai cho ảnh và nguồn ngoài, nhưng cần thử trên triển khai thật trước.
+- `HttpExceptionFilter` chung trả thông điệp của Prisma cho client khi lỗi không phải HTTP. Lý do: đây là lỗi có sẵn, không thuộc riêng tính năng chat, nên nên sửa trong một thay đổi riêng.
