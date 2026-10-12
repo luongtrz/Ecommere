@@ -40,9 +40,9 @@ export interface AgentRunnerDeps {
     getState?(
       config: unknown,
     ): PromiseLike<unknown> | unknown;
-    checkpointer?: {
-      deleteThread(threadId: string): Promise<void>;
-    };
+    // The compiled LangGraph graph types this as a boolean or a saver, so accept any
+    // value here and check the shape where it is used.
+    checkpointer?: unknown;
   };
   registry: ToolRegistry;
   threads: {
@@ -228,8 +228,17 @@ export class AgentRunner {
   }
 
   async deleteCheckpoints(threadId: string): Promise<void> {
-    if (this.graph.checkpointer) {
-      await this.graph.checkpointer.deleteThread(threadId);
+    const checkpointer = this.graph.checkpointer as
+      | { deleteThread?: (id: string) => Promise<void> }
+      | boolean
+      | null
+      | undefined;
+    if (
+      typeof checkpointer === 'object' &&
+      checkpointer !== null &&
+      typeof checkpointer.deleteThread === 'function'
+    ) {
+      await checkpointer.deleteThread(threadId);
     }
   }
 
