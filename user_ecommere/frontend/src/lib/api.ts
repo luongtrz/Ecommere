@@ -2,7 +2,7 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { useCartStore } from '@/features/cart/store/cartStore';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api`,
@@ -31,7 +31,7 @@ export const authToken = {
   },
 };
 
-function getCookie(name: string): string | null {
+export function getCookie(name: string): string | null {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) {
