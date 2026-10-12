@@ -43,6 +43,9 @@ export function ChatMarkdown({ content }: ChatMarkdownProps) {
               {children}
             </pre>
           ),
+          img: ({ alt }) => (
+            <span className="text-muted-foreground">{alt}</span>
+          ),
           a: ({ href, children }) => {
             if (href && href.startsWith('/') && !href.startsWith('//')) {
               return (
