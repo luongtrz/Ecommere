@@ -16,9 +16,17 @@ describe('ThreadService', () => {
       updateMany: jest.fn(),
       delete: jest.fn(),
     },
+    agentToolLog: {
+      deleteMany: jest.fn(),
+    },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
+    mockPrismaService.$transaction.mockImplementation((ops) =>
+      Array.isArray(ops) ? Promise.all(ops) : ops(mockPrismaService),
+    );
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ThreadService,
@@ -269,6 +277,36 @@ describe('ThreadService', () => {
       });
     });
 
+    it('deletes the tool-call rows and the thread in one transaction', async () => {
+      const mockThread = {
+        id: 't-1',
+        userId: 'user-1',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
+      const deleteLogsOp = { count: 3 };
+      const deleteThreadOp = mockThread;
+      mockPrismaService.agentToolLog.deleteMany.mockReturnValue(deleteLogsOp);
+      mockPrismaService.agentThread.delete.mockReturnValue(deleteThreadOp);
+
+      await service.remove('t-1', { userId: 'user-1', app: 'USER' });
+
+      expect(mockPrismaService.agentToolLog.deleteMany).toHaveBeenCalledWith({
+        where: { threadId: 't-1' },
+      });
+      expect(mockPrismaService.agentThread.delete).toHaveBeenCalledWith({
+        where: { id: 't-1' },
+      });
+      expect(mockPrismaService.$transaction).toHaveBeenCalledWith([
+        deleteLogsOp,
+        deleteThreadOp,
+      ]);
+    });
+
     it('does not call delete when assertOwned fails', async () => {
       mockPrismaService.agentThread.findUnique.mockResolvedValue(null);
 
@@ -276,7 +314,30 @@ describe('ThreadService', () => {
         service.remove('t-missing', { userId: 'user-1', app: 'USER' }),
       ).rejects.toThrow(NotFoundException);
 
+      expect(mockPrismaService.agentToolLog.deleteMany).not.toHaveBeenCalled();
       expect(mockPrismaService.agentThread.delete).not.toHaveBeenCalled();
+      expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('refuses a foreign thread and deletes nothing', async () => {
+      const foreignThread = {
+        id: 't-foreign',
+        userId: 'user-2',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(foreignThread);
+
+      await expect(
+        service.remove('t-foreign', { userId: 'user-1', app: 'USER' }),
+      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+
+      expect(mockPrismaService.agentToolLog.deleteMany).not.toHaveBeenCalled();
+      expect(mockPrismaService.agentThread.delete).not.toHaveBeenCalled();
+      expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
     });
   });
 
