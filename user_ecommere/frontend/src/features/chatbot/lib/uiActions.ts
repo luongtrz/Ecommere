@@ -23,7 +23,16 @@ import type { QueryKey } from '@tanstack/react-query';
  * to useCartStore, react-router-dom navigate, and TanStack Query client.
  */
 export interface UiActionDeps {
-  addToCart(item: { variantId: string; quantity: number; name?: string; price?: number }): void;
+  addToCart(item: {
+    variantId: string;
+    quantity: number;
+    name?: string;
+    price?: number;
+    productId?: string;
+    image?: string;
+    scent?: string;
+    volumeMl?: number;
+  }): void;
   updateCartItem(variantId: string, quantity: number): void;
   removeFromCart(variantId: string): void;
   clearCart(): void;
@@ -56,6 +65,10 @@ export function applyUiAction(
         const quantity = payload.quantity;
         const name = payload.name;
         const price = payload.price;
+        const productId = payload.productId;
+        const image = payload.image;
+        const scent = payload.scent;
+        const volumeMl = payload.volumeMl;
 
         if (typeof variantId !== 'string' || variantId.trim().length === 0) {
           return;
@@ -81,11 +94,37 @@ export function applyUiAction(
           return;
         }
 
+        if (
+          productId !== undefined &&
+          (typeof productId !== 'string' || productId.trim().length === 0)
+        ) {
+          return;
+        }
+
+        if (image !== undefined && typeof image !== 'string') {
+          return;
+        }
+
+        if (scent !== undefined && typeof scent !== 'string') {
+          return;
+        }
+
+        if (
+          volumeMl !== undefined &&
+          (typeof volumeMl !== 'number' || !Number.isFinite(volumeMl) || volumeMl <= 0)
+        ) {
+          return;
+        }
+
         const item: {
           variantId: string;
           quantity: number;
           name?: string;
           price?: number;
+          productId?: string;
+          image?: string;
+          scent?: string;
+          volumeMl?: number;
         } = {
           variantId,
           quantity,
@@ -97,6 +136,29 @@ export function applyUiAction(
 
         if (typeof price === 'number') {
           item.price = price;
+        }
+
+        if (typeof productId === 'string') {
+          item.productId = productId;
+        }
+
+        if (typeof image === 'string') {
+          item.image = image;
+        } else if (
+          image === undefined &&
+          (typeof productId === 'string' ||
+            typeof scent === 'string' ||
+            typeof volumeMl === 'number')
+        ) {
+          item.image = '';
+        }
+
+        if (typeof scent === 'string') {
+          item.scent = scent;
+        }
+
+        if (typeof volumeMl === 'number') {
+          item.volumeMl = volumeMl;
         }
 
         deps.addToCart?.(item);
