@@ -1069,4 +1069,92 @@ describe('AgentRunner', () => {
       runnerNoCheckpointer.deleteCheckpoints('thread-delete-456'),
     ).resolves.toBeUndefined();
   });
+
+  it('deleteCheckpoints deletes checkpoint_writes, checkpoint_blobs, and checkpoints using the pg pool', async () => {
+    const queryMock = jest.fn().mockResolvedValue({ rowCount: 1 });
+    const mockPool = { query: queryMock };
+
+    const runner = new AgentRunner({
+      graph: {
+        ...createStateGraph({}),
+        checkpointer: { pool: mockPool, schema: 'agent' },
+      },
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runner.deleteCheckpoints('thread-pg-123'),
+    ).resolves.toBeUndefined();
+
+    expect(queryMock).toHaveBeenCalledTimes(3);
+    expect(queryMock).toHaveBeenNthCalledWith(
+      1,
+      'DELETE FROM "agent".checkpoint_writes WHERE thread_id = $1',
+      ['thread-pg-123'],
+    );
+    expect(queryMock).toHaveBeenNthCalledWith(
+      2,
+      'DELETE FROM "agent".checkpoint_blobs WHERE thread_id = $1',
+      ['thread-pg-123'],
+    );
+    expect(queryMock).toHaveBeenNthCalledWith(
+      3,
+      'DELETE FROM "agent".checkpoints WHERE thread_id = $1',
+      ['thread-pg-123'],
+    );
+  });
+
+  it('deleteCheckpoints uses custom schema when specified on checkpointer', async () => {
+    const queryMock = jest.fn().mockResolvedValue({ rowCount: 0 });
+    const mockPool = { query: queryMock };
+
+    const runner = new AgentRunner({
+      graph: {
+        ...createStateGraph({}),
+        checkpointer: { pool: mockPool, schema: 'custom_checkpoints' },
+      },
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runner.deleteCheckpoints('thread-custom-456'),
+    ).resolves.toBeUndefined();
+
+    expect(queryMock).toHaveBeenCalledTimes(3);
+    expect(queryMock).toHaveBeenNthCalledWith(
+      1,
+      'DELETE FROM "custom_checkpoints".checkpoint_writes WHERE thread_id = $1',
+      ['thread-custom-456'],
+    );
+    expect(queryMock).toHaveBeenNthCalledWith(
+      2,
+      'DELETE FROM "custom_checkpoints".checkpoint_blobs WHERE thread_id = $1',
+      ['thread-custom-456'],
+    );
+    expect(queryMock).toHaveBeenNthCalledWith(
+      3,
+      'DELETE FROM "custom_checkpoints".checkpoints WHERE thread_id = $1',
+      ['thread-custom-456'],
+    );
+  });
+
+  it('deleteCheckpoints resolves without error when checkpointer has no pool or deleteThread', async () => {
+    const runner = new AgentRunner({
+      graph: {
+        ...createStateGraph({}),
+        checkpointer: { someOtherProp: true },
+      },
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runner.deleteCheckpoints('thread-no-pool'),
+    ).resolves.toBeUndefined();
+  });
 });

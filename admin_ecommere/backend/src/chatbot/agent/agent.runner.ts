@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Command } from '@langchain/langgraph';
 import {
   HumanMessage,
@@ -8,6 +9,7 @@ import {
 import type { ToolRegistry } from '../tools/tool.registry';
 import type { ToolContext } from '../tools/tool.types';
 import type { AgentStreamEvent } from './sse.frames';
+import { getCheckpointerPool, deleteThreadCheckpoints } from './checkpointer.provider';
 
 export class AgentBusyError extends Error {
   constructor(message = 'Cuộc trò chuyện đang được xử lý') {
@@ -63,6 +65,7 @@ export interface AgentRunParams {
 }
 
 export class AgentRunner {
+  private readonly logger = new Logger(AgentRunner.name);
   private readonly runningThreads = new Set<string>();
   private readonly graph: AgentRunnerDeps['graph'];
   private readonly registry: ToolRegistry;
@@ -228,18 +231,31 @@ export class AgentRunner {
   }
 
   async deleteCheckpoints(threadId: string): Promise<void> {
-    const checkpointer = this.graph.checkpointer as
-      | { deleteThread?: (id: string) => Promise<void> }
-      | boolean
-      | null
-      | undefined;
+    const checkpointer = this.graph.checkpointer;
+    const pool = getCheckpointerPool(checkpointer);
+
+    if (pool && typeof pool.query === 'function') {
+      const rawSchema =
+        typeof (checkpointer as any)?.schema === 'string' &&
+        (checkpointer as any).schema.trim().length > 0
+          ? (checkpointer as any).schema.trim()
+          : 'agent';
+      await deleteThreadCheckpoints(pool, threadId, rawSchema);
+      return;
+    }
+
     if (
       typeof checkpointer === 'object' &&
       checkpointer !== null &&
-      typeof checkpointer.deleteThread === 'function'
+      typeof (checkpointer as any).deleteThread === 'function'
     ) {
-      await checkpointer.deleteThread(threadId);
+      await (checkpointer as any).deleteThread(threadId);
+      return;
     }
+
+    this.logger.warn(
+      `Không tìm thấy pool để xóa checkpoints cho thread ${threadId}`,
+    );
   }
 
   private resolveMessageType(msg: unknown): string {

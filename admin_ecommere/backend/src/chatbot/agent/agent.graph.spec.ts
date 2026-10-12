@@ -783,5 +783,119 @@ describe('LangGraph Agent Graph', () => {
     expect((res as any).__interrupt__[0].value.kind).toBe('confirm');
     expect((res as any).__interrupt__[0].value.calls[0].summary).toBe('Xác nhận đơn hàng ord-300');
   });
+
+  it('case empty id 1: a tool call with an empty or missing id requiring confirmation is treated as declined by confirm node and never reaches handler', async () => {
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: '', name: 'cancel_order', args: { orderId: 'ord-empty-1' } }],
+      }),
+      new AIMessage({ content: 'Đã giữ nguyên đơn hàng.' }),
+    ]);
+    const graph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-empty-1', ctx: customerCtx } };
+    const res1 = await graph.invoke(
+      { messages: [new HumanMessage('Hủy đơn với id rỗng')] },
+      config,
+    );
+
+    expect((res1 as any).__interrupt__).toBeDefined();
+    expect(cancelOrderHandler).not.toHaveBeenCalled();
+
+    const res2 = await graph.invoke(
+      new Command({ resume: { decisions: [{ callId: '', approve: true }] } }),
+      config,
+    );
+
+    expect(cancelOrderHandler).not.toHaveBeenCalled();
+    const toolMsg = res2.messages.find(
+      (m: any) => m.getType() === 'tool' && (!m.tool_call_id || m.tool_call_id === ''),
+    );
+    expect(toolMsg).toBeDefined();
+    const parsed = JSON.parse(toolMsg!.content as string);
+    expect(parsed.ok).toBe(false);
+    expect(parsed.error).toBe('Người dùng đã từ chối thao tác này');
+  });
+
+  it('case empty id 2: a read tool call without an id never reaches handler and returns tool error', async () => {
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: '', name: 'read_catalog', args: { query: 'laptop' } }],
+      }),
+      new AIMessage({ content: 'Lỗi công cụ.' }),
+    ]);
+    const graph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-empty-2', ctx: customerCtx } };
+    const res = await graph.invoke(
+      { messages: [new HumanMessage('Tìm laptop')] },
+      config,
+    );
+
+    expect(readCatalogHandler).not.toHaveBeenCalled();
+    const toolMsg = res.messages.find(
+      (m: any) => m.getType() === 'tool' && (!m.tool_call_id || m.tool_call_id === ''),
+    );
+    expect(toolMsg).toBeDefined();
+    const parsed = JSON.parse(toolMsg!.content as string);
+    expect(parsed.ok).toBe(false);
+    expect(parsed.error).toBe('Mã gọi công cụ không hợp lệ');
+  });
+
+  it('case sequential: approved calls run sequentially in the order the model returned them', async () => {
+    const events: string[] = [];
+    addToCartHandler.mockImplementation(async (args: { itemId: string; quantity: number }) => {
+      events.push(`start:${args.itemId}`);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      events.push(`end:${args.itemId}`);
+      return { success: true, added: args.itemId };
+    });
+
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [
+          { id: 'call_seq_1', name: 'add_to_cart', args: { itemId: 'item-1', quantity: 1 } },
+          { id: 'call_seq_2', name: 'add_to_cart', args: { itemId: 'item-2', quantity: 2 } },
+        ],
+      }),
+      new AIMessage({ content: 'Đã thêm cả hai sản phẩm.' }),
+    ]);
+    const graph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-seq-1', ctx: customerCtx } };
+    await graph.invoke(
+      { messages: [new HumanMessage('Thêm 2 món')] },
+      config,
+    );
+
+    expect(addToCartHandler).toHaveBeenCalledTimes(2);
+    expect(events).toEqual([
+      'start:item-1',
+      'end:item-1',
+      'start:item-2',
+      'end:item-2',
+    ]);
+  });
 });
 
