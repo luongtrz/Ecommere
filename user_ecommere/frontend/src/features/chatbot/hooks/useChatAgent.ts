@@ -428,7 +428,7 @@ export function useChatAgent(): {
         .getState()
         .messages.find((m) => m.id === messageId);
       const calls = message?.confirm?.calls;
-      if (!calls || calls.length === 0) {
+      if (!calls || calls.length === 0 || message?.confirm?.decided) {
         return;
       }
 
