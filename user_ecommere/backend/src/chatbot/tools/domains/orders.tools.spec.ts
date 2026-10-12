@@ -1,0 +1,439 @@
+import { createOrdersTools, OrdersToolDeps, ORDER_STATUSES } from './orders.tools';
+import { ToolContext, AgentToolDef } from '../tool.types';
+import type { OrdersService } from '../../../orders/orders.service';
+
+describe('Orders Tools', () => {
+  let mockOrdersService: {
+    checkout: jest.Mock;
+    getMyOrders: jest.Mock;
+    getMyOrderById: jest.Mock;
+    cancelOrder: jest.Mock;
+  };
+  let tools: AgentToolDef[];
+  let listTool: AgentToolDef;
+  let getTool: AgentToolDef;
+  let cancelTool: AgentToolDef;
+  let checkoutTool: AgentToolDef;
+
+  const validCustomerCtx: ToolContext = {
+    userId: 'user-123',
+    role: 'CUSTOMER',
+    app: 'USER',
+    threadId: 'thread-1',
+    clientContext: {
+      cart: [
+        {
+          variantId: 'var-1',
+          quantity: 2,
+          price: 50000,
+          total: 100000,
+        },
+      ],
+    },
+  };
+
+  const unauthenticatedCtx: ToolContext = {
+    userId: null,
+    role: 'GUEST',
+    app: 'USER',
+    threadId: 'thread-2',
+  };
+
+  beforeEach(() => {
+    mockOrdersService = {
+      checkout: jest.fn(),
+      getMyOrders: jest.fn(),
+      getMyOrderById: jest.fn(),
+      cancelOrder: jest.fn(),
+    };
+
+    const deps: OrdersToolDeps = {
+      orders: mockOrdersService as unknown as OrdersService,
+    };
+
+    tools = createOrdersTools(deps);
+    listTool = tools.find((t) => t.name === 'list_my_orders')!;
+    getTool = tools.find((t) => t.name === 'get_my_order')!;
+    cancelTool = tools.find((t) => t.name === 'cancel_my_order')!;
+    checkoutTool = tools.find((t) => t.name === 'checkout')!;
+  });
+
+  describe('Factory and General Requirements', () => {
+    it('returns exactly 4 tools with unique names', () => {
+      expect(tools).toHaveLength(4);
+      const names = tools.map((t) => t.name);
+      const uniqueNames = new Set(names);
+      expect(uniqueNames.size).toBe(4);
+      expect(names).toEqual([
+        'list_my_orders',
+        'get_my_order',
+        'cancel_my_order',
+        'checkout',
+      ]);
+    });
+
+    it('sets auth to "customer" on all tools', () => {
+      for (const tool of tools) {
+        expect(tool.auth).toBe('customer');
+      }
+    });
+
+    it('sets domain to "orders" on all tools', () => {
+      for (const tool of tools) {
+        expect(tool.domain).toBe('orders');
+      }
+    });
+
+    it('enforces strict schema on all tools (rejects unknown properties)', () => {
+      for (const tool of tools) {
+        const result = tool.schema.safeParse({ unknownProp: 'value' });
+        expect(result.success).toBe(false);
+      }
+    });
+
+    it('does not include userId or role in any schema', () => {
+      for (const tool of tools) {
+        expect(tool.schema.shape).not.toHaveProperty('userId');
+        expect(tool.schema.shape).not.toHaveProperty('role');
+
+        const checkUserId = tool.schema.safeParse({ userId: 'user-1' });
+        expect(checkUserId.success).toBe(false);
+
+        const checkRole = tool.schema.safeParse({ role: 'CUSTOMER' });
+        expect(checkRole.success).toBe(false);
+      }
+    });
+
+    it('throws "Cần đăng nhập để dùng chức năng này" for all tools when ctx.userId is null', async () => {
+      await expect(listTool.handler({}, unauthenticatedCtx)).rejects.toThrow(
+        'Cần đăng nhập để dùng chức năng này',
+      );
+      await expect(
+        getTool.handler({ orderId: 'ord-1' }, unauthenticatedCtx),
+      ).rejects.toThrow('Cần đăng nhập để dùng chức năng này');
+      await expect(
+        cancelTool.handler({ orderId: 'ord-1' }, unauthenticatedCtx),
+      ).rejects.toThrow('Cần đăng nhập để dùng chức năng này');
+      await expect(checkoutTool.handler({}, unauthenticatedCtx)).rejects.toThrow(
+        'Cần đăng nhập để dùng chức năng này',
+      );
+    });
+  });
+
+  describe('list_my_orders', () => {
+    it('has risk READ and expected description', () => {
+      expect(listTool.risk).toBe('READ');
+      expect(listTool.description).toBe(
+        'Danh sách đơn hàng của khách, mới nhất trước. Dùng công cụ này để tìm mã đơn trước khi xem chi tiết.',
+      );
+    });
+
+    it('calls getMyOrders with expected filter arguments', async () => {
+      mockOrdersService.getMyOrders.mockResolvedValue({
+        data: [],
+        total: 0,
+      });
+
+      const args = { status: 'PAID' as const, page: 2, limit: 15 };
+      await listTool.handler(args, validCustomerCtx);
+
+      expect(mockOrdersService.getMyOrders).toHaveBeenCalledTimes(1);
+      expect(mockOrdersService.getMyOrders).toHaveBeenCalledWith('user-123', {
+        status: 'PAID',
+        page: 2,
+        limit: 15,
+      });
+    });
+
+    it('rejects an invalid status', () => {
+      const invalid = listTool.schema.safeParse({ status: 'INVALID_STATUS' });
+      expect(invalid.success).toBe(false);
+    });
+
+    it('accepts each of the seven valid OrderStatus values', () => {
+      for (const status of ORDER_STATUSES) {
+        const res = listTool.schema.safeParse({ status });
+        expect(res.success).toBe(true);
+      }
+    });
+
+    it('validates page and limit range (1..50)', () => {
+      expect(listTool.schema.safeParse({ page: 0 }).success).toBe(false);
+      expect(listTool.schema.safeParse({ page: 51 }).success).toBe(false);
+      expect(listTool.schema.safeParse({ limit: 0 }).success).toBe(false);
+      expect(listTool.schema.safeParse({ limit: 51 }).success).toBe(false);
+      expect(listTool.schema.safeParse({ page: 1, limit: 50 }).success).toBe(true);
+    });
+
+    it('summarize returns a Vietnamese string', () => {
+      expect(listTool.summarize({})).toBe('Xem danh sách đơn hàng');
+      expect(listTool.summarize({ status: 'PAID' })).toContain('PAID');
+    });
+  });
+
+  describe('get_my_order', () => {
+    it('has risk READ and calls getMyOrderById', async () => {
+      expect(getTool.risk).toBe('READ');
+      mockOrdersService.getMyOrderById.mockResolvedValue({
+        id: 'order-123',
+        code: 'ORD-123',
+      });
+
+      const result = await getTool.handler(
+        { orderId: 'order-123' },
+        validCustomerCtx,
+      );
+
+      expect(mockOrdersService.getMyOrderById).toHaveBeenCalledTimes(1);
+      expect(mockOrdersService.getMyOrderById).toHaveBeenCalledWith(
+        'user-123',
+        'order-123',
+      );
+      expect(result).toEqual({ id: 'order-123', code: 'ORD-123' });
+    });
+
+    it('validates orderId string constraints', () => {
+      expect(getTool.schema.safeParse({ orderId: '' }).success).toBe(false);
+      expect(getTool.schema.safeParse({ orderId: 'a'.repeat(65) }).success).toBe(
+        false,
+      );
+      expect(getTool.schema.safeParse({ orderId: 'valid-id-123' }).success).toBe(
+        true,
+      );
+    });
+
+    it('summarize returns a Vietnamese line referencing orderId', () => {
+      const summary = getTool.summarize({ orderId: 'order-123' });
+      expect(summary).toBe('Xem đơn hàng order-123');
+    });
+  });
+
+  describe('cancel_my_order', () => {
+    it('has risk SENSITIVE and expected description', () => {
+      expect(cancelTool.risk).toBe('SENSITIVE');
+      expect(cancelTool.description).toBe(
+        'Hủy đơn hàng. Chỉ hủy được đơn đang chờ thanh toán hoặc đã thanh toán. Không hoàn tác được.',
+      );
+    });
+
+    it('calls cancelOrder with userId and orderId', async () => {
+      mockOrdersService.cancelOrder.mockResolvedValue({
+        id: 'order-999',
+        status: 'CANCELED',
+      });
+
+      const result = await cancelTool.handler(
+        { orderId: 'order-999' },
+        validCustomerCtx,
+      );
+
+      expect(mockOrdersService.cancelOrder).toHaveBeenCalledTimes(1);
+      expect(mockOrdersService.cancelOrder).toHaveBeenCalledWith(
+        'user-123',
+        'order-999',
+      );
+      expect(result).toEqual({ id: 'order-999', status: 'CANCELED' });
+    });
+
+    it('summarize returns "Hủy đơn hàng <orderId>"', () => {
+      expect(cancelTool.summarize({ orderId: 'order-999' })).toBe(
+        'Hủy đơn hàng order-999',
+      );
+    });
+  });
+
+  describe('checkout', () => {
+    it('has risk SENSITIVE and expected description', () => {
+      expect(checkoutTool.risk).toBe('SENSITIVE');
+      expect(checkoutTool.description).toBe(
+        'Đặt đơn từ giỏ hàng hiện tại của khách. Giá và phí ship do máy chủ tính lại. Thanh toán thực hiện trên trang đơn hàng.',
+      );
+    });
+
+    it('rejects a model argument named items or userId via strict schema', () => {
+      const withItems = checkoutTool.schema.safeParse({
+        items: [{ variantId: 'v1', quantity: 1 }],
+      });
+      expect(withItems.success).toBe(false);
+
+      const withUserId = checkoutTool.schema.safeParse({
+        userId: 'some-user',
+      });
+      expect(withUserId.success).toBe(false);
+    });
+
+    it('defaults shippingMethod to STANDARD and paymentMethod to COD', () => {
+      const parsed = checkoutTool.schema.parse({});
+      expect(parsed.shippingMethod).toBe('STANDARD');
+      expect(parsed.paymentMethod).toBe('COD');
+    });
+
+    it('throws "Giỏ hàng đang trống" when clientContext.cart is missing or empty', async () => {
+      const missingClientCtx: ToolContext = {
+        userId: 'user-123',
+        role: 'CUSTOMER',
+        app: 'USER',
+        threadId: 't-1',
+      };
+      await expect(
+        checkoutTool.handler({}, missingClientCtx),
+      ).rejects.toThrow('Giỏ hàng đang trống');
+
+      const nullCartCtx: ToolContext = {
+        ...missingClientCtx,
+        clientContext: { cart: null },
+      };
+      await expect(checkoutTool.handler({}, nullCartCtx)).rejects.toThrow(
+        'Giỏ hàng đang trống',
+      );
+
+      const emptyCartCtx: ToolContext = {
+        ...missingClientCtx,
+        clientContext: { cart: [] },
+      };
+      await expect(checkoutTool.handler({}, emptyCartCtx)).rejects.toThrow(
+        'Giỏ hàng đang trống',
+      );
+    });
+
+    it('sends no price or total fields to the service even when present in cart items (strip them)', async () => {
+      mockOrdersService.checkout.mockResolvedValue({
+        id: 'order-res-1',
+        code: 'ORD-2026-001',
+        status: 'PENDING_PAYMENT',
+        paymentStatus: 'PENDING',
+        total: 100000,
+        createdAt: new Date(),
+        items: [{ id: 'item-1' }],
+      });
+
+      const ctxWithExtraFields: ToolContext = {
+        userId: 'user-123',
+        role: 'CUSTOMER',
+        app: 'USER',
+        threadId: 'thread-1',
+        clientContext: {
+          cart: [
+            {
+              variantId: 'var-1',
+              quantity: 2,
+              price: 50000,
+              total: 100000,
+              salePrice: 45000,
+              unitPrice: 50000,
+              lineTotal: 100000,
+            },
+            {
+              variantId: 'var-2',
+              quantity: 1,
+              price: 30000,
+              total: 30000,
+            },
+          ],
+        },
+      };
+
+      await checkoutTool.handler(
+        { addressId: 'addr-001' },
+        ctxWithExtraFields,
+      );
+
+      expect(mockOrdersService.checkout).toHaveBeenCalledTimes(1);
+      const [userIdArg, dtoArg] = mockOrdersService.checkout.mock.calls[0];
+      expect(userIdArg).toBe('user-123');
+
+      // Check DTO does not have root price, shippingFee, or total
+      expect(dtoArg).not.toHaveProperty('total');
+      expect(dtoArg).not.toHaveProperty('price');
+      expect(dtoArg).not.toHaveProperty('shippingFee');
+      expect(dtoArg).not.toHaveProperty('subtotal');
+
+      expect(dtoArg.addressId).toBe('addr-001');
+      expect(dtoArg.paymentMethod).toBe('COD');
+      expect(dtoArg.shippingMethod).toBe('STANDARD');
+
+      // Check items have ONLY variantId and quantity
+      expect(dtoArg.items).toEqual([
+        { variantId: 'var-1', quantity: 2 },
+        { variantId: 'var-2', quantity: 1 },
+      ]);
+      for (const item of dtoArg.items) {
+        expect(item).not.toHaveProperty('price');
+        expect(item).not.toHaveProperty('total');
+        expect(item).not.toHaveProperty('salePrice');
+        expect(item).not.toHaveProperty('unitPrice');
+        expect(item).not.toHaveProperty('lineTotal');
+      }
+    });
+
+    it('supports custom shippingMethod and paymentMethod', async () => {
+      mockOrdersService.checkout.mockResolvedValue({ id: 'ord-1' });
+
+      await checkoutTool.handler(
+        {
+          addressId: 'addr-xyz',
+          shippingMethod: 'EXPRESS',
+          paymentMethod: 'BANK_TRANSFER',
+        },
+        validCustomerCtx,
+      );
+
+      expect(mockOrdersService.checkout).toHaveBeenCalledWith('user-123', {
+        addressId: 'addr-xyz',
+        shippingMethod: 'EXPRESS',
+        paymentMethod: 'BANK_TRANSFER',
+        items: [{ variantId: 'var-1', quantity: 2 }],
+      });
+    });
+
+    it('project() keeps id, code, status, paymentStatus, total, createdAt, and itemCount while stripping other fields', () => {
+      const now = new Date();
+      const rawOrder = {
+        id: 'ord-999',
+        code: 'ORD-CODE-999',
+        status: 'PENDING_PAYMENT',
+        paymentStatus: 'PENDING',
+        total: 250000,
+        createdAt: now,
+        userId: 'user-123',
+        subtotal: 220000,
+        shippingFee: 30000,
+        addressId: 'addr-1',
+        address: { province: 'Hà Nội' },
+        items: [
+          { id: 'item-1', variantId: 'v-1', quantity: 2 },
+          { id: 'item-2', variantId: 'v-2', quantity: 1 },
+        ],
+        extraField: 'should-be-omitted',
+      };
+
+      const projected = checkoutTool.project!(rawOrder) as Record<string, unknown>;
+
+      expect(projected).toEqual({
+        id: 'ord-999',
+        code: 'ORD-CODE-999',
+        status: 'PENDING_PAYMENT',
+        paymentStatus: 'PENDING',
+        total: 250000,
+        createdAt: now,
+        itemCount: 2,
+      });
+
+      expect(projected).not.toHaveProperty('userId');
+      expect(projected).not.toHaveProperty('items');
+      expect(projected).not.toHaveProperty('subtotal');
+      expect(projected).not.toHaveProperty('shippingFee');
+      expect(projected).not.toHaveProperty('address');
+      expect(projected).not.toHaveProperty('extraField');
+    });
+
+    it('summarize() describes the cart checkout and the shipping method', () => {
+      expect(checkoutTool.summarize({ shippingMethod: 'EXPRESS' })).toBe(
+        'Đặt đơn từ giỏ hàng hiện tại, giao hàng nhanh',
+      );
+      expect(checkoutTool.summarize({})).toBe(
+        'Đặt đơn từ giỏ hàng hiện tại, giao hàng tiêu chuẩn',
+      );
+    });
+  });
+});
