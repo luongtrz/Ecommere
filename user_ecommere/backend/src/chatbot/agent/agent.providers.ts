@@ -18,6 +18,7 @@ import { OrdersService } from '../../orders/orders.service';
 import { ReviewsService } from '../../reviews/reviews.service';
 import { CouponsService } from '../../coupons/coupons.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CartService } from '../../cart/cart.service';
 
 export const AGENT_CONFIG = 'AGENT_CONFIG';
 export const AGENT_CHECKPOINTER = 'AGENT_CHECKPOINTER';
@@ -56,6 +57,7 @@ export const agentProviders: Provider[] = [
       reviews: ReviewsService,
       coupons: CouponsService,
       prisma: PrismaService,
+      cart: CartService,
     ) =>
       buildUserToolRegistry({
         products,
@@ -67,6 +69,7 @@ export const agentProviders: Provider[] = [
         reviews,
         coupons,
         prisma,
+        cart,
       }),
     inject: [
       ProductsService,
@@ -78,6 +81,7 @@ export const agentProviders: Provider[] = [
       ReviewsService,
       CouponsService,
       PrismaService,
+      CartService,
     ],
   },
   {

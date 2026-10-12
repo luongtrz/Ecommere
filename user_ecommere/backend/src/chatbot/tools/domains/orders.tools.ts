@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
 import type { OrdersService } from '../../../orders/orders.service';
+import type { CartService } from '../../../cart/cart.service';
 import { MoneyUtil } from '../../../common/utils/money.util';
 
 export const ORDER_STATUSES = [
@@ -17,6 +18,7 @@ export const SHIPPING_METHODS = ['STANDARD', 'EXPRESS'] as const;
 
 export type OrdersToolDeps = {
   orders: OrdersService;
+  cart: CartService;
 };
 
 export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
@@ -115,12 +117,24 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
         throw new Error('Cần đăng nhập để dùng chức năng này');
       }
 
-      const rawCart = ctx.clientContext?.cart;
-      const cartItems = Array.isArray(rawCart)
-        ? rawCart
-        : rawCart && typeof rawCart === 'object' && Array.isArray((rawCart as any).items)
-          ? (rawCart as any).items
-          : null;
+      const cart = await deps.cart.getCart(ctx.userId);
+
+      let cartItems: any[] | null = null;
+      let cartId: string | null = null;
+      let couponCode: string | null = null;
+
+      if (cart) {
+        cartItems = Array.isArray(cart.items) ? cart.items : null;
+        cartId = cart.id ?? null;
+        couponCode = cart.coupon?.code ?? null;
+      } else {
+        const rawCart = ctx.clientContext?.cart;
+        cartItems = Array.isArray(rawCart)
+          ? rawCart
+          : rawCart && typeof rawCart === 'object' && Array.isArray((rawCart as any).items)
+            ? (rawCart as any).items
+            : null;
+      }
 
       if (!cartItems || cartItems.length === 0) {
         throw new Error('Giỏ hàng đang trống');
@@ -139,6 +153,8 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
         items,
         paymentMethod,
         shippingMethod,
+        ...(cartId ? { cartId } : {}),
+        ...(couponCode ? { couponCode } : {}),
       };
 
       return deps.orders.checkout(ctx.userId, checkoutDto);
@@ -152,12 +168,22 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
         return undefined;
       }
 
-      const rawCart = ctx.clientContext?.cart;
-      const cartItems = Array.isArray(rawCart)
-        ? rawCart
-        : rawCart && typeof rawCart === 'object' && Array.isArray((rawCart as any).items)
-          ? (rawCart as any).items
-          : null;
+      const cart = await deps.cart.getCart(ctx.userId);
+
+      let cartItems: any[] | null = null;
+      let couponCodeFromCart: string | null = null;
+
+      if (cart) {
+        cartItems = Array.isArray(cart.items) ? cart.items : null;
+        couponCodeFromCart = cart.coupon?.code ?? null;
+      } else {
+        const rawCart = ctx.clientContext?.cart;
+        cartItems = Array.isArray(rawCart)
+          ? rawCart
+          : rawCart && typeof rawCart === 'object' && Array.isArray((rawCart as any).items)
+            ? (rawCart as any).items
+            : null;
+      }
 
       if (!cartItems || cartItems.length === 0) {
         return undefined;
@@ -208,7 +234,7 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
       parts.push(`phí vận chuyển ${MoneyUtil.format(previewData.shippingFee)}`);
 
       // Optional note if args has a coupon code
-      const couponCode = args?.couponCode || (args as any)?.coupon;
+      const couponCode = args?.couponCode || (args as any)?.coupon || couponCodeFromCart;
       if (couponCode && typeof couponCode === 'string' && couponCode.trim().length > 0) {
         parts.push(`mã giảm giá ${couponCode.trim()} sẽ được áp dụng khi đặt đơn`);
       }
