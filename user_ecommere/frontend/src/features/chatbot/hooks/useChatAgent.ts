@@ -213,10 +213,17 @@ export function useChatAgent(): {
               tools: updatedTools,
             });
 
-            if (resData.ok === true && !isCartTool(resData.name)) {
-              const keys = keysForTool(resData.name);
-              for (const queryKey of keys) {
-                queryClient.invalidateQueries({ queryKey });
+            if (resData.ok === true) {
+              if (resData.name === 'checkout') {
+                useCartStore.getState().clearCart();
+                queryClient.invalidateQueries({ queryKey: ['cart'] });
+              }
+
+              if (!isCartTool(resData.name)) {
+                const keys = keysForTool(resData.name);
+                for (const queryKey of keys) {
+                  queryClient.invalidateQueries({ queryKey });
+                }
               }
             }
           }

@@ -1,5 +1,6 @@
 import apiClient from '@/lib/api';
 import { streamAgentRequest, type SseMessage } from './sse';
+import { getChatSessionId } from '../lib/session';
 
 export interface AgentDecision {
   callId: string;
@@ -66,21 +67,74 @@ export function resumeTurn(
  */
 export const agentApi = {
   async listThreads(): Promise<AgentThreadSummary[]> {
-    const response = await apiClient.get('/chatbot/threads');
+    const response = await apiClient.get('/chatbot/threads', {
+      headers: {
+        'X-Chat-Session': getChatSessionId(),
+      },
+    });
     return (response.data?.data ?? response.data) as AgentThreadSummary[];
   },
 
   async getThread(threadId: string): Promise<AgentThreadSummary> {
     const response = await apiClient.get(
-      `/chatbot/threads/${encodeURIComponent(threadId)}`
+      `/chatbot/threads/${encodeURIComponent(threadId)}`,
+      {
+        headers: {
+          'X-Chat-Session': getChatSessionId(),
+        },
+      }
     );
     return (response.data?.data ?? response.data) as AgentThreadSummary;
   },
 
   async deleteThread(threadId: string): Promise<{ deleted: boolean }> {
     const response = await apiClient.delete(
-      `/chatbot/threads/${encodeURIComponent(threadId)}`
+      `/chatbot/threads/${encodeURIComponent(threadId)}`,
+      {
+        headers: {
+          'X-Chat-Session': getChatSessionId(),
+        },
+      }
     );
     return (response.data?.data ?? response.data) as { deleted: boolean };
   },
+
+  async getTranscript(threadId: string): Promise<any> {
+    const response = await apiClient.get(
+      `/chatbot/threads/${encodeURIComponent(threadId)}/messages`,
+      {
+        headers: {
+          'X-Chat-Session': getChatSessionId(),
+        },
+      }
+    );
+    return response.data?.data ?? response.data;
+  },
+
+  async getMessages(threadId: string): Promise<any> {
+    const response = await apiClient.get(
+      `/chatbot/threads/${encodeURIComponent(threadId)}/messages`,
+      {
+        headers: {
+          'X-Chat-Session': getChatSessionId(),
+        },
+      }
+    );
+    return response.data?.data ?? response.data;
+  },
+
+  async sendMessage(prompt: string, sessionId?: string): Promise<any> {
+    const response = await apiClient.post(
+      '/chatbot/messages',
+      { prompt, sessionId },
+      {
+        headers: {
+          'X-Chat-Session': getChatSessionId(),
+        },
+      }
+    );
+    return response.data?.data ?? response.data;
+  },
 };
+
+export { getChatSessionId } from '../lib/session';

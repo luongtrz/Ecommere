@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { StateStorage } from 'zustand/middleware';
 import type { ChatMessage } from '../types';
+import { getChatSessionId, formatChatOwnerKey } from '../lib/session';
 
 export interface ChatState {
   ownerId: string | null;
@@ -70,16 +71,17 @@ const safeLocalStorage: StateStorage = {
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
-      ownerId: null,
+      ownerId: formatChatOwnerKey(null),
       threadId: null,
       messages: [],
       open: false,
 
       claimOwner: (ownerId: string | null) => {
-        if (get().ownerId === ownerId) {
+        const nextOwnerKey = formatChatOwnerKey(ownerId);
+        if (get().ownerId === nextOwnerKey) {
           return;
         }
-        set({ ownerId, threadId: null, messages: [] });
+        set({ ownerId: nextOwnerKey, threadId: null, messages: [] });
       },
 
       setThreadId: (id: string | null) => {
@@ -109,6 +111,15 @@ export const useChatStore = create<ChatState>()(
     {
       name: 'thai-spray-chat',
       storage: createJSONStorage(() => safeLocalStorage),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        const currentGuestKey = `guest:${getChatSessionId()}`;
+        if (!state.ownerId || (state.ownerId.startsWith('guest:') && state.ownerId !== currentGuestKey)) {
+          state.ownerId = currentGuestKey;
+          state.threadId = null;
+          state.messages = [];
+        }
+      },
       partialize: (state): ChatPersistedState => ({
         ownerId: state.ownerId,
         threadId: state.threadId,
@@ -119,3 +130,4 @@ export const useChatStore = create<ChatState>()(
 );
 
 export const chatStore = useChatStore;
+export { getChatSessionId, formatChatOwnerKey } from '../lib/session';

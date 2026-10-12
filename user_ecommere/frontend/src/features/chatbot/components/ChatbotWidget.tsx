@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useChatAgent } from '../hooks/useChatAgent';
 import { useChatStore } from '../store/chatStore';
+import { formatChatOwnerKey } from '../lib/session';
 import { ToolCallCard } from './ToolCallCard';
 import { ConfirmActionCard } from './ConfirmActionCard';
 import { ChatMarkdown } from './ChatMarkdown';
@@ -61,18 +62,18 @@ export function ChatbotWidget() {
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
   const wasOpenRef = useRef(open);
 
-  // Sync conversation ownership with signed-in user
+  const ownerKey = formatChatOwnerKey(user ? user.id : null);
+
+  // Sync conversation ownership with signed-in user or guest session
   useEffect(() => {
     if (user === undefined) return;
-    const id = user ? user.id : null;
-    if (useChatStore.getState().ownerId !== id) {
+    if (useChatStore.getState().ownerId !== ownerKey) {
       newThread();
-      claimOwner(id);
+      claimOwner(ownerKey);
     }
-  }, [user, newThread, claimOwner]);
+  }, [user, ownerKey, newThread, claimOwner]);
 
-  const currentUserId = user ? user.id : null;
-  const isOwnerMatch = user !== undefined && ownerId === currentUserId;
+  const isOwnerMatch = user !== undefined && ownerId === ownerKey;
   const visibleMessages = isOwnerMatch ? messages : [];
 
   // Escape closes the panel

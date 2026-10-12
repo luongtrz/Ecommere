@@ -243,22 +243,44 @@ export async function streamAgentRequest(
   const decoder = new TextDecoder('utf-8');
   const parser = createSseParser(onMessage);
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    if (value) {
-      const chunk = decoder.decode(value, { stream: true });
-      if (chunk) {
-        parser.push(chunk);
+  let hasError = false;
+  let streamError: unknown = null;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      if (value) {
+        const chunk = decoder.decode(value, { stream: true });
+        if (chunk) {
+          parser.push(chunk);
+        }
       }
     }
-  }
 
-  const finalChunk = decoder.decode();
-  if (finalChunk) {
-    parser.push(finalChunk);
+    const finalChunk = decoder.decode();
+    if (finalChunk) {
+      parser.push(finalChunk);
+    }
+    parser.end();
+  } catch (err) {
+    hasError = true;
+    streamError = err;
+    throw err;
+  } finally {
+    if (hasError) {
+      try {
+        await reader.cancel(streamError);
+      } catch {
+        // Bỏ qua lỗi khi cancel stream
+      }
+    }
+    try {
+      reader.releaseLock();
+    } catch {
+      // Bỏ qua lỗi nếu lock đã được giải phóng
+    }
   }
-  parser.end();
 }

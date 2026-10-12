@@ -21,6 +21,7 @@ export function isCartTool(toolName: string): boolean {
 export function keysForTool(toolName: string): QueryKey[] {
   switch (toolName) {
     case 'checkout':
+      return [['orders'], ['order-detail'], ['cart']];
     case 'cancel_my_order':
       return [['orders'], ['order-detail']];
     case 'update_my_profile':
