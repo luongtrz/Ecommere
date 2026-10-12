@@ -808,7 +808,10 @@ describe('AgentRunner', () => {
       values: {
         messages: [
           new HumanMessage({
-            content: ['Tôi muốn tìm ', 'sơn Samurai màu đen'],
+            content: [
+              { type: 'text', text: 'Tôi muốn tìm ' },
+              { type: 'text', text: 'sơn Samurai màu đen' },
+            ],
             id: 'h-parts',
           }),
           new AIMessage({
