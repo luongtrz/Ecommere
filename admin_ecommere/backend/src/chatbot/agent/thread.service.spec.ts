@@ -51,6 +51,7 @@ describe('ThreadService', () => {
       mockPrismaService.agentThread.create.mockResolvedValue({
         id: 'mock-id',
         userId: 'user-1',
+        sessionKeyHash: null,
         app: 'USER',
         title: null,
         totalTokens: 0,
@@ -68,6 +69,7 @@ describe('ThreadService', () => {
         data: {
           id: result.id,
           userId: 'user-1',
+          sessionKeyHash: null,
           app: 'USER',
         },
       });
@@ -78,6 +80,7 @@ describe('ThreadService', () => {
       mockPrismaService.agentThread.create.mockResolvedValue({
         id: 'mock-id',
         userId: null,
+        sessionKeyHash: null,
         app: 'USER',
         title: null,
         totalTokens: 0,
@@ -95,6 +98,40 @@ describe('ThreadService', () => {
         data: {
           id: result.id,
           userId: null,
+          sessionKeyHash: null,
+          app: 'USER',
+        },
+      });
+    });
+
+    it('creates a guest thread with sessionKeyHash and a UUID-shaped id', async () => {
+      const actor: AgentActor = {
+        userId: null,
+        app: 'USER',
+        sessionKeyHash: 'guest-hash-1',
+      };
+      mockPrismaService.agentThread.create.mockResolvedValue({
+        id: 'mock-id',
+        userId: null,
+        sessionKeyHash: 'guest-hash-1',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.create(actor);
+
+      expect(result.id).toBeDefined();
+      expect(result.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
+      expect(mockPrismaService.agentThread.create).toHaveBeenCalledWith({
+        data: {
+          id: result.id,
+          userId: null,
+          sessionKeyHash: 'guest-hash-1',
           app: 'USER',
         },
       });
@@ -106,6 +143,7 @@ describe('ThreadService', () => {
       const mockThread = {
         id: 't-user',
         userId: 'user-1',
+        sessionKeyHash: null,
         app: 'USER',
         title: null,
         totalTokens: 0,
@@ -122,10 +160,11 @@ describe('ThreadService', () => {
       });
     });
 
-    it('returns thread when owned by a guest with matching app', async () => {
+    it('returns thread for a guest with matching hash', async () => {
       const mockThread = {
         id: 't-guest',
         userId: null,
+        sessionKeyHash: 'hash-guest-1',
         app: 'USER',
         title: null,
         totalTokens: 0,
@@ -134,9 +173,100 @@ describe('ThreadService', () => {
       };
       mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
 
-      const result = await service.assertOwned('t-guest', { userId: null, app: 'USER' });
+      const result = await service.assertOwned('t-guest', {
+        userId: null,
+        app: 'USER',
+        sessionKeyHash: 'hash-guest-1',
+      });
 
       expect(result).toBe(mockThread);
+    });
+
+    it('throws 404 NotFoundException for a guest with different hash', async () => {
+      const mockThread = {
+        id: 't-guest',
+        userId: null,
+        sessionKeyHash: 'hash-guest-1',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
+
+      await expect(
+        service.assertOwned('t-guest', {
+          userId: null,
+          app: 'USER',
+          sessionKeyHash: 'hash-guest-2',
+        }),
+      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+    });
+
+    it('throws 404 NotFoundException for a guest without hash', async () => {
+      const mockThread = {
+        id: 't-guest',
+        userId: null,
+        sessionKeyHash: 'hash-guest-1',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
+
+      await expect(
+        service.assertOwned('t-guest', {
+          userId: null,
+          app: 'USER',
+        }),
+      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+    });
+
+    it('throws 404 NotFoundException for a logged-in actor on guest thread', async () => {
+      const mockThread = {
+        id: 't-guest',
+        userId: null,
+        sessionKeyHash: 'hash-guest-1',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
+
+      await expect(
+        service.assertOwned('t-guest', {
+          userId: 'user-1',
+          app: 'USER',
+          sessionKeyHash: 'hash-guest-1',
+        }),
+      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+    });
+
+    it('throws 404 NotFoundException for a guest thread with null sessionKeyHash (legacy)', async () => {
+      const mockThread = {
+        id: 't-guest-legacy',
+        userId: null,
+        sessionKeyHash: null,
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
+
+      await expect(
+        service.assertOwned('t-guest-legacy', {
+          userId: null,
+          app: 'USER',
+          sessionKeyHash: 'hash-guest-1',
+        }),
+      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
     });
 
     it('throws 404 NotFoundException if thread is not found', async () => {

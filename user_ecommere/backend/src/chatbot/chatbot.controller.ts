@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import {
   Body,
   Controller,
@@ -418,10 +419,32 @@ export class ChatbotController {
 
   private getActor(req: Request): AgentActor {
     const user = (req as any)?.user;
-    return {
+    const actor: AgentActor = {
       userId: user?.id ?? null,
       app: 'USER',
     };
+
+    const rawHeader =
+      (typeof req.header === 'function' ? req.header('x-chat-session') : undefined) ??
+      req.headers?.['x-chat-session'] ??
+      req.headers?.['X-Chat-Session'] ??
+      (req.headers &&
+        Object.entries(req.headers).find(
+          ([k]) => k.toLowerCase() === 'x-chat-session',
+        )?.[1]);
+    const sessionKey = Array.isArray(rawHeader) ? rawHeader[0] : rawHeader;
+
+    if (
+      typeof sessionKey === 'string' &&
+      sessionKey.length >= 16 &&
+      sessionKey.length <= 128
+    ) {
+      actor.sessionKeyHash = createHash('sha256')
+        .update(sessionKey)
+        .digest('hex');
+    }
+
+    return actor;
   }
 
   private getRole(req: Request): AgentRole {
