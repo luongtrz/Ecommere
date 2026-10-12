@@ -29,16 +29,16 @@ import type { QueryKey } from '@tanstack/react-query';
  *    - get_stock_history (read-only) -> []
  *
  * 4. Categories (Danh mục):
- *    CategoryTreeView fetches its data directly (categoriesApi.getTree()) and is not a TanStack query;
- *    no query key is cached on the frontend, so mutating tools invalidate nothing ([]).
- *    - create_category (mutating, not cached in TanStack Query) -> []
- *    - update_category (mutating, not cached in TanStack Query) -> []
- *    - delete_category (mutating, not cached in TanStack Query) -> []
+ *    CategoryNav in the header reads the 'categories' key through TanStack Query, so mutating tools
+ *    invalidate it. CategoryTreeView fetches its tree directly and reloads when it is mounted again.
+ *    - create_category (mutating) -> [['categories']]
+ *    - update_category (mutating) -> [['categories']]
+ *    - delete_category (mutating) -> [['categories']]
  *    - list_categories (read-only) -> []
  *
  * 5. Coupons (Mã giảm giá):
- *    The admin coupons tab is currently a placeholder without a TanStack query cache.
- *    No coupon query exists on the frontend, so mutating tools invalidate nothing ([]).
+ *    No admin query lists promo-code coupons. AdminCouponsPage only shows referral data (section 6),
+ *    so coupon tools invalidate nothing ([]).
  *    - create_coupon (mutating, no frontend query cache) -> []
  *    - update_coupon (mutating, no frontend query cache) -> []
  *    - delete_coupon (mutating, no frontend query cache) -> []
@@ -90,6 +90,10 @@ const REFERRAL_CONFIG_KEYS: QueryKey[] = [
   ['admin-referral-stats'],
 ];
 
+const CATEGORY_KEYS: QueryKey[] = [
+  ['categories'],
+];
+
 const EMPTY_KEYS: QueryKey[] = [];
 
 export const TOOL_KEYS_MAP: Record<string, QueryKey[]> = {
@@ -109,12 +113,12 @@ export const TOOL_KEYS_MAP: Record<string, QueryKey[]> = {
   stock_remove: PRODUCT_KEYS,
   stock_set: PRODUCT_KEYS,
 
-  // Categories (CategoryTreeView fetches directly; not in TanStack Query)
-  create_category: EMPTY_KEYS,
-  update_category: EMPTY_KEYS,
-  delete_category: EMPTY_KEYS,
+  // Categories (CategoryNav reads 'categories' through TanStack Query)
+  create_category: CATEGORY_KEYS,
+  update_category: CATEGORY_KEYS,
+  delete_category: CATEGORY_KEYS,
 
-  // Coupons (placeholder tab; no TanStack Query on frontend)
+  // Coupons (no admin query lists promo codes)
   create_coupon: EMPTY_KEYS,
   update_coupon: EMPTY_KEYS,
   delete_coupon: EMPTY_KEYS,
