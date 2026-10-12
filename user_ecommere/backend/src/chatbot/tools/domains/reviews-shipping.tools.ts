@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 import type { ReviewsService } from '../../../reviews/reviews.service';
 import type { CouponsService } from '../../../coupons/coupons.service';
 import type { OrdersService } from '../../../orders/orders.service';
@@ -93,7 +94,7 @@ export function createReviewsShippingTools(
     risk: 'SENSITIVE',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.reviews.createReview(ctx.userId, {
         productId: args.productId,
@@ -132,7 +133,7 @@ export function createReviewsShippingTools(
     risk: 'READ',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.reviews.getMyReviews(ctx.userId, {
         page: args.page,
@@ -160,10 +161,10 @@ export function createReviewsShippingTools(
     risk: 'SENSITIVE',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       if (args.rating === undefined && args.content === undefined) {
-        throw new Error('Ít nhất một trong hai trường rating hoặc content phải có');
+        throw new ToolError('Ít nhất một trong hai trường rating hoặc content phải có');
       }
       const fields: { rating?: number; content?: string } = {};
       if (args.rating !== undefined) {
@@ -204,7 +205,7 @@ export function createReviewsShippingTools(
     risk: 'DESTRUCTIVE',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.reviews.deleteReview(ctx.userId, args.reviewId);
     },
@@ -226,7 +227,7 @@ export function createReviewsShippingTools(
     risk: 'READ',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.coupons.validateCoupon(
         args.code,

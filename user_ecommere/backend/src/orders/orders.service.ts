@@ -6,6 +6,7 @@ import { Prisma, CouponType, OrderStatus, PaymentStatus, StockMovementType } fro
 import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
+import { calculateShippingFee } from '../shipping/shipping.rules';
 
 @Injectable()
 export class OrdersService {
@@ -862,23 +863,14 @@ export class OrdersService {
     return { subtotal, shippingFee };
   }
 
-  private calculateShippingFee(address: any, shippingMethod: ShippingMethod): number {
-    // Mock shipping calculation - flat rate based on province
-    // In real implementation, this would integrate with shipping provider API
-    const provinceLowerCase = address.province.toLowerCase();
-
-    // Free shipping for Bangkok and surrounding areas
-    if (
-      provinceLowerCase.includes('bangkok') ||
-      provinceLowerCase.includes('กรุงเทพ') ||
-      provinceLowerCase.includes('nonthaburi') ||
-      provinceLowerCase.includes('นนทบุรี')
-    ) {
-      return 0;
-    }
-
-    // Match the shipping options exposed by both frontends.
-    return shippingMethod === ShippingMethod.EXPRESS ? 50000 : 30000;
+  private calculateShippingFee(
+    address: any,
+    shippingMethod?: ShippingMethod,
+  ): number {
+    return calculateShippingFee({
+      province: address?.province,
+      method: shippingMethod,
+    });
   }
 
   private validateStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus) {

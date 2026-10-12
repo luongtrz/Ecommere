@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 import type { UsersService } from '../../../users/users.service';
 import type { ReferralsService } from '../../../referrals/referrals.service';
 
@@ -62,7 +63,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
     risk: 'READ',
     handler: async (_args: Record<string, never>, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.users.getProfile(ctx.userId);
     },
@@ -92,10 +93,10 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       ctx: ToolContext,
     ) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       if (args.name === undefined && args.phone === undefined) {
-        throw new Error('Ít nhất một trong hai trường name hoặc phone phải có');
+        throw new ToolError('Ít nhất một trong hai trường name hoặc phone phải có');
       }
       const fields: { name?: string; phone?: string } = {};
       if (args.name !== undefined) {
@@ -131,7 +132,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
     risk: 'READ',
     handler: async (_args: Record<string, never>, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.users.getAddresses(ctx.userId);
     },
@@ -172,7 +173,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       ctx: ToolContext,
     ) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       const dto: {
         fullName: string;
@@ -262,7 +263,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       ctx: ToolContext,
     ) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       const fields: {
         fullName?: string;
@@ -282,7 +283,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       if (args.isDefault !== undefined) fields.isDefault = args.isDefault;
 
       if (Object.keys(fields).length === 0) {
-        throw new Error('Cần ít nhất một trường để cập nhật địa chỉ');
+        throw new ToolError('Cần ít nhất một trường để cập nhật địa chỉ');
       }
 
       return deps.users.updateAddress(ctx.userId, args.addressId, fields);
@@ -342,7 +343,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
     risk: 'DESTRUCTIVE',
     handler: async (args: { addressId: string }, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.users.deleteAddress(ctx.userId, args.addressId);
     },
@@ -360,7 +361,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
     risk: 'READ',
     handler: async (_args: Record<string, never>, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.referrals.getMyReferralInfo(ctx.userId);
     },
@@ -385,7 +386,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       ctx: ToolContext,
     ) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.referrals.getMyReferrals(ctx.userId, {
         page: args.page,
@@ -410,7 +411,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
     risk: 'READ',
     handler: async (_args: Record<string, never>, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.referrals.getMyCouponsFromReferral(ctx.userId);
     },
