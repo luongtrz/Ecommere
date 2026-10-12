@@ -695,6 +695,28 @@ export class OrdersService {
     });
   }
 
+  quoteShippingFee(
+    province: string,
+    shippingMethod?: ShippingMethod,
+  ): { province: string; shippingMethod: ShippingMethod; fee: number } {
+    const trimmedProvince = typeof province === 'string' ? province.trim() : '';
+    if (!trimmedProvince) {
+      throw new BadRequestException('Vui lòng nhập tỉnh/thành phố');
+    }
+
+    const selectedShippingMethod = shippingMethod ?? ShippingMethod.STANDARD;
+    const fee = this.calculateShippingFee(
+      { province: trimmedProvince },
+      selectedShippingMethod,
+    );
+
+    return {
+      province: trimmedProvince,
+      shippingMethod: selectedShippingMethod,
+      fee,
+    };
+  }
+
   private async generateOrderNumber(): Promise<string> {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);

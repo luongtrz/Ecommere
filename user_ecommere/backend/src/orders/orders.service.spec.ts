@@ -3,6 +3,7 @@ import { OrdersService } from './orders.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { OrderStatus, PaymentStatus } from '@prisma/client';
+import { ShippingMethod } from './dtos/checkout.dto';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -403,6 +404,88 @@ describe('OrdersService', () => {
 
       await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(BadRequestException);
       await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Order cannot be cancelled at this stage');
+    });
+  });
+
+  describe('quoteShippingFee', () => {
+    it('should throw BadRequestException when province is empty', () => {
+      expect(() => service.quoteShippingFee('')).toThrow(BadRequestException);
+      expect(() => service.quoteShippingFee('')).toThrow('Vui lòng nhập tỉnh/thành phố');
+      expect(() => service.quoteShippingFee('   ')).toThrow(BadRequestException);
+      expect(() => service.quoteShippingFee('   ')).toThrow('Vui lòng nhập tỉnh/thành phố');
+    });
+
+    it('should return 0 for a Bangkok quote', () => {
+      const result = service.quoteShippingFee('Bangkok');
+
+      expect(result).toEqual({
+        province: 'Bangkok',
+        shippingMethod: ShippingMethod.STANDARD,
+        fee: 0,
+      });
+
+      const expressResult = service.quoteShippingFee('Bangkok', ShippingMethod.EXPRESS);
+      expect(expressResult).toEqual({
+        province: 'Bangkok',
+        shippingMethod: ShippingMethod.EXPRESS,
+        fee: 0,
+      });
+    });
+
+    it('should return the same fee as calculateShippingFee for a non-free province with STANDARD and EXPRESS', () => {
+      const province = 'Chiang Mai';
+      const address = { province };
+
+      const standardExpectedFee = (service as any).calculateShippingFee(
+        address,
+        ShippingMethod.STANDARD,
+      );
+      const standardResult = service.quoteShippingFee(province, ShippingMethod.STANDARD);
+
+      expect(standardResult).toEqual({
+        province,
+        shippingMethod: ShippingMethod.STANDARD,
+        fee: standardExpectedFee,
+      });
+
+      const expressExpectedFee = (service as any).calculateShippingFee(
+        address,
+        ShippingMethod.EXPRESS,
+      );
+      const expressResult = service.quoteShippingFee(province, ShippingMethod.EXPRESS);
+
+      expect(expressResult).toEqual({
+        province,
+        shippingMethod: ShippingMethod.EXPRESS,
+        fee: expressExpectedFee,
+      });
+    });
+
+    it('should default shippingMethod to STANDARD when not provided', () => {
+      const province = 'Chiang Mai';
+      const address = { province };
+      const expectedFee = (service as any).calculateShippingFee(
+        address,
+        ShippingMethod.STANDARD,
+      );
+
+      const result = service.quoteShippingFee(province);
+
+      expect(result).toEqual({
+        province,
+        shippingMethod: ShippingMethod.STANDARD,
+        fee: expectedFee,
+      });
+    });
+
+    it('should trim province before calculating fee', () => {
+      const result = service.quoteShippingFee('  Bangkok  ');
+
+      expect(result).toEqual({
+        province: 'Bangkok',
+        shippingMethod: ShippingMethod.STANDARD,
+        fee: 0,
+      });
     });
   });
 });
