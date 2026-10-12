@@ -9,6 +9,7 @@ import { ReferralsModule } from '../referrals/referrals.module';
 import { OrdersModule } from '../orders/orders.module';
 import { ReviewsModule } from '../reviews/reviews.module';
 import { CouponsModule } from '../coupons/coupons.module';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CouponsModule } from '../coupons/coupons.module';
     OrdersModule,
     ReviewsModule,
     CouponsModule,
+    CartModule,
   ],
   controllers: [ChatbotController],
   providers: [ChatbotRetrievalService, ...agentProviders],

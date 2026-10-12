@@ -1,6 +1,7 @@
 import { createOrdersTools, OrdersToolDeps, ORDER_STATUSES } from './orders.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import type { OrdersService } from '../../../orders/orders.service';
+import type { CartService } from '../../../cart/cart.service';
 import { MoneyUtil } from '../../../common/utils/money.util';
 
 describe('Orders Tools', () => {
@@ -10,6 +11,9 @@ describe('Orders Tools', () => {
     getMyOrderById: jest.Mock;
     cancelOrder: jest.Mock;
     previewCheckout: jest.Mock;
+  };
+  let mockCartService: {
+    getCart: jest.Mock;
   };
   let tools: AgentToolDef[];
   let listTool: AgentToolDef;
@@ -49,9 +53,13 @@ describe('Orders Tools', () => {
       cancelOrder: jest.fn(),
       previewCheckout: jest.fn(),
     };
+    mockCartService = {
+      getCart: jest.fn().mockResolvedValue(null),
+    };
 
     const deps: OrdersToolDeps = {
       orders: mockOrdersService as unknown as OrdersService,
+      cart: mockCartService as unknown as CartService,
     };
 
     tools = createOrdersTools(deps);
@@ -558,6 +566,202 @@ describe('Orders Tools', () => {
         expect(
           await checkoutTool.preview!({ addressId: 'addr-001' }, emptyCtx),
         ).toBeUndefined();
+      });
+    });
+
+    describe('server-side DB cart and resume', () => {
+      it('resume without clientContext checks out using the DB cart', async () => {
+        const mockCartService = {
+          getCart: jest.fn().mockResolvedValue({
+            id: 'cart-db-1',
+            userId: 'user-123',
+            items: [
+              {
+                variantId: 'var-101',
+                quantity: 2,
+              },
+            ],
+            couponId: null,
+            coupon: null,
+          }),
+        };
+        const toolsWithCart = createOrdersTools({
+          orders: mockOrdersService as unknown as OrdersService,
+          cart: mockCartService as unknown as CartService,
+        });
+        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+
+        const resumeCtx: ToolContext = {
+          userId: 'user-123',
+          role: 'CUSTOMER',
+          app: 'USER',
+          threadId: 't-resume',
+        };
+
+        mockOrdersService.checkout.mockResolvedValue({
+          id: 'ord-res-1',
+          code: 'ORD-1',
+        });
+
+        await checkoutWithCart.handler({ addressId: 'addr-001' }, resumeCtx);
+
+        expect(mockCartService.getCart).toHaveBeenCalledWith('user-123');
+        expect(mockOrdersService.checkout).toHaveBeenCalledWith('user-123', {
+          addressId: 'addr-001',
+          paymentMethod: 'COD',
+          shippingMethod: 'STANDARD',
+          cartId: 'cart-db-1',
+          items: [{ variantId: 'var-101', quantity: 2 }],
+        });
+      });
+
+      it('checkout passes cartId when a server cart exists and couponCode only when coupon with code exists', async () => {
+        const mockCartService = {
+          getCart: jest.fn().mockResolvedValue({
+            id: 'cart-srv-789',
+            userId: 'user-123',
+            items: [
+              {
+                variantId: 'var-1',
+                quantity: 1,
+              },
+            ],
+            couponId: 'cuid-not-a-code',
+            coupon: { code: 'SALE50' },
+          }),
+        };
+        const toolsWithCart = createOrdersTools({
+          orders: mockOrdersService as unknown as OrdersService,
+          cart: mockCartService as unknown as CartService,
+        });
+        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+
+        mockOrdersService.checkout.mockResolvedValue({ id: 'ord-2' });
+
+        await checkoutWithCart.handler(
+          {
+            addressId: 'addr-xyz',
+            shippingMethod: 'EXPRESS',
+            paymentMethod: 'BANK_TRANSFER',
+          },
+          validCustomerCtx,
+        );
+
+        expect(mockOrdersService.checkout).toHaveBeenCalledWith('user-123', {
+          addressId: 'addr-xyz',
+          shippingMethod: 'EXPRESS',
+          paymentMethod: 'BANK_TRANSFER',
+          cartId: 'cart-srv-789',
+          couponCode: 'SALE50',
+          items: [{ variantId: 'var-1', quantity: 1 }],
+        });
+
+        // When coupon has no code or coupon is null, couponCode must not be passed
+        mockCartService.getCart.mockResolvedValueOnce({
+          id: 'cart-srv-no-code',
+          userId: 'user-123',
+          items: [{ variantId: 'var-1', quantity: 1 }],
+          couponId: 'cuid-without-code',
+          coupon: null,
+        });
+
+        await checkoutWithCart.handler(
+          { addressId: 'addr-xyz' },
+          validCustomerCtx,
+        );
+
+        const lastCallDto = mockOrdersService.checkout.mock.calls[1][1];
+        expect(lastCallDto).toHaveProperty('cartId', 'cart-srv-no-code');
+        expect(lastCallDto).not.toHaveProperty('couponCode');
+      });
+
+      it('a logged-in user with an empty server cart gets the empty-cart error', async () => {
+        const mockCartService = {
+          getCart: jest.fn().mockResolvedValue({
+            id: 'cart-empty-1',
+            userId: 'user-123',
+            items: [],
+          }),
+        };
+        const toolsWithCart = createOrdersTools({
+          orders: mockOrdersService as unknown as OrdersService,
+          cart: mockCartService as unknown as CartService,
+        });
+        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+
+        await expect(
+          checkoutWithCart.handler({}, validCustomerCtx),
+        ).rejects.toThrow('Giỏ hàng đang trống');
+
+        const noClientCtx: ToolContext = {
+          userId: 'user-123',
+          role: 'CUSTOMER',
+          app: 'USER',
+          threadId: 't-no-client',
+        };
+        await expect(
+          checkoutWithCart.handler({}, noClientCtx),
+        ).rejects.toThrow('Giỏ hàng đang trống');
+      });
+
+      it('builds confirm preview from server cart for logged-in user', async () => {
+        const mockCartService = {
+          getCart: jest.fn().mockResolvedValue({
+            id: 'cart-srv-prev',
+            userId: 'user-123',
+            items: [
+              {
+                variantId: 'var-1',
+                quantity: 2,
+              },
+            ],
+            couponId: 'COUPON2026',
+            coupon: { code: 'COUPON2026' },
+          }),
+        };
+        mockOrdersService.previewCheckout.mockResolvedValue({
+          address: {
+            id: 'addr-001',
+            line1: '123 Đường Cầu Giấy',
+            ward: 'Dịch Vọng',
+            district: 'Cầu Giấy',
+            province: 'Hà Nội',
+          },
+          deliveryAddress: '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+          itemCount: 1,
+          subtotal: 100000,
+          shippingFee: 30000,
+          everyItemPriced: true,
+        });
+
+        const toolsWithCart = createOrdersTools({
+          orders: mockOrdersService as unknown as OrdersService,
+          cart: mockCartService as unknown as CartService,
+        });
+        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+
+        const resumeCtx: ToolContext = {
+          userId: 'user-123',
+          role: 'CUSTOMER',
+          app: 'USER',
+          threadId: 't-resume-preview',
+        };
+
+        const previewText = await checkoutWithCart.preview!(
+          { addressId: 'addr-001' },
+          resumeCtx,
+        );
+
+        expect(mockCartService.getCart).toHaveBeenCalledWith('user-123');
+        expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith('user-123', {
+          addressId: 'addr-001',
+          shippingMethod: undefined,
+          items: [{ variantId: 'var-1', quantity: 2 }],
+        });
+        expect(previewText).toContain('123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội');
+        expect(previewText).toContain('1 sản phẩm');
+        expect(previewText).toContain(MoneyUtil.format(100000));
+        expect(previewText).toContain('mã giảm giá COUPON2026 sẽ được áp dụng khi đặt đơn');
       });
     });
   });

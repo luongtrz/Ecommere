@@ -14,6 +14,7 @@ import type { OrdersService } from '../../orders/orders.service';
 import type { ReviewsService } from '../../reviews/reviews.service';
 import type { CouponsService } from '../../coupons/coupons.service';
 import type { PrismaService } from '../../prisma/prisma.service';
+import type { CartService } from '../../cart/cart.service';
 
 export interface UserRegistryDeps {
   products: ProductsService;
@@ -25,6 +26,7 @@ export interface UserRegistryDeps {
   reviews: ReviewsService;
   coupons: CouponsService;
   prisma: PrismaService;
+  cart: CartService;
 }
 
 export function buildUserToolRegistry(deps: UserRegistryDeps): ToolRegistry {
@@ -40,6 +42,7 @@ export function buildUserToolRegistry(deps: UserRegistryDeps): ToolRegistry {
     }),
     ...createOrdersTools({
       orders: deps.orders,
+      cart: deps.cart,
     }),
     ...createReviewsShippingTools({
       reviews: deps.reviews,
