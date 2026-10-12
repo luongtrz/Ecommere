@@ -1,6 +1,6 @@
 import { HttpException, NotFoundException } from '@nestjs/common';
 import { ChatbotController } from './chatbot.controller';
-import { AgentBusyError } from './agent/agent.runner';
+import { AgentBusyError, AgentNotPendingError } from './agent/agent.runner';
 import type { AgentConfig } from './agent/agent.config';
 import type { AgentStreamEvent } from './agent/sse.frames';
 import { SendAgentMessageDto } from './dtos/agent-message.dto';
@@ -118,7 +118,11 @@ function createFakeRequest(user?: { id: string; role?: string }): FakeRequest {
 
 describe('ChatbotController', () => {
   let controller: ChatbotController;
-  let mockRunner: { run: jest.Mock };
+  let mockRunner: {
+    run: jest.Mock;
+    assertResumable: jest.Mock;
+    deleteCheckpoints: jest.Mock;
+  };
   let mockThreads: {
     create: jest.Mock;
     assertOwned: jest.Mock;
@@ -143,6 +147,8 @@ describe('ChatbotController', () => {
 
     mockRunner = {
       run: jest.fn(),
+      assertResumable: jest.fn().mockResolvedValue(undefined),
+      deleteCheckpoints: jest.fn().mockResolvedValue(undefined),
     };
 
     mockThreads = {
@@ -453,6 +459,60 @@ describe('ChatbotController', () => {
       });
       expect(mockRunner.run).not.toHaveBeenCalled();
     });
+
+    it('the resume route answers 409 JSON and does not start a run when assertResumable rejects with AgentNotPendingError', async () => {
+      const threadId = 'thread-not-pending';
+      mockThreads.assertOwned.mockResolvedValue({
+        id: threadId,
+        userId: 'user-resume',
+        app: 'USER',
+      } as any);
+      mockRunner.assertResumable.mockRejectedValue(
+        new AgentNotPendingError('Không có thao tác nào đang chờ xác nhận'),
+      );
+
+      const req = createFakeRequest({ id: 'user-resume', role: 'CUSTOMER' });
+      const res = createFakeResponse();
+      const body: ResumeAgentDto = {
+        decisions: [{ callId: 'call_1', approve: true }],
+      };
+
+      await controller.resume(req as any, res as any, threadId, body);
+
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(res.json).toHaveBeenCalledWith({
+        statusCode: 409,
+        message: 'Không có thao tác nào đang chờ xác nhận',
+      });
+      expect(mockRunner.run).not.toHaveBeenCalled();
+      expect(res.setHeader).not.toHaveBeenCalled();
+      expect(res.write).not.toHaveBeenCalled();
+    });
+
+    it('the resume route passes the decision call ids to assertResumable', async () => {
+      const threadId = 'thread-to-resume';
+      mockThreads.assertOwned.mockResolvedValue({
+        id: threadId,
+        userId: 'user-resume',
+        app: 'USER',
+      } as any);
+
+      const req = createFakeRequest({ id: 'user-resume', role: 'CUSTOMER' });
+      const res = createFakeResponse();
+      const body: ResumeAgentDto = {
+        decisions: [
+          { callId: 'call_1', approve: true },
+          { callId: 'call_2', approve: false },
+        ],
+      };
+
+      await controller.resume(req as any, res as any, threadId, body);
+
+      expect(mockRunner.assertResumable).toHaveBeenCalledWith(threadId, [
+        'call_1',
+        'call_2',
+      ]);
+    });
   });
 
   describe('Route 3: GET /chatbot/threads', () => {
@@ -565,6 +625,53 @@ describe('ChatbotController', () => {
       await expect(
         controller.deleteThread(req as any, 'thread-del-id'),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('the delete route calls assertOwned before deleteCheckpoints, and deleteCheckpoints before threads.remove', async () => {
+      const order: string[] = [];
+      mockThreads.assertOwned.mockImplementation(async () => {
+        order.push('assertOwned');
+      });
+      mockRunner.deleteCheckpoints.mockImplementation(async () => {
+        order.push('deleteCheckpoints');
+      });
+      mockThreads.remove.mockImplementation(async () => {
+        order.push('remove');
+      });
+
+      const req = createFakeRequest({ id: 'user-del', role: 'CUSTOMER' });
+      const result = await controller.deleteThread(req as any, 'thread-del-id');
+
+      expect(order).toEqual(['assertOwned', 'deleteCheckpoints', 'remove']);
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-del-id', {
+        userId: 'user-del',
+        app: 'USER',
+      });
+      expect(mockRunner.deleteCheckpoints).toHaveBeenCalledWith('thread-del-id');
+      expect(mockThreads.remove).toHaveBeenCalledWith('thread-del-id', {
+        userId: 'user-del',
+        app: 'USER',
+      });
+      expect(result).toEqual({ deleted: true });
+    });
+
+    it('a foreign thread answers 404 on delete and deleteCheckpoints is not called', async () => {
+      mockThreads.assertOwned.mockRejectedValue(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
+
+      const req = createFakeRequest({ id: 'user-del', role: 'CUSTOMER' });
+
+      await expect(
+        controller.deleteThread(req as any, 'foreign-thread-id'),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith('foreign-thread-id', {
+        userId: 'user-del',
+        app: 'USER',
+      });
+      expect(mockRunner.deleteCheckpoints).not.toHaveBeenCalled();
+      expect(mockThreads.remove).not.toHaveBeenCalled();
     });
   });
 

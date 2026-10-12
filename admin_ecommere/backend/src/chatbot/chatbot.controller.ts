@@ -24,6 +24,7 @@ import { AGENT_CONFIG } from './agent/admin.providers';
 import {
   AgentRunner,
   AgentBusyError,
+  AgentNotPendingError,
   type AgentTranscriptMessage,
 } from './agent/agent.runner';
 import { ThreadService, type AgentActor } from './agent/thread.service';
@@ -121,6 +122,25 @@ export class AdminChatbotController {
 
     await this.threads.assertOwned(threadId, actor);
 
+    try {
+      await this.runner.assertResumable(
+        threadId,
+        body.decisions.map((d) => d.callId),
+      );
+    } catch (err: any) {
+      if (
+        err instanceof AgentNotPendingError ||
+        err?.name === 'AgentNotPendingError'
+      ) {
+        res.status(409).json({
+          statusCode: 409,
+          message: 'Không có thao tác nào đang chờ xác nhận',
+        });
+        return;
+      }
+      throw err;
+    }
+
     const ctx: ToolContext = {
       userId: actor.userId,
       role: 'ADMIN',
@@ -191,6 +211,8 @@ export class AdminChatbotController {
     @Param('threadId') threadId: string,
   ) {
     const actor = this.getActor(req);
+    await this.threads.assertOwned(threadId, actor);
+    await this.runner.deleteCheckpoints(threadId);
     await this.threads.remove(threadId, actor);
     return { deleted: true };
   }

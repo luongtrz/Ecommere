@@ -24,7 +24,11 @@ import type { Request, Response } from 'express';
 import { Public } from '../common/decorators/public.decorator';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { AGENT_CONFIG } from './agent/agent.providers';
-import { AgentRunner, AgentBusyError } from './agent/agent.runner';
+import {
+  AgentRunner,
+  AgentBusyError,
+  AgentNotPendingError,
+} from './agent/agent.runner';
 import { ThreadService, type AgentActor } from './agent/thread.service';
 import type { AgentConfig } from './agent/agent.config';
 import { SseWriter, type AgentStreamEvent } from './agent/sse.frames';
@@ -134,6 +138,25 @@ export class ChatbotController {
 
     await this.threads.assertOwned(threadId, actor);
 
+    try {
+      await this.runner.assertResumable(
+        threadId,
+        body.decisions.map((d) => d.callId),
+      );
+    } catch (err: any) {
+      if (
+        err instanceof AgentNotPendingError ||
+        err?.name === 'AgentNotPendingError'
+      ) {
+        res.status(409).json({
+          statusCode: 409,
+          message: 'Không có thao tác nào đang chờ xác nhận',
+        });
+        return;
+      }
+      throw err;
+    }
+
     const ctx: ToolContext = {
       userId: actor.userId,
       role,
@@ -197,6 +220,8 @@ export class ChatbotController {
     @Param('threadId') threadId: string,
   ) {
     const actor = this.getActor(req);
+    await this.threads.assertOwned(threadId, actor);
+    await this.runner.deleteCheckpoints(threadId);
     await this.threads.remove(threadId, actor);
     return { deleted: true };
   }
