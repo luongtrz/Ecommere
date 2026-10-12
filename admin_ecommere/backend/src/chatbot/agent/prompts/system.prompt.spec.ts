@@ -45,4 +45,41 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('trợ lý mua sắm của Thai Spray Shop cho khách hàng');
     expect(prompt.length).toBeLessThan(2500);
   });
+
+  it('should include the invitation block with /login for a guest in the user app', () => {
+    const today = '2026-10-12';
+    const prompt = buildSystemPrompt({
+      app: 'USER',
+      role: 'GUEST',
+      today,
+    });
+
+    expect(prompt).toContain('/login');
+    expect(prompt).toContain('/register');
+    expect(prompt.length).toBeLessThan(2500);
+  });
+
+  it('should not include the invitation block for a signed-in customer in the user app', () => {
+    const today = '2026-10-12';
+    const prompt = buildSystemPrompt({
+      app: 'USER',
+      role: 'CUSTOMER',
+      today,
+    });
+
+    expect(prompt).not.toContain('/login');
+    expect(prompt).not.toContain('/register');
+  });
+
+  it('should not include the invitation block for an admin in the admin app', () => {
+    const today = '2026-10-12';
+    const prompt = buildSystemPrompt({
+      app: 'ADMIN',
+      role: 'ADMIN',
+      today,
+    });
+
+    expect(prompt).not.toContain('/login');
+    expect(prompt).not.toContain('/register');
+  });
 });

@@ -8,7 +8,7 @@ export function buildSystemPrompt(input: {
       ? 'Bạn là trợ lý vận hành của Thai Spray Shop cho quản trị viên cửa hàng.'
       : 'Bạn là trợ lý mua sắm của Thai Spray Shop cho khách hàng.';
 
-  return [
+  const rules = [
     identity,
     `Thông tin phiên làm việc: Ứng dụng: ${input.app}, Vai trò: ${input.role}, Ngày hôm nay: ${input.today}.`,
     '',
@@ -20,5 +20,17 @@ export function buildSystemPrompt(input: {
     '- Vai trò GUEST: Hướng dẫn khách hàng đăng nhập để xem đơn hàng, tài khoản, thanh toán giỏ hàng hoặc gửi đánh giá.',
     '- Ứng dụng USER: Không bao giờ tiết lộ ghi chú nội bộ, chi phí, hoặc dữ liệu của khách hàng khác. Chatbot không trực tiếp nhận thanh toán; khách hàng thanh toán trên trang đơn hàng.',
     '- Ứng dụng ADMIN: Khi công cụ trả về chuyển đổi trạng thái không hợp lệ hoặc không đủ tồn kho, hãy giải thích rõ ràng và gợi ý bước hợp lệ tiếp theo.',
-  ].join('\n');
+  ];
+
+  if (input.app === 'USER' && input.role === 'GUEST') {
+    rules.push(
+      '',
+      'Chỉ dẫn dành cho khách chưa đăng nhập (GUEST):',
+      '- Trả lời đầy đủ và hữu ích các câu hỏi về sản phẩm và website.',
+      '- Khách chưa đăng nhập nên không thể truy cập thông tin cá nhân: đơn hàng, địa chỉ, hồ sơ cá nhân, đánh giá, giới thiệu, mã giảm giá tài khoản và thanh toán. Khi khách hỏi về bất kỳ thông tin nào trong số này, hãy thông báo rằng cần đăng nhập và tuyệt đối không giả vờ thao tác trên tài khoản.',
+      '- Luôn kết thúc mỗi câu trả lời bằng đúng một câu ngắn bằng tiếng Việt có đầy đủ dấu để mời khách đăng nhập hoặc tạo tài khoản, bao gồm liên kết markdown đến trang đăng nhập ([Đăng nhập](/login)) và trang đăng ký ([Đăng ký](/register)).',
+    );
+  }
+
+  return rules.join('\n');
 }
