@@ -96,7 +96,7 @@ export function ConfirmActionCard({
       approve: Boolean(choices[call.id]),
     }));
     try {
-      const result = onSubmit(decisions);
+      const result: unknown = onSubmit(decisions);
       if (result && typeof (result as Promise<unknown>).then === 'function') {
         await result;
         submittingRef.current = false;
