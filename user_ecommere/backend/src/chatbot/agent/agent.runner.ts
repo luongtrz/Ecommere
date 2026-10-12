@@ -17,12 +17,21 @@ export class AgentBusyError extends Error {
   }
 }
 
+export interface AgentTranscriptMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface AgentRunnerDeps {
   graph: {
     stream(
       input: unknown,
       config: unknown,
     ): PromiseLike<AsyncIterable<unknown>> | AsyncIterable<unknown>;
+    getState?(
+      config: unknown,
+    ): PromiseLike<unknown> | unknown;
   };
   registry: ToolRegistry;
   threads: {
@@ -72,6 +81,114 @@ export class AgentRunner {
         this.runningThreads.delete(threadId);
       }
     })();
+  }
+
+  async readTranscript(threadId: string): Promise<AgentTranscriptMessage[]> {
+    if (!this.graph.getState) {
+      return [];
+    }
+
+    const state = (await this.graph.getState({
+      configurable: { thread_id: threadId },
+    })) as
+      | {
+          values?: { messages?: unknown[] };
+          messages?: unknown[];
+        }
+      | undefined
+      | null;
+
+    if (!state) {
+      return [];
+    }
+
+    const rawMessages = state.values?.messages ?? state.messages;
+    if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
+      return [];
+    }
+
+    const transcript: AgentTranscriptMessage[] = [];
+
+    for (let i = 0; i < rawMessages.length; i++) {
+      const msg = rawMessages[i];
+      if (!msg || typeof msg !== 'object') {
+        continue;
+      }
+
+      let role: 'user' | 'assistant' | null = null;
+      const type = this.resolveMessageType(msg);
+      if (type === 'human' || type === 'user') {
+        role = 'user';
+      } else if (type === 'ai' || type === 'assistant') {
+        role = 'assistant';
+      } else {
+        continue;
+      }
+
+      const content = this.extractMessageContent((msg as any).content);
+
+      if (role === 'assistant' && (!content || content.length === 0)) {
+        continue;
+      }
+
+      const rawId = (msg as any).id;
+      const id =
+        rawId !== undefined && rawId !== null && rawId !== ''
+          ? String(rawId)
+          : String(i);
+
+      transcript.push({
+        id,
+        role,
+        content,
+      });
+    }
+
+    return transcript;
+  }
+
+  private resolveMessageType(msg: unknown): string {
+    if (!msg || typeof msg !== 'object') {
+      return '';
+    }
+    const m = msg as Record<string, unknown>;
+    if (typeof m.getType === 'function') {
+      return (m.getType as () => string)();
+    }
+    if (typeof m._getType === 'function') {
+      return (m._getType as () => string)();
+    }
+    if (typeof m.type === 'string') {
+      return m.type;
+    }
+    if (typeof m.role === 'string') {
+      return m.role;
+    }
+    return '';
+  }
+
+  private extractMessageContent(content: unknown): string {
+    if (typeof content === 'string') {
+      return content;
+    }
+    if (Array.isArray(content)) {
+      const parts: string[] = [];
+      for (const part of content) {
+        if (typeof part === 'string') {
+          parts.push(part);
+        } else if (part && typeof part === 'object') {
+          const block = part as Record<string, unknown>;
+          if (
+            (block.type === 'text' || block.type === undefined) &&
+            typeof block.text === 'string'
+          ) {
+            parts.push(block.text);
+          }
+        }
+      }
+      return parts.join('');
+    }
+    return '';
   }
 
   private async execute(params: AgentRunParams): Promise<void> {

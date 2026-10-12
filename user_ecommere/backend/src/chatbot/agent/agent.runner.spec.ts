@@ -2,6 +2,8 @@ import { MemorySaver } from '@langchain/langgraph';
 import {
   AIMessage,
   AIMessageChunk,
+  HumanMessage,
+  SystemMessage,
   ToolMessage,
   type BaseMessage,
 } from '@langchain/core/messages';
@@ -10,6 +12,7 @@ import {
   AgentRunner,
   AgentBusyError,
   type AgentRunnerDeps,
+  type AgentTranscriptMessage,
 } from './agent.runner';
 import type { AgentStreamEvent } from './sse.frames';
 import {
@@ -53,6 +56,21 @@ function createScriptedGraph(
       for (const chunk of chunks) {
         yield chunk;
       }
+    },
+  };
+}
+
+function createStateGraph(
+  stateOrHandler: unknown,
+): AgentRunnerDeps['graph'] {
+  const handler =
+    typeof stateOrHandler === 'function'
+      ? (stateOrHandler as (config: unknown) => unknown)
+      : async () => stateOrHandler;
+  return {
+    async *stream() {},
+    async getState(config: unknown) {
+      return handler(config);
     },
   };
 }
@@ -668,5 +686,189 @@ describe('AgentRunner', () => {
       event: 'done',
       data: { usage: { totalTokens: 30 } },
     });
+  });
+
+  it('readTranscript maps a human and an AI message in order', async () => {
+    const getState = jest.fn().mockResolvedValue({
+      values: {
+        messages: [
+          new HumanMessage({ content: 'Xin chào shop', id: 'h-1' }),
+          new AIMessage({
+            content: 'Chào bạn! Shop có thể hỗ trợ gì cho bạn?',
+            id: 'ai-1',
+          }),
+        ],
+      },
+    });
+    const fakeGraph = createStateGraph(getState);
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-order-test');
+
+    expect(getState).toHaveBeenCalledWith({
+      configurable: { thread_id: 'thread-order-test' },
+    });
+    expect(transcript).toEqual([
+      { id: 'h-1', role: 'user', content: 'Xin chào shop' },
+      {
+        id: 'ai-1',
+        role: 'assistant',
+        content: 'Chào bạn! Shop có thể hỗ trợ gì cho bạn?',
+      },
+    ]);
+  });
+
+  it('readTranscript skips a tool-call-only AI message, tool messages and system messages', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new SystemMessage({
+            content: 'You are a helpful assistant.',
+            id: 'sys-1',
+          }),
+          new HumanMessage({ content: 'Hủy đơn hàng ord-100', id: 'h-2' }),
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: 'call_1',
+                name: 'cancel_order',
+                args: { orderId: 'ord-100' },
+              },
+            ],
+            id: 'ai-tool-call',
+          }),
+          new ToolMessage({
+            tool_call_id: 'call_1',
+            content: JSON.stringify({ ok: true }),
+            id: 'tool-result-1',
+          }),
+          new AIMessage({
+            content: 'Đã hủy đơn hàng ord-100 thành công.',
+            id: 'ai-2',
+          }),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-skips-test');
+
+    expect(transcript).toEqual([
+      { id: 'h-2', role: 'user', content: 'Hủy đơn hàng ord-100' },
+      {
+        id: 'ai-2',
+        role: 'assistant',
+        content: 'Đã hủy đơn hàng ord-100 thành công.',
+      },
+    ]);
+  });
+
+  it('readTranscript returns [] when thread has no checkpoint', async () => {
+    const runnerEmptyValues = new AgentRunner({
+      graph: createStateGraph({ values: {} }),
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    const resEmptyValues = await runnerEmptyValues.readTranscript('missing-thread-1');
+    expect(resEmptyValues).toEqual([]);
+
+    const runnerUndefined = new AgentRunner({
+      graph: createStateGraph(undefined),
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    const resUndefined = await runnerUndefined.readTranscript('missing-thread-2');
+    expect(resUndefined).toEqual([]);
+
+    const runnerNoGetState = new AgentRunner({
+      graph: createScriptedGraph([]),
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    const resNoGetState = await runnerNoGetState.readTranscript('missing-thread-3');
+    expect(resNoGetState).toEqual([]);
+  });
+
+  it('readTranscript joins text parts when a message content is an array of parts', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new HumanMessage({
+            content: ['Tôi muốn tìm ', 'sơn Samurai màu đen'],
+            id: 'h-parts',
+          }),
+          new AIMessage({
+            content: [
+              { type: 'text', text: 'Đây là danh sách ' },
+              {
+                type: 'image_url',
+                image_url: { url: 'https://example.com/img.jpg' },
+              },
+              { type: 'text', text: 'sơn Samurai màu đen cho bạn.' },
+            ],
+            id: 'ai-parts',
+          }),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-parts-test');
+
+    expect(transcript).toEqual([
+      {
+        id: 'h-parts',
+        role: 'user',
+        content: 'Tôi muốn tìm sơn Samurai màu đen',
+      },
+      {
+        id: 'ai-parts',
+        role: 'assistant',
+        content: 'Đây là danh sách sơn Samurai màu đen cho bạn.',
+      },
+    ]);
+  });
+
+  it('readTranscript falls back to message index when message has no id', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new HumanMessage('Tin nhắn đầu tiên'),
+          new AIMessage('Tin nhắn thứ hai'),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-no-ids');
+
+    expect(transcript).toEqual([
+      { id: '0', role: 'user', content: 'Tin nhắn đầu tiên' },
+      { id: '1', role: 'assistant', content: 'Tin nhắn thứ hai' },
+    ]);
   });
 });
