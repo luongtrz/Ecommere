@@ -365,13 +365,13 @@ AGENT_CHECKPOINT_SCHEMA="agent"
 Hệ thống chatbot sử dụng AI agent xây dựng trên LangGraph và OpenAI SDK. Toàn bộ lịch sử cuộc trò chuyện được lưu trữ theo từng thread trong cơ sở dữ liệu PostgreSQL (thông qua bảng `agent_threads` và schema checkpoint `agent`).
 
 Các công cụ (tools) của agent phụ thuộc vào vai trò (role) của người gọi:
-- Khách vãng lai (`GUEST`): chỉ có thể sử dụng các công cụ công khai (public tools như tìm kiếm sản phẩm và tra cứu danh mục).
+- Khách vãng lai (`GUEST`): chỉ có thể sử dụng các công cụ công khai (public tools như tìm kiếm sản phẩm và tra cứu danh mục). Khách vãng lai có thể hỏi tự do về sản phẩm và website, và trợ lý luôn hướng dẫn khách đăng nhập.
 - Khách hàng đã đăng nhập (`CUSTOMER`): có thể sử dụng thêm các công cụ tài khoản, đơn hàng và đánh giá (như xem và cập nhật hồ sơ, quản lý địa chỉ, tra cứu và hủy đơn hàng, đặt hàng, kiểm tra mã giảm giá, viết và sửa đánh giá).
 
 Chính sách xác nhận thao tác (confirm policy):
 - Các thao tác chỉ đọc (`READ`) không yêu cầu xác nhận.
 - Với `GUEST`, mọi thao tác khác `READ` đều yêu cầu xác nhận.
-- Với `CUSTOMER` trên ứng dụng người dùng (`USER`), các thao tác ghi thông thường (`WRITE`) không cần xác nhận, nhưng các thao tác ghi có mức độ rủi ro nhạy cảm (`SENSITIVE`, ví dụ hủy đơn hàng) hoặc có tính phá hủy (`DESTRUCTIVE`, ví dụ xóa địa chỉ, xóa đánh giá) sẽ được giữ lại (held) để chờ người dùng xác nhận phê duyệt trước khi thực thi.
+- Với `CUSTOMER` trên ứng dụng người dùng (`USER`), khách hàng xác nhận các thay đổi đối với dữ liệu cá nhân (hồ sơ, địa chỉ, đánh giá), thao tác hủy đơn và thanh toán (checkout); các thay đổi giỏ hàng không cần xác nhận. Các thao tác có mức độ rủi ro nhạy cảm (`SENSITIVE`) hoặc có tính phá hủy (`DESTRUCTIVE`) sẽ được giữ lại (held) để chờ người dùng xác nhận phê duyệt trước khi thực thi.
 
 Khi biến môi trường `OPENAI_API_KEY` chưa được cấu hình, các endpoint chatbot sẽ phản hồi mã lỗi HTTP 503 (`Trợ lý chưa được cấu hình`).
 

@@ -297,48 +297,51 @@ T5.1 xóa `chatbot.service.ts`/`chatbot-history.service.ts`, `CHATBOT_*` env, c�
 | Pha 3 | Lấp khoảng trống G1 đến G5 | Xong | Báo cáo doanh thu và top sản phẩm, danh sách và chi tiết khách, danh sách đánh giá, trường active của coupon, quoteShippingFee. |
 | Pha 4 | Widget chat người dùng | Xong | ChatbotWidget viết lại trên useChatAgent; đã xóa chatbot.api.ts cũ. |
 | Pha 4 | Trang /admin/chatbot | Xong | Có route, mục điều hướng 'Trợ lý AI', và chuyển hướng /chatbot. |
-| Pha 5 | Dọn code Gemini và Redis trong backend user | Xong | Đã xóa chatbot.service.ts, chatbot-history.service.ts, dependency redis và khóa cấu hình cũ. Service Redis còn trong compose.yaml. |
+| Pha 5 | Dọn code Gemini và Redis trong backend user | Xong | Đã xóa chatbot.service.ts, chatbot-history.service.ts, dependency redis và khóa cấu hình cũ; đã gỡ bỏ service Redis khỏi compose.yaml và DEPLOYMENT.md. |
 | Pha 5 | Ví dụ biến môi trường, tài liệu, script kiểm lõi | Xong | .env.example, README, DEPLOYMENT.md và scripts/check-agent-core-sync.sh. |
 | Pha 5 | Kiểm tra SSE qua Caddy | Chưa làm | Cần triển khai thật; xem DEPLOYMENT.md. |
-| Pha 5 | /security-review và /code-review trên toàn nhánh | Chưa làm | Đã kiểm tra có mục tiêu các route, quyền và điểm render markdown; chưa có review toàn diện. |
+| Pha 5 | /security-review và /code-review trên toàn nhánh | Một phần | Đã rà soát có mục tiêu ranh giới bảo mật và có các bản sửa; chưa review toàn diện trên toàn nhánh. |
 | Pha 5 | Bộ kịch bản đánh giá tiếng Việt | Chưa làm | Danh sách kịch bản thủ công nằm ở mục 9. |
+| Pha 5 | Xác nhận thao tác ghi cá nhân và checkout (preview địa chỉ và tạm tính) | Xong | Nâng rủi ro thao tác ghi cá nhân lên SENSITIVE; bổ sung hook xem trước và tính toán giá máy chủ cho thẻ checkout. |
+| Pha 5 | Nhật ký công cụ và checkpoint xóa cùng thread | Xong | Xóa AgentToolLog và checkpoint LangGraph trong cùng transaction và controller khi xóa thread. |
+| Pha 5 | Bỏ Redis khỏi compose.yaml | Xong | Đã loại bỏ hoàn toàn service Redis khỏi compose.yaml và DEPLOYMENT.md. |
 
 ### Sai khác so với kế hoạch
 
 - Thêm route đọc transcript: GET /api/admin/chatbot/threads/:threadId/messages và AgentRunner.readTranscript. Lý do: kế hoạch chỉ có danh sách và chi tiết thread, nên không thể mở lại một cuộc trò chuyện cũ và xem nội dung của nó.
 - Payload cart.add của cart_add_item trả thêm productId, image, scent và volumeMl. Lý do: CartItem của trình duyệt cần các trường này; kế hoạch chưa nêu, và lỗi này được phát hiện khi review.
 - Bảng invalidation của admin: create, update và delete category làm mới khóa 'categories', vì CategoryNav trên header đọc khóa này. Kế hoạch ghi rằng danh mục không có query.
-- Service Redis chưa bị bỏ khỏi compose.yaml và DEPLOYMENT.md. Lý do: việc bỏ service là quyết định triển khai, đang chờ xác nhận.
+- Đã gỡ bỏ service Redis khỏi compose.yaml và hướng dẫn triển khai DEPLOYMENT.md không còn liệt kê service này. Khóa `sessionId` cũ của route `POST /chatbot/messages` là một thread id (`AgentThread`), không phải khóa Redis.
+- Chính sách đối với khách vãng lai (GUEST): Khách vãng lai (khách chưa đăng nhập) có thể hỏi tự do về sản phẩm và website mà không bị giới hạn ngân sách token (ngân sách token cho khách vãng lai từng được cân nhắc đã không triển khai; trong mã nguồn không tồn tại hạn mức này). Trợ lý luôn chủ động điều hướng khách hướng tới việc đăng nhập hoặc tạo tài khoản mới. Điểm này thay đổi so với kế hoạch đã duyệt: kế hoạch ban đầu chỉ cho phép khách dùng các công cụ công khai và không có quy tắc điều hướng đăng nhập. Quy tắc điều hướng này được triển khai trong `buildSystemPrompt` cho ứng dụng `USER` và vai trò `GUEST` (`src/chatbot/agent/prompts/system.prompt.ts`).
 
 ### Việc còn lại trước khi mở PR và phát hành
 
 - Đặt OPENAI_API_KEY và chọn AGENT_MODEL cho môi trường thử.
-- Chạy prisma db push trên DATABASE_URL dev, rồi khởi động backend và kiểm tra schema checkpoint agent được tạo.
-- Kiểm tra SSE qua Caddy sau khi triển khai (xem DEPLOYMENT.md).
+- Chạy prisma db push trên DATABASE_URL dev, khởi động backend và kiểm tra schema agent.
 - Chạy các kịch bản trong mục 9 với khóa thật.
-- Quyết định về service Redis trong compose.yaml.
-- Hai frontend chưa có cấu hình ESLint, nên chưa chạy được npm run lint; chỉ có tsc và build.
-- Các lỗ hổng có sẵn ở mục 10 vẫn chưa sửa trong nhánh này.
+- Kiểm tra SSE qua Caddy sau khi triển khai (xem DEPLOYMENT.md).
+- Frontend chưa có cấu hình ESLint, nên chưa chạy npm run lint; đã chạy tsc và vite build.
 
 ### Thay đổi sau rà soát bảo mật
 
 Sau khi rà soát ranh giới bảo mật, các điểm dưới đây đã được đối chiếu và xác nhận trực tiếp trên mã nguồn; trong đó một số điểm chưa nằm trong kế hoạch đã duyệt, và một số điểm kế hoạch đã yêu cầu nhưng lần triển khai đầu tiên chưa có.
 
-**Đã sửa**
+**Đã làm**
 
-- Trust proxy: `main.ts` của cả hai backend tin cậy một proxy hop (Caddy). Lý do: nếu không có cấu hình này, `req.ip` là địa chỉ của Caddy cho mọi client, nên cơ chế throttle theo IP sẽ tính gộp tất cả khách truy cập lại với nhau; điều này chỉ đúng chừng nào các cổng backend được giữ riêng tư trong mạng Docker (`DEPLOYMENT.md`).
-- Ảnh trong câu trả lời: `ChatMarkdown` của hai ứng dụng hiển thị alt text thay cho ảnh, nên trình duyệt không tải URL nào từ nội dung của model.
-- Resume: thao tác resume bị từ chối với mã 409 trừ khi thread đang chờ đúng các lệnh gọi được gửi quyết định. Lý do: điều này đã được yêu cầu ở mục 4.3 nhưng bị thiếu trong lần triển khai đầu tiên.
-- Xóa thread: các checkpoint LangGraph của thread được xóa cùng với thread. Lý do: dọn dẹp các checkpoint đã lưu; các dòng `AgentToolLog` hiện vẫn được giữ lại (xem các mục cần quyết định bên dưới).
-- Hội thoại thuộc về người dùng: chat store ghi nhận người sở hữu (`ownerId`), cuộc trò chuyện được xóa khi người dùng đăng nhập thay đổi, và tin nhắn đã lưu bị ẩn cho đến khi biết người dùng và khớp người sở hữu. Lý do: trước thay đổi này, cuộc trò chuyện vẫn lưu lại trong `localStorage` sau khi đăng xuất.
-- Quyết định theo từng thao tác: thẻ xác nhận cung cấp lựa chọn riêng cho từng lệnh gọi. Lý do: lựa chọn đơn lẻ trước đây áp dụng đồng ý hoặc từ chối cho toàn bộ nhóm thao tác.
+- Trust proxy một hop ở cả hai backend: `main.ts` của cả hai backend thiết lập `trust proxy` là 1 hop (Caddy). Lý do: nếu không có cấu hình này, `req.ip` là địa chỉ IP của Caddy cho mọi client, khiến cơ chế throttle theo IP sẽ tính gộp tất cả khách truy cập lại với nhau.
+- Ảnh trong câu trả lời hiển thị alt text: `ChatMarkdown` ở cả hai frontend render văn bản thay thế (alt text) thay vì thẻ `<img>`. Lý do: ngăn trình duyệt tự động tải các tài nguyên hay URL bên ngoài từ nội dung do mô hình AI sinh ra.
+- Resume bị từ chối (409) khi không khớp chính xác: thao tác resume bị từ chối với mã HTTP 409 trừ khi các call id gửi lên khớp chính xác với các lệnh gọi đang chờ xác nhận (`assertResumable` ở cả hai controller). Lý do: ngăn chặn việc gửi quyết định không hợp lệ, không đúng thời điểm hoặc sai lệch phiên xử lý.
+- Xóa thread xóa checkpoint và nhật ký công cụ: khi xóa thread, các checkpoint LangGraph của thread được xóa đồng thời với các dòng `AgentToolLog` trong cùng một transaction (`src/chatbot/agent/thread.service.ts` và cả hai controller). Lý do: dọn dẹp triệt để dữ liệu nhạy cảm và trạng thái lưu trữ của phiên trò chuyện.
+- Hội thoại thuộc về người dùng (ownerId): chat store ghi nhận `ownerId`, tự động dọn sạch cuộc trò chuyện khi đổi người dùng đăng nhập, và ẩn tin nhắn đã lưu cho đến khi khớp người sở hữu. Lý do: tránh rò rỉ lịch sử chat trong `localStorage` sau khi đăng xuất hoặc chuyển tài khoản.
+- Quyết định xác nhận theo từng thao tác: thẻ xác nhận cung cấp lựa chọn phê duyệt hoặc từ chối riêng biệt cho từng lệnh gọi công cụ. Lý do: cho phép người dùng kiểm soát linh hoạt từng hành vi thay vì bắt buộc đồng ý hoặc từ chối toàn bộ nhóm thao tác.
+- Thao tác ghi dữ liệu cá nhân và đánh giá là SENSITIVE: các công cụ `update_my_profile`, `create_address`, `update_address`, `create_review` và `update_review` được đặt mức rủi ro `SENSITIVE` trong `src/chatbot/tools/domains/account.tools.ts` và `reviews-shipping.tools.ts` (các thao tác giỏ hàng giữ nguyên `WRITE`). Lý do: ngăn chặn việc vô tình thay đổi thông tin cá nhân, địa chỉ hoặc gửi đánh giá ngoài ý muốn mà không có sự xác nhận của người dùng.
+- Thẻ checkout có địa chỉ và tạm tính: thẻ xác nhận đặt hàng hiển thị đầy đủ địa chỉ giao hàng, số lượng sản phẩm, tạm tính tiền hàng từ giá phía máy chủ, phí vận chuyển và ghi chú chốt giá khi tạo đơn (thông qua `AgentToolDef.preview` và `OrdersService.previewCheckout`). Lý do: trước đây thẻ chỉ có một câu tóm tắt ngắn, khiến khách hàng không nắm được đơn hàng sẽ giao về đâu và tổng chi phí ước tính bao nhiêu trước khi bấm duyệt.
+- Khách vãng lai hỏi tự do và được hướng dẫn đăng nhập: khách chưa đăng nhập được hỏi tự do về sản phẩm và website không giới hạn token, trợ lý luôn chủ động hướng dẫn khách đăng nhập hoặc tạo tài khoản (`buildSystemPrompt` tại `src/chatbot/agent/prompts/system.prompt.ts`). Lý do: tối ưu trải nghiệm khám phá sản phẩm của khách mới đồng thời khuyến khích tạo tài khoản để thực hiện các chức năng cá nhân hóa.
+- Bỏ Redis khỏi compose: service Redis đã được loại bỏ hoàn toàn khỏi `compose.yaml` và tài liệu `DEPLOYMENT.md`. Lý do: kiến trúc mới sử dụng PostgreSQL checkpointing và Prisma, không còn thành phần nào phụ thuộc vào Redis.
+- Mô tả sessionId cũ được sửa: tham số `sessionId` cũ của endpoint `POST /chatbot/messages` được xử lý là thread id (`AgentThread`), không phải khóa Redis. Lý do: làm rõ bản chất định danh phiên trong cơ sở dữ liệu và loại bỏ hiểu nhầm về phụ thuộc Redis còn sót lại.
 
-**Chưa làm, cần quyết định**
+**Còn mở, không thuộc PR này**
 
-- Nâng rủi ro của thao tác ghi cá nhân của khách (`update_my_profile`, `create_address`, `update_address`, `create_review`, `update_review`) lên mức cần xác nhận. Lý do: hiện chúng không cần xác nhận, nên nội dung từ đánh giá sản phẩm có thể làm đổi số điện thoại hoặc thêm địa chỉ mặc định mà khách không thấy.
-- Hiển thị địa chỉ và tổng tiền trong thẻ xác nhận checkout. Lý do: thẻ hiện chỉ có một câu tóm tắt, nên khách xác nhận mà không thấy đơn sẽ giao đi đâu.
-- Giới hạn chi phí cho khách vãng lai (yêu cầu đăng nhập, hoặc ngân sách token theo ngày). Lý do: hiện mỗi khách có thể bắt đầu nhiều lượt chat, và chi phí OpenAI không có trần.
-- Thời gian lưu `AgentToolLog`. Lý do: các dòng này chứa địa chỉ và kết quả công cụ rút gọn; việc xóa theo thread hay theo số ngày cần quyết định.
-- Thẻ xác nhận của admin chỉ hiển thị id. Lý do: để duyệt có hiểu biết, cần hiển thị tên và chi tiết, mà điều đó cần một bước xem trước phía máy chủ.
-- Content-Security-Policy cho frontend (Caddy hoặc nginx). Lý do: đây là lớp bảo vệ thứ hai cho ảnh và nguồn ngoài, nhưng cần thử trên triển khai thật trước.
-- `HttpExceptionFilter` chung trả thông điệp của Prisma cho client khi lỗi không phải HTTP. Lý do: đây là lỗi có sẵn, không thuộc riêng tính năng chat, nên nên sửa trong một thay đổi riêng.
+- Thẻ xác nhận của admin chỉ hiển thị id: thẻ xác nhận thao tác của admin hiện chỉ hiển thị id của đối tượng thay vì tên hoặc thông tin chi tiết. Lý do: để duyệt có hiểu biết cần bước xem trước (preview) phía máy chủ cho tài nguyên admin; việc này cần thiết kế và đánh giá riêng trong một PR sau.
+- Content-Security-Policy cho frontend: thiết lập CSP nghiêm ngặt trên Caddy hoặc server cho cả hai ứng dụng web. Lý do: đây là lớp phòng thủ chuyên sâu thứ hai cho tài nguyên ngoài, cần kiểm thử và đo lường tương thích trên môi trường triển khai thực tế trước khi áp dụng.
+- HttpExceptionFilter trả thông điệp Prisma cho lỗi không phải HTTP: bộ lọc ngoại lệ toàn cục để lộ thông điệp lỗi nội bộ của Prisma cho client khi gặp các lỗi ngoài HTTP. Lý do: đây là lỗi kiến trúc có sẵn từ trước trong codebase, không thuộc riêng tính năng AI agent nên cần sửa trong một tác vụ độc lập.
