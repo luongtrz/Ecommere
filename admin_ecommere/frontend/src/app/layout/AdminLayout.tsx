@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Suspense, useState } from 'react';
 import {
+  Bot,
   FolderTree,
   LayoutDashboard,
   LogOut,
@@ -26,6 +27,7 @@ import {
 
 const navigation = [
   { name: 'Dashboard', description: 'Tổng quan hiệu suất', href: '/admin', icon: LayoutDashboard },
+  { name: 'Trợ lý AI', description: 'Điều hành cửa hàng bằng hội thoại', href: '/admin/chatbot', icon: Bot },
   { name: 'Sản phẩm', description: 'Danh mục và nội dung bán hàng', href: '/admin/products', icon: Package },
   { name: 'Đơn hàng', description: 'Theo dõi và xử lý đơn', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Mã giảm giá', description: 'Chiến dịch và ưu đãi', href: '/admin/coupons', icon: Ticket },

@@ -53,6 +53,12 @@ export function resumeTurn(
   );
 }
 
+export interface AgentTranscriptMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export const agentApi = {
   async listThreads(limit?: number): Promise<AgentThreadSummary[]> {
     const response = await apiClient.get('/admin/chatbot/threads', {
@@ -66,6 +72,13 @@ export const agentApi = {
       `/admin/chatbot/threads/${encodeURIComponent(threadId)}`
     );
     return (response.data.data ?? response.data) as AgentThreadSummary;
+  },
+
+  async getTranscript(threadId: string): Promise<AgentTranscriptMessage[]> {
+    const response = await apiClient.get(
+      `/admin/chatbot/threads/${encodeURIComponent(threadId)}/messages`
+    );
+    return (response.data.data ?? response.data) as AgentTranscriptMessage[];
   },
 
   async deleteThread(threadId: string): Promise<void> {
