@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { ChatConfirmCall } from '../types';
@@ -48,10 +48,26 @@ export function ConfirmActionCard({
   onSubmit: (decisions: Array<{ callId: string; approve: boolean }>) => void;
 }) {
   const isDecided = Boolean(decided);
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [choices, setChoices] = useState<Record<string, boolean>>({});
 
+  useEffect(() => {
+    if (decided) {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  }, [decided]);
+
+  useEffect(() => {
+    submittingRef.current = false;
+    setSubmitting(false);
+  }, [calls]);
+
+  const isBusy = isDecided || submitting;
+
   const handleChoice = (callId: string, approve: boolean) => {
-    if (isDecided) return;
+    if (isBusy) return;
     setChoices((prev) => ({
       ...prev,
       [callId]: approve,
@@ -59,7 +75,7 @@ export function ConfirmActionCard({
   };
 
   const handleBulk = (approve: boolean) => {
-    if (isDecided) return;
+    if (isBusy) return;
     const next: Record<string, boolean> = {};
     for (const call of calls) {
       next[call.id] = approve;
@@ -71,13 +87,25 @@ export function ConfirmActionCard({
     calls.length > 0 &&
     calls.every((call) => typeof choices[call.id] === 'boolean');
 
-  const handleSubmit = () => {
-    if (isDecided || !allChosen) return;
+  const handleSubmit = async () => {
+    if (isBusy || submittingRef.current || !allChosen) return;
+    submittingRef.current = true;
+    setSubmitting(true);
     const decisions = calls.map((call) => ({
       callId: call.id,
       approve: Boolean(choices[call.id]),
     }));
-    onSubmit(decisions);
+    try {
+      const result = onSubmit(decisions);
+      if (result && typeof (result as Promise<unknown>).then === 'function') {
+        await result;
+        submittingRef.current = false;
+        setSubmitting(false);
+      }
+    } catch {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -93,7 +121,7 @@ export function ConfirmActionCard({
             className="flex flex-col gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
-              <span className="font-medium text-foreground flex-1 break-words">
+              <span className="font-medium text-foreground flex-1 break-words whitespace-pre-line">
                 {call.summary}
               </span>
               {renderRiskBadge(call.risk)}
@@ -104,7 +132,7 @@ export function ConfirmActionCard({
                 variant={choices[call.id] === true ? 'default' : 'outline'}
                 size="sm"
                 aria-pressed={choices[call.id] === true}
-                disabled={isDecided}
+                disabled={isBusy}
                 onClick={() => handleChoice(call.id, true)}
               >
                 Xác nhận
@@ -114,7 +142,7 @@ export function ConfirmActionCard({
                 variant={choices[call.id] === false ? 'destructive' : 'outline'}
                 size="sm"
                 aria-pressed={choices[call.id] === false}
-                disabled={isDecided}
+                disabled={isBusy}
                 onClick={() => handleChoice(call.id, false)}
               >
                 Từ chối
@@ -130,7 +158,7 @@ export function ConfirmActionCard({
             type="button"
             variant="outline"
             size="sm"
-            disabled={isDecided}
+            disabled={isBusy}
             onClick={() => handleBulk(true)}
           >
             Xác nhận tất cả
@@ -139,7 +167,7 @@ export function ConfirmActionCard({
             type="button"
             variant="outline"
             size="sm"
-            disabled={isDecided}
+            disabled={isBusy}
             onClick={() => handleBulk(false)}
           >
             Từ chối tất cả
@@ -155,7 +183,7 @@ export function ConfirmActionCard({
             type="button"
             variant="default"
             size="sm"
-            disabled={isDecided || !allChosen}
+            disabled={isBusy || !allChosen}
             onClick={handleSubmit}
           >
             Gửi quyết định

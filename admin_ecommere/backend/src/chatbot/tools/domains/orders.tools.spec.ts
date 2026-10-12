@@ -5,6 +5,7 @@ import {
 } from './orders.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import type { OrdersService } from '../../../orders/orders.service';
+import { MoneyUtil } from '../../../common/utils/money.util';
 
 describe('Admin Orders Tools', () => {
   let mockOrdersService: {
@@ -428,6 +429,64 @@ describe('Admin Orders Tools', () => {
       expect(
         updateStatusTool.summarize({ orderId: 'ord-456', status: 'CANCELED' }),
       ).toBe('Đổi trạng thái đơn ord-456 sang CANCELED');
+    });
+
+    it('preview returns undefined when status is neither REFUNDED nor CANCELED', async () => {
+      const res = await updateStatusTool.preview!(
+        { orderId: 'ord-123', status: 'PAID' },
+        adminCtx,
+      );
+      expect(res).toBeUndefined();
+      expect(mockOrdersService.getOrderById).not.toHaveBeenCalled();
+    });
+
+    it('preview returns summary with order id, REFUNDED and formatted total', async () => {
+      mockOrdersService.getOrderById.mockResolvedValue({
+        id: 'ord-123',
+        total: 250000,
+      });
+
+      const res = await updateStatusTool.preview!(
+        { orderId: 'ord-123', status: 'REFUNDED' },
+        adminCtx,
+      );
+
+      expect(mockOrdersService.getOrderById).toHaveBeenCalledWith('ord-123');
+      expect(res).toBeDefined();
+      expect(res).toContain('ord-123');
+      expect(res).toContain('REFUNDED');
+      expect(res).toContain(MoneyUtil.format(250000));
+      expect(res).toContain('hoàn lại');
+    });
+
+    it('preview returns summary with order id, CANCELED and formatted total', async () => {
+      mockOrdersService.getOrderById.mockResolvedValue({
+        id: 'ord-456',
+        total: 180000,
+      });
+
+      const res = await updateStatusTool.preview!(
+        { orderId: 'ord-456', status: 'CANCELED' },
+        adminCtx,
+      );
+
+      expect(mockOrdersService.getOrderById).toHaveBeenCalledWith('ord-456');
+      expect(res).toBeDefined();
+      expect(res).toContain('ord-456');
+      expect(res).toContain('CANCELED');
+      expect(res).toContain(MoneyUtil.format(180000));
+      expect(res).toContain('giải phóng');
+    });
+
+    it('preview returns undefined when getOrderById throws or order is not found', async () => {
+      mockOrdersService.getOrderById.mockRejectedValue(new Error('Order not found'));
+
+      const res = await updateStatusTool.preview!(
+        { orderId: 'ord-999', status: 'REFUNDED' },
+        adminCtx,
+      );
+
+      expect(res).toBeUndefined();
     });
 
     it('propagates service transition errors without duplicating the transition table in tool code', async () => {

@@ -7,7 +7,7 @@ import { SalesReportQueryDto } from './dtos/sales-report-query.dto';
 import { TopProductsQueryDto } from './dtos/top-products-query.dto';
 
 @ApiTags('admin-reports')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}

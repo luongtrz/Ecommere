@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
 import type { OrdersService } from '../../../orders/orders.service';
+import { MoneyUtil } from '../../../common/utils/money.util';
 
 export const ORDER_STATUSES = [
   'PENDING_PAYMENT',
@@ -132,6 +133,26 @@ export function createAdminOrdersTools(deps: AdminOrdersToolDeps): AgentToolDef[
       });
     },
     summarize: (args) => `Đổi trạng thái đơn ${args.orderId} sang ${args.status}`,
+    preview: async (args, ctx: ToolContext) => {
+      if (args.status !== 'REFUNDED' && args.status !== 'CANCELED') {
+        return undefined;
+      }
+
+      try {
+        const order = await deps.orders.getOrderById(args.orderId);
+        if (!order || typeof order.total !== 'number') {
+          return undefined;
+        }
+
+        const totalFormatted = MoneyUtil.format(order.total);
+        if (args.status === 'REFUNDED') {
+          return `Đổi trạng thái đơn ${args.orderId} sang REFUNDED\nSố tiền hoàn lại: ${totalFormatted}`;
+        }
+        return `Đổi trạng thái đơn ${args.orderId} sang CANCELED\nSố tiền giải phóng: ${totalFormatted}`;
+      } catch {
+        return undefined;
+      }
+    },
   };
 
   return [listOrdersTool, getOrderTool, updateOrderStatusTool];
