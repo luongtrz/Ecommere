@@ -4,7 +4,7 @@ import {
   Loader2,
   SendHorizonal,
   Sparkles,
-  Trash2,
+  Plus,
   X,
   ArrowUpRight,
 } from 'lucide-react';
@@ -112,7 +112,8 @@ export function ChatbotWidget() {
   };
 
   const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    // Enter that confirms an IME composition (Vietnamese input methods) must not send.
+    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
       handleSubmit();
     }
@@ -144,7 +145,7 @@ export function ChatbotWidget() {
                 aria-label="Cuộc trò chuyện mới"
                 type="button"
               >
-                <Trash2 className="h-4 w-4 opacity-80 hover:opacity-100" />
+                <Plus className="h-4 w-4 opacity-80 hover:opacity-100" />
                 <span className="sr-only">Cuộc trò chuyện mới</span>
               </Button>
               <Button
