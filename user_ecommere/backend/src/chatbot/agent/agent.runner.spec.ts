@@ -11,6 +11,7 @@ import { z } from 'zod';
 import {
   AgentRunner,
   AgentBusyError,
+  AgentNotPendingError,
   type AgentRunnerDeps,
   type AgentTranscriptMessage,
 } from './agent.runner';
@@ -873,5 +874,199 @@ describe('AgentRunner', () => {
       { id: '0', role: 'user', content: 'Tin nhắn đầu tiên' },
       { id: '1', role: 'assistant', content: 'Tin nhắn thứ hai' },
     ]);
+  });
+
+  it('assertResumable resolves when the callIds equal the pending ids', async () => {
+    const fakeGraph = createStateGraph({
+      tasks: [
+        {
+          id: 'task-confirm',
+          name: 'confirm',
+          interrupts: [
+            {
+              value: {
+                kind: 'confirm',
+                calls: [
+                  { id: 'call-1', name: 'cancel_order' },
+                  { id: 'call-2', name: 'update_stock' },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runner.assertResumable('thread-resumable-1', ['call-1', 'call-2']),
+    ).resolves.toBeUndefined();
+
+    await expect(
+      runner.assertResumable('thread-resumable-1', ['call-2', 'call-1']),
+    ).resolves.toBeUndefined();
+  });
+
+  it('assertResumable throws AgentNotPendingError when nothing is pending', async () => {
+    const threads = createMockThreads();
+
+    const runnerNullState = new AgentRunner({
+      graph: createStateGraph(null),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerNullState.assertResumable('thread-empty', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    const runnerEmptyTasks = new AgentRunner({
+      graph: createStateGraph({ tasks: [] }),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerEmptyTasks.assertResumable('thread-no-tasks', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    const runnerNoInterrupts = new AgentRunner({
+      graph: createStateGraph({
+        tasks: [{ id: 'task-1', name: 'agent', interrupts: [] }],
+      }),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerNoInterrupts.assertResumable('thread-no-interrupts', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    const runnerEmptyCalls = new AgentRunner({
+      graph: createStateGraph({
+        tasks: [
+          {
+            id: 'task-1',
+            name: 'confirm',
+            interrupts: [{ value: { kind: 'confirm', calls: [] } }],
+          },
+        ],
+      }),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerEmptyCalls.assertResumable('thread-empty-calls', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    const runnerNoGetState = new AgentRunner({
+      graph: createScriptedGraph([]),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerNoGetState.assertResumable('thread-no-getstate', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    try {
+      await runnerEmptyTasks.assertResumable('thread-err-props', ['call-1']);
+      throw new Error('should not reach here');
+    } catch (err: any) {
+      expect(err).toBeInstanceOf(AgentNotPendingError);
+      expect(err.name).toBe('AgentNotPendingError');
+      expect(err.message).toBe('Không có thao tác nào đang chờ xác nhận');
+    }
+  });
+
+  it('assertResumable throws AgentNotPendingError when a call id is unknown, when a pending call has no decision, and when the list is empty', async () => {
+    const fakeGraph = createStateGraph({
+      tasks: [
+        {
+          id: 'task-confirm',
+          name: 'confirm',
+          interrupts: [
+            {
+              value: {
+                kind: 'confirm',
+                calls: [
+                  { id: 'call-1', name: 'cancel_order' },
+                  { id: 'call-2', name: 'update_stock' },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    // Unknown call id
+    await expect(
+      runner.assertResumable('thread-check', ['call-1', 'call-unknown']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    await expect(
+      runner.assertResumable('thread-check', ['call-unknown']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    // Pending call has no decision (missing call-2)
+    await expect(
+      runner.assertResumable('thread-check', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    // List is empty
+    await expect(
+      runner.assertResumable('thread-check', []),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    // Duplicate call id
+    await expect(
+      runner.assertResumable('thread-check', ['call-1', 'call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+  });
+
+  it('deleteCheckpoints calls the checkpointer deleteThread with the thread id, and resolves without error when there is no checkpointer', async () => {
+    const deleteThreadMock = jest.fn().mockResolvedValue(undefined);
+
+    // When checkpointer exists
+    const runnerWithCheckpointer = new AgentRunner({
+      graph: {
+        ...createStateGraph({}),
+        checkpointer: { deleteThread: deleteThreadMock },
+      },
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runnerWithCheckpointer.deleteCheckpoints('thread-delete-123'),
+    ).resolves.toBeUndefined();
+    expect(deleteThreadMock).toHaveBeenCalledTimes(1);
+    expect(deleteThreadMock).toHaveBeenCalledWith('thread-delete-123');
+
+    // When no checkpointer exists on graph
+    const runnerNoCheckpointer = new AgentRunner({
+      graph: createStateGraph({}),
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runnerNoCheckpointer.deleteCheckpoints('thread-delete-456'),
+    ).resolves.toBeUndefined();
   });
 });

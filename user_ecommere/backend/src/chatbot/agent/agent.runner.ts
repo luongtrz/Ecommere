@@ -17,6 +17,14 @@ export class AgentBusyError extends Error {
   }
 }
 
+export class AgentNotPendingError extends Error {
+  constructor(message = 'Không có thao tác nào đang chờ xác nhận') {
+    super(message);
+    this.name = 'AgentNotPendingError';
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
 export interface AgentTranscriptMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -32,6 +40,9 @@ export interface AgentRunnerDeps {
     getState?(
       config: unknown,
     ): PromiseLike<unknown> | unknown;
+    checkpointer?: {
+      deleteThread(threadId: string): Promise<void>;
+    };
   };
   registry: ToolRegistry;
   threads: {
@@ -145,6 +156,81 @@ export class AgentRunner {
     }
 
     return transcript;
+  }
+
+  async assertResumable(threadId: string, callIds: string[]): Promise<void> {
+    if (!this.graph.getState) {
+      throw new AgentNotPendingError();
+    }
+
+    const state = (await this.graph.getState({
+      configurable: { thread_id: threadId },
+    })) as
+      | {
+          tasks?: Array<{
+            interrupts?: Array<{
+              value?: {
+                calls?: Array<{ id?: string }>;
+              };
+            }>;
+          }>;
+        }
+      | undefined
+      | null;
+
+    if (!state || !Array.isArray(state.tasks)) {
+      throw new AgentNotPendingError();
+    }
+
+    const pendingCallIds: string[] = [];
+    for (const task of state.tasks) {
+      if (task && Array.isArray(task.interrupts)) {
+        for (const interrupt of task.interrupts) {
+          const calls = (interrupt as any)?.value?.calls;
+          if (Array.isArray(calls)) {
+            for (const call of calls) {
+              const id = (call as any)?.id;
+              if (typeof id === 'string') {
+                pendingCallIds.push(id);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (pendingCallIds.length === 0) {
+      throw new AgentNotPendingError();
+    }
+
+    if (callIds.length === 0) {
+      throw new AgentNotPendingError();
+    }
+
+    const callIdSet = new Set<string>();
+    for (const id of callIds) {
+      if (callIdSet.has(id)) {
+        throw new AgentNotPendingError();
+      }
+      callIdSet.add(id);
+    }
+
+    const pendingSet = new Set(pendingCallIds);
+    if (callIdSet.size !== pendingSet.size || callIds.length !== pendingCallIds.length) {
+      throw new AgentNotPendingError();
+    }
+
+    for (const id of callIdSet) {
+      if (!pendingSet.has(id)) {
+        throw new AgentNotPendingError();
+      }
+    }
+  }
+
+  async deleteCheckpoints(threadId: string): Promise<void> {
+    if (this.graph.checkpointer) {
+      await this.graph.checkpointer.deleteThread(threadId);
+    }
   }
 
   private resolveMessageType(msg: unknown): string {
