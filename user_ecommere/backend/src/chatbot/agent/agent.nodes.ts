@@ -74,19 +74,35 @@ export function createConfirmNode(deps: AgentGraphDeps) {
     });
     if (pending.length === 0) return {};
 
-    const callsPayload = pending.map((c) => {
-      const def = deps.registry.get(c.name);
-      let summary = c.name;
-      if (def) {
-        try {
-          const parsed = def.schema.safeParse(c.args);
-          if (parsed.success) summary = def.summarize(parsed.data);
-        } catch {
-          summary = c.name;
+    const callsPayload = await Promise.all(
+      pending.map(async (c) => {
+        const def = deps.registry.get(c.name);
+        let summary = c.name;
+        if (def) {
+          try {
+            const parsed = def.schema.safeParse(c.args);
+            if (parsed.success) {
+              let previewText: string | undefined;
+              if (def.preview) {
+                try {
+                  previewText = await def.preview(parsed.data, ctx);
+                } catch {
+                  // preview failure falls back to summarize
+                }
+              }
+              if (typeof previewText === 'string' && previewText.length > 0) {
+                summary = previewText;
+              } else {
+                summary = def.summarize(parsed.data);
+              }
+            }
+          } catch {
+            summary = c.name;
+          }
         }
-      }
-      return { id: c.id ?? '', name: c.name, summary, risk: def?.risk ?? 'DESTRUCTIVE' };
-    });
+        return { id: c.id ?? '', name: c.name, summary, risk: def?.risk ?? 'DESTRUCTIVE' };
+      }),
+    );
 
     const resume = interrupt({ kind: 'confirm', calls: callsPayload }) as
       | { decisions?: Array<{ callId: string; approve: boolean }> }

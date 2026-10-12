@@ -27,6 +27,7 @@ export interface AgentToolDef<A = any> {
   risk: ToolRisk;
   handler: (args: A, ctx: ToolContext) => Promise<unknown>;
   summarize: (args: A) => string; // one Vietnamese line, used on confirmation cards
+  preview?(args: A, ctx: ToolContext): Promise<string | undefined>; // may read the database, must not write, and returns a single line of text, or undefined to keep summarize
   project?: (result: unknown) => unknown; // optional trimming before the result goes back to the model
   uiAction?: (result: unknown) => UiAction | undefined;
 }

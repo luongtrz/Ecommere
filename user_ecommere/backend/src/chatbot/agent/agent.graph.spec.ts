@@ -652,4 +652,136 @@ describe('LangGraph Agent Graph', () => {
     expect(parsed.ok).toBe(false);
     expect(parsed.error).toBe('Người dùng đã từ chối thao tác này');
   });
+
+  it('case preview 1: tool with a preview uses the preview text as interrupt call summary', async () => {
+    const previewHandler = jest.fn().mockResolvedValue({ ok: true });
+    const previewFn = jest.fn().mockResolvedValue('Đơn hàng ord-100: giao tới 123 Lê Lợi, tổng 500.000đ');
+
+    const previewTool: AgentToolDef<{ orderId: string }> = {
+      name: 'confirm_order_preview',
+      domain: 'orders',
+      description: 'Xác nhận đơn hàng',
+      schema: z.object({ orderId: z.string() }).strict(),
+      auth: 'customer',
+      risk: 'DESTRUCTIVE',
+      handler: previewHandler,
+      summarize: (args) => `Xác nhận đơn hàng ${args.orderId}`,
+      preview: previewFn,
+    };
+
+    const graph = buildAgentGraph({
+      model: new ScriptedFakeModel([
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: 'call_prev_1', name: 'confirm_order_preview', args: { orderId: 'ord-100' } }],
+        }),
+      ]),
+      registry: new ToolRegistry([previewTool]),
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-prev-1', ctx: customerCtx } };
+    const res = await graph.invoke(
+      { messages: [new HumanMessage('Xác nhận')] },
+      config,
+    );
+
+    expect(previewFn).toHaveBeenCalledTimes(1);
+    expect(previewFn).toHaveBeenCalledWith({ orderId: 'ord-100' }, customerCtx);
+    expect((res as any).__interrupt__).toBeDefined();
+    expect((res as any).__interrupt__.length).toBeGreaterThan(0);
+    expect((res as any).__interrupt__[0].value.kind).toBe('confirm');
+    expect((res as any).__interrupt__[0].value.calls[0].summary).toBe(
+      'Đơn hàng ord-100: giao tới 123 Lê Lợi, tổng 500.000đ',
+    );
+  });
+
+  it('case preview 2: tool whose preview throws uses summarize(args) and run still reaches interrupt', async () => {
+    const previewHandler = jest.fn().mockResolvedValue({ ok: true });
+    const previewFn = jest.fn().mockRejectedValue(new Error('Lỗi cơ sở dữ liệu'));
+
+    const previewTool: AgentToolDef<{ orderId: string }> = {
+      name: 'throwing_preview_tool',
+      domain: 'orders',
+      description: 'Xác nhận đơn hàng',
+      schema: z.object({ orderId: z.string() }).strict(),
+      auth: 'customer',
+      risk: 'DESTRUCTIVE',
+      handler: previewHandler,
+      summarize: (args) => `Xác nhận đơn hàng ${args.orderId}`,
+      preview: previewFn,
+    };
+
+    const graph = buildAgentGraph({
+      model: new ScriptedFakeModel([
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: 'call_prev_2', name: 'throwing_preview_tool', args: { orderId: 'ord-200' } }],
+        }),
+      ]),
+      registry: new ToolRegistry([previewTool]),
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-prev-2', ctx: customerCtx } };
+    const res = await graph.invoke(
+      { messages: [new HumanMessage('Xác nhận')] },
+      config,
+    );
+
+    expect(previewFn).toHaveBeenCalledTimes(1);
+    expect(previewFn).toHaveBeenCalledWith({ orderId: 'ord-200' }, customerCtx);
+    expect((res as any).__interrupt__).toBeDefined();
+    expect((res as any).__interrupt__.length).toBeGreaterThan(0);
+    expect((res as any).__interrupt__[0].value.kind).toBe('confirm');
+    expect((res as any).__interrupt__[0].value.calls[0].summary).toBe('Xác nhận đơn hàng ord-200');
+  });
+
+  it('case preview 3: tool whose preview returns undefined uses summarize(args)', async () => {
+    const previewHandler = jest.fn().mockResolvedValue({ ok: true });
+    const previewFn = jest.fn().mockResolvedValue(undefined);
+
+    const previewTool: AgentToolDef<{ orderId: string }> = {
+      name: 'undefined_preview_tool',
+      domain: 'orders',
+      description: 'Xác nhận đơn hàng',
+      schema: z.object({ orderId: z.string() }).strict(),
+      auth: 'customer',
+      risk: 'DESTRUCTIVE',
+      handler: previewHandler,
+      summarize: (args) => `Xác nhận đơn hàng ${args.orderId}`,
+      preview: previewFn,
+    };
+
+    const graph = buildAgentGraph({
+      model: new ScriptedFakeModel([
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: 'call_prev_3', name: 'undefined_preview_tool', args: { orderId: 'ord-300' } }],
+        }),
+      ]),
+      registry: new ToolRegistry([previewTool]),
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-prev-3', ctx: customerCtx } };
+    const res = await graph.invoke(
+      { messages: [new HumanMessage('Xác nhận')] },
+      config,
+    );
+
+    expect(previewFn).toHaveBeenCalledTimes(1);
+    expect(previewFn).toHaveBeenCalledWith({ orderId: 'ord-300' }, customerCtx);
+    expect((res as any).__interrupt__).toBeDefined();
+    expect((res as any).__interrupt__.length).toBeGreaterThan(0);
+    expect((res as any).__interrupt__[0].value.kind).toBe('confirm');
+    expect((res as any).__interrupt__[0].value.calls[0].summary).toBe('Xác nhận đơn hàng ord-300');
+  });
 });
+
