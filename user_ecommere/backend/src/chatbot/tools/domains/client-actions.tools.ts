@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext, UiAction } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 
 export interface ClientActionToolDeps {
   prisma: {
@@ -81,15 +82,15 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
       });
 
       if (!variant) {
-        throw new Error('Biến thể sản phẩm không tồn tại.');
+        throw new ToolError('Biến thể sản phẩm không tồn tại.');
       }
 
       if (!variant.product || !variant.product.active) {
-        throw new Error('Sản phẩm hiện không còn kinh doanh hoặc đã ngừng hoạt động.');
+        throw new ToolError('Sản phẩm hiện không còn kinh doanh hoặc đã ngừng hoạt động.');
       }
 
       if (variant.stock < args.quantity) {
-        throw new Error(`Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`);
+        throw new ToolError(`Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`);
       }
 
       const productId = variant.product.id ?? variant.productId;
@@ -158,15 +159,15 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
       });
 
       if (!variant) {
-        throw new Error('Biến thể sản phẩm không tồn tại.');
+        throw new ToolError('Biến thể sản phẩm không tồn tại.');
       }
 
       if (!variant.product || !variant.product.active) {
-        throw new Error('Sản phẩm hiện không còn kinh doanh hoặc đã ngừng hoạt động.');
+        throw new ToolError('Sản phẩm hiện không còn kinh doanh hoặc đã ngừng hoạt động.');
       }
 
       if (variant.stock < args.quantity) {
-        throw new Error(`Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`);
+        throw new ToolError(`Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`);
       }
 
       return {
@@ -254,7 +255,7 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
     risk: 'WRITE',
     handler: async (args: { path: string }) => {
       if (!isAllowedPath(args.path)) {
-        throw new Error('Đường dẫn không hợp lệ hoặc không được phép truy cập.');
+        throw new ToolError('Đường dẫn không hợp lệ hoặc không được phép truy cập.');
       }
       return {
         path: args.path,

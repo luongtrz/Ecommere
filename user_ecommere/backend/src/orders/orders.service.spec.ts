@@ -4,6 +4,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { OrderStatus, PaymentStatus } from '@prisma/client';
 import { ShippingMethod } from './dtos/checkout.dto';
+import { ShippingService } from '../shipping/shipping.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -486,6 +487,146 @@ describe('OrdersService', () => {
         shippingMethod: ShippingMethod.STANDARD,
         fee: 0,
       });
+    });
+
+    describe('shipping fee rules spec table', () => {
+      const cases = [
+        {
+          name: 'Bangkok is free (STANDARD)',
+          province: 'Bangkok',
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 0,
+        },
+        {
+          name: 'Bangkok is free (EXPRESS)',
+          province: 'Bangkok',
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 0,
+        },
+        {
+          name: 'Nonthaburi is free (STANDARD)',
+          province: 'Nonthaburi',
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 0,
+        },
+        {
+          name: 'Nonthaburi is free (EXPRESS)',
+          province: 'Nonthaburi',
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 0,
+        },
+        {
+          name: 'Samut Prakan is not free (STANDARD)',
+          province: 'Samut Prakan',
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'Samut Prakan is not free (EXPRESS)',
+          province: 'Samut Prakan',
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+        {
+          name: 'missing province is not free and does not throw exception (STANDARD)',
+          province: undefined,
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'missing province is not free and does not throw exception (EXPRESS)',
+          province: undefined,
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+        {
+          name: 'standard shipping for non-free province',
+          province: 'Chiang Mai',
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'express shipping for non-free province',
+          province: 'Chiang Mai',
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+        {
+          name: 'weight does not change fee (non-free province with 10kg STANDARD)',
+          province: 'Chiang Mai',
+          weight: 10,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'weight does not change fee (non-free province with 20kg EXPRESS)',
+          province: 'Chiang Mai',
+          weight: 20,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+        {
+          name: 'weight does not change fee (free province with 10kg)',
+          province: 'Bangkok',
+          weight: 10,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 0,
+        },
+        {
+          name: 'weight does not change fee (Samut Prakan with 15kg STANDARD)',
+          province: 'Samut Prakan',
+          weight: 15,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'weight does not change fee (Samut Prakan with 15kg EXPRESS)',
+          province: 'Samut Prakan',
+          weight: 15,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+      ];
+
+      test.each(cases)(
+        '$name ($province, weight: $weight, method: $method) -> fee: $expectedFee',
+        async ({ province, weight, method, expectedFee }) => {
+          const address = province !== undefined ? { province } : {};
+          const fee = (service as any).calculateShippingFee(address, method);
+          expect(fee).toBe(expectedFee);
+
+          const shippingService = new ShippingService();
+          const mockOrigin = {
+            province: 'Bangkok',
+            district: 'Chatuchak',
+            ward: 'Lat Yao',
+            line1: '123 Warehouse St.',
+          };
+          const destination = {
+            province: province ?? '',
+            district: 'Unknown',
+            ward: 'Unknown',
+            line1: 'Customer address',
+          };
+          const shippingQuote = await shippingService.calculateFee(
+            mockOrigin,
+            destination,
+            weight,
+            method,
+          );
+          expect(shippingQuote.fee).toBe(expectedFee);
+        },
+      );
     });
   });
 

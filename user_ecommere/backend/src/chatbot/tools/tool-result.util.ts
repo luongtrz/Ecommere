@@ -1,5 +1,13 @@
 import { HttpException } from '@nestjs/common';
 
+export class ToolError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = 'ToolError';
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
 export function toToolResult(value: unknown, maxChars = 6000): string {
   try {
     const raw = JSON.stringify({ ok: true, data: value });
@@ -23,6 +31,10 @@ export function toToolResult(value: unknown, maxChars = 6000): string {
 }
 
 export function toErrorMessage(error: unknown): string {
+  if (error instanceof ToolError || (error instanceof Error && error.name === 'ToolError')) {
+    return error.message;
+  }
+
   if (error instanceof HttpException) {
     const response = error.getResponse();
 
@@ -49,3 +61,4 @@ export function toErrorMessage(error: unknown): string {
 
   return 'Thao tác không thành công.';
 }
+

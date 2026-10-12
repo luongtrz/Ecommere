@@ -7,6 +7,7 @@ import {
   ShipmentResult,
   TrackingInfo,
 } from './interfaces/shipping-provider.interface';
+import { calculateShippingFee, isFreeShippingProvince } from './shipping.rules';
 
 @Injectable()
 export class ShippingService implements ShippingProvider {
@@ -14,30 +15,19 @@ export class ShippingService implements ShippingProvider {
     return 'Mock Shipping Service';
   }
 
-  async calculateFee(origin: Address, destination: Address, weight: number): Promise<ShippingFee> {
-    // Mock calculation based on province
-    const destProvinceLower = destination.province.toLowerCase();
-
-    let fee = 50000; // Default 50k VND
-    let estimatedDays = 3;
-
-    // Free shipping for Bangkok and surrounding areas
-    if (
-      destProvinceLower.includes('bangkok') ||
-      destProvinceLower.includes('กรุงเทพ') ||
-      destProvinceLower.includes('nonthaburi') ||
-      destProvinceLower.includes('นนทบุรี') ||
-      destProvinceLower.includes('samut prakan') ||
-      destProvinceLower.includes('สมุทรปราการ')
-    ) {
-      fee = 0;
-      estimatedDays = 1;
-    }
-
-    // Add weight surcharge (mock)
-    if (weight > 5) {
-      fee += Math.ceil((weight - 5) / 5) * 10000; // 10k per 5kg
-    }
+  async calculateFee(
+    origin: Address,
+    destination: Address,
+    weight: number,
+    method?: string,
+  ): Promise<ShippingFee> {
+    const selectedMethod = method || 'STANDARD';
+    const fee = calculateShippingFee({
+      province: destination?.province,
+      method: selectedMethod,
+    });
+    const isFree = isFreeShippingProvince(destination?.province);
+    const estimatedDays = isFree ? 1 : 3;
 
     return {
       fee,
