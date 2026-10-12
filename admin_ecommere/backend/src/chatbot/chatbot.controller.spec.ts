@@ -117,7 +117,7 @@ function createFakeRequest(user?: { id: string; role?: string }): FakeRequest {
 
 describe('AdminChatbotController', () => {
   let controller: AdminChatbotController;
-  let mockRunner: { run: jest.Mock };
+  let mockRunner: { run: jest.Mock; readTranscript: jest.Mock };
   let mockThreads: {
     create: jest.Mock;
     assertOwned: jest.Mock;
@@ -142,6 +142,7 @@ describe('AdminChatbotController', () => {
 
     mockRunner = {
       run: jest.fn(),
+      readTranscript: jest.fn(),
     };
 
     mockThreads = {
@@ -511,6 +512,53 @@ describe('AdminChatbotController', () => {
       await expect(
         controller.getThread(req as any, 'thread-detail-1'),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('GET /admin/chatbot/threads/:threadId/messages', () => {
+    it("the owner gets the runner's messages in order, and readTranscript is called with the same threadId", async () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Thống kê doanh thu' },
+        { id: '2', role: 'assistant', content: 'Doanh thu tháng này đạt 50 triệu.' },
+      ];
+      mockThreads.assertOwned.mockResolvedValue({
+        id: 'thread-detail-1',
+        title: 'Thống kê doanh thu',
+        app: 'ADMIN',
+        totalTokens: 120,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: 'admin-user-1',
+      });
+      mockRunner.readTranscript.mockResolvedValue(messages);
+
+      const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
+      const result = await controller.getMessages(req as any, 'thread-detail-1');
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-detail-1', {
+        userId: 'admin-user-1',
+        app: 'ADMIN',
+      });
+      expect(mockRunner.readTranscript).toHaveBeenCalledWith('thread-detail-1');
+      expect(result).toEqual(messages);
+    });
+
+    it('a thread owned by another admin gives 404 and readTranscript is not called', async () => {
+      mockThreads.assertOwned.mockRejectedValue(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
+
+      const req = createFakeRequest({ id: 'other-user', role: 'ADMIN' });
+
+      await expect(
+        controller.getMessages(req as any, 'thread-detail-1'),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-detail-1', {
+        userId: 'other-user',
+        app: 'ADMIN',
+      });
+      expect(mockRunner.readTranscript).not.toHaveBeenCalled();
     });
   });
 
