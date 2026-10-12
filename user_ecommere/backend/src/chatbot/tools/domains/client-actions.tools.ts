@@ -92,14 +92,20 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
         throw new Error(`Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`);
       }
 
-      const name = `${variant.product.name} ${variant.scent} ${variant.volumeMl}ml`;
+      const productId = variant.product.id ?? variant.productId;
+      const name = variant.product.name;
+      const image = variant.product.images?.[0] ?? '';
       const price = variant.salePrice ?? variant.price;
 
       return {
         variantId: args.variantId,
+        productId,
         name,
+        image,
         price,
         quantity: args.quantity,
+        scent: variant.scent,
+        volumeMl: variant.volumeMl,
         stock: variant.stock,
       };
     },
@@ -109,15 +115,23 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
       const res = result as {
         variantId: string;
         quantity: number;
+        productId: string;
         name: string;
+        image: string;
         price: number;
+        scent: string;
+        volumeMl: number;
       };
       return {
         type: 'cart.add',
         payload: {
           variantId: res.variantId,
           quantity: res.quantity,
+          productId: res.productId,
           name: res.name,
+          image: res.image,
+          scent: res.scent,
+          volumeMl: res.volumeMl,
           price: res.price,
         },
       };

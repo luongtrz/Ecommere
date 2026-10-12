@@ -181,13 +181,16 @@ describe('client-actions tools', () => {
       const tool = getTool('cart_add_item');
       mockPrisma.productVariant.findUnique.mockResolvedValue({
         id: 'var-123',
+        productId: 'prod-123',
         stock: 15,
         scent: 'Bạc Hà',
         volumeMl: 100,
         price: 150000,
         salePrice: null,
         product: {
+          id: 'prod-123',
           name: 'Xịt thơm phòng',
+          images: ['https://example.com/spray.jpg'],
           active: true,
         },
       });
@@ -197,9 +200,13 @@ describe('client-actions tools', () => {
 
       expect(result).toEqual({
         variantId: 'var-123',
-        name: 'Xịt thơm phòng Bạc Hà 100ml',
+        productId: 'prod-123',
+        name: 'Xịt thơm phòng',
+        image: 'https://example.com/spray.jpg',
         price: 150000,
         quantity: 2,
+        scent: 'Bạc Hà',
+        volumeMl: 100,
         stock: 15,
       });
 
@@ -210,7 +217,11 @@ describe('client-actions tools', () => {
         payload: {
           variantId: 'var-123',
           quantity: 2,
-          name: 'Xịt thơm phòng Bạc Hà 100ml',
+          productId: 'prod-123',
+          name: 'Xịt thơm phòng',
+          image: 'https://example.com/spray.jpg',
+          scent: 'Bạc Hà',
+          volumeMl: 100,
           price: 150000,
         },
       });
@@ -220,13 +231,16 @@ describe('client-actions tools', () => {
       const tool = getTool('cart_add_item');
       mockPrisma.productVariant.findUnique.mockResolvedValue({
         id: 'var-discount',
+        productId: 'prod-456',
         stock: 10,
         scent: 'Gỗ Đàn Hương',
         volumeMl: 200,
         price: 250000,
         salePrice: 199000,
         product: {
+          id: 'prod-456',
           name: 'Xịt phòng cao cấp',
+          images: ['https://example.com/luxury.jpg'],
           active: true,
         },
       });
@@ -245,8 +259,54 @@ describe('client-actions tools', () => {
         payload: {
           variantId: 'var-discount',
           quantity: 1,
-          name: 'Xịt phòng cao cấp Gỗ Đàn Hương 200ml',
+          productId: 'prod-456',
+          name: 'Xịt phòng cao cấp',
+          image: 'https://example.com/luxury.jpg',
+          scent: 'Gỗ Đàn Hương',
+          volumeMl: 200,
           price: 199000,
+        },
+      });
+    });
+
+    it('yields image "" when product has no images', async () => {
+      const tool = getTool('cart_add_item');
+      mockPrisma.productVariant.findUnique.mockResolvedValue({
+        id: 'var-no-img',
+        productId: 'prod-no-img',
+        stock: 8,
+        scent: 'Sả Chanh',
+        volumeMl: 50,
+        price: 95000,
+        salePrice: null,
+        product: {
+          id: 'prod-no-img',
+          name: 'Xịt phòng sả chanh',
+          images: [],
+          active: true,
+        },
+      });
+
+      const parsedArgs = tool.schema.parse({
+        variantId: 'var-no-img',
+        quantity: 1,
+      });
+      const result: any = await tool.handler(parsedArgs, mockContext);
+
+      expect(result.image).toBe('');
+
+      const action = tool.uiAction!(result);
+      expect(action).toEqual({
+        type: 'cart.add',
+        payload: {
+          variantId: 'var-no-img',
+          quantity: 1,
+          productId: 'prod-no-img',
+          name: 'Xịt phòng sả chanh',
+          image: '',
+          scent: 'Sả Chanh',
+          volumeMl: 50,
+          price: 95000,
         },
       });
     });
