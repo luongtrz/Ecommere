@@ -278,3 +278,44 @@ T5.1 xóa `chatbot.service.ts`/`chatbot-history.service.ts`, `CHATBOT_*` env, c�
 - Frontend user: `features/chatbot/{components/ChatbotWidget.tsx,api/chatbot.api.ts}`, `app/layout/MainLayout.tsx`, `lib/api.ts`, `features/cart/store/cartStore.ts`, `features/checkout/pages/CheckoutPage.tsx:68-81`.
 - Frontend admin: `app/router.tsx`, `app/layout/AdminLayout.tsx:27-34`, `lib/api.ts`, `features/admin/{api,hooks,pages}/*` (mẫu: products).
 - Hạ tầng: `compose.yaml`, `deploy/caddy/Caddyfile`, `setup-azure.sh:55`, `*/backend/Dockerfile`, `DEPLOYMENT.md`.
+
+## 11. Trạng thái triển khai và sai khác so với kế hoạch
+
+### Trạng thái theo pha
+
+| Pha | Hạng mục | Trạng thái | Ghi chú |
+|---|---|---|---|
+| Pha 0 | Worktree tích hợp và .gitignore | Xong | .worktrees/ và .agy-sessions/ đã có trong .gitignore. |
+| Pha 0 | Spike runtime và image Node 22 | Xong | Hai backend build được với LangGraph, @langchain/openai và PostgresSaver; hai Dockerfile backend dùng node:22-bookworm-slim. |
+| Pha 0 | Model Prisma AgentApp, AgentThread, AgentToolLog | Xong | Giống hệt nhau trong hai schema.prisma; db push chưa chạy trên DB nào. |
+| Pha 1 | Lõi agent backend user | Xong | Graph, runner, tool registry, chính sách xác nhận, prompt, audit, thread service. |
+| Pha 1 | API chatbot backend user | Xong | Stream, resume, danh sách và chi tiết thread, xóa thread, route tương thích POST messages. |
+| Pha 1 | Tool catalog | Xong | Gồm tìm kiếm, chi tiết, bộ lọc, danh mục và gợi ý sản phẩm. |
+| Pha 2 | Tool tài khoản, đơn hàng, đánh giá, coupon, phí vận chuyển, giỏ hàng phía trình duyệt | Xong | Các tool giỏ hàng là client action; checkout lấy danh sách món từ giỏ phía trình duyệt, và server tính giá. |
+| Pha 3 | Lõi agent backend admin (bản copy) | Xong | Được kiểm tra bằng scripts/check-agent-core-sync.sh. |
+| Pha 3 | Registry, provider, tool domain và controller admin | Xong | Các route /api/admin/chatbot yêu cầu vai trò ADMIN ở cấp class. |
+| Pha 3 | Lấp khoảng trống G1 đến G5 | Xong | Báo cáo doanh thu và top sản phẩm, danh sách và chi tiết khách, danh sách đánh giá, trường active của coupon, quoteShippingFee. |
+| Pha 4 | Widget chat người dùng | Xong | ChatbotWidget viết lại trên useChatAgent; đã xóa chatbot.api.ts cũ. |
+| Pha 4 | Trang /admin/chatbot | Xong | Có route, mục điều hướng 'Trợ lý AI', và chuyển hướng /chatbot. |
+| Pha 5 | Dọn code Gemini và Redis trong backend user | Xong | Đã xóa chatbot.service.ts, chatbot-history.service.ts, dependency redis và khóa cấu hình cũ. Service Redis còn trong compose.yaml. |
+| Pha 5 | Ví dụ biến môi trường, tài liệu, script kiểm lõi | Xong | .env.example, README, DEPLOYMENT.md và scripts/check-agent-core-sync.sh. |
+| Pha 5 | Kiểm tra SSE qua Caddy | Chưa làm | Cần triển khai thật; xem DEPLOYMENT.md. |
+| Pha 5 | /security-review và /code-review trên toàn nhánh | Chưa làm | Đã kiểm tra có mục tiêu các route, quyền và điểm render markdown; chưa có review toàn diện. |
+| Pha 5 | Bộ kịch bản đánh giá tiếng Việt | Chưa làm | Danh sách kịch bản thủ công nằm ở mục 9. |
+
+### Sai khác so với kế hoạch
+
+- Thêm route đọc transcript: GET /api/admin/chatbot/threads/:threadId/messages và AgentRunner.readTranscript. Lý do: kế hoạch chỉ có danh sách và chi tiết thread, nên không thể mở lại một cuộc trò chuyện cũ và xem nội dung của nó.
+- Payload cart.add của cart_add_item trả thêm productId, image, scent và volumeMl. Lý do: CartItem của trình duyệt cần các trường này; kế hoạch chưa nêu, và lỗi này được phát hiện khi review.
+- Bảng invalidation của admin: create, update và delete category làm mới khóa 'categories', vì CategoryNav trên header đọc khóa này. Kế hoạch ghi rằng danh mục không có query.
+- Service Redis chưa bị bỏ khỏi compose.yaml và DEPLOYMENT.md. Lý do: việc bỏ service là quyết định triển khai, đang chờ xác nhận.
+
+### Việc còn lại trước khi mở PR và phát hành
+
+- Đặt OPENAI_API_KEY và chọn AGENT_MODEL cho môi trường thử.
+- Chạy prisma db push trên DATABASE_URL dev, rồi khởi động backend và kiểm tra schema checkpoint agent được tạo.
+- Kiểm tra SSE qua Caddy sau khi triển khai (xem DEPLOYMENT.md).
+- Chạy các kịch bản trong mục 9 với khóa thật.
+- Quyết định về service Redis trong compose.yaml.
+- Hai frontend chưa có cấu hình ESLint, nên chưa chạy được npm run lint; chỉ có tsc và build.
+- Các lỗ hổng có sẵn ở mục 10 vẫn chưa sửa trong nhánh này.
