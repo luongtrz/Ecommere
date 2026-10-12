@@ -1,6 +1,6 @@
 # Deployment
 
-The production stack is the root `compose.yaml`: Caddy, the user frontend/backend, the admin frontend/backend, and Redis. PostgreSQL is external and must be provisioned separately.
+The production stack is the root `compose.yaml`: Caddy, the user frontend/backend, and the admin frontend/backend. PostgreSQL is external and must be provisioned separately.
 
 ## Prerequisites
 

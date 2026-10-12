@@ -26,8 +26,6 @@ services:
       context: ./user_ecommere/backend
     container_name: thaispray-user-backend
     restart: unless-stopped
-    depends_on:
-      - redis
     env_file:
       - ./user_ecommere/backend/.env
     volumes:
@@ -65,14 +63,6 @@ services:
         VITE_STORE_URL: "https://ecommere.luongtrz.me"
     container_name: thaispray-admin-frontend
     restart: unless-stopped
-    networks:
-      - thaispray-net
-
-  redis:
-    image: redis:7-alpine
-    container_name: thaispray-redis
-    restart: unless-stopped
-    command: ["redis-server", "--appendonly", "no"]
     networks:
       - thaispray-net
 
