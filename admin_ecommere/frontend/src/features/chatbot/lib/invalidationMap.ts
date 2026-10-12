@@ -6,7 +6,7 @@ import type { QueryKey } from '@tanstack/react-query';
  * Full list of admin tools grouped according to approved plan (section 5.2):
  *
  * 1. Orders (Đơn):
- *    - update_order_status (mutating) -> [['admin', 'orders']]
+ *    - update_order_status (mutating) -> [['admin', 'orders'], ['admin', 'dashboard-stats']]
  *    - list_orders (read-only) -> []
  *    - get_order (read-only) -> []
  *
@@ -29,15 +29,19 @@ import type { QueryKey } from '@tanstack/react-query';
  *    - get_stock_history (read-only) -> []
  *
  * 4. Categories (Danh mục):
- *    - create_category (mutating) -> [['categories']]
- *    - update_category (mutating) -> [['categories']]
- *    - delete_category (mutating) -> [['categories']]
+ *    CategoryTreeView fetches its data directly (categoriesApi.getTree()) and is not a TanStack query;
+ *    no query key is cached on the frontend, so mutating tools invalidate nothing ([]).
+ *    - create_category (mutating, not cached in TanStack Query) -> []
+ *    - update_category (mutating, not cached in TanStack Query) -> []
+ *    - delete_category (mutating, not cached in TanStack Query) -> []
  *    - list_categories (read-only) -> []
  *
  * 5. Coupons (Mã giảm giá):
- *    - create_coupon (mutating) -> [['admin-referral-list']]
- *    - update_coupon (mutating) -> [['admin-referral-list']]
- *    - delete_coupon (mutating) -> [['admin-referral-list']]
+ *    The admin coupons tab is currently a placeholder without a TanStack query cache.
+ *    No coupon query exists on the frontend, so mutating tools invalidate nothing ([]).
+ *    - create_coupon (mutating, no frontend query cache) -> []
+ *    - update_coupon (mutating, no frontend query cache) -> []
+ *    - delete_coupon (mutating, no frontend query cache) -> []
  *    - list_coupons (read-only) -> []
  *    - get_coupon (read-only) -> []
  *
@@ -48,7 +52,8 @@ import type { QueryKey } from '@tanstack/react-query';
  *    - list_referrals (read-only) -> []
  *
  * 7. Reviews:
- *    - delete_review (mutating) -> [['product-detail']]
+ *    Reviews are not queried or cached via TanStack Query in the admin frontend.
+ *    - delete_review (mutating, no frontend query cache) -> []
  *    - get_product_reviews (read-only) -> []
  *    - get_review_stats (read-only) -> []
  *    - list_reviews (read-only) -> []
@@ -77,23 +82,12 @@ const PRODUCT_KEYS: QueryKey[] = [
 
 const ORDER_KEYS: QueryKey[] = [
   ['admin', 'orders'],
-];
-
-const CATEGORY_KEYS: QueryKey[] = [
-  ['categories'],
-];
-
-const COUPON_KEYS: QueryKey[] = [
-  ['admin-referral-list'],
+  ['admin', 'dashboard-stats'],
 ];
 
 const REFERRAL_CONFIG_KEYS: QueryKey[] = [
   ['admin-referral-config'],
   ['admin-referral-stats'],
-];
-
-const REVIEW_KEYS: QueryKey[] = [
-  ['product-detail'],
 ];
 
 const EMPTY_KEYS: QueryKey[] = [];
@@ -115,21 +109,21 @@ export const TOOL_KEYS_MAP: Record<string, QueryKey[]> = {
   stock_remove: PRODUCT_KEYS,
   stock_set: PRODUCT_KEYS,
 
-  // Categories
-  create_category: CATEGORY_KEYS,
-  update_category: CATEGORY_KEYS,
-  delete_category: CATEGORY_KEYS,
+  // Categories (CategoryTreeView fetches directly; not in TanStack Query)
+  create_category: EMPTY_KEYS,
+  update_category: EMPTY_KEYS,
+  delete_category: EMPTY_KEYS,
 
-  // Coupons
-  create_coupon: COUPON_KEYS,
-  update_coupon: COUPON_KEYS,
-  delete_coupon: COUPON_KEYS,
+  // Coupons (placeholder tab; no TanStack Query on frontend)
+  create_coupon: EMPTY_KEYS,
+  update_coupon: EMPTY_KEYS,
+  delete_coupon: EMPTY_KEYS,
 
   // Referral
   update_referral_config: REFERRAL_CONFIG_KEYS,
 
-  // Reviews
-  delete_review: REVIEW_KEYS,
+  // Reviews (no TanStack Query cache in admin)
+  delete_review: EMPTY_KEYS,
 
   // Images
   delete_image: EMPTY_KEYS,
