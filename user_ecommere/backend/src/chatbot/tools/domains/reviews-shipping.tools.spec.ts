@@ -740,10 +740,10 @@ describe('Reviews and Shipping Tools', () => {
       });
       expect(fullSummary).toContain('rev-100');
       expect(fullSummary).toContain('4 sao');
-      expect(fullSummary).toContain('16 ký tự');
+      expect(fullSummary).toContain('17 ký tự');
       expect(fullSummary).not.toContain('Nội dung cập nhật');
       expect(fullSummary).toBe(
-        'Cập nhật đánh giá rev-100 (4 sao, nhận xét 16 ký tự)',
+        'Cập nhật đánh giá rev-100 (4 sao, nhận xét 17 ký tự)',
       );
 
       const ratingSummary = updateReviewTool.summarize({
