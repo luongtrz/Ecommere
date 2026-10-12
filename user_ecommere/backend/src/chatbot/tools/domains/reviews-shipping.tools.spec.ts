@@ -440,8 +440,8 @@ describe('Reviews and Shipping Tools', () => {
   });
 
   describe('create_review', () => {
-    it('has risk WRITE, domain reviews, and expected description', () => {
-      expect(createReviewTool.risk).toBe('WRITE');
+    it('has risk SENSITIVE, domain reviews, and expected description', () => {
+      expect(createReviewTool.risk).toBe('SENSITIVE');
       expect(createReviewTool.domain).toBe('reviews');
       expect(createReviewTool.description).toBe(
         'Gửi đánh giá sản phẩm. Chỉ khi khách đã nhận hàng và chưa đánh giá sản phẩm này.',
@@ -540,13 +540,26 @@ describe('Reviews and Shipping Tools', () => {
       ).toBe(false);
     });
 
-    it('summarize returns a Vietnamese string mentioning productId and rating', () => {
-      const summary = createReviewTool.summarize({
+    it('summarize returns a Vietnamese string mentioning productId, rating, and comment length without comment text', () => {
+      const payload = {
+        productId: 'prod-001',
+        rating: 5,
+        content: 'Chất lượng rất tốt',
+      };
+      const summary = createReviewTool.summarize(payload);
+      expect(summary).toContain('prod-001');
+      expect(summary).toContain('5 sao');
+      expect(summary).toContain(`${payload.content.length} ký tự`);
+      expect(summary).not.toContain(payload.content);
+      expect(summary).toBe(
+        'Đánh giá sản phẩm prod-001 (5 sao, nhận xét 18 ký tự)',
+      );
+
+      const minimalSummary = createReviewTool.summarize({
         productId: 'prod-001',
         rating: 5,
       });
-      expect(summary).toContain('prod-001');
-      expect(summary).toContain('5');
+      expect(minimalSummary).toBe('Đánh giá sản phẩm prod-001 (5 sao)');
     });
   });
 
@@ -597,8 +610,8 @@ describe('Reviews and Shipping Tools', () => {
   });
 
   describe('update_review', () => {
-    it('has risk WRITE, domain reviews, and calls updateReview with userId, reviewId, and fields', async () => {
-      expect(updateReviewTool.risk).toBe('WRITE');
+    it('has risk SENSITIVE, domain reviews, and calls updateReview with userId, reviewId, and fields', async () => {
+      expect(updateReviewTool.risk).toBe('SENSITIVE');
       expect(updateReviewTool.domain).toBe('reviews');
 
       mockReviewsService.updateReview.mockResolvedValue({
@@ -715,10 +728,36 @@ describe('Reviews and Shipping Tools', () => {
       ).toBe(false);
     });
 
-    it('summarize returns a Vietnamese string mentioning reviewId', () => {
+    it('summarize returns a Vietnamese string mentioning reviewId and provided fields without comment text', () => {
       expect(
         updateReviewTool.summarize({ reviewId: 'rev-100' }),
-      ).toContain('rev-100');
+      ).toBe('Cập nhật đánh giá rev-100');
+
+      const fullSummary = updateReviewTool.summarize({
+        reviewId: 'rev-100',
+        rating: 4,
+        content: 'Nội dung cập nhật',
+      });
+      expect(fullSummary).toContain('rev-100');
+      expect(fullSummary).toContain('4 sao');
+      expect(fullSummary).toContain('16 ký tự');
+      expect(fullSummary).not.toContain('Nội dung cập nhật');
+      expect(fullSummary).toBe(
+        'Cập nhật đánh giá rev-100 (4 sao, nhận xét 16 ký tự)',
+      );
+
+      const ratingSummary = updateReviewTool.summarize({
+        reviewId: 'rev-100',
+        rating: 5,
+      });
+      expect(ratingSummary).toBe('Cập nhật đánh giá rev-100 (5 sao)');
+
+      const contentSummary = updateReviewTool.summarize({
+        reviewId: 'rev-100',
+        content: 'Rất ưng ý',
+      });
+      expect(contentSummary).not.toContain('Rất ưng ý');
+      expect(contentSummary).toBe('Cập nhật đánh giá rev-100 (nhận xét 9 ký tự)');
     });
   });
 

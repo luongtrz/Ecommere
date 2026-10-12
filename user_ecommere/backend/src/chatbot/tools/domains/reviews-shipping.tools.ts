@@ -90,7 +90,7 @@ export function createReviewsShippingTools(
       })
       .strict(),
     auth: 'customer',
-    risk: 'WRITE',
+    risk: 'SENSITIVE',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
         throw new Error('Cần đăng nhập để dùng chức năng này');
@@ -101,8 +101,21 @@ export function createReviewsShippingTools(
         content: args.content,
       });
     },
-    summarize: (args) =>
-      `Đánh giá sản phẩm ${args.productId} (${args.rating} sao)`,
+    summarize: (args: {
+      productId?: string;
+      rating?: number;
+      content?: string;
+    }) => {
+      const parts: string[] = [];
+      if (args?.rating !== undefined) {
+        parts.push(`${args.rating} sao`);
+      }
+      if (typeof args?.content === 'string') {
+        parts.push(`nhận xét ${args.content.length} ký tự`);
+      }
+      const details = parts.length > 0 ? ` (${parts.join(', ')})` : '';
+      return `Đánh giá sản phẩm ${args?.productId || ''}${details}`.trim();
+    },
   };
 
   const listMyReviewsTool: AgentToolDef = {
@@ -144,7 +157,7 @@ export function createReviewsShippingTools(
       'Cập nhật nội dung hoặc số sao đánh giá của chính khách hàng.',
     schema: updateReviewBaseSchema,
     auth: 'customer',
-    risk: 'WRITE',
+    risk: 'SENSITIVE',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
         throw new Error('Cần đăng nhập để dùng chức năng này');
@@ -161,7 +174,21 @@ export function createReviewsShippingTools(
       }
       return deps.reviews.updateReview(ctx.userId, args.reviewId, fields);
     },
-    summarize: (args) => `Cập nhật đánh giá ${args.reviewId}`,
+    summarize: (args: {
+      reviewId?: string;
+      rating?: number;
+      content?: string;
+    }) => {
+      const parts: string[] = [];
+      if (args?.rating !== undefined) {
+        parts.push(`${args.rating} sao`);
+      }
+      if (typeof args?.content === 'string') {
+        parts.push(`nhận xét ${args.content.length} ký tự`);
+      }
+      const details = parts.length > 0 ? ` (${parts.join(', ')})` : '';
+      return `Cập nhật đánh giá ${args?.reviewId || ''}${details}`.trim();
+    },
   };
 
   const deleteReviewTool: AgentToolDef = {

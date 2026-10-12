@@ -86,7 +86,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       'Cập nhật thông tin hồ sơ tài khoản (tên hoặc số điện thoại). Cần cung cấp ít nhất một trường.',
     schema: updateMyProfileSchema,
     auth: 'customer',
-    risk: 'WRITE',
+    risk: 'SENSITIVE',
     handler: async (
       args: { name?: string; phone?: string },
       ctx: ToolContext,
@@ -106,7 +106,19 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       }
       return deps.users.updateProfile(ctx.userId, fields);
     },
-    summarize: () => 'Cập nhật thông tin tài khoản cá nhân',
+    summarize: (args: { name?: string; phone?: string }) => {
+      const parts: string[] = [];
+      if (args?.name) {
+        parts.push(`tên: ${args.name}`);
+      }
+      if (args?.phone) {
+        parts.push(`số điện thoại: ${args.phone}`);
+      }
+      if (parts.length === 0) {
+        return 'Cập nhật thông tin tài khoản cá nhân';
+      }
+      return `Cập nhật thông tin tài khoản: ${parts.join(', ')}`;
+    },
   };
 
   // 3. list_my_addresses
@@ -146,7 +158,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
     description: 'Tạo địa chỉ nhận hàng mới cho người dùng hiện tại.',
     schema: createAddressSchema,
     auth: 'customer',
-    risk: 'WRITE',
+    risk: 'SENSITIVE',
     handler: async (
       args: {
         fullName: string;
@@ -183,10 +195,32 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       }
       return deps.users.createAddress(ctx.userId, dto);
     },
-    summarize: (args) =>
-      args?.province
-        ? `Thêm địa chỉ giao hàng tại ${args.province}`
-        : 'Thêm địa chỉ giao hàng mới',
+    summarize: (args: {
+      fullName?: string;
+      line1?: string;
+      province?: string;
+      isDefault?: boolean;
+    }) => {
+      const parts: string[] = [];
+      if (args?.fullName) {
+        parts.push(`người nhận: ${args.fullName}`);
+      }
+      if (args?.line1) {
+        parts.push(`địa chỉ: ${args.line1}`);
+      }
+      if (args?.province) {
+        parts.push(`tỉnh/thành: ${args.province}`);
+      }
+      if (args?.isDefault !== undefined) {
+        parts.push(args.isDefault ? 'đặt làm mặc định' : 'không đặt làm mặc định');
+      } else {
+        parts.push('không đặt làm mặc định');
+      }
+      if (parts.length === 0) {
+        return 'Thêm địa chỉ giao hàng mới';
+      }
+      return `Thêm địa chỉ giao hàng: ${parts.join(', ')}`;
+    },
     project: (result: unknown) => projectAddress(result),
   };
 
@@ -213,7 +247,7 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
       'Cập nhật thông tin địa chỉ nhận hàng. Cần cung cấp ít nhất một trường ngoài addressId.',
     schema: updateAddressSchema,
     auth: 'customer',
-    risk: 'WRITE',
+    risk: 'SENSITIVE',
     handler: async (
       args: {
         addressId: string;
@@ -253,7 +287,44 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
 
       return deps.users.updateAddress(ctx.userId, args.addressId, fields);
     },
-    summarize: (args) => `Cập nhật địa chỉ nhận hàng ${args.addressId}`,
+    summarize: (args: {
+      addressId?: string;
+      fullName?: string;
+      phone?: string;
+      province?: string;
+      district?: string;
+      ward?: string;
+      line1?: string;
+      isDefault?: boolean;
+    }) => {
+      const parts: string[] = [];
+      if (args?.fullName !== undefined) {
+        parts.push(`người nhận: ${args.fullName}`);
+      }
+      if (args?.phone !== undefined) {
+        parts.push(`số điện thoại: ${args.phone}`);
+      }
+      if (args?.line1 !== undefined) {
+        parts.push(`địa chỉ: ${args.line1}`);
+      }
+      if (args?.ward !== undefined) {
+        parts.push(`phường/xã: ${args.ward}`);
+      }
+      if (args?.district !== undefined) {
+        parts.push(`quận/huyện: ${args.district}`);
+      }
+      if (args?.province !== undefined) {
+        parts.push(`tỉnh/thành: ${args.province}`);
+      }
+      if (args?.isDefault !== undefined) {
+        parts.push(args.isDefault ? 'đặt làm mặc định' : 'không đặt làm mặc định');
+      }
+      const addrId = args?.addressId ? ` ${args.addressId}` : '';
+      if (parts.length === 0) {
+        return `Cập nhật địa chỉ nhận hàng${addrId}`.trim();
+      }
+      return `Cập nhật địa chỉ nhận hàng${addrId}: ${parts.join(', ')}`;
+    },
     project: (result: unknown) => projectAddress(result),
   };
 

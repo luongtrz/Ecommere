@@ -124,11 +124,11 @@ describe('Account Tools', () => {
       }
     });
 
-    it('assigns correct risk levels: delete_address is DESTRUCTIVE, other write tools are WRITE, read tools are READ', () => {
+    it('assigns correct risk levels: delete_address is DESTRUCTIVE, personal write tools are SENSITIVE, read tools are READ', () => {
       expect(deleteAddressTool.risk).toBe('DESTRUCTIVE');
-      expect(updateMyProfileTool.risk).toBe('WRITE');
-      expect(createAddressTool.risk).toBe('WRITE');
-      expect(updateAddressTool.risk).toBe('WRITE');
+      expect(updateMyProfileTool.risk).toBe('SENSITIVE');
+      expect(createAddressTool.risk).toBe('SENSITIVE');
+      expect(updateAddressTool.risk).toBe('SENSITIVE');
 
       expect(getMyProfileTool.risk).toBe('READ');
       expect(listMyAddressesTool.risk).toBe('READ');
@@ -231,8 +231,8 @@ describe('Account Tools', () => {
   });
 
   describe('update_my_profile', () => {
-    it('has risk WRITE and calls users.updateProfile with only provided fields', async () => {
-      expect(updateMyProfileTool.risk).toBe('WRITE');
+    it('has risk SENSITIVE and calls users.updateProfile with only provided fields', async () => {
+      expect(updateMyProfileTool.risk).toBe('SENSITIVE');
       mockUsersService.updateProfile.mockResolvedValue({
         id: 'user-123',
         name: 'Nguyễn Văn B',
@@ -311,10 +311,28 @@ describe('Account Tools', () => {
       expect(res.success).toBe(false);
     });
 
-    it('summarize returns a Vietnamese string', () => {
+    it('summarize returns a Vietnamese string naming provided fields', () => {
       expect(updateMyProfileTool.summarize({})).toBe(
         'Cập nhật thông tin tài khoản cá nhân',
       );
+      expect(
+        updateMyProfileTool.summarize({
+          name: 'Nguyễn Văn B',
+          phone: '0912345678',
+        }),
+      ).toBe(
+        'Cập nhật thông tin tài khoản: tên: Nguyễn Văn B, số điện thoại: 0912345678',
+      );
+      expect(
+        updateMyProfileTool.summarize({
+          name: 'Nguyễn Văn C',
+        }),
+      ).toBe('Cập nhật thông tin tài khoản: tên: Nguyễn Văn C');
+      expect(
+        updateMyProfileTool.summarize({
+          phone: '0987654321',
+        }),
+      ).toBe('Cập nhật thông tin tài khoản: số điện thoại: 0987654321');
     });
   });
 
@@ -379,8 +397,8 @@ describe('Account Tools', () => {
   });
 
   describe('create_address', () => {
-    it('has risk WRITE and calls users.createAddress with expected arguments', async () => {
-      expect(createAddressTool.risk).toBe('WRITE');
+    it('has risk SENSITIVE and calls users.createAddress with expected arguments', async () => {
+      expect(createAddressTool.risk).toBe('SENSITIVE');
       mockUsersService.createAddress.mockResolvedValue({
         id: 'addr-new',
         ...validAddressPayload,
@@ -471,16 +489,24 @@ describe('Account Tools', () => {
       expect(projected.line1).toBe(validAddressPayload.line1);
     });
 
-    it('summarize returns a Vietnamese string with province', () => {
+    it('summarize returns a Vietnamese string with recipient, address line, province, and default status', () => {
       expect(createAddressTool.summarize(validAddressPayload)).toBe(
-        'Thêm địa chỉ giao hàng tại Hà Nội',
+        'Thêm địa chỉ giao hàng: người nhận: Nguyễn Văn A, địa chỉ: 123 Đường Cầu Giấy, tỉnh/thành: Hà Nội, đặt làm mặc định',
+      );
+      expect(
+        createAddressTool.summarize({
+          ...validAddressPayload,
+          isDefault: false,
+        }),
+      ).toBe(
+        'Thêm địa chỉ giao hàng: người nhận: Nguyễn Văn A, địa chỉ: 123 Đường Cầu Giấy, tỉnh/thành: Hà Nội, không đặt làm mặc định',
       );
     });
   });
 
   describe('update_address', () => {
-    it('has risk WRITE and calls users.updateAddress with (userId, addressId, fields)', async () => {
-      expect(updateAddressTool.risk).toBe('WRITE');
+    it('has risk SENSITIVE and calls users.updateAddress with (userId, addressId, fields)', async () => {
+      expect(updateAddressTool.risk).toBe('SENSITIVE');
       mockUsersService.updateAddress.mockResolvedValue({
         id: 'addr-1',
         fullName: 'Nguyễn Văn C',
@@ -554,10 +580,31 @@ describe('Account Tools', () => {
       expect(projected.id).toBe('addr-1');
     });
 
-    it('summarize returns a Vietnamese string with addressId', () => {
+    it('summarize returns a Vietnamese string with addressId and provided fields', () => {
       expect(
         updateAddressTool.summarize({ addressId: 'addr-999' }),
       ).toBe('Cập nhật địa chỉ nhận hàng addr-999');
+      expect(
+        updateAddressTool.summarize({
+          addressId: 'addr-1',
+          fullName: 'Nguyễn Văn C',
+          province: 'Đà Nẵng',
+        }),
+      ).toBe(
+        'Cập nhật địa chỉ nhận hàng addr-1: người nhận: Nguyễn Văn C, tỉnh/thành: Đà Nẵng',
+      );
+      expect(
+        updateAddressTool.summarize({
+          addressId: 'addr-1',
+          isDefault: true,
+        }),
+      ).toBe('Cập nhật địa chỉ nhận hàng addr-1: đặt làm mặc định');
+      expect(
+        updateAddressTool.summarize({
+          addressId: 'addr-1',
+          phone: '0912345678',
+        }),
+      ).toBe('Cập nhật địa chỉ nhận hàng addr-1: số điện thoại: 0912345678');
     });
   });
 
