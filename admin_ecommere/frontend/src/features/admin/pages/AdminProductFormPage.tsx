@@ -154,13 +154,15 @@ export function AdminProductFormPage() {
         })),
       );
       setImages(product.images || []); // Initialize images
-
-      // Only set categoryId if categories are loaded
-      if (categories.length > 0) {
-        setValue('categoryId', product.categoryId);
-      }
     }
-  }, [product, isEditMode, replace, setValue, categories]);
+  }, [product, isEditMode, replace, setValue]);
+
+  // Set categoryId when both product and categories are loaded
+  useEffect(() => {
+    if (product && isEditMode && categories.length > 0) {
+      setValue('categoryId', product.categoryId);
+    }
+  }, [product, isEditMode, categories, setValue]);
 
   const onSubmit = async (data: ProductFormData) => {
     try {
