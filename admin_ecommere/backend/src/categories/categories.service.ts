@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
@@ -149,15 +149,27 @@ export class CategoriesService {
       throw new NotFoundException('Category not found');
     }
 
-    // Use canDelete validation
-    const validation = await this.canDelete(id);
-    if (!validation.canDelete) {
-      throw new BadRequestException(validation.reason);
-    }
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const validation = await this.canDelete(id, tx);
+        if (!validation.canDelete) {
+          throw new BadRequestException(validation.reason);
+        }
 
-    await this.prisma.category.delete({
-      where: { id },
-    });
+        await tx.category.delete({
+          where: { id },
+        });
+      });
+    } catch (error) {
+      if (
+        (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') ||
+        ((error as any)?.code === 'P2003')
+      ) {
+        throw new ConflictException('Danh mục đang được sử dụng');
+      }
+
+      throw error;
+    }
 
     return { message: 'Category deleted successfully' };
   }
@@ -238,8 +250,9 @@ export class CategoriesService {
    * Validate if category can be deleted
    * Rules: No children AND no products
    */
-  async canDelete(id: string): Promise<{ canDelete: boolean; reason?: string }> {
-    const category = await this.prisma.category.findUnique({
+  async canDelete(id: string, tx?: Prisma.TransactionClient): Promise<{ canDelete: boolean; reason?: string }> {
+    const prisma = tx ?? this.prisma;
+    const category = await prisma.category.findUnique({
       where: { id },
       include: {
         children: true,
