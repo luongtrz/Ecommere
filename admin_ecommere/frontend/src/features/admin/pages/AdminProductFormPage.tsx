@@ -42,7 +42,7 @@ const productFormSchema = z.object({
   name: z.string().min(1, 'Tên sản phẩm là bắt buộc'),
   description: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
   categoryId: z.string().min(1, 'Vui lòng chọn danh mục'),
-  basePrice: z.number().min(0, 'Giá phải lớn hơn 0'),
+  basePrice: z.number().int('Giá phải là số nguyên').positive('Giá phải lớn hơn 0'),
   active: z.boolean(),
   variants: z.array(variantFormSchema).min(1, 'Sản phẩm phải có ít nhất một biến thể'),
 });
