@@ -10,6 +10,7 @@ export interface CartItem {
   quantity: number;
   scent: string;
   volumeMl: number;
+  stock?: number;
 }
 
 interface CartState {
@@ -24,6 +25,7 @@ interface CartState {
   toggleCart: () => void;
   getTotalPrice: () => number;
   getTotalItems: () => number;
+  replaceItems: (items: CartItem[]) => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -82,6 +84,10 @@ export const useCartStore = create<CartState>()(
       getTotalItems: () => {
         const total = get().items.reduce((total, item) => total + item.quantity, 0);
         return total;
+      },
+
+      replaceItems: (items) => {
+        set({ items });
       },
     }),
     {

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
 import { useCart } from '../hooks/useCart';
+import { useRefreshCartPrices } from '../hooks/useRefreshCartPrices';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -9,6 +10,7 @@ import { getImageUrl } from '@/lib/utils';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, CreditCard, Truck, Shield } from 'lucide-react';
 
 export function CartPage() {
+  useRefreshCartPrices();
   const { items, updateQuantity, removeItem, totalPrice } = useCart();
 
   if (items.length === 0) {
