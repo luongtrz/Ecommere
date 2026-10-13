@@ -698,6 +698,13 @@ export class OrdersService {
     let paymentStatus = order.paymentStatus;
     if (status === OrderStatus.PAID || status === OrderStatus.PACKING || status === OrderStatus.SHIPPED) {
       paymentStatus = PaymentStatus.COMPLETED;
+    } else if (status === OrderStatus.CANCELED) {
+      paymentStatus =
+        order.status === OrderStatus.PAID ||
+        order.status === OrderStatus.PACKING ||
+        order.status === OrderStatus.SHIPPED
+          ? PaymentStatus.REFUNDED
+          : PaymentStatus.FAILED;
     } else if (status === OrderStatus.REFUNDED) {
       paymentStatus = PaymentStatus.REFUNDED;
     }
@@ -722,7 +729,7 @@ export class OrdersService {
         await this.restoreStockForOrder(order, tx);
       }
 
-      if (status === OrderStatus.CANCELED && order.status === OrderStatus.PENDING_PAYMENT) {
+      if (status === OrderStatus.CANCELED && order.couponCode) {
         await this.releaseCouponUsage(order, tx);
       }
 
@@ -773,6 +780,13 @@ export class OrdersService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      const paymentStatus =
+        order.status === OrderStatus.PAID ||
+        order.status === OrderStatus.PACKING ||
+        order.status === OrderStatus.SHIPPED
+          ? PaymentStatus.REFUNDED
+          : PaymentStatus.FAILED;
+
       const statusUpdate = await tx.order.updateMany({
         where: {
           id: orderId,
@@ -783,7 +797,7 @@ export class OrdersService {
         },
         data: {
           status: OrderStatus.CANCELED,
-          paymentStatus: PaymentStatus.FAILED,
+          paymentStatus,
         },
       });
 
@@ -793,7 +807,7 @@ export class OrdersService {
 
       await this.restoreStockForOrder(order, tx);
 
-      if (order.status === OrderStatus.PENDING_PAYMENT) {
+      if (order.couponCode) {
         await this.releaseCouponUsage(order, tx);
       }
 

@@ -333,6 +333,107 @@ describe('OrdersService', () => {
         'Invalid status transition',
       );
     });
+
+    it('should transition to CANCELED from PAID and set paymentStatus to REFUNDED, restore stock, and release coupon', async () => {
+      const mockOrder = {
+        id: 'order1',
+        code: 'ORD25102800001',
+        status: OrderStatus.PAID,
+        paymentStatus: PaymentStatus.COMPLETED,
+        couponCode: 'SAVE10',
+        items: [
+          {
+            variantId: 'var1',
+            quantity: 2,
+          },
+        ],
+      };
+
+      const updatedOrder = {
+        ...mockOrder,
+        status: OrderStatus.CANCELED,
+        paymentStatus: PaymentStatus.REFUNDED,
+      };
+
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
+      mockPrismaService.order.findUnique
+        .mockResolvedValueOnce(mockOrder)
+        .mockResolvedValueOnce(updatedOrder);
+      mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
+      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.coupon.updateMany.mockResolvedValue({ count: 1 });
+
+      const result = await service.updateOrderStatus('order1', { status: OrderStatus.CANCELED });
+
+      expect(mockPrismaService.order.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'order1',
+          status: OrderStatus.PAID,
+        },
+        data: {
+          status: OrderStatus.CANCELED,
+          paymentStatus: PaymentStatus.REFUNDED,
+        },
+      });
+      expect(mockPrismaService.productVariant.update).toHaveBeenCalledTimes(1);
+      expect(mockPrismaService.coupon.updateMany).toHaveBeenCalledWith({
+        where: {
+          code: 'SAVE10',
+          usedCount: { gt: 0 },
+        },
+        data: { usedCount: { decrement: 1 } },
+      });
+      expect(result.status).toBe(OrderStatus.CANCELED);
+      expect(result.paymentStatus).toBe(PaymentStatus.REFUNDED);
+    });
+
+    it('should transition to CANCELED from PENDING_PAYMENT and set paymentStatus to FAILED', async () => {
+      const mockOrder = {
+        id: 'order1',
+        code: 'ORD25102800001',
+        status: OrderStatus.PENDING_PAYMENT,
+        paymentStatus: PaymentStatus.PENDING,
+        couponCode: null,
+        items: [],
+      };
+
+      const updatedOrder = {
+        ...mockOrder,
+        status: OrderStatus.CANCELED,
+        paymentStatus: PaymentStatus.FAILED,
+      };
+
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
+      mockPrismaService.order.findUnique
+        .mockResolvedValueOnce(mockOrder)
+        .mockResolvedValueOnce(updatedOrder);
+      mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
+
+      const releaseCouponSpy = jest.spyOn(service as any, 'releaseCouponUsage');
+
+      const result = await service.updateOrderStatus('order1', { status: OrderStatus.CANCELED });
+
+      expect(mockPrismaService.order.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'order1',
+          status: OrderStatus.PENDING_PAYMENT,
+        },
+        data: {
+          status: OrderStatus.CANCELED,
+          paymentStatus: PaymentStatus.FAILED,
+        },
+      });
+      expect(releaseCouponSpy).not.toHaveBeenCalled();
+      expect(result.status).toBe(OrderStatus.CANCELED);
+      expect(result.paymentStatus).toBe(PaymentStatus.FAILED);
+    });
   });
 
   describe('cancelOrder', () => {
@@ -371,6 +472,168 @@ describe('OrdersService', () => {
 
       expect(result.status).toBe(OrderStatus.CANCELED);
       expect(result.paymentStatus).toBe(PaymentStatus.FAILED);
+    });
+
+    it('should cancel a paid order and set paymentStatus to REFUNDED, restore stock, and release coupon', async () => {
+      const mockOrder = {
+        id: 'order1',
+        userId: 'user1',
+        status: OrderStatus.PAID,
+        paymentStatus: PaymentStatus.COMPLETED,
+        couponCode: 'SAVE10',
+        items: [
+          {
+            variantId: 'var1',
+            quantity: 2,
+          },
+        ],
+      };
+
+      const cancelledOrder = {
+        ...mockOrder,
+        status: OrderStatus.CANCELED,
+        paymentStatus: PaymentStatus.REFUNDED,
+      };
+
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
+      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.coupon.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.order.findUnique
+        .mockResolvedValueOnce(mockOrder)
+        .mockResolvedValueOnce(cancelledOrder);
+
+      const result = await service.cancelOrder('user1', 'order1');
+
+      expect(mockPrismaService.order.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'order1',
+          userId: 'user1',
+          status: {
+            in: [OrderStatus.PENDING_PAYMENT, OrderStatus.PAID],
+          },
+        },
+        data: {
+          status: OrderStatus.CANCELED,
+          paymentStatus: PaymentStatus.REFUNDED,
+        },
+      });
+      expect(mockPrismaService.productVariant.update).toHaveBeenCalledTimes(1);
+      expect(mockPrismaService.coupon.updateMany).toHaveBeenCalledWith({
+        where: {
+          code: 'SAVE10',
+          usedCount: { gt: 0 },
+        },
+        data: { usedCount: { decrement: 1 } },
+      });
+      expect(result.status).toBe(OrderStatus.CANCELED);
+      expect(result.paymentStatus).toBe(PaymentStatus.REFUNDED);
+    });
+
+    it('should cancel a pending payment order with coupon, set paymentStatus to FAILED, restore stock, and release coupon', async () => {
+      const mockOrder = {
+        id: 'order1',
+        userId: 'user1',
+        status: OrderStatus.PENDING_PAYMENT,
+        paymentStatus: PaymentStatus.PENDING,
+        couponCode: 'SAVE10',
+        items: [
+          {
+            variantId: 'var1',
+            quantity: 1,
+          },
+        ],
+      };
+
+      const cancelledOrder = {
+        ...mockOrder,
+        status: OrderStatus.CANCELED,
+        paymentStatus: PaymentStatus.FAILED,
+      };
+
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 5 });
+      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 6 });
+      mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.coupon.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.order.findUnique
+        .mockResolvedValueOnce(mockOrder)
+        .mockResolvedValueOnce(cancelledOrder);
+
+      const result = await service.cancelOrder('user1', 'order1');
+
+      expect(mockPrismaService.order.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'order1',
+          userId: 'user1',
+          status: {
+            in: [OrderStatus.PENDING_PAYMENT, OrderStatus.PAID],
+          },
+        },
+        data: {
+          status: OrderStatus.CANCELED,
+          paymentStatus: PaymentStatus.FAILED,
+        },
+      });
+      expect(mockPrismaService.productVariant.update).toHaveBeenCalledTimes(1);
+      expect(mockPrismaService.coupon.updateMany).toHaveBeenCalledWith({
+        where: {
+          code: 'SAVE10',
+          usedCount: { gt: 0 },
+        },
+        data: { usedCount: { decrement: 1 } },
+      });
+      expect(result.status).toBe(OrderStatus.CANCELED);
+      expect(result.paymentStatus).toBe(PaymentStatus.FAILED);
+    });
+
+    it('should not call releaseCouponUsage when cancelling an order without coupon', async () => {
+      const mockOrder = {
+        id: 'order1',
+        userId: 'user1',
+        status: OrderStatus.PAID,
+        paymentStatus: PaymentStatus.COMPLETED,
+        couponCode: null,
+        items: [
+          {
+            variantId: 'var1',
+            quantity: 2,
+          },
+        ],
+      };
+
+      const cancelledOrder = {
+        ...mockOrder,
+        status: OrderStatus.CANCELED,
+        paymentStatus: PaymentStatus.REFUNDED,
+      };
+
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
+      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.order.findUnique
+        .mockResolvedValueOnce(mockOrder)
+        .mockResolvedValueOnce(cancelledOrder);
+
+      const releaseCouponSpy = jest.spyOn(service as any, 'releaseCouponUsage');
+
+      const result = await service.cancelOrder('user1', 'order1');
+
+      expect(releaseCouponSpy).not.toHaveBeenCalled();
+      expect(mockPrismaService.coupon.updateMany).not.toHaveBeenCalled();
+      expect(result.status).toBe(OrderStatus.CANCELED);
+      expect(result.paymentStatus).toBe(PaymentStatus.REFUNDED);
     });
 
     it('should throw NotFoundException when order not found', async () => {
