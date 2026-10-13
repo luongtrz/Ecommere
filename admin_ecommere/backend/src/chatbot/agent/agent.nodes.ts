@@ -38,6 +38,9 @@ export const findLastAIMessage = (messages: BaseMessage[]): AIMessage | undefine
 const toolError = (id: string, name: string, error: string) =>
   new ToolMessage({ tool_call_id: id, name, content: JSON.stringify({ ok: false, error }) });
 
+export const SINGLE_WRITE_PER_TURN_ERROR =
+  'Chỉ cho phép một thao tác ghi trong mỗi lượt. Vui lòng gửi lại thao tác này trong tin nhắn tiếp theo';
+
 const auditRole = (role: string): 'CUSTOMER' | 'ADMIN' | null =>
   role === 'GUEST' ? null : (role as 'CUSTOMER' | 'ADMIN');
 
@@ -199,6 +202,36 @@ export function createToolsNode(deps: AgentGraphDeps) {
 
     const remainingCalls = calls.filter((_, idx) => !doneCallIndices.has(idx));
 
+    let hasWriteCall = false;
+    for (const msg of currentTurnToolMessages) {
+      if (msg.getType?.() === 'tool') {
+        const tmsg = msg as ToolMessage;
+        let isDeclined = false;
+        try {
+          const parsed = typeof tmsg.content === 'string' ? JSON.parse(tmsg.content) : tmsg.content;
+          if (
+            parsed &&
+            typeof parsed === 'object' &&
+            (parsed as Record<string, unknown>).ok === false &&
+            (parsed as Record<string, unknown>).error === 'Người dùng đã từ chối thao tác này'
+          ) {
+            isDeclined = true;
+          }
+        } catch {}
+        if (!isDeclined) {
+          const tid = (tmsg as { tool_call_id?: string }).tool_call_id;
+          const callName = tmsg.name || calls.find((c) => c.id === tid)?.name;
+          if (callName) {
+            const def = deps.registry.forContext(ctx).find((d) => d.name === callName);
+            if (def && def.risk !== 'READ') {
+              hasWriteCall = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+
     const toolMessages: ToolMessage[] = [];
     for (let i = 0; i < remainingCalls.length; i++) {
       const call = remainingCalls[i];
@@ -224,13 +257,21 @@ export function createToolsNode(deps: AgentGraphDeps) {
         continue;
       }
 
+      const isWriteTool = def.risk !== 'READ';
+      if (isWriteTool) {
+        if (hasWriteCall) {
+          toolMessages.push(toolError(id, call.name, SINGLE_WRITE_PER_TURN_ERROR));
+          continue;
+        }
+        hasWriteCall = true;
+      }
+
       const parsed = def.schema.safeParse(call.args);
       if (!parsed.success) {
         toolMessages.push(toolError(id, call.name, getZodErrorMessage(parsed.error)));
         continue;
       }
 
-      const isWriteTool = def.risk !== 'READ';
       if (isWriteTool && typeof deps.audit.findCompleted === 'function') {
         const storedResult = await deps.audit.findCompleted(ctx.threadId, id);
         if (storedResult) {
