@@ -1,6 +1,30 @@
 import apiClient from '@/lib/api';
 import { z } from 'zod';
 
+export function parseAddressJson(value?: unknown): any {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, any>;
+  }
+
+  if (typeof value !== 'string' || !value.trim()) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, any>;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 const orderSchema = z.object({
   id: z.string(),
   code: z.string().optional(),
@@ -17,10 +41,10 @@ const orderSchema = z.object({
   ...data,
   orderNumber: data.code || data.orderNumber,
   shippingAddress: (() => {
-    const address = data.addressJson ? JSON.parse(data.addressJson) : data.shippingAddress;
+    const address = data.addressJson ? parseAddressJson(data.addressJson) : parseAddressJson(data.shippingAddress);
 
     if (!address) {
-      return address;
+      return null;
     }
 
     return {
