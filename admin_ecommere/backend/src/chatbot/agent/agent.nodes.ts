@@ -218,6 +218,11 @@ export function createToolsNode(deps: AgentGraphDeps) {
         continue;
       }
 
+      if (def.auth === 'admin' && ctx.role !== 'ADMIN') {
+        toolMessages.push(toolError(id, call.name, 'Thao tác không được phép'));
+        continue;
+      }
+
       const parsed = def.schema.safeParse(call.args);
       if (!parsed.success) {
         toolMessages.push(toolError(id, call.name, getZodErrorMessage(parsed.error)));
