@@ -12,6 +12,16 @@ export class OrdersService {
   constructor(private prisma: PrismaService) { }
 
   async checkout(userId: string, checkoutDto: CheckoutDto) {
+    if (checkoutDto.checkoutKey) {
+      const existingOrder = await this.findOrderByCheckoutKey(
+        userId,
+        checkoutDto.checkoutKey,
+      );
+      if (existingOrder) {
+        return existingOrder;
+      }
+    }
+
     const {
       addressId,
       fullName,
@@ -231,9 +241,6 @@ export class OrdersService {
       shippingMethod ?? ShippingMethod.STANDARD,
     );
     const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
-    if (coupon?.type === CouponType.FREESHIP) {
-      discount = calculatedShippingFee;
-    }
 
     const orderTotal = subtotal - discount + shippingFee;
 
@@ -241,136 +248,155 @@ export class OrdersService {
     const code = await this.generateOrderNumber();
 
     // Create order in transaction
-    const order = await this.runSerializableTransaction(async (tx) => {
-      if (couponCode && coupon && coupon.maxUsesPerUser) {
-        const userUsageCount = await tx.order.count({
-          where: {
-            userId,
-            couponCode,
-            status: { not: OrderStatus.CANCELED },
-          },
-        });
+    let order;
+    try {
+      order = await this.runSerializableTransaction(async (tx) => {
+        if (couponCode && coupon && coupon.maxUsesPerUser) {
+          const userUsageCount = await tx.order.count({
+            where: {
+              userId,
+              couponCode,
+              status: { not: OrderStatus.CANCELED },
+            },
+          });
 
-        if (userUsageCount >= coupon.maxUsesPerUser) {
-          throw new BadRequestException('You have already used this coupon the maximum number of times');
+          if (userUsageCount >= coupon.maxUsesPerUser) {
+            throw new BadRequestException('You have already used this coupon the maximum number of times');
+          }
         }
-      }
 
-      // Create order
-      const newOrder = await tx.order.create({
-        data: {
-          code,
-          user: {
-            connect: { id: userId },
+        // Create order
+        const newOrder = await tx.order.create({
+          data: {
+            code,
+            user: {
+              connect: { id: userId },
+            },
+            status: OrderStatus.PENDING_PAYMENT,
+            paymentStatus: PaymentStatus.PENDING,
+            subtotal,
+            discount,
+            shippingFee,
+            total: orderTotal,
+            couponCode,
+            checkoutKey: checkoutDto.checkoutKey ?? null,
+            paymentMethod: paymentMethod || 'PENDING',
+            addressJson: JSON.stringify({
+              fullName: address.fullName,
+              phone: address.phone,
+              province: address.province,
+              district: address.district,
+              ward: address.ward,
+              line1: address.line1,
+            }),
+            items: {
+              create: orderItems,
+            },
           },
-          status: OrderStatus.PENDING_PAYMENT,
-          paymentStatus: PaymentStatus.PENDING,
-          subtotal,
-          discount,
-          shippingFee,
-          total: orderTotal,
-          couponCode,
-          paymentMethod: paymentMethod || 'PENDING',
-          addressJson: JSON.stringify({
-            fullName: address.fullName,
-            phone: address.phone,
-            province: address.province,
-            district: address.district,
-            ward: address.ward,
-            line1: address.line1,
-          }),
-          items: {
-            create: orderItems,
-          },
-        },
-        include: {
-          items: {
-            include: {
-              variant: {
-                include: {
-                  product: true,
+          include: {
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: true,
+                  },
                 },
               },
             },
           },
-        },
+        });
+
+        // Reserve stock for each item
+        for (const item of itemsToUse) {
+          const stockUpdate = await tx.productVariant.updateMany({
+            where: {
+              id: item.variantId,
+              stock: { gte: item.quantity },
+            },
+            data: { stock: { decrement: item.quantity } },
+          });
+
+          if (stockUpdate.count !== 1) {
+            throw new BadRequestException(
+              `Insufficient stock for ${item.variant.product.name} - ${item.variant.scent}.`,
+            );
+          }
+
+          const updatedVariant = await tx.productVariant.findUnique({
+            where: { id: item.variantId },
+            select: { stock: true },
+          });
+
+          if (!updatedVariant) {
+            throw new NotFoundException(`Product variant not found: ${item.variantId}`);
+          }
+
+          const newStock = updatedVariant.stock;
+          const previousStock = newStock + item.quantity;
+
+          await tx.stockMovement.create({
+            data: {
+              variantId: item.variantId,
+              type: StockMovementType.OUT,
+              quantity: item.quantity,
+              previousStock,
+              newStock,
+              notes: `Reserved for order ${code}`,
+            },
+          });
+        }
+
+        // Increment coupon usage count
+        if (couponCode && coupon) {
+          const couponUsage = await tx.coupon.updateMany({
+            where: coupon.maxUses
+              ? {
+                  code: couponCode,
+                  active: true,
+                  usedCount: { lt: coupon.maxUses },
+                }
+              : { code: couponCode, active: true },
+            data: { usedCount: { increment: 1 } },
+          });
+
+          if (couponUsage.count !== 1) {
+            throw new BadRequestException('Coupon is no longer available');
+          }
+        }
+
+        // Clear cart if it was used
+        if (cartId) {
+          await tx.cartItem.deleteMany({
+            where: {
+              cartId,
+              id: { in: cartItemIds },
+            },
+          });
+
+          await tx.cart.update({
+            where: { id: cartId },
+            data: { couponId: null },
+          });
+        }
+
+        return newOrder;
       });
-
-      // Reserve stock for each item
-      for (const item of itemsToUse) {
-        const stockUpdate = await tx.productVariant.updateMany({
-          where: {
-            id: item.variantId,
-            stock: { gte: item.quantity },
-          },
-          data: { stock: { decrement: item.quantity } },
-        });
-
-        if (stockUpdate.count !== 1) {
-          throw new BadRequestException(
-            `Insufficient stock for ${item.variant.product.name} - ${item.variant.scent}.`,
-          );
-        }
-
-        const updatedVariant = await tx.productVariant.findUnique({
-          where: { id: item.variantId },
-          select: { stock: true },
-        });
-
-        if (!updatedVariant) {
-          throw new NotFoundException(`Product variant not found: ${item.variantId}`);
-        }
-
-        const newStock = updatedVariant.stock;
-        const previousStock = newStock + item.quantity;
-
-        await tx.stockMovement.create({
-          data: {
-            variantId: item.variantId,
-            type: StockMovementType.OUT,
-            quantity: item.quantity,
-            previousStock,
-            newStock,
-            notes: `Reserved for order ${code}`,
-          },
-        });
-      }
-
-      // Increment coupon usage count
-      if (couponCode && coupon) {
-        const couponUsage = await tx.coupon.updateMany({
-          where: coupon.maxUses
-            ? {
-                code: couponCode,
-                active: true,
-                usedCount: { lt: coupon.maxUses },
-              }
-            : { code: couponCode, active: true },
-          data: { usedCount: { increment: 1 } },
-        });
-
-        if (couponUsage.count !== 1) {
-          throw new BadRequestException('Coupon is no longer available');
+    } catch (error) {
+      if (
+        checkoutDto.checkoutKey &&
+        this.isCheckoutKeyUniqueConstraintError(error)
+      ) {
+        const existingOrder = await this.findOrderByCheckoutKey(
+          userId,
+          checkoutDto.checkoutKey,
+        );
+        if (existingOrder) {
+          return existingOrder;
         }
       }
 
-      // Clear cart if it was used
-      if (cartId) {
-        await tx.cartItem.deleteMany({
-          where: {
-            cartId,
-            id: { in: cartItemIds },
-          },
-        });
-
-        await tx.cart.update({
-          where: { id: cartId },
-          data: { couponId: null },
-        });
-      }
-
-      return newOrder;
-    });
+      throw error;
+    }
 
     return order;
   }
@@ -678,6 +704,58 @@ export class OrdersService {
         where: { id: orderId },
       });
     });
+  }
+
+  private async findOrderByCheckoutKey(userId: string, checkoutKey: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { checkoutKey },
+      include: {
+        items: {
+          include: {
+            variant: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      return null;
+    }
+
+    if (order.userId !== userId) {
+      throw new BadRequestException('Mã đặt hàng không hợp lệ');
+    }
+
+    return order;
+  }
+
+  private isCheckoutKeyUniqueConstraintError(error: unknown): boolean {
+    const isPrismaError =
+      error instanceof Prisma.PrismaClientKnownRequestError ||
+      (typeof error === 'object' &&
+        error !== null &&
+        ((error as any).name === 'PrismaClientKnownRequestError' ||
+          (error as any).code === 'P2002'));
+
+    if (!isPrismaError || (error as any).code !== 'P2002') {
+      return false;
+    }
+
+    const target = (error as any).meta?.target;
+    if (Array.isArray(target)) {
+      return target.some(
+        (t: unknown) => typeof t === 'string' && (t === 'checkoutKey' || t.includes('checkoutKey')),
+      );
+    }
+    if (typeof target === 'string') {
+      return target === 'checkoutKey' || target.includes('checkoutKey');
+    }
+
+    return false;
   }
 
   private async generateOrderNumber(): Promise<string> {

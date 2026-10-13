@@ -10,6 +10,8 @@ import {
   Min,
   ValidateNested,
   IsEnum,
+  MinLength,
+  MaxLength,
 } from 'class-validator';
 
 export enum ShippingMethod {
@@ -106,4 +108,11 @@ export class CheckoutDto {
   @IsOptional()
   @IsNumber()
   total?: number;
+
+  @ApiProperty({ example: 'checkout-key-12345678', required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(64)
+  checkoutKey?: string;
 }
