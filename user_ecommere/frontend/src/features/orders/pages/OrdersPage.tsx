@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
 import { useOrders, useCancelOrder } from '../hooks/useOrders';
+import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Pagination } from '@/components/common/Pagination';
 import { Card } from '@/components/ui/card';
@@ -66,7 +67,12 @@ export function OrdersPage() {
       setCancellingId(null);
     } catch (error) {
       console.error('Cancel order failed:', error);
-      alert('Hủy đơn hàng thất bại. Vui lòng thử lại.');
+      const serverMessage = (error as any)?.response?.data?.message;
+      const message =
+        (Array.isArray(serverMessage) ? serverMessage.map((m: any) => (typeof m === 'string' ? m : String(m))).filter(Boolean).join(', ') : null) ||
+        (typeof serverMessage === 'string' && serverMessage.trim() ? serverMessage : null) ||
+        'Hủy đơn hàng thất bại. Vui lòng thử lại.';
+      toast.error(message);
     }
   };
 

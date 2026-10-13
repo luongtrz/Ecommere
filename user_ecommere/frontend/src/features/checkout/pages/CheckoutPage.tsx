@@ -14,6 +14,7 @@ import { ArrowLeft, Truck, CreditCard, MapPin, Shield, ChevronRight, CheckCircle
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
 import { CheckoutSteps } from '../components/CheckoutSteps';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
 function generateCheckoutKey(): string {
   const bytes = new Uint8Array(16);
@@ -58,7 +59,7 @@ export function CheckoutPage() {
 
   const handleNextStep = () => {
     if (step === 1 && !selectedAddress) {
-      alert("Vui lòng chọn địa chỉ giao hàng");
+      toast.error('Vui lòng chọn địa chỉ giao hàng');
       return;
     }
     setStep(prev => prev + 1);
@@ -119,7 +120,12 @@ export function CheckoutPage() {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
     } catch (error) {
       console.error('Order creation failed:', error);
-      alert('Đặt hàng thất bại. Vui lòng thử lại.');
+      const serverMessage = (error as any)?.response?.data?.message;
+      const message =
+        (Array.isArray(serverMessage) ? serverMessage.map((m: any) => (typeof m === 'string' ? m : String(m))).filter(Boolean).join(', ') : null) ||
+        (typeof serverMessage === 'string' && serverMessage.trim() ? serverMessage : null) ||
+        'Đặt hàng thất bại. Vui lòng thử lại.';
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
