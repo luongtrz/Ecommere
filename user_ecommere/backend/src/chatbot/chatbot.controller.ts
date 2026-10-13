@@ -164,6 +164,7 @@ export class ChatbotController {
       role,
       app: 'USER',
       threadId,
+      ...(body.clientContext ? { clientContext: body.clientContext as any } : {}),
     };
 
     await this.runSseTurn(req, res, {
