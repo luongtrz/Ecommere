@@ -17,7 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+import { Throttle, type ThrottlerGetTrackerFunction } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { Role } from '@prisma/client';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -35,6 +35,12 @@ import type { ToolContext } from './tools/tool.types';
 import { SendAgentMessageDto } from './dtos/agent-message.dto';
 import { ResumeAgentDto } from './dtos/agent-resume.dto';
 import { AgentThreadQueryDto } from './dtos/agent-thread-query.dto';
+
+export const getChatbotTracker: ThrottlerGetTrackerFunction = (
+  req: Record<string, any>,
+) => {
+  return req?.user?.id || req?.user?.sub || req?.ip;
+};
 
 @ApiTags('Admin chatbot')
 @ApiBearerAuth('JWT-auth')
@@ -55,7 +61,13 @@ export class AdminChatbotController {
     this.threads = threads;
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @Throttle({
+    default: {
+      limit: 20,
+      ttl: 60000,
+      getTracker: getChatbotTracker,
+    },
+  })
   @Post('stream')
   @ApiOperation({ summary: 'Stream assistant responses using Server-Sent Events' })
   @ApiResponse({ status: 200, description: 'Server-Sent Events stream' })
@@ -99,7 +111,13 @@ export class AdminChatbotController {
     });
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @Throttle({
+    default: {
+      limit: 20,
+      ttl: 60000,
+      getTracker: getChatbotTracker,
+    },
+  })
   @Post('threads/:threadId/resume')
   @ApiOperation({ summary: 'Resume assistant execution with tool call decisions' })
   @ApiResponse({ status: 200, description: 'Server-Sent Events stream' })
