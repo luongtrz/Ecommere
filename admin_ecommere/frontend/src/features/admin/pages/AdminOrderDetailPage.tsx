@@ -182,7 +182,7 @@ export function AdminOrderDetailPage() {
                                                 <p className="font-medium text-sm">{formatCurrency(item.unitPrice)}</p>
                                                 <p className="text-xs text-muted-foreground">x{item.quantity}</p>
                                                 <p className="font-medium text-sm mt-0.5 text-primary">
-                                                    {formatCurrency(item.unitPrice * item.quantity)}
+                                                    {formatCurrency(item.lineTotal)}
                                                 </p>
                                             </div>
                                         </div>
