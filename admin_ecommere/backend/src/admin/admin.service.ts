@@ -46,7 +46,7 @@ export class AdminService {
       this.getProductStats(firstDayOfMonth),
       this.getCustomerStats(firstDayOfMonth, firstDayOfLastMonth, lastDayOfLastMonth),
       this.getRecentOrders(),
-      this.getTopProducts(),
+      this.getTopProducts(firstDayOfMonth),
       this.getRevenueHistory(),
     ]);
 
@@ -315,13 +315,16 @@ export class AdminService {
   /**
    * 5 sản phẩm bán chạy nhất
    */
-  private async getTopProducts(): Promise<TopProductDto[]> {
+  private async getTopProducts(firstDayOfMonth: Date): Promise<TopProductDto[]> {
     // Tính tổng quantity đã bán theo product (từ OrderItem với status DELIVERED)
     const topProductsData = await this.prisma.orderItem.groupBy({
       by: ['productId'],
       where: {
         order: {
           status: OrderStatus.DELIVERED,
+          createdAt: {
+            gte: firstDayOfMonth,
+          },
         },
       },
       _sum: {
