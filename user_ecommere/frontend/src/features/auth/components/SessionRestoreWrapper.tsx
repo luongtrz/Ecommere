@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from 'react';
-import apiClient, { authToken } from '@/lib/api';
+import { authToken, refreshAccessToken } from '@/lib/api';
 import { useCartStore } from '@/features/cart/store/cartStore';
 
 interface SessionRestoreWrapperProps {
@@ -16,9 +16,7 @@ export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) 
       if (!userStr) return;
 
       try {
-        const { data } = await apiClient.post('/auth/refresh');
-        const actualData = data.data || data;
-        authToken.set(actualData.accessToken);
+        await refreshAccessToken();
       } catch (error) {
         console.log('Session expired');
         authToken.remove();
