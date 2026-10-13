@@ -1,5 +1,6 @@
 import { createOrdersTools, OrdersToolDeps, ORDER_STATUSES } from './orders.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 import type { OrdersService } from '../../../orders/orders.service';
 import type { CartService } from '../../../cart/cart.service';
 import { MoneyUtil } from '../../../common/utils/money.util';
@@ -117,14 +118,26 @@ describe('Orders Tools', () => {
 
     it('throws "Cần đăng nhập để dùng chức năng này" for all tools when ctx.userId is null', async () => {
       await expect(listTool.handler({}, unauthenticatedCtx)).rejects.toThrow(
+        ToolError,
+      );
+      await expect(listTool.handler({}, unauthenticatedCtx)).rejects.toThrow(
         'Cần đăng nhập để dùng chức năng này',
       );
+      await expect(
+        getTool.handler({ orderId: 'ord-1' }, unauthenticatedCtx),
+      ).rejects.toThrow(ToolError);
       await expect(
         getTool.handler({ orderId: 'ord-1' }, unauthenticatedCtx),
       ).rejects.toThrow('Cần đăng nhập để dùng chức năng này');
       await expect(
         cancelTool.handler({ orderId: 'ord-1' }, unauthenticatedCtx),
+      ).rejects.toThrow(ToolError);
+      await expect(
+        cancelTool.handler({ orderId: 'ord-1' }, unauthenticatedCtx),
       ).rejects.toThrow('Cần đăng nhập để dùng chức năng này');
+      await expect(checkoutTool.handler({}, unauthenticatedCtx)).rejects.toThrow(
+        ToolError,
+      );
       await expect(checkoutTool.handler({}, unauthenticatedCtx)).rejects.toThrow(
         'Cần đăng nhập để dùng chức năng này',
       );
@@ -288,12 +301,18 @@ describe('Orders Tools', () => {
       };
       await expect(
         checkoutTool.handler({}, missingClientCtx),
+      ).rejects.toThrow(ToolError);
+      await expect(
+        checkoutTool.handler({}, missingClientCtx),
       ).rejects.toThrow('Giỏ hàng đang trống');
 
       const nullCartCtx: ToolContext = {
         ...missingClientCtx,
         clientContext: { cart: null },
       };
+      await expect(checkoutTool.handler({}, nullCartCtx)).rejects.toThrow(
+        ToolError,
+      );
       await expect(checkoutTool.handler({}, nullCartCtx)).rejects.toThrow(
         'Giỏ hàng đang trống',
       );
@@ -302,6 +321,9 @@ describe('Orders Tools', () => {
         ...missingClientCtx,
         clientContext: { cart: [] },
       };
+      await expect(checkoutTool.handler({}, emptyCartCtx)).rejects.toThrow(
+        ToolError,
+      );
       await expect(checkoutTool.handler({}, emptyCartCtx)).rejects.toThrow(
         'Giỏ hàng đang trống',
       );
@@ -675,7 +697,7 @@ describe('Orders Tools', () => {
         expect(lastCallDto).not.toHaveProperty('couponCode');
       });
 
-      it('a logged-in user with an empty server cart gets the empty-cart error', async () => {
+      it('falls back to browser cart when server cart has no items, or throws when both are empty', async () => {
         const mockCartService = {
           getCart: jest.fn().mockResolvedValue({
             id: 'cart-empty-1',
@@ -689,9 +711,19 @@ describe('Orders Tools', () => {
         });
         const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
 
-        await expect(
-          checkoutWithCart.handler({}, validCustomerCtx),
-        ).rejects.toThrow('Giỏ hàng đang trống');
+        mockOrdersService.checkout.mockResolvedValue({
+          id: 'ord-fallback-1',
+          code: 'ORD-FB-1',
+        });
+
+        await checkoutWithCart.handler({}, validCustomerCtx);
+
+        expect(mockCartService.getCart).toHaveBeenCalledWith('user-123');
+        expect(mockOrdersService.checkout).toHaveBeenCalledWith('user-123', {
+          paymentMethod: 'COD',
+          shippingMethod: 'STANDARD',
+          items: [{ variantId: 'var-1', quantity: 2 }],
+        });
 
         const noClientCtx: ToolContext = {
           userId: 'user-123',
@@ -701,7 +733,83 @@ describe('Orders Tools', () => {
         };
         await expect(
           checkoutWithCart.handler({}, noClientCtx),
+        ).rejects.toThrow(ToolError);
+        await expect(
+          checkoutWithCart.handler({}, noClientCtx),
         ).rejects.toThrow('Giỏ hàng đang trống');
+      });
+
+      it('builds confirm preview falling back to browser cart when server cart has no items', async () => {
+        const mockCartService = {
+          getCart: jest.fn().mockResolvedValue({
+            id: 'cart-empty-prev',
+            userId: 'user-123',
+            items: [],
+          }),
+        };
+        mockOrdersService.previewCheckout.mockResolvedValue({
+          address: {
+            id: 'addr-001',
+            line1: '123 Đường Cầu Giấy',
+            ward: 'Dịch Vọng',
+            district: 'Cầu Giấy',
+            province: 'Hà Nội',
+          },
+          deliveryAddress: '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+          itemCount: 1,
+          subtotal: 100000,
+          shippingFee: 30000,
+          everyItemPriced: true,
+        });
+
+        const toolsWithCart = createOrdersTools({
+          orders: mockOrdersService as unknown as OrdersService,
+          cart: mockCartService as unknown as CartService,
+        });
+        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+
+        const previewText = await checkoutWithCart.preview!(
+          { addressId: 'addr-001' },
+          validCustomerCtx,
+        );
+
+        expect(mockCartService.getCart).toHaveBeenCalledWith('user-123');
+        expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith('user-123', {
+          addressId: 'addr-001',
+          shippingMethod: undefined,
+          items: [{ variantId: 'var-1', quantity: 2 }],
+        });
+        expect(previewText).toContain('123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội');
+        expect(previewText).toContain('1 sản phẩm');
+        expect(previewText).toContain(MoneyUtil.format(100000));
+      });
+
+      it('returns undefined in preview when server cart and browser cart are both empty', async () => {
+        const mockCartService = {
+          getCart: jest.fn().mockResolvedValue({
+            id: 'cart-empty-prev',
+            userId: 'user-123',
+            items: [],
+          }),
+        };
+        const toolsWithCart = createOrdersTools({
+          orders: mockOrdersService as unknown as OrdersService,
+          cart: mockCartService as unknown as CartService,
+        });
+        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+
+        const noClientCtx: ToolContext = {
+          userId: 'user-123',
+          role: 'CUSTOMER',
+          app: 'USER',
+          threadId: 't-no-client-preview',
+        };
+
+        const previewText = await checkoutWithCart.preview!(
+          { addressId: 'addr-001' },
+          noClientCtx,
+        );
+        expect(previewText).toBeUndefined();
       });
 
       it('builds confirm preview from server cart for logged-in user', async () => {

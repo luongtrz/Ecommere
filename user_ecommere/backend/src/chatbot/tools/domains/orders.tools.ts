@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 import type { OrdersService } from '../../../orders/orders.service';
 import type { CartService } from '../../../cart/cart.service';
 import { MoneyUtil } from '../../../common/utils/money.util';
@@ -38,7 +39,7 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
     risk: 'READ',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.orders.getMyOrders(ctx.userId, {
         status: args.status,
@@ -67,7 +68,7 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
     risk: 'READ',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.orders.getMyOrderById(ctx.userId, args.orderId);
     },
@@ -88,7 +89,7 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
     risk: 'SENSITIVE',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       return deps.orders.cancelOrder(ctx.userId, args.orderId);
     },
@@ -114,7 +115,7 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
     risk: 'SENSITIVE',
     handler: async (args, ctx: ToolContext) => {
       if (!ctx.userId) {
-        throw new Error('Cần đăng nhập để dùng chức năng này');
+        throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
 
       const cart = await deps.cart.getCart(ctx.userId);
@@ -123,8 +124,11 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
       let cartId: string | null = null;
       let couponCode: string | null = null;
 
-      if (cart) {
-        cartItems = Array.isArray(cart.items) ? cart.items : null;
+      const hasServerCartItems =
+        cart && Array.isArray(cart.items) && cart.items.length > 0;
+
+      if (hasServerCartItems) {
+        cartItems = cart.items;
         cartId = cart.id ?? null;
         couponCode = cart.coupon?.code ?? null;
       } else {
@@ -137,7 +141,7 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
       }
 
       if (!cartItems || cartItems.length === 0) {
-        throw new Error('Giỏ hàng đang trống');
+        throw new ToolError('Giỏ hàng đang trống');
       }
 
       const items = cartItems.map((item: any) => ({
@@ -173,8 +177,11 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
       let cartItems: any[] | null = null;
       let couponCodeFromCart: string | null = null;
 
-      if (cart) {
-        cartItems = Array.isArray(cart.items) ? cart.items : null;
+      const hasServerCartItems =
+        cart && Array.isArray(cart.items) && cart.items.length > 0;
+
+      if (hasServerCartItems) {
+        cartItems = cart.items;
         couponCodeFromCart = cart.coupon?.code ?? null;
       } else {
         const rawCart = ctx.clientContext?.cart;
