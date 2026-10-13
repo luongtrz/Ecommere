@@ -103,12 +103,8 @@ export class AuthService {
 
     const isPasswordValid = await HashUtil.compare(password, user.passwordHash);
 
-    if (!isPasswordValid) {
+    if (!isPasswordValid || user.role !== 'ADMIN') {
       throw new UnauthorizedException('Invalid credentials');
-    }
-
-    if (user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Tài khoản không có quyền quản trị');
     }
 
     this.logger.log(`User logged in: ${phone}`);
