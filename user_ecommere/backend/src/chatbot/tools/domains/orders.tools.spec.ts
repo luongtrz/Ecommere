@@ -1,4 +1,9 @@
-import { createOrdersTools, OrdersToolDeps, ORDER_STATUSES } from './orders.tools';
+import {
+  createOrdersTools,
+  deriveCheckoutKey,
+  OrdersToolDeps,
+  ORDER_STATUSES,
+} from './orders.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import { ToolError } from '../tool-result.util';
 import type { OrdersService } from '../../../orders/orders.service';
@@ -416,6 +421,7 @@ describe('Orders Tools', () => {
         shippingMethod: 'EXPRESS',
         paymentMethod: 'BANK_TRANSFER',
         items: [{ variantId: 'var-1', quantity: 2 }],
+        checkoutKey: expect.any(String),
       });
     });
 
@@ -634,6 +640,7 @@ describe('Orders Tools', () => {
           shippingMethod: 'STANDARD',
           cartId: 'cart-db-1',
           items: [{ variantId: 'var-101', quantity: 2 }],
+          checkoutKey: expect.any(String),
         });
       });
 
@@ -676,6 +683,7 @@ describe('Orders Tools', () => {
           cartId: 'cart-srv-789',
           couponCode: 'SALE50',
           items: [{ variantId: 'var-1', quantity: 1 }],
+          checkoutKey: expect.any(String),
         });
 
         // When coupon has no code or coupon is null, couponCode must not be passed
@@ -723,6 +731,7 @@ describe('Orders Tools', () => {
           paymentMethod: 'COD',
           shippingMethod: 'STANDARD',
           items: [{ variantId: 'var-1', quantity: 2 }],
+          checkoutKey: expect.any(String),
         });
 
         const noClientCtx: ToolContext = {
@@ -870,6 +879,157 @@ describe('Orders Tools', () => {
         expect(previewText).toContain('1 sản phẩm');
         expect(previewText).toContain(MoneyUtil.format(100000));
         expect(previewText).toContain('mã giảm giá COUPON2026 sẽ được áp dụng khi đặt đơn');
+      });
+    });
+
+    describe('checkoutKey deduplication', () => {
+      it('attaches a checkoutKey satisfying length constraints (8 to 64 chars)', async () => {
+        mockOrdersService.checkout.mockResolvedValue({ id: 'ord-1' });
+
+        await checkoutTool.handler({ addressId: 'addr-1' }, validCustomerCtx);
+
+        expect(mockOrdersService.checkout).toHaveBeenCalledTimes(1);
+        const [, dto] = mockOrdersService.checkout.mock.calls[0];
+        expect(typeof dto.checkoutKey).toBe('string');
+        expect(dto.checkoutKey.length).toBeGreaterThanOrEqual(8);
+        expect(dto.checkoutKey.length).toBeLessThanOrEqual(64);
+      });
+
+      it('produces identical checkoutKey for identical thread and checkout arguments', async () => {
+        mockOrdersService.checkout.mockResolvedValue({ id: 'ord-1' });
+
+        await checkoutTool.handler({ addressId: 'addr-1' }, validCustomerCtx);
+        await checkoutTool.handler({ addressId: 'addr-1' }, validCustomerCtx);
+
+        const [, dto1] = mockOrdersService.checkout.mock.calls[0];
+        const [, dto2] = mockOrdersService.checkout.mock.calls[1];
+        expect(dto1.checkoutKey).toBe(dto2.checkoutKey);
+      });
+
+      it('produces identical checkoutKey regardless of cart item ordering', async () => {
+        mockOrdersService.checkout.mockResolvedValue({ id: 'ord-1' });
+
+        const ctxOrderA: ToolContext = {
+          ...validCustomerCtx,
+          clientContext: {
+            cart: [
+              { variantId: 'var-1', quantity: 2 },
+              { variantId: 'var-2', quantity: 1 },
+            ],
+          },
+        };
+        const ctxOrderB: ToolContext = {
+          ...validCustomerCtx,
+          clientContext: {
+            cart: [
+              { variantId: 'var-2', quantity: 1 },
+              { variantId: 'var-1', quantity: 2 },
+            ],
+          },
+        };
+
+        await checkoutTool.handler({ addressId: 'addr-1' }, ctxOrderA);
+        await checkoutTool.handler({ addressId: 'addr-1' }, ctxOrderB);
+
+        const [, dto1] = mockOrdersService.checkout.mock.calls[0];
+        const [, dto2] = mockOrdersService.checkout.mock.calls[1];
+        expect(dto1.checkoutKey).toBe(dto2.checkoutKey);
+      });
+
+      it('produces different checkoutKeys when checkout arguments change', async () => {
+        mockOrdersService.checkout.mockResolvedValue({ id: 'ord-1' });
+
+        // Base call
+        await checkoutTool.handler({ addressId: 'addr-1' }, validCustomerCtx);
+        const baseKey = mockOrdersService.checkout.mock.calls[0][1].checkoutKey;
+
+        // Different threadId
+        const diffThreadCtx = { ...validCustomerCtx, threadId: 'thread-different' };
+        await checkoutTool.handler({ addressId: 'addr-1' }, diffThreadCtx);
+        const diffThreadKey = mockOrdersService.checkout.mock.calls[1][1].checkoutKey;
+        expect(diffThreadKey).not.toBe(baseKey);
+
+        // Different addressId
+        await checkoutTool.handler({ addressId: 'addr-2' }, validCustomerCtx);
+        const diffAddressKey = mockOrdersService.checkout.mock.calls[2][1].checkoutKey;
+        expect(diffAddressKey).not.toBe(baseKey);
+
+        // Different shippingMethod
+        await checkoutTool.handler(
+          { addressId: 'addr-1', shippingMethod: 'EXPRESS' },
+          validCustomerCtx,
+        );
+        const diffShippingKey = mockOrdersService.checkout.mock.calls[3][1].checkoutKey;
+        expect(diffShippingKey).not.toBe(baseKey);
+
+        // Different paymentMethod
+        await checkoutTool.handler(
+          { addressId: 'addr-1', paymentMethod: 'BANK_TRANSFER' },
+          validCustomerCtx,
+        );
+        const diffPaymentKey = mockOrdersService.checkout.mock.calls[4][1].checkoutKey;
+        expect(diffPaymentKey).not.toBe(baseKey);
+
+        // Different items
+        const diffItemsCtx: ToolContext = {
+          ...validCustomerCtx,
+          clientContext: {
+            cart: [{ variantId: 'var-1', quantity: 5 }],
+          },
+        };
+        await checkoutTool.handler({ addressId: 'addr-1' }, diffItemsCtx);
+        const diffItemsKey = mockOrdersService.checkout.mock.calls[5][1].checkoutKey;
+        expect(diffItemsKey).not.toBe(baseKey);
+      });
+
+      it('direct deriveCheckoutKey unit tests for determinism and sensitivity', () => {
+        const key1 = deriveCheckoutKey({
+          threadId: 't-1',
+          addressId: 'addr-1',
+          items: [{ variantId: 'v1', quantity: 1 }],
+          paymentMethod: 'COD',
+          shippingMethod: 'STANDARD',
+          cartId: 'c-1',
+          couponCode: 'SALE10',
+        });
+
+        const key2 = deriveCheckoutKey({
+          threadId: 't-1',
+          addressId: 'addr-1',
+          items: [{ variantId: 'v1', quantity: 1 }],
+          paymentMethod: 'COD',
+          shippingMethod: 'STANDARD',
+          cartId: 'c-1',
+          couponCode: 'SALE10',
+        });
+
+        expect(key1).toBe(key2);
+        expect(key1.length).toBeGreaterThanOrEqual(8);
+        expect(key1.length).toBeLessThanOrEqual(64);
+
+        // Different cartId
+        const keyDiffCart = deriveCheckoutKey({
+          threadId: 't-1',
+          addressId: 'addr-1',
+          items: [{ variantId: 'v1', quantity: 1 }],
+          paymentMethod: 'COD',
+          shippingMethod: 'STANDARD',
+          cartId: 'c-2',
+          couponCode: 'SALE10',
+        });
+        expect(keyDiffCart).not.toBe(key1);
+
+        // Different couponCode
+        const keyDiffCoupon = deriveCheckoutKey({
+          threadId: 't-1',
+          addressId: 'addr-1',
+          items: [{ variantId: 'v1', quantity: 1 }],
+          paymentMethod: 'COD',
+          shippingMethod: 'STANDARD',
+          cartId: 'c-1',
+          couponCode: null,
+        });
+        expect(keyDiffCoupon).not.toBe(key1);
       });
     });
   });
