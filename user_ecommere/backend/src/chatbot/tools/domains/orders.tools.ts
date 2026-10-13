@@ -132,10 +132,10 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
     name: 'checkout',
     domain: 'orders',
     description:
-      'Đặt đơn từ giỏ hàng hiện tại của khách. Giá và phí ship do máy chủ tính lại. Thanh toán thực hiện trên trang đơn hàng.',
+      'Đặt đơn từ giỏ hàng hiện tại của khách. Bắt buộc có addressId; nếu chưa biết địa chỉ, hãy hỏi khách chọn địa chỉ hoặc liệt kê danh sách địa chỉ của khách trước. Giá và phí ship do máy chủ tính lại. Thanh toán thực hiện trên trang đơn hàng.',
     schema: z
       .object({
-        addressId: z.string().min(1).max(64).optional(),
+        addressId: z.string().min(1).max(64),
         shippingMethod: z
           .enum(SHIPPING_METHODS)
           .optional()

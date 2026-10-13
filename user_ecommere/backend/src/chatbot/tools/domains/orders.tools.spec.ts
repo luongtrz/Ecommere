@@ -275,7 +275,7 @@ describe('Orders Tools', () => {
     it('has risk SENSITIVE and expected description', () => {
       expect(checkoutTool.risk).toBe('SENSITIVE');
       expect(checkoutTool.description).toBe(
-        'Đặt đơn từ giỏ hàng hiện tại của khách. Giá và phí ship do máy chủ tính lại. Thanh toán thực hiện trên trang đơn hàng.',
+        'Đặt đơn từ giỏ hàng hiện tại của khách. Bắt buộc có addressId; nếu chưa biết địa chỉ, hãy hỏi khách chọn địa chỉ hoặc liệt kê danh sách địa chỉ của khách trước. Giá và phí ship do máy chủ tính lại. Thanh toán thực hiện trên trang đơn hàng.',
       );
     });
 
@@ -291,8 +291,15 @@ describe('Orders Tools', () => {
       expect(withUserId.success).toBe(false);
     });
 
+    it('requires addressId as a non-empty string of max 64 chars', () => {
+      expect(checkoutTool.schema.safeParse({}).success).toBe(false);
+      expect(checkoutTool.schema.safeParse({ addressId: '' }).success).toBe(false);
+      expect(checkoutTool.schema.safeParse({ addressId: 'a'.repeat(65) }).success).toBe(false);
+      expect(checkoutTool.schema.safeParse({ addressId: 'addr-123' }).success).toBe(true);
+    });
+
     it('defaults shippingMethod to STANDARD and paymentMethod to COD', () => {
-      const parsed = checkoutTool.schema.parse({});
+      const parsed = checkoutTool.schema.parse({ addressId: 'addr-001' });
       expect(parsed.shippingMethod).toBe('STANDARD');
       expect(parsed.paymentMethod).toBe('COD');
     });
