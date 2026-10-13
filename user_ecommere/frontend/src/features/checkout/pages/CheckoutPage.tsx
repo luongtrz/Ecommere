@@ -29,6 +29,7 @@ export function CheckoutPage() {
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOrdered, setIsOrdered] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
 
@@ -67,7 +68,7 @@ export function CheckoutPage() {
 
 
   const handleSubmit = async () => {
-    if (!selectedAddress) return;
+    if (isOrdered || !selectedAddress) return;
 
     const fingerprint = JSON.stringify({
       addressId: selectedAddress.id,
@@ -112,7 +113,7 @@ export function CheckoutPage() {
 
       await apiClient.post('/orders/checkout', orderData);
       orderCreated = true;
-      checkoutKeyRef.current = null;
+      setIsOrdered(true);
     } catch (error) {
       console.error('Order creation failed:', error);
       alert('Đặt hàng thất bại. Vui lòng thử lại.');
@@ -392,7 +393,7 @@ export function CheckoutPage() {
                   )}
                   <Button
                     onClick={step < 3 ? handleNextStep : handleSubmit}
-                    disabled={step === 1 && !selectedAddress || isSubmitting}
+                    disabled={step === 1 && !selectedAddress || isSubmitting || isOrdered}
                     className={`h-12 flex-1 rounded-xl text-base font-bold shadow-lg transition-all hover:scale-[1.01] ${step < 3
                       ? 'bg-primary text-primary-foreground shadow-primary/10'
                       : 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-500/25'
