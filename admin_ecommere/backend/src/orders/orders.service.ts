@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
 import { Prisma, CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
@@ -18,6 +18,7 @@ export class OrdersService {
         checkoutDto.checkoutKey,
       );
       if (existingOrder) {
+        await this.assertCheckoutMatchesOrder(existingOrder, checkoutDto);
         return existingOrder;
       }
     }
@@ -391,6 +392,7 @@ export class OrdersService {
           checkoutDto.checkoutKey,
         );
         if (existingOrder) {
+          await this.assertCheckoutMatchesOrder(existingOrder, checkoutDto);
           return existingOrder;
         }
       }
@@ -731,6 +733,102 @@ export class OrdersService {
     }
 
     return order;
+  }
+
+  private async assertCheckoutMatchesOrder(
+    order: any,
+    checkoutDto: CheckoutDto,
+  ): Promise<void> {
+    if (checkoutDto.items && checkoutDto.items.length > 0) {
+      const orderItems = order.items ?? [];
+      if (checkoutDto.items.length !== orderItems.length) {
+        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+      }
+
+      const sortedDtoItems = [...checkoutDto.items].sort(
+        (a, b) =>
+          (a.variantId ?? '').localeCompare(b.variantId ?? '') ||
+          (a.quantity ?? 0) - (b.quantity ?? 0),
+      );
+      const sortedOrderItems = [...orderItems].sort(
+        (a, b) =>
+          (a.variantId ?? '').localeCompare(b.variantId ?? '') ||
+          (a.quantity ?? 0) - (b.quantity ?? 0),
+      );
+
+      for (let i = 0; i < sortedDtoItems.length; i++) {
+        if (
+          sortedDtoItems[i].variantId !== sortedOrderItems[i].variantId ||
+          sortedDtoItems[i].quantity !== sortedOrderItems[i].quantity
+        ) {
+          throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        }
+      }
+    }
+
+    let orderAddress: Record<string, any> = {};
+    try {
+      orderAddress =
+        typeof order.addressJson === 'string'
+          ? JSON.parse(order.addressJson)
+          : null;
+    } catch {
+      throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+    }
+
+    if (!orderAddress || typeof orderAddress !== 'object') {
+      throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+    }
+
+    let requestAddress: {
+      fullName?: string;
+      phone?: string;
+      province?: string;
+      district?: string;
+      ward?: string;
+      line1?: string;
+    } | null = null;
+
+    if (checkoutDto.addressId) {
+      requestAddress = await this.prisma.address.findFirst({
+        where: {
+          id: checkoutDto.addressId,
+          userId: order.userId,
+        },
+      });
+      if (!requestAddress) {
+        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+      }
+    } else {
+      requestAddress = {
+        fullName: checkoutDto.fullName,
+        phone: checkoutDto.phone,
+        province: checkoutDto.province,
+        district: checkoutDto.district,
+        ward: checkoutDto.ward,
+        line1: checkoutDto.line1,
+      };
+    }
+
+    const addressFields = [
+      'fullName',
+      'phone',
+      'province',
+      'district',
+      'ward',
+      'line1',
+    ] as const;
+
+    for (const field of addressFields) {
+      if (requestAddress[field] !== orderAddress[field]) {
+        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+      }
+    }
+
+    const expectedPaymentMethod = checkoutDto.paymentMethod || 'PENDING';
+    if (expectedPaymentMethod !== order.paymentMethod) {
+      throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+    }
   }
 
   private isCheckoutKeyUniqueConstraintError(error: unknown): boolean {
