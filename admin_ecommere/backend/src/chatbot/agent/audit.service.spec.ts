@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuditService, ToolAuditEntry, redactArgs } from './audit.service';
+import { AuditService, ToolAuditEntry, redactArgs, redactSummary } from './audit.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -172,6 +172,46 @@ describe('AuditService', () => {
     });
   });
 
+  describe('redactSummary', () => {
+    it('masks an email address keeping the first character of the local part and the full domain', () => {
+      expect(redactSummary('Email: alice@example.com')).toBe('Email: a***@example.com');
+      expect(redactSummary('Contact bob.smith@corp.co.uk for details')).toBe('Contact b***@corp.co.uk for details');
+      expect(redactSummary('{"email":"support@shop.vn"}')).toBe('{"email":"s***@shop.vn"}');
+      expect(redactSummary('a@b.com')).toBe('a***@b.com');
+    });
+
+    it('masks phone numbers of 9 to 11 digits keeping only the last 3 digits', () => {
+      expect(redactSummary('SĐT: 0912345678')).toBe('SĐT: ***678');
+      expect(redactSummary('Phone: +84912345678')).toBe('Phone: ***678');
+      expect(redactSummary('International: +84 912 345 678')).toBe('International: ***678');
+      expect(redactSummary('Format dash: 0912-345-678')).toBe('Format dash: ***678');
+      expect(redactSummary('9 digits: 912345678')).toBe('9 digits: ***678');
+      expect(redactSummary('11 digits: 01234567890')).toBe('11 digits: ***890');
+      expect(redactSummary('{"phone":"0912345678"}')).toBe('{"phone":"***678"}');
+      // Numbers with fewer than 9 digits or non-phone are unchanged
+      expect(redactSummary('Order 12345')).toBe('Order 12345');
+    });
+
+    it('masks values after sensitive words matching sensitive key regex', () => {
+      expect(redactSummary('password: rawPassword123')).toBe('password: [REDACTED]');
+      expect(redactSummary('token=mySecretToken123&scope=all')).toBe('token=[REDACTED]&scope=all');
+      expect(redactSummary('secret: topsecretValue.')).toBe('secret: [REDACTED].');
+      expect(redactSummary('authorization: Bearer jwt.token.here')).toBe('authorization: [REDACTED]');
+      expect(redactSummary('cookie: sessionId=abc123xyz; other=clean')).toBe('cookie: [REDACTED]; other=clean');
+      expect(redactSummary('cvv: 999')).toBe('cvv: [REDACTED]');
+      expect(redactSummary('card: 1234567890123456')).toBe('card: [REDACTED]');
+      expect(redactSummary('{"password":"mySecretPassword","token":"secretToken"}')).toBe(
+        '{"password":"[REDACTED]","token":"[REDACTED]"}',
+      );
+    });
+
+    it('preserves ordinary summaries without sensitive data', () => {
+      expect(redactSummary('Found 3 products')).toBe('Found 3 products');
+      expect(redactSummary('Đã nhập thêm tồn kho')).toBe('Đã nhập thêm tồn kho');
+      expect(redactSummary('Customer query returned 0 rows')).toBe('Customer query returned 0 rows');
+    });
+  });
+
   describe('record', () => {
     it('calls prisma.agentToolLog.create with redacted args (not the raw password)', async () => {
       mockPrismaService.agentToolLog.create.mockResolvedValue({ id: 'log-1' });
@@ -319,6 +359,29 @@ describe('AuditService', () => {
             toolCallId: 'call_add_1',
           },
           resultSummary: 'Đã nhập thêm tồn kho',
+        }),
+      });
+    });
+
+    it('redacts email, phone, and sensitive values in resultSummary before writing to prisma', async () => {
+      mockPrismaService.agentToolLog.create.mockResolvedValue({ id: 'log-5' });
+
+      const entry: ToolAuditEntry = {
+        threadId: 'thread-123',
+        userId: 'user-456',
+        role: 'CUSTOMER',
+        app: 'USER',
+        toolName: 'getUserInfo',
+        risk: 'LOW',
+        status: 'OK',
+        resultSummary: 'User: email=john.doe@example.com, phone=0912345678, token: secret123',
+      };
+
+      await service.record(entry);
+
+      expect(mockPrismaService.agentToolLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          resultSummary: 'User: email=j***@example.com, phone=***678, token: [REDACTED]',
         }),
       });
     });

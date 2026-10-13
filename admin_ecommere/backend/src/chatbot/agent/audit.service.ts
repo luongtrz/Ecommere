@@ -22,6 +22,47 @@ export interface ToolAuditEntry {
 const SENSITIVE_KEY_REGEX = /pass|token|secret|authorization|cookie|cvv|card/i;
 const PHONE_KEY_REGEX = /phone/i;
 
+const EMAIL_REGEX = /\b([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g;
+const PHONE_REGEX = /(?<!\w|\+)(?:\(?\+84\)?[\s.-]?)?(?:\d[\s.-]?){8,10}\d(?!\w)/g;
+const SENSITIVE_VALUE_REGEX =
+  /(?<=(?:^|[^\w]))("?)(\b[\w-]*(?:pass|token|secret|authorization|cookie|cvv|card)[\w-]*\b)\1((?:\s*[:=]\s*|\s+is\s+|\s+))(?:(")(?:Bearer\s+)?[^"\r\n]*(")|(')(?:Bearer\s+)?[^'\r\n]*(')|(Bearer\s+[^\s"',;]+|[^\s"',;:!?(){}\[\]<>&|]*[^\s"',;:.!?(){}\[\]<>&|]))/gi;
+
+export function redactSummary(text: string): string {
+  if (!text || typeof text !== 'string') {
+    return text;
+  }
+
+  // 1. Mask sensitive key-value pairs (for example password, token, secret, authorization, cookie, cvv, card)
+  let result = text.replace(
+    SENSITIVE_VALUE_REGEX,
+    (_match, quoteKey, key, sep, dQuote1, dQuote2, sQuote1, sQuote2, unquotedVal) => {
+      if (unquotedVal === '[REDACTED]' || unquotedVal === '***') {
+        return _match;
+      }
+      if (dQuote1 && dQuote2) {
+        return `${quoteKey}${key}${quoteKey}${sep}"[REDACTED]"`;
+      }
+      if (sQuote1 && sQuote2) {
+        return `${quoteKey}${key}${quoteKey}${sep}'[REDACTED]'`;
+      }
+      return `${quoteKey}${key}${quoteKey}${sep}[REDACTED]`;
+    },
+  );
+
+  // 2. Mask email addresses: keep the first character of the local part and the full domain
+  result = result.replace(EMAIL_REGEX, (_, local: string, domain: string) => {
+    return `${local[0]}***@${domain}`;
+  });
+
+  // 3. Mask phone numbers of 9 to 11 digits: keep only the last 3 digits
+  result = result.replace(PHONE_REGEX, (match: string) => {
+    const digits = match.replace(/\D/g, '');
+    return '***' + digits.slice(-3);
+  });
+
+  return result;
+}
+
 export function redactArgs(value: unknown, depth = 0): unknown {
   if (depth > 5) {
     return '[TRUNCATED]';
@@ -98,7 +139,7 @@ export class AuditService {
           status: entry.status,
           args,
           resultSummary: entry.resultSummary !== undefined && entry.resultSummary !== null
-            ? entry.resultSummary.slice(0, 500)
+            ? redactSummary(entry.resultSummary).slice(0, 500)
             : null,
           error: entry.error !== undefined && entry.error !== null
             ? entry.error.slice(0, 500)
