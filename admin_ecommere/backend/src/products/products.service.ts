@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { OrderStatus, Prisma } from '@prisma/client';
+import { OrderStatus, Prisma, StockMovementType } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
 import { CategoriesService } from '@/categories/categories.service';
@@ -311,32 +311,50 @@ export class ProductsService {
 
     // Create product with variants
     try {
-      return await this.prisma.product.create({
-        data: {
-          name,
-          slug,
-          description,
-          brand,
-          images,
-          categoryId,
-          basePrice,
-          active,
-          variants: {
-            create: variants.map((variant) => ({
-              sku: `${slug.toUpperCase()}-${variant.scent.substring(0, 3).toUpperCase()}-${variant.volumeMl}ML`,
-              scent: variant.scent,
-              volumeMl: variant.volumeMl,
-              price: variant.price,
-              salePrice: variant.salePrice,
-              stock: variant.stock,
-              barcode: variant.barcode,
-            })),
+      return await this.prisma.$transaction(async (tx) => {
+        const product = await tx.product.create({
+          data: {
+            name,
+            slug,
+            description,
+            brand,
+            images,
+            categoryId,
+            basePrice,
+            active,
+            variants: {
+              create: variants.map((variant) => ({
+                sku: `${slug.toUpperCase()}-${variant.scent.substring(0, 3).toUpperCase()}-${variant.volumeMl}ML`,
+                scent: variant.scent,
+                volumeMl: variant.volumeMl,
+                price: variant.price,
+                salePrice: variant.salePrice,
+                stock: variant.stock,
+                barcode: variant.barcode,
+              })),
+            },
           },
-        },
-        include: {
-          variants: true,
-          category: true,
-        },
+          include: {
+            variants: true,
+            category: true,
+          },
+        });
+
+        for (const variant of product.variants) {
+          if (variant.stock > 0) {
+            await tx.stockMovement.create({
+              data: {
+                variantId: variant.id,
+                type: StockMovementType.IN,
+                quantity: variant.stock,
+                previousStock: 0,
+                newStock: variant.stock,
+              },
+            });
+          }
+        }
+
+        return product;
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
@@ -442,17 +460,33 @@ export class ProductsService {
     const sku = `${product.slug.toUpperCase()}-${createVariantDto.scent.substring(0, 3).toUpperCase()}-${createVariantDto.volumeMl}ML`;
 
     try {
-      return await this.prisma.productVariant.create({
-        data: {
-          productId,
-          sku,
-          scent: createVariantDto.scent,
-          volumeMl: createVariantDto.volumeMl,
-          price: createVariantDto.price,
-          salePrice: createVariantDto.salePrice,
-          stock: createVariantDto.stock,
-          barcode: createVariantDto.barcode,
-        },
+      return await this.prisma.$transaction(async (tx) => {
+        const variant = await tx.productVariant.create({
+          data: {
+            productId,
+            sku,
+            scent: createVariantDto.scent,
+            volumeMl: createVariantDto.volumeMl,
+            price: createVariantDto.price,
+            salePrice: createVariantDto.salePrice,
+            stock: createVariantDto.stock,
+            barcode: createVariantDto.barcode,
+          },
+        });
+
+        if (variant.stock > 0) {
+          await tx.stockMovement.create({
+            data: {
+              variantId: variant.id,
+              type: StockMovementType.IN,
+              quantity: variant.stock,
+              previousStock: 0,
+              newStock: variant.stock,
+            },
+          });
+        }
+
+        return variant;
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
