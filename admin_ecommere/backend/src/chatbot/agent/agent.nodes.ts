@@ -132,6 +132,7 @@ export function createConfirmNode(deps: AgentGraphDeps) {
         try {
           await deps.audit.record({
             threadId: ctx.threadId,
+            toolCallId: id || undefined,
             userId: ctx.userId,
             role: auditRole(ctx.role),
             app: ctx.app,
@@ -229,6 +230,15 @@ export function createToolsNode(deps: AgentGraphDeps) {
         continue;
       }
 
+      const isWriteTool = def.risk !== 'READ';
+      if (isWriteTool && typeof deps.audit.findCompleted === 'function') {
+        const storedResult = await deps.audit.findCompleted(ctx.threadId, id);
+        if (storedResult) {
+          toolMessages.push(new ToolMessage({ tool_call_id: id, name: call.name, content: storedResult }));
+          continue;
+        }
+      }
+
       const startMs = Date.now();
       let content: string;
       let status: 'OK' | 'ERROR';
@@ -248,6 +258,7 @@ export function createToolsNode(deps: AgentGraphDeps) {
       try {
         await deps.audit.record({
           threadId: ctx.threadId,
+          toolCallId: id,
           userId: ctx.userId,
           role: auditRole(ctx.role),
           app: ctx.app,

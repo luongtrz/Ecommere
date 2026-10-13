@@ -10,6 +10,7 @@ describe('AuditService', () => {
   const mockPrismaService = {
     agentToolLog: {
       create: jest.fn(),
+      findFirst: jest.fn(),
     },
   };
 
@@ -287,6 +288,104 @@ describe('AuditService', () => {
 
       await expect(service.record(entry)).resolves.not.toThrow();
       expect(mockPrismaService.agentToolLog.create).toHaveBeenCalled();
+    });
+
+    it('attaches toolCallId to args when toolCallId is provided', async () => {
+      mockPrismaService.agentToolLog.create.mockResolvedValue({ id: 'log-4' });
+
+      const entry: ToolAuditEntry = {
+        threadId: 'thread-123',
+        userId: 'admin-1',
+        role: 'ADMIN',
+        app: 'ADMIN',
+        toolName: 'stock_add',
+        risk: 'WRITE',
+        status: 'OK',
+        toolCallId: 'call_add_1',
+        args: { variantId: 'v1', quantity: 5 },
+        resultSummary: 'Đã nhập thêm tồn kho',
+      };
+
+      await service.record(entry);
+
+      expect(mockPrismaService.agentToolLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          threadId: 'thread-123',
+          toolName: 'stock_add',
+          status: 'OK',
+          args: {
+            variantId: 'v1',
+            quantity: 5,
+            toolCallId: 'call_add_1',
+          },
+          resultSummary: 'Đã nhập thêm tồn kho',
+        }),
+      });
+    });
+  });
+
+  describe('findCompleted', () => {
+    it('returns the resultSummary when a completed OK row matches', async () => {
+      mockPrismaService.agentToolLog.findFirst.mockResolvedValue({
+        id: 'log-found-1',
+        threadId: 'thread-123',
+        status: 'OK',
+        args: {
+          variantId: 'v1',
+          toolCallId: 'call_match_1',
+        },
+        resultSummary: 'Đã thực hiện thao tác',
+      });
+
+      const result = await service.findCompleted('thread-123', 'call_match_1');
+
+      expect(result).toBe('Đã thực hiện thao tác');
+      expect(mockPrismaService.agentToolLog.findFirst).toHaveBeenCalledWith({
+        where: {
+          threadId: 'thread-123',
+          status: 'OK',
+          args: {
+            path: ['toolCallId'],
+            equals: 'call_match_1',
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+
+    it('does not replay an ERROR row and returns null', async () => {
+      mockPrismaService.agentToolLog.findFirst.mockResolvedValue(null);
+
+      const result = await service.findCompleted('thread-123', 'call_error_1');
+
+      expect(result).toBeNull();
+      expect(mockPrismaService.agentToolLog.findFirst).toHaveBeenCalledWith({
+        where: {
+          threadId: 'thread-123',
+          status: 'OK',
+          args: {
+            path: ['toolCallId'],
+            equals: 'call_error_1',
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+
+    it('returns null when no matching audit row exists', async () => {
+      mockPrismaService.agentToolLog.findFirst.mockResolvedValue(null);
+
+      const result = await service.findCompleted('thread-123', 'call_not_found');
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null and does not throw when Prisma throws an error', async () => {
+      mockPrismaService.agentToolLog.findFirst.mockRejectedValue(new Error('DB failure'));
+
+      const result = await service.findCompleted('thread-123', 'call_err');
+
+      expect(result).toBeNull();
     });
   });
 });

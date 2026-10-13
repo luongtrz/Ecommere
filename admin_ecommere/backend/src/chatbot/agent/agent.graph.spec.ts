@@ -13,6 +13,8 @@ import {
   type AgentModelLike,
   type AgentAuditSink,
 } from './agent.graph';
+import type { ToolAuditEntry } from './audit.service';
+import { createToolsNode } from './agent.nodes';
 
 class ScriptedFakeModel implements AgentModelLike {
   public invocations: BaseMessage[][] = [];
@@ -896,6 +898,172 @@ describe('LangGraph Agent Graph', () => {
       'start:item-2',
       'end:item-2',
     ]);
+  });
+
+  it('write tool idempotency: confirmed write tool sent twice with same thread and tool call id runs handler once and returns stored result on second call', async () => {
+    const memoryStore = new Map<string, string>();
+    const customAudit: AgentAuditSink = {
+      record: jest.fn().mockImplementation(async (entry: ToolAuditEntry) => {
+        if (entry.status === 'OK' && entry.toolCallId) {
+          memoryStore.set(`${entry.threadId}:${entry.toolCallId}`, entry.resultSummary ?? 'Đã thực hiện');
+        }
+      }),
+      findCompleted: jest.fn().mockImplementation(async (threadId: string, toolCallId: string) => {
+        return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
+      }),
+    };
+
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'call_write_idem_1', name: 'update_stock', args: { productId: 'p1', stock: 10 } }],
+      }),
+      new AIMessage({ content: 'Tồn kho đã được cập nhật lần 1.' }),
+    ]);
+
+    const graph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit: customAudit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-idem-1', ctx: adminCtx } };
+
+    // Turn 1: request requiring confirmation
+    await graph.invoke({ messages: [new HumanMessage('Cập nhật kho p1')] }, config);
+    expect(updateStockHandler).not.toHaveBeenCalled();
+
+    // First confirmation: handler runs once
+    const res1 = await graph.invoke(
+      new Command({ resume: { decisions: [{ callId: 'call_write_idem_1', approve: true }] } }),
+      config,
+    );
+    expect(updateStockHandler).toHaveBeenCalledTimes(1);
+    expect(updateStockHandler).toHaveBeenCalledWith({ productId: 'p1', stock: 10 }, adminCtx);
+
+    const toolMsg1 = res1.messages.find(
+      (m: any) => m.getType() === 'tool' && m.tool_call_id === 'call_write_idem_1',
+    );
+    expect(toolMsg1).toBeDefined();
+
+    // Second call: simulate retried confirmation for the same thread and tool call id
+    const res2 = await createToolsNode({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit: customAudit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    })({
+      messages: [
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: 'call_write_idem_1', name: 'update_stock', args: { productId: 'p1', stock: 10 } }],
+        }),
+      ],
+    } as any, config);
+
+    // Handler must NOT run a second time
+    expect(updateStockHandler).toHaveBeenCalledTimes(1);
+
+    // Stored summary must be returned as the tool result content
+    expect(res2.messages).toHaveLength(1);
+    expect((res2.messages[0] as ToolMessage).tool_call_id).toBe('call_write_idem_1');
+    expect((res2.messages[0] as ToolMessage).content).toBe((toolMsg1 as ToolMessage).content.slice(0, 300));
+  });
+
+  it('write tool idempotency: a write call with a new tool call id still runs normally', async () => {
+    const memoryStore = new Map<string, string>();
+    const customAudit: AgentAuditSink = {
+      record: jest.fn().mockImplementation(async (entry: ToolAuditEntry) => {
+        if (entry.status === 'OK' && entry.toolCallId) {
+          memoryStore.set(`${entry.threadId}:${entry.toolCallId}`, entry.resultSummary ?? 'Đã thực hiện');
+        }
+      }),
+      findCompleted: jest.fn().mockImplementation(async (threadId: string, toolCallId: string) => {
+        return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
+      }),
+    };
+
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'call_write_new_1', name: 'add_to_cart', args: { itemId: 'p1', quantity: 2 } }],
+      }),
+      new AIMessage({ content: 'Đã thêm p1.' }),
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'call_write_new_2', name: 'add_to_cart', args: { itemId: 'p2', quantity: 3 } }],
+      }),
+      new AIMessage({ content: 'Đã thêm p2.' }),
+    ]);
+
+    const graph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit: customAudit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-new-id', ctx: customerCtx } };
+
+    await graph.invoke({ messages: [new HumanMessage('Thêm p1')] }, config);
+    expect(addToCartHandler).toHaveBeenCalledTimes(1);
+    expect(addToCartHandler).toHaveBeenLastCalledWith({ itemId: 'p1', quantity: 2 }, customerCtx);
+
+    await graph.invoke({ messages: [new HumanMessage('Thêm p2')] }, config);
+    expect(addToCartHandler).toHaveBeenCalledTimes(2);
+    expect(addToCartHandler).toHaveBeenLastCalledWith({ itemId: 'p2', quantity: 3 }, customerCtx);
+  });
+
+  it('write tool idempotency: read tools behave as before and are not deduplicated across calls', async () => {
+    const memoryStore = new Map<string, string>();
+    const customAudit: AgentAuditSink = {
+      record: jest.fn().mockImplementation(async (entry: ToolAuditEntry) => {
+        if (entry.status === 'OK' && entry.toolCallId) {
+          memoryStore.set(`${entry.threadId}:${entry.toolCallId}`, entry.resultSummary ?? 'Đã thực hiện');
+        }
+      }),
+      findCompleted: jest.fn().mockImplementation(async (threadId: string, toolCallId: string) => {
+        return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
+      }),
+    };
+
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'call_read_repeat', name: 'read_catalog', args: { query: 'laptop' } }],
+      }),
+      new AIMessage({ content: 'Kết quả 1.' }),
+    ]);
+
+    const toolsNode = createToolsNode({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit: customAudit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const config = { configurable: { thread_id: 'th-read-repeat', ctx: customerCtx } };
+    const state = {
+      messages: [
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: 'call_read_repeat', name: 'read_catalog', args: { query: 'laptop' } }],
+        }),
+      ],
+    } as any;
+
+    await toolsNode(state, config);
+    expect(readCatalogHandler).toHaveBeenCalledTimes(1);
+
+    // Call again with same thread and tool call id: handler for READ tool still runs!
+    await toolsNode(state, config);
+    expect(readCatalogHandler).toHaveBeenCalledTimes(2);
+    expect(customAudit.findCompleted).not.toHaveBeenCalled();
   });
 });
 

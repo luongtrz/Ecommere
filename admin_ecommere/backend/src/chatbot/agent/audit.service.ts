@@ -16,6 +16,7 @@ export interface ToolAuditEntry {
   resultSummary?: string;
   error?: string;
   durationMs?: number;
+  toolCallId?: string;
 }
 
 const SENSITIVE_KEY_REGEX = /pass|token|secret|authorization|cookie|cvv|card/i;
@@ -67,9 +68,24 @@ export class AuditService {
   async record(entry: ToolAuditEntry): Promise<void> {
     try {
       const redacted = entry.args !== undefined ? redactArgs(entry.args) : undefined;
-      const args = (redacted === undefined || redacted === null)
-        ? Prisma.JsonNull
-        : (redacted as Prisma.InputJsonValue);
+      let args: Prisma.InputJsonValue | typeof Prisma.JsonNull;
+
+      if (entry.toolCallId) {
+        if (typeof redacted === 'object' && redacted !== null && !Array.isArray(redacted)) {
+          args = {
+            ...(redacted as Prisma.InputJsonObject),
+            toolCallId: entry.toolCallId,
+          };
+        } else {
+          args = {
+            toolCallId: entry.toolCallId,
+          };
+        }
+      } else {
+        args = (redacted === undefined || redacted === null)
+          ? Prisma.JsonNull
+          : (redacted as Prisma.InputJsonValue);
+      }
 
       await this.prisma.agentToolLog.create({
         data: {
@@ -92,6 +108,27 @@ export class AuditService {
       });
     } catch (error) {
       this.logger.warn(`Failed to record tool audit log: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  async findCompleted(threadId: string, toolCallId: string): Promise<string | null> {
+    try {
+      const log = await this.prisma.agentToolLog.findFirst({
+        where: {
+          threadId,
+          status: 'OK',
+          args: {
+            path: ['toolCallId'],
+            equals: toolCallId,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return log?.resultSummary ?? null;
+    } catch (error) {
+      this.logger.warn(`Failed to find completed tool audit log: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
     }
   }
 }
