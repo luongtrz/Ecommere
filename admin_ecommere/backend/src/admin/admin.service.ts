@@ -20,9 +20,16 @@ export class AdminService {
    */
   async getDashboardStats(): Promise<DashboardStatsDto> {
     const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    // Time zone Asia/Ho_Chi_Minh is UTC+7 with no DST.
+    // Shift by +7 hours to obtain current date/month in VN time.
+    const vnNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const vnYear = vnNow.getUTCFullYear();
+    const vnMonth = vnNow.getUTCMonth();
+
+    // Shift by -7 hours to obtain UTC range for DB query.
+    const firstDayOfMonth = new Date(Date.UTC(vnYear, vnMonth, 1, 0, 0, 0, 0) - 7 * 60 * 60 * 1000);
+    const firstDayOfLastMonth = new Date(Date.UTC(vnYear, vnMonth - 1, 1, 0, 0, 0, 0) - 7 * 60 * 60 * 1000);
+    const lastDayOfLastMonth = firstDayOfMonth;
 
     // Chạy tất cả queries song song
     const [
@@ -60,7 +67,7 @@ export class AdminService {
   private async getRevenueStats(
     firstDayOfMonth: Date,
     firstDayOfLastMonth: Date,
-    lastDayOfLastMonth: Date,
+    lastDayOfLastMonth: Date = firstDayOfMonth,
   ): Promise<RevenueStatsDto> {
     // Doanh thu tổng (chỉ tính đơn đã thanh toán, không bao gồm CANCELED/REFUNDED)
     const totalRevenueData = await this.prisma.order.aggregate({
@@ -97,7 +104,7 @@ export class AdminService {
         },
         createdAt: {
           gte: firstDayOfLastMonth,
-          lte: lastDayOfLastMonth,
+          lt: lastDayOfLastMonth,
         },
       },
       _sum: {
@@ -127,7 +134,7 @@ export class AdminService {
   private async getOrderStats(
     firstDayOfMonth: Date,
     firstDayOfLastMonth: Date,
-    lastDayOfLastMonth: Date,
+    lastDayOfLastMonth: Date = firstDayOfMonth,
   ): Promise<OrderStatsDto> {
     // Tổng đơn hàng
     const totalOrders = await this.prisma.order.count();
@@ -146,7 +153,7 @@ export class AdminService {
       where: {
         createdAt: {
           gte: firstDayOfLastMonth,
-          lte: lastDayOfLastMonth,
+          lt: lastDayOfLastMonth,
         },
       },
     });
@@ -235,7 +242,7 @@ export class AdminService {
   private async getCustomerStats(
     firstDayOfMonth: Date,
     firstDayOfLastMonth: Date,
-    lastDayOfLastMonth: Date,
+    lastDayOfLastMonth: Date = firstDayOfMonth,
   ): Promise<CustomerStatsDto> {
     // Tổng khách hàng (không tính admin)
     const totalCustomers = await this.prisma.user.count({
@@ -260,7 +267,7 @@ export class AdminService {
         role: Role.CUSTOMER,
         createdAt: {
           gte: firstDayOfLastMonth,
-          lte: lastDayOfLastMonth,
+          lt: lastDayOfLastMonth,
         },
       },
     });
