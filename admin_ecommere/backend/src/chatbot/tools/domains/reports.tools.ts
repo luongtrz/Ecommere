@@ -79,7 +79,18 @@ export function projectList<T>(
     };
   }
   if (Array.isArray((result as any).periods)) {
-    const sliced = (result as any).periods.slice(0, maxItems);
+    const rawPeriods = (result as any).periods;
+    if (rawPeriods.length > maxItems) {
+      const sliced = rawPeriods.slice(0, maxItems);
+      return {
+        ...result,
+        periods: itemProjector ? sliced.map(itemProjector) : sliced,
+        periodsTotal: rawPeriods.length,
+        periodsShown: sliced.length,
+        truncated: true,
+      };
+    }
+    const sliced = rawPeriods.slice(0, maxItems);
     return {
       ...result,
       periods: itemProjector ? sliced.map(itemProjector) : sliced,

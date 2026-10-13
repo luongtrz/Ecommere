@@ -319,11 +319,73 @@ describe('Reports Tools', () => {
         totals: { orders: 465, revenue: 465000 },
       };
 
-      const projected = getSalesReportTool.project!(report) as typeof report;
+      const projected = getSalesReportTool.project!(report) as typeof report & {
+        periodsTotal?: number;
+        periodsShown?: number;
+        truncated?: boolean;
+      };
       expect(projected.periods).toHaveLength(20);
       expect(projected.periods[0].period).toBe('2026-01-01');
       expect(projected.periods[19].period).toBe('2026-01-20');
       expect(projected.totals.orders).toBe(465);
+      expect(projected.totals.revenue).toBe(465000);
+      expect(projected.periodsTotal).toBe(31);
+      expect(projected.periodsShown).toBe(20);
+      expect(projected.truncated).toBe(true);
+    });
+
+    it('project() does not truncate when periods count does not exceed limit', () => {
+      const report = {
+        from: '2026-01-01',
+        to: '2026-01-05',
+        periods: Array.from({ length: 5 }, (_, i) => ({
+          period: `2026-01-${String(i + 1).padStart(2, '0')}`,
+          orders: i,
+          revenue: i * 1000,
+        })),
+        totals: { orders: 10, revenue: 10000 },
+      };
+
+      const projected = getSalesReportTool.project!(report) as typeof report & {
+        periodsTotal?: number;
+        periodsShown?: number;
+        truncated?: boolean;
+      };
+      expect(projected.periods).toHaveLength(5);
+      expect(projected.periods[0].period).toBe('2026-01-01');
+      expect(projected.periods[4].period).toBe('2026-01-05');
+      expect(projected.totals.orders).toBe(10);
+      expect(projected.totals.revenue).toBe(10000);
+      expect(projected.periodsTotal).toBeUndefined();
+      expect(projected.periodsShown).toBeUndefined();
+      expect(projected.truncated).toBeUndefined();
+    });
+
+    it('project() does not truncate when periods count is exactly 20', () => {
+      const report = {
+        from: '2026-01-01',
+        to: '2026-01-20',
+        periods: Array.from({ length: 20 }, (_, i) => ({
+          period: `2026-01-${String(i + 1).padStart(2, '0')}`,
+          orders: i,
+          revenue: i * 1000,
+        })),
+        totals: { orders: 190, revenue: 190000 },
+      };
+
+      const projected = getSalesReportTool.project!(report) as typeof report & {
+        periodsTotal?: number;
+        periodsShown?: number;
+        truncated?: boolean;
+      };
+      expect(projected.periods).toHaveLength(20);
+      expect(projected.periods[0].period).toBe('2026-01-01');
+      expect(projected.periods[19].period).toBe('2026-01-20');
+      expect(projected.totals.orders).toBe(190);
+      expect(projected.totals.revenue).toBe(190000);
+      expect(projected.periodsTotal).toBeUndefined();
+      expect(projected.periodsShown).toBeUndefined();
+      expect(projected.truncated).toBeUndefined();
     });
   });
 
