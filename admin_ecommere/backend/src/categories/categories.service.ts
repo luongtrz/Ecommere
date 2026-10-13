@@ -335,5 +335,13 @@ export class CategoriesService {
 
       currentId = parent.parentId;
     }
+
+    const productCount = await this.prisma.product.count({
+      where: { categoryId: parentId },
+    });
+
+    if (productCount > 0) {
+      throw new BadRequestException('Danh mục cha không được chứa sản phẩm');
+    }
   }
 }
