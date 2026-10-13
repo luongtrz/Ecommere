@@ -54,7 +54,13 @@ export const authApi = {
 
       return parsed;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
       throw error;
     }
   },
@@ -81,7 +87,13 @@ export const authApi = {
 
       return parsed;
     } catch (error) {
-      console.error('Register error:', error);
+      console.error('Register error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
       throw error;
     }
   },
@@ -97,7 +109,13 @@ export const authApi = {
       // Call backend to revoke refresh token and clear cookies
       await apiClient.post('/auth/logout');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
       // Continue with local cleanup even if backend fails
     } finally {
       // Clear memory token
