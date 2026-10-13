@@ -1,5 +1,6 @@
 import apiClient, { authToken } from '@/lib/api';
 import { useCartStore } from '@/features/cart/store/cartStore';
+import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { z } from 'zod';
 
 function clearCartIfAccountChanged(nextUserId: string) {
@@ -121,6 +122,7 @@ export const authApi = {
       // Clear memory token
       authToken.remove();
       useCartStore.getState().clearCart();
+      useWishlist.getState().clearWishlist();
       localStorage.removeItem('user');
       // Cookies will be cleared by backend
     }
