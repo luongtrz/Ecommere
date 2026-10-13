@@ -229,33 +229,22 @@ export function AdminChatbotPage() {
         return;
       }
       const now = new Date().toISOString();
-      for (let i = 0; i < transcript.length; i++) {
-        const msg = transcript[i];
-        const isLast = i === transcript.length - 1;
+      for (const msg of transcript) {
         const hasToolCalls =
           Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
 
         let confirm: ChatMessage['confirm'] | undefined = undefined;
 
-        if (isLast && msg.role === 'assistant' && hasToolCalls) {
-          const hasToolResultAfter = transcript
-            .slice(i + 1)
-            .some(
-              (m) =>
-                (m.role as string) === 'tool' ||
-                (m as any).type === 'tool'
-            );
-          if (!hasToolResultAfter) {
-            confirm = {
-              calls: msg.tool_calls!.map((c) => ({
-                id: c.id ?? '',
-                name: c.name,
-                summary: c.summary ?? c.name,
-                risk: c.risk ?? 'DESTRUCTIVE',
-              })),
-              decided: false,
-            };
-          }
+        if (msg.role === 'assistant' && msg.pending === true && hasToolCalls) {
+          confirm = {
+            calls: msg.tool_calls!.map((c) => ({
+              id: c.id ?? '',
+              name: c.name,
+              summary: c.summary ?? c.name,
+              risk: c.risk ?? 'DESTRUCTIVE',
+            })),
+            decided: false,
+          };
         }
 
         const hasContent = Boolean(msg.content && msg.content.trim().length > 0);

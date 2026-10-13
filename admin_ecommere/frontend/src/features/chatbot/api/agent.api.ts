@@ -65,6 +65,7 @@ export interface AgentTranscriptMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  pending?: boolean;
   tool_calls?: AgentTranscriptToolCall[];
 }
 
