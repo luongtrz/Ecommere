@@ -1,4 +1,4 @@
-import { apiClient, authToken, getCookie, API_BASE_URL } from '@/lib/api';
+import { refreshAccessToken, authToken, getCookie, API_BASE_URL } from '@/lib/api';
 
 export interface SseMessage {
   event: string;
@@ -203,13 +203,10 @@ export async function streamAgentRequest(
 
   const refreshAuthToken = async (): Promise<void> => {
     try {
-      const { data } = await apiClient.post('/auth/refresh');
-      const actualData = data.data || data;
-      const newAccessToken = actualData?.accessToken;
+      const newAccessToken = await refreshAccessToken();
       if (!newAccessToken || typeof newAccessToken !== 'string') {
         throw new Error('Refresh response missing access token');
       }
-      authToken.set(newAccessToken);
     } catch (refreshErr: any) {
       authToken.remove();
       let message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
