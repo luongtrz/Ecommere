@@ -18,6 +18,7 @@ function projectProduct(product: any): any {
 
   const variants = Array.isArray(product.variants)
     ? product.variants.slice(0, 3).map((v: any) => ({
+        id: v?.id,
         scent: v?.scent,
         volumeMl: v?.volumeMl,
         price: v?.price,

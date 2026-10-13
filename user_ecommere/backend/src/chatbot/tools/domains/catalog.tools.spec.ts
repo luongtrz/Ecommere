@@ -271,6 +271,7 @@ describe('Catalog Tools', () => {
         basePrice: 150000,
         variants: [
           {
+            id: 'v-0-1',
             scent: 'Hoa hồng',
             volumeMl: 50,
             price: 150000,
@@ -278,6 +279,7 @@ describe('Catalog Tools', () => {
             stock: 10,
           },
           {
+            id: 'v-0-2',
             scent: 'Vani',
             volumeMl: 100,
             price: 250000,
@@ -285,6 +287,7 @@ describe('Catalog Tools', () => {
             stock: 5,
           },
           {
+            id: 'v-0-3',
             scent: 'Gỗ đàn hương',
             volumeMl: 30,
             price: 100000,
@@ -295,6 +298,7 @@ describe('Catalog Tools', () => {
       });
 
       expect(projected.data[0].variants).toHaveLength(3);
+      expect(projected.data[0].variants[0].id).toBe('v-0-1');
       expect(projected.data[0].description).toBeUndefined();
       expect(projected.data[0].categoryId).toBeUndefined();
     });
@@ -418,6 +422,7 @@ describe('Catalog Tools', () => {
         basePrice: 650000,
         variants: [
           {
+            id: 'v-1',
             scent: 'Trầm hương',
             volumeMl: 50,
             price: 650000,
@@ -425,6 +430,7 @@ describe('Catalog Tools', () => {
             stock: 8,
           },
           {
+            id: 'v-2',
             scent: 'Hổ phách',
             volumeMl: 100,
             price: 950000,
@@ -432,6 +438,7 @@ describe('Catalog Tools', () => {
             stock: 4,
           },
           {
+            id: 'v-3',
             scent: 'Xạ hương',
             volumeMl: 30,
             price: 450000,
@@ -442,6 +449,7 @@ describe('Catalog Tools', () => {
       });
 
       expect((projected as any).variants).toHaveLength(3);
+      expect((projected as any).variants[0].id).toBe('v-1');
       expect((projected as any).description).toBeUndefined();
       expect((projected as any).images).toBeUndefined();
       expect((projected as any).reviews).toBeUndefined();
