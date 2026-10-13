@@ -37,7 +37,7 @@ ecommere-admin/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 22+
 - PostgreSQL 14+
 - npm 9+
 

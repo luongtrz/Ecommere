@@ -14,6 +14,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { AdminModule } from './admin/admin.module';
 import { ReferralsModule } from './referrals/referrals.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ReferralsModule } from './referrals/referrals.module';
     UploadsModule,
     AdminModule,
     ReferralsModule,
+    ChatbotModule,
   ],
 })
 export class AppModule { }

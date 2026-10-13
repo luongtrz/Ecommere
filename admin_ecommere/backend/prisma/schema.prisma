@@ -338,3 +338,43 @@ model Referral {
   @@index([referrerId])
   @@map("referrals")
 }
+
+enum AgentApp {
+  USER
+  ADMIN
+}
+
+model AgentThread {
+  id             String   @id @default(cuid())
+  userId         String?
+  sessionKeyHash String?
+  app            AgentApp
+  title          String?
+  totalTokens    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId, app, updatedAt])
+  @@map("agent_threads")
+}
+
+model AgentToolLog {
+  id            String   @id @default(cuid())
+  threadId      String
+  userId        String?
+  role          Role?
+  app           AgentApp
+  toolName      String
+  risk          String
+  status        String
+  args          Json?
+  resultSummary String?
+  error         String?
+  durationMs    Int?
+  createdAt     DateTime @default(now())
+
+  @@index([threadId])
+  @@index([userId, createdAt])
+  @@index([toolName, createdAt])
+  @@map("agent_tool_logs")
+}

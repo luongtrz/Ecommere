@@ -4,6 +4,7 @@ import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dtos/create-review.dto';
 import { UpdateReviewDto } from './dtos/update-review.dto';
 import { ReviewFilterDto } from './dtos/review-filter.dto';
+import { AdminReviewFilterDto } from './dtos/admin-review-filter.dto';
 import { ReviewEntity } from './entities/review.entity';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 import { Public } from '@/common/decorators/public.decorator';
@@ -66,6 +67,15 @@ export class ReviewsController {
   @ApiResponse({ status: 200 })
   async deleteReview(@CurrentUser('id') userId: string, @Param('reviewId') reviewId: string) {
     return this.reviewsService.deleteReview(userId, reviewId);
+  }
+
+  @Get('admin')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Danh sách đánh giá (admin)' })
+  @ApiResponse({ status: 200 })
+  async getAllReviewsForAdmin(@Query() filter: AdminReviewFilterDto) {
+    return this.reviewsService.getAllReviewsForAdmin(filter);
   }
 
   @Delete('admin/:reviewId')

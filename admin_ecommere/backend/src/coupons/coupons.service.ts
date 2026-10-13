@@ -102,7 +102,7 @@ export class CouponsService {
       throw new NotFoundException('Coupon not found');
     }
 
-    const { type, value, validFrom, validUntil } = updateCouponDto;
+    const { type, value, validFrom, validUntil, active } = updateCouponDto;
     const effectiveType = type ?? coupon.type;
     const effectiveValue = value ?? coupon.value;
 
@@ -118,10 +118,20 @@ export class CouponsService {
       throw new BadRequestException('validFrom must be before validUntil');
     }
 
+    const updateData: Prisma.CouponUpdateInput = {
+      ...updateCouponDto,
+    };
+
+    if (active !== undefined) {
+      updateData.active = active;
+    } else {
+      delete updateData.active;
+    }
+
     try {
       return await this.prisma.coupon.update({
         where: { code: code.toUpperCase() },
-        data: updateCouponDto,
+        data: updateData,
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

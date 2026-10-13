@@ -16,6 +16,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  // Caddy is the only proxy in front of this backend (see DEPLOYMENT.md), so trust
+  // exactly one hop. Without this, req.ip is Caddy's address for every client and
+  // the per-IP rate limits are shared by all of them.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   // Global prefix
   app.setGlobalPrefix('api');
 

@@ -1,6 +1,6 @@
 # Deployment
 
-The production stack is the root `compose.yaml`: Caddy, the user frontend/backend, the admin frontend/backend, and Redis. PostgreSQL is external and must be provisioned separately.
+The production stack is the root `compose.yaml`: Caddy, the user frontend/backend, and the admin frontend/backend. PostgreSQL is external and must be provisioned separately.
 
 ## Prerequisites
 
@@ -8,6 +8,7 @@ The production stack is the root `compose.yaml`: Caddy, the user frontend/backen
 - A PostgreSQL database reachable by both backends.
 - Cloudinary credentials for image uploads.
 - DNS for the hostnames in `deploy/caddy/Caddyfile`.
+- An OpenAI API key for the chatbot (`OPENAI_API_KEY` in the backend environment). Without it the chat endpoints answer 503.
 
 ## Deploy
 
@@ -38,8 +39,14 @@ the production schema. It does not provision PostgreSQL, generate credentials,
 seed data, or print environment files.
 
 This repository currently does not commit Prisma migration directories, so the
-setup step uses `prisma db push`. Review schema changes before running it against
-production and do not use the destructive seed there.
+setup step uses `prisma db push` (executed in `setup-azure.sh` via
+`docker compose run --rm --no-deps backend npx prisma db push --skip-generate`).
+Review schema changes before running it against production and do not use the
+destructive seed there. The agent tables (`AgentThread` and `AgentToolLog`) are
+created by this same `prisma db push` step. On application startup, the backend
+initializes the LangGraph Postgres checkpointer, which automatically calls its
+`setup()` method to create the checkpoint tables in the PostgreSQL schema named by
+`AGENT_CHECKPOINT_SCHEMA` (defaults to `agent`).
 
 ## Local seed data
 
@@ -63,3 +70,7 @@ docker compose restart backend admin-backend
 ```
 
 Public access is provided through the configured Caddy hostnames. Keep the backend ports private to the Docker network and terminate TLS at Caddy.
+
+### Chat streaming
+
+The chat uses Server-Sent Events (SSE), so Caddy must not buffer them. After a deploy, send one chat message and confirm the reply arrives in pieces. If it arrives in one block, add `flush_interval -1` to the `reverse_proxy` of the `/api/chatbot/*` and `/api/admin/chatbot/*` routes in `deploy/caddy/Caddyfile`.

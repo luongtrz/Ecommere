@@ -7,11 +7,6 @@ enum Environment {
   Test = 'test',
 }
 
-enum ChatbotProvider {
-  Gemini = 'gemini',
-  OpenAiCompatible = 'openai-compatible',
-}
-
 class EnvironmentVariables {
   @IsEnum(Environment)
   NODE_ENV: Environment = Environment.Development;
@@ -52,45 +47,6 @@ class EnvironmentVariables {
   @IsNumber()
   MAX_PAGE_SIZE: number = 100;
 
-  @IsOptional()
-  @IsString()
-  REDIS_URL?: string;
-
-  @IsNumber()
-  CHATBOT_REDIS_TTL_SECONDS: number = 604800;
-
-  @IsOptional()
-  @IsEnum(ChatbotProvider)
-  CHATBOT_PROVIDER?: ChatbotProvider;
-
-  @IsOptional()
-  @IsString()
-  CHATBOT_PROVIDER_URL?: string;
-
-  @IsOptional()
-  @IsString()
-  CHATBOT_API_KEY?: string;
-
-  @IsOptional()
-  @IsString()
-  CHATBOT_MODEL?: string;
-
-  @IsOptional()
-  @IsString()
-  CHATBOT_SYSTEM_PROMPT?: string;
-
-  @IsNumber()
-  CHATBOT_TIMEOUT_MS: number = 30000;
-
-  @IsNumber()
-  CHATBOT_TEMPERATURE: number = 0.4;
-
-  @IsNumber()
-  CHATBOT_MAX_TOKENS: number = 500;
-
-  @IsNumber()
-  CHATBOT_HISTORY_LIMIT: number = 10;
-
   @IsNumber()
   CHATBOT_RAG_PRODUCT_LIMIT: number = 4;
 
@@ -99,6 +55,46 @@ class EnvironmentVariables {
 
   @IsNumber()
   CHATBOT_RAG_CANDIDATE_LIMIT: number = 12;
+
+  @IsOptional()
+  @IsString()
+  OPENAI_API_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  OPENAI_BASE_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  AGENT_MODEL?: string;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_TEMPERATURE?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_MAX_OUTPUT_TOKENS?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_TIMEOUT_MS?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_MAX_STEPS?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_MAX_TOOL_CALLS_PER_TURN?: number;
+
+  @IsOptional()
+  @IsNumber()
+  AGENT_HISTORY_MAX_MESSAGES?: number;
+
+  @IsOptional()
+  @IsString()
+  AGENT_CHECKPOINT_SCHEMA?: string;
 }
 
 export function validate(config: Record<string, unknown>) {

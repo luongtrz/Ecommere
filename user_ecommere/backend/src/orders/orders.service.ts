@@ -6,6 +6,7 @@ import { Prisma, CouponType, OrderStatus, PaymentStatus, StockMovementType } fro
 import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
+import { calculateShippingFee } from '../shipping/shipping.rules';
 
 @Injectable()
 export class OrdersService {
@@ -159,11 +160,15 @@ export class OrdersService {
     }
 
     // Calculate order totals
-    let subtotal = 0;
+    const { subtotal, shippingFee: calculatedShippingFee } = this.calculateSubtotalAndShipping(
+      itemsToUse,
+      address,
+      shippingMethod,
+    );
+
     const orderItems = itemsToUse.map((item) => {
-      const price = item.variant.salePrice ?? item.variant.price;
+      const price = this.getItemPrice(item.variant);
       const itemTotal = price * item.quantity;
-      subtotal += itemTotal;
 
       return {
         variantId: item.variantId,
@@ -236,10 +241,6 @@ export class OrdersService {
 
     // Shipping is calculated on the server. Client-provided totals and fees
     // are display values only and must not affect the amount charged.
-    const calculatedShippingFee = this.calculateShippingFee(
-      address,
-      shippingMethod ?? ShippingMethod.STANDARD,
-    );
     const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
 
     const orderTotal = subtotal - discount + shippingFee;
@@ -399,6 +400,103 @@ export class OrdersService {
     }
 
     return order;
+  }
+
+  async previewCheckout(
+    userId: string,
+    input: {
+      addressId?: string;
+      items?: Array<{ variantId: string; quantity: number }>;
+      shippingMethod?: ShippingMethod | string;
+    } = {},
+  ) {
+    const { addressId, items, shippingMethod } = input;
+
+    // Check delivery address (only when it belongs to userId)
+    let address: any = null;
+    if (addressId) {
+      const foundAddress = await this.prisma.address.findUnique({
+        where: { id: addressId },
+      });
+      if (foundAddress && foundAddress.userId === userId) {
+        address = foundAddress;
+      }
+    }
+
+    // Determine items to use
+    let itemsToUse: Array<{ variantId: string; quantity: number }> = [];
+    if (items && items.length > 0) {
+      itemsToUse = items;
+    } else {
+      const cart = await this.prisma.cart.findUnique({
+        where: { userId },
+        include: {
+          items: true,
+        },
+      });
+      if (cart && cart.items.length > 0) {
+        itemsToUse = cart.items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        }));
+      }
+    }
+
+    const itemCount = itemsToUse.length;
+    let everyItemPriced = itemsToUse.length > 0;
+    const itemsToPrice: Array<{
+      variant: { price: number; salePrice?: number | null };
+      quantity: number;
+    }> = [];
+
+    for (const item of itemsToUse) {
+      if (!item.variantId || !Number.isInteger(item.quantity) || item.quantity < 1) {
+        everyItemPriced = false;
+        continue;
+      }
+
+      const variant = await this.prisma.productVariant.findUnique({
+        where: { id: item.variantId },
+        include: { product: true },
+      });
+
+      if (!variant || !variant.product || !variant.product.active) {
+        everyItemPriced = false;
+        continue;
+      }
+
+      itemsToPrice.push({
+        variant,
+        quantity: item.quantity,
+      });
+    }
+
+    const selectedShippingMethod =
+      shippingMethod === 'EXPRESS' || shippingMethod === ShippingMethod.EXPRESS
+        ? ShippingMethod.EXPRESS
+        : ShippingMethod.STANDARD;
+
+    const { subtotal, shippingFee } = this.calculateSubtotalAndShipping(
+      itemsToPrice,
+      address,
+      selectedShippingMethod,
+    );
+
+    const deliveryAddress = address
+      ? [address.line1, address.ward, address.district, address.province]
+          .filter((p: any) => typeof p === 'string' && p.trim().length > 0)
+          .join(', ')
+      : null;
+
+    return {
+      address,
+      deliveryAddress,
+      itemCount,
+      subtotal,
+      shippingFee,
+      everyItemPriced,
+      canPriceAll: everyItemPriced,
+    };
   }
 
   async getMyOrders(userId: string, filterDto: OrderFilterDto) {
@@ -721,6 +819,28 @@ export class OrdersService {
     });
   }
 
+  quoteShippingFee(
+    province: string,
+    shippingMethod?: ShippingMethod,
+  ): { province: string; shippingMethod: ShippingMethod; fee: number } {
+    const trimmedProvince = typeof province === 'string' ? province.trim() : '';
+    if (!trimmedProvince) {
+      throw new BadRequestException('Vui lòng nhập tỉnh/thành phố');
+    }
+
+    const selectedShippingMethod = shippingMethod ?? ShippingMethod.STANDARD;
+    const fee = this.calculateShippingFee(
+      { province: trimmedProvince },
+      selectedShippingMethod,
+    );
+
+    return {
+      province: trimmedProvince,
+      shippingMethod: selectedShippingMethod,
+      fee,
+    };
+  }
+
   private async findOrderByCheckoutKey(userId: string, checkoutKey: string) {
     const order = await this.prisma.order.findUnique({
       where: { checkoutKey },
@@ -801,23 +921,34 @@ export class OrdersService {
     return `ORD${year}${month}${day}${sequence}${random}`;
   }
 
-  private calculateShippingFee(address: any, shippingMethod: ShippingMethod): number {
-    // Mock shipping calculation - flat rate based on province
-    // In real implementation, this would integrate with shipping provider API
-    const provinceLowerCase = address.province.toLowerCase();
+  private getItemPrice(variant: { price: number; salePrice?: number | null }): number {
+    return variant.salePrice ?? variant.price;
+  }
 
-    // Free shipping for Bangkok and surrounding areas
-    if (
-      provinceLowerCase.includes('bangkok') ||
-      provinceLowerCase.includes('กรุงเทพ') ||
-      provinceLowerCase.includes('nonthaburi') ||
-      provinceLowerCase.includes('นนทบุรี')
-    ) {
-      return 0;
+  private calculateSubtotalAndShipping(
+    items: Array<{ variant: { price: number; salePrice?: number | null }; quantity: number }>,
+    address?: any,
+    shippingMethod?: ShippingMethod,
+  ): { subtotal: number; shippingFee: number } {
+    let subtotal = 0;
+    for (const item of items) {
+      const price = this.getItemPrice(item.variant);
+      subtotal += price * item.quantity;
     }
+    const shippingFee = address
+      ? this.calculateShippingFee(address, shippingMethod ?? ShippingMethod.STANDARD)
+      : 0;
+    return { subtotal, shippingFee };
+  }
 
-    // Match the shipping options exposed by both frontends.
-    return shippingMethod === ShippingMethod.EXPRESS ? 50000 : 30000;
+  private calculateShippingFee(
+    address: any,
+    shippingMethod?: ShippingMethod,
+  ): number {
+    return calculateShippingFee({
+      province: address?.province,
+      method: shippingMethod,
+    });
   }
 
   private validateStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus) {

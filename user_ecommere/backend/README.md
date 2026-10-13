@@ -15,7 +15,7 @@ A complete NestJS + Prisma + PostgreSQL backend for a Thai spray products e-comm
 - Profile management (name, phone, email)
 - Address management (multiple addresses, default address)
 - User-specific data isolation
-- Chatbot proxy endpoint for product and order consultation via external AI provider
+- AI agent for product and order consultation and account actions via LangGraph and OpenAI SDK
 
 ### 📦 Product Management
 - Complete CRUD for products & variants
@@ -147,7 +147,7 @@ backend/
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 22+ 
 - PostgreSQL 14+
 - npm or yarn
 
@@ -344,33 +344,44 @@ UPLOAD_DIR="./uploads"
 RATE_LIMIT_TTL=60
 RATE_LIMIT_MAX=100
 
-# Redis
-REDIS_URL="redis://redis:6379"
-
 # Chatbot provider
-CHATBOT_PROVIDER="gemini"
-CHATBOT_PROVIDER_URL="https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent"
-CHATBOT_API_KEY="replace-with-gemini-api-key"
-CHATBOT_MODEL="gemma-4-31b-it"
-CHATBOT_SYSTEM_PROMPT="Bạn là trợ lý bán hàng cho Thai Spray. Luôn trả lời bằng tiếng Việt có dấu, ngắn gọn, tự nhiên, tập trung tư vấn sản phẩm, đơn hàng và cách sử dụng. Chỉ trả lời nội dung cuối cùng cho khách hàng. Không lặp lại yêu cầu, không giải thích hệ thống, không nêu giả định, không liệt kê suy luận nội bộ, không dùng tiếng Anh nếu không được yêu cầu."
-CHATBOT_TIMEOUT_MS=30000
-CHATBOT_TEMPERATURE=0.4
-CHATBOT_MAX_TOKENS=500
-CHATBOT_HISTORY_LIMIT=10
-CHATBOT_REDIS_TTL_SECONDS=604800
 CHATBOT_RAG_PRODUCT_LIMIT=4
 CHATBOT_RAG_VARIANT_LIMIT=3
 CHATBOT_RAG_CANDIDATE_LIMIT=12
+
+# AI agent (OpenAI)
+OPENAI_API_KEY="replace-with-openai-api-key"
+OPENAI_BASE_URL=""
+AGENT_MODEL="gpt-4.1-mini"
+AGENT_TEMPERATURE=0.2
+AGENT_MAX_OUTPUT_TOKENS=800
+AGENT_TIMEOUT_MS=90000
+AGENT_MAX_STEPS=24
+AGENT_MAX_TOOL_CALLS_PER_TURN=6
+AGENT_HISTORY_MAX_MESSAGES=30
+AGENT_CHECKPOINT_SCHEMA="agent"
 ```
 
-Nếu dùng `CHATBOT_PROVIDER="gemini"`, backend sẽ gọi trực tiếp Gemini API theo chuẩn `generateContent`. Với `gemma-4-31b-it`, service gửi `thinkingLevel: "minimal"` và tự bỏ `thought` parts để frontend chỉ nhận câu trả lời cuối cùng.
+Hệ thống chatbot sử dụng AI agent xây dựng trên LangGraph và OpenAI SDK. Toàn bộ lịch sử cuộc trò chuyện được lưu trữ theo từng thread trong cơ sở dữ liệu PostgreSQL (thông qua bảng `agent_threads` và schema checkpoint `agent`).
 
-Chatbot hiện dùng flow RAG theo DB sản phẩm:
-- frontend gửi `sessionId + prompt`
-- backend lấy history gần nhất từ Redis, không lưu lịch sử vào DB
-- backend retrieve và rank sản phẩm/biến thể từ PostgreSQL qua Prisma
-- chỉ inject context catalog ngắn gọn của top kết quả vào prompt trước khi gọi model
-- nếu không có dữ liệu phù hợp trong DB, chatbot sẽ nói rõ chưa tìm thấy thay vì bịa thông tin
+Các công cụ (tools) của agent phụ thuộc vào vai trò (role) của người gọi:
+- Khách vãng lai (`GUEST`): chỉ có thể sử dụng các công cụ công khai (public tools như tìm kiếm sản phẩm và tra cứu danh mục). Khách vãng lai có thể hỏi tự do về sản phẩm và website, và trợ lý luôn hướng dẫn khách đăng nhập.
+- Khách hàng đã đăng nhập (`CUSTOMER`): có thể sử dụng thêm các công cụ tài khoản, đơn hàng và đánh giá (như xem và cập nhật hồ sơ, quản lý địa chỉ, tra cứu và hủy đơn hàng, đặt hàng, kiểm tra mã giảm giá, viết và sửa đánh giá).
+
+Chính sách xác nhận thao tác (confirm policy):
+- Các thao tác chỉ đọc (`READ`) không yêu cầu xác nhận.
+- Với `GUEST`, mọi thao tác khác `READ` đều yêu cầu xác nhận.
+- Với `CUSTOMER` trên ứng dụng người dùng (`USER`), khách hàng xác nhận các thay đổi đối với dữ liệu cá nhân (hồ sơ, địa chỉ, đánh giá), thao tác hủy đơn và thanh toán (checkout); các thay đổi giỏ hàng không cần xác nhận. Các thao tác có mức độ rủi ro nhạy cảm (`SENSITIVE`) hoặc có tính phá hủy (`DESTRUCTIVE`) sẽ được giữ lại (held) để chờ người dùng xác nhận phê duyệt trước khi thực thi.
+
+Khi biến môi trường `OPENAI_API_KEY` chưa được cấu hình, các endpoint chatbot sẽ phản hồi mã lỗi HTTP 503 (`Trợ lý chưa được cấu hình`).
+
+Các endpoint của chatbot:
+- `POST /api/chatbot/stream`: Stream phản hồi của trợ lý theo Server-Sent Events (SSE).
+- `POST /api/chatbot/threads/:threadId/resume`: Tiếp tục luồng xử lý sau khi nhận quyết định phê duyệt thao tác (tool decisions).
+- `GET /api/chatbot/threads`: Lấy danh sách các thread trò chuyện của người dùng.
+- `GET /api/chatbot/threads/:threadId`: Lấy thông tin chi tiết của một thread.
+- `DELETE /api/chatbot/threads/:threadId`: Xóa thread trò chuyện.
+- `POST /api/chatbot/messages`: Endpoint tương thích ngược (legacy compatibility endpoint), xử lý tin nhắn đồng bộ và trả về kết quả JSON.
 
 ## 🎯 Key Features Explained
 
@@ -494,6 +505,14 @@ npm run start:prod
 - `GET /orders/my` - My orders
 - `POST /reviews` - Create review
 - `POST /payments/create` - Create payment
+
+### Chatbot Endpoints
+- `POST /chatbot/stream` - Stream assistant responses (SSE)
+- `POST /chatbot/threads/:threadId/resume` - Resume assistant execution with tool decisions (SSE)
+- `GET /chatbot/threads` - List user chat threads
+- `GET /chatbot/threads/:threadId` - Get thread details
+- `DELETE /chatbot/threads/:threadId` - Delete chat thread
+- `POST /chatbot/messages` - Send message to assistant (legacy compatibility endpoint)
 
 ### Admin Endpoints
 - `POST /categories` - Create category

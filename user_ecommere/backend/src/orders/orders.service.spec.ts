@@ -3,6 +3,8 @@ import { OrdersService } from './orders.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { OrderStatus, PaymentStatus } from '@prisma/client';
+import { ShippingMethod } from './dtos/checkout.dto';
+import { ShippingService } from '../shipping/shipping.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -403,6 +405,372 @@ describe('OrdersService', () => {
 
       await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(BadRequestException);
       await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Order cannot be cancelled at this stage');
+    });
+  });
+
+  describe('quoteShippingFee', () => {
+    it('should throw BadRequestException when province is empty', () => {
+      expect(() => service.quoteShippingFee('')).toThrow(BadRequestException);
+      expect(() => service.quoteShippingFee('')).toThrow('Vui lòng nhập tỉnh/thành phố');
+      expect(() => service.quoteShippingFee('   ')).toThrow(BadRequestException);
+      expect(() => service.quoteShippingFee('   ')).toThrow('Vui lòng nhập tỉnh/thành phố');
+    });
+
+    it('should return 0 for a Bangkok quote', () => {
+      const result = service.quoteShippingFee('Bangkok');
+
+      expect(result).toEqual({
+        province: 'Bangkok',
+        shippingMethod: ShippingMethod.STANDARD,
+        fee: 0,
+      });
+
+      const expressResult = service.quoteShippingFee('Bangkok', ShippingMethod.EXPRESS);
+      expect(expressResult).toEqual({
+        province: 'Bangkok',
+        shippingMethod: ShippingMethod.EXPRESS,
+        fee: 0,
+      });
+    });
+
+    it('should return the same fee as calculateShippingFee for a non-free province with STANDARD and EXPRESS', () => {
+      const province = 'Chiang Mai';
+      const address = { province };
+
+      const standardExpectedFee = (service as any).calculateShippingFee(
+        address,
+        ShippingMethod.STANDARD,
+      );
+      const standardResult = service.quoteShippingFee(province, ShippingMethod.STANDARD);
+
+      expect(standardResult).toEqual({
+        province,
+        shippingMethod: ShippingMethod.STANDARD,
+        fee: standardExpectedFee,
+      });
+
+      const expressExpectedFee = (service as any).calculateShippingFee(
+        address,
+        ShippingMethod.EXPRESS,
+      );
+      const expressResult = service.quoteShippingFee(province, ShippingMethod.EXPRESS);
+
+      expect(expressResult).toEqual({
+        province,
+        shippingMethod: ShippingMethod.EXPRESS,
+        fee: expressExpectedFee,
+      });
+    });
+
+    it('should default shippingMethod to STANDARD when not provided', () => {
+      const province = 'Chiang Mai';
+      const address = { province };
+      const expectedFee = (service as any).calculateShippingFee(
+        address,
+        ShippingMethod.STANDARD,
+      );
+
+      const result = service.quoteShippingFee(province);
+
+      expect(result).toEqual({
+        province,
+        shippingMethod: ShippingMethod.STANDARD,
+        fee: expectedFee,
+      });
+    });
+
+    it('should trim province before calculating fee', () => {
+      const result = service.quoteShippingFee('  Bangkok  ');
+
+      expect(result).toEqual({
+        province: 'Bangkok',
+        shippingMethod: ShippingMethod.STANDARD,
+        fee: 0,
+      });
+    });
+
+    describe('shipping fee rules spec table', () => {
+      const cases = [
+        {
+          name: 'Bangkok is free (STANDARD)',
+          province: 'Bangkok',
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 0,
+        },
+        {
+          name: 'Bangkok is free (EXPRESS)',
+          province: 'Bangkok',
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 0,
+        },
+        {
+          name: 'Nonthaburi is free (STANDARD)',
+          province: 'Nonthaburi',
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 0,
+        },
+        {
+          name: 'Nonthaburi is free (EXPRESS)',
+          province: 'Nonthaburi',
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 0,
+        },
+        {
+          name: 'Samut Prakan is not free (STANDARD)',
+          province: 'Samut Prakan',
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'Samut Prakan is not free (EXPRESS)',
+          province: 'Samut Prakan',
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+        {
+          name: 'missing province is not free and does not throw exception (STANDARD)',
+          province: undefined,
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'missing province is not free and does not throw exception (EXPRESS)',
+          province: undefined,
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+        {
+          name: 'standard shipping for non-free province',
+          province: 'Chiang Mai',
+          weight: 1,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'express shipping for non-free province',
+          province: 'Chiang Mai',
+          weight: 1,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+        {
+          name: 'weight does not change fee (non-free province with 10kg STANDARD)',
+          province: 'Chiang Mai',
+          weight: 10,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'weight does not change fee (non-free province with 20kg EXPRESS)',
+          province: 'Chiang Mai',
+          weight: 20,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+        {
+          name: 'weight does not change fee (free province with 10kg)',
+          province: 'Bangkok',
+          weight: 10,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 0,
+        },
+        {
+          name: 'weight does not change fee (Samut Prakan with 15kg STANDARD)',
+          province: 'Samut Prakan',
+          weight: 15,
+          method: ShippingMethod.STANDARD,
+          expectedFee: 30000,
+        },
+        {
+          name: 'weight does not change fee (Samut Prakan with 15kg EXPRESS)',
+          province: 'Samut Prakan',
+          weight: 15,
+          method: ShippingMethod.EXPRESS,
+          expectedFee: 50000,
+        },
+      ];
+
+      test.each(cases)(
+        '$name ($province, weight: $weight, method: $method) -> fee: $expectedFee',
+        async ({ province, weight, method, expectedFee }) => {
+          const address = province !== undefined ? { province } : {};
+          const fee = (service as any).calculateShippingFee(address, method);
+          expect(fee).toBe(expectedFee);
+
+          const shippingService = new ShippingService();
+          const mockOrigin = {
+            province: 'Bangkok',
+            district: 'Chatuchak',
+            ward: 'Lat Yao',
+            line1: '123 Warehouse St.',
+          };
+          const destination = {
+            province: province ?? '',
+            district: 'Unknown',
+            ward: 'Unknown',
+            line1: 'Customer address',
+          };
+          const shippingQuote = await shippingService.calculateFee(
+            mockOrigin,
+            destination,
+            weight,
+            method,
+          );
+          expect(shippingQuote.fee).toBe(expectedFee);
+        },
+      );
+    });
+  });
+
+  describe('previewCheckout', () => {
+    const mockAddress = {
+      id: 'addr1',
+      userId: 'user1',
+      fullName: 'John Doe',
+      phone: '0812345678',
+      province: 'Bangkok',
+      district: 'Chatuchak',
+      ward: 'Lat Yao',
+      line1: '123 Test St.',
+      line2: null,
+      isDefault: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('should return preview data with server prices, subtotal, shipping fee, and delivery address without writing to database', async () => {
+      mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: 90000,
+        stock: 10,
+        product: {
+          id: 'prod1',
+          name: 'Lavender Spray',
+          active: true,
+        },
+      });
+
+      const result = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 2 }],
+      });
+
+      expect(result.address).toEqual(mockAddress);
+      expect(result.deliveryAddress).toBe('123 Test St., Lat Yao, Chatuchak, Bangkok');
+      expect(result.itemCount).toBe(1);
+      expect(result.subtotal).toBe(180000);
+      expect(result.shippingFee).toBe(0);
+      expect(result.everyItemPriced).toBe(true);
+
+      // Verify read-only behavior: no writes or stock reservations
+      expect(mockPrismaService.order.create).not.toHaveBeenCalled();
+      expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+      expect(mockPrismaService.productVariant.update).not.toHaveBeenCalled();
+      expect(mockPrismaService.stockMovement.create).not.toHaveBeenCalled();
+    });
+
+    it('should return null address and 0 shipping fee when address belongs to a different user (foreign address)', async () => {
+      const foreignAddress = { ...mockAddress, userId: 'user2' };
+      mockPrismaService.address.findUnique.mockResolvedValue(foreignAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: null,
+        product: { id: 'prod1', name: 'Lavender Spray', active: true },
+      });
+
+      const result = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+      });
+
+      expect(result.address).toBeNull();
+      expect(result.deliveryAddress).toBeNull();
+      expect(result.shippingFee).toBe(0);
+    });
+
+    it('should return everyItemPriced false when product variant is not found or product is inactive', async () => {
+      mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: null,
+        product: { id: 'prod1', name: 'Inactive Spray', active: false },
+      });
+
+      const result = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+      });
+
+      expect(result.everyItemPriced).toBe(false);
+      expect(result.subtotal).toBe(0);
+    });
+
+    it('should compute shipping fee for non-free province with STANDARD and EXPRESS', async () => {
+      const chiangMaiAddress = { ...mockAddress, province: 'Chiang Mai' };
+      mockPrismaService.address.findUnique.mockResolvedValue(chiangMaiAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: null,
+        product: { id: 'prod1', name: 'Spray', active: true },
+      });
+
+      const standardResult = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+        shippingMethod: ShippingMethod.STANDARD,
+      });
+      expect(standardResult.shippingFee).toBe(30000);
+
+      const expressResult = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+        shippingMethod: ShippingMethod.EXPRESS,
+      });
+      expect(expressResult.shippingFee).toBe(50000);
+    });
+
+    it('should fall back to server cart if items are not provided', async () => {
+      const mockCart = {
+        id: 'cart1',
+        userId: 'user1',
+        items: [
+          {
+            id: 'item1',
+            cartId: 'cart1',
+            variantId: 'var1',
+            quantity: 2,
+          },
+        ],
+      };
+      mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
+      mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        price: 100000,
+        salePrice: null,
+        product: { id: 'prod1', name: 'Spray', active: true },
+      });
+
+      const result = await service.previewCheckout('user1', {
+        addressId: 'addr1',
+      });
+
+      expect(result.itemCount).toBe(1);
+      expect(result.subtotal).toBe(200000);
+      expect(result.everyItemPriced).toBe(true);
     });
   });
 });

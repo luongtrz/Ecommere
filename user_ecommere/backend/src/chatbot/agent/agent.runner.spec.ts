@@ -1,0 +1,1311 @@
+import { MemorySaver } from '@langchain/langgraph';
+import {
+  AIMessage,
+  AIMessageChunk,
+  HumanMessage,
+  SystemMessage,
+  ToolMessage,
+  type BaseMessage,
+} from '@langchain/core/messages';
+import { z } from 'zod';
+import {
+  AgentRunner,
+  AgentBusyError,
+  AgentNotPendingError,
+  type AgentRunnerDeps,
+  type AgentTranscriptMessage,
+} from './agent.runner';
+import type { AgentStreamEvent } from './sse.frames';
+import {
+  buildAgentGraph,
+  type AgentModelLike,
+  type AgentAuditSink,
+} from './agent.graph';
+import { ToolRegistry } from '../tools/tool.registry';
+import type { AgentToolDef, ToolContext } from '../tools/tool.types';
+
+class ScriptedFakeModel implements AgentModelLike {
+  public invocations: BaseMessage[][] = [];
+  public boundTools: unknown[][] = [];
+
+  constructor(private responses: AIMessage[] = []) {}
+
+  setResponses(responses: AIMessage[]) {
+    this.responses = [...responses];
+  }
+
+  bindTools(tools: unknown[]) {
+    this.boundTools.push(tools);
+    return {
+      invoke: async (messages: BaseMessage[]): Promise<AIMessage> => {
+        this.invocations.push(messages);
+        const next = this.responses.shift();
+        if (!next) {
+          throw new Error('ScriptedFakeModel: no scripted response available');
+        }
+        return next;
+      },
+    };
+  }
+}
+
+function createScriptedGraph(
+  chunks: Array<[string, unknown]>,
+): AgentRunnerDeps['graph'] {
+  return {
+    async *stream() {
+      for (const chunk of chunks) {
+        yield chunk;
+      }
+    },
+  };
+}
+
+function createStateGraph(
+  stateOrHandler: unknown,
+): AgentRunnerDeps['graph'] {
+  const handler =
+    typeof stateOrHandler === 'function'
+      ? (stateOrHandler as (config: unknown) => unknown)
+      : async () => stateOrHandler;
+  return {
+    async *stream() {},
+    async getState(config: unknown) {
+      return handler(config);
+    },
+  };
+}
+
+describe('AgentRunner', () => {
+  let registry: ToolRegistry;
+  let readCatalogTool: AgentToolDef<{ query: string }>;
+  let recommendProductsTool: AgentToolDef<{ category: string }>;
+  let cancelOrderTool: AgentToolDef<{ orderId: string }>;
+
+  const customerCtx: ToolContext = {
+    userId: 'cust-123',
+    role: 'CUSTOMER',
+    app: 'USER',
+    threadId: 'thread-test-1',
+  };
+
+  const createMockThreads = () => ({
+    recordUsage: jest.fn().mockResolvedValue(undefined),
+    setTitleIfEmpty: jest.fn().mockResolvedValue(undefined),
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    readCatalogTool = {
+      name: 'read_catalog',
+      domain: 'catalog',
+      description: 'Tìm kiếm sản phẩm trong danh mục',
+      schema: z.object({ query: z.string().min(1) }).strict(),
+      auth: 'public',
+      risk: 'READ',
+      handler: jest.fn().mockResolvedValue({ items: ['Sơn lót xịt'] }),
+      summarize: (args) => `Tìm kiếm sản phẩm: ${args.query}`,
+      uiAction: (data) => ({
+        type: 'NAVIGATE',
+        payload: { path: '/search', data: data as Record<string, unknown> },
+      }),
+    };
+
+    recommendProductsTool = {
+      name: 'recommend_products',
+      domain: 'catalog',
+      description: 'Gợi ý sản phẩm phù hợp',
+      schema: z.object({ category: z.string() }).strict(),
+      auth: 'public',
+      risk: 'READ',
+      handler: jest.fn().mockResolvedValue({
+        sources: [{ id: 'prod-1', title: 'Sơn Samurai đen nhám' }],
+      }),
+      summarize: (args) => `Gợi ý sản phẩm cho danh mục: ${args.category}`,
+    };
+
+    cancelOrderTool = {
+      name: 'cancel_order',
+      domain: 'orders',
+      description: 'Hủy đơn hàng của khách',
+      schema: z.object({ orderId: z.string() }).strict(),
+      auth: 'customer',
+      risk: 'DESTRUCTIVE',
+      handler: jest.fn().mockResolvedValue({ cancelled: true, orderId: 'ord-100' }),
+      summarize: (args) => `Hủy đơn hàng ${args.orderId}`,
+    };
+
+    registry = new ToolRegistry([
+      readCatalogTool,
+      recommendProductsTool,
+      cancelOrderTool,
+    ]);
+  });
+
+  it('case a: a text-only turn emits thread, token(s), done with usage, and calls recordUsage and setTitleIfEmpty', async () => {
+    const threads = createMockThreads();
+    const fakeGraph = createScriptedGraph([
+      ['messages', [new AIMessageChunk({ content: 'Xin ' }), { langgraph_node: 'agent' }]],
+      ['messages', [new AIMessageChunk({ content: 'chào!' }), { langgraph_node: 'agent' }]],
+      [
+        'updates',
+        {
+          agent: {
+            messages: [
+              new AIMessage({
+                content: 'Xin chào!',
+                usage_metadata: {
+                  input_tokens: 10,
+                  output_tokens: 5,
+                  total_tokens: 15,
+                },
+              }),
+            ],
+          },
+        },
+      ],
+    ]);
+
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const events: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Chào shop',
+      sink: (e) => events.push(e),
+    });
+
+    expect(events).toEqual([
+      { event: 'thread', data: { threadId: customerCtx.threadId } },
+      { event: 'token', data: { text: 'Xin ' } },
+      { event: 'token', data: { text: 'chào!' } },
+      { event: 'done', data: { usage: { totalTokens: 15 } } },
+    ]);
+
+    expect(threads.recordUsage).toHaveBeenCalledTimes(1);
+    expect(threads.recordUsage).toHaveBeenCalledWith(customerCtx.threadId, 15);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(customerCtx.threadId, 'Chào shop');
+  });
+
+  it('case b: a read tool call emits tool_start, tool_result ok true, and the uiAction event when the tool defines uiAction; recommend_products emits sources', async () => {
+    const threads = createMockThreads();
+    const fakeGraph = createScriptedGraph([
+      [
+        'updates',
+        {
+          agent: {
+            messages: [
+              new AIMessage({
+                content: '',
+                tool_calls: [
+                  { id: 'call-read-1', name: 'read_catalog', args: { query: 'sơn xịt' } },
+                  { id: 'call-rec-1', name: 'recommend_products', args: { category: 'paint' } },
+                ],
+              }),
+            ],
+          },
+        },
+      ],
+      [
+        'updates',
+        {
+          tools: {
+            messages: [
+              new ToolMessage({
+                tool_call_id: 'call-read-1',
+                name: 'read_catalog',
+                content: JSON.stringify({ ok: true, data: { items: ['Sơn lót xịt'] } }),
+              }),
+              new ToolMessage({
+                tool_call_id: 'call-rec-1',
+                name: 'recommend_products',
+                content: JSON.stringify({
+                  ok: true,
+                  data: {
+                    sources: [{ id: 'prod-1', title: 'Sơn Samurai đen nhám' }],
+                  },
+                }),
+              }),
+            ],
+          },
+        },
+      ],
+      [
+        'messages',
+        [new AIMessageChunk({ content: 'Đây là các sản phẩm bạn cần.' }), { langgraph_node: 'agent' }],
+      ],
+      [
+        'updates',
+        {
+          agent: {
+            messages: [
+              new AIMessage({
+                content: 'Đây là các sản phẩm bạn cần.',
+              }),
+            ],
+          },
+        },
+      ],
+    ]);
+
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const events: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Tìm sơn xịt',
+      sink: (e) => events.push(e),
+    });
+
+    expect(events).toEqual([
+      { event: 'thread', data: { threadId: customerCtx.threadId } },
+      {
+        event: 'tool_start',
+        data: {
+          id: 'call-read-1',
+          name: 'read_catalog',
+          summary: 'Tìm kiếm sản phẩm: sơn xịt',
+        },
+      },
+      {
+        event: 'tool_start',
+        data: {
+          id: 'call-rec-1',
+          name: 'recommend_products',
+          summary: 'Gợi ý sản phẩm cho danh mục: paint',
+        },
+      },
+      {
+        event: 'tool_result',
+        data: {
+          id: 'call-read-1',
+          name: 'read_catalog',
+          ok: true,
+          summary: 'Đã thực hiện thao tác',
+        },
+      },
+      {
+        event: 'ui_action',
+        data: {
+          type: 'NAVIGATE',
+          payload: { path: '/search', data: { items: ['Sơn lót xịt'] } },
+        },
+      },
+      {
+        event: 'tool_result',
+        data: {
+          id: 'call-rec-1',
+          name: 'recommend_products',
+          ok: true,
+          summary: 'Đã thực hiện thao tác',
+        },
+      },
+      {
+        event: 'sources',
+        data: [{ id: 'prod-1', title: 'Sơn Samurai đen nhám' }],
+      },
+      {
+        event: 'token',
+        data: { text: 'Đây là các sản phẩm bạn cần.' },
+      },
+      {
+        event: 'done',
+        data: { usage: null },
+      },
+    ]);
+  });
+
+  it('case c: a confirm interrupt emits confirm_required and no done; a resume with approve true then emits tool_result and done', async () => {
+    const cancelHandler = cancelOrderTool.handler;
+    const audit: AgentAuditSink = { record: jest.fn().mockResolvedValue(undefined) };
+
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'call_destr_1', name: 'cancel_order', args: { orderId: 'ord-100' } }],
+        usage_metadata: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
+      }),
+      new AIMessage({
+        content: 'Đã hủy đơn hàng thành công.',
+        usage_metadata: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+      }),
+    ]);
+
+    const realGraph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const threads = createMockThreads();
+    const runner = new AgentRunner({
+      graph: realGraph,
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    // Turn 1: request requiring confirmation
+    const eventsTurn1: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Hủy đơn ord-100',
+      sink: (e) => eventsTurn1.push(e),
+    });
+
+    expect(eventsTurn1).toContainEqual({
+      event: 'thread',
+      data: { threadId: customerCtx.threadId },
+    });
+    expect(eventsTurn1).toContainEqual({
+      event: 'tool_start',
+      data: {
+        id: 'call_destr_1',
+        name: 'cancel_order',
+        summary: 'Hủy đơn hàng ord-100',
+      },
+    });
+    expect(eventsTurn1).toContainEqual({
+      event: 'confirm_required',
+      data: {
+        calls: [
+          {
+            id: 'call_destr_1',
+            name: 'cancel_order',
+            summary: 'Hủy đơn hàng ord-100',
+            risk: 'DESTRUCTIVE',
+          },
+        ],
+      },
+    });
+
+    // No done event in turn 1
+    expect(eventsTurn1.find((e) => e.event === 'done')).toBeUndefined();
+    expect(cancelHandler).not.toHaveBeenCalled();
+
+    // Turn 1 records usage and sets thread title
+    expect(threads.recordUsage).toHaveBeenCalledTimes(1);
+    expect(threads.recordUsage).toHaveBeenCalledWith(customerCtx.threadId, 15);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(customerCtx.threadId, 'Hủy đơn ord-100');
+
+    // Turn 2: resume with approve: true
+    const eventsTurn2: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      resume: { decisions: [{ callId: 'call_destr_1', approve: true }] },
+      sink: (e) => eventsTurn2.push(e),
+    });
+
+    expect(cancelHandler).toHaveBeenCalledTimes(1);
+    expect(cancelHandler).toHaveBeenCalledWith({ orderId: 'ord-100' }, customerCtx);
+
+    expect(eventsTurn2).toContainEqual({
+      event: 'thread',
+      data: { threadId: customerCtx.threadId },
+    });
+    expect(eventsTurn2).toContainEqual({
+      event: 'tool_result',
+      data: {
+        id: 'call_destr_1',
+        name: 'cancel_order',
+        ok: true,
+        summary: 'Đã thực hiện thao tác',
+      },
+    });
+    expect(eventsTurn2).toContainEqual({
+      event: 'done',
+      data: { usage: { totalTokens: 20 } },
+    });
+
+    // Turn 2 records usage; does not set title again on resume
+    expect(threads.recordUsage).toHaveBeenCalledTimes(2);
+    expect(threads.recordUsage).toHaveBeenLastCalledWith(customerCtx.threadId, 20);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
+  });
+
+  it('case c-decline: a resume with approve false emits tool_result ok false, does not call tool handler, and emits done', async () => {
+    const cancelHandler = cancelOrderTool.handler;
+    const audit: AgentAuditSink = { record: jest.fn().mockResolvedValue(undefined) };
+
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'call_destr_1', name: 'cancel_order', args: { orderId: 'ord-100' } }],
+        usage_metadata: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
+      }),
+      new AIMessage({
+        content: 'Bạn đã từ chối thao tác này.',
+        usage_metadata: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+      }),
+    ]);
+
+    const realGraph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const threads = createMockThreads();
+    const runner = new AgentRunner({
+      graph: realGraph,
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    // Turn 1: request requiring confirmation
+    const eventsTurn1: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Hủy đơn ord-100',
+      sink: (e) => eventsTurn1.push(e),
+    });
+
+    expect(eventsTurn1.find((e) => e.event === 'confirm_required')).toBeDefined();
+    expect(eventsTurn1.find((e) => e.event === 'done')).toBeUndefined();
+    expect(threads.recordUsage).toHaveBeenCalledWith(customerCtx.threadId, 15);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(customerCtx.threadId, 'Hủy đơn ord-100');
+
+    // Turn 2: resume with approve: false
+    const eventsTurn2: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      resume: { decisions: [{ callId: 'call_destr_1', approve: false }] },
+      sink: (e) => eventsTurn2.push(e),
+    });
+
+    expect(cancelHandler).not.toHaveBeenCalled();
+
+    expect(eventsTurn2).toContainEqual({
+      event: 'thread',
+      data: { threadId: customerCtx.threadId },
+    });
+    expect(eventsTurn2).toContainEqual({
+      event: 'tool_result',
+      data: {
+        id: 'call_destr_1',
+        name: 'cancel_order',
+        ok: false,
+        summary: 'Người dùng đã từ chối thao tác này',
+      },
+    });
+    expect(eventsTurn2).toContainEqual({
+      event: 'done',
+      data: { usage: { totalTokens: 20 } },
+    });
+    expect(threads.recordUsage).toHaveBeenCalledTimes(2);
+    expect(threads.recordUsage).toHaveBeenLastCalledWith(customerCtx.threadId, 20);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles payload.confirm by emitting tool_result ok false with call id and error summary', async () => {
+    const fakeGraph = createScriptedGraph([
+      [
+        'updates',
+        {
+          confirm: {
+            messages: [
+              new ToolMessage({
+                tool_call_id: 'call-declined-1',
+                name: 'cancel_order',
+                content: JSON.stringify({
+                  ok: false,
+                  error: 'Người dùng đã từ chối thao tác này',
+                }),
+              }),
+            ],
+          },
+        },
+      ],
+      [
+        'updates',
+        {
+          agent: {
+            messages: [
+              new AIMessage({
+                content: 'Đã hủy thao tác.',
+              }),
+            ],
+          },
+        },
+      ],
+    ]);
+
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const events: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      resume: { decisions: [{ callId: 'call-declined-1', approve: false }] },
+      sink: (e) => events.push(e),
+    });
+
+    expect(events).toContainEqual({
+      event: 'tool_result',
+      data: {
+        id: 'call-declined-1',
+        name: 'cancel_order',
+        ok: false,
+        summary: 'Người dùng đã từ chối thao tác này',
+      },
+    });
+    expect(events).toContainEqual({
+      event: 'done',
+      data: { usage: null },
+    });
+  });
+
+  it('case d: a second run on the same threadId while the first is running throws AgentBusyError; the lock is released afterwards', async () => {
+    let finishStream!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      finishStream = resolve;
+    });
+
+    const blockingGraph: AgentRunnerDeps['graph'] = {
+      async *stream() {
+        await gate;
+        yield ['updates', {}];
+      },
+    };
+
+    const runner = new AgentRunner({
+      graph: blockingGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const turnPromise = runner.run({
+      ctx: customerCtx,
+      message: 'Turn 1',
+      sink: () => {},
+    });
+
+    // Calling run on same threadId throws synchronously
+    expect(() =>
+      runner.run({
+        ctx: customerCtx,
+        message: 'Turn 2',
+        sink: () => {},
+      }),
+    ).toThrow(AgentBusyError);
+
+    finishStream();
+    await turnPromise;
+
+    // After finish, lock is released: next run on same threadId succeeds
+    await expect(
+      runner.run({
+        ctx: customerCtx,
+        message: 'Turn 3',
+        sink: () => {},
+      }),
+    ).resolves.toBeUndefined();
+  });
+
+  it('case e: a stream that throws emits one error event with code AGENT_ERROR and the Vietnamese message, and the lock is released', async () => {
+    const failingGraph: AgentRunnerDeps['graph'] = {
+      async *stream() {
+        throw new Error('Graph exploded');
+      },
+    };
+
+    const runner = new AgentRunner({
+      graph: failingGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const events: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Fail me',
+      sink: (e) => events.push(e),
+    });
+
+    expect(events).toEqual([
+      { event: 'thread', data: { threadId: customerCtx.threadId } },
+      {
+        event: 'error',
+        data: {
+          message: 'Trợ lý tạm thời không phản hồi, vui lòng thử lại sau.',
+          code: 'AGENT_ERROR',
+        },
+      },
+    ]);
+
+    // Lock is released after error
+    const eventsRetry: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Retry',
+      sink: (e) => eventsRetry.push(e),
+    });
+    expect(eventsRetry).toContainEqual({
+      event: 'thread',
+      data: { threadId: customerCtx.threadId },
+    });
+  });
+
+  it('case f: a timeout (timeoutMs small) emits one error event with code AGENT_TIMEOUT', async () => {
+    const hangingGraph: AgentRunnerDeps['graph'] = {
+      async *stream() {
+        await new Promise((r) => setTimeout(r, 1000));
+        yield ['updates', {}];
+      },
+    };
+
+    const runner = new AgentRunner({
+      graph: hangingGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 25 },
+    });
+
+    const events: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Timeout me',
+      sink: (e) => events.push(e),
+    });
+
+    expect(events).toEqual([
+      { event: 'thread', data: { threadId: customerCtx.threadId } },
+      {
+        event: 'error',
+        data: {
+          message: 'Yêu cầu quá thời gian, vui lòng thử lại.',
+          code: 'AGENT_TIMEOUT',
+        },
+      },
+    ]);
+  });
+
+  it('case g: an aborted signal emits no error event and returns', async () => {
+    const abortController = new AbortController();
+    const midStreamGraph: AgentRunnerDeps['graph'] = {
+      async *stream() {
+        yield ['messages', [new AIMessageChunk({ content: 'Khởi đầu' }), { langgraph_node: 'agent' }]];
+        abortController.abort();
+        await new Promise((r) => setTimeout(r, 50));
+        yield ['messages', [new AIMessageChunk({ content: ' tiếp diễn' }), { langgraph_node: 'agent' }]];
+      },
+    };
+
+    const runner = new AgentRunner({
+      graph: midStreamGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const events: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Abort me',
+      signal: abortController.signal,
+      sink: (e) => events.push(e),
+    });
+
+    expect(events.filter((e) => e.event === 'error')).toEqual([]);
+    expect(events.filter((e) => e.event === 'done')).toEqual([]);
+
+    // Pre-aborted signal emits no events at all and returns immediately
+    const preAborted = new AbortController();
+    preAborted.abort();
+    const eventsPre: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Pre-aborted turn',
+      signal: preAborted.signal,
+      sink: (e) => eventsPre.push(e),
+    });
+    expect(eventsPre).toEqual([]);
+  });
+
+  it('case h: ctx.userId or role never appears in any message sent to the model', async () => {
+    const model = new ScriptedFakeModel([
+      new AIMessage({ content: 'Phản hồi từ trợ lý.' }),
+    ]);
+
+    const audit: AgentAuditSink = { record: jest.fn().mockResolvedValue(undefined) };
+    const realGraph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const runner = new AgentRunner({
+      graph: realGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const secretUserId = 'super-secret-user-identity-4567';
+    const privacyCtx: ToolContext = {
+      userId: secretUserId,
+      role: 'CUSTOMER',
+      app: 'USER',
+      threadId: 'th-privacy-check',
+    };
+
+    await runner.run({
+      ctx: privacyCtx,
+      message: 'Xin chào trợ lý',
+      sink: () => {},
+    });
+
+    expect(model.invocations.length).toBeGreaterThan(0);
+    for (const invocation of model.invocations) {
+      // Secret userId never appears in any message sent to the model
+      const serialized = JSON.stringify(invocation);
+      expect(serialized).not.toContain(secretUserId);
+
+      // Human message contains only the user message text, never role or userId
+      const humanMsg = invocation.find((m) => m.getType() === 'human');
+      expect(humanMsg).toBeDefined();
+      expect(humanMsg!.content).toBe('Xin chào trợ lý');
+      expect(humanMsg!.content).not.toContain(privacyCtx.role);
+      expect(humanMsg!.content).not.toContain(secretUserId);
+    }
+  });
+
+  it('ignores thread service errors without throwing or failing the run', async () => {
+    const failingThreads = {
+      recordUsage: jest.fn().mockRejectedValue(new Error('DB connection down')),
+      setTitleIfEmpty: jest.fn().mockRejectedValue(new Error('DB timeout')),
+    };
+
+    const fakeGraph = createScriptedGraph([
+      [
+        'updates',
+        {
+          agent: {
+            messages: [
+              new AIMessage({
+                content: 'Xong lượt.',
+                usage_metadata: { total_tokens: 30, input_tokens: 20, output_tokens: 10 },
+              }),
+            ],
+          },
+        },
+      ],
+    ]);
+
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: failingThreads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const events: AgentStreamEvent[] = [];
+    await expect(
+      runner.run({
+        ctx: customerCtx,
+        message: 'Lưu dữ liệu',
+        sink: (e) => events.push(e),
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(events).toContainEqual({
+      event: 'done',
+      data: { usage: { totalTokens: 30 } },
+    });
+  });
+
+  it('readTranscript maps a human and an AI message in order', async () => {
+    const getState = jest.fn().mockResolvedValue({
+      values: {
+        messages: [
+          new HumanMessage({ content: 'Xin chào shop', id: 'h-1' }),
+          new AIMessage({
+            content: 'Chào bạn! Shop có thể hỗ trợ gì cho bạn?',
+            id: 'ai-1',
+          }),
+        ],
+      },
+    });
+    const fakeGraph = createStateGraph(getState);
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-order-test');
+
+    expect(getState).toHaveBeenCalledWith({
+      configurable: { thread_id: 'thread-order-test' },
+    });
+    expect(transcript).toEqual([
+      { id: 'h-1', role: 'user', content: 'Xin chào shop' },
+      {
+        id: 'ai-1',
+        role: 'assistant',
+        content: 'Chào bạn! Shop có thể hỗ trợ gì cho bạn?',
+      },
+    ]);
+  });
+
+  it('readTranscript skips a tool-call-only AI message, tool messages and system messages', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new SystemMessage({
+            content: 'You are a helpful assistant.',
+            id: 'sys-1',
+          }),
+          new HumanMessage({ content: 'Hủy đơn hàng ord-100', id: 'h-2' }),
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: 'call_1',
+                name: 'cancel_order',
+                args: { orderId: 'ord-100' },
+              },
+            ],
+            id: 'ai-tool-call',
+          }),
+          new ToolMessage({
+            tool_call_id: 'call_1',
+            content: JSON.stringify({ ok: true }),
+            id: 'tool-result-1',
+          }),
+          new AIMessage({
+            content: 'Đã hủy đơn hàng ord-100 thành công.',
+            id: 'ai-2',
+          }),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-skips-test');
+
+    expect(transcript).toEqual([
+      { id: 'h-2', role: 'user', content: 'Hủy đơn hàng ord-100' },
+      {
+        id: 'ai-2',
+        role: 'assistant',
+        content: 'Đã hủy đơn hàng ord-100 thành công.',
+      },
+    ]);
+  });
+
+  it('readTranscript returns [] when thread has no checkpoint', async () => {
+    const runnerEmptyValues = new AgentRunner({
+      graph: createStateGraph({ values: {} }),
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    const resEmptyValues = await runnerEmptyValues.readTranscript('missing-thread-1');
+    expect(resEmptyValues).toEqual([]);
+
+    const runnerUndefined = new AgentRunner({
+      graph: createStateGraph(undefined),
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    const resUndefined = await runnerUndefined.readTranscript('missing-thread-2');
+    expect(resUndefined).toEqual([]);
+
+    const runnerNoGetState = new AgentRunner({
+      graph: createScriptedGraph([]),
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    const resNoGetState = await runnerNoGetState.readTranscript('missing-thread-3');
+    expect(resNoGetState).toEqual([]);
+  });
+
+  it('readTranscript joins text parts when a message content is an array of parts', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new HumanMessage({
+            content: [
+              { type: 'text', text: 'Tôi muốn tìm ' },
+              { type: 'text', text: 'sơn Samurai màu đen' },
+            ],
+            id: 'h-parts',
+          }),
+          new AIMessage({
+            content: [
+              { type: 'text', text: 'Đây là danh sách ' },
+              {
+                type: 'image_url',
+                image_url: { url: 'https://example.com/img.jpg' },
+              },
+              { type: 'text', text: 'sơn Samurai màu đen cho bạn.' },
+            ],
+            id: 'ai-parts',
+          }),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-parts-test');
+
+    expect(transcript).toEqual([
+      {
+        id: 'h-parts',
+        role: 'user',
+        content: 'Tôi muốn tìm sơn Samurai màu đen',
+      },
+      {
+        id: 'ai-parts',
+        role: 'assistant',
+        content: 'Đây là danh sách sơn Samurai màu đen cho bạn.',
+      },
+    ]);
+  });
+
+  it('readTranscript falls back to message index when message has no id', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new HumanMessage('Tin nhắn đầu tiên'),
+          new AIMessage('Tin nhắn thứ hai'),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-no-ids');
+
+    expect(transcript).toEqual([
+      { id: '0', role: 'user', content: 'Tin nhắn đầu tiên' },
+      { id: '1', role: 'assistant', content: 'Tin nhắn thứ hai' },
+    ]);
+  });
+
+  it('assertResumable resolves when the callIds equal the pending ids', async () => {
+    const fakeGraph = createStateGraph({
+      tasks: [
+        {
+          id: 'task-confirm',
+          name: 'confirm',
+          interrupts: [
+            {
+              value: {
+                kind: 'confirm',
+                calls: [
+                  { id: 'call-1', name: 'cancel_order' },
+                  { id: 'call-2', name: 'update_stock' },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runner.assertResumable('thread-resumable-1', ['call-1', 'call-2']),
+    ).resolves.toBeUndefined();
+
+    await expect(
+      runner.assertResumable('thread-resumable-1', ['call-2', 'call-1']),
+    ).resolves.toBeUndefined();
+  });
+
+  it('assertResumable throws AgentNotPendingError when nothing is pending', async () => {
+    const threads = createMockThreads();
+
+    const runnerNullState = new AgentRunner({
+      graph: createStateGraph(null),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerNullState.assertResumable('thread-empty', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    const runnerEmptyTasks = new AgentRunner({
+      graph: createStateGraph({ tasks: [] }),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerEmptyTasks.assertResumable('thread-no-tasks', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    const runnerNoInterrupts = new AgentRunner({
+      graph: createStateGraph({
+        tasks: [{ id: 'task-1', name: 'agent', interrupts: [] }],
+      }),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerNoInterrupts.assertResumable('thread-no-interrupts', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    const runnerEmptyCalls = new AgentRunner({
+      graph: createStateGraph({
+        tasks: [
+          {
+            id: 'task-1',
+            name: 'confirm',
+            interrupts: [{ value: { kind: 'confirm', calls: [] } }],
+          },
+        ],
+      }),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerEmptyCalls.assertResumable('thread-empty-calls', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    const runnerNoGetState = new AgentRunner({
+      graph: createScriptedGraph([]),
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+    await expect(
+      runnerNoGetState.assertResumable('thread-no-getstate', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    try {
+      await runnerEmptyTasks.assertResumable('thread-err-props', ['call-1']);
+      throw new Error('should not reach here');
+    } catch (err: any) {
+      expect(err).toBeInstanceOf(AgentNotPendingError);
+      expect(err.name).toBe('AgentNotPendingError');
+      expect(err.message).toBe('Không có thao tác nào đang chờ xác nhận');
+    }
+  });
+
+  it('assertResumable throws AgentNotPendingError when a call id is unknown, when a pending call has no decision, and when the list is empty', async () => {
+    const fakeGraph = createStateGraph({
+      tasks: [
+        {
+          id: 'task-confirm',
+          name: 'confirm',
+          interrupts: [
+            {
+              value: {
+                kind: 'confirm',
+                calls: [
+                  { id: 'call-1', name: 'cancel_order' },
+                  { id: 'call-2', name: 'update_stock' },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    // Unknown call id
+    await expect(
+      runner.assertResumable('thread-check', ['call-1', 'call-unknown']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    await expect(
+      runner.assertResumable('thread-check', ['call-unknown']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    // Pending call has no decision (missing call-2)
+    await expect(
+      runner.assertResumable('thread-check', ['call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    // List is empty
+    await expect(
+      runner.assertResumable('thread-check', []),
+    ).rejects.toThrow(AgentNotPendingError);
+
+    // Duplicate call id
+    await expect(
+      runner.assertResumable('thread-check', ['call-1', 'call-1']),
+    ).rejects.toThrow(AgentNotPendingError);
+  });
+
+  it('deleteCheckpoints calls the checkpointer deleteThread with the thread id, and resolves without error when there is no checkpointer', async () => {
+    const deleteThreadMock = jest.fn().mockResolvedValue(undefined);
+
+    // When checkpointer exists
+    const runnerWithCheckpointer = new AgentRunner({
+      graph: {
+        ...createStateGraph({}),
+        checkpointer: { deleteThread: deleteThreadMock },
+      },
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runnerWithCheckpointer.deleteCheckpoints('thread-delete-123'),
+    ).resolves.toBeUndefined();
+    expect(deleteThreadMock).toHaveBeenCalledTimes(1);
+    expect(deleteThreadMock).toHaveBeenCalledWith('thread-delete-123');
+
+    // When no checkpointer exists on graph
+    const runnerNoCheckpointer = new AgentRunner({
+      graph: createStateGraph({}),
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runnerNoCheckpointer.deleteCheckpoints('thread-delete-456'),
+    ).resolves.toBeUndefined();
+  });
+
+  it('deleteCheckpoints deletes checkpoint_writes, checkpoint_blobs, and checkpoints using the pg pool', async () => {
+    const queryMock = jest.fn().mockResolvedValue({ rowCount: 1 });
+    const mockPool = { query: queryMock };
+
+    const runner = new AgentRunner({
+      graph: {
+        ...createStateGraph({}),
+        checkpointer: { pool: mockPool, schema: 'agent' },
+      },
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runner.deleteCheckpoints('thread-pg-123'),
+    ).resolves.toBeUndefined();
+
+    expect(queryMock).toHaveBeenCalledTimes(3);
+    expect(queryMock).toHaveBeenNthCalledWith(
+      1,
+      'DELETE FROM "agent".checkpoint_writes WHERE thread_id = $1',
+      ['thread-pg-123'],
+    );
+    expect(queryMock).toHaveBeenNthCalledWith(
+      2,
+      'DELETE FROM "agent".checkpoint_blobs WHERE thread_id = $1',
+      ['thread-pg-123'],
+    );
+    expect(queryMock).toHaveBeenNthCalledWith(
+      3,
+      'DELETE FROM "agent".checkpoints WHERE thread_id = $1',
+      ['thread-pg-123'],
+    );
+  });
+
+  it('deleteCheckpoints uses custom schema when specified on checkpointer', async () => {
+    const queryMock = jest.fn().mockResolvedValue({ rowCount: 0 });
+    const mockPool = { query: queryMock };
+
+    const runner = new AgentRunner({
+      graph: {
+        ...createStateGraph({}),
+        checkpointer: { pool: mockPool, schema: 'custom_checkpoints' },
+      },
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runner.deleteCheckpoints('thread-custom-456'),
+    ).resolves.toBeUndefined();
+
+    expect(queryMock).toHaveBeenCalledTimes(3);
+    expect(queryMock).toHaveBeenNthCalledWith(
+      1,
+      'DELETE FROM "custom_checkpoints".checkpoint_writes WHERE thread_id = $1',
+      ['thread-custom-456'],
+    );
+    expect(queryMock).toHaveBeenNthCalledWith(
+      2,
+      'DELETE FROM "custom_checkpoints".checkpoint_blobs WHERE thread_id = $1',
+      ['thread-custom-456'],
+    );
+    expect(queryMock).toHaveBeenNthCalledWith(
+      3,
+      'DELETE FROM "custom_checkpoints".checkpoints WHERE thread_id = $1',
+      ['thread-custom-456'],
+    );
+  });
+
+  it('deleteCheckpoints resolves without error when checkpointer has no pool or deleteThread', async () => {
+    const runner = new AgentRunner({
+      graph: {
+        ...createStateGraph({}),
+        checkpointer: { someOtherProp: true },
+      },
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    await expect(
+      runner.deleteCheckpoints('thread-no-pool'),
+    ).resolves.toBeUndefined();
+  });
+});

@@ -43,3 +43,7 @@ yarn.lock
 # Misc
 .github/
 cookies.txt
+
+# Local agent tooling (git worktrees and session files)
+.worktrees/
+.agy-sessions/
