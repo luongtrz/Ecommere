@@ -12,7 +12,10 @@ import { calculateShippingFee } from '../shipping/shipping.rules';
 export class OrdersService {
   constructor(private prisma: PrismaService) { }
 
-  async checkout(userId: string, checkoutDto: CheckoutDto) {
+  async checkout(
+    userId: string,
+    checkoutDto: CheckoutDto & { couponCode?: string },
+  ) {
     if (checkoutDto.checkoutKey) {
       const existingOrder = await this.findOrderByCheckoutKey(
         userId,
@@ -92,6 +95,27 @@ export class OrdersService {
           variantId: item.variantId,
           priceSnapshot: item.price,
         });
+      }
+
+      if (checkoutDto.couponCode != null) {
+        const trimmedCode =
+          typeof checkoutDto.couponCode === 'string'
+            ? checkoutDto.couponCode.trim()
+            : '';
+        if (trimmedCode.length > 0) {
+          let coupon = await this.prisma.coupon.findUnique({
+            where: { code: trimmedCode },
+          });
+          if (!coupon) {
+            coupon = await this.prisma.coupon.findUnique({
+              where: { code: trimmedCode.toUpperCase() },
+            });
+          }
+          if (!coupon) {
+            throw new NotFoundException('Coupon not found');
+          }
+          couponCode = coupon.code;
+        }
       }
     } else if (cart && cart.items.length > 0) {
       // Fall back to the server-side cart for API clients that do not send items.
@@ -191,6 +215,9 @@ export class OrdersService {
       coupon = await this.prisma.coupon.findUnique({
         where: { code: couponCode },
       });
+      if (!coupon) {
+        throw new NotFoundException('Coupon not found');
+      }
     }
 
     if (coupon) {
