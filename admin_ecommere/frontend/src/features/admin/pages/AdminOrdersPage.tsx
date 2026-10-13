@@ -195,7 +195,13 @@ export function AdminOrdersPage() {
           />
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => {
+              setStatusFilter(value);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-[180px] bg-gray-50 border-gray-200">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
