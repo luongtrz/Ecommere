@@ -71,6 +71,14 @@ export function CheckoutPage() {
 
     const fingerprint = JSON.stringify({
       addressId: selectedAddress.id,
+      address: [
+        selectedAddress.fullName,
+        selectedAddress.phone,
+        selectedAddress.province,
+        selectedAddress.district,
+        selectedAddress.ward,
+        selectedAddress.line1,
+      ],
       paymentMethod,
       shippingMethod,
       items: items.map((i) => [i.variantId, i.quantity, i.price]),
