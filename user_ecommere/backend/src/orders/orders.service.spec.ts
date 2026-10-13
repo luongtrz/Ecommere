@@ -148,6 +148,164 @@ describe('OrdersService', () => {
       expect(result).toBeDefined();
       expect(result.code).toContain('ORD');
       expect(result.total).toBe(200000);
+      expect(mockPrismaService.cartItem.deleteMany).toHaveBeenCalledWith({
+        where: {
+          cartId: 'cart1',
+          id: { in: ['item1'] },
+        },
+      });
+      expect(mockPrismaService.cart.update).toHaveBeenCalledWith({
+        where: { id: 'cart1' },
+        data: { couponId: null },
+      });
+    });
+
+    it('should remove ordered variants from customer server cart when checkout uses explicit items', async () => {
+      const mockOrder = {
+        id: 'order1',
+        code: 'ORD25102800001',
+        userId: 'user1',
+        status: OrderStatus.PENDING_PAYMENT,
+        paymentStatus: PaymentStatus.PENDING,
+        subtotal: 100000,
+        discount: 0,
+        shippingFee: 0,
+        total: 100000,
+        couponCode: null,
+        addressJson: mockAddress,
+        items: [
+          {
+            variantId: 'var1',
+            quantity: 1,
+            price: 100000,
+            total: 100000,
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockCartWithMultipleItems = {
+        id: 'cart1',
+        userId: 'user1',
+        couponCode: null,
+        items: [
+          mockCart.items[0],
+          {
+            id: 'item2',
+            cartId: 'cart1',
+            variantId: 'var2',
+            quantity: 1,
+            variant: {
+              id: 'var2',
+              sku: 'ROSE-250ML',
+              scent: 'Rose',
+              volumeMl: 250,
+              price: 120000,
+              salePrice: null,
+              stock: 5,
+              product: {
+                id: 'prod2',
+                name: 'Rose Spray',
+                active: true,
+              },
+            },
+          },
+        ],
+        coupon: null,
+      };
+
+      mockPrismaService.cart.findUnique.mockResolvedValue(mockCartWithMultipleItems);
+      mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        sku: 'LAV-250ML',
+        scent: 'Lavender',
+        volumeMl: 250,
+        price: 100000,
+        salePrice: null,
+        stock: 10,
+        product: {
+          id: 'prod1',
+          name: 'Lavender Spray',
+          active: true,
+        },
+      });
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
+      mockPrismaService.order.create.mockResolvedValue(mockOrder);
+      mockPrismaService.order.count.mockResolvedValue(0);
+
+      const result = await service.checkout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+      });
+
+      expect(result).toBeDefined();
+      expect(mockPrismaService.cartItem.deleteMany).toHaveBeenCalledWith({
+        where: {
+          cartId: 'cart1',
+          variantId: { in: ['var1'] },
+        },
+      });
+      expect(mockPrismaService.cart.update).not.toHaveBeenCalled();
+    });
+
+    it('should complete checkout with explicit items when customer has no server cart', async () => {
+      const mockOrder = {
+        id: 'order1',
+        code: 'ORD25102800001',
+        userId: 'user1',
+        status: OrderStatus.PENDING_PAYMENT,
+        paymentStatus: PaymentStatus.PENDING,
+        subtotal: 100000,
+        discount: 0,
+        shippingFee: 0,
+        total: 100000,
+        couponCode: null,
+        addressJson: mockAddress,
+        items: [
+          {
+            variantId: 'var1',
+            quantity: 1,
+            price: 100000,
+            total: 100000,
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockPrismaService.cart.findUnique.mockResolvedValue(null);
+      mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        sku: 'LAV-250ML',
+        scent: 'Lavender',
+        volumeMl: 250,
+        price: 100000,
+        salePrice: null,
+        stock: 10,
+        product: {
+          id: 'prod1',
+          name: 'Lavender Spray',
+          active: true,
+        },
+      });
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
+      mockPrismaService.order.create.mockResolvedValue(mockOrder);
+      mockPrismaService.order.count.mockResolvedValue(0);
+
+      const result = await service.checkout('user1', {
+        addressId: 'addr1',
+        items: [{ variantId: 'var1', quantity: 1 }],
+      });
+
+      expect(result).toBeDefined();
+      expect(mockPrismaService.cartItem.deleteMany).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when cart is empty', async () => {

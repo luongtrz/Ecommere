@@ -380,6 +380,14 @@ export class OrdersService {
             where: { id: cartId },
             data: { couponId: null },
           });
+        } else if (items && items.length > 0 && cart) {
+          const orderedVariantIds = items.map((item) => item.variantId);
+          await tx.cartItem.deleteMany({
+            where: {
+              cartId: cart.id,
+              variantId: { in: orderedVariantIds },
+            },
+          });
         }
 
         return newOrder;
