@@ -19,10 +19,48 @@ import { Search, Grid3X3, List, ShoppingBag, X, Filter } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { FilterSidebar } from '../components/FilterSidebar';
 
+function parseNumericParam(
+  value: string | null,
+  defaultValue: number,
+  min?: number,
+  max?: number
+): number;
+function parseNumericParam(
+  value: string | null,
+  defaultValue: undefined,
+  min?: number,
+  max?: number
+): number | undefined;
+function parseNumericParam(
+  value: string | null,
+  defaultValue: number | undefined,
+  min?: number,
+  max?: number
+): number | undefined {
+  if (value === null || value === undefined || value.trim() === '') {
+    return defaultValue;
+  }
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    return defaultValue;
+  }
+  const parsed = parseInt(value, 10);
+  if (!Number.isFinite(parsed)) {
+    return defaultValue;
+  }
+  if (min !== undefined && parsed < min) {
+    return defaultValue;
+  }
+  if (max !== undefined && parsed > max) {
+    return defaultValue;
+  }
+  return parsed;
+}
+
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(true);
-  const page = parseInt(searchParams.get('page') || '1');
+  const page = parseNumericParam(searchParams.get('page'), 1, 1);
   const sortBy = searchParams.get('sort') || 'newest';
   const searchQuery = searchParams.get('q') || '';
   const viewMode = searchParams.get('view') || 'grid';
@@ -33,8 +71,8 @@ export function CatalogPage() {
 
   // Filter params
   const categorySlug = searchParams.get('category') || undefined;
-  const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
-  const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
+  const minPrice = parseNumericParam(searchParams.get('minPrice'), undefined, 0);
+  const maxPrice = parseNumericParam(searchParams.get('maxPrice'), undefined, 0);
   const scent = searchParams.get('scent') || undefined;
   const volumeMl = searchParams.get('volumeMl') || undefined;
   const brand = searchParams.get('brand') || undefined;
