@@ -41,6 +41,28 @@ export function getCookie(name: string): string | null {
   return null;
 }
 
+let refreshPromise: Promise<string> | null = null;
+
+export async function refreshAccessToken(): Promise<string> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const { data } = await apiClient.post('/auth/refresh');
+      const actualData = data.data || data;
+      const newAccessToken = actualData.accessToken;
+      authToken.set(newAccessToken);
+      return newAccessToken;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: any) => void;
@@ -100,11 +122,8 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await apiClient.post('/auth/refresh');
-        const actualData = data.data || data;
-        const newAccessToken = actualData.accessToken;
+        const newAccessToken = await refreshAccessToken();
 
-        authToken.set(newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         processQueue(null, newAccessToken);
 
