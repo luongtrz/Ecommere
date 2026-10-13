@@ -27,10 +27,17 @@ export class AgentNotPendingError extends Error {
   }
 }
 
+export interface AgentTranscriptToolCall {
+  id?: string;
+  name: string;
+  args?: Record<string, any>;
+}
+
 export interface AgentTranscriptMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  tool_calls?: AgentTranscriptToolCall[];
 }
 
 export interface AgentRunnerDeps {
@@ -145,7 +152,18 @@ export class AgentRunner {
 
       const content = this.extractMessageContent((msg as any).content);
 
-      if (role === 'assistant' && (!content || content.length === 0)) {
+      const rawToolCalls =
+        role === 'assistant' ? (msg as any).tool_calls : undefined;
+      const validCalls = Array.isArray(rawToolCalls)
+        ? rawToolCalls.filter((c: any) => c && typeof c === 'object')
+        : [];
+      const hasToolCalls = validCalls.length > 0;
+
+      if (
+        role === 'assistant' &&
+        (!content || content.length === 0) &&
+        !hasToolCalls
+      ) {
         continue;
       }
 
@@ -155,11 +173,35 @@ export class AgentRunner {
           ? String(rawId)
           : String(i);
 
-      transcript.push({
+      const transcriptMsg: AgentTranscriptMessage = {
         id,
         role,
         content,
-      });
+      };
+
+      if (hasToolCalls) {
+        transcriptMsg.tool_calls = validCalls.map((call: any) => {
+          let args = call.args;
+          if (typeof args === 'string') {
+            try {
+              args = JSON.parse(args);
+            } catch {}
+          }
+          const item: AgentTranscriptToolCall = {
+            ...(call.id !== undefined && call.id !== null
+              ? { id: String(call.id) }
+              : {}),
+            name:
+              typeof call.name === 'string'
+                ? call.name
+                : String(call.name ?? ''),
+            ...(args !== undefined ? { args } : {}),
+          };
+          return item;
+        });
+      }
+
+      transcript.push(transcriptMsg);
     }
 
     return transcript;

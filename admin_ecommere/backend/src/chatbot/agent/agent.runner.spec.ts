@@ -875,7 +875,7 @@ describe('AgentRunner', () => {
     ]);
   });
 
-  it('readTranscript skips a tool-call-only AI message, tool messages and system messages', async () => {
+  it('readTranscript keeps a tool-call-only AI message with its tool calls, but skips tool messages, system messages, and empty AI messages without tools', async () => {
     const fakeGraph = createStateGraph({
       values: {
         messages: [
@@ -901,6 +901,10 @@ describe('AgentRunner', () => {
             id: 'tool-result-1',
           }),
           new AIMessage({
+            content: '',
+            id: 'ai-empty-no-tools',
+          }),
+          new AIMessage({
             content: 'Đã hủy đơn hàng ord-100 thành công.',
             id: 'ai-2',
           }),
@@ -919,9 +923,66 @@ describe('AgentRunner', () => {
     expect(transcript).toEqual([
       { id: 'h-2', role: 'user', content: 'Hủy đơn hàng ord-100' },
       {
+        id: 'ai-tool-call',
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          {
+            id: 'call_1',
+            name: 'cancel_order',
+            args: { orderId: 'ord-100' },
+          },
+        ],
+      },
+      {
         id: 'ai-2',
         role: 'assistant',
         content: 'Đã hủy đơn hàng ord-100 thành công.',
+      },
+    ]);
+  });
+
+  it('readTranscript returns pending tool call for a thread waiting for confirmation', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new HumanMessage({ content: 'Cập nhật biến thể v-1', id: 'h-1' }),
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: 'call_pending',
+                name: 'update_variant',
+                args: { variantId: 'v-1', price: 200000 },
+              },
+            ],
+            id: 'ai-confirm-wait',
+          }),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-waiting-confirm');
+
+    expect(transcript).toEqual([
+      { id: 'h-1', role: 'user', content: 'Cập nhật biến thể v-1' },
+      {
+        id: 'ai-confirm-wait',
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          {
+            id: 'call_pending',
+            name: 'update_variant',
+            args: { variantId: 'v-1', price: 200000 },
+          },
+        ],
       },
     ]);
   });
