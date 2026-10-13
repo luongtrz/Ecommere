@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
 import { useOrders, useCancelOrder } from '../hooks/useOrders';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { Pagination } from '@/components/common/Pagination';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -53,7 +54,8 @@ const TABS = [
 ];
 
 export function OrdersPage() {
-  const { data, isLoading } = useOrders();
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useOrders(page);
   const cancelOrder = useCancelOrder();
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('ALL');
@@ -77,6 +79,9 @@ export function OrdersPage() {
   }
 
   const allOrders = data?.orders || [];
+  const totalOrders = data?.total ?? 0;
+  const limit = 10;
+  const totalPages = data?.totalPages ?? Math.ceil(totalOrders / limit);
 
   // Filter orders based on active tab
   const filteredOrders = activeTab === 'ALL'
@@ -101,7 +106,7 @@ export function OrdersPage() {
               </div>
 
               {/* Tabs moved to Header for compactness */}
-              {allOrders.length > 0 && (
+              {totalOrders > 0 && (
                 <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-lg self-start md:self-center overflow-x-auto max-w-full">
                   {TABS.map((tab) => (
                     <button
@@ -122,11 +127,11 @@ export function OrdersPage() {
             </div>
 
             {/* Stats Overview Compact */}
-            {allOrders.length > 0 && (
+            {totalOrders > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
                   <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">Tổng đơn</div>
-                  <div className="text-xl font-bold text-gray-900">{allOrders.length}</div>
+                  <div className="text-xl font-bold text-gray-900">{totalOrders}</div>
                 </div>
                 <div className="bg-amber-50/50 rounded-xl p-3 border border-amber-100/50 flex items-center justify-between">
                   <div className="text-amber-600 text-xs font-medium uppercase tracking-wider">Đang xử lý</div>
@@ -174,7 +179,8 @@ export function OrdersPage() {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
+            <>
+              <div className="space-y-4">
               {filteredOrders.map((order, index) => {
                 const status = getStatusConfig(order.status);
                 const StatusIcon = status.icon;
@@ -288,7 +294,18 @@ export function OrdersPage() {
                 );
               })}
             </div>
-          )}
+
+            {totalPages > 1 && (
+              <div className="flex justify-center pt-6">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
+          </>
+        )}
         </div>
       </div>
     </>

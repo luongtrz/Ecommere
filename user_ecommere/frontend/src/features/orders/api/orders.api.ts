@@ -41,6 +41,7 @@ const orderSchema = z.object({
 const ordersResponseSchema = z.object({
   orders: z.array(orderSchema),
   total: z.number(),
+  totalPages: z.number().optional(),
 });
 
 export type Order = z.infer<typeof orderSchema>;
@@ -52,6 +53,7 @@ export const ordersApi = {
     const mapped = {
       orders: actualData.data || [],
       total: actualData.total || 0,
+      totalPages: actualData.totalPages ?? Math.ceil((actualData.total || 0) / limit),
     };
     return ordersResponseSchema.parse(mapped);
   },
