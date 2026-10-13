@@ -290,6 +290,7 @@ export class OrdersService {
               district: address.district,
               ward: address.ward,
               line1: address.line1,
+              shippingMethod: shippingMethod ?? ShippingMethod.STANDARD,
             }),
             items: {
               create: orderItems,
@@ -977,6 +978,13 @@ export class OrdersService {
     const expectedPaymentMethod = checkoutDto.paymentMethod || 'PENDING';
     if (expectedPaymentMethod !== order.paymentMethod) {
       throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+    }
+
+    const storedShippingMethod = orderAddress.shippingMethod;
+    if (storedShippingMethod && checkoutDto.shippingMethod) {
+      if (storedShippingMethod !== checkoutDto.shippingMethod) {
+        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+      }
     }
   }
 
