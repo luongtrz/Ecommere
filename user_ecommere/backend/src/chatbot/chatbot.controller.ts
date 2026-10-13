@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import {
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
@@ -216,12 +217,18 @@ export class ChatbotController {
   @ApiOperation({ summary: 'Delete a chat thread' })
   @ApiResponse({ status: 200, description: 'Thread deleted' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
+  @ApiResponse({ status: 409, description: 'Thread is busy' })
   async deleteThread(
     @Req() req: Request,
     @Param('threadId') threadId: string,
   ) {
     const actor = this.getActor(req);
     await this.threads.assertOwned(threadId, actor);
+    if (this.runner.isThreadRunning(threadId)) {
+      throw new ConflictException(
+        'Cuộc trò chuyện đang được xử lý, vui lòng thử lại sau.',
+      );
+    }
     await this.runner.deleteCheckpoints(threadId);
     await this.threads.remove(threadId, actor);
     return { deleted: true };

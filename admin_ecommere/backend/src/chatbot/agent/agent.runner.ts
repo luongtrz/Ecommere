@@ -81,6 +81,10 @@ export class AgentRunner {
     this.now = deps.now ?? Date.now;
   }
 
+  isThreadRunning(threadId: string): boolean {
+    return this.runningThreads.has(threadId);
+  }
+
   run(params: AgentRunParams): Promise<void> {
     const threadId = params.ctx.threadId;
     if (this.runningThreads.has(threadId)) {

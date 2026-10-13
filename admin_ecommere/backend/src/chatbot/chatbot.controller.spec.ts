@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { AdminChatbotController } from './chatbot.controller';
 import { AgentBusyError, AgentNotPendingError } from './agent/agent.runner';
 import type { AgentConfig } from './agent/agent.config';
@@ -122,6 +122,7 @@ describe('AdminChatbotController', () => {
     readTranscript: jest.Mock;
     assertResumable: jest.Mock;
     deleteCheckpoints: jest.Mock;
+    isThreadRunning: jest.Mock;
   };
   let mockThreads: {
     create: jest.Mock;
@@ -150,6 +151,7 @@ describe('AdminChatbotController', () => {
       readTranscript: jest.fn(),
       assertResumable: jest.fn().mockResolvedValue(undefined),
       deleteCheckpoints: jest.fn().mockResolvedValue(undefined),
+      isThreadRunning: jest.fn().mockReturnValue(false),
     };
 
     mockThreads = {
@@ -692,6 +694,29 @@ describe('AdminChatbotController', () => {
         userId: 'admin-user-1',
         app: 'ADMIN',
       });
+      expect(mockRunner.deleteCheckpoints).not.toHaveBeenCalled();
+      expect(mockThreads.remove).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 ConflictException when thread is running and does not call deleteCheckpoints or remove', async () => {
+      mockRunner.isThreadRunning.mockReturnValue(true);
+
+      const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
+
+      await expect(
+        controller.deleteThread(req as any, 'running-thread-id'),
+      ).rejects.toThrow(ConflictException);
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith(
+        'running-thread-id',
+        {
+          userId: 'admin-user-1',
+          app: 'ADMIN',
+        },
+      );
+      expect(mockRunner.isThreadRunning).toHaveBeenCalledWith(
+        'running-thread-id',
+      );
       expect(mockRunner.deleteCheckpoints).not.toHaveBeenCalled();
       expect(mockThreads.remove).not.toHaveBeenCalled();
     });
