@@ -479,6 +479,7 @@ export class ProductsService {
     );
 
     const data: any = { ...updateVariantDto };
+    delete data.stock;
 
     if (updateVariantDto.scent || updateVariantDto.volumeMl) {
       const scent = updateVariantDto.scent || variant.scent;
