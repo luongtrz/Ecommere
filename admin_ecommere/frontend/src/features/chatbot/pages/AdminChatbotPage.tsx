@@ -19,6 +19,7 @@ import { agentApi, type AgentThreadSummary } from '../api/agent.api';
 import { ToolCallCard } from '../components/ToolCallCard';
 import { ConfirmActionCard } from '../components/ConfirmActionCard';
 import { ChatMarkdown } from '../components/ChatMarkdown';
+import type { ChatMessage } from '../types';
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { SEO } from '@/lib/seo';
@@ -228,12 +229,48 @@ export function AdminChatbotPage() {
         return;
       }
       const now = new Date().toISOString();
-      for (const msg of transcript) {
+      for (let i = 0; i < transcript.length; i++) {
+        const msg = transcript[i];
+        const isLast = i === transcript.length - 1;
+        const hasToolCalls =
+          Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
+
+        let confirm: ChatMessage['confirm'] | undefined = undefined;
+
+        if (isLast && msg.role === 'assistant' && hasToolCalls) {
+          const hasToolResultAfter = transcript
+            .slice(i + 1)
+            .some(
+              (m) =>
+                (m.role as string) === 'tool' ||
+                (m as any).type === 'tool'
+            );
+          if (!hasToolResultAfter) {
+            confirm = {
+              calls: msg.tool_calls!.map((c) => ({
+                id: c.id ?? '',
+                name: c.name,
+                summary: c.summary ?? c.name,
+                risk: c.risk ?? 'DESTRUCTIVE',
+              })),
+              decided: false,
+            };
+          }
+        }
+
+        const hasContent = Boolean(msg.content && msg.content.trim().length > 0);
+
+        // An assistant message with no text and no card must not show as an empty chat bubble.
+        if (msg.role === 'assistant' && !hasContent && !confirm) {
+          continue;
+        }
+
         appendMessage({
           id: msg.id,
           role: msg.role,
           content: msg.content,
           tools: [],
+          confirm,
           createdAt: now,
         });
       }
@@ -431,11 +468,24 @@ export function AdminChatbotPage() {
                     );
                   }
 
+                  const hasTools = Boolean(message.tools && message.tools.length > 0);
+                  const hasContent = Boolean(
+                    message.content && message.content.trim().length > 0
+                  );
+                  const hasConfirm = Boolean(
+                    message.confirm?.calls && message.confirm.calls.length > 0
+                  );
+                  const hasError = Boolean(message.error);
+
+                  if (!hasTools && !hasContent && !hasConfirm && !hasError) {
+                    return null;
+                  }
+
                   return (
                     <div key={message.id} className="flex justify-start">
                       <div className="max-w-[95%] sm:max-w-[85%] rounded-2xl border border-border/60 bg-card p-4 text-card-foreground shadow-sm space-y-3">
                         {/* Tools rows above its text */}
-                        {message.tools && message.tools.length > 0 && (
+                        {hasTools && (
                           <div className="space-y-1.5">
                             {message.tools.map((step) => (
                               <ToolCallCard key={step.id} step={step} />
@@ -444,23 +494,23 @@ export function AdminChatbotPage() {
                         )}
 
                         {/* Text with ChatMarkdown */}
-                        {message.content ? (
+                        {hasContent ? (
                           <ChatMarkdown content={message.content} />
                         ) : null}
 
                         {/* Confirm block */}
-                        {message.confirm && message.confirm.calls && (
-                          <div className="mt-2">
+                        {hasConfirm && (
+                          <div className={hasContent ? 'mt-2' : undefined}>
                             <ConfirmActionCard
-                              calls={message.confirm.calls}
-                              decided={message.confirm.decided}
+                              calls={message.confirm!.calls}
+                              decided={message.confirm!.decided}
                               onSubmit={(decisions) => decide(message.id, decisions)}
                             />
                           </div>
                         )}
 
                         {/* Error in a visible alert with role="alert" */}
-                        {message.error && (
+                        {hasError && (
                           <Alert variant="destructive" role="alert" className="mt-2">
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription>{message.error}</AlertDescription>

@@ -53,10 +53,19 @@ export function resumeTurn(
   );
 }
 
+export interface AgentTranscriptToolCall {
+  id?: string;
+  name: string;
+  args?: Record<string, any>;
+  summary?: string;
+  risk?: 'WRITE' | 'SENSITIVE' | 'DESTRUCTIVE';
+}
+
 export interface AgentTranscriptMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  tool_calls?: AgentTranscriptToolCall[];
 }
 
 export const agentApi = {
