@@ -85,7 +85,7 @@ export class ReferralsService {
             data: referrals.map((r) => ({
                 id: r.id,
                 refereeName: r.referee.name || r.referee.email,
-                refereeEmail: r.referee.email,
+                refereeEmail: this.maskEmail(r.referee.email),
                 couponCode: r.referrerCouponCode,
                 createdAt: r.createdAt,
             })),
@@ -330,5 +330,18 @@ export class ReferralsService {
 
     private isSerializationConflict(error: unknown) {
         return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034';
+    }
+
+    private maskEmail(email: string | null | undefined): string | null | undefined {
+        if (!email) {
+            return email;
+        }
+
+        const atIndex = email.indexOf('@');
+        if (atIndex <= 0) {
+            return '***';
+        }
+
+        return `${email[0]}***${email.slice(atIndex)}`;
     }
 }
