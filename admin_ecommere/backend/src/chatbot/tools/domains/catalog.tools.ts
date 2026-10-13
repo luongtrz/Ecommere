@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 import type { ProductsService } from '../../../products/products.service';
 import type { CategoriesService } from '../../../categories/categories.service';
 import type { CreateProductDto, CreateVariantDto } from '../../../products/dtos/create-product.dto';
@@ -83,7 +84,7 @@ function projectProductDetail(product: any): any {
   };
 }
 
-function projectCategoryTree(categories: any, depth = 1): any {
+function projectCategoryTree(categories: any, depth = 1, maxDepth = 3): any {
   if (!Array.isArray(categories)) {
     return categories;
   }
@@ -96,9 +97,9 @@ function projectCategoryTree(categories: any, depth = 1): any {
       productCount: cat?.productCount ?? 0,
     };
 
-    if (depth < 2) {
+    if (depth < maxDepth) {
       node.children = Array.isArray(cat?.children)
-        ? projectCategoryTree(cat.children, depth + 1)
+        ? projectCategoryTree(cat.children, depth + 1, maxDepth)
         : [];
     }
 
@@ -244,7 +245,7 @@ export function createAdminCatalogTools(
     ) => {
       const { id, ...fields } = args;
       if (Object.keys(fields).length === 0) {
-        throw new Error(
+        throw new ToolError(
           'Cần ít nhất một trường để cập nhật sản phẩm ngoài id',
         );
       }
@@ -291,7 +292,7 @@ export function createAdminCatalogTools(
       scent: z.string().min(1).max(100).optional(),
       volumeMl: z.number().int().min(1).optional(),
       price: z.number().int().min(0).optional(),
-      salePrice: z.number().int().min(0).optional(),
+      salePrice: z.number().int().min(0).nullable().optional(),
       stock: z.number().int().min(0).optional(),
       barcode: z.string().min(1).max(64).optional(),
     })
@@ -311,7 +312,7 @@ export function createAdminCatalogTools(
     ) => {
       const { variantId, ...fields } = args;
       if (Object.keys(fields).length === 0) {
-        throw new Error(
+        throw new ToolError(
           'Cần ít nhất một trường để cập nhật biến thể ngoài variantId',
         );
       }
@@ -436,7 +437,7 @@ export function createAdminCatalogTools(
     ) => {
       const { id, ...fields } = args;
       if (fields.name === undefined && fields.parentId === undefined) {
-        throw new Error(
+        throw new ToolError(
           'Cần ít nhất một trong hai trường name hoặc parentId để cập nhật danh mục',
         );
       }

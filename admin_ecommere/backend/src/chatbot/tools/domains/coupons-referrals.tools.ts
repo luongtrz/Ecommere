@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 import type { CouponsService } from '../../../coupons/coupons.service';
 import type { ReferralsService } from '../../../referrals/referrals.service';
 
@@ -189,7 +190,7 @@ export function createCouponsReferralsTools(
       if (args.active !== undefined) fields.active = args.active;
 
       if (Object.keys(fields).length === 0) {
-        throw new Error('Cần ít nhất một trường ngoài mã code để cập nhật');
+        throw new ToolError('Cần ít nhất một trường ngoài mã code để cập nhật');
       }
 
       return deps.coupons.update(args.code, fields);
@@ -293,7 +294,7 @@ export function createCouponsReferralsTools(
       if (args.maxReferralsPerUser !== undefined) fields.maxReferralsPerUser = args.maxReferralsPerUser;
 
       if (Object.keys(fields).length === 0) {
-        throw new Error('Cần ít nhất một trường để cập nhật cấu hình giới thiệu');
+        throw new ToolError('Cần ít nhất một trường để cập nhật cấu hình giới thiệu');
       }
 
       return deps.referrals.updateConfig(fields);

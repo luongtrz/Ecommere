@@ -4,6 +4,7 @@ import {
   COUPON_TYPES,
 } from './coupons-referrals.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 import type { CouponsService } from '../../../coupons/coupons.service';
 import type { ReferralsService } from '../../../referrals/referrals.service';
 
@@ -491,6 +492,9 @@ describe('Coupons and Referrals Tools', () => {
     it('rejects a call with only code in handler check', async () => {
       await expect(
         updateCouponTool.handler({ code: 'SUMMER2026' }, adminCtx),
+      ).rejects.toThrow(ToolError);
+      await expect(
+        updateCouponTool.handler({ code: 'SUMMER2026' }, adminCtx),
       ).rejects.toThrow('Cần ít nhất một trường ngoài mã code để cập nhật');
       expect(mockCouponsService.update).not.toHaveBeenCalled();
     });
@@ -669,6 +673,9 @@ describe('Coupons and Referrals Tools', () => {
     });
 
     it('rejects a call with no fields in handler check', async () => {
+      await expect(
+        updateReferralConfigTool.handler({}, adminCtx),
+      ).rejects.toThrow(ToolError);
       await expect(
         updateReferralConfigTool.handler({}, adminCtx),
       ).rejects.toThrow('Cần ít nhất một trường để cập nhật cấu hình giới thiệu');

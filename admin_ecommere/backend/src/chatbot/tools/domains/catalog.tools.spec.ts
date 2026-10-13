@@ -3,6 +3,7 @@ import {
   AdminCatalogToolDeps,
 } from './catalog.tools';
 import { AgentToolDef, ToolContext } from '../tool.types';
+import { ToolError } from '../tool-result.util';
 import type { ProductsService } from '../../../products/products.service';
 import type { CategoriesService } from '../../../categories/categories.service';
 
@@ -520,6 +521,9 @@ describe('Admin Catalog Tools', () => {
     it('rejects a call with only id (handler check)', async () => {
       await expect(
         updateProductTool.handler({ id: 'prod-1' }, adminCtx),
+      ).rejects.toThrow(ToolError);
+      await expect(
+        updateProductTool.handler({ id: 'prod-1' }, adminCtx),
       ).rejects.toThrow('Cần ít nhất một trường để cập nhật sản phẩm ngoài id');
     });
 
@@ -635,7 +639,57 @@ describe('Admin Catalog Tools', () => {
     it('rejects a call with only variantId (handler check)', async () => {
       await expect(
         updateVariantTool.handler({ variantId: 'var-1' }, adminCtx),
+      ).rejects.toThrow(ToolError);
+      await expect(
+        updateVariantTool.handler({ variantId: 'var-1' }, adminCtx),
       ).rejects.toThrow('Cần ít nhất một trường để cập nhật biến thể ngoài variantId');
+    });
+
+    it('accepts salePrice null to remove sale price and calls products.updateVariant', async () => {
+      mockProductsService.updateVariant.mockResolvedValue({
+        id: 'var-1',
+        salePrice: null,
+      });
+
+      const parsed = updateVariantTool.schema.safeParse({
+        variantId: 'var-1',
+        salePrice: null,
+      });
+      expect(parsed.success).toBe(true);
+
+      const result = await updateVariantTool.handler(
+        { variantId: 'var-1', salePrice: null },
+        adminCtx,
+      );
+
+      expect(mockProductsService.updateVariant).toHaveBeenCalledTimes(1);
+      expect(mockProductsService.updateVariant).toHaveBeenCalledWith('var-1', {
+        salePrice: null,
+      });
+      expect(result).toEqual({ id: 'var-1', salePrice: null });
+    });
+
+    it('accepts numeric salePrice and calls products.updateVariant', async () => {
+      mockProductsService.updateVariant.mockResolvedValue({
+        id: 'var-1',
+        salePrice: 120000,
+      });
+
+      const parsed = updateVariantTool.schema.safeParse({
+        variantId: 'var-1',
+        salePrice: 120000,
+      });
+      expect(parsed.success).toBe(true);
+
+      const result = await updateVariantTool.handler(
+        { variantId: 'var-1', salePrice: 120000 },
+        adminCtx,
+      );
+
+      expect(mockProductsService.updateVariant).toHaveBeenCalledWith('var-1', {
+        salePrice: 120000,
+      });
+      expect(result).toEqual({ id: 'var-1', salePrice: 120000 });
     });
 
     it('rejects extra keys (strict)', () => {
@@ -724,7 +778,7 @@ describe('Admin Catalog Tools', () => {
       expect(result).toBe(mockTree);
     });
 
-    it('project() limits children to at most two levels of depth', () => {
+    it('project() exposes leaf categories in a three-level category tree', () => {
       const rawTree = [
         {
           id: 'root-1',
@@ -765,11 +819,20 @@ describe('Admin Catalog Tools', () => {
               name: 'Xịt phòng',
               slug: 'xit-phong',
               productCount: 15,
+              children: [
+                {
+                  id: 'leaf-1',
+                  name: 'Xịt phòng tự động',
+                  slug: 'xit-phong-tu-dong',
+                  productCount: 5,
+                },
+              ],
             },
           ],
         },
       ]);
-      expect(projected[0].children[0].children).toBeUndefined();
+      expect(projected[0].children[0].children[0].id).toBe('leaf-1');
+      expect(projected[0].children[0].children[0].children).toBeUndefined();
     });
 
     it('summarize returns a Vietnamese line', () => {
@@ -842,6 +905,9 @@ describe('Admin Catalog Tools', () => {
     });
 
     it('rejects a call with only id (handler check)', async () => {
+      await expect(
+        updateCategoryTool.handler({ id: 'cat-1' }, adminCtx),
+      ).rejects.toThrow(ToolError);
       await expect(
         updateCategoryTool.handler({ id: 'cat-1' }, adminCtx),
       ).rejects.toThrow(
