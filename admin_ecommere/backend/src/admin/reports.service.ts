@@ -1,8 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import { SalesReportQueryDto } from './dtos/sales-report-query.dto';
 import { TopProductsQueryDto } from './dtos/top-products-query.dto';
+
+interface SalesReportRawRow {
+  period: string;
+  orders: bigint | number;
+  revenue: bigint | number;
+}
 
 @Injectable()
 export class ReportsService {
@@ -146,30 +152,15 @@ export class ReportsService {
   }
 
   /**
-   * Tính bucket key từ thời gian VN đã dịch +7 giờ
-   */
-  private getBucketKey(vnDate: Date, groupBy: 'day' | 'week' | 'month'): string {
-    const y = vnDate.getUTCFullYear();
-    const m = vnDate.getUTCMonth() + 1;
-    const d = vnDate.getUTCDate();
-
-    if (groupBy === 'day') {
-      return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    }
-
-    if (groupBy === 'week') {
-      return this.getMondayOfIsoWeek(y, m, d);
-    }
-
-    return `${y}-${String(m).padStart(2, '0')}-01`;
-  }
-
-  /**
    * Feature A: Báo cáo doanh thu bán hàng
    */
   async getSalesReport(query: SalesReportQueryDto) {
     const { from, to } = query;
     const groupBy = query.groupBy || 'day';
+
+    if (groupBy !== 'day' && groupBy !== 'week' && groupBy !== 'month') {
+      throw new BadRequestException('groupBy phải là day, week hoặc month');
+    }
 
     const { startDateUtc, endDateUtc, fromY, fromM, fromD, toY, toM, toD } =
       this.parseAndValidateDateRange(from, to);
@@ -177,40 +168,35 @@ export class ReportsService {
     const periods = this.generatePeriods(fromY, fromM, fromD, toY, toM, toD, groupBy);
 
     // Revenue orders: status in PAID, PACKING, SHIPPED, DELIVERED
-    const orders = await this.prisma.order.findMany({
-      where: {
-        status: {
-          in: [
-            OrderStatus.PAID,
-            OrderStatus.PACKING,
-            OrderStatus.SHIPPED,
-            OrderStatus.DELIVERED,
-          ],
-        },
-        createdAt: {
-          gte: startDateUtc,
-          lte: endDateUtc,
-        },
-      },
-      select: {
-        createdAt: true,
-        total: true,
-      },
-    });
+    const statuses = [
+      OrderStatus.PAID,
+      OrderStatus.PACKING,
+      OrderStatus.SHIPPED,
+      OrderStatus.DELIVERED,
+    ];
+
+    const rawRows = await this.prisma.$queryRaw<SalesReportRawRow[]>(Prisma.sql`
+      SELECT
+        to_char(date_trunc(${groupBy}, "createdAt" + INTERVAL '7 hours'), 'YYYY-MM-DD') AS "period",
+        COUNT(*)::bigint AS "orders",
+        COALESCE(SUM("total"), 0)::bigint AS "revenue"
+      FROM "orders"
+      WHERE "status"::text IN (${Prisma.join(statuses)})
+        AND "createdAt" >= ${startDateUtc.toISOString()}::timestamp
+        AND "createdAt" <= ${endDateUtc.toISOString()}::timestamp
+      GROUP BY 1
+    `);
 
     const periodMap = new Map<string, { orders: number; revenue: number }>();
     for (const p of periods) {
       periodMap.set(p, { orders: 0, revenue: 0 });
     }
 
-    for (const order of orders) {
-      // Shift timestamps by +7 hours and read UTC fields
-      const vnTime = new Date(order.createdAt.getTime() + 7 * 60 * 60 * 1000);
-      const key = this.getBucketKey(vnTime, groupBy);
-      const item = periodMap.get(key);
+    for (const row of rawRows) {
+      const item = periodMap.get(row.period);
       if (item) {
-        item.orders += 1;
-        item.revenue += order.total;
+        item.orders = Number(row.orders ?? 0);
+        item.revenue = Number(row.revenue ?? 0);
       }
     }
 
