@@ -100,6 +100,10 @@ export class PaymentsService {
       throw new BadRequestException('Order has not been paid');
     }
 
+    if (order.status !== OrderStatus.DELIVERED) {
+      throw new BadRequestException('Order has not been delivered');
+    }
+
     const provider = method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
 
     // Mock payment ID - in production, this would be stored with the order
