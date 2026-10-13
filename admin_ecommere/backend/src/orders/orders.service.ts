@@ -632,7 +632,7 @@ export class OrdersService {
         throw new BadRequestException('Order status changed; please retry');
       }
 
-      if (status === OrderStatus.CANCELED || status === OrderStatus.REFUNDED) {
+      if (status === OrderStatus.CANCELED) {
         await this.restoreStockForOrder(order, tx);
       }
 
