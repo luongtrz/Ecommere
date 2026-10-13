@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { SEO } from '@/lib/seo';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useAddresses } from '@/features/users/hooks/useAddresses';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatters';
-import { PAYMENT_METHODS, SHIPPING_METHODS } from '@/lib/constants';
+import { PAYMENT_METHODS, SHIPPING_METHODS, QUERY_KEYS } from '@/lib/constants';
 import apiClient from '@/lib/api';
 import { ArrowLeft, Truck, CreditCard, MapPin, Shield, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
@@ -24,6 +25,7 @@ export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { data: addresses } = useAddresses();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const checkoutKeyRef = useRef<{ key: string; fingerprint: string } | null>(null);
 
@@ -114,6 +116,7 @@ export function CheckoutPage() {
       await apiClient.post('/orders/checkout', orderData);
       orderCreated = true;
       setIsOrdered(true);
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
     } catch (error) {
       console.error('Order creation failed:', error);
       alert('Đặt hàng thất bại. Vui lòng thử lại.');
