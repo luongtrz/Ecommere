@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, matchRoutes, type RouteObject } from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { RequireAuth } from './guards/RequireAuth';
@@ -23,6 +23,22 @@ const OrderDetailPage = lazy(() => import('@/features/orders/pages/OrderDetailPa
 const ReferralPage = lazy(() => import('@/features/referrals/pages/ReferralPage').then(m => ({ default: m.ReferralPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 const ErrorPage = lazy(() => import('@/pages/ErrorPage').then(m => ({ default: m.ErrorPage })));
+
+export const protectedRoutes: RouteObject[] = [
+  { path: 'account', element: <AccountPage /> },
+  { path: 'addresses', element: <AddressesPage /> },
+  { path: 'checkout', element: <CheckoutPage /> },
+  { path: 'orders', element: <OrdersPage /> },
+  { path: 'orders/:orderId', element: <OrderDetailPage /> },
+  { path: 'referral', element: <ReferralPage /> },
+];
+
+export function isProtectedRoute(pathname: string): boolean {
+  if (!pathname || pathname === '/login') return false;
+  const path = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  const cleanPath = path.split('?')[0].split('#')[0];
+  return matchRoutes(protectedRoutes, cleanPath) !== null;
+}
 
 export function AppRouter() {
   const fallback = <div className="min-h-screen flex items-center justify-center"><LoadingSpinner /></div>;
@@ -50,12 +66,9 @@ export function AppRouter() {
 
         {/* Protected User Routes */}
         <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
-          <Route path="account" element={<AccountPage />} />
-          <Route path="addresses" element={<AddressesPage />} />
-          <Route path="checkout" element={<CheckoutPage />} />
-          <Route path="orders" element={<OrdersPage />} />
-          <Route path="orders/:orderId" element={<OrderDetailPage />} />
-          <Route path="referral" element={<ReferralPage />} />
+          {protectedRoutes.map(route => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
         </Route>
 
         {/* Error Routes */}

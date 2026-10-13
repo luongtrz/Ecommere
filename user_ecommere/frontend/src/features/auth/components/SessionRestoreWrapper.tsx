@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from 'react';
 import { authToken, refreshAccessToken } from '@/lib/api';
 import { useCartStore } from '@/features/cart/store/cartStore';
+import { isProtectedRoute } from '@/app/router';
 
 interface SessionRestoreWrapperProps {
   children: ReactNode;
@@ -22,7 +23,7 @@ export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) 
         authToken.remove();
         useCartStore.getState().clearCart();
         localStorage.removeItem('user');
-        if (window.location.pathname !== '/login') {
+        if (window.location.pathname !== '/login' && isProtectedRoute(window.location.pathname)) {
           window.location.replace('/login');
         }
       }
