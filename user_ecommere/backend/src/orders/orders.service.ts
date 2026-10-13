@@ -950,13 +950,28 @@ export class OrdersService {
         throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
       }
     } else {
+      const shippingAddress = checkoutDto.shippingAddress as
+        | {
+            fullName?: string;
+            phone?: string;
+            province?: string;
+            district?: string;
+            ward?: string;
+            address?: string;
+            line1?: string;
+          }
+        | undefined;
+
       requestAddress = {
-        fullName: checkoutDto.fullName,
-        phone: checkoutDto.phone,
-        province: checkoutDto.province,
-        district: checkoutDto.district,
-        ward: checkoutDto.ward,
-        line1: checkoutDto.line1,
+        fullName: shippingAddress?.fullName ?? checkoutDto.fullName,
+        phone: shippingAddress?.phone ?? checkoutDto.phone,
+        province: shippingAddress?.province ?? checkoutDto.province,
+        district: shippingAddress?.district ?? checkoutDto.district,
+        ward: shippingAddress?.ward ?? checkoutDto.ward,
+        line1:
+          shippingAddress?.line1 ??
+          shippingAddress?.address ??
+          checkoutDto.line1,
       };
     }
 
