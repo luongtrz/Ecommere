@@ -613,7 +613,7 @@ export class OrdersService {
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new NotFoundException('Order not found');
     }
 
     return order;
@@ -804,7 +804,7 @@ export class OrdersService {
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new NotFoundException('Order not found');
     }
 
     // Only allow cancellation for pending or paid orders (before packing)
