@@ -506,6 +506,14 @@ export function useChatAgent(): {
 
         const errorMsg = mapStreamError(err);
         useChatStore.getState().patchMessage(messageId, {
+          ...(status !== 404
+            ? {
+                confirm: {
+                  calls,
+                  decided: false,
+                },
+              }
+            : {}),
           error: errorMsg,
         });
       } finally {
