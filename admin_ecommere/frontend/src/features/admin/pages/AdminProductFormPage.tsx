@@ -45,6 +45,7 @@ const productFormSchema = z.object({
   basePrice: z.number().int('Giá phải là số nguyên').positive('Giá phải lớn hơn 0'),
   active: z.boolean(),
   variants: z.array(variantFormSchema).min(1, 'Sản phẩm phải có ít nhất một biến thể'),
+  images: z.array(z.string()).min(1, 'Vui lòng thêm ít nhất 1 ảnh'),
 });
 
 type ProductFormData = z.infer<typeof productFormSchema>;
@@ -91,6 +92,7 @@ export function AdminProductFormPage() {
           barcode: '',
         },
       ],
+      images: [],
     },
   });
 
@@ -154,6 +156,7 @@ export function AdminProductFormPage() {
         })),
       );
       setImages(product.images || []); // Initialize images
+      setValue('images', product.images || []);
     }
   }, [product, isEditMode, replace, setValue]);
 
@@ -277,7 +280,17 @@ export function AdminProductFormPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <ImageUpload images={images} onChange={setImages} maxImages={5} />
+                      <ImageUpload
+                        images={images}
+                        onChange={(newImages) => {
+                          setImages(newImages);
+                          setValue('images', newImages, { shouldValidate: true });
+                        }}
+                        maxImages={5}
+                      />
+                      {errors.images && (
+                        <p className="text-sm text-destructive">{errors.images.message}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
