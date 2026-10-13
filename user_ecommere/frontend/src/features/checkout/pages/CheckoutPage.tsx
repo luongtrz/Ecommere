@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -14,10 +14,18 @@ import { AddressFormDialog } from '@/features/users/components/AddressFormDialog
 import { CheckoutSteps } from '../components/CheckoutSteps';
 import confetti from 'canvas-confetti';
 
+function generateCheckoutKey(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { data: addresses } = useAddresses();
   const navigate = useNavigate();
+
+  const checkoutKeyRef = useRef<{ key: string; fingerprint: string } | null>(null);
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,13 +69,29 @@ export function CheckoutPage() {
   const handleSubmit = async () => {
     if (!selectedAddress) return;
 
+    const fingerprint = JSON.stringify({
+      addressId: selectedAddress.id,
+      paymentMethod,
+      shippingMethod,
+      items: items.map((i) => [i.variantId, i.quantity, i.price]),
+    });
+
+    let key: string;
+    if (!checkoutKeyRef.current || checkoutKeyRef.current.fingerprint !== fingerprint) {
+      key = generateCheckoutKey();
+      checkoutKeyRef.current = { key, fingerprint };
+    } else {
+      key = checkoutKeyRef.current.key;
+    }
+
     setIsSubmitting(true);
     let orderCreated = false;
 
     try {
       const orderData = {
+        checkoutKey: key,
         addressId: selectedAddress.id,
-        items: items.map(item => ({
+        items: items.map((item) => ({
           variantId: item.variantId,
           quantity: item.quantity,
           price: item.price,
@@ -80,6 +104,7 @@ export function CheckoutPage() {
 
       await apiClient.post('/orders/checkout', orderData);
       orderCreated = true;
+      checkoutKeyRef.current = null;
     } catch (error) {
       console.error('Order creation failed:', error);
       alert('Đặt hàng thất bại. Vui lòng thử lại.');

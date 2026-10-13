@@ -112,8 +112,8 @@ export class CouponsService {
     }
 
     // Validate date range
-    const newValidFrom = validFrom || coupon.validFrom;
-    const newValidUntil = validUntil || coupon.validUntil;
+    const newValidFrom = validFrom !== undefined ? validFrom : coupon.validFrom;
+    const newValidUntil = validUntil !== undefined ? validUntil : coupon.validUntil;
     if (newValidFrom && newValidUntil && newValidFrom >= newValidUntil) {
       throw new BadRequestException('validFrom must be before validUntil');
     }
