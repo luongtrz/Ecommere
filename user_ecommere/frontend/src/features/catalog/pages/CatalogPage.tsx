@@ -90,6 +90,8 @@ export function CatalogPage() {
   };
 
   const handleAddToCart = (product: any, variant: any) => {
+    if (!variant || variant.stock === 0) return;
+
     addItem({
       productId: product.id,
       variantId: variant.id,
@@ -276,6 +278,7 @@ export function CatalogPage() {
                           price={product.basePrice}
                           rating={product.rating}
                           reviewCount={product.reviewCount}
+                          variants={product.variants}
                           onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                         />
                       ) : (

@@ -271,6 +271,7 @@ export function SearchPage() {
                       price={product.basePrice}
                       rating={product.rating}
                       reviewCount={product.reviewCount}
+                      variants={product.variants}
                       onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                     />
                   ) : (
