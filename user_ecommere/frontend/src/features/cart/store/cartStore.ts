@@ -37,17 +37,35 @@ export const useCartStore = create<CartState>()(
       addItem: (item) => {
         const existingItem = get().items.find((i) => i.variantId === item.variantId);
         if (existingItem) {
+          const effectiveStock =
+            typeof item.stock === 'number' ? item.stock : existingItem.stock;
+          let newQuantity = existingItem.quantity + (item.quantity || 1);
+          if (typeof effectiveStock === 'number') {
+            if (effectiveStock > 0) {
+              newQuantity = Math.max(1, Math.min(newQuantity, effectiveStock));
+            } else {
+              newQuantity = existingItem.quantity;
+            }
+          }
           set({
             items: get().items.map((i) =>
               i.variantId === item.variantId
-                ? { ...i, quantity: i.quantity + (item.quantity || 1) }
+                ? {
+                    ...i,
+                    ...(typeof item.stock === 'number' ? { stock: item.stock } : {}),
+                    quantity: newQuantity,
+                  }
                 : i
             ),
             isOpen: true, // Auto open drawer
           });
         } else {
+          let newQuantity = item.quantity || 1;
+          if (typeof item.stock === 'number' && item.stock > 0) {
+            newQuantity = Math.max(1, Math.min(newQuantity, item.stock));
+          }
           set({
-            items: [...get().items, { ...item, quantity: item.quantity || 1 }],
+            items: [...get().items, { ...item, quantity: newQuantity }],
             isOpen: true, // Auto open drawer
           });
         }
@@ -58,15 +76,26 @@ export const useCartStore = create<CartState>()(
       },
 
       updateQuantity: (variantId, quantity) => {
+        const item = get().items.find((i) => i.variantId === variantId);
+        if (!item) return;
+
         if (quantity <= 0) {
           get().removeItem(variantId);
-        } else {
-          set({
-            items: get().items.map((i) =>
-              i.variantId === variantId ? { ...i, quantity } : i
-            ),
-          });
+          return;
         }
+
+        // Raising a line is capped at its stock, so a sold-out line cannot go up.
+        // Lowering or removing a line is always allowed.
+        let newQuantity = quantity;
+        if (quantity > item.quantity && typeof item.stock === 'number') {
+          newQuantity = Math.max(item.quantity, Math.min(quantity, item.stock));
+        }
+
+        set({
+          items: get().items.map((i) =>
+            i.variantId === variantId ? { ...i, quantity: newQuantity } : i
+          ),
+        });
       },
 
       clearCart: () => {
@@ -87,7 +116,14 @@ export const useCartStore = create<CartState>()(
       },
 
       replaceItems: (items) => {
-        set({ items });
+        set({
+          items: items.map((item) => {
+            if (typeof item.stock === 'number' && item.stock > 0 && item.quantity > item.stock) {
+              return { ...item, quantity: Math.max(1, item.stock) };
+            }
+            return item;
+          }),
+        });
       },
     }),
     {

@@ -126,6 +126,7 @@ export function CartPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                            disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
                             className="h-8 w-8 rounded-lg"
                           >
                             <Plus className="h-3 w-3" />
