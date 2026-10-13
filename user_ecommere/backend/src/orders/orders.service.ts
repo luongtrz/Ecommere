@@ -231,9 +231,6 @@ export class OrdersService {
       shippingMethod ?? ShippingMethod.STANDARD,
     );
     const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
-    if (coupon?.type === CouponType.FREESHIP) {
-      discount = calculatedShippingFee;
-    }
 
     const orderTotal = subtotal - discount + shippingFee;
 
