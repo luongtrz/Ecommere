@@ -182,6 +182,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
+    if (tokenRecord.user.role !== 'ADMIN') {
+      await this.prisma.refreshToken.updateMany({
+        where: {
+          userId: payload.sub,
+          tokenFamily: payload.family,
+        },
+        data: { revokedAt: new Date() },
+      });
+
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
     // Handle token already replaced (used before)
     if (tokenRecord.replacedBy) {
       const timeSinceReplaced = Date.now() - tokenRecord.updatedAt.getTime();
