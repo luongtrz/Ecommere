@@ -31,12 +31,15 @@ export interface AgentTranscriptToolCall {
   id?: string;
   name: string;
   args?: Record<string, any>;
+  risk?: string;
+  summary?: string;
 }
 
 export interface AgentTranscriptMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  pending?: boolean;
   tool_calls?: AgentTranscriptToolCall[];
 }
 
@@ -132,6 +135,41 @@ export class AgentRunner {
       return [];
     }
 
+    let lastToolCallMsgIndex = -1;
+    for (let i = rawMessages.length - 1; i >= 0; i--) {
+      const msg = rawMessages[i];
+      if (!msg || typeof msg !== 'object') {
+        continue;
+      }
+      const type = this.resolveMessageType(msg);
+      if (type !== 'ai' && type !== 'assistant') {
+        continue;
+      }
+      const rawToolCalls = (msg as any).tool_calls;
+      if (
+        Array.isArray(rawToolCalls) &&
+        rawToolCalls.some((c: any) => c && typeof c === 'object')
+      ) {
+        lastToolCallMsgIndex = i;
+        break;
+      }
+    }
+
+    let hasToolMessageAfter = false;
+    if (lastToolCallMsgIndex >= 0) {
+      for (let i = lastToolCallMsgIndex + 1; i < rawMessages.length; i++) {
+        const msg = rawMessages[i];
+        if (!msg || typeof msg !== 'object') {
+          continue;
+        }
+        const type = this.resolveMessageType(msg);
+        if (type === 'tool' || (msg as any).tool_call_id !== undefined) {
+          hasToolMessageAfter = true;
+          break;
+        }
+      }
+    }
+
     const transcript: AgentTranscriptMessage[] = [];
 
     for (let i = 0; i < rawMessages.length; i++) {
@@ -180,6 +218,10 @@ export class AgentRunner {
       };
 
       if (hasToolCalls) {
+        if (i === lastToolCallMsgIndex && !hasToolMessageAfter) {
+          transcriptMsg.pending = true;
+        }
+
         transcriptMsg.tool_calls = validCalls.map((call: any) => {
           let args = call.args;
           if (typeof args === 'string') {
@@ -187,16 +229,40 @@ export class AgentRunner {
               args = JSON.parse(args);
             } catch {}
           }
+          const callName =
+            typeof call.name === 'string'
+              ? call.name
+              : String(call.name ?? '');
+
           const item: AgentTranscriptToolCall = {
             ...(call.id !== undefined && call.id !== null
               ? { id: String(call.id) }
               : {}),
-            name:
-              typeof call.name === 'string'
-                ? call.name
-                : String(call.name ?? ''),
+            name: callName,
             ...(args !== undefined ? { args } : {}),
           };
+
+          const def = this.registry.get(callName);
+          if (def) {
+            let summary = callName;
+            try {
+              const parsed = def.schema.safeParse(args);
+              if (parsed.success) {
+                summary = def.summarize(parsed.data) ?? callName;
+              } else {
+                summary = def.summarize(args as any) ?? callName;
+              }
+            } catch {
+              try {
+                summary = def.summarize(args as any) ?? callName;
+              } catch {
+                summary = callName;
+              }
+            }
+            item.risk = def.risk;
+            item.summary = summary;
+          }
+
           return item;
         });
       }
