@@ -32,8 +32,6 @@ const loginResponseSchema = z.object({
   expiresIn: z.string(),
 });
 
-const registerResponseSchema = loginResponseSchema;
-
 export type User = z.infer<typeof userSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
@@ -55,32 +53,6 @@ export const authApi = {
       return parsed;
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
-    }
-  },
-
-  async register(name: string, phone: string, password: string, email?: string): Promise<LoginResponse> {
-    try {
-      const response = await apiClient.post('/auth/register', {
-        name,
-        phone,
-        password,
-        ...(email ? { email } : {}),
-      });
-      // Backend wraps with TransformInterceptor
-      const actualData = response.data.data || response.data;
-
-      const parsed = registerResponseSchema.parse(actualData);
-
-      authToken.set(parsed.accessToken);
-      clearCartIfAccountChanged(parsed.user.id);
-
-      // Store non-sensitive user data
-      localStorage.setItem('user', JSON.stringify(parsed.user));
-
-      return parsed;
-    } catch (error) {
-      console.error('Register error:', error);
       throw error;
     }
   },
