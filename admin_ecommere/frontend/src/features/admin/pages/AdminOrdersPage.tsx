@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { useAdminOrders, useUpdateOrderStatus } from '../hooks/useAdminOrders';
-import { formatCurrency, formatDateTime } from '@/lib/utils';
+import { formatCurrency, formatDateTime, parseShippingAddress } from '@/lib/utils';
 import {
   AlertCircle,
   ChevronLeft,
@@ -120,25 +120,19 @@ export function AdminOrdersPage() {
 
   // Parse address for display (safely)
   const parseAddress = (addressJson: string | null) => {
-    if (!addressJson) return '';
-    try {
-      const addr = JSON.parse(addressJson);
-      if (typeof addr === 'object' && addr !== null) {
-        const parts = [
-          addr.line1,
-          addr.ward,
-          addr.district,
-          addr.province
-        ].filter(Boolean);
+    const addr = parseShippingAddress(addressJson);
+    if (!addr) return '';
 
-        if (parts.length > 0) return parts.join(', ');
+    const parts = [
+      addr.line1,
+      addr.ward,
+      addr.district,
+      addr.province
+    ].filter(Boolean);
 
-        return addr.address || addressJson;
-      }
-      return addressJson;
-    } catch {
-      return addressJson;
-    }
+    if (parts.length > 0) return parts.join(', ');
+
+    return addr.address || '';
   };
 
 

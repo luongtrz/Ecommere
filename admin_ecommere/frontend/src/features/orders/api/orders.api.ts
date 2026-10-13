@@ -1,4 +1,5 @@
 import apiClient from '@/lib/api';
+import { parseShippingAddress } from '@/lib/utils';
 import { z } from 'zod';
 
 const orderSchema = z.object({
@@ -16,7 +17,7 @@ const orderSchema = z.object({
 }).transform(data => ({
   ...data,
   orderNumber: data.code || data.orderNumber,
-  shippingAddress: data.addressJson ? JSON.parse(data.addressJson) : data.shippingAddress,
+  shippingAddress: data.addressJson ? parseShippingAddress(data.addressJson) : data.shippingAddress,
   items: data.items.map((item: any) => ({
     ...item,
     name: item.nameSnapshot,
