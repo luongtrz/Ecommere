@@ -224,7 +224,7 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
     description: 'Xóa toàn bộ sản phẩm khỏi giỏ hàng trong trình duyệt.',
     schema: z.object({}).strict(),
     auth: 'public',
-    risk: 'WRITE',
+    risk: 'DESTRUCTIVE',
     handler: async () => {
       return {
         cleared: true,
