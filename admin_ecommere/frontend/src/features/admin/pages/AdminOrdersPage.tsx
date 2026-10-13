@@ -320,7 +320,7 @@ export function AdminOrdersPage() {
                         <div className="flex items-center justify-end gap-2">
                           {/* Quick Status Update */}
                           <Select
-                            defaultValue={order.status}
+                            value={order.status}
                             onValueChange={(val) => handleUpdateStatus(order.id, val as OrderStatus, order.code)}
                           >
                             <SelectTrigger className="w-[130px] h-8 text-xs bg-white border-gray-200 shadow-none">
