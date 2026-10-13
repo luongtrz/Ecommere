@@ -794,5 +794,88 @@ describe('AdminChatbotController', () => {
       );
       expect(res.end).toHaveBeenCalled();
     });
+
+    it('stops ping timer and ends response immediately when client disconnects', async () => {
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+      let runSignal: AbortSignal | undefined;
+      mockThreads.create.mockResolvedValue({ id: 'stream-ping-thread' });
+      mockRunner.run.mockImplementation(
+        async (params: { signal?: AbortSignal; sink: any }) => {
+          runSignal = params.signal;
+          params.sink({
+            event: 'thread',
+            data: { threadId: 'stream-ping-thread' },
+          });
+          return new Promise((resolve) => setTimeout(resolve, 50));
+        },
+      );
+
+      const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
+      const res = createFakeResponse();
+
+      const streamPromise = controller.stream(req as any, res as any, {
+        prompt: 'Hi',
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(res.end).not.toHaveBeenCalled();
+
+      res.emit('close');
+      expect(res.end).toHaveBeenCalledTimes(1);
+      expect(clearIntervalSpy).toHaveBeenCalled();
+
+      await streamPromise;
+      expect(runSignal?.aborted).toBe(true);
+      expect(res.end).toHaveBeenCalledTimes(1);
+      clearIntervalSpy.mockRestore();
+    });
+
+    it('a repeated close event does not throw and does not write to closed response', async () => {
+      mockThreads.create.mockResolvedValue({ id: 'stream-repeat-close-thread' });
+      mockRunner.run.mockImplementation(
+        async (params: { signal?: AbortSignal; sink: any }) => {
+          params.sink({
+            event: 'token',
+            data: { text: 'chunk' },
+          });
+          return new Promise((resolve) => setTimeout(resolve, 30));
+        },
+      );
+
+      const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
+      const res = createFakeResponse();
+
+      const streamPromise = controller.stream(req as any, res as any, {
+        prompt: 'Hi',
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(() => {
+        res.emit('close');
+        res.emit('close');
+      }).not.toThrow();
+
+      expect(res.end).toHaveBeenCalledTimes(1);
+      await streamPromise;
+      expect(res.end).toHaveBeenCalledTimes(1);
+    });
+
+    it('normal end of stream clears interval once without duplicate cleanup', async () => {
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+      mockThreads.create.mockResolvedValue({ id: 'stream-normal-thread' });
+      mockRunner.run.mockImplementation(
+        async (params: { sink: any }) => {
+          params.sink({ event: 'token', data: { text: 'done' } });
+        },
+      );
+
+      const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
+      const res = createFakeResponse();
+
+      await controller.stream(req as any, res as any, { prompt: 'Hi' });
+
+      expect(res.end).toHaveBeenCalledTimes(1);
+      expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
+      clearIntervalSpy.mockRestore();
+    });
   });
 });

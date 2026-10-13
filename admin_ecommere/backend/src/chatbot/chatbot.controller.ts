@@ -242,13 +242,39 @@ export class AdminChatbotController {
       return writer;
     };
 
+    let isTerminated = false;
+    const closeStream = () => {
+      if (isTerminated) {
+        return;
+      }
+      isTerminated = true;
+      if (writer) {
+        try {
+          writer.close();
+        } catch {
+          // ignore
+        }
+      } else if (
+        !res.writableFinished &&
+        !(res as any)?.writableEnded &&
+        typeof (res as any)?.end === 'function'
+      ) {
+        try {
+          (res as any).end();
+        } catch {
+          // ignore
+        }
+      }
+    };
+
     // Listen on the response, not the request: on Node 16+ the request emits
     // 'close' as soon as its body is read, which would cancel the turn at once.
     // The response emits 'close' early only when the client has gone away.
     const abortController = new AbortController();
     const onClose = () => {
-      if (!res.writableFinished) {
+      if (!isTerminated && !res.writableFinished) {
         abortController.abort();
+        closeStream();
       }
     };
     res.on('close', onClose);
@@ -264,6 +290,9 @@ export class AdminChatbotController {
         message: options.message,
         resume: options.resume,
         sink: (event: AgentStreamEvent) => {
+          if (isTerminated || abortController.signal.aborted || res.writableFinished) {
+            return;
+          }
           const w = getWriter();
           w.send(event);
         },
@@ -286,21 +315,19 @@ export class AdminChatbotController {
     try {
       await runPromise;
     } catch {
-      const w = getWriter();
-      w.send({
-        event: 'error',
-        data: {
-          message: 'Trợ lý tạm thời không phản hồi, vui lòng thử lại sau.',
-          code: 'AGENT_ERROR',
-        },
-      });
+      if (!isTerminated && !abortController.signal.aborted && !res.writableFinished) {
+        const w = getWriter();
+        w.send({
+          event: 'error',
+          data: {
+            message: 'Trợ lý tạm thời không phản hồi, vui lòng thử lại sau.',
+            code: 'AGENT_ERROR',
+          },
+        });
+      }
     } finally {
       cleanupClose();
-      if (writer) {
-        writer.close();
-      } else if (typeof (res as any)?.end === 'function') {
-        (res as any).end();
-      }
+      closeStream();
     }
   }
 
