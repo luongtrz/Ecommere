@@ -107,6 +107,9 @@ apiClient.interceptors.response.use(
     const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh');
 
     if (error.response?.status === 401 && !originalRequest?._retry && !isRefreshRequest) {
+      // Mark before queueing: a queued replay that gets 401 again must not refresh a second time
+      originalRequest._retry = true;
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -118,7 +121,6 @@ apiClient.interceptors.response.use(
           .catch((err) => Promise.reject(err));
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
