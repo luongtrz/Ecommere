@@ -604,6 +604,16 @@ export class OrdersService {
       paymentStatus = PaymentStatus.COMPLETED;
     } else if (status === OrderStatus.REFUNDED) {
       paymentStatus = PaymentStatus.REFUNDED;
+    } else if (status === OrderStatus.CANCELED) {
+      if (
+        order.status === OrderStatus.PAID ||
+        order.status === OrderStatus.PACKING ||
+        order.status === OrderStatus.SHIPPED
+      ) {
+        paymentStatus = PaymentStatus.REFUNDED;
+      } else {
+        paymentStatus = PaymentStatus.FAILED;
+      }
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -626,7 +636,7 @@ export class OrdersService {
         await this.restoreStockForOrder(order, tx);
       }
 
-      if (status === OrderStatus.CANCELED && order.status === OrderStatus.PENDING_PAYMENT) {
+      if (status === OrderStatus.CANCELED && order.couponCode) {
         await this.releaseCouponUsage(order, tx);
       }
 
