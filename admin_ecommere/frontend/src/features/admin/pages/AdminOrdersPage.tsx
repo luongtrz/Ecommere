@@ -42,6 +42,16 @@ const ORDER_STATUS_MAP: Record<OrderStatus, { label: string; color: string; bg: 
   REFUNDED: { label: 'Đã hoàn tiền', color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200' },
 };
 
+const ALLOWED_NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
+  PENDING_PAYMENT: ['PAID', 'CANCELED'],
+  PAID: ['PACKING', 'CANCELED'],
+  PACKING: ['SHIPPED', 'CANCELED'],
+  SHIPPED: ['DELIVERED'],
+  DELIVERED: ['REFUNDED'],
+  CANCELED: [],
+  REFUNDED: [],
+};
+
 export function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -79,8 +89,11 @@ export function AdminOrdersPage() {
             </div>
           );
         },
-        onError: () => {
-          toast.error('Cập nhật thất bại. Vui lòng thử lại.');
+        onError: (error: any) => {
+          const message = typeof error?.response?.data?.message === 'string'
+            ? error.response.data.message
+            : 'Cập nhật thất bại. Vui lòng thử lại.';
+          toast.error(message);
         },
       }
     );
@@ -308,9 +321,9 @@ export function AdminOrdersPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {Object.entries(ORDER_STATUS_MAP).map(([key, config]) => (
-                                <SelectItem key={key} value={key} className="text-xs">
-                                  {config.label}
+                              {[order.status, ...(ALLOWED_NEXT_STATUSES[order.status] || [])].map((status) => (
+                                <SelectItem key={status} value={status} className="text-xs">
+                                  {ORDER_STATUS_MAP[status]?.label || status}
                                 </SelectItem>
                               ))}
                             </SelectContent>
