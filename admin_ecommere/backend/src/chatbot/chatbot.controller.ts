@@ -238,7 +238,14 @@ export class AdminChatbotController {
       );
     }
     await this.runner.deleteCheckpoints(threadId);
-    await this.threads.remove(threadId, actor);
+    if (this.runner.isThreadRunning(threadId)) {
+      throw new ConflictException(
+        'Cuộc trò chuyện đang được xử lý, vui lòng thử lại sau.',
+      );
+    }
+    await this.threads.remove(threadId, actor, () =>
+      this.runner.isThreadRunning(threadId),
+    );
     return { deleted: true };
   }
 

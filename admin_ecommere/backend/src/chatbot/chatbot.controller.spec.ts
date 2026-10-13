@@ -632,10 +632,14 @@ describe('AdminChatbotController', () => {
       const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
       const result = await controller.deleteThread(req as any, 'thread-del-id');
 
-      expect(mockThreads.remove).toHaveBeenCalledWith('thread-del-id', {
-        userId: 'admin-user-1',
-        app: 'ADMIN',
-      });
+      expect(mockThreads.remove).toHaveBeenCalledWith(
+        'thread-del-id',
+        {
+          userId: 'admin-user-1',
+          app: 'ADMIN',
+        },
+        expect.any(Function),
+      );
       expect(result).toEqual({ deleted: true });
     });
 
@@ -672,10 +676,14 @@ describe('AdminChatbotController', () => {
         app: 'ADMIN',
       });
       expect(mockRunner.deleteCheckpoints).toHaveBeenCalledWith('thread-del-id');
-      expect(mockThreads.remove).toHaveBeenCalledWith('thread-del-id', {
-        userId: 'admin-user-1',
-        app: 'ADMIN',
-      });
+      expect(mockThreads.remove).toHaveBeenCalledWith(
+        'thread-del-id',
+        {
+          userId: 'admin-user-1',
+          app: 'ADMIN',
+        },
+        expect.any(Function),
+      );
       expect(result).toEqual({ deleted: true });
     });
 
@@ -718,6 +726,30 @@ describe('AdminChatbotController', () => {
         'running-thread-id',
       );
       expect(mockRunner.deleteCheckpoints).not.toHaveBeenCalled();
+      expect(mockThreads.remove).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 ConflictException when thread becomes running during checkpoint deletion and does not call remove', async () => {
+      mockRunner.isThreadRunning
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true);
+
+      const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
+
+      await expect(
+        controller.deleteThread(req as any, 'running-thread-id'),
+      ).rejects.toThrow(ConflictException);
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith(
+        'running-thread-id',
+        {
+          userId: 'admin-user-1',
+          app: 'ADMIN',
+        },
+      );
+      expect(mockRunner.deleteCheckpoints).toHaveBeenCalledWith(
+        'running-thread-id',
+      );
       expect(mockThreads.remove).not.toHaveBeenCalled();
     });
   });
