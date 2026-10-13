@@ -389,22 +389,20 @@ export class AdminService {
   private async getRevenueHistory() {
     const months = 6;
     const history = [];
+    const now = new Date();
 
     // Loop for last 6 months including current
     for (let i = months - 1; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const lastDay = new Date(firstDay.getFullYear(), firstDay.getMonth() + 1, 0, 23, 59, 59, 999);
 
-      const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-      const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
-
-      const monthLabel = `T${date.getMonth() + 1}`;
+      const monthLabel = `T${firstDay.getMonth() + 1}`;
 
       history.push({
         firstDay,
         lastDay,
         name: monthLabel,
-        fullDate: date, // Keep date for sorting if needed, but not returned
+        fullDate: firstDay, // Keep date for sorting if needed, but not returned
       });
     }
 
