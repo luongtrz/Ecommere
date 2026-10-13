@@ -335,6 +335,7 @@ describe('AgentRunner', () => {
       new AIMessage({
         content: '',
         tool_calls: [{ id: 'call_destr_1', name: 'cancel_order', args: { orderId: 'ord-100' } }],
+        usage_metadata: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
       }),
       new AIMessage({
         content: 'Đã hủy đơn hàng thành công.',
@@ -396,6 +397,12 @@ describe('AgentRunner', () => {
     expect(eventsTurn1.find((e) => e.event === 'done')).toBeUndefined();
     expect(cancelHandler).not.toHaveBeenCalled();
 
+    // Turn 1 records usage and sets thread title
+    expect(threads.recordUsage).toHaveBeenCalledTimes(1);
+    expect(threads.recordUsage).toHaveBeenCalledWith(customerCtx.threadId, 15);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(customerCtx.threadId, 'Hủy đơn ord-100');
+
     // Turn 2: resume with approve: true
     const eventsTurn2: AgentStreamEvent[] = [];
     await runner.run({
@@ -423,6 +430,150 @@ describe('AgentRunner', () => {
     expect(eventsTurn2).toContainEqual({
       event: 'done',
       data: { usage: { totalTokens: 20 } },
+    });
+
+    // Turn 2 records usage; does not set title again on resume
+    expect(threads.recordUsage).toHaveBeenCalledTimes(2);
+    expect(threads.recordUsage).toHaveBeenLastCalledWith(customerCtx.threadId, 20);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
+  });
+
+  it('case c-decline: a resume with approve false emits tool_result ok false, does not call tool handler, and emits done', async () => {
+    const cancelHandler = cancelOrderTool.handler;
+    const audit: AgentAuditSink = { record: jest.fn().mockResolvedValue(undefined) };
+
+    const model = new ScriptedFakeModel([
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'call_destr_1', name: 'cancel_order', args: { orderId: 'ord-100' } }],
+        usage_metadata: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
+      }),
+      new AIMessage({
+        content: 'Bạn đã từ chối thao tác này.',
+        usage_metadata: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+      }),
+    ]);
+
+    const realGraph = buildAgentGraph({
+      model,
+      registry,
+      checkpointer: new MemorySaver(),
+      audit,
+      limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
+    });
+
+    const threads = createMockThreads();
+    const runner = new AgentRunner({
+      graph: realGraph,
+      registry,
+      threads,
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    // Turn 1: request requiring confirmation
+    const eventsTurn1: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      message: 'Hủy đơn ord-100',
+      sink: (e) => eventsTurn1.push(e),
+    });
+
+    expect(eventsTurn1.find((e) => e.event === 'confirm_required')).toBeDefined();
+    expect(eventsTurn1.find((e) => e.event === 'done')).toBeUndefined();
+    expect(threads.recordUsage).toHaveBeenCalledWith(customerCtx.threadId, 15);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(customerCtx.threadId, 'Hủy đơn ord-100');
+
+    // Turn 2: resume with approve: false
+    const eventsTurn2: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      resume: { decisions: [{ callId: 'call_destr_1', approve: false }] },
+      sink: (e) => eventsTurn2.push(e),
+    });
+
+    expect(cancelHandler).not.toHaveBeenCalled();
+
+    expect(eventsTurn2).toContainEqual({
+      event: 'thread',
+      data: { threadId: customerCtx.threadId },
+    });
+    expect(eventsTurn2).toContainEqual({
+      event: 'tool_result',
+      data: {
+        id: 'call_destr_1',
+        name: 'cancel_order',
+        ok: false,
+        summary: 'Người dùng đã từ chối thao tác này',
+      },
+    });
+    expect(eventsTurn2).toContainEqual({
+      event: 'done',
+      data: { usage: { totalTokens: 20 } },
+    });
+    expect(threads.recordUsage).toHaveBeenCalledTimes(2);
+    expect(threads.recordUsage).toHaveBeenLastCalledWith(customerCtx.threadId, 20);
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles payload.confirm by emitting tool_result ok false with call id and error summary', async () => {
+    const fakeGraph = createScriptedGraph([
+      [
+        'updates',
+        {
+          confirm: {
+            messages: [
+              new ToolMessage({
+                tool_call_id: 'call-declined-1',
+                name: 'cancel_order',
+                content: JSON.stringify({
+                  ok: false,
+                  error: 'Người dùng đã từ chối thao tác này',
+                }),
+              }),
+            ],
+          },
+        },
+      ],
+      [
+        'updates',
+        {
+          agent: {
+            messages: [
+              new AIMessage({
+                content: 'Đã hủy thao tác.',
+              }),
+            ],
+          },
+        },
+      ],
+    ]);
+
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const events: AgentStreamEvent[] = [];
+    await runner.run({
+      ctx: customerCtx,
+      resume: { decisions: [{ callId: 'call-declined-1', approve: false }] },
+      sink: (e) => events.push(e),
+    });
+
+    expect(events).toContainEqual({
+      event: 'tool_result',
+      data: {
+        id: 'call-declined-1',
+        name: 'cancel_order',
+        ok: false,
+        summary: 'Người dùng đã từ chối thao tác này',
+      },
+    });
+    expect(events).toContainEqual({
+      event: 'done',
+      data: { usage: null },
     });
   });
 

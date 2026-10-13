@@ -302,6 +302,78 @@ export class AgentRunner {
     return '';
   }
 
+  private handleToolMessages(
+    messages: unknown[],
+    sink: (event: AgentStreamEvent) => void,
+  ): void {
+    for (const msg of messages) {
+      const toolCallId =
+        (msg as any)?.tool_call_id ?? (msg as any)?.id ?? '';
+      const toolName = (msg as any)?.name ?? '';
+
+      let parsedContent: any = null;
+      try {
+        if (typeof (msg as any)?.content === 'string') {
+          parsedContent = JSON.parse((msg as any).content);
+        } else if ((msg as any)?.content && typeof (msg as any).content === 'object') {
+          parsedContent = (msg as any).content;
+        }
+      } catch {
+        parsedContent = null;
+      }
+
+      const ok = Boolean(parsedContent?.ok);
+      let summary: string;
+      if (ok) {
+        summary = 'Đã thực hiện thao tác';
+      } else {
+        const rawErr = parsedContent?.error;
+        let errText = 'Thao tác không thành công.';
+        if (typeof rawErr === 'string' && rawErr.length > 0) {
+          errText = rawErr;
+        } else if (rawErr) {
+          errText = JSON.stringify(rawErr);
+        }
+        summary = errText.slice(0, 200);
+      }
+
+      sink({
+        event: 'tool_result',
+        data: {
+          id: toolCallId,
+          name: toolName,
+          ok,
+          summary,
+        },
+      });
+
+      if (ok) {
+        const def = this.registry.get(toolName);
+        if (def?.uiAction) {
+          try {
+            const action = def.uiAction(parsedContent?.data);
+            if (action) {
+              sink({
+                event: 'ui_action',
+                data: action,
+              });
+            }
+          } catch {}
+        }
+
+        if (
+          toolName === 'recommend_products' &&
+          Array.isArray(parsedContent?.data?.sources)
+        ) {
+          sink({
+            event: 'sources',
+            data: parsedContent.data.sources,
+          });
+        }
+      }
+    }
+  }
+
   private async execute(params: AgentRunParams): Promise<void> {
     if (params.signal?.aborted) {
       return;
@@ -369,6 +441,7 @@ export class AgentRunner {
 
     let totalTokens = 0;
     let hasUsage = false;
+    let interruptedByConfirm = false;
 
     try {
       const stream = await this.graph.stream(input, config);
@@ -467,74 +540,16 @@ export class AgentRunner {
                 }
               }
 
+              // Node 'confirm'
+              const confirmUpdate = (payload as any).confirm;
+              if (confirmUpdate && Array.isArray(confirmUpdate.messages)) {
+                this.handleToolMessages(confirmUpdate.messages, params.sink);
+              }
+
               // Node 'tools'
               const toolsUpdate = (payload as any).tools;
               if (toolsUpdate && Array.isArray(toolsUpdate.messages)) {
-                for (const msg of toolsUpdate.messages) {
-                  const toolCallId = msg?.tool_call_id ?? msg?.id ?? '';
-                  const toolName = msg?.name ?? '';
-
-                  let parsedContent: any = null;
-                  try {
-                    if (typeof msg?.content === 'string') {
-                      parsedContent = JSON.parse(msg.content);
-                    } else if (msg?.content && typeof msg.content === 'object') {
-                      parsedContent = msg.content;
-                    }
-                  } catch {
-                    parsedContent = null;
-                  }
-
-                  const ok = Boolean(parsedContent?.ok);
-                  let summary: string;
-                  if (ok) {
-                    summary = 'Đã thực hiện thao tác';
-                  } else {
-                    const rawErr = parsedContent?.error;
-                    let errText = 'Thao tác không thành công.';
-                    if (typeof rawErr === 'string' && rawErr.length > 0) {
-                      errText = rawErr;
-                    } else if (rawErr) {
-                      errText = JSON.stringify(rawErr);
-                    }
-                    summary = errText.slice(0, 200);
-                  }
-
-                  params.sink({
-                    event: 'tool_result',
-                    data: {
-                      id: toolCallId,
-                      name: toolName,
-                      ok,
-                      summary,
-                    },
-                  });
-
-                  if (ok) {
-                    const def = this.registry.get(toolName);
-                    if (def?.uiAction) {
-                      try {
-                        const action = def.uiAction(parsedContent?.data);
-                        if (action) {
-                          params.sink({
-                            event: 'ui_action',
-                            data: action,
-                          });
-                        }
-                      } catch {}
-                    }
-
-                    if (
-                      toolName === 'recommend_products' &&
-                      Array.isArray(parsedContent?.data?.sources)
-                    ) {
-                      params.sink({
-                        event: 'sources',
-                        data: parsedContent.data.sources,
-                      });
-                    }
-                  }
-                }
+                this.handleToolMessages(toolsUpdate.messages, params.sink);
               }
 
               // Key '__interrupt__'
@@ -550,7 +565,8 @@ export class AgentRunner {
                       calls: confirmInterrupt.value.calls,
                     },
                   });
-                  return;
+                  interruptedByConfirm = true;
+                  break;
                 }
               }
             }
@@ -579,12 +595,14 @@ export class AgentRunner {
       }
 
       // Finish (no interrupt)
-      params.sink({
-        event: 'done',
-        data: {
-          usage: hasUsage ? { totalTokens } : null,
-        },
-      });
+      if (!interruptedByConfirm) {
+        params.sink({
+          event: 'done',
+          data: {
+            usage: hasUsage ? { totalTokens } : null,
+          },
+        });
+      }
 
       if (totalTokens > 0) {
         try {
