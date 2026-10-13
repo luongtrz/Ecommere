@@ -5,8 +5,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
   Inject,
   Param,
   Post,
@@ -38,14 +36,6 @@ import type { ToolContext, AgentRole } from './tools/tool.types';
 import { SendAgentMessageDto } from './dtos/agent-message.dto';
 import { ResumeAgentDto } from './dtos/agent-resume.dto';
 import { AgentThreadQueryDto } from './dtos/agent-thread-query.dto';
-import { SendChatbotMessageDto } from './dtos/send-chatbot-message.dto';
-
-const UUID_V4_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function isUuidV4(val?: string): boolean {
-  return typeof val === 'string' && UUID_V4_REGEX.test(val);
-}
 
 @ApiTags('Chatbot')
 @ApiBearerAuth('JWT-auth')
@@ -235,115 +225,6 @@ export class ChatbotController {
     return { deleted: true };
   }
 
-  @Public()
-  @UseGuards(OptionalJwtAuthGuard)
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
-  @Post('messages')
-  @ApiOperation({ summary: 'Send message to assistant (legacy compatibility endpoint)' })
-  @ApiResponse({ status: 200, description: 'Chatbot response' })
-  @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
-  @ApiResponse({ status: 502, description: 'Assistant error' })
-  @ApiResponse({ status: 503, description: 'Assistant is not configured' })
-  async sendMessage(
-    @Req() req: Request,
-    @Body() dto: SendChatbotMessageDto,
-  ) {
-    if (!this.config?.apiKey) {
-      throw new HttpException(
-        { statusCode: 503, message: 'Trợ lý chưa được cấu hình' },
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
-    }
-
-    const actor = this.getActor(req);
-    const role = this.getRole(req);
-
-    let threadId: string;
-    if (isUuidV4(dto.sessionId) && dto.sessionId) {
-      await this.threads.assertOwned(dto.sessionId, actor);
-      threadId = dto.sessionId;
-    } else {
-      const created = await this.threads.create(actor);
-      threadId = created.id;
-    }
-
-    const ctx: ToolContext = {
-      userId: actor.userId,
-      role,
-      app: 'USER',
-      threadId,
-    };
-
-    let text = '';
-    let sources: Array<Record<string, unknown>> | null = null;
-    let doneUsage: Record<string, number> | null = null;
-    let pendingConfirm: Array<{ id: string; name: string; summary: string; risk: string }> | null = null;
-    let errorEvent: { message: string; code: string } | null = null;
-
-    try {
-      await this.runner.run({
-        ctx,
-        message: dto.prompt,
-        sink: (event: AgentStreamEvent) => {
-          if (event.event === 'token') {
-            text += event.data.text;
-          } else if (event.event === 'sources') {
-            sources = event.data;
-          } else if (event.event === 'done') {
-            doneUsage = event.data.usage;
-          } else if (event.event === 'confirm_required') {
-            pendingConfirm = event.data.calls;
-          } else if (event.event === 'error') {
-            errorEvent = event.data;
-          }
-        },
-      });
-    } catch (err: any) {
-      if (err instanceof AgentBusyError || err?.name === 'AgentBusyError') {
-        throw new HttpException(
-          { statusCode: 409, message: 'Cuộc trò chuyện đang được xử lý' },
-          HttpStatus.CONFLICT,
-        );
-      }
-      if (!errorEvent) {
-        errorEvent = {
-          message:
-            err?.message ||
-            'Trợ lý tạm thời không phản hồi, vui lòng thử lại sau.',
-          code: 'AGENT_ERROR',
-        };
-      }
-    }
-
-    if (errorEvent) {
-      throw new HttpException(
-        { statusCode: 502, message: errorEvent.message },
-        HttpStatus.BAD_GATEWAY,
-      );
-    }
-
-    const response: {
-      message: string;
-      model: string;
-      usage: Record<string, number> | null;
-      sessionId: string;
-      sources: Array<Record<string, unknown>>;
-      pendingConfirm?: Array<{ id: string; name: string; summary: string; risk: string }>;
-    } = {
-      message: text,
-      model: this.config.model,
-      usage: doneUsage ?? null,
-      sessionId: threadId,
-      sources: sources ?? [],
-    };
-
-    if (pendingConfirm) {
-      response.message = 'Cần xác nhận thao tác trước khi tiếp tục.';
-      response.pendingConfirm = pendingConfirm;
-    }
-
-    return response;
-  }
 
   private async runSseTurn(
     req: Request,
