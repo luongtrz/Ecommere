@@ -1,14 +1,11 @@
-import { BadRequestException, Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dtos/create-coupon.dto';
 import { UpdateCouponDto } from './dtos/update-coupon.dto';
-import { ValidateCouponDto } from './dtos/validate-coupon.dto';
-import { CouponEntity, CouponValidationEntity } from './entities/coupon.entity';
+import { CouponEntity } from './entities/coupon.entity';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
-import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Coupons')
@@ -59,27 +56,5 @@ export class CouponsController {
   @ApiResponse({ status: 200 })
   async remove(@Param('code') code: string) {
     return this.couponsService.remove(code);
-  }
-
-  @Post('validate')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Validate coupon code (Authenticated)' })
-  @ApiResponse({ status: 200, type: CouponValidationEntity })
-  async validateCoupon(
-    @Body() validateCouponDto: ValidateCouponDto,
-    @CurrentUser('id') userId: string,
-    @Query('orderTotal') orderTotal?: string,
-  ) {
-    const normalizedOrderTotal = orderTotal?.trim();
-    const total = normalizedOrderTotal === undefined ? 0 : Number(normalizedOrderTotal);
-
-    if (
-      normalizedOrderTotal !== undefined &&
-      (normalizedOrderTotal === '' || !Number.isSafeInteger(total) || total < 0)
-    ) {
-      throw new BadRequestException('orderTotal must be a non-negative integer');
-    }
-
-    return this.couponsService.validateCoupon(validateCouponDto.code, userId, total);
   }
 }
