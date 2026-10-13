@@ -56,12 +56,10 @@ export class UploadsService {
   }
 
   async deleteFile(filePath: string) {
-    if (!filePath?.trim()) {
-      throw new BadRequestException('File path is required');
-    }
+    const validPath = this.validateDeletePath(filePath);
 
     try {
-      const result = await cloudinary.uploader.destroy(filePath.trim(), {
+      const result = await cloudinary.uploader.destroy(validPath, {
         resource_type: 'image',
       });
 
@@ -74,6 +72,41 @@ export class UploadsService {
       this.logger.error(`Delete failed: ${this.getErrorMessage(error)}`);
       throw new BadRequestException('Failed to delete file');
     }
+  }
+
+  private validateDeletePath(filePath: string): string {
+    if (typeof filePath !== 'string' || !filePath.trim()) {
+      throw new BadRequestException('File path is required');
+    }
+
+    const trimmedPath = filePath.trim();
+
+    if (
+      trimmedPath.startsWith('/') ||
+      trimmedPath.includes('..') ||
+      trimmedPath.includes('\\') ||
+      trimmedPath.includes('//') ||
+      trimmedPath.endsWith('/') ||
+      !this.isAllowedUploadPath(trimmedPath)
+    ) {
+      throw new BadRequestException('Invalid file path');
+    }
+
+    return trimmedPath;
+  }
+
+  private isAllowedUploadPath(filePath: string): boolean {
+    const configuredFolder = this.configService
+      ?.get<string>('CLOUDINARY_FOLDER')
+      ?.trim()
+      .replace(/^\/+|\/+$/g, '');
+    const rootFolder = configuredFolder || 'thaispray';
+    const allowedFolders = Array.from(new Set([rootFolder, 'thaispray', DEFAULT_FOLDER]));
+
+    return allowedFolders.some((folder) => {
+      const prefix = `${folder}/`;
+      return filePath.startsWith(prefix) && filePath.length > prefix.length;
+    });
   }
 
   private validateFile(file: Express.Multer.File) {
