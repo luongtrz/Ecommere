@@ -50,6 +50,8 @@ const SUGGESTIONS = [
   'Mã giảm giá đang hoạt động',
 ];
 
+const MAX_MESSAGE_LENGTH = 4000;
+
 function formatVietnameseDate(dateStr?: string | null): string {
   if (!dateStr) return '';
   try {
@@ -278,6 +280,10 @@ export function AdminChatbotPage() {
   const handleSend = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isStreaming) return;
+    if (trimmed.length > MAX_MESSAGE_LENGTH) {
+      toast.error(`Tin nhắn không được vượt quá ${MAX_MESSAGE_LENGTH} ký tự.`);
+      return;
+    }
     setInput('');
     setThreadError(null);
     try {

@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useChatAgent } from '../hooks/useChatAgent';
@@ -18,6 +19,8 @@ import { ToolCallCard } from './ToolCallCard';
 import { ConfirmActionCard } from './ConfirmActionCard';
 import { ChatMarkdown } from './ChatMarkdown';
 import type { ChatSource } from '../types';
+
+const MAX_MESSAGE_LENGTH = 4000;
 
 const SUGGESTIONS = [
   'Tư vấn mùi xịt phòng cho phòng khách',
@@ -56,6 +59,7 @@ export function ChatbotWidget() {
   const { open, setOpen, messages, ownerId, claimOwner } = useChatStore();
   const { isStreaming, send, decide, newThread } = useChatAgent();
   const { user } = useAuth();
+  const toast = useToast();
 
   const [draft, setDraft] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -105,6 +109,10 @@ export function ChatbotWidget() {
   const handleSubmit = () => {
     const prompt = draft.trim();
     if (!prompt || isStreaming) {
+      return;
+    }
+    if (prompt.length > MAX_MESSAGE_LENGTH) {
+      toast.error(`Tin nhắn không được vượt quá ${MAX_MESSAGE_LENGTH} ký tự.`);
       return;
     }
     setDraft('');
@@ -318,7 +326,6 @@ export function ChatbotWidget() {
                 placeholder="Nhập câu hỏi của bạn..."
                 aria-label="Nhập câu hỏi"
                 className="min-h-[40px] max-h-[120px] resize-none border-0 px-3 py-2 shadow-none focus-visible:ring-0 focus:outline-none w-full text-sm placeholder:text-slate-400"
-                maxLength={4000}
               />
               <Button
                 onClick={handleSubmit}
