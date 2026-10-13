@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from './constants';
 import { categoriesApi } from '@/features/catalog/api/categories.api';
+import { registerQueryCacheClear } from './api';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,6 +17,8 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+registerQueryCacheClear(() => queryClient.clear());
 
 queryClient.prefetchQuery({
   queryKey: [QUERY_KEYS.CATEGORIES],

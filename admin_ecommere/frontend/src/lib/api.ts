@@ -41,6 +41,20 @@ export function getCookie(name: string): string | null {
   return null;
 }
 
+let clearQueryCacheCallback: (() => void) | null = null;
+
+export function registerQueryCacheClear(clear: () => void): void {
+  clearQueryCacheCallback = clear;
+}
+
+export function clearQueryCache(): void {
+  try {
+    clearQueryCacheCallback?.();
+  } catch {
+    // Ignore clear errors to ensure redirect proceeds
+  }
+}
+
 let refreshPromise: Promise<string> | null = null;
 
 export async function refreshAccessToken(): Promise<string> {
@@ -139,6 +153,8 @@ apiClient.interceptors.response.use(
 
         const toastEvent = new CustomEvent('session-expired');
         window.dispatchEvent(toastEvent);
+
+        clearQueryCache();
 
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
