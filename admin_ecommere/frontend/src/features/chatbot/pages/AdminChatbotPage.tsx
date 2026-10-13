@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import {
   Bot,
   Send,
@@ -51,6 +51,9 @@ const SUGGESTIONS = [
 ];
 
 const MAX_MESSAGE_LENGTH = 4000;
+const DEFAULT_THREAD_LIMIT = 20;
+const THREAD_LIMIT_STEP = 20;
+const MAX_THREAD_LIMIT = 50;
 
 function formatVietnameseDate(dateStr?: string | null): string {
   if (!dateStr) return '';
@@ -70,6 +73,9 @@ interface ThreadListContentProps {
   onNewThread: () => void;
   onDeleteClick: (thread: AgentThreadSummary) => void;
   isLoading: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
 }
 
 function ThreadListContent({
@@ -79,6 +85,9 @@ function ThreadListContent({
   onNewThread,
   onDeleteClick,
   isLoading,
+  hasMore,
+  onLoadMore,
+  isLoadingMore,
 }: ThreadListContentProps) {
   return (
     <div className="flex flex-1 flex-col min-h-0">
@@ -105,52 +114,69 @@ function ThreadListContent({
             <p className="text-xs text-muted-foreground">Chưa có cuộc trò chuyện nào</p>
           </div>
         ) : (
-          threads.map((thread) => {
-            const isSelected = thread.id === currentThreadId;
-            const title = thread.title || 'Cuộc trò chuyện chưa đặt tên';
-            const dateText = formatVietnameseDate(thread.updatedAt);
+          <>
+            {threads.map((thread) => {
+              const isSelected = thread.id === currentThreadId;
+              const title = thread.title || 'Cuộc trò chuyện chưa đặt tên';
+              const dateText = formatVietnameseDate(thread.updatedAt);
 
-            return (
-              <div
-                key={thread.id}
-                className="group flex items-center justify-between gap-1 rounded-xl"
-              >
-                <button
-                  type="button"
-                  aria-current={isSelected ? 'true' : undefined}
-                  onClick={() => onSelectThread(thread.id)}
-                  className={cn(
-                    'flex-1 min-w-0 rounded-xl px-3 py-2.5 text-xs text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    isSelected
-                      ? 'bg-primary/10 text-primary font-medium border border-primary/20 shadow-sm'
-                      : 'hover:bg-muted/60 text-foreground/80 hover:text-foreground border border-transparent'
-                  )}
+              return (
+                <div
+                  key={thread.id}
+                  className="group flex items-center justify-between gap-1 rounded-xl"
                 >
-                  <p className="truncate font-medium leading-snug">{title}</p>
-                  {dateText && (
-                    <p
-                      className={cn(
-                        'mt-1 text-[11px] truncate',
-                        isSelected ? 'text-primary/70' : 'text-muted-foreground'
-                      )}
-                    >
-                      {dateText}
-                    </p>
-                  )}
-                </button>
+                  <button
+                    type="button"
+                    aria-current={isSelected ? 'true' : undefined}
+                    onClick={() => onSelectThread(thread.id)}
+                    className={cn(
+                      'flex-1 min-w-0 rounded-xl px-3 py-2.5 text-xs text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      isSelected
+                        ? 'bg-primary/10 text-primary font-medium border border-primary/20 shadow-sm'
+                        : 'hover:bg-muted/60 text-foreground/80 hover:text-foreground border border-transparent'
+                    )}
+                  >
+                    <p className="truncate font-medium leading-snug">{title}</p>
+                    {dateText && (
+                      <p
+                        className={cn(
+                          'mt-1 text-[11px] truncate',
+                          isSelected ? 'text-primary/70' : 'text-muted-foreground'
+                        )}
+                      >
+                        {dateText}
+                      </p>
+                    )}
+                  </button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                    onClick={() => onDeleteClick(thread)}
+                    aria-label="Xóa cuộc trò chuyện"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              );
+            })}
+
+            {hasMore && (
+              <div className="pt-2 pb-1">
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                  onClick={() => onDeleteClick(thread)}
-                  aria-label="Xóa cuộc trò chuyện"
+                  variant="outline"
+                  className="w-full justify-center gap-2 rounded-xl text-xs font-semibold h-9 shadow-sm"
+                  onClick={onLoadMore}
+                  disabled={isLoadingMore}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  {isLoadingMore && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                  <span>Tải thêm</span>
                 </Button>
               </div>
-            );
-          })
+            )}
+          </>
         )}
       </div>
     </div>
@@ -164,6 +190,7 @@ export function AdminChatbotPage() {
   const [threadToDelete, setThreadToDelete] = useState<AgentThreadSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [threadError, setThreadError] = useState<string | null>(null);
+  const [threadLimit, setThreadLimit] = useState(DEFAULT_THREAD_LIMIT);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const transcriptRequestIdRef = useRef(0);
@@ -197,10 +224,17 @@ export function AdminChatbotPage() {
   const {
     data: threads = [],
     isLoading: isThreadsLoading,
+    isFetching: isThreadsFetching,
   } = useQuery({
-    queryKey: ['admin', 'chatbot', 'threads'],
-    queryFn: () => agentApi.listThreads(),
+    queryKey: ['admin', 'chatbot', 'threads', threadLimit],
+    queryFn: () => agentApi.listThreads(threadLimit),
+    placeholderData: keepPreviousData,
   });
+
+  const hasMoreThreads = threads.length >= threadLimit && threadLimit < MAX_THREAD_LIMIT;
+  const handleLoadMoreThreads = () => {
+    setThreadLimit((limit) => Math.min(limit + THREAD_LIMIT_STEP, MAX_THREAD_LIMIT));
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -338,6 +372,9 @@ export function AdminChatbotPage() {
                       setThreadToDelete(thread);
                     }}
                     isLoading={isThreadsLoading}
+                    hasMore={hasMoreThreads}
+                    onLoadMore={handleLoadMoreThreads}
+                    isLoadingMore={isThreadsFetching}
                   />
                 </div>
               </SheetContent>
@@ -356,6 +393,9 @@ export function AdminChatbotPage() {
               onNewThread={startNewConversation}
               onDeleteClick={(thread) => setThreadToDelete(thread)}
               isLoading={isThreadsLoading}
+              hasMore={hasMoreThreads}
+              onLoadMore={handleLoadMoreThreads}
+              isLoadingMore={isThreadsFetching}
             />
           </aside>
 
