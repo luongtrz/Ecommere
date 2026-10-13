@@ -302,21 +302,56 @@ export class CategoriesService {
    * Used for filtering products by parent category
    */
   async getDescendantIds(categoryId: string): Promise<string[]> {
-    const category = await this.prisma.category.findUnique({
-      where: { id: categoryId },
-      include: { children: true },
-    });
-
-    if (!category) return [];
-
-    let ids = [category.id];
-
-    for (const child of category.children) {
-      const childIds = await this.getDescendantIds(child.id);
-      ids = [...ids, ...childIds];
+    if (!categoryId) {
+      return [];
     }
 
-    return ids;
+    const allCategories = await this.prisma.category.findMany({
+      select: { id: true, parentId: true },
+    });
+
+    const childrenByParent = new Map<string, string[]>();
+    let categoryExists = false;
+
+    for (const cat of allCategories) {
+      if (cat.id === categoryId) {
+        categoryExists = true;
+      }
+      if (cat.parentId) {
+        const children = childrenByParent.get(cat.parentId);
+        if (children) {
+          children.push(cat.id);
+        } else {
+          childrenByParent.set(cat.parentId, [cat.id]);
+        }
+      }
+    }
+
+    if (!categoryExists) {
+      return [];
+    }
+
+    const result: string[] = [];
+    const visited = new Set<string>();
+
+    const traverse = (currentId: string) => {
+      if (visited.has(currentId)) {
+        return;
+      }
+      visited.add(currentId);
+      result.push(currentId);
+
+      const children = childrenByParent.get(currentId);
+      if (children) {
+        for (const childId of children) {
+          traverse(childId);
+        }
+      }
+    };
+
+    traverse(categoryId);
+
+    return result;
   }
 
   private async validateParentCategory(parentId?: string | null, categoryId?: string) {
