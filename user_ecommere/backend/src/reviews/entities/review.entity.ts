@@ -14,7 +14,7 @@ export class ReviewEntity {
   rating: number;
 
   @ApiProperty()
-  comment: string;
+  content: string;
 
   @ApiProperty()
   createdAt: Date;
