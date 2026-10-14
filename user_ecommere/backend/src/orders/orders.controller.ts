@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CheckoutDto } from './dtos/checkout.dto';
+import { PreviewCheckoutDto } from './dtos/preview-checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
 import { OrderEntity } from './entities/order.entity';
@@ -14,6 +15,14 @@ import { Role } from '@prisma/client';
 @Controller('orders')
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
+
+  @Post('preview')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Preview checkout' })
+  @ApiResponse({ status: 200 })
+  async previewCheckout(@CurrentUser('id') userId: string, @Body() previewCheckoutDto: PreviewCheckoutDto) {
+    return this.ordersService.previewCheckout(userId, previewCheckoutDto);
+  }
 
   @Post('checkout')
   @ApiOperation({ summary: 'Checkout and create order from cart' })

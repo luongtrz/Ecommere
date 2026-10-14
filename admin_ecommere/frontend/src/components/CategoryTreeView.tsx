@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Plus, Edit, Trash, FolderTree, FileText, Loader2, AlertCircle } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Category, categoriesApi } from '@/features/admin/api/categories.api';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/useToast';
+import { QUERY_KEYS } from '@/lib/constants';
 
 interface CategoryTreeNodeProps {
     category: Category;
@@ -89,6 +91,7 @@ function CategoryTreeNode({ category, level, onAddChild, onEdit, onDelete }: Cat
 }
 
 export function CategoryTreeView() {
+    const queryClient = useQueryClient();
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const toast = useToast();
@@ -152,9 +155,11 @@ export function CategoryTreeView() {
         try {
             if (dialogMode === 'add') {
                 await categoriesApi.create({ name, parentId: activeParentId || undefined });
+                queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CATEGORIES] });
                 toast.success(`Tạo danh mục "${name}" thành công`);
             } else if (dialogMode === 'edit' && activeCategoryId) {
                 await categoriesApi.update(activeCategoryId, { name });
+                queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CATEGORIES] });
                 toast.success('Cập nhật tên danh mục thành công');
             }
             setIsDialogOpen(false);
@@ -172,6 +177,7 @@ export function CategoryTreeView() {
         setIsSubmitting(true);
         try {
             await categoriesApi.delete(categoryToDelete.id);
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CATEGORIES] });
             toast.success(`Xóa danh mục "${categoryToDelete.name}" thành công`);
             setIsDeleteOpen(false);
             setCategoryToDelete(null);

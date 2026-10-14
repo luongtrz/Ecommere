@@ -169,6 +169,7 @@ model ProductVariant {
   
   @@index([productId])
   @@index([sku])
+  @@index([stock])
   @@map("product_variants")
 }
 
@@ -246,6 +247,7 @@ model Order {
   @@index([code])
   @@index([status])
   @@index([createdAt])
+  @@index([couponCode])
   @@map("orders")
 }
 

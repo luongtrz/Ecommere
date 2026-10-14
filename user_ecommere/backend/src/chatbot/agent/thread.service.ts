@@ -72,14 +72,10 @@ export class ThreadService {
 
   async remove(threadId: string, actor: AgentActor): Promise<void> {
     await this.assertOwned(threadId, actor);
-    await this.prisma.$transaction([
-      this.prisma.agentToolLog.deleteMany({
-        where: { threadId },
-      }),
-      this.prisma.agentThread.delete({
-        where: { id: threadId },
-      }),
-    ]);
+    // Tool-call audit rows are kept on purpose: they record what the chatbot did for the customer.
+    await this.prisma.agentThread.delete({
+      where: { id: threadId },
+    });
   }
 
   async recordUsage(threadId: string, tokens: number): Promise<void> {

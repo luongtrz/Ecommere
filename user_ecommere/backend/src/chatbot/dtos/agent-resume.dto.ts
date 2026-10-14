@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -6,10 +6,12 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { AgentClientContextDto } from './agent-client-context.dto';
 
 export class AgentDecisionDto {
   @ApiProperty({
@@ -43,4 +45,13 @@ export class ResumeAgentDto {
   @ValidateNested({ each: true })
   @Type(() => AgentDecisionDto)
   decisions: AgentDecisionDto[];
+
+  @ApiPropertyOptional({
+    type: () => AgentClientContextDto,
+    description: 'Optional browser client context hints',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AgentClientContextDto)
+  clientContext?: AgentClientContextDto;
 }

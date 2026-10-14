@@ -1,7 +1,8 @@
-import { BadRequestException, Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import { StockAdjustmentDto } from './dtos/stock-adjustment.dto';
+import { LowStockQueryDto } from './dtos/low-stock-query.dto';
 import { StockMovementEntity } from './entities/stock-movement.entity';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -41,16 +42,12 @@ export class InventoryController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get variants with low stock (Admin only)' })
-  @ApiQuery({ name: 'threshold', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200 })
-  async getLowStockVariants(@Query('threshold') threshold?: number) {
-    const normalizedThreshold = threshold === undefined ? 10 : Number(threshold);
+  async getLowStockVariants(@Query() query: LowStockQueryDto = new LowStockQueryDto()) {
+    const threshold = query?.threshold ?? 10;
+    const limit = query?.limit ?? 100;
 
-    if (!Number.isInteger(normalizedThreshold) || normalizedThreshold < 0) {
-      throw new BadRequestException('Threshold must be a non-negative integer');
-    }
-
-    return this.inventoryService.getLowStockVariants(normalizedThreshold);
+    return this.inventoryService.getLowStockVariants(threshold, limit);
   }
 
   @Get('stock-levels')

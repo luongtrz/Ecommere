@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { z } from 'zod';
 import { AgentToolDef, ToolContext } from '../tool.types';
 import { ToolError } from '../tool-result.util';
@@ -21,6 +22,37 @@ export type OrdersToolDeps = {
   orders: OrdersService;
   cart: CartService;
 };
+
+export function deriveCheckoutKey(params: {
+  threadId: string;
+  addressId?: string | null;
+  items: Array<{ variantId: string; quantity: number }>;
+  paymentMethod?: string | null;
+  shippingMethod?: string | null;
+  cartId?: string | null;
+  couponCode?: string | null;
+}): string {
+  const normalizedItems = (params.items ?? [])
+    .map((item) => ({
+      variantId: String(item.variantId),
+      quantity: Number(item.quantity),
+    }))
+    .sort((a, b) =>
+      a.variantId.localeCompare(b.variantId) || a.quantity - b.quantity,
+    );
+
+  const payload = JSON.stringify({
+    threadId: params.threadId ?? '',
+    addressId: params.addressId ?? null,
+    items: normalizedItems,
+    paymentMethod: params.paymentMethod ?? 'COD',
+    shippingMethod: params.shippingMethod ?? 'STANDARD',
+    cartId: params.cartId ?? null,
+    couponCode: params.couponCode ?? null,
+  });
+
+  return createHash('sha256').update(payload).digest('hex');
+}
 
 export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
   const listMyOrdersTool: AgentToolDef = {
@@ -100,10 +132,10 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
     name: 'checkout',
     domain: 'orders',
     description:
-      'Đặt đơn từ giỏ hàng hiện tại của khách. Giá và phí ship do máy chủ tính lại. Thanh toán thực hiện trên trang đơn hàng.',
+      'Đặt đơn từ giỏ hàng hiện tại của khách. Bắt buộc có addressId; nếu chưa biết địa chỉ, hãy hỏi khách chọn địa chỉ hoặc liệt kê danh sách địa chỉ của khách trước. Giá và phí ship do máy chủ tính lại. Thanh toán thực hiện trên trang đơn hàng.',
     schema: z
       .object({
-        addressId: z.string().min(1).max(64).optional(),
+        addressId: z.string().min(1).max(64),
         shippingMethod: z
           .enum(SHIPPING_METHODS)
           .optional()
@@ -152,6 +184,16 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
       const shippingMethod = args.shippingMethod ?? 'STANDARD';
       const paymentMethod = args.paymentMethod ?? 'COD';
 
+      const checkoutKey = deriveCheckoutKey({
+        threadId: ctx.threadId,
+        addressId: args.addressId,
+        items,
+        paymentMethod,
+        shippingMethod,
+        cartId,
+        couponCode,
+      });
+
       const checkoutDto: any = {
         ...(args.addressId ? { addressId: args.addressId } : {}),
         items,
@@ -159,6 +201,7 @@ export function createOrdersTools(deps: OrdersToolDeps): AgentToolDef[] {
         shippingMethod,
         ...(cartId ? { cartId } : {}),
         ...(couponCode ? { couponCode } : {}),
+        checkoutKey,
       };
 
       return deps.orders.checkout(ctx.userId, checkoutDto);

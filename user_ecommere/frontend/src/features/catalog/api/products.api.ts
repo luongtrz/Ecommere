@@ -39,6 +39,7 @@ const productsResponseSchema = z.object({
   page: z.number(),
   limit: z.number(),
   totalPages: z.number(),
+  hasNextPage: z.boolean().optional(),
 });
 
 export type Product = z.infer<typeof productSchema>;
@@ -82,6 +83,7 @@ export const productsApi = {
       page: actualData.page || 1,
       limit: actualData.limit || 12,
       totalPages: actualData.totalPages || 1,
+      hasNextPage: actualData.hasNextPage ?? (actualData.page < actualData.totalPages),
     };
 
     return productsResponseSchema.parse(mapped);
@@ -106,6 +108,7 @@ export const productsApi = {
       page: actualData.page || 1,
       limit: actualData.limit || 12,
       totalPages: actualData.totalPages || 1,
+      hasNextPage: actualData.hasNextPage ?? (actualData.page < actualData.totalPages),
     };
 
     return productsResponseSchema.parse(mapped);

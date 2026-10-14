@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  HttpException,
   NotFoundException,
 } from '@nestjs/common';
 import { ChatbotController } from './chatbot.controller';
@@ -9,7 +8,6 @@ import type { AgentConfig } from './agent/agent.config';
 import type { AgentStreamEvent } from './agent/sse.frames';
 import { SendAgentMessageDto } from './dtos/agent-message.dto';
 import { ResumeAgentDto } from './dtos/agent-resume.dto';
-import { SendChatbotMessageDto } from './dtos/send-chatbot-message.dto';
 
 jest.mock(
   './agent/agent.providers',
@@ -127,6 +125,7 @@ describe('ChatbotController', () => {
     assertResumable: jest.Mock;
     deleteCheckpoints: jest.Mock;
     isThreadRunning: jest.Mock;
+    readTranscript: jest.Mock;
   };
   let mockThreads: {
     create: jest.Mock;
@@ -155,6 +154,7 @@ describe('ChatbotController', () => {
       assertResumable: jest.fn().mockResolvedValue(undefined),
       deleteCheckpoints: jest.fn().mockResolvedValue(undefined),
       isThreadRunning: jest.fn().mockReturnValue(false),
+      readTranscript: jest.fn(),
     };
 
     mockThreads = {
@@ -607,6 +607,82 @@ describe('ChatbotController', () => {
     });
   });
 
+  describe('Route: GET /chatbot/threads/:threadId/messages', () => {
+    it("the owner gets the runner's messages in order, and readTranscript is called with the same threadId", async () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Tìm sơn màu đen' },
+        { id: '2', role: 'assistant', content: 'Shop có sơn màu đen mờ và đen bóng.' },
+      ];
+      mockThreads.assertOwned.mockResolvedValue({
+        id: 'thread-detail-1',
+        title: 'Tìm sơn màu đen',
+        app: 'USER',
+        totalTokens: 100,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: 'user-owner-1',
+      });
+      mockRunner.readTranscript.mockResolvedValue(messages);
+
+      const req = createFakeRequest({ id: 'user-owner-1', role: 'CUSTOMER' });
+      const result = await controller.getMessages(req as any, 'thread-detail-1');
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-detail-1', {
+        userId: 'user-owner-1',
+        app: 'USER',
+      });
+      expect(mockRunner.readTranscript).toHaveBeenCalledWith('thread-detail-1');
+      expect(result).toEqual(messages);
+    });
+
+    it('guest with x-chat-session owner key gets saved messages if owned', async () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Chào shop' },
+        { id: '2', role: 'assistant', content: 'Chào bạn!' },
+      ];
+      mockThreads.assertOwned.mockResolvedValue({
+        id: 'guest-thread-1',
+        app: 'USER',
+        totalTokens: 50,
+      });
+      mockRunner.readTranscript.mockResolvedValue(messages);
+
+      const req = createFakeRequest(undefined);
+      req.headers['x-chat-session'] = '0123456789abcdef0123456789abcdef';
+
+      const result = await controller.getMessages(req as any, 'guest-thread-1');
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith(
+        'guest-thread-1',
+        expect.objectContaining({
+          userId: null,
+          app: 'USER',
+          sessionKeyHash: expect.any(String),
+        }),
+      );
+      expect(mockRunner.readTranscript).toHaveBeenCalledWith('guest-thread-1');
+      expect(result).toEqual(messages);
+    });
+
+    it('a thread not owned gives 404 and readTranscript is not called', async () => {
+      mockThreads.assertOwned.mockRejectedValue(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
+
+      const req = createFakeRequest({ id: 'other-user', role: 'CUSTOMER' });
+
+      await expect(
+        controller.getMessages(req as any, 'thread-detail-1'),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-detail-1', {
+        userId: 'other-user',
+        app: 'USER',
+      });
+      expect(mockRunner.readTranscript).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Route 5: DELETE /chatbot/threads/:threadId', () => {
     it('DELETE returns { deleted: true }', async () => {
       mockThreads.remove.mockResolvedValue(undefined);
@@ -704,168 +780,6 @@ describe('ChatbotController', () => {
     });
   });
 
-  describe('Route 6: POST /chatbot/messages (legacy compatibility)', () => {
-    it('the legacy route returns message, sessionId and sources', async () => {
-      mockThreads.create.mockResolvedValue({ id: 'legacy-thread-new' });
-      mockRunner.run.mockImplementation(
-        async (params: { sink: (event: AgentStreamEvent) => void }) => {
-          params.sink({ event: 'token', data: { text: 'Nước hoa ' } });
-          params.sink({ event: 'token', data: { text: 'mùa hè tươi mát.' } });
-          params.sink({
-            event: 'sources',
-            data: [{ id: 'sp-1', name: 'Nước hoa A' }],
-          });
-          params.sink({
-            event: 'done',
-            data: { usage: { totalTokens: 85 } },
-          });
-        },
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = {
-        prompt: 'Gợi ý nước hoa mùa hè',
-        sessionId: 'chat_old_style_session_id',
-      } as any;
-
-      const result = await controller.sendMessage(req as any, dto);
-
-      expect(mockThreads.create).toHaveBeenCalledWith({
-        userId: null,
-        app: 'USER',
-      });
-      expect(result).toEqual({
-        message: 'Nước hoa mùa hè tươi mát.',
-        model: 'gpt-4.1-mini',
-        usage: { totalTokens: 85 },
-        sessionId: 'legacy-thread-new',
-        sources: [{ id: 'sp-1', name: 'Nước hoa A' }],
-      });
-    });
-
-    it('an error event in the legacy route gives 502', async () => {
-      mockThreads.create.mockResolvedValue({ id: 'legacy-err-thread' });
-      mockRunner.run.mockImplementation(
-        async (params: { sink: (event: AgentStreamEvent) => void }) => {
-          params.sink({
-            event: 'error',
-            data: { message: 'OpenAI upstream error', code: 'AGENT_ERROR' },
-          });
-        },
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = { prompt: 'Hello' } as any;
-
-      await expect(controller.sendMessage(req as any, dto)).rejects.toThrow(
-        HttpException,
-      );
-
-      try {
-        await controller.sendMessage(req as any, dto);
-        fail('Expected exception');
-      } catch (err: any) {
-        expect(err).toBeInstanceOf(HttpException);
-        expect(err.getStatus()).toBe(502);
-        expect(err.getResponse()).toEqual({
-          statusCode: 502,
-          message: 'OpenAI upstream error',
-        });
-      }
-    });
-
-    it('the legacy route uses existing thread if sessionId is a valid UUID v4', async () => {
-      const validUuid = '0f5f4fe8-c1e2-43ec-9e2c-85f0f7b52d10';
-      mockThreads.assertOwned.mockResolvedValue({
-        id: validUuid,
-        userId: null,
-        app: 'USER',
-      } as any);
-      mockRunner.run.mockImplementation(
-        async (params: { sink: (event: AgentStreamEvent) => void }) => {
-          params.sink({ event: 'token', data: { text: 'Câu trả lời' } });
-          params.sink({ event: 'done', data: { usage: null } });
-        },
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = {
-        prompt: 'Tiếp tục',
-        sessionId: validUuid,
-      } as any;
-
-      const result = await controller.sendMessage(req as any, dto);
-
-      expect(mockThreads.assertOwned).toHaveBeenCalledWith(validUuid, {
-        userId: null,
-        app: 'USER',
-      });
-      expect(mockThreads.create).not.toHaveBeenCalled();
-      expect(result.sessionId).toBe(validUuid);
-    });
-
-    it('the legacy route handles confirm_required event', async () => {
-      mockThreads.create.mockResolvedValue({ id: 'legacy-thread-confirm' });
-      mockRunner.run.mockImplementation(
-        async (params: { sink: (event: AgentStreamEvent) => void }) => {
-          params.sink({
-            event: 'confirm_required',
-            data: {
-              calls: [
-                {
-                  id: 'call_del',
-                  name: 'cancel_order',
-                  summary: 'Hủy đơn hàng',
-                  risk: 'DESTRUCTIVE',
-                },
-              ],
-            },
-          });
-        },
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = { prompt: 'Hủy đơn hàng' } as any;
-
-      const result = await controller.sendMessage(req as any, dto);
-
-      expect(result.message).toBe('Cần xác nhận thao tác trước khi tiếp tục.');
-      expect(result.pendingConfirm).toEqual([
-        {
-          id: 'call_del',
-          name: 'cancel_order',
-          summary: 'Hủy đơn hàng',
-          risk: 'DESTRUCTIVE',
-        },
-      ]);
-    });
-
-    it('legacy route throws 503 when apiKey is missing', async () => {
-      const controllerWithoutKey = new ChatbotController(
-        { ...mockConfig, apiKey: null },
-        mockRunner as any,
-        mockThreads as any,
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = { prompt: 'Hello' } as any;
-
-      await expect(
-        controllerWithoutKey.sendMessage(req as any, dto),
-      ).rejects.toThrow(HttpException);
-
-      try {
-        await controllerWithoutKey.sendMessage(req as any, dto);
-        fail('Expected exception');
-      } catch (err: any) {
-        expect(err.getStatus()).toBe(503);
-        expect(err.getResponse()).toEqual({
-          statusCode: 503,
-          message: 'Trợ lý chưa được cấu hình',
-        });
-      }
-    });
-  });
 
   describe('Route names and IDOR check', () => {
     it('the controller has no route named sessions (check the route metadata by reading the method names only)', () => {

@@ -66,7 +66,13 @@ export function CartDrawer() {
                                                         <Minus className="h-3 w-3" />
                                                     </Button>
                                                     <span className="w-6 text-center text-xs font-medium">{item.quantity}</span>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md" onClick={() => updateQuantity(item.variantId, item.quantity + 1)}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-6 w-6 rounded-md"
+                                                        onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                                                        disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                                                    >
                                                         <Plus className="h-3 w-3" />
                                                     </Button>
                                                 </div>
