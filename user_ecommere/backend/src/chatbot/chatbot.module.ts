@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ChatbotController } from './chatbot.controller';
 import { ChatbotRetrievalService } from './chatbot-retrieval.service';
 import { agentProviders } from './agent/agent.providers';
+import { CheckpointRetentionService } from './checkpoint-retention.service';
 import { ProductsModule } from '../products/products.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { UsersModule } from '../users/users.module';
@@ -24,5 +25,6 @@ import { CartModule } from '../cart/cart.module';
   ],
   controllers: [ChatbotController],
   providers: [ChatbotRetrievalService, ...agentProviders],
+  exports: [CheckpointRetentionService],
 })
 export class ChatbotModule {}

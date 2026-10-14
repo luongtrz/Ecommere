@@ -2,6 +2,7 @@ import {
   toCheckpointConnectionString,
   getCheckpointerPool,
   deleteThreadCheckpoints,
+  deleteExpiredCheckpoints,
 } from './checkpointer.provider';
 
 describe('toCheckpointConnectionString', () => {
@@ -132,4 +133,55 @@ describe('deleteThreadCheckpoints', () => {
     );
   });
 });
+
+describe('deleteExpiredCheckpoints', () => {
+  it('executes a single CTE delete query for checkpoint_writes, checkpoint_blobs, and checkpoints using agent_threads updatedAt cutoff', async () => {
+    const query = jest.fn().mockResolvedValue({ rowCount: 3 });
+    const pool = { query };
+    const cutoff = new Date('2026-09-01T00:00:00Z');
+
+    const result = await deleteExpiredCheckpoints(pool, cutoff);
+
+    expect(result).toBe(3);
+    expect(query).toHaveBeenCalledTimes(1);
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('WITH expired_threads AS');
+    expect(sql).toContain('SELECT id FROM "agent_threads" WHERE "updatedAt" < $1');
+    expect(sql).toContain('DELETE FROM "agent".checkpoint_writes');
+    expect(sql).toContain('DELETE FROM "agent".checkpoint_blobs');
+    expect(sql).toContain('DELETE FROM "agent".checkpoints');
+    expect(params).toEqual([cutoff]);
+  });
+
+  it('uses custom schema when provided', async () => {
+    const query = jest.fn().mockResolvedValue({ rowCount: 0 });
+    const pool = { query };
+    const cutoff = new Date('2026-09-01T00:00:00Z');
+
+    const result = await deleteExpiredCheckpoints(pool, cutoff, 'custom_schema');
+
+    expect(result).toBe(0);
+    expect(query).toHaveBeenCalledTimes(1);
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('DELETE FROM "custom_schema".checkpoint_writes');
+    expect(sql).toContain('DELETE FROM "custom_schema".checkpoint_blobs');
+    expect(sql).toContain('DELETE FROM "custom_schema".checkpoints');
+    expect(params).toEqual([cutoff]);
+  });
+
+  it('falls back to agent schema if schema name is invalid', async () => {
+    const query = jest.fn().mockResolvedValue({ rowCount: 0 });
+    const pool = { query };
+    const cutoff = new Date('2026-09-01T00:00:00Z');
+
+    await deleteExpiredCheckpoints(pool, cutoff, 'invalid; DROP TABLE');
+
+    expect(query).toHaveBeenCalledTimes(1);
+    const [sql] = query.mock.calls[0];
+    expect(sql).toContain('DELETE FROM "agent".checkpoint_writes');
+    expect(sql).toContain('DELETE FROM "agent".checkpoint_blobs');
+    expect(sql).toContain('DELETE FROM "agent".checkpoints');
+  });
+});
+
 
