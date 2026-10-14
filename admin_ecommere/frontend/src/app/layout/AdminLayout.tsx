@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Suspense, useState } from 'react';
 import {
   Bot,
+  ExternalLink,
   FolderTree,
   LayoutDashboard,
   LogOut,
@@ -14,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { STORE_URL } from '@/lib/constants';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
@@ -120,6 +122,22 @@ export function AdminLayout() {
             );
           })}
         </nav>
+
+  {/* Quick Link to Customer Store */}
+          <div className="p-4 border-t border-slate-100">
+            <a
+              href={STORE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-between rounded-xl bg-slate-50 hover:bg-teal-50/80 border border-slate-200/80 hover:border-teal-200 p-3 text-xs text-slate-700 hover:text-teal-800 transition-all"
+            >
+              <span className="flex items-center gap-2 font-bold">
+                <ExternalLink className="h-3.5 w-3.5 text-teal-600" />
+                Xem Cửa Hàng
+              </span>
+              <span className="text-[10px] text-teal-700 font-mono font-bold">Live</span>
+            </a>
+          </div>
       </aside>
  
       <div className="flex min-h-screen flex-1 flex-col px-3 pb-3 pt-3 md:px-4 lg:pl-4 lg:pr-6">

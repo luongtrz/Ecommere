@@ -12,6 +12,9 @@ export const PRODUCT_SCENTS = [
 
 export const PRODUCT_VOLUMES = [50, 100, 150, 200, 300, 500] as const;
 
+// Customer storefront URL, set per deployment through VITE_STORE_URL.
+export const STORE_URL = (import.meta.env.VITE_STORE_URL || 'http://localhost:5173').replace(/\/$/, '');
+
 export const PAYMENT_METHODS = [
   { id: 'COD', name: 'Thanh toán khi nhận hàng (COD)' },
   { id: 'BANK_TRANSFER', name: 'Chuyển khoản ngân hàng' },
