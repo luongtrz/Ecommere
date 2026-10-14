@@ -125,6 +125,7 @@ describe('ChatbotController', () => {
     assertResumable: jest.Mock;
     deleteCheckpoints: jest.Mock;
     isThreadRunning: jest.Mock;
+    readTranscript: jest.Mock;
   };
   let mockThreads: {
     create: jest.Mock;
@@ -153,6 +154,7 @@ describe('ChatbotController', () => {
       assertResumable: jest.fn().mockResolvedValue(undefined),
       deleteCheckpoints: jest.fn().mockResolvedValue(undefined),
       isThreadRunning: jest.fn().mockReturnValue(false),
+      readTranscript: jest.fn(),
     };
 
     mockThreads = {
@@ -602,6 +604,82 @@ describe('ChatbotController', () => {
       await expect(
         controller.getThread(req as any, 'thread-detail-1'),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('Route: GET /chatbot/threads/:threadId/messages', () => {
+    it("the owner gets the runner's messages in order, and readTranscript is called with the same threadId", async () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Tìm sơn màu đen' },
+        { id: '2', role: 'assistant', content: 'Shop có sơn màu đen mờ và đen bóng.' },
+      ];
+      mockThreads.assertOwned.mockResolvedValue({
+        id: 'thread-detail-1',
+        title: 'Tìm sơn màu đen',
+        app: 'USER',
+        totalTokens: 100,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: 'user-owner-1',
+      });
+      mockRunner.readTranscript.mockResolvedValue(messages);
+
+      const req = createFakeRequest({ id: 'user-owner-1', role: 'CUSTOMER' });
+      const result = await controller.getMessages(req as any, 'thread-detail-1');
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-detail-1', {
+        userId: 'user-owner-1',
+        app: 'USER',
+      });
+      expect(mockRunner.readTranscript).toHaveBeenCalledWith('thread-detail-1');
+      expect(result).toEqual(messages);
+    });
+
+    it('guest with x-chat-session owner key gets saved messages if owned', async () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Chào shop' },
+        { id: '2', role: 'assistant', content: 'Chào bạn!' },
+      ];
+      mockThreads.assertOwned.mockResolvedValue({
+        id: 'guest-thread-1',
+        app: 'USER',
+        totalTokens: 50,
+      });
+      mockRunner.readTranscript.mockResolvedValue(messages);
+
+      const req = createFakeRequest(undefined);
+      req.headers['x-chat-session'] = '0123456789abcdef0123456789abcdef';
+
+      const result = await controller.getMessages(req as any, 'guest-thread-1');
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith(
+        'guest-thread-1',
+        expect.objectContaining({
+          userId: null,
+          app: 'USER',
+          sessionKeyHash: expect.any(String),
+        }),
+      );
+      expect(mockRunner.readTranscript).toHaveBeenCalledWith('guest-thread-1');
+      expect(result).toEqual(messages);
+    });
+
+    it('a thread not owned gives 404 and readTranscript is not called', async () => {
+      mockThreads.assertOwned.mockRejectedValue(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
+
+      const req = createFakeRequest({ id: 'other-user', role: 'CUSTOMER' });
+
+      await expect(
+        controller.getMessages(req as any, 'thread-detail-1'),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-detail-1', {
+        userId: 'other-user',
+        app: 'USER',
+      });
+      expect(mockRunner.readTranscript).not.toHaveBeenCalled();
     });
   });
 
