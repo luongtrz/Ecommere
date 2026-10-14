@@ -18,7 +18,7 @@ export function MobileNav() {
 
   return (
     <div className="fixed bottom-3 left-3 right-3 z-50 md:hidden">
-      <div className="glass-panel flex h-16 items-center justify-around rounded-[2rem] px-2 shadow-luxury border border-border/80 bg-card/90 backdrop-blur-2xl">
+      <div className="flex h-16 items-center justify-around rounded-2xl px-2 shadow-lg border border-slate-200 bg-white/95 backdrop-blur-md font-sans">
         {navItems.map((item, index) => {
           const isActive = item.href ? location.pathname === item.href : false;
 
@@ -28,12 +28,12 @@ export function MobileNav() {
                 key={index}
                 type="button"
                 onClick={item.action}
-                className="flex h-full w-full min-h-[48px] flex-col items-center justify-center gap-1 rounded-2xl text-muted-foreground transition active:scale-95 hover:text-foreground"
+                className="flex h-full w-full min-h-[48px] flex-col items-center justify-center gap-1 rounded-xl text-slate-500 transition active:scale-95 hover:text-teal-600 font-sans"
               >
                 <div className="relative">
                   <item.icon className="h-5 w-5" />
                   {item.badge && item.badge > 0 ? (
-                    <span className="absolute -right-2 -top-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold tabular-nums text-primary-foreground border border-card shadow-sm">
+                    <span className="absolute -right-2 -top-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold tabular-nums text-white border-2 border-white shadow-sm">
                       {item.badge > 99 ? '99+' : item.badge}
                     </span>
                   ) : null}
@@ -48,11 +48,11 @@ export function MobileNav() {
               key={index}
               to={item.href!}
               className={cn(
-                'flex h-full w-full min-h-[48px] flex-col items-center justify-center gap-1 rounded-2xl transition active:scale-95',
-                isActive ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground',
+                'flex h-full w-full min-h-[48px] flex-col items-center justify-center gap-1 rounded-xl transition active:scale-95 font-sans',
+                isActive ? 'text-teal-600 font-semibold' : 'text-slate-500 hover:text-slate-900',
               )}
             >
-              <item.icon className={cn('h-5 w-5 transition-transform', isActive && 'scale-110 text-primary')} />
+              <item.icon className={cn('h-5 w-5 transition-transform', isActive && 'scale-110 text-teal-600')} />
               <span className={cn('text-[10px] tracking-wide', isActive ? 'font-bold' : 'font-medium')}>
                 {item.label}
               </span>

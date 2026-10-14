@@ -3,14 +3,16 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background',
+  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2',
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm',
-        secondary: 'border-border/60 bg-secondary/80 text-secondary-foreground hover:bg-secondary',
-        destructive: 'border-rose-500/25 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25',
-        outline: 'border-border text-foreground hover:bg-accent hover:text-accent-foreground',
+        default: 'border-transparent bg-teal-600 text-white hover:bg-teal-700 shadow-sm',
+        secondary: 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200',
+        destructive: 'border-rose-200 bg-rose-50 text-rose-700 ring-1 ring-rose-200 hover:bg-rose-100',
+        outline: 'border-slate-200 text-slate-700 hover:bg-slate-50',
+        success: 'border-emerald-200 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100',
+        warning: 'border-amber-200 bg-amber-50 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100',
       },
     },
     defaultVariants: {

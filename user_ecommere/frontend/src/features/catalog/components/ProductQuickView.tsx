@@ -69,7 +69,7 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl p-0 overflow-y-auto md:overflow-hidden gap-0 bg-card border border-border/60 rounded-2xl md:rounded-[1.8rem] shadow-luxury max-h-[92vh] flex flex-col md:flex-row">
+            <DialogContent className="max-w-4xl p-0 overflow-y-auto md:overflow-hidden gap-0 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-[92vh] flex flex-col md:flex-row">
                 {/* Helper for accessibility if needed */}
                 <VisuallyHidden.Root>
                     <DialogTitle>{product?.name || 'Xem nhanh sản phẩm'}</DialogTitle>
@@ -78,20 +78,20 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
 
                 {isLoading || !product ? (
                     <div className="flex-1 flex items-center justify-center p-12 min-h-[400px]">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
                     </div>
                 ) : (
                     <>
                         {/* Left: Images */}
-                        <div className="w-full md:w-1/2 bg-secondary/40 border-b md:border-b-0 md:border-r border-border/50 p-6 flex flex-col justify-center relative flex-shrink-0">
-                            <div className="aspect-square relative overflow-hidden rounded-2xl bg-card shadow-sm border border-border/40 mb-4 flex items-center justify-center p-5">
+                        <div className="w-full md:w-1/2 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 p-6 flex flex-col justify-center relative flex-shrink-0">
+                            <div className="aspect-square relative overflow-hidden rounded-xl bg-white shadow-sm border border-slate-200 mb-4 flex items-center justify-center p-4">
                                 <img
                                     src={getImageUrl(product.images[selectedImage])}
                                     alt={product.name}
-                                    className="w-full h-full object-contain transition-transform duration-500 ease-out hover:scale-105"
+                                    className="w-full h-full object-contain transition-transform duration-200 ease-out hover:scale-105"
                                 />
                                 {hasDiscount && (
-                                    <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-bold hover:bg-primary/90 rounded-full px-3 py-1 text-xs shadow-sm">
+                                    <Badge className="absolute top-3 left-3 bg-rose-600 text-white font-semibold hover:bg-rose-700 rounded-md px-2.5 py-0.5 text-xs shadow-sm border-0">
                                         {formatDiscount(originalPrice, finalPrice)}
                                     </Badge>
                                 )}
@@ -104,10 +104,10 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                                         onClick={() => setSelectedImage(idx)}
                                         aria-label={`Xem ảnh ${idx + 1}`}
                                         className={cn(
-                                            'w-16 h-16 rounded-xl border overflow-hidden flex-shrink-0 transition-all duration-200 bg-card p-1',
+                                            'w-16 h-16 rounded-lg border overflow-hidden flex-shrink-0 transition-all duration-150 bg-white p-1',
                                             selectedImage === idx
-                                                ? 'border-primary ring-2 ring-primary/20 ring-offset-1'
-                                                : 'border-border/60 hover:border-primary/50 opacity-70 hover:opacity-100'
+                                                ? 'border-teal-600 ring-2 ring-teal-600/20'
+                                                : 'border-slate-200 hover:border-slate-300 opacity-70 hover:opacity-100'
                                         )}
                                     >
                                         <img src={getImageUrl(img, { width: 100 })} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-contain" />
@@ -117,9 +117,9 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                         </div>
 
                         {/* Right: Details */}
-                        <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col overflow-y-auto md:max-h-[92vh]">
-                            <div className="mb-1 flex justify-between items-center pr-8">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-foreground">{product.category?.name}</span>
+                        <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col overflow-y-auto md:max-h-[92vh] bg-white">
+                            <div className="mb-2 flex justify-between items-center pr-8">
+                                <span className="text-xs font-semibold uppercase tracking-wider text-teal-600">{product.category?.name}</span>
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -127,31 +127,33 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                                     onClick={handleToggleWishlist}
                                     aria-label="Thêm vào yêu thích"
                                     className={cn(
-                                        'rounded-full transition-colors',
+                                        'rounded-full transition-colors h-8 w-8',
                                         isWishlisted
-                                            ? 'text-destructive bg-destructive/10 hover:bg-destructive/15'
-                                            : 'text-muted-foreground hover:text-destructive hover:bg-muted'
+                                            ? 'text-rose-600 bg-rose-50 hover:bg-rose-100'
+                                            : 'text-slate-400 hover:text-rose-600 hover:bg-slate-100'
                                     )}
                                 >
-                                    <Heart className={cn('h-5 w-5 transition-transform duration-300', isWishlisted && 'fill-destructive text-destructive scale-110')} />
+                                    <Heart className={cn('h-5 w-5 transition-transform duration-200', isWishlisted && 'fill-rose-600 text-rose-600 scale-110')} />
                                 </Button>
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground mb-2 leading-tight">{product.name}</h2>
+                            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 mb-2 leading-snug">{product.name}</h2>
 
                             <div className="flex items-baseline gap-3 mb-4">
-                                <span className="text-2xl font-bold text-foreground tabular-nums">{formatCurrency(finalPrice)}</span>
+                                <span className={cn('text-2xl font-semibold tabular-nums', hasDiscount ? 'text-rose-600' : 'text-slate-900')}>
+                                    {formatCurrency(finalPrice)}
+                                </span>
                                 {hasDiscount && (
-                                    <span className="text-lg text-muted-foreground line-through tabular-nums">{formatCurrency(originalPrice)}</span>
+                                    <span className="text-base text-slate-400 line-through tabular-nums">{formatCurrency(originalPrice)}</span>
                                 )}
                             </div>
 
-                            <div className="text-sm text-muted-foreground mb-6 line-clamp-3 leading-relaxed">
+                            <div className="text-sm text-slate-600 mb-6 line-clamp-3 leading-relaxed">
                                 {product.description}
                             </div>
 
-                            <div className="space-y-4 mb-8">
+                            <div className="space-y-4 mb-6">
                                 <div>
-                                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Phiên bản:</label>
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">Phiên bản:</label>
                                     <Select
                                         value={selectedVariantId || product.variants[0]?.id}
                                         onValueChange={(val) => {
@@ -159,14 +161,14 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                                             setQuantity(1);
                                         }}
                                     >
-                                        <SelectTrigger className="w-full rounded-xl border-border bg-background text-foreground focus:ring-ring">
+                                        <SelectTrigger className="w-full rounded-lg border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-teal-500">
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-xl border-border bg-popover text-popover-foreground">
+                                        <SelectContent className="rounded-lg border-slate-200 bg-white text-slate-900">
                                             {product.variants.map((v) => (
-                                                <SelectItem key={v.id} value={v.id} disabled={v.stock === 0} className="rounded-lg">
+                                                <SelectItem key={v.id} value={v.id} disabled={v.stock === 0} className="rounded-md">
                                                     <span className="font-medium">{v.scent}</span> - {v.volumeMl}ml
-                                                    {v.stock === 0 && <span className="text-destructive ml-2">(Hết hàng)</span>}
+                                                    {v.stock === 0 && <span className="text-rose-600 ml-2">(Hết hàng)</span>}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -174,26 +176,26 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                                 </div>
 
                                 <div>
-                                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Số lượng:</label>
-                                    <div className="flex items-center h-10 w-32 bg-secondary/60 rounded-full border border-border">
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">Số lượng:</label>
+                                    <div className="flex items-center h-10 w-32 bg-slate-50 rounded-lg border border-slate-200">
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                             aria-label="Giảm số lượng"
-                                            className="h-full w-9 rounded-l-full hover:bg-card text-muted-foreground hover:text-foreground"
+                                            className="h-full w-9 rounded-l-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900"
                                         >
                                             <Minus className="h-3.5 w-3.5" />
                                         </Button>
-                                        <span className="flex-1 text-center font-semibold text-sm text-foreground tabular-nums">{quantity}</span>
+                                        <span className="flex-1 text-center font-semibold text-sm text-slate-900 tabular-nums">{quantity}</span>
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => setQuantity(Math.min(selectedVariant?.stock || 99, quantity + 1))}
                                             aria-label="Tăng số lượng"
-                                            className="h-full w-9 rounded-r-full hover:bg-card text-muted-foreground hover:text-foreground"
+                                            className="h-full w-9 rounded-r-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900"
                                         >
                                             <Plus className="h-3.5 w-3.5" />
                                         </Button>
@@ -201,16 +203,16 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                                 </div>
                             </div>
 
-                            <div className="mt-auto pt-6 space-y-3">
+                            <div className="mt-auto pt-6 space-y-2.5">
                                 <Button
                                     onClick={handleAddToCart}
                                     disabled={!selectedVariant || selectedVariant.stock === 0}
-                                    className="w-full h-11 rounded-full bg-primary text-primary-foreground font-bold uppercase tracking-wider text-xs transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/15 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full h-11 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 font-semibold text-sm transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <ShoppingCart className="mr-2 h-4 w-4" />
                                     {selectedVariant?.stock === 0 ? 'Tạm hết hàng' : 'Thêm vào giỏ'}
                                 </Button>
-                                <Button variant="outline" asChild className="w-full h-10 rounded-full border-border hover:bg-muted text-foreground font-bold text-xs uppercase tracking-wider">
+                                <Button variant="outline" asChild className="w-full h-10 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-colors duration-150">
                                     <Link to={`/p/${slug}`} onClick={() => onOpenChange(false)}>
                                         Xem chi tiết sản phẩm
                                     </Link>

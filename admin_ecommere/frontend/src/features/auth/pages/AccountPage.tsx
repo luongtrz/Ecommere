@@ -27,31 +27,31 @@ export function AccountPage() {
 
   const getRoleColor = (role: string) => {
     return role === 'ADMIN'
-      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25 border'
-      : 'bg-muted text-muted-foreground border-border border';
+      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent font-medium'
+      : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200 border-transparent font-medium';
   };
 
   return (
     <>
       <SEO title="Tài khoản" />
-      <div className="container max-w-6xl py-8 space-y-8">
+      <div className="container max-w-6xl py-8 md:py-12 space-y-8 font-sans">
         <div className="space-y-1">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Tài khoản của tôi</h1>
-          <p className="text-sm text-muted-foreground font-medium">Quản lý thông tin cá nhân và hoạt động mua sắm</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Tài khoản của tôi</h1>
+          <p className="text-sm text-slate-600 font-normal">Quản lý thông tin cá nhân và hoạt động mua sắm</p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* Profile Card */}
           <div className="lg:col-span-1 space-y-6">
-            <Card className="border-border bg-card/80 backdrop-blur-xl shadow-xl">
+            <Card className="border-slate-200 bg-white shadow-sm rounded-xl">
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="h-24 w-24 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center text-primary text-2xl font-black shadow-lg shadow-primary/20">
+                  <div className="h-24 w-24 rounded-full bg-teal-50 border-2 border-teal-200 flex items-center justify-center text-teal-700 text-2xl font-bold shadow-sm">
                     {getInitials(user.name)}
                   </div>
 
                   <div className="space-y-1.5">
-                    <h2 className="text-xl font-bold text-foreground">{user.name}</h2>
+                    <h2 className="text-xl font-bold text-slate-900">{user.name}</h2>
                     <Badge variant="secondary" className={getRoleColor(user.role)}>
                       {user.role === 'ADMIN' ? 'Quản trị viên' : 'Khách hàng'}
                     </Badge>
@@ -60,10 +60,10 @@ export function AccountPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full rounded-xl border-border bg-background/50 hover:bg-muted/50 hover:border-primary/40 transition-colors font-medium text-foreground"
+                    className="w-full rounded-lg border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-900 transition-colors font-medium text-slate-700 shadow-sm"
                     onClick={() => setIsProfileDialogOpen(true)}
                   >
-                    <Settings className="h-4 w-4 mr-2 text-primary" />
+                    <Settings className="h-4 w-4 mr-2 text-teal-600" />
                     Chỉnh sửa hồ sơ
                   </Button>
                 </div>
@@ -71,13 +71,17 @@ export function AccountPage() {
             </Card>
 
             {/* Account Actions */}
-            <Card className="border-destructive/30 bg-card/80 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-destructive text-lg font-bold">Hành động tài khoản</CardTitle>
+            <Card className="border-slate-200 bg-white shadow-sm rounded-xl">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-rose-600 text-base font-bold">Hành động tài khoản</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-3">
-                  <Button variant="destructive" onClick={logout} className="flex-1 rounded-xl font-bold shadow-md shadow-destructive/20">
+                  <Button
+                    variant="destructive"
+                    onClick={logout}
+                    className="flex-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 font-semibold shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-rose-500"
+                  >
                     <LogOut className="h-4 w-4 mr-2" />
                     Đăng xuất
                   </Button>
@@ -89,42 +93,42 @@ export function AccountPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Personal Information */}
-            <Card className="border-border bg-card/80 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground text-lg font-bold">
-                  <User className="h-5 w-5 text-primary" />
+            <Card className="border-slate-200 bg-white shadow-sm rounded-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-slate-900 text-base sm:text-lg font-bold">
+                  <User className="h-5 w-5 text-teal-600" />
                   Thông tin cá nhân
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="flex items-center gap-3.5 p-3.5 rounded-xl border border-border/60 bg-muted/30">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <div className="flex items-center gap-3.5 p-3.5 rounded-lg border border-slate-200 bg-slate-50">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
                       <Mail className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</p>
-                      <p className="font-medium text-foreground truncate">{user.email}</p>
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Email</p>
+                      <p className="font-medium text-slate-900 truncate">{user.email}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3.5 p-3.5 rounded-xl border border-border/60 bg-muted/30">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <div className="flex items-center gap-3.5 p-3.5 rounded-lg border border-slate-200 bg-slate-50">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
                       <Phone className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Số điện thoại</p>
-                      <p className="font-medium text-foreground">{user.phone || 'Chưa cập nhật'}</p>
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Số điện thoại</p>
+                      <p className="font-medium text-slate-900 tabular-nums">{user.phone || 'Chưa cập nhật'}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3.5 p-3.5 rounded-xl border border-border/60 bg-muted/30 md:col-span-2">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <div className="flex items-center gap-3.5 p-3.5 rounded-lg border border-slate-200 bg-slate-50 md:col-span-2">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
                       <Calendar className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Ngày tham gia</p>
-                      <p className="font-medium text-foreground">
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Ngày tham gia</p>
+                      <p className="font-medium text-slate-900">
                         {user.createdAt ? formatDate(user.createdAt) : 'Không rõ'}
                       </p>
                     </div>
@@ -134,31 +138,31 @@ export function AccountPage() {
             </Card>
 
             {/* Security Section */}
-            <Card className="border-border bg-card/80 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground text-lg font-bold">
-                  <Shield className="h-5 w-5 text-primary" />
+            <Card className="border-slate-200 bg-white shadow-sm rounded-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-slate-900 text-base sm:text-lg font-bold">
+                  <Shield className="h-5 w-5 text-teal-600" />
                   Bảo mật tài khoản
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/60 bg-muted/30">
+                  <div className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50">
                     <div className="space-y-0.5">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Xác thực hai lớp</p>
-                      <p className="text-sm font-semibold text-foreground">Mã OTP bảo mật</p>
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Xác thực hai lớp</p>
+                      <p className="text-sm font-semibold text-slate-900">Mã OTP bảo mật</p>
                     </div>
-                    <Badge variant="outline" className="bg-emerald-500/15 text-emerald-300 border-emerald-500/25">
+                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent font-medium">
                       Đang bật
                     </Badge>
                   </div>
 
-                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/60 bg-muted/30">
+                  <div className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50">
                     <div className="space-y-0.5">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mã hóa kết nối</p>
-                      <p className="text-sm font-semibold text-foreground">Bảo mật SSL / TLS</p>
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Mã hóa kết nối</p>
+                      <p className="text-sm font-semibold text-slate-900">Bảo mật SSL / TLS</p>
                     </div>
-                    <Badge variant="outline" className="bg-emerald-500/15 text-emerald-300 border-emerald-500/25">
+                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent font-medium">
                       Chuẩn cao cấp
                     </Badge>
                   </div>
@@ -167,67 +171,67 @@ export function AccountPage() {
             </Card>
 
             {/* Sessions Section */}
-            <Card className="border-border bg-card/80 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground text-lg font-bold">
-                  <Settings className="h-5 w-5 text-primary" />
+            <Card className="border-slate-200 bg-white shadow-sm rounded-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-slate-900 text-base sm:text-lg font-bold">
+                  <Settings className="h-5 w-5 text-teal-600" />
                   Phiên hoạt động
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-border/60 bg-muted/30">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-slate-200 bg-slate-50">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-foreground">Phiên quản trị hiện tại</p>
-                      <Badge variant="outline" className="bg-emerald-500/15 text-emerald-300 border-emerald-500/25 text-[10px] py-0 px-2">
+                      <p className="text-sm font-semibold text-slate-900">Phiên quản trị hiện tại</p>
+                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent text-[10px] py-0 px-2 font-medium">
                         Đang hoạt động
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">Khu vực làm việc Thai Spray Admin Control Platform</p>
+                    <p className="text-xs text-slate-500">Khu vực làm việc Thai Spray Admin Control Platform</p>
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0 font-medium">Phiên hiện thời</span>
+                  <span className="text-xs text-slate-400 shrink-0 font-medium">Phiên hiện thời</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Quick Actions */}
-            <Card className="border-border bg-card/80 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-foreground text-lg font-bold">Hoạt động nhanh</CardTitle>
+            <Card className="border-slate-200 bg-white shadow-sm rounded-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-slate-900 text-base sm:text-lg font-bold">Hoạt động nhanh</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 md:grid-cols-2">
                   <Button
                     variant="outline"
-                    className="h-auto p-4 justify-start border-border bg-background/50 hover:bg-muted/50 hover:border-primary/40 transition-colors text-foreground rounded-xl"
+                    className="h-auto p-4 justify-start border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-200 transition-all text-slate-900 rounded-lg group shadow-sm"
                     onClick={() => navigate('/admin/orders')}
                   >
-                    <ShoppingBag className="h-5 w-5 mr-3 text-primary shrink-0" />
+                    <ShoppingBag className="h-5 w-5 mr-3 text-teal-600 shrink-0 transition-transform group-hover:scale-110" />
                     <div className="text-left">
-                      <div className="font-medium text-foreground">Đơn hàng của tôi</div>
-                      <div className="text-sm text-muted-foreground">Xem lịch sử mua hàng</div>
+                      <div className="font-semibold text-slate-900 text-sm">Đơn hàng của tôi</div>
+                      <div className="text-xs text-slate-500">Xem lịch sử mua hàng</div>
                     </div>
                   </Button>
 
                   <Button
                     variant="outline"
-                    className="h-auto p-4 justify-start border-border bg-background/50 hover:bg-muted/50 hover:border-primary/40 transition-colors text-foreground rounded-xl"
+                    className="h-auto p-4 justify-start border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-200 transition-all text-slate-900 rounded-lg group shadow-sm"
                   >
-                    <Heart className="h-5 w-5 mr-3 text-primary shrink-0" />
+                    <Heart className="h-5 w-5 mr-3 text-teal-600 shrink-0 transition-transform group-hover:scale-110" />
                     <div className="text-left">
-                      <div className="font-medium text-foreground">Danh sách yêu thích</div>
-                      <div className="text-sm text-muted-foreground">Sản phẩm đã lưu</div>
+                      <div className="font-semibold text-slate-900 text-sm">Danh sách yêu thích</div>
+                      <div className="text-xs text-slate-500">Sản phẩm đã lưu</div>
                     </div>
                   </Button>
 
                   <Button
                     variant="outline"
-                    className="h-auto p-4 justify-start border-border bg-background/50 hover:bg-muted/50 hover:border-primary/40 transition-colors text-foreground rounded-xl md:col-span-2"
+                    className="h-auto p-4 justify-start border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-200 transition-all text-slate-900 rounded-lg md:col-span-2 group shadow-sm"
                   >
-                    <Shield className="h-5 w-5 mr-3 text-primary shrink-0" />
+                    <Shield className="h-5 w-5 mr-3 text-teal-600 shrink-0 transition-transform group-hover:scale-110" />
                     <div className="text-left">
-                      <div className="font-medium text-foreground">Bảo mật tài khoản</div>
-                      <div className="text-sm text-muted-foreground">Đổi mật khẩu</div>
+                      <div className="font-semibold text-slate-900 text-sm">Bảo mật tài khoản</div>
+                      <div className="text-xs text-slate-500">Đổi mật khẩu</div>
                     </div>
                   </Button>
                 </div>

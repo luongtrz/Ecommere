@@ -13,33 +13,33 @@ export function WishlistPage() {
   return (
     <>
       <SEO title="Danh sách yêu thích" />
-      <div className="min-h-screen bg-background py-12 md:py-20">
+      <div className="min-h-screen bg-slate-50 py-8 md:py-12">
         <div className="container">
           {/* Header */}
-          <div className="flex items-center gap-3.5 mb-8 md:mb-12">
-            <div className="w-11 h-11 bg-accent/20 border border-accent/30 rounded-full flex items-center justify-center text-primary shadow-sm">
-              <Heart className="h-5 w-5 fill-accent text-primary" />
+          <div className="flex items-center gap-3.5 mb-8 md:mb-10">
+            <div className="w-11 h-11 bg-rose-50 border border-rose-100 rounded-xl flex items-center justify-center text-rose-600 shadow-sm">
+              <Heart className="h-5 w-5 fill-rose-600 text-rose-600" />
             </div>
             <div>
-              <p className="uppercase tracking-[0.2em] text-[10px] font-bold text-accent-foreground/80 mb-0.5">
+              <p className="uppercase tracking-wider text-[10px] font-semibold text-teal-600 mb-0.5">
                 Yêu thích
               </p>
-              <h1 className="text-2xl md:text-3xl font-serif font-normal text-foreground tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-sans font-bold text-slate-900 tracking-tight">
                 Danh sách yêu thích ({items.length})
               </h1>
             </div>
           </div>
 
           {items.length === 0 ? (
-            <div className="section-shell p-12 md:p-16 text-center max-w-xl mx-auto shadow-luxury animate-fade-in">
-              <div className="w-20 h-20 bg-muted/40 rounded-full flex items-center justify-center mx-auto mb-4 border border-border/60">
-                <Heart className="h-10 w-10 text-muted-foreground/40" />
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 md:p-16 text-center max-w-xl mx-auto shadow-sm animate-fade-in">
+              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-100">
+                <Heart className="h-8 w-8 text-rose-500" />
               </div>
-              <h2 className="text-xl md:text-2xl font-serif font-normal text-foreground">Danh sách trống</h2>
-              <p className="text-sm text-muted-foreground mt-2 mb-6 max-w-sm mx-auto">
+              <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900">Danh sách trống</h2>
+              <p className="text-sm text-slate-600 mt-2 mb-6 max-w-sm mx-auto">
                 Bạn chưa lưu sản phẩm nào vào danh sách yêu thích.
               </p>
-              <Button asChild className="rounded-full px-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-luxury transition-all duration-300">
+              <Button asChild className="rounded-lg px-8 bg-teal-600 hover:bg-teal-700 text-white focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200">
                 <Link to="/catalog">Khám phá sản phẩm ngay</Link>
               </Button>
             </div>
@@ -48,42 +48,42 @@ export function WishlistPage() {
               {items.map((item) => (
                 <Card
                   key={item.productId}
-                  className="group overflow-hidden border border-black/[0.03] shadow-luxury hover:shadow-luxury-glow hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full bg-card rounded-2xl md:rounded-[1.8rem]"
+                  className="group overflow-hidden border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col h-full bg-white rounded-xl"
                 >
-                  <Link to={`/p/${item.slug}`} className="relative overflow-hidden aspect-square block bg-muted/30">
+                  <Link to={`/p/${item.slug}`} className="relative overflow-hidden aspect-square block bg-slate-50 border-b border-slate-100">
                     <img
                       src={getImageUrl(item.image)}
                       alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         removeItem(item.productId);
                       }}
-                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-card/85 backdrop-blur-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-card transition-all duration-200 shadow-sm opacity-0 group-hover:opacity-100"
+                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-white transition-all duration-200 shadow-sm border border-slate-200"
                       aria-label="Xóa khỏi danh sách yêu thích"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </Link>
-                  <CardContent className="p-4 md:p-5 flex-1 flex flex-col justify-between">
+                  <CardContent className="p-4 flex-1 flex flex-col justify-between">
                     <div>
-                      <p className="uppercase tracking-[0.2em] text-[10px] font-bold text-accent-foreground/70 mb-1">
+                      <p className="uppercase tracking-wider text-[10px] font-semibold text-teal-600 mb-1">
                         Thai Spray
                       </p>
                       <Link to={`/p/${item.slug}`}>
-                        <h3 className="text-sm font-serif font-medium line-clamp-2 text-foreground group-hover:text-primary transition-colors mb-2 min-h-[2.5rem] leading-snug">
+                        <h3 className="text-sm font-sans font-semibold line-clamp-2 text-slate-900 group-hover:text-teal-600 transition-colors mb-2 min-h-[2.5rem] leading-snug">
                           {item.name}
                         </h3>
                       </Link>
                     </div>
-                    <div className="font-serif font-semibold text-primary text-base md:text-lg pt-2">
+                    <div className="font-sans font-bold text-rose-600 text-base md:text-lg pt-2 tabular-nums">
                       {formatCurrency(item.price)}
                     </div>
                   </CardContent>
-                  <CardFooter className="p-4 md:p-5 pt-0">
-                    <Button asChild className="w-full rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold h-10 shadow-luxury transition-all duration-300 active:scale-95">
+                  <CardFooter className="p-4 pt-0">
+                    <Button asChild className="w-full rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold h-9 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-all duration-200 active:scale-95">
                       <Link to={`/p/${item.slug}`}>
                         <ShoppingBag className="h-3.5 w-3.5 mr-2" />
                         Xem chi tiết

@@ -119,12 +119,12 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading || images.length >= maxImages}
-                    className="border-border/80"
+                    className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg"
                 >
-                    <Upload className="mr-2 h-4 w-4" />
+                    <Upload className="mr-2 h-4 w-4 text-teal-600" />
                     {isUploading ? 'Đang upload...' : 'Chọn ảnh'}
                 </Button>
-                <span className="text-xs text-muted-foreground tabular-nums font-mono">
+                <span className="text-xs text-slate-500 tabular-nums font-mono">
                     {images.length}/{maxImages} ảnh
                 </span>
                 <input
@@ -141,11 +141,11 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
             {images.length === 0 ? (
                 <div
                     onClick={() => !isUploading && fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-border/80 hover:border-primary/60 bg-muted/10 hover:bg-muted/20 rounded-xl p-8 text-center cursor-pointer transition-colors"
+                    className="border-2 border-dashed border-slate-200 hover:border-teal-500 bg-slate-50/60 hover:bg-teal-50/30 rounded-xl p-8 text-center cursor-pointer transition-colors"
                 >
-                    <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground/60 mb-2" />
-                    <p className="text-sm font-medium text-foreground">Chưa có ảnh nào</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <ImageIcon className="h-10 w-10 mx-auto text-slate-400 mb-2" />
+                    <p className="text-sm font-medium text-slate-900">Chưa có ảnh nào</p>
+                    <p className="text-xs text-slate-400 mt-1">
                         Click "Chọn ảnh" để upload (tối đa {maxImages} ảnh)
                     </p>
                 </div>
@@ -159,13 +159,13 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
                                 onDragStart={() => handleDragStart(index)}
                                 onDragOver={(e) => handleDragOver(e, index)}
                                 onDragEnd={handleDragEnd}
-                                className={`relative group aspect-square rounded-xl overflow-hidden border border-border/60 bg-muted/20 cursor-move transition-all ${
-                                    draggedIndex === index ? 'opacity-40 scale-95 border-primary' : 'hover:border-border'
+                                className={`relative group aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-50 cursor-move transition-all ${
+                                    draggedIndex === index ? 'opacity-40 scale-95 border-teal-500' : 'hover:border-slate-300 hover:shadow-sm'
                                 }`}
                             >
                                 {/* Drag handle */}
-                                <div className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-move z-10 border border-border/40">
-                                    <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                                <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-move z-10 border border-slate-200 shadow-sm">
+                                    <GripVertical className="h-3.5 w-3.5 text-slate-500" />
                                 </div>
 
                                 <img
@@ -177,17 +177,17 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
                                 {/* Delete button */}
                                 <Button
                                     type="button"
-                                    variant="destructive"
                                     size="icon"
-                                    className="absolute top-2 right-2 h-7 w-7 rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                    className="absolute top-2 right-2 h-7 w-7 rounded-md bg-rose-600 hover:bg-rose-700 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
                                     onClick={() => removeImage(index)}
+                                    aria-label={`Xóa ảnh ${index + 1}`}
                                 >
                                     <X className="h-3.5 w-3.5" />
                                 </Button>
 
                                 {/* Primary image badge */}
                                 {index === 0 && (
-                                    <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground text-[10px] font-semibold px-2 py-0.5 rounded shadow-sm">
+                                    <div className="absolute bottom-2 left-2 bg-teal-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow-sm">
                                         Ảnh chính
                                     </div>
                                 )}
@@ -198,9 +198,9 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
                     {images.length < maxImages && (
                         <div
                             onClick={() => !isUploading && fileInputRef.current?.click()}
-                            className="border border-dashed border-border/80 hover:border-primary/60 bg-muted/10 hover:bg-muted/20 rounded-xl p-3 text-center cursor-pointer transition-colors"
+                            className="border border-dashed border-slate-200 hover:border-teal-500 bg-slate-50/60 hover:bg-teal-50/30 rounded-xl p-3 text-center cursor-pointer transition-colors"
                         >
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-slate-500">
                                 Nhấn để thêm ảnh khác ({images.length}/{maxImages})
                             </p>
                         </div>
@@ -208,8 +208,8 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
                 </div>
             )}
 
-            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <GripVertical className="h-3.5 w-3.5 inline shrink-0" />
+            <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                <GripVertical className="h-3.5 w-3.5 inline shrink-0 text-slate-400" />
                 <span>Kéo thả ảnh để sắp xếp lại thứ tự. Ảnh đầu tiên sẽ là ảnh chính của sản phẩm.</span>
             </p>
         </div>

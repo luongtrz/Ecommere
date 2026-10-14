@@ -19,19 +19,19 @@ export function Rating({ value, max = 5, size = 'sm', showValue = false, classNa
   const stars = [];
   for (let i = 1; i <= max; i++) {
     if (value >= i) {
-      stars.push(<Star key={i} className={cn(sizeClasses[size], 'fill-accent text-accent')} />);
+      stars.push(<Star key={i} className={cn(sizeClasses[size], 'fill-amber-400 text-amber-400')} />);
     } else if (value >= i - 0.5) {
-      stars.push(<StarHalf key={i} className={cn(sizeClasses[size], 'fill-accent text-accent')} />);
+      stars.push(<StarHalf key={i} className={cn(sizeClasses[size], 'fill-amber-400 text-amber-400')} />);
     } else {
-      stars.push(<Star key={i} className={cn(sizeClasses[size], 'text-muted-foreground/30')} />);
+      stars.push(<Star key={i} className={cn(sizeClasses[size], 'text-slate-200 fill-slate-100')} />);
     }
   }
 
   return (
-    <div className={cn('flex items-center gap-1', className)}>
+    <div className={cn('flex items-center gap-1 font-sans', className)}>
       <div className="flex items-center gap-0.5">{stars}</div>
       {showValue && (
-        <span className="ml-1 text-xs md:text-sm font-semibold tabular-nums text-foreground">
+        <span className="ml-1 text-xs md:text-sm font-semibold tabular-nums text-slate-700 font-sans">
           {value.toFixed(1)}
         </span>
       )}

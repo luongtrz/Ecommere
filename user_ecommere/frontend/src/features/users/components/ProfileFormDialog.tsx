@@ -50,20 +50,20 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:rounded-[1.8rem] border border-border/80 bg-card p-6 md:p-8 shadow-luxury max-w-md">
-        <DialogHeader className="pb-4 border-b border-border/60">
-          <DialogTitle className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">
+      <DialogContent className="sm:rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-lg max-w-md">
+        <DialogHeader className="pb-4 border-b border-slate-200">
+          <DialogTitle className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
             Chỉnh sửa thông tin cá nhân
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-foreground text-sm font-medium">Họ và tên *</Label>
+            <Label htmlFor="name" className="text-slate-900 text-sm font-medium">Họ và tên *</Label>
             <Input
               id="name"
               required
-              className="h-11 rounded-xl bg-secondary/40 border-border/70 focus:bg-background focus:border-primary focus:ring-2 focus:ring-ring/20 transition-all text-foreground placeholder:text-muted-foreground/60"
+              className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Nguyễn Văn A"
@@ -71,24 +71,24 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-foreground text-sm font-medium">Số điện thoại</Label>
+            <Label htmlFor="phone" className="text-slate-900 text-sm font-medium">Số điện thoại</Label>
             <Input
               id="phone"
               type="tel"
-              className="h-11 rounded-xl bg-secondary/40 border-border/70 focus:bg-background focus:border-primary focus:ring-2 focus:ring-ring/20 transition-all text-foreground placeholder:text-muted-foreground/60"
+              className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="0912345678"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-border/60">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="h-11 rounded-full border-border hover:bg-secondary text-foreground px-6 text-sm font-medium">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="h-11 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-6 text-sm font-medium transition-colors">
               Hủy
             </Button>
             <Button
               type="submit"
-              className="h-11 px-7 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-luxury text-sm font-medium"
+              className="h-11 px-7 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm text-sm font-medium transition-colors"
               disabled={updateProfile.isPending}
             >
               Cập nhật

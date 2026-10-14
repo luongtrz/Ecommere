@@ -27,13 +27,13 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
   if (totalPages <= 1) return null;
 
   return (
-    <nav aria-label="Pagination" className={cn('flex items-center justify-center gap-1.5 md:gap-2 py-6', className)}>
+    <nav aria-label="Pagination" className={cn('flex items-center justify-center gap-1.5 md:gap-2 py-6 font-sans', className)}>
       <Button
         variant="outline"
         size="icon"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="h-10 w-10 rounded-full border-border/80 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+        className="h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-slate-600 shadow-sm"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -43,11 +43,11 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
           <Button
             variant="outline"
             onClick={() => onPageChange(1)}
-            className="h-10 w-10 rounded-full p-0 border-border/80 text-muted-foreground hover:bg-secondary hover:text-foreground tabular-nums"
+            className="h-9 w-9 rounded-lg p-0 border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 tabular-nums"
           >
             1
           </Button>
-          {startPage > 2 && <span className="flex h-10 w-6 items-center justify-center text-xs font-serif text-muted-foreground/60 select-none">...</span>}
+          {startPage > 2 && <span className="flex h-9 w-6 items-center justify-center text-xs font-sans text-slate-400 select-none">...</span>}
         </>
       )}
 
@@ -57,10 +57,10 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
           variant={currentPage === page ? 'default' : 'outline'}
           onClick={() => onPageChange(page)}
           className={cn(
-            'h-10 w-10 rounded-full p-0 tabular-nums transition-all duration-200',
+            'h-9 w-9 rounded-lg p-0 text-sm font-semibold tabular-nums transition-colors',
             currentPage === page
-              ? 'bg-primary text-primary-foreground font-semibold shadow-sm hover:bg-primary/90'
-              : 'border-border/80 text-muted-foreground hover:bg-secondary hover:text-foreground'
+              ? 'bg-teal-600 text-white shadow-sm hover:bg-teal-700'
+              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
           )}
         >
           {page}
@@ -69,11 +69,11 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
 
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="flex h-10 w-6 items-center justify-center text-xs font-serif text-muted-foreground/60 select-none">...</span>}
+          {endPage < totalPages - 1 && <span className="flex h-9 w-6 items-center justify-center text-xs font-sans text-slate-400 select-none">...</span>}
           <Button
             variant="outline"
             onClick={() => onPageChange(totalPages)}
-            className="h-10 w-10 rounded-full p-0 border-border/80 text-muted-foreground hover:bg-secondary hover:text-foreground tabular-nums"
+            className="h-9 w-9 rounded-lg p-0 border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 tabular-nums"
           >
             {totalPages}
           </Button>
@@ -85,7 +85,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
         size="icon"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="h-10 w-10 rounded-full border-border/80 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+        className="h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-slate-600 shadow-sm"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

@@ -16,8 +16,7 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', '"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
-        serif: ['Fraunces', '"Playfair Display"', 'serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -60,9 +59,9 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       boxShadow: {
-        'luxury': '0 20px 48px -12px rgba(20, 20, 20, 0.04), 0 8px 20px -6px rgba(20, 20, 20, 0.02), 0 0 0 1px rgba(20, 20, 20, 0.02)',
-        'luxury-soft': '0 10px 30px -10px rgba(20, 20, 20, 0.04), 0 4px 12px -4px rgba(20, 20, 20, 0.02), 0 0 0 1px rgba(20, 20, 20, 0.02)',
-        'luxury-glow': '0 30px 60px -15px rgba(20, 20, 20, 0.05), 0 0 30px -5px rgba(197, 160, 107, 0.08)',
+        'luxury': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        'luxury-soft': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+        'luxury-glow': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
       },
       keyframes: {
         'accordion-down': {

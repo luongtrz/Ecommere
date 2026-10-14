@@ -28,44 +28,46 @@ export function Header() {
   const { openCart } = useCart();
 
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <div className="border-b border-primary/20 bg-primary text-primary-foreground">
-        <div className="container flex min-h-10 items-center justify-between gap-3 text-xs md:text-sm">
-          <div className="flex items-center gap-2 text-primary-foreground/90">
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
+    <header className="sticky top-0 z-50 w-full bg-white">
+      {/* Top promotional strip */}
+      <div className="border-b border-teal-700/20 bg-teal-600 text-white">
+        <div className="container flex min-h-9 items-center justify-between gap-3 text-xs md:text-sm">
+          <div className="flex items-center gap-2 text-teal-50">
+            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
             <span>Hương thơm cho nhà ở, xe hơi và quà tặng mỗi ngày.</span>
           </div>
-          <div className="hidden items-center gap-5 text-primary-foreground/75 md:flex">
+          <div className="hidden items-center gap-5 text-teal-100 md:flex">
             <span>Giao nhanh nội thành</span>
             <span>Đổi trả 7 ngày</span>
           </div>
         </div>
       </div>
 
-      <div className="border-b border-border/70 bg-background/85 backdrop-blur-2xl transition-all duration-300 md:mx-auto md:max-w-7xl md:mt-3 md:rounded-[2rem] md:border md:border-border/80 md:bg-card/90 md:shadow-luxury">
+      {/* Main header row */}
+      <div className="border-b border-slate-200 bg-white">
         <div className="container py-2.5 md:py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full md:hidden hover:bg-secondary/60">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 md:hidden">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[88vw] max-w-sm border-border bg-card/95 p-6 backdrop-blur-xl">
+                <SheetContent side="left" className="w-[88vw] max-w-sm border-r border-slate-200 bg-white p-6">
                   <div className="mt-6 flex flex-col gap-6">
                     <Link to="/" className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary font-serif text-sm font-bold text-primary-foreground shadow-md border border-primary/10">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 font-sans text-sm font-bold text-white shadow-sm">
                         TS
                       </div>
                       <div>
-                        <p className="font-serif text-lg font-bold text-foreground">Thai Spray</p>
-                        <p className="text-xs text-muted-foreground">Không gian có gu, hương thơm có dấu ấn.</p>
+                        <p className="font-sans text-base font-bold text-slate-900 tracking-tight">Thai Spray</p>
+                        <p className="text-xs text-slate-500 font-sans">Không gian có gu, hương thơm có dấu ấn.</p>
                       </div>
                     </Link>
 
-                    <div className="rounded-2xl border border-border/70 bg-secondary/40 p-4">
-                      <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">
                         Điều hướng nhanh
                       </p>
                       <div className="flex flex-col gap-1.5">
@@ -73,7 +75,7 @@ export function Header() {
                           <Link
                             key={link.to}
                             to={link.to}
-                            className="rounded-xl px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary"
+                            className="rounded-lg px-3.5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-teal-50 hover:text-teal-700"
                           >
                             {link.label}
                           </Link>
@@ -81,23 +83,23 @@ export function Header() {
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-border/70 bg-secondary/40 p-4 text-sm text-muted-foreground">
-                      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Tài khoản</p>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">Tài khoản</p>
                       <div className="flex flex-col gap-1.5">
                         {user ? (
                           <>
-                            <Link to="/account" className="rounded-xl px-4 py-3 transition hover:bg-secondary text-foreground">Thông tin cá nhân</Link>
-                            <Link to="/orders" className="rounded-xl px-4 py-3 transition hover:bg-secondary text-foreground">Theo dõi đơn hàng</Link>
-                            <Link to="/referral" className="rounded-xl px-4 py-3 transition hover:bg-secondary text-foreground">Mời bạn bè</Link>
+                            <Link to="/account" className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium">Thông tin cá nhân</Link>
+                            <Link to="/orders" className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium">Theo dõi đơn hàng</Link>
+                            <Link to="/referral" className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium">Mời bạn bè</Link>
                             <button
-                               onClick={logout}
-                               className="rounded-xl px-4 py-3 text-left text-destructive transition hover:bg-destructive/10"
+                              onClick={logout}
+                              className="rounded-lg px-3.5 py-2.5 text-left text-rose-600 font-medium transition hover:bg-rose-50"
                             >
-                               Đăng xuất
+                              Đăng xuất
                             </button>
                           </>
                         ) : (
-                          <Link to="/login" className="rounded-xl px-4 py-3 transition hover:bg-secondary text-foreground">Đăng nhập / Đăng ký</Link>
+                          <Link to="/login" className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium">Đăng nhập / Đăng ký</Link>
                         )}
                       </div>
                     </div>
@@ -106,17 +108,17 @@ export function Header() {
               </Sheet>
 
               <Link to="/" className="flex items-center gap-3 group">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary font-serif text-sm font-bold text-primary-foreground shadow-md transition duration-300 group-hover:scale-105 border border-primary/10">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 font-sans text-sm font-bold text-white shadow-sm transition duration-200 group-hover:bg-teal-700">
                   TS
                 </div>
                 <div className="hidden min-w-0 sm:block">
-                  <p className="font-serif text-lg font-bold leading-none text-foreground transition duration-300 group-hover:text-primary">Thai Spray</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Mùi hương tinh gọn, hiện đại, dễ sống cùng.</p>
+                  <p className="font-sans text-base font-bold leading-none text-slate-900 transition duration-200 group-hover:text-teal-600 tracking-tight">Thai Spray</p>
+                  <p className="mt-1 text-xs text-slate-500 font-sans">Mùi hương tinh gọn, hiện đại, dễ sống cùng.</p>
                 </div>
               </Link>
             </div>
 
-            <div className="hidden flex-1 max-w-md mx-auto md:block">
+            <div className="hidden flex-1 max-w-lg mx-6 md:block">
               <SearchBox />
             </div>
 
@@ -124,7 +126,7 @@ export function Header() {
               <Button
                 asChild
                 variant="ghost"
-                className="hidden rounded-full px-4 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground lg:inline-flex"
+                className="hidden rounded-lg px-3.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:inline-flex"
               >
                 <Link to="/catalog?sort=best_selling">Bán chạy</Link>
               </Button>
@@ -132,7 +134,7 @@ export function Header() {
               <Button
                 type="button"
                 variant="ghost"
-                className="relative h-11 rounded-full px-3 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                className="relative h-10 w-10 rounded-lg p-0 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                 onClick={openCart}
               >
                 <CartBadge />
@@ -143,46 +145,46 @@ export function Header() {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-11 rounded-full px-2 hover:bg-secondary">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                    <Button variant="ghost" className="h-10 rounded-lg px-2 hover:bg-slate-100">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-50 text-teal-700 border border-teal-200/60 shadow-sm">
                         <User className="h-4 w-4" />
                       </div>
                       <div className="hidden text-left md:block">
-                        <p className="max-w-[140px] truncate text-sm font-semibold text-foreground">
+                        <p className="max-w-[140px] truncate text-sm font-semibold text-slate-900">
                           {user.name || 'Tài khoản'}
                         </p>
-                        <p className="max-w-[140px] truncate text-xs text-muted-foreground">{user.email}</p>
+                        <p className="max-w-[140px] truncate text-xs text-slate-500">{user.email}</p>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 rounded-2xl border-border bg-card p-2 shadow-luxury">
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5">
+                  <DropdownMenuContent align="end" className="w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-md">
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700">
                       <Link to="/account">Tài khoản</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5">
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700">
                       <Link to="/orders">Đơn hàng</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5">
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700">
                       <Link to="/referral">Mời bạn bè</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator className="my-1 bg-slate-100" />
                     <DropdownMenuItem
                       onClick={logout}
-                      className="cursor-pointer rounded-xl px-3 py-2.5 text-destructive focus:text-destructive"
+                      className="cursor-pointer rounded-lg px-3 py-2 text-rose-600 hover:bg-rose-50 hover:text-rose-700 focus:bg-rose-50 focus:text-rose-700"
                     >
                       Đăng xuất
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild className="h-11 rounded-full bg-primary text-primary-foreground px-5 shadow-sm hover:bg-primary/90">
+                <Button asChild className="h-9 rounded-lg bg-teal-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500">
                   <Link to="/login">Đăng nhập</Link>
                 </Button>
               )}
             </nav>
           </div>
 
-          <div className="mt-3 md:hidden">
+          <div className="mt-2.5 md:hidden">
             <SearchBox />
           </div>
         </div>

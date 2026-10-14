@@ -25,24 +25,24 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 font-sans">
         <FormField
           control={form.control}
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Tài khoản / Số điện thoại
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <Phone className="h-4 w-4" />
                   </div>
                   <Input
                     type="text"
                     placeholder="Nhập số điện thoại hoặc email admin"
-                    className="pl-10 h-12 rounded-xl border-border bg-background/60 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                    className="pl-10 h-11 rounded-lg border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-sm font-medium"
                     {...field}
                   />
                 </div>
@@ -57,24 +57,24 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Mật khẩu bảo mật
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <Lock className="h-4 w-4" />
                   </div>
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="pl-10 pr-10 h-12 rounded-xl border-border bg-background/60 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                    className="pl-10 pr-10 h-11 rounded-lg border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-sm font-medium"
                     {...field}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -87,7 +87,7 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
 
         <Button
           type="submit"
-          className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm shadow-lg shadow-primary/25 transition-all hover:scale-[1.01] active:scale-[0.98] mt-2"
+          className="w-full h-11 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-50 mt-2"
           disabled={isLoading}
         >
           {isLoading ? (

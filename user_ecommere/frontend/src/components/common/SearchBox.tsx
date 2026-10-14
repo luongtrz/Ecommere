@@ -88,26 +88,26 @@ export function SearchBox() {
       <form onSubmit={handleSubmit} className="relative">
         <div
           className={cn(
-            'flex items-center rounded-2xl border px-3.5 py-1.5 transition-all duration-300',
+            'flex items-center rounded-xl border px-3.5 py-1.5 transition-all duration-200',
             showingSuggestions
-              ? 'border-ring bg-card shadow-luxury ring-2 ring-ring/15'
-              : 'border-border/80 bg-secondary/50 hover:border-border hover:bg-card',
+              ? 'border-teal-500 bg-white shadow-sm ring-2 ring-teal-500/20'
+              : 'border-slate-200 bg-slate-100 hover:border-slate-300 hover:bg-slate-50',
           )}
         >
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <Search className="h-4 w-4 shrink-0 text-slate-400" />
           <input
             type="search"
             placeholder="Tìm chai xịt chuột, kiến gián, tẩy rửa, nước giặt..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onFocus={() => setIsFocused(true)}
-            className="w-full bg-transparent px-3 py-1 text-sm outline-none placeholder:text-muted-foreground text-foreground"
+            className="w-full bg-transparent px-3 py-1 text-sm outline-none placeholder:text-slate-400 text-slate-900 font-sans"
           />
           {query ? (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              className="flex h-6 w-6 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -116,22 +116,22 @@ export function SearchBox() {
       </form>
 
       {showingSuggestions ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] overflow-hidden rounded-2xl border border-border bg-card shadow-luxury backdrop-blur-xl">
+        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
           <div className="grid gap-0 md:grid-cols-[1.2fr_0.8fr]">
             <div className="p-4">
               {deferredQuery ? (
                 <div className="space-y-2">
                   <button
                     onClick={() => handleSearch(deferredQuery)}
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-secondary text-foreground font-medium"
+                    className="flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-left text-sm transition hover:bg-teal-50 text-slate-900 font-medium font-sans"
                   >
-                    <Search className="h-4 w-4 text-primary" />
+                    <Search className="h-4 w-4 text-teal-600" />
                     <span className="flex-1">
-                      Tìm kiếm cho <strong className="text-primary font-bold">“{deferredQuery}”</strong>
+                      Tìm kiếm cho <strong className="text-teal-600 font-bold">“{deferredQuery}”</strong>
                     </span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <ArrowRight className="h-4 w-4 text-slate-400" />
                   </button>
-                  <p className="px-4 text-xs text-muted-foreground">
+                  <p className="px-3.5 text-xs text-slate-400 font-sans">
                     Mẹo: Nhập tên sản phẩm, công dụng (đuổi chuột, diệt gián, tẩy bồn cầu) để xem nhanh.
                   </p>
                 </div>
@@ -139,8 +139,8 @@ export function SearchBox() {
                 <>
                   {recentSearches.length > 0 ? (
                     <div className="mb-4">
-                      <p className="mb-2 flex items-center gap-2 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                        <History className="h-3.5 w-3.5 text-muted-foreground" />
+                      <p className="mb-2 flex items-center gap-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">
+                        <History className="h-3.5 w-3.5 text-slate-400" />
                         Tìm gần đây
                       </p>
                       <div className="space-y-1">
@@ -148,12 +148,12 @@ export function SearchBox() {
                           <div
                             key={term}
                             onClick={() => handleSearch(term)}
-                            className="group flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-foreground transition hover:bg-secondary"
+                            className="group flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 font-sans"
                           >
                             <span>{term}</span>
                             <button
                               onClick={(event) => removeRecent(event, term)}
-                              className="rounded-md p-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:bg-muted hover:text-foreground"
+                              className="rounded p-1 text-slate-400 opacity-0 transition group-hover:opacity-100 hover:bg-slate-200 hover:text-slate-700"
                             >
                               <X className="h-3.5 w-3.5" />
                             </button>
@@ -164,8 +164,8 @@ export function SearchBox() {
                   ) : null}
 
                   <div>
-                    <p className="mb-2.5 flex items-center gap-1.5 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                      <Sparkles className="h-3.5 w-3.5 text-accent" />
+                    <p className="mb-2.5 flex items-center gap-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">
+                      <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                       Gợi ý phổ biến
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -173,7 +173,7 @@ export function SearchBox() {
                         <button
                           key={keyword}
                           onClick={() => handleSearch(keyword)}
-                          className="rounded-full border border-border bg-secondary/50 px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-accent hover:bg-accent/15 hover:text-accent-foreground"
+                          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 font-sans"
                         >
                           {keyword}
                         </button>
@@ -184,8 +184,8 @@ export function SearchBox() {
               )}
             </div>
 
-            <div className="border-t border-border/70 bg-secondary/30 p-4 md:border-l md:border-t-0">
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="border-t border-slate-100 bg-slate-50/70 p-4 md:border-l md:border-t-0">
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">
                 Sản phẩm tìm kiếm nhiều
               </p>
               <div className="space-y-2">
@@ -194,18 +194,18 @@ export function SearchBox() {
                     key={product.id}
                     type="button"
                     onClick={() => handleSearch(product.query)}
-                    className="group flex w-full items-center gap-3 rounded-xl bg-card p-2.5 text-left border border-border/80 transition hover:border-accent hover:shadow-sm"
+                    className="group flex w-full items-center gap-3 rounded-lg bg-white p-2.5 text-left border border-slate-200 transition hover:border-teal-300 hover:shadow-sm"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-serif text-xs font-bold">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-600 text-white font-sans text-xs font-bold">
                       TS
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-bold text-foreground group-hover:text-primary">
+                      <p className="truncate text-xs font-semibold text-slate-900 group-hover:text-teal-600 font-sans">
                         {product.name}
                       </p>
-                      <p className="text-[11px] text-muted-foreground">Chính hãng Thái Lan</p>
+                      <p className="text-[11px] text-slate-500 font-sans">Chính hãng Thái Lan</p>
                     </div>
-                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-teal-600 transition-transform group-hover:translate-x-0.5" />
                   </button>
                 ))}
               </div>

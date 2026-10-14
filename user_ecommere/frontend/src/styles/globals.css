@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    --background: 32 24% 98%; /* Luxurious warm silk white */
-    --foreground: 20 20% 12%; /* Deep elegant charcoal */
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
     --card: 0 0% 100%;
-    --card-foreground: 20 20% 12%;
+    --card-foreground: 222.2 47.4% 11.2%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 20% 12%;
-    --primary: 24 24% 13%; /* Luxury obsidian bronze */
-    --primary-foreground: 36 45% 97%;
-    --secondary: 32 18% 94%;
-    --secondary-foreground: 20 20% 12%;
-    --muted: 32 14% 93%;
-    --muted-foreground: 24 10% 45%;
-    --accent: 38 34% 74%; /* Champagne gold */
-    --accent-foreground: 20 20% 12%;
-    --destructive: 0 84% 60%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --primary: 174.7 83.9% 31.6%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 98%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 38 92% 50%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 346.8 77.2% 49.8%;
     --destructive-foreground: 0 0% 100%;
-    --border: 32 14% 90%; /* Soft warm border */
-    --input: 32 14% 90%;
-    --ring: 24 24% 13%;
-    --radius: 1.25rem;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 173.4 80.4% 40%;
+    --radius: 0.5rem;
   }
 
   * {
@@ -37,16 +37,9 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
-    line-height: 1.6;
-    letter-spacing: -0.011em;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background-image:
-      radial-gradient(circle at 10% 10%, rgba(197, 160, 107, 0.07), transparent 35%),
-      radial-gradient(circle at 90% 15%, rgba(212, 175, 115, 0.05), transparent 30%),
-      linear-gradient(180deg, hsl(32 24% 98%) 0%, hsl(30 18% 96%) 100%);
-    background-attachment: fixed;
+    @apply bg-background text-slate-600 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -57,25 +50,27 @@
   h4,
   h5,
   h6 {
-    font-family: 'Fraunces', 'Playfair Display', serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: hsl(var(--foreground));
+    font-weight: 600;
+    letter-spacing: -0.025em;
   }
 
   h1 {
     letter-spacing: -0.03em;
-    line-height: 1.15;
-    font-weight: 600;
+    line-height: 1.2;
+    font-weight: 700;
   }
 
   h2 {
     letter-spacing: -0.025em;
-    line-height: 1.2;
+    line-height: 1.25;
     font-weight: 600;
   }
 
   h3 {
     letter-spacing: -0.02em;
-    line-height: 1.25;
+    line-height: 1.3;
     font-weight: 600;
   }
 
@@ -83,54 +78,50 @@
   h5,
   h6 {
     letter-spacing: -0.015em;
-    line-height: 1.35;
+    line-height: 1.4;
     font-weight: 600;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply border border-black/[0.03] bg-card/85 shadow-luxury backdrop-blur-2xl transition-all duration-300;
+    @apply border border-slate-200 bg-white/95 shadow-sm backdrop-blur-md transition-all duration-200;
   }
 
   .glass-header {
-    @apply border-b border-black/[0.03] bg-background/80 shadow-sm backdrop-blur-xl transition-all duration-300;
+    @apply border-b border-slate-200 bg-white shadow-sm transition-all duration-200;
   }
 
   .section-shell {
-    @apply rounded-[2.2rem] border border-black/[0.03] bg-card/80 shadow-luxury backdrop-blur-xl transition-all duration-300;
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200;
   }
 
   .section-title {
-    @apply font-serif text-3xl font-semibold leading-tight tracking-tight text-foreground md:text-4xl;
+    @apply font-sans text-2xl font-bold tracking-tight text-slate-900 md:text-3xl;
   }
 
   .lux-eyebrow {
-    @apply uppercase tracking-[0.2em] text-[10px] font-bold text-muted-foreground;
+    @apply uppercase tracking-wider text-xs font-semibold text-slate-400;
   }
 
   .lux-card {
-    @apply rounded-[1.8rem] border border-black/[0.03] bg-card text-card-foreground shadow-luxury transition-all duration-500 ease-out hover:shadow-luxury-glow;
-  }
-
-  .lux-card:hover {
-    transform: translateY(-4px);
+    @apply rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
   }
 
   .lux-section {
-    @apply py-12 md:py-20;
+    @apply py-8 md:py-12;
   }
 
   .lux-btn-primary {
-    @apply inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all duration-300 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply inline-flex items-center justify-center rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2;
   }
 
   .lux-btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-900 transition-all duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2;
   }
 
   .lux-grid {
-    @apply grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4;
+    @apply grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5;
   }
 }
 
@@ -149,20 +140,20 @@
   }
 
   .hover-glow {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease-in-out;
   }
   
   .hover-glow:hover {
-    box-shadow: 0 24px 48px -12px rgba(20, 20, 20, 0.06), 0 0 24px -2px rgba(197, 160, 107, 0.12);
-    border-color: rgba(197, 160, 107, 0.2);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    border-color: rgb(203 213 225);
   }
 
   .glass-premium {
-    @apply rounded-[1.6rem] border border-black/[0.03] bg-card/80 backdrop-blur-2xl shadow-luxury-glow transition-all duration-300;
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200;
   }
 
   .text-gradient-emerald {
-    @apply bg-gradient-to-r from-primary via-amber-700 to-amber-950 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-teal-600 via-teal-700 to-emerald-600 bg-clip-text text-transparent;
   }
 }
 

@@ -15,7 +15,7 @@ export function LoadingSpinner({ className, size = 'md' }: LoadingSpinnerProps) 
 
   return (
     <div className="flex items-center justify-center" role="status" aria-label="Đang tải">
-      <Loader2 className={cn('animate-spin text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)] transition-all', sizeClasses[size], className)} />
+      <Loader2 className={cn('animate-spin text-teal-600 transition-colors', sizeClasses[size], className)} />
       <span className="sr-only">Đang tải...</span>
     </div>
   );

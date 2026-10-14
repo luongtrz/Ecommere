@@ -206,7 +206,7 @@ export function AdminProductFormPage() {
     return (
       <>
         <SEO title="Đang tải..." />
-        <div className="py-12">
+        <div className="py-12 flex justify-center">
           <LoadingSpinner />
         </div>
       </>
@@ -219,8 +219,8 @@ export function AdminProductFormPage() {
       <>
         <SEO title="Không tìm thấy sản phẩm" />
         <div className="text-center py-12">
-          <h1 className="text-2xl font-bold mb-4">Không tìm thấy sản phẩm</h1>
-          <Button asChild>
+          <h1 className="text-2xl font-bold mb-4 text-slate-900">Không tìm thấy sản phẩm</h1>
+          <Button asChild className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500">
             <Link to="/admin/products">Quay lại danh sách</Link>
           </Button>
         </div>
@@ -235,16 +235,16 @@ export function AdminProductFormPage() {
         {/* Dominant Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" asChild className="h-9 w-9 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" asChild className="h-9 w-9 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900">
               <Link to="/admin/products">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 {isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
               </h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-sm text-slate-500 mt-0.5">
                 {isEditMode ? 'Cập nhật thông tin chi tiết, hình ảnh và biến thể sản phẩm' : 'Điền đầy đủ các thông tin để tạo sản phẩm mới vào danh mục'}
               </p>
             </div>
@@ -255,11 +255,11 @@ export function AdminProductFormPage() {
               variant="outline"
               onClick={() => navigate('/admin/products')}
               disabled={isSubmitting}
-              className="border-border/80"
+              className="rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             >
               Hủy
             </Button>
-            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="min-w-[130px]">
+            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="min-w-[130px] rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500">
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -280,52 +280,52 @@ export function AdminProductFormPage() {
             {/* Left 2 columns: Basic info + Variants */}
             <div className="lg:col-span-2 space-y-6">
               {/* Card 1: Basic Info */}
-              <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm rounded-xl">
-                <CardHeader className="pb-4 border-b border-border/40">
-                  <CardTitle className="text-lg font-semibold text-foreground">Thông tin chung</CardTitle>
+              <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
+                <CardHeader className="pb-4 border-b border-slate-100">
+                  <CardTitle className="text-lg font-semibold text-slate-900">Thông tin chung</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-6">
                   {/* Product Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-medium text-foreground">
-                      Tên sản phẩm <span className="text-destructive">*</span>
+                    <Label htmlFor="name" className="text-sm font-medium text-slate-900">
+                      Tên sản phẩm <span className="text-rose-600">*</span>
                     </Label>
                     <Input
                       id="name"
                       placeholder="Nhập tên sản phẩm"
-                      className="bg-background border-border/80"
+                      className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-teal-500"
                       {...register('name')}
                     />
                     {errors.name && (
-                      <p className="text-sm text-destructive">{errors.name.message}</p>
+                      <p className="text-sm text-rose-600">{errors.name.message}</p>
                     )}
                   </div>
 
                   {/* Description */}
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-medium text-foreground">
-                      Mô tả <span className="text-destructive">*</span>
+                    <Label htmlFor="description" className="text-sm font-medium text-slate-900">
+                      Mô tả <span className="text-rose-600">*</span>
                     </Label>
                     <Textarea
                       id="description"
                       placeholder="Nhập mô tả sản phẩm"
                       rows={6}
-                      className="resize-none bg-background border-border/80"
+                      className="resize-none bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-teal-500"
                       {...register('description')}
                     />
                     {errors.description && (
-                      <p className="text-sm text-destructive">{errors.description.message}</p>
+                      <p className="text-sm text-rose-600">{errors.description.message}</p>
                     )}
                   </div>
                 </CardContent>
               </Card>
 
               {/* Card 2: Variants */}
-              <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm rounded-xl">
-                <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-border/40">
+              <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-slate-100">
                   <div>
-                    <CardTitle className="text-lg font-semibold text-foreground">Biến thể sản phẩm</CardTitle>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <CardTitle className="text-lg font-semibold text-slate-900">Biến thể sản phẩm</CardTitle>
+                    <p className="mt-1 text-sm text-slate-500">
                       {isEditMode
                         ? 'Các biến thể hiện có được hiển thị để đối chiếu.'
                         : 'Thêm ít nhất một mùi hương và dung tích trước khi lưu sản phẩm.'}
@@ -336,7 +336,7 @@ export function AdminProductFormPage() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="border-border/80"
+                      className="rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
                       onClick={() => append({
                         scent: '',
                         volumeMl: 50,
@@ -346,102 +346,102 @@ export function AdminProductFormPage() {
                         barcode: '',
                       })}
                     >
-                      <Plus className="mr-2 h-4 w-4" />
+                      <Plus className="mr-2 h-4 w-4 text-teal-600" />
                       Thêm biến thể
                     </Button>
                   )}
                 </CardHeader>
                 <CardContent className="space-y-4 pt-6">
                   {fields.map((field, index) => (
-                    <div key={field.id} className="rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors">
+                    <div key={field.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 transition-colors">
                       <div className="mb-3 flex items-center justify-between">
-                        <p className="text-sm font-semibold text-foreground">Biến thể {index + 1}</p>
+                        <p className="text-sm font-semibold text-slate-900">Biến thể {index + 1}</p>
                         {!isEditMode && fields.length > 1 && (
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                            className="h-8 w-8 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
                             onClick={() => remove(index)}
                             aria-label={`Xóa biến thể ${index + 1}`}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                         <div className="space-y-2">
-                          <Label htmlFor={`variants.${index}.scent`}>Mùi hương</Label>
+                          <Label htmlFor={`variants.${index}.scent`} className="text-xs font-medium text-slate-700">Mùi hương</Label>
                           <Input
                             id={`variants.${index}.scent`}
                             disabled={isEditMode}
-                            className="bg-background border-border/80"
+                            className="bg-white border-slate-200 text-slate-900 focus-visible:ring-teal-500 disabled:bg-slate-100 disabled:text-slate-500"
                             {...register(`variants.${index}.scent`)}
                           />
                           {errors.variants?.[index]?.scent && (
-                            <p className="text-sm text-destructive">{errors.variants[index]?.scent?.message}</p>
+                            <p className="text-sm text-rose-600">{errors.variants[index]?.scent?.message}</p>
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor={`variants.${index}.volumeMl`}>Dung tích (ml)</Label>
+                          <Label htmlFor={`variants.${index}.volumeMl`} className="text-xs font-medium text-slate-700">Dung tích (ml)</Label>
                           <Input
                             id={`variants.${index}.volumeMl`}
                             type="number"
                             disabled={isEditMode}
-                            className="bg-background border-border/80 tabular-nums"
+                            className="bg-white border-slate-200 text-slate-900 tabular-nums focus-visible:ring-teal-500 disabled:bg-slate-100 disabled:text-slate-500"
                             {...register(`variants.${index}.volumeMl`, { valueAsNumber: true })}
                           />
                           {errors.variants?.[index]?.volumeMl && (
-                            <p className="text-sm text-destructive">{errors.variants[index]?.volumeMl?.message}</p>
+                            <p className="text-sm text-rose-600">{errors.variants[index]?.volumeMl?.message}</p>
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor={`variants.${index}.stock`}>Tồn kho</Label>
+                          <Label htmlFor={`variants.${index}.stock`} className="text-xs font-medium text-slate-700">Tồn kho</Label>
                           <Input
                             id={`variants.${index}.stock`}
                             type="number"
                             disabled={isEditMode}
-                            className="bg-background border-border/80 tabular-nums"
+                            className="bg-white border-slate-200 text-slate-900 tabular-nums focus-visible:ring-teal-500 disabled:bg-slate-100 disabled:text-slate-500"
                             {...register(`variants.${index}.stock`, { valueAsNumber: true })}
                           />
                           {errors.variants?.[index]?.stock && (
-                            <p className="text-sm text-destructive">{errors.variants[index]?.stock?.message}</p>
+                            <p className="text-sm text-rose-600">{errors.variants[index]?.stock?.message}</p>
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor={`variants.${index}.price`}>Giá niêm yết</Label>
+                          <Label htmlFor={`variants.${index}.price`} className="text-xs font-medium text-slate-700">Giá niêm yết</Label>
                           <Input
                             id={`variants.${index}.price`}
                             type="number"
                             disabled={isEditMode}
-                            className="bg-background border-border/80 tabular-nums"
+                            className="bg-white border-slate-200 text-slate-900 tabular-nums focus-visible:ring-teal-500 disabled:bg-slate-100 disabled:text-slate-500"
                             {...register(`variants.${index}.price`, { valueAsNumber: true })}
                           />
                           {errors.variants?.[index]?.price && (
-                            <p className="text-sm text-destructive">{errors.variants[index]?.price?.message}</p>
+                            <p className="text-sm text-rose-600">{errors.variants[index]?.price?.message}</p>
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor={`variants.${index}.salePrice`}>Giá sale</Label>
+                          <Label htmlFor={`variants.${index}.salePrice`} className="text-xs font-medium text-slate-700">Giá sale</Label>
                           <Input
                             id={`variants.${index}.salePrice`}
                             type="number"
                             disabled={isEditMode}
-                            className="bg-background border-border/80 tabular-nums"
+                            className="bg-white border-slate-200 text-slate-900 tabular-nums focus-visible:ring-teal-500 disabled:bg-slate-100 disabled:text-slate-500"
                             {...register(`variants.${index}.salePrice`, {
                               setValueAs: (value) => value === '' ? undefined : Number(value),
                             })}
                           />
                           {errors.variants?.[index]?.salePrice && (
-                            <p className="text-sm text-destructive">{errors.variants[index]?.salePrice?.message}</p>
+                            <p className="text-sm text-rose-600">{errors.variants[index]?.salePrice?.message}</p>
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor={`variants.${index}.barcode`}>Barcode</Label>
+                          <Label htmlFor={`variants.${index}.barcode`} className="text-xs font-medium text-slate-700">Barcode</Label>
                           <Input
                             id={`variants.${index}.barcode`}
                             disabled={isEditMode}
-                            className="bg-background border-border/80 font-mono"
+                            className="bg-white border-slate-200 text-slate-900 font-mono focus-visible:ring-teal-500 disabled:bg-slate-100 disabled:text-slate-500"
                             {...register(`variants.${index}.barcode`)}
                           />
                         </div>
@@ -449,7 +449,7 @@ export function AdminProductFormPage() {
                     </div>
                   ))}
                   {errors.variants?.root && (
-                    <p className="text-sm text-destructive">{errors.variants.root.message}</p>
+                    <p className="text-sm text-rose-600">{errors.variants.root.message}</p>
                   )}
                 </CardContent>
               </Card>
@@ -458,9 +458,9 @@ export function AdminProductFormPage() {
             {/* Right 1 column: Images + Category & Pricing */}
             <div className="lg:col-span-1 space-y-6">
               {/* Card 3: Images */}
-              <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm rounded-xl">
-                <CardHeader className="pb-4 border-b border-border/40">
-                  <CardTitle className="text-lg font-semibold text-foreground">Hình ảnh</CardTitle>
+              <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
+                <CardHeader className="pb-4 border-b border-slate-100">
+                  <CardTitle className="text-lg font-semibold text-slate-900">Hình ảnh</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <div className="space-y-2">
@@ -473,22 +473,22 @@ export function AdminProductFormPage() {
                       maxImages={5}
                     />
                     {errors.images && (
-                      <p className="text-sm text-destructive">{errors.images.message}</p>
+                      <p className="text-sm text-rose-600">{errors.images.message}</p>
                     )}
                   </div>
                 </CardContent>
               </Card>
 
               {/* Card 4: Category & Price */}
-              <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm rounded-xl">
-                <CardHeader className="pb-4 border-b border-border/40">
-                  <CardTitle className="text-lg font-semibold text-foreground">Phân loại & Giá</CardTitle>
+              <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
+                <CardHeader className="pb-4 border-b border-slate-100">
+                  <CardTitle className="text-lg font-semibold text-slate-900">Phân loại & Giá</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-6">
                   {/* Category */}
                   <div className="space-y-2">
-                    <Label htmlFor="categoryId" className="text-sm font-medium text-foreground">
-                      Danh mục <span className="text-destructive">*</span>
+                    <Label htmlFor="categoryId" className="text-sm font-medium text-slate-900">
+                      Danh mục <span className="text-rose-600">*</span>
                     </Label>
 
                     <DropdownMenu>
@@ -497,7 +497,7 @@ export function AdminProductFormPage() {
                           variant="outline"
                           role="combobox"
                           className={
-                            `w-full justify-between h-10 border-border/80 bg-background ${!watch('categoryId') && "text-muted-foreground"
+                            `w-full justify-between h-10 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 ${!watch('categoryId') && "text-slate-400"
                             }`
                           }
                         >
@@ -506,10 +506,10 @@ export function AdminProductFormPage() {
                               ? categories.find((c) => c.id === watch('categoryId'))?.displayName
                               : (categories.length > 0 ? "Chọn danh mục" : "Đang tải danh mục...")}
                           </span>
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-slate-400" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-[300px] max-h-[300px] overflow-y-auto bg-card border-border/80" align="start">
+                      <DropdownMenuContent className="w-[300px] max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-md" align="start">
                         {(() => {
                           const renderMenu = (nodes: any[]) => {
                             return nodes.map((node) => {
@@ -522,9 +522,9 @@ export function AdminProductFormPage() {
                                     onClick={() => {
                                       setValue('categoryId', node.id, { shouldValidate: true });
                                     }}
-                                    className="cursor-pointer"
+                                    className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
                                   >
-                                    <span className={watch('categoryId') === node.id ? "font-bold text-primary" : ""}>
+                                    <span className={watch('categoryId') === node.id ? "font-bold text-teal-600" : ""}>
                                       {node.name}
                                     </span>
                                   </DropdownMenuItem>
@@ -533,10 +533,10 @@ export function AdminProductFormPage() {
 
                               return (
                                 <DropdownMenuSub key={node.id}>
-                                  <DropdownMenuSubTrigger className="cursor-pointer font-medium">
+                                  <DropdownMenuSubTrigger className="cursor-pointer font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700">
                                     <span>{node.name}</span>
                                   </DropdownMenuSubTrigger>
-                                  <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto bg-card border-border/80">
+                                  <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-md">
                                     {renderMenu(node.children)}
                                   </DropdownMenuSubContent>
                                 </DropdownMenuSub>
@@ -549,31 +549,31 @@ export function AdminProductFormPage() {
                     </DropdownMenu>
 
                     {errors.categoryId && (
-                      <p className="text-sm text-destructive">{errors.categoryId.message}</p>
+                      <p className="text-sm text-rose-600">{errors.categoryId.message}</p>
                     )}
                   </div>
 
                   {/* Base Price */}
                   <div className="space-y-2">
-                    <Label htmlFor="basePrice" className="text-sm font-medium text-foreground">
-                      Giá cơ bản <span className="text-destructive">*</span>
+                    <Label htmlFor="basePrice" className="text-sm font-medium text-slate-900">
+                      Giá cơ bản <span className="text-rose-600">*</span>
                     </Label>
                     <Input
                       id="basePrice"
                       type="number"
                       placeholder="0"
-                      className="bg-background border-border/80 tabular-nums"
+                      className="bg-white border-slate-200 text-slate-900 tabular-nums placeholder:text-slate-400 focus-visible:ring-teal-500"
                       {...register('basePrice', { valueAsNumber: true })}
                     />
                     {errors.basePrice && (
-                      <p className="text-sm text-destructive">{errors.basePrice.message}</p>
+                      <p className="text-sm text-rose-600">{errors.basePrice.message}</p>
                     )}
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between rounded-lg border border-border/60 bg-muted/10 p-4">
+                  <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50/70 p-4">
                     <div>
-                      <Label htmlFor="active" className="text-sm font-medium text-foreground cursor-pointer">Hiển thị sản phẩm</Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <Label htmlFor="active" className="text-sm font-medium text-slate-900 cursor-pointer">Hiển thị sản phẩm</Label>
+                      <p className="text-xs text-slate-400 mt-0.5">
                         Sản phẩm tắt sẽ không xuất hiện trong catalog công khai.
                       </p>
                     </div>
@@ -590,8 +590,8 @@ export function AdminProductFormPage() {
           </div>
 
           {/* Sticky Save Bar at Bottom */}
-          <div className="sticky bottom-4 z-20 bg-card/95 backdrop-blur-md border border-border/80 shadow-xl rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <span className="text-xs text-muted-foreground">
+          <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <span className="text-xs text-slate-500">
               {isEditMode ? `Đang chỉnh sửa: ${watch('name') || 'Sản phẩm'}` : 'Vui lòng kiểm tra kỹ thông tin trước khi lưu'}
             </span>
             <div className="flex items-center justify-end gap-3">
@@ -600,11 +600,11 @@ export function AdminProductFormPage() {
                 variant="outline"
                 onClick={() => navigate('/admin/products')}
                 disabled={isSubmitting}
-                className="border-border/80"
+                className="rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
               >
                 Hủy
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="min-w-[130px]">
+              <Button type="submit" disabled={isSubmitting} className="min-w-[130px] rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500">
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

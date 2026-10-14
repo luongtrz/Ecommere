@@ -312,14 +312,14 @@ export function AdminInventoryPage() {
   return (
     <>
       <SEO title="Quản lý kho hàng - Admin" />
-      <div className="space-y-8 p-4 md:p-6 lg:p-8">
+      <div className="min-h-screen bg-slate-50 font-sans space-y-8 p-4 md:p-6 lg:p-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
               Quản lý kho hàng
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-slate-600 mt-1">
               Theo dõi định mức tồn kho, cảnh báo hàng sắp hết và lịch sử luân chuyển kho
             </p>
           </div>
@@ -328,16 +328,16 @@ export function AdminInventoryPage() {
               variant="outline"
               size="sm"
               onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-inventory-stock-levels'] })}
-              className="gap-2 rounded-xl border-border bg-background hover:bg-muted text-foreground"
+              className="gap-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4 text-slate-500" />
               Làm mới
             </Button>
             {stockItems.length > 0 && (
               <Button
                 size="sm"
                 onClick={() => openAdjustDialog(stockItems[0])}
-                className="gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+                className="gap-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 font-medium"
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 Điều chỉnh tồn kho
@@ -348,80 +348,80 @@ export function AdminInventoryPage() {
 
         {/* Overview Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border border-border bg-card shadow-sm rounded-xl">
+          <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Tổng mặt hàng</CardTitle>
-              <Box className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-slate-600">Tổng mặt hàng</CardTitle>
+              <Box className="h-4 w-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-foreground">{stats.total}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tổng cộng <span className="tabular-nums font-medium text-foreground">{stats.totalUnits}</span> đơn vị lưu kho
+              <div className="text-2xl font-bold tabular-nums text-slate-900">{stats.total}</div>
+              <p className="text-xs text-slate-500 mt-1">
+                Tổng cộng <span className="tabular-nums font-medium text-slate-700">{stats.totalUnits}</span> đơn vị lưu kho
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border border-border bg-card shadow-sm rounded-xl">
+          <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Tồn kho an toàn</CardTitle>
-              <Badge variant="outline" className="bg-emerald-500/15 text-emerald-300 border-emerald-500/25 text-[10px]">
+              <CardTitle className="text-sm font-medium text-slate-600">Tồn kho an toàn</CardTitle>
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-[10px] font-medium">
                 Đạt chuẩn
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-foreground">{stats.safe}</div>
-              <p className="text-xs text-muted-foreground mt-1">Mặt hàng duy trì trên 10 đơn vị</p>
+              <div className="text-2xl font-bold tabular-nums text-emerald-600">{stats.safe}</div>
+              <p className="text-xs text-slate-500 mt-1">Mặt hàng duy trì trên 10 đơn vị</p>
             </CardContent>
           </Card>
 
-          <Card className="border border-border bg-card shadow-sm rounded-xl">
+          <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Sắp hết hàng</CardTitle>
-              <Badge variant="outline" className="bg-rose-500/15 text-rose-300 border-rose-500/25 text-[10px]">
+              <CardTitle className="text-sm font-medium text-slate-600">Sắp hết hàng</CardTitle>
+              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-[10px] font-medium">
                 Cần nhập
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-rose-300">{stats.low}</div>
-              <p className="text-xs text-muted-foreground mt-1">Mặt hàng còn từ 1 đến 10 đơn vị</p>
+              <div className="text-2xl font-bold tabular-nums text-amber-600">{stats.low}</div>
+              <p className="text-xs text-slate-500 mt-1">Mặt hàng còn từ 1 đến 10 đơn vị</p>
             </CardContent>
           </Card>
 
-          <Card className="border border-border bg-card shadow-sm rounded-xl">
+          <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Đã hết hàng</CardTitle>
-              <Badge variant="outline" className="bg-rose-500/15 text-rose-300 border-rose-500/25 text-[10px]">
+              <CardTitle className="text-sm font-medium text-slate-600">Đã hết hàng</CardTitle>
+              <Badge variant="outline" className="bg-rose-50 text-rose-700 border-0 ring-1 ring-rose-200 text-[10px] font-medium">
                 Cảnh báo
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-rose-400">{stats.out}</div>
-              <p className="text-xs text-muted-foreground mt-1">Mặt hàng tồn bằng 0</p>
+              <div className="text-2xl font-bold tabular-nums text-rose-600">{stats.out}</div>
+              <p className="text-xs text-slate-500 mt-1">Mặt hàng tồn bằng 0</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Stock Level Section with Bars & Filter Chips */}
-        <Card className="border border-border bg-card shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="border-b border-border p-4 md:p-6">
+        <Card className="border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden">
+          <CardHeader className="border-b border-slate-200 bg-white p-4 md:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-lg md:text-xl font-semibold text-foreground">
+                <CardTitle className="text-lg md:text-xl font-semibold text-slate-900 tracking-tight">
                   Mức tồn kho sản phẩm
                 </CardTitle>
-                <CardDescription className="text-xs md:text-sm text-muted-foreground mt-0.5">
+                <CardDescription className="text-xs md:text-sm text-slate-600 mt-0.5">
                   Thanh định mức tồn kho trực quan với cảnh báo màu rose khi lượng tồn chạm mức thấp
                 </CardDescription>
               </div>
 
               {/* Search Toolbar */}
               <div className="relative w-full md:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Tìm theo tên sản phẩm, SKU..."
-                  className="pl-9 h-9 rounded-xl bg-background border-input text-foreground text-xs focus-visible:ring-ring"
+                  className="pl-9 h-9 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs focus-visible:ring-2 focus-visible:ring-teal-500"
                 />
               </div>
             </div>
@@ -434,12 +434,19 @@ export function AdminInventoryPage() {
                 className={cn(
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   activeFilter === 'all'
-                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                    : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                    ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
                 )}
               >
                 <span>Tất cả</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold bg-muted/60 text-foreground">
+                <span
+                  className={cn(
+                    'px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold',
+                    activeFilter === 'all'
+                      ? 'bg-teal-700 text-white'
+                      : 'bg-slate-200 text-slate-700'
+                  )}
+                >
                   {stats.total}
                 </span>
               </button>
@@ -450,12 +457,19 @@ export function AdminInventoryPage() {
                 className={cn(
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   activeFilter === 'low'
-                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
-                    : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                    ? 'bg-amber-50 text-amber-700 border-amber-300 ring-1 ring-amber-200 shadow-sm font-semibold'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
                 )}
               >
                 <span>Sắp hết hàng</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold bg-rose-500/20 text-rose-300">
+                <span
+                  className={cn(
+                    'px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold',
+                    activeFilter === 'low'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-slate-200 text-slate-700'
+                  )}
+                >
                   {stats.low}
                 </span>
               </button>
@@ -466,12 +480,19 @@ export function AdminInventoryPage() {
                 className={cn(
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   activeFilter === 'out'
-                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
-                    : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                    ? 'bg-rose-50 text-rose-700 border-rose-300 ring-1 ring-rose-200 shadow-sm font-semibold'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
                 )}
               >
                 <span>Đã hết hàng</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold bg-rose-500/20 text-rose-300">
+                <span
+                  className={cn(
+                    'px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold',
+                    activeFilter === 'out'
+                      ? 'bg-rose-100 text-rose-800'
+                      : 'bg-slate-200 text-slate-700'
+                  )}
+                >
                   {stats.out}
                 </span>
               </button>
@@ -482,12 +503,19 @@ export function AdminInventoryPage() {
                 className={cn(
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   activeFilter === 'safe'
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
-                    : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-1 ring-emerald-200 shadow-sm font-semibold'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
                 )}
               >
                 <span>Tồn kho an toàn</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold bg-emerald-500/20 text-emerald-300">
+                <span
+                  className={cn(
+                    'px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold',
+                    activeFilter === 'safe'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-slate-200 text-slate-700'
+                  )}
+                >
                   {stats.safe}
                 </span>
               </button>
@@ -497,31 +525,31 @@ export function AdminInventoryPage() {
           <CardContent className="p-0">
             {filteredItems.length === 0 ? (
               <div className="p-6">
-                <p className="text-muted-foreground text-center py-12">
+                <p className="text-slate-500 text-center py-12 text-sm">
                   Danh sách kho hàng sẽ hiển thị tại đây
                 </p>
               </div>
             ) : (
               <div className="relative overflow-x-auto">
                 <Table>
-                  <TableHeader className="sticky top-0 bg-card/95 backdrop-blur z-10 border-b border-border">
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                  <TableHeader className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200">
+                    <TableRow className="border-slate-200 hover:bg-slate-50">
+                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600">
                         Sản phẩm & SKU
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600">
                         Phân loại
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-right">
+                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600 text-right">
                         Số lượng tồn
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground min-w-[180px]">
+                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600 min-w-[180px]">
                         Thanh định mức tồn kho
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-center">
+                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600 text-center">
                         Trạng thái
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-right">
+                      <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600 text-right">
                         Thao tác
                       </TableHead>
                     </TableRow>
@@ -534,36 +562,36 @@ export function AdminInventoryPage() {
                       const percentage = Math.min(100, Math.max(0, Math.round((item.stock / maxCapacity) * 100)));
 
                       return (
-                        <TableRow key={item.id} className="border-b border-border/50 hover:bg-muted/40 transition-colors">
+                        <TableRow key={item.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
                           <TableCell className="px-4 py-3 align-middle">
-                            <div className="font-medium text-foreground">{item.product?.name || 'Sản phẩm'}</div>
-                            <div className="text-xs text-muted-foreground font-mono mt-0.5">{item.sku}</div>
+                            <div className="font-medium text-slate-900">{item.product?.name || 'Sản phẩm'}</div>
+                            <div className="text-xs text-slate-500 font-mono mt-0.5">{item.sku}</div>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-sm text-muted-foreground">
+                          <TableCell className="px-4 py-3 align-middle text-sm text-slate-600">
                             <span>{item.scent}</span>
-                            <span className="mx-1 text-muted-foreground/50">•</span>
+                            <span className="mx-1 text-slate-400">•</span>
                             <span className="tabular-nums">{item.volumeMl}ml</span>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-right font-semibold tabular-nums text-foreground">
+                          <TableCell className="px-4 py-3 align-middle text-right font-semibold tabular-nums text-slate-900">
                             {item.stock}
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle">
                             <div className="space-y-1.5 w-full max-w-[200px]">
                               <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground text-[11px]">Định mức:</span>
-                                <span className="tabular-nums font-medium text-xs text-foreground">
+                                <span className="text-slate-500 text-[11px]">Định mức:</span>
+                                <span className="tabular-nums font-medium text-xs text-slate-900">
                                   {item.stock} / {maxCapacity}
                                 </span>
                               </div>
-                              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                              <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                                 <div
                                   className={cn(
                                     'h-full rounded-full transition-all duration-500',
                                     isOutOfStock || isLowStock
-                                      ? 'bg-rose-500'
+                                      ? 'bg-rose-600'
                                       : item.stock <= 20
                                       ? 'bg-amber-500'
-                                      : 'bg-emerald-500'
+                                      : 'bg-emerald-600'
                                   )}
                                   style={{ width: `${isOutOfStock ? 4 : Math.max(8, percentage)}%` }}
                                 />
@@ -572,15 +600,15 @@ export function AdminInventoryPage() {
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
                             {isOutOfStock ? (
-                              <Badge variant="outline" className="bg-rose-500/15 text-rose-300 border-rose-500/25 text-xs">
+                              <Badge variant="outline" className="bg-rose-50 text-rose-700 border-0 ring-1 ring-rose-200 text-xs font-medium">
                                 Hết hàng
                               </Badge>
                             ) : isLowStock ? (
-                              <Badge variant="outline" className="bg-rose-500/15 text-rose-300 border-rose-500/25 text-xs">
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium">
                                 Sắp hết hàng
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="bg-emerald-500/15 text-emerald-300 border-emerald-500/25 text-xs">
+                              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs font-medium">
                                 Tồn kho an toàn
                               </Badge>
                             )}
@@ -590,7 +618,7 @@ export function AdminInventoryPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => openAdjustDialog(item)}
-                              className="h-8 px-2.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted"
+                              className="h-8 px-2.5 rounded-lg text-xs font-medium text-teal-600 hover:text-teal-700 hover:bg-teal-50"
                             >
                               Điều chỉnh
                             </Button>
@@ -606,19 +634,19 @@ export function AdminInventoryPage() {
         </Card>
 
         {/* Movement History Table */}
-        <Card className="border border-border bg-card shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="border-b border-border p-4 md:p-6">
+        <Card className="border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden">
+          <CardHeader className="border-b border-slate-200 bg-white p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg md:text-xl font-semibold text-foreground flex items-center gap-2">
-                  <History className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg md:text-xl font-semibold text-slate-900 flex items-center gap-2">
+                  <History className="h-5 w-5 text-teal-600" />
                   Lịch sử biến động kho
                 </CardTitle>
-                <CardDescription className="text-xs md:text-sm text-muted-foreground mt-0.5">
+                <CardDescription className="text-xs md:text-sm text-slate-600 mt-0.5">
                   Nhật ký các lượt nhập kho, xuất kho và kiểm kê điều chỉnh gần nhất
                 </CardDescription>
               </div>
-              <Badge variant="outline" className="bg-slate-500/15 text-slate-300 border-slate-500/25 tabular-nums text-xs">
+              <Badge variant="outline" className="bg-slate-50 text-slate-700 border-0 ring-1 ring-slate-200 tabular-nums text-xs font-medium">
                 {movementList.length} giao dịch
               </Badge>
             </div>
@@ -626,71 +654,71 @@ export function AdminInventoryPage() {
           <CardContent className="p-0">
             <div className="relative overflow-x-auto">
               <Table>
-                <TableHeader className="sticky top-0 bg-card/95 backdrop-blur z-10 border-b border-border">
-                  <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                <TableHeader className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200">
+                  <TableRow className="border-slate-200 hover:bg-slate-50">
+                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600">
                       Thời gian
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600">
                       Sản phẩm & SKU
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600">
                       Loại giao dịch
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-right">
+                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600 text-right">
                       Số lượng
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-right">
+                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600 text-right">
                       Tồn trước
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-right">
+                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600 text-right">
                       Tồn sau
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                    <TableHead className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600">
                       Ghi chú
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {movementList.map((mov) => (
-                    <TableRow key={mov.id} className="border-b border-border/50 hover:bg-muted/40 transition-colors">
-                      <TableCell className="px-4 py-3 align-middle text-xs text-muted-foreground tabular-nums">
+                    <TableRow key={mov.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                      <TableCell className="px-4 py-3 align-middle text-xs text-slate-500 tabular-nums">
                         {mov.createdAt}
                       </TableCell>
                       <TableCell className="px-4 py-3 align-middle">
-                        <div className="font-medium text-foreground text-sm">{mov.productName}</div>
-                        <div className="text-xs text-muted-foreground font-mono">{mov.sku}</div>
+                        <div className="font-medium text-slate-900 text-sm">{mov.productName}</div>
+                        <div className="text-xs text-slate-500 font-mono">{mov.sku}</div>
                       </TableCell>
                       <TableCell className="px-4 py-3 align-middle">
                         {mov.type === 'IN' && (
-                          <Badge variant="outline" className="bg-emerald-500/15 text-emerald-300 border-emerald-500/25 text-xs gap-1">
-                            <ArrowDownRight className="h-3 w-3" />
+                          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs gap-1 font-medium">
+                            <ArrowDownRight className="h-3 w-3 text-emerald-600" />
                             Nhập kho
                           </Badge>
                         )}
                         {mov.type === 'OUT' && (
-                          <Badge variant="outline" className="bg-amber-500/15 text-amber-300 border-amber-500/25 text-xs gap-1">
-                            <ArrowUpRight className="h-3 w-3" />
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs gap-1 font-medium">
+                            <ArrowUpRight className="h-3 w-3 text-amber-600" />
                             Xuất kho
                           </Badge>
                         )}
                         {mov.type === 'ADJUST' && (
-                          <Badge variant="outline" className="bg-slate-500/15 text-slate-300 border-slate-500/25 text-xs gap-1">
-                            <RefreshCw className="h-3 w-3" />
+                          <Badge variant="outline" className="bg-slate-50 text-slate-700 border-0 ring-1 ring-slate-200 text-xs gap-1 font-medium">
+                            <RefreshCw className="h-3 w-3 text-slate-500" />
                             Kiểm kê
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="px-4 py-3 align-middle text-right font-semibold tabular-nums text-foreground">
+                      <TableCell className="px-4 py-3 align-middle text-right font-semibold tabular-nums text-slate-900">
                         {mov.type === 'OUT' ? `-${mov.quantity}` : `+${mov.quantity}`}
                       </TableCell>
-                      <TableCell className="px-4 py-3 align-middle text-right text-muted-foreground tabular-nums">
+                      <TableCell className="px-4 py-3 align-middle text-right text-slate-500 tabular-nums">
                         {mov.previousStock}
                       </TableCell>
-                      <TableCell className="px-4 py-3 align-middle text-right font-medium text-foreground tabular-nums">
+                      <TableCell className="px-4 py-3 align-middle text-right font-medium text-slate-900 tabular-nums">
                         {mov.newStock}
                       </TableCell>
-                      <TableCell className="px-4 py-3 align-middle text-xs text-muted-foreground max-w-[220px] truncate">
+                      <TableCell className="px-4 py-3 align-middle text-xs text-slate-600 max-w-[220px] truncate">
                         {mov.notes || '--'}
                       </TableCell>
                     </TableRow>
@@ -703,12 +731,12 @@ export function AdminInventoryPage() {
 
         {/* Stock Adjustment Dialog */}
         <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
-          <DialogContent className="max-w-md bg-card border border-border text-card-foreground shadow-2xl rounded-2xl p-0 gap-0 overflow-hidden">
-            <DialogHeader className="px-6 pt-6 pb-4 border-b border-border bg-card">
-              <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+          <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-0 gap-0 overflow-hidden font-sans">
+            <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-200 bg-white">
+              <DialogTitle className="text-xl font-bold tracking-tight text-slate-900">
                 Điều chỉnh tồn kho
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-1">
+              <DialogDescription className="text-xs text-slate-600 mt-1">
                 {selectedVariant
                   ? `${selectedVariant.product?.name || 'Sản phẩm'} (${selectedVariant.sku})`
                   : 'Cập nhật số lượng tồn'}
@@ -717,7 +745,7 @@ export function AdminInventoryPage() {
 
             <form onSubmit={handleAdjustSubmit} className="p-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="adjust-type" className="text-sm font-medium text-foreground">
+                <Label htmlFor="adjust-type" className="text-sm font-medium text-slate-900">
                   Loại điều chỉnh *
                 </Label>
                 <div className="grid grid-cols-3 gap-2">
@@ -725,10 +753,10 @@ export function AdminInventoryPage() {
                     type="button"
                     onClick={() => setAdjustType('IN')}
                     className={cn(
-                      'p-2 rounded-xl text-xs font-medium border text-center transition-colors',
+                      'p-2 rounded-lg text-xs font-medium border text-center transition-colors',
                       adjustType === 'IN'
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25'
-                        : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-1 ring-emerald-200'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
                     )}
                   >
                     Nhập kho
@@ -737,10 +765,10 @@ export function AdminInventoryPage() {
                     type="button"
                     onClick={() => setAdjustType('OUT')}
                     className={cn(
-                      'p-2 rounded-xl text-xs font-medium border text-center transition-colors',
+                      'p-2 rounded-lg text-xs font-medium border text-center transition-colors',
                       adjustType === 'OUT'
-                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/25'
-                        : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted'
+                        ? 'bg-amber-50 text-amber-700 border-amber-300 ring-1 ring-amber-200'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
                     )}
                   >
                     Xuất kho
@@ -749,10 +777,10 @@ export function AdminInventoryPage() {
                     type="button"
                     onClick={() => setAdjustType('ADJUST')}
                     className={cn(
-                      'p-2 rounded-xl text-xs font-medium border text-center transition-colors',
+                      'p-2 rounded-lg text-xs font-medium border text-center transition-colors',
                       adjustType === 'ADJUST'
-                        ? 'bg-slate-500/15 text-slate-300 border-slate-500/25'
-                        : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted'
+                        ? 'bg-teal-50 text-teal-700 border-teal-300 ring-1 ring-teal-200'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
                     )}
                   >
                     Kiểm kê
@@ -761,7 +789,7 @@ export function AdminInventoryPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adjust-quantity" className="text-sm font-medium text-foreground">
+                <Label htmlFor="adjust-quantity" className="text-sm font-medium text-slate-900">
                   {adjustType === 'ADJUST' ? 'Mức tồn thực tế mới *' : 'Số lượng thay đổi *'}
                 </Label>
                 <Input
@@ -771,17 +799,17 @@ export function AdminInventoryPage() {
                   required
                   value={adjustQuantity}
                   onChange={(e) => setAdjustQuantity(Number(e.target.value))}
-                  className="bg-background border-input text-foreground tabular-nums focus-visible:ring-ring"
+                  className="bg-white border border-slate-200 text-slate-900 tabular-nums rounded-lg focus-visible:ring-2 focus-visible:ring-teal-500"
                 />
                 {selectedVariant && (
-                  <p className="text-xs text-muted-foreground">
-                    Tồn kho hiện tại: <span className="tabular-nums font-semibold text-foreground">{selectedVariant.stock}</span> đơn vị
+                  <p className="text-xs text-slate-500">
+                    Tồn kho hiện tại: <span className="tabular-nums font-semibold text-slate-900">{selectedVariant.stock}</span> đơn vị
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adjust-notes" className="text-sm font-medium text-foreground">
+                <Label htmlFor="adjust-notes" className="text-sm font-medium text-slate-900">
                   Ghi chú lý do
                 </Label>
                 <Input
@@ -789,23 +817,23 @@ export function AdminInventoryPage() {
                   value={adjustNotes}
                   onChange={(e) => setAdjustNotes(e.target.value)}
                   placeholder="Ví dụ: Kiểm kê định kỳ, hàng hỏng..."
-                  className="bg-background border-input text-foreground focus-visible:ring-ring"
+                  className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-lg focus-visible:ring-2 focus-visible:ring-teal-500"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border bg-muted/20 -mx-6 -mb-6 mt-6">
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 -mx-6 -mb-6 mt-6">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsAdjustDialogOpen(false)}
-                  className="rounded-xl border-border bg-background hover:bg-muted text-foreground"
+                  className="rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium"
                 >
                   Hủy
                 </Button>
                 <Button
                   type="submit"
                   disabled={adjustMutation.isPending}
-                  className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 font-medium"
                 >
                   {adjustMutation.isPending ? 'Đang lưu...' : 'Lưu thay đổi'}
                 </Button>
