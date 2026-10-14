@@ -33,13 +33,13 @@ import { useToast } from '@/hooks/useToast';
 import { Link } from 'react-router-dom';
 
 const ORDER_STATUS_MAP: Record<OrderStatus, { label: string; color: string; bg: string }> = {
-  PENDING_PAYMENT: { label: 'Chờ thanh toán', color: 'text-yellow-700', bg: 'bg-yellow-50 border-yellow-200' },
-  PAID: { label: 'Đã thanh toán', color: 'text-green-700', bg: 'bg-green-50 border-green-200' },
-  PACKING: { label: 'Đang đóng gói', color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200' },
-  SHIPPED: { label: 'Đang giao hàng', color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200' },
-  DELIVERED: { label: 'Giao thành công', color: 'text-slate-700', bg: 'bg-slate-100 border-slate-200' },
-  CANCELED: { label: 'Đã hủy', color: 'text-red-700', bg: 'bg-red-50 border-red-200' },
-  REFUNDED: { label: 'Đã hoàn tiền', color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200' },
+  PENDING_PAYMENT: { label: 'Chờ thanh toán', color: 'text-yellow-400', bg: 'bg-yellow-950/40 border-yellow-800/30' },
+  PAID: { label: 'Đã thanh toán', color: 'text-green-400', bg: 'bg-green-950/40 border-green-800/30' },
+  PACKING: { label: 'Đang đóng gói', color: 'text-blue-400', bg: 'bg-blue-950/40 border-blue-800/30' },
+  SHIPPED: { label: 'Đang giao hàng', color: 'text-purple-400', bg: 'bg-purple-950/40 border-purple-800/30' },
+  DELIVERED: { label: 'Giao thành công', color: 'text-slate-300', bg: 'bg-slate-900 border-slate-800' },
+  CANCELED: { label: 'Đã hủy', color: 'text-red-400', bg: 'bg-red-950/40 border-red-800/30' },
+  REFUNDED: { label: 'Đã hoàn tiền', color: 'text-orange-400', bg: 'bg-orange-950/40 border-orange-800/30' },
 };
 
 const ALLOWED_NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
@@ -141,7 +141,7 @@ export function AdminOrdersPage() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Quản lý đơn hàng</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Quản lý đơn hàng</h1>
           <p className="text-muted-foreground mt-1">Theo dõi và xử lý các đơn hàng của cửa hàng.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -178,12 +178,12 @@ export function AdminOrdersPage() {
       </div>
 
       {/* Filters & Actions */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl border shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-900/40 p-4 rounded-xl border border-slate-800 shadow-sm">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Tìm kiếm theo mã đơn, khách hàng..."
-            className="pl-9 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+            className="pl-9 bg-slate-950 border-slate-800 focus:bg-slate-900/50 transition-colors text-slate-100"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -196,13 +196,13 @@ export function AdminOrdersPage() {
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-[180px] bg-gray-50 border-gray-200">
+            <SelectTrigger className="w-[180px] bg-slate-950 border-slate-800 text-slate-200">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
                 <SelectValue placeholder="Trạng thái" />
               </div>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-slate-950 border-slate-800 text-slate-200">
               <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
               {Object.entries(ORDER_STATUS_MAP).map(([key, config]) => (
                 <SelectItem key={key} value={key}>{config.label}</SelectItem>
@@ -213,7 +213,7 @@ export function AdminOrdersPage() {
       </div>
 
       {/* Orders Table */}
-      <div className="rounded-xl border shadow-sm bg-white overflow-hidden">
+      <div className="rounded-xl border border-slate-800 shadow-sm bg-slate-900/20 overflow-hidden">
         {isLoading ? (
           <div className="p-8 space-y-4">
             {[1, 2, 3, 4, 5].map(i => (
@@ -225,7 +225,7 @@ export function AdminOrdersPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50/50 text-xs uppercase text-gray-500 font-medium">
+              <thead className="bg-slate-950/50 text-xs uppercase text-slate-400 font-medium border-b border-slate-800">
                 <tr>
                   <th className="px-6 py-4">Mã đơn</th>
                   <th className="px-6 py-4">Sản phẩm</th>
@@ -235,20 +235,20 @@ export function AdminOrdersPage() {
                   <th className="px-6 py-4 text-right">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-850">
                 {!data?.data?.length ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                      <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <Package className="h-12 w-12 mx-auto mb-3 text-slate-700" />
                       <p>Không tìm thấy đơn hàng nào</p>
                     </td>
                   </tr>
                 ) : (
                   data?.data?.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
+                    <tr key={order.id} className="hover:bg-slate-900/40 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <Link to={`/admin/orders/${order.id}`} className="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                          <Link to={`/admin/orders/${order.id}`} className="font-semibold text-slate-100 group-hover:text-primary transition-colors">
                             {order.code}
                           </Link>
                           <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
@@ -261,7 +261,7 @@ export function AdminOrdersPage() {
                         <div className="space-y-2 max-w-[300px]">
                           {order.items?.slice(0, 2).map((item: any, idx) => (
                             <div key={idx} className="flex items-center gap-3">
-                              <div className="relative w-10 h-10 rounded-md border border-gray-100 shadow-sm overflow-hidden shrink-0">
+                              <div className="relative w-10 h-10 rounded-md border border-slate-800 shadow-sm overflow-hidden shrink-0">
                                 {item.variant?.product?.images?.[0] ? (
                                   <img
                                     src={item.variant.product.images[0]}
@@ -270,13 +270,13 @@ export function AdminOrdersPage() {
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
-                                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                    <Package className="h-4 w-4 text-gray-400" />
+                                  <div className="w-full h-full bg-slate-950 flex items-center justify-center">
+                                    <Package className="h-4 w-4 text-slate-500" />
                                   </div>
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate" title={item.nameSnapshot}>
+                                <p className="text-sm font-medium text-slate-100 truncate" title={item.nameSnapshot}>
                                   {item.nameSnapshot}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
@@ -293,16 +293,16 @@ export function AdminOrdersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">{order.user?.name || order.user?.email}</div>
+                        <div className="font-medium text-slate-100">{order.user?.name || order.user?.email}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">{order.user?.phone || 'Chưa cập nhật SĐT'}</div>
                         <div className="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap">
                           {parseAddress(order.addressJson)}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="font-bold text-gray-900">{formatCurrency(order.total)}</div>
+                        <div className="font-bold text-slate-100">{formatCurrency(order.total)}</div>
                         <div className="text-xs text-muted-foreground mt-1 flex justify-end items-center gap-1">
-                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 font-normal">
+                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 font-normal border-slate-800 text-slate-300">
                             {order.paymentMethod}
                           </Badge>
                         </div>
@@ -317,7 +317,7 @@ export function AdminOrdersPage() {
                             value={order.status}
                             onValueChange={(val) => handleUpdateStatus(order.id, val as OrderStatus, order.code)}
                           >
-                            <SelectTrigger className="w-[130px] h-8 text-xs bg-white border-gray-200 shadow-none">
+                            <SelectTrigger className="w-[130px] h-8 text-xs bg-slate-950 border-slate-800 text-slate-200 shadow-none">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>

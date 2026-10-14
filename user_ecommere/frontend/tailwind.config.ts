@@ -59,6 +59,10 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      boxShadow: {
+        'luxury': '0 24px 48px -12px rgba(20, 20, 20, 0.03), 0 0 0 1px rgba(20, 20, 20, 0.01)',
+        'luxury-glow': '0 30px 60px -15px rgba(20, 20, 20, 0.05), 0 0 30px -5px rgba(197, 160, 107, 0.06)',
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },

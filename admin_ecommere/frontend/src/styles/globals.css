@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;       /* #F8FAFC - crisp light slate */
-    --foreground: 222 47% 11%;       /* #0F172A - deep text */
-    --card: 0 0% 100%;               /* #FFFFFF - pure white */
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 168 85% 30%;          /* #0D9488 - Teal 600 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 168 45% 96%;        /* #F0FDFA - soft teal tint */
-    --secondary-foreground: 168 85% 20%;
-    --muted: 210 40% 96%;            /* #F1F5F9 */
-    --muted-foreground: 215 16% 47%; /* #64748B */
-    --accent: 168 45% 94%;
-    --accent-foreground: 168 85% 20%;
+    --background: 224 71% 4%; /* Deep Space Navy/Black */
+    --foreground: 213 31% 91%;
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 263 90% 60%; /* Cyber Indigo/Purple */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 213 31% 91%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 66.9%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;           /* #E2E8F0 */
-    --input: 214 32% 91%;
-    --ring: 168 85% 30%;
-    --radius: 1rem;
+    --destructive-foreground: 210 40% 98%;
+    --border: 222 47% 12%;
+    --input: 222 47% 12%;
+    --ring: 263 90% 60%;
+    --radius: 1.25rem;
   }
 
   * {
@@ -34,57 +34,39 @@
 
   html {
     @apply scroll-smooth;
-    color-scheme: light;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background-color: #F8FAFC;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     background-image:
-      radial-gradient(circle at 10% 0%, rgba(13, 148, 136, 0.05) 0%, transparent 40%),
-      radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.04) 0%, transparent 35%),
-      linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+      radial-gradient(circle at top right, rgba(124, 58, 237, 0.08), transparent 30%),
+      radial-gradient(circle at top left, rgba(99, 102, 241, 0.08), transparent 28%),
+      linear-gradient(180deg, hsl(224, 71%, 4%), hsl(222, 47%, 2%));
     background-attachment: fixed;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    letter-spacing: -0.025em;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.02em;
     font-weight: 700;
   }
 }
 
 @layer components {
   .admin-surface {
-    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm backdrop-blur-md transition-all duration-200;
+    @apply rounded-[1.75rem] border border-white/5 bg-slate-950/40 shadow-[0_24px_64px_-24px_rgba(0,0,0,0.4)] backdrop-blur-xl transition-all duration-300;
   }
 
-  .sidebar-white {
-    background-color: #FFFFFF;
-    border-right: 1px solid #E2E8F0;
-  }
-
-  /* Universal clean styling for admin */
-  .admin-shell {
-    color: #0F172A;
-  }
-
-  .admin-shell table thead th {
-    background-color: #F8FAFC;
-    color: #475569;
-    border-color: #E2E8F0;
-  }
-
-  .admin-shell table tbody tr {
-    border-color: #F1F5F9;
-  }
-
-  .admin-shell table tbody tr:hover {
-    background-color: #F8FAFC;
+  .sidebar-glass {
+    background: linear-gradient(135deg, rgba(10, 12, 18, 0.96) 0%, rgba(5, 6, 8, 0.92) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
 }
 
@@ -96,5 +78,14 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .admin-glow {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .admin-glow:hover {
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.3), 0 0 24px -2px rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.25);
   }
 }

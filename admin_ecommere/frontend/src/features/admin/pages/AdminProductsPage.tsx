@@ -167,7 +167,7 @@ export function AdminProductsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-lg font-semibold text-gray-900">Không thể tải danh sách sản phẩm</h2>
+        <h2 className="text-lg font-semibold text-foreground">Không thể tải danh sách sản phẩm</h2>
         <Button onClick={() => window.location.reload()}>Thử lại</Button>
       </div>
     );
@@ -256,7 +256,7 @@ export function AdminProductsPage() {
         </div>
 
         {/* Action Toolbar */}
-        <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-lg shadow-sm border">
+        <div className="flex items-center justify-between gap-4 bg-slate-900/40 p-4 rounded-lg shadow-sm border border-slate-800">
           <div className="flex items-center gap-2 flex-1 max-w-md">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -319,9 +319,9 @@ export function AdminProductsPage() {
               </div>
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <Package className="h-12 w-12 text-gray-300 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900">Chưa có sản phẩm nào</h3>
-                <p className="text-sm text-gray-500 max-w-sm mt-1 mb-6">Create your first product to get started managing your catalog.</p>
+                <Package className="h-12 w-12 text-slate-700 mb-4" />
+                <h3 className="text-lg font-medium text-foreground">Chưa có sản phẩm nào</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-6">Create your first product to get started managing your catalog.</p>
                 <Button asChild>
                   <Link to="/admin/products/new">
                     Tạo sản phẩm
@@ -331,15 +331,15 @@ export function AdminProductsPage() {
             ) : (
               <div className="relative">
                 <Table>
-                  <TableHeader className="bg-gray-50/50 sticky top-0 z-10">
-                    <TableRow>
-                      <TableHead className="w-[80px]">Hình ảnh</TableHead>
-                      <TableHead className="min-w-[200px]">Tên sản phẩm</TableHead>
-                      <TableHead>Danh mục</TableHead>
-                      <TableHead>Giá bán</TableHead>
-                      <TableHead className="text-center">Tồn kho</TableHead>
-                      <TableHead className="text-center">Đánh giá</TableHead>
-                      <TableHead className="text-right">Thao tác</TableHead>
+                  <TableHeader className="bg-slate-900/50 sticky top-0 z-10 border-b border-slate-800">
+                    <TableRow className="hover:bg-transparent border-b border-slate-800">
+                      <TableHead className="w-[80px] text-slate-300">Hình ảnh</TableHead>
+                      <TableHead className="min-w-[200px] text-slate-300">Tên sản phẩm</TableHead>
+                      <TableHead className="text-slate-300">Danh mục</TableHead>
+                      <TableHead className="text-slate-300">Giá bán</TableHead>
+                      <TableHead className="text-center text-slate-300">Tồn kho</TableHead>
+                      <TableHead className="text-center text-slate-300">Đánh giá</TableHead>
+                      <TableHead className="text-right text-slate-300">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -347,9 +347,9 @@ export function AdminProductsPage() {
                       const totalStock = calculateTotalStock(product);
                       const isDeleting = (deleteProduct.isPending && deleteProduct.variables === product.id) || deletingIdRef.current === product.id;
                       return (
-                        <TableRow key={product.id} className="group hover:bg-gray-50/50 transition-colors">
+                        <TableRow key={product.id} className="group hover:bg-slate-900/40 transition-colors border-b border-slate-850">
                           <TableCell>
-                            <div className="relative h-12 w-12 rounded-lg border border-gray-100 overflow-hidden bg-white shadow-sm group-hover:shadow-md transition-shadow">
+                            <div className="relative h-12 w-12 rounded-lg border border-slate-800 overflow-hidden bg-slate-950 shadow-sm group-hover:shadow-md transition-shadow">
                               <img
                                 src={product.images[0] || 'https://placehold.co/100x100?text=No+Image'}
                                 alt={product.name}
@@ -362,7 +362,7 @@ export function AdminProductsPage() {
                             <div className="flex flex-col">
                               <Link
                                 to={`/admin/products/${product.id}/edit`}
-                                className="font-semibold text-gray-900 group-hover:text-primary transition-colors cursor-pointer line-clamp-2 hover:underline"
+                                className="font-semibold text-slate-100 group-hover:text-primary transition-colors cursor-pointer line-clamp-2 hover:underline"
                                 title={product.name}
                               >
                                 {product.name}

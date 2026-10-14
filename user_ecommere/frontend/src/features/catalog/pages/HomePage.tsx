@@ -1,56 +1,45 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Flame,
-  ShieldCheck,
+  RefreshCw,
+  Shield,
   Sparkles,
-  Tag,
   Truck,
-  Zap,
 } from 'lucide-react';
+import { SEO } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/common/ProductCard';
-import { useCategories } from '@/features/catalog/hooks/useCategories';
-import { useProducts } from '@/features/catalog/hooks/useProducts';
-import { useCart } from '@/features/cart/hooks/useCart';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { SEO } from '@/lib/seo';
-import type { Product, ProductVariant } from '@/features/catalog/api/products.api';
+import { useCart } from '@/features/cart/hooks/useCart';
+import { useCategories } from '../hooks/useCategories';
+import { useProducts } from '../hooks/useProducts';
 
-const TRUST_BADGES = [
-  {
-    icon: ShieldCheck,
-    title: '100% Chính Hãng Thái Lan',
-    desc: 'Hàng nội địa nhập khẩu trực tiếp, đầy đủ mã vạch nguồn gốc',
-  },
-  {
-    icon: Truck,
-    title: 'Giao Hàng Hỏa Tốc',
-    desc: 'Đóng gói kỹ càng, giao hàng nhanh chóng toàn quốc',
-  },
-  {
-    icon: CheckCircle2,
-    title: 'Đổi Trả 7 Ngày',
-    desc: 'Cam kết 1 đổi 1 ngay lập tức nếu lỗi hoặc hư hại do vận chuyển',
-  },
-  {
-    icon: Tag,
-    title: 'Giá Tốt Tận Gốc',
-    desc: 'Sỉ lẻ đồng giá ưu đãi, mua nhiều giảm sâu',
-  },
+const HIGHLIGHTS = [
+  { label: 'Mùi hương bán chạy', value: '120+' },
+  { label: 'Khách quay lại mua', value: '89%' },
+  { label: 'Tư vấn theo không gian', value: '1:1' },
 ];
 
-const QUICK_TAGS = [
-  { label: '🐭 Xịt đuổi chuột ARS', q: 'chuột' },
-  { label: '🦎 Xịt thằn lằn & gián', q: 'gián' },
-  { label: '🚽 Chai xịt tẩy Magiclean', q: 'tẩy' },
-  { label: '🌸 Xịt thơm phòng sả chanh', q: 'sả chanh' },
-  { label: '🧺 Nước giặt xả Hygiene', q: 'hygiene' },
+const BENEFITS = [
+  { icon: Truck, title: 'Giao nhanh', desc: 'Nội thành linh hoạt trong ngày' },
+  { icon: Shield, title: 'Chính hãng', desc: 'Danh mục được chọn lọc kỹ' },
+  { icon: RefreshCw, title: 'Đổi trả rõ ràng', desc: 'Hỗ trợ trong 7 ngày đầu' },
 ];
+
+const FEATURED_CATEGORY_LIMIT = 4;
+
+function HomeSectionSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="h-[360px] animate-pulse rounded-[1.65rem] bg-white/70" />
+      ))}
+    </div>
+  );
+}
 
 interface CategoryProductSectionProps {
   category: {
@@ -59,7 +48,7 @@ interface CategoryProductSectionProps {
     slug: string;
   };
   index: number;
-  onAddToCart: (product: Product, variant: ProductVariant) => void;
+  onAddToCart: (product: any, variant: any) => void;
 }
 
 function CategoryProductSection({ category, index, onAddToCart }: CategoryProductSectionProps) {
@@ -68,7 +57,9 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isVisible || !sectionRef.current) return;
+    if (isVisible || !sectionRef.current) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -77,10 +68,11 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
           observer.disconnect();
         }
       },
-      { rootMargin: '160px 0px' }
+      { rootMargin: '160px 0px' },
     );
 
     observer.observe(sectionRef.current);
+
     return () => observer.disconnect();
   }, [isVisible]);
 
@@ -92,86 +84,60 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
     },
     {
       enabled: isVisible,
-    }
+    },
   );
 
   const scroll = (direction: 'left' | 'right') => {
     scrollRef.current?.scrollBy({
-      left: direction === 'left' ? -300 : 300,
+      left: direction === 'left' ? -320 : 320,
       behavior: 'smooth',
     });
   };
 
-  if (!isLoading && (!productsData?.products || productsData.products.length === 0)) {
-    return null;
-  }
-
   return (
-    <section
-      ref={sectionRef}
-      className="rounded-3xl border border-slate-200/80 bg-white p-6 md:p-8 shadow-sm space-y-6"
-    >
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between border-b border-slate-100 pb-5">
+    <section ref={sectionRef} className="section-shell overflow-hidden p-5 md:p-8">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-teal-700 uppercase tracking-wider mb-1">
-            <Sparkles className="h-3.5 w-3.5 text-teal-600" />
-            Danh Mục Tiêu Dùng Thái Lan
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-            {category.name}
-          </h2>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500 font-medium">
-            Hàng chính hãng nhập khẩu nguyên chai từ Thái Lan, an toàn và hiệu quả vượt trội.
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Danh mục nổi bật</p>
+          <h2 className="section-title text-2xl md:text-3xl">{category.name}</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Những lựa chọn được khách chọn nhiều khi cần mùi thơm gọn, dễ dùng và phù hợp sinh hoạt mỗi ngày.
           </p>
         </div>
-        <Button
-          asChild
-          variant="outline"
-          className="rounded-xl border-slate-200 hover:border-teal-400 hover:bg-teal-50 text-teal-700 font-bold self-start md:self-auto"
-        >
+        <Button asChild variant="outline" className="rounded-full px-5">
           <Link to={`/c/${category.slug}`}>
-            Xem toàn bộ {category.name}
+            Xem toàn bộ danh mục
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
       </div>
 
-      {isLoading && !productsData ? (
-        <div className="flex justify-center py-10">
-          <LoadingSpinner />
-        </div>
-      ) : null}
+      {isLoading && !productsData ? <HomeSectionSkeleton /> : null}
 
       {!isLoading && productsData?.products?.length ? (
         <>
-          {/* Desktop Grid */}
-          <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {productsData.products.slice(0, 4).map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                slug={product.slug}
-                images={product.images}
-                price={product.basePrice}
-                rating={product.rating}
-                reviewCount={product.reviewCount}
-                variants={product.variants}
-                onAddToCart={() =>
-                  product.variants[0] && onAddToCart(product, product.variants[0])
-                }
-              />
+          <div className="hidden gap-5 md:grid md:grid-cols-2 xl:grid-cols-4">
+            {productsData.products.slice(0, 4).map((product, idx) => (
+              <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${idx * 80}ms` }}>
+                <ProductCard
+                  id={product.id}
+                  name={product.name}
+                  slug={product.slug}
+                  images={product.images}
+                  price={product.basePrice}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  variants={product.variants}
+                  onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                />
+              </div>
             ))}
           </div>
 
-          {/* Mobile Horizontal Scroll */}
           <div className="relative md:hidden">
-            <div
-              ref={scrollRef}
-              className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-hide snap-x"
-            >
+            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
               {productsData.products.map((product) => (
-                <div key={product.id} className="w-[240px] shrink-0 snap-start">
+                <div key={product.id} className="w-[265px] shrink-0">
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -181,24 +147,20 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     variants={product.variants}
-                    onAddToCart={() =>
-                      product.variants[0] && onAddToCart(product, product.variants[0])
-                    }
+                    onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
                   />
                 </div>
               ))}
             </div>
             <button
               onClick={() => scroll('left')}
-              className="absolute left-1 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-800 shadow-md border border-slate-200"
-              aria-label="Scroll left"
+              className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               onClick={() => scroll('right')}
-              className="absolute right-1 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-800 shadow-md border border-slate-200"
-              aria-label="Scroll right"
+              className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -210,19 +172,16 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
 }
 
 export function HomePage() {
+  const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { addItem } = useCart();
-  const { data: categoriesData, isLoading: isLoadingCategories } = useCategories();
   const { data: curatedProducts, isLoading: isLoadingCuratedProducts } = useProducts({
-    limit: 8,
     sortBy: 'best_selling',
+    limit: 4,
   });
 
-  const rootCategories = useMemo(
-    () => categoriesData?.filter((c) => !c.parentId) ?? [],
-    [categoriesData]
-  );
+  const rootCategories = (categories?.filter((category) => !category.parentId) || []).slice(0, FEATURED_CATEGORY_LIMIT);
 
-  const handleAddToCart = (product: Product, variant: ProductVariant) => {
+  const handleAddToCart = (product: any, variant: any) => {
     addItem({
       productId: product.id,
       variantId: variant.id,
@@ -236,184 +195,162 @@ export function HomePage() {
 
   return (
     <>
-      <SEO
-        title="Thai Spray - Tổng Kho Hàng Tiêu Dùng & Chai Xịt Thái Lan Chính Hãng"
-        description="Chuyên phân phối sỉ lẻ chai xịt đuổi chuột ARS, xịt gián kiến, nước tẩy rửa sinh học, nước xả vải và tinh dầu xịt phòng chính hãng Thái Lan. Giao nhanh toàn quốc."
-      />
+      <SEO />
 
-      <div className="container mx-auto px-4 py-6 space-y-10">
-        {/* HERO SECTION */}
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 p-7 md:p-12 text-white shadow-2xl">
-          {/* Ambient Lighting Orbs */}
-          <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
-
-          <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center">
-            {/* Text Column */}
-            <div className="space-y-6 lg:col-span-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/15 px-3.5 py-1.5 text-xs font-bold text-teal-300 backdrop-blur-md">
-                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                TỔNG KHO CHAI XỊT &amp; TIÊU DÙNG THÁI LAN
-              </div>
-
-              <div className="space-y-3">
-                <h1 className="text-3xl font-black tracking-tight sm:text-4xl md:text-5xl lg:text-[2.85rem] leading-[1.15]">
-                  Giải Pháp Tiện Ích &amp; Làm Sạch Chuẩn{' '}
-                  <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-amber-300 bg-clip-text text-transparent">
-                    Nội Địa Thái Lan
-                  </span>
-                </h1>
-                <p className="max-w-xl text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-                  Tổng hợp các dòng chai xịt đuổi chuột ARS, diệt côn trùng, xịt tẩy rửa đa năng, nước giặt xả và tinh dầu thơm phòng được tin dùng số 1 tại Thái Lan.
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Button
-                  asChild
-                  size="lg"
-                  className="rounded-2xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold px-7 py-6 text-sm shadow-xl shadow-teal-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
+      <div className="container space-y-8 py-6 md:space-y-10 md:py-8">
+        <section className="section-shell relative overflow-hidden px-6 py-12 md:px-12 md:py-20 bg-white/80 backdrop-blur-xl border border-black/[0.02] shadow-luxury">
+          {/* Animated Ambient Blobs */}
+          <div className="absolute top-[-20%] left-[-10%] h-[350px] w-[350px] rounded-full bg-amber-300/12 blur-[80px] animate-float-orb pointer-events-none" />
+          <div className="absolute bottom-[-15%] right-[-5%] h-[400px] w-[400px] rounded-full bg-neutral-400/10 blur-[90px] animate-float-orb [animation-delay:-5s] pointer-events-none" />
+          
+          <div className="relative grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+            <div>
+              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-white/80 px-4.5 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary shadow-sm hover:scale-[1.01] transition-transform duration-300 backdrop-blur-md">
+                <Sparkles className="h-3.5 w-3.5 text-accent-foreground/75 fill-accent/10 animate-pulse" />
+                Hương thơm cho không gian sống hiện đại
+              </p>
+              <h1 className="max-w-3xl text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-7xl font-serif">
+                Chọn mùi hương khiến không gian của bạn <span className="text-gradient-emerald">trông có gu hơn</span>.
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg font-medium">
+                Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết, gọn và không gắt. Bạn có thể bắt đầu từ
+                mùi bán chạy, hỏi chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay trên catalog.
+              </p>
+              <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
+                <Button asChild size="lg" className="h-[3.25rem] rounded-full px-8 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 shadow-xl shadow-primary/15 hover:shadow-primary/25 bg-primary font-bold uppercase tracking-wider text-xs">
                   <Link to="/catalog">
-                    Khám Phá Toàn Bộ Sản Phẩm
+                    Khám phá bộ sưu tập
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="rounded-2xl border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold px-6 py-6 text-sm backdrop-blur-sm transition-all"
-                >
-                  <Link to="/catalog?sort=best_selling">🔥 Bán Chạy Nhất</Link>
+                <Button asChild variant="outline" size="lg" className="h-[3.25rem] rounded-full px-8 border-black/[0.05] bg-white/60 hover:bg-white/95 hover:-translate-y-0.5 hover:scale-[1.03] transition-all duration-300 shadow-sm font-bold uppercase tracking-wider text-xs">
+                  <Link to="/catalog?sort=best_selling">Xem nhóm bán chạy nhất</Link>
                 </Button>
               </div>
-
-              {/* Quick Tags */}
-              <div className="pt-2">
-                <p className="text-xs font-semibold text-teal-200/80 mb-2.5 uppercase tracking-wider">
-                  Tìm kiếm phổ biến:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {QUICK_TAGS.map((tag) => (
-                    <Link
-                      key={tag.q}
-                      to={`/search?q=${encodeURIComponent(tag.q)}`}
-                      className="rounded-xl border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-teal-500/20 hover:border-teal-400/40 hover:text-teal-200 transition-all"
-                    >
-                      {tag.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
             </div>
-
-            {/* Visual Hero Image Column */}
-            <div className="relative lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-[420px]">
-                <div className="overflow-hidden rounded-3xl border border-white/15 bg-white/5 shadow-2xl backdrop-blur-md">
-                  <img
-                    src="/hero-spray.jpg"
-                    alt="Bộ sưu tập chai xịt tiện ích Thái Lan chính hãng"
-                    className="w-full h-auto object-cover transform transition-transform duration-700 hover:scale-105"
-                    loading="eager"
-                  />
-                </div>
-
-                {/* Floating Micro Card 1 */}
-                <div className="absolute -top-3 -right-3 rounded-2xl bg-amber-500 text-slate-950 px-4 py-2.5 font-black text-xs shadow-xl shadow-amber-500/30 flex items-center gap-1.5 border border-amber-300 animate-bounce [animation-duration:3s]">
-                  <Zap className="h-4 w-4 fill-slate-950" />
-                  <span>GIẢM ĐẾN 45%</span>
-                </div>
-
-                {/* Floating Micro Card 2 */}
-                <div className="absolute -bottom-3 -left-3 rounded-2xl bg-white text-slate-900 px-4 py-3 shadow-xl border border-slate-200 hidden sm:flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-800 font-bold">
-                    ⭐
+ 
+            <div className="relative aspect-square w-full max-w-[400px] mx-auto lg:max-w-none rounded-[2.2rem] border border-black/[0.02] shadow-luxury group animate-scale-in">
+              <div className="h-full w-full overflow-hidden rounded-[2.2rem] bg-gradient-to-tr from-secondary/50 to-white/30 border border-white/40">
+                <img
+                  src="/hero-fragrance.png"
+                  alt="Thai Spray Luxury Fragrance"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.2s] ease-out"
+                />
+              </div>
+              <div className="absolute inset-0 rounded-[2.2rem] bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/80">Premium Scent Collection</p>
+                <h3 className="text-lg font-bold mt-1 font-serif leading-tight">Mùi hương tinh tế cho nhịp sống hiện đại</h3>
+              </div>
+              <div className="absolute top-4 right-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-md px-4 py-2.5 text-white shadow-lg animate-bounce [animation-duration:4s]">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-white/80">Khuyên dùng</p>
+                <p className="text-xs font-extrabold mt-0.5 tracking-wide">Woody & Fresh</p>
+              </div>
+              
+              {/* Scent notes overlay */}
+              <div className="absolute -bottom-4 -left-4 glass-premium p-4.5 rounded-[1.6rem] max-w-[210px] border border-black/[0.02] shadow-luxury hidden sm:block hover:scale-105 duration-300">
+                <p className="text-[9px] font-extrabold uppercase tracking-widest text-primary">Olfactory Notes</p>
+                <div className="flex flex-col gap-2 mt-2.5">
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
+                    <span className="h-2 w-2 rounded-full bg-emerald-600 shadow-sm" />
+                    <span>Gỗ thông rừng</span>
                   </div>
-                  <div>
-                    <p className="text-xs font-black text-slate-900">4.9 / 5.0 Đánh Giá</p>
-                    <p className="text-[10px] text-slate-500 font-semibold">
-                      Hơn 5.000 khách hàng tin dùng
-                    </p>
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
+                    <span className="h-2 w-2 rounded-full bg-amber-400 shadow-sm" />
+                    <span>Xô thơm quýt</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
+                    <span className="h-2 w-2 rounded-full bg-blue-400 shadow-sm" />
+                    <span>Bạc hà lạnh</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
-
-        {/* 4 TRUST BADGES */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {TRUST_BADGES.map((item) => (
-            <div
-              key={item.title}
-              className="flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm hover:shadow-md hover:border-teal-300 transition-all duration-300"
-            >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
-                <item.icon className="h-6 w-6" />
+ 
+        <section className="grid gap-6 md:grid-cols-2">
+          <div className="section-shell p-6 bg-white/60 backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Điểm mạnh của shop</p>
+            <div className="grid gap-3 grid-cols-3">
+              {HIGHLIGHTS.map((item) => (
+                <div key={item.label} className="rounded-2xl bg-white/90 border border-black/[0.02] p-4 shadow-luxury text-center hover-glow hover:-translate-y-0.5 transition-all duration-300">
+                  <p className="text-2xl font-bold text-primary">{item.value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground font-semibold leading-tight">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="section-shell p-6 bg-white/60 backdrop-blur-sm flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Gợi ý bắt đầu nhanh</p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {['Xịt phòng khách', 'Body mist nhẹ', 'Quà tặng', 'Mùi sạch cho xe'].map((item) => (
+                  <Link
+                    key={item}
+                    to={`/search?q=${encodeURIComponent(item)}`}
+                    className="rounded-full border border-white/60 bg-white/80 px-4 py-2 text-xs font-bold text-foreground transition-all duration-300 hover:scale-[1.02] hover:border-primary/25 hover:bg-secondary shadow-sm"
+                  >
+                    {item}
+                  </Link>
+                ))}
               </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-bold text-slate-900">{item.title}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed font-medium">{item.desc}</p>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-4">Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.</p>
+          </div>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          {BENEFITS.map((item) => (
+            <div key={item.title} className="section-shell flex items-start gap-4 p-5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-foreground">
+                <item.icon className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-foreground">{item.title}</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.desc}</p>
               </div>
             </div>
           ))}
         </section>
 
-        {/* CURATED FLASH DEALS */}
-        <section className="rounded-3xl border border-slate-200/80 bg-white p-6 md:p-8 shadow-sm space-y-6">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-slate-100 pb-5">
+        <section className="section-shell p-5 md:p-8">
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-rose-600 uppercase tracking-wider mb-1">
-                <Flame className="h-4 w-4 fill-rose-500 text-rose-500" />
-                Sản phẩm nổi bật
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                Top Sản Phẩm Bán Chạy Nhất
-              </h2>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Biên tập bởi Thai Spray</p>
+              <h2 className="section-title text-2xl md:text-3xl">Những lựa chọn đang được hỏi nhiều</h2>
             </div>
-            <Button
-              asChild
-              variant="ghost"
-              className="text-teal-700 hover:text-teal-800 hover:bg-teal-50 font-bold"
-            >
+            <Button asChild variant="ghost" className="justify-start rounded-full px-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
               <Link to="/catalog?sort=best_selling">
-                Xem toàn bộ catalog
-                <ArrowRight className="ml-1.5 h-4 w-4" />
+                Xem thêm trong catalog
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
 
           {isLoadingCuratedProducts && !curatedProducts ? (
-            <div className="flex justify-center py-12">
-              <LoadingSpinner />
-            </div>
+            <HomeSectionSkeleton />
           ) : (
-            <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-              {curatedProducts?.products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  slug={product.slug}
-                  images={product.images}
-                  price={product.basePrice}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  variants={product.variants}
-                  onAddToCart={() =>
-                    product.variants[0] && handleAddToCart(product, product.variants[0])
-                  }
-                />
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+              {curatedProducts?.products.map((product, index) => (
+                <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 80}ms` }}>
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    slug={product.slug}
+                    images={product.images}
+                    price={product.basePrice}
+                    rating={product.rating}
+                    reviewCount={product.reviewCount}
+                    variants={product.variants}
+                    onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                  />
+                </div>
               ))}
             </div>
           )}
         </section>
 
-        {/* CATEGORIES SECTIONS */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {isLoadingCategories ? (
             <div className="flex justify-center py-10">
               <LoadingSpinner />
