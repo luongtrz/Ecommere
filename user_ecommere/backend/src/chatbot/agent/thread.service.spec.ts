@@ -407,7 +407,7 @@ describe('ThreadService', () => {
       });
     });
 
-    it('deletes the tool-call rows and the thread in one transaction', async () => {
+    it('deletes the thread and keeps its tool-call audit rows', async () => {
       const mockThread = {
         id: 't-1',
         userId: 'user-1',
@@ -418,23 +418,15 @@ describe('ThreadService', () => {
         updatedAt: new Date(),
       };
       mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
-      const deleteLogsOp = { count: 3 };
-      const deleteThreadOp = mockThread;
-      mockPrismaService.agentToolLog.deleteMany.mockReturnValue(deleteLogsOp);
-      mockPrismaService.agentThread.delete.mockReturnValue(deleteThreadOp);
+      mockPrismaService.agentThread.delete.mockReturnValue(mockThread);
+      mockPrismaService.agentToolLog.deleteMany.mockClear();
 
       await service.remove('t-1', { userId: 'user-1', app: 'USER' });
 
-      expect(mockPrismaService.agentToolLog.deleteMany).toHaveBeenCalledWith({
-        where: { threadId: 't-1' },
-      });
+      expect(mockPrismaService.agentToolLog.deleteMany).not.toHaveBeenCalled();
       expect(mockPrismaService.agentThread.delete).toHaveBeenCalledWith({
         where: { id: 't-1' },
       });
-      expect(mockPrismaService.$transaction).toHaveBeenCalledWith([
-        deleteLogsOp,
-        deleteThreadOp,
-      ]);
     });
 
     it('does not call delete when assertOwned fails', async () => {

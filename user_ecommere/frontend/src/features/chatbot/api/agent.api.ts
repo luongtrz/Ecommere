@@ -122,19 +122,6 @@ export const agentApi = {
     );
     return response.data?.data ?? response.data;
   },
-
-  async sendMessage(prompt: string, sessionId?: string): Promise<any> {
-    const response = await apiClient.post(
-      '/chatbot/messages',
-      { prompt, sessionId },
-      {
-        headers: {
-          'X-Chat-Session': getChatSessionId(),
-        },
-      }
-    );
-    return response.data?.data ?? response.data;
-  },
 };
 
 export { getChatSessionId } from '../lib/session';

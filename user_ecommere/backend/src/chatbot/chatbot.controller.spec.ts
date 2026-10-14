@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  HttpException,
   NotFoundException,
 } from '@nestjs/common';
 import { ChatbotController } from './chatbot.controller';
@@ -9,7 +8,6 @@ import type { AgentConfig } from './agent/agent.config';
 import type { AgentStreamEvent } from './agent/sse.frames';
 import { SendAgentMessageDto } from './dtos/agent-message.dto';
 import { ResumeAgentDto } from './dtos/agent-resume.dto';
-import { SendChatbotMessageDto } from './dtos/send-chatbot-message.dto';
 
 jest.mock(
   './agent/agent.providers',
@@ -704,168 +702,6 @@ describe('ChatbotController', () => {
     });
   });
 
-  describe('Route 6: POST /chatbot/messages (legacy compatibility)', () => {
-    it('the legacy route returns message, sessionId and sources', async () => {
-      mockThreads.create.mockResolvedValue({ id: 'legacy-thread-new' });
-      mockRunner.run.mockImplementation(
-        async (params: { sink: (event: AgentStreamEvent) => void }) => {
-          params.sink({ event: 'token', data: { text: 'Nước hoa ' } });
-          params.sink({ event: 'token', data: { text: 'mùa hè tươi mát.' } });
-          params.sink({
-            event: 'sources',
-            data: [{ id: 'sp-1', name: 'Nước hoa A' }],
-          });
-          params.sink({
-            event: 'done',
-            data: { usage: { totalTokens: 85 } },
-          });
-        },
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = {
-        prompt: 'Gợi ý nước hoa mùa hè',
-        sessionId: 'chat_old_style_session_id',
-      } as any;
-
-      const result = await controller.sendMessage(req as any, dto);
-
-      expect(mockThreads.create).toHaveBeenCalledWith({
-        userId: null,
-        app: 'USER',
-      });
-      expect(result).toEqual({
-        message: 'Nước hoa mùa hè tươi mát.',
-        model: 'gpt-4.1-mini',
-        usage: { totalTokens: 85 },
-        sessionId: 'legacy-thread-new',
-        sources: [{ id: 'sp-1', name: 'Nước hoa A' }],
-      });
-    });
-
-    it('an error event in the legacy route gives 502', async () => {
-      mockThreads.create.mockResolvedValue({ id: 'legacy-err-thread' });
-      mockRunner.run.mockImplementation(
-        async (params: { sink: (event: AgentStreamEvent) => void }) => {
-          params.sink({
-            event: 'error',
-            data: { message: 'OpenAI upstream error', code: 'AGENT_ERROR' },
-          });
-        },
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = { prompt: 'Hello' } as any;
-
-      await expect(controller.sendMessage(req as any, dto)).rejects.toThrow(
-        HttpException,
-      );
-
-      try {
-        await controller.sendMessage(req as any, dto);
-        fail('Expected exception');
-      } catch (err: any) {
-        expect(err).toBeInstanceOf(HttpException);
-        expect(err.getStatus()).toBe(502);
-        expect(err.getResponse()).toEqual({
-          statusCode: 502,
-          message: 'OpenAI upstream error',
-        });
-      }
-    });
-
-    it('the legacy route uses existing thread if sessionId is a valid UUID v4', async () => {
-      const validUuid = '0f5f4fe8-c1e2-43ec-9e2c-85f0f7b52d10';
-      mockThreads.assertOwned.mockResolvedValue({
-        id: validUuid,
-        userId: null,
-        app: 'USER',
-      } as any);
-      mockRunner.run.mockImplementation(
-        async (params: { sink: (event: AgentStreamEvent) => void }) => {
-          params.sink({ event: 'token', data: { text: 'Câu trả lời' } });
-          params.sink({ event: 'done', data: { usage: null } });
-        },
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = {
-        prompt: 'Tiếp tục',
-        sessionId: validUuid,
-      } as any;
-
-      const result = await controller.sendMessage(req as any, dto);
-
-      expect(mockThreads.assertOwned).toHaveBeenCalledWith(validUuid, {
-        userId: null,
-        app: 'USER',
-      });
-      expect(mockThreads.create).not.toHaveBeenCalled();
-      expect(result.sessionId).toBe(validUuid);
-    });
-
-    it('the legacy route handles confirm_required event', async () => {
-      mockThreads.create.mockResolvedValue({ id: 'legacy-thread-confirm' });
-      mockRunner.run.mockImplementation(
-        async (params: { sink: (event: AgentStreamEvent) => void }) => {
-          params.sink({
-            event: 'confirm_required',
-            data: {
-              calls: [
-                {
-                  id: 'call_del',
-                  name: 'cancel_order',
-                  summary: 'Hủy đơn hàng',
-                  risk: 'DESTRUCTIVE',
-                },
-              ],
-            },
-          });
-        },
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = { prompt: 'Hủy đơn hàng' } as any;
-
-      const result = await controller.sendMessage(req as any, dto);
-
-      expect(result.message).toBe('Cần xác nhận thao tác trước khi tiếp tục.');
-      expect(result.pendingConfirm).toEqual([
-        {
-          id: 'call_del',
-          name: 'cancel_order',
-          summary: 'Hủy đơn hàng',
-          risk: 'DESTRUCTIVE',
-        },
-      ]);
-    });
-
-    it('legacy route throws 503 when apiKey is missing', async () => {
-      const controllerWithoutKey = new ChatbotController(
-        { ...mockConfig, apiKey: null },
-        mockRunner as any,
-        mockThreads as any,
-      );
-
-      const req = createFakeRequest(undefined);
-      const dto: SendChatbotMessageDto = { prompt: 'Hello' } as any;
-
-      await expect(
-        controllerWithoutKey.sendMessage(req as any, dto),
-      ).rejects.toThrow(HttpException);
-
-      try {
-        await controllerWithoutKey.sendMessage(req as any, dto);
-        fail('Expected exception');
-      } catch (err: any) {
-        expect(err.getStatus()).toBe(503);
-        expect(err.getResponse()).toEqual({
-          statusCode: 503,
-          message: 'Trợ lý chưa được cấu hình',
-        });
-      }
-    });
-  });
 
   describe('Route names and IDOR check', () => {
     it('the controller has no route named sessions (check the route metadata by reading the method names only)', () => {
