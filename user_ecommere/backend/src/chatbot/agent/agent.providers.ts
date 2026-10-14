@@ -19,6 +19,7 @@ import { ReviewsService } from '../../reviews/reviews.service';
 import { CouponsService } from '../../coupons/coupons.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CartService } from '../../cart/cart.service';
+import { CheckpointRetentionService } from '../checkpoint-retention.service';
 
 export const AGENT_CONFIG = 'AGENT_CONFIG';
 export const AGENT_CHECKPOINTER = 'AGENT_CHECKPOINTER';
@@ -142,6 +143,7 @@ export const agentProviders: Provider[] = [
       AGENT_CONFIG,
     ],
   },
+  CheckpointRetentionService,
 ];
 
 export { ThreadService, AuditService, AgentRunner };
