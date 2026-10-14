@@ -10,6 +10,13 @@ interface SalesReportRawRow {
   revenue: bigint | number;
 }
 
+interface TopProductRawRow {
+  productId: string;
+  name: string;
+  soldQuantity: bigint | number;
+  revenue: bigint | number;
+}
+
 @Injectable()
 export class ReportsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -233,57 +240,34 @@ export class ReportsService {
 
     const { startDateUtc, endDateUtc } = this.parseAndValidateDateRange(from, to);
 
-    // Orders counted: DELIVERED only (same rule as the dashboard topProducts)
-    const grouped = await this.prisma.orderItem.groupBy({
-      by: ['productId'],
-      where: {
-        order: {
-          status: OrderStatus.DELIVERED,
-          createdAt: {
-            gte: startDateUtc,
-            lte: endDateUtc,
-          },
-        },
-      },
-      _sum: {
-        quantity: true,
-        lineTotal: true,
-      },
-    });
-
-    // Sắp xếp theo soldQuantity desc, sau đó revenue desc
-    grouped.sort((a, b) => {
-      const qtyDiff = (b._sum.quantity || 0) - (a._sum.quantity || 0);
-      if (qtyDiff !== 0) {
-        return qtyDiff;
-      }
-      return (b._sum.lineTotal || 0) - (a._sum.lineTotal || 0);
-    });
-
-    const topItems = grouped.slice(0, limit);
-
-    if (topItems.length === 0) {
+    if (limit <= 0) {
       return [];
     }
 
-    const productIds = topItems.map((item) => item.productId);
-    const products = await this.prisma.product.findMany({
-      where: {
-        id: { in: productIds },
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
+    // Orders counted: DELIVERED only (same rule as the dashboard topProducts)
+    // Sắp xếp theo soldQuantity desc, sau đó revenue desc và giới hạn theo limit trong database
+    const rawRows = await this.prisma.$queryRaw<TopProductRawRow[]>(Prisma.sql`
+      SELECT
+        oi."productId",
+        COALESCE(p."name", 'Unknown Product') AS "name",
+        COALESCE(SUM(oi."quantity"), 0)::bigint AS "soldQuantity",
+        COALESCE(SUM(oi."lineTotal"), 0)::bigint AS "revenue"
+      FROM "order_items" oi
+      JOIN "orders" o ON o."id" = oi."orderId"
+      LEFT JOIN "products" p ON p."id" = oi."productId"
+      WHERE o."status"::text = ${OrderStatus.DELIVERED}
+        AND o."createdAt" >= ${startDateUtc.toISOString()}::timestamp
+        AND o."createdAt" <= ${endDateUtc.toISOString()}::timestamp
+      GROUP BY oi."productId", p."name"
+      ORDER BY "soldQuantity" DESC, "revenue" DESC
+      LIMIT ${limit}
+    `);
 
-    const productMap = new Map(products.map((p) => [p.id, p.name]));
-
-    return topItems.map((item) => ({
-      productId: item.productId,
-      name: productMap.get(item.productId) || 'Unknown Product',
-      soldQuantity: item._sum.quantity || 0,
-      revenue: item._sum.lineTotal || 0,
+    return rawRows.map((row) => ({
+      productId: row.productId,
+      name: row.name || 'Unknown Product',
+      soldQuantity: Number(row.soldQuantity ?? 0),
+      revenue: Number(row.revenue ?? 0),
     }));
   }
 }
