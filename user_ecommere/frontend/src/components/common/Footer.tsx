@@ -1,66 +1,108 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, Sparkles } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck, Truck, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
 
 const shoppingLinks = [
-  { to: '/catalog', label: 'Toàn bộ sản phẩm' },
-  { to: '/catalog?sort=best_selling', label: 'Bán chạy nhất' },
-  { to: '/search?q=x%E1%BB%8Bt%20ph%C3%B2ng', label: 'Xịt phòng được yêu thích' },
+  { to: '/catalog', label: 'Tất cả sản phẩm' },
+  { to: '/catalog?sort=best_selling', label: 'Sản phẩm bán chạy' },
+  { to: '/catalog?category=diet-con-trung', label: 'Xịt diệt côn trùng Thái Lan' },
+  { to: '/catalog?category=tay-rua-nha-bep', label: 'Tẩy rửa & Vệ sinh nhà cửa' },
+  { to: '/catalog?category=thom-phong', label: 'Xịt thơm & Khử mùi phòng' },
 ];
 
 const policyLinks = [
-  { to: '/policy/shipping', label: 'Chính sách vận chuyển' },
-  { to: '/policy/return', label: 'Đổi trả và hoàn tiền' },
-  { to: '/policy/privacy', label: 'Bảo mật thông tin' },
+  { to: '/policy/shipping', label: 'Chính sách vận chuyển siêu tốc' },
+  { to: '/policy/return', label: 'Chính sách đổi trả 7 ngày' },
+  { to: '/policy/privacy', label: 'Chính sách bảo mật thông tin' },
+  { to: '/policy/terms', label: 'Điều khoản sử dụng dịch vụ' },
 ];
 
 export function Footer() {
   return (
-    <footer className="mt-12 border-t border-white/60 bg-foreground text-white">
-      <div className="container py-12">
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr_1fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-sm font-bold text-foreground">
+    <footer className="mt-20 border-t border-slate-200/80 bg-slate-950 text-slate-300">
+      {/* Top Value Propositions */}
+      <div className="border-b border-slate-800/80 bg-slate-900/60 py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-white text-sm">100% Chính Hãng</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Cam kết hàng Thái Lan nội địa</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400">
+                <Truck className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-white text-sm">Giao Hàng Toàn Quốc</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Đóng gói chống sốc an toàn</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400">
+                <RefreshCw className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-white text-sm">Đổi Trả 7 Ngày</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Miễn phí nếu vỡ hoặc lỗi tem</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-white text-sm">Kiểm Tra Hàng</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Đồng kiểm trước khi thanh toán</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer Links */}
+      <div className="container mx-auto px-4 py-14">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+          {/* Brand Info */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-500 text-white font-extrabold shadow-lg shadow-teal-500/20">
                 TS
               </div>
               <div>
-                <p className="text-lg font-semibold">Thai Spray</p>
-                <p className="text-sm text-white/65">Hương thơm tinh tế cho nhà ở và nhịp sống hiện đại.</p>
+                <span className="text-xl font-bold tracking-tight text-white block">
+                  Thai <span className="text-teal-400">Spray</span>
+                </span>
+                <span className="text-[11px] text-teal-300/80 uppercase tracking-widest font-medium">Hàng Thái Chính Hãng</span>
               </div>
             </div>
-            <p className="max-w-xl text-sm leading-7 text-white/72">
-              Chúng tôi chọn những dòng xịt thơm, body mist và hương phòng dễ dùng mỗi ngày, mùi sạch,
-              gọn và không tạo cảm giác nồng gắt.
+            <p className="text-sm leading-relaxed text-slate-400">
+              Chuyên phân phối sỉ &amp; lẻ các dòng chai xịt gia dụng, xịt côn trùng, tẩy rửa sinh học và tinh dầu thơm phòng nhập khẩu trực tiếp từ Thái Lan.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/80">
-                <Sparkles className="h-4 w-4" />
-                Tư vấn mùi theo không gian sử dụng
+            <div className="pt-2 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-950/60 border border-teal-800/40 px-3 py-1 text-xs text-teal-300">
+                <Sparkles className="h-3.5 w-3.5 text-teal-400" />
+                Hàng Chuẩn Nội Địa
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/80">
-                <Sparkles className="h-4 w-4" />
-                Đề xuất theo ngân sách và dung tích
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-950/40 border border-amber-800/40 px-3 py-1 text-xs text-amber-300">
+                Giá Tốt Nhất Thị Trường
               </span>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-            <h4 className="mb-4 text-base font-semibold">Mua sắm</h4>
-            <ul className="space-y-3 text-sm text-white/72">
+          {/* Catalog Categories */}
+          <div>
+            <h4 className="mb-4 text-base font-semibold text-white">Danh Mục Sản Phẩm</h4>
+            <ul className="space-y-2.5 text-sm text-slate-400">
               {shoppingLinks.map((item) => (
                 <li key={item.to}>
-                  <Link to={item.to} className="transition hover:text-white">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
-            <h4 className="mb-4 mt-8 text-base font-semibold">Chính sách</h4>
-            <ul className="space-y-3 text-sm text-white/72">
-              {policyLinks.map((item) => (
-                <li key={item.to}>
-                  <Link to={item.to} className="transition hover:text-white">
+                  <Link to={item.to} className="transition-colors hover:text-teal-300">
                     {item.label}
                   </Link>
                 </li>
@@ -68,32 +110,58 @@ export function Footer() {
             </ul>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-            <h4 className="mb-4 text-base font-semibold">Liên hệ</h4>
-            <ul className="space-y-4 text-sm text-white/72">
+          {/* Policies */}
+          <div>
+            <h4 className="mb-4 text-base font-semibold text-white">Hỗ Trợ Khách Hàng</h4>
+            <ul className="space-y-2.5 text-sm text-slate-400">
+              {policyLinks.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="transition-colors hover:text-teal-300">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact Details */}
+          <div>
+            <h4 className="mb-4 text-base font-semibold text-white">Thông Tin Liên Hệ</h4>
+            <ul className="space-y-3.5 text-sm text-slate-400">
               <li className="flex items-start gap-3">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-white" />
-                <span>0123 456 789</span>
+                <Phone className="mt-1 h-4 w-4 shrink-0 text-teal-400" />
+                <div>
+                  <span className="block text-white font-medium">0987.654.321</span>
+                  <span className="text-xs text-slate-500">Hỗ trợ tư vấn Zalo / Hotline (8h - 22h)</span>
+                </div>
               </li>
               <li className="flex items-start gap-3">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-white" />
-                <span>noreply@thaispray.shop</span>
+                <Mail className="mt-1 h-4 w-4 shrink-0 text-teal-400" />
+                <span>cskh@thaispray.shop</span>
               </li>
               <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-white" />
-                <span>TP. Hồ Chí Minh, giao nhanh nội thành và hỗ trợ tư vấn online toàn quốc.</span>
+                <MapPin className="mt-1 h-4 w-4 shrink-0 text-teal-400" />
+                <span>Kho tổng: 128 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh (Giao toàn quốc)</span>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      <div className="border-t border-white/10">
-        <div className="container flex flex-col gap-2 py-4 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
-          <p>&copy; 2026 Thai Spray. Không gian sống có mùi hương riêng.</p>
-          <div className="flex items-center gap-4">
-            <Link to="/policy/privacy" className="transition hover:text-white">Bảo mật</Link>
-            <Link to="/policy/terms" className="transition hover:text-white">Điều khoản</Link>
+      {/* Bottom Copyright */}
+      <div className="border-t border-slate-800/80 bg-black/40">
+        <div className="container mx-auto px-4 py-5 flex flex-col gap-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>&copy; {new Date().getFullYear()} Thai Spray Việt Nam - Chuyên Hàng Gia Dụng &amp; Chai Xịt Thái Lan Cao Cấp.</p>
+          <div className="flex items-center gap-5">
+            <Link to="/policy/privacy" className="hover:text-slate-400 transition-colors">Bảo mật</Link>
+            <Link to="/policy/terms" className="hover:text-slate-400 transition-colors">Điều khoản</Link>
+            <span className="text-emerald-500 font-medium flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              Hệ thống hoạt động ổn định
+            </span>
           </div>
         </div>
       </div>

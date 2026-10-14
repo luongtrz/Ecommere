@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import {
   Bot,
   FolderTree,
@@ -9,9 +9,9 @@ import {
   Package,
   ShoppingCart,
   Ticket,
-  User as UserIcon,
   Warehouse,
   X,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -28,11 +28,11 @@ import {
 const navigation = [
   { name: 'Dashboard', description: 'Tổng quan hiệu suất', href: '/admin', icon: LayoutDashboard },
   { name: 'Trợ lý AI', description: 'Điều hành cửa hàng bằng hội thoại', href: '/admin/chatbot', icon: Bot },
-  { name: 'Sản phẩm', description: 'Danh mục và nội dung bán hàng', href: '/admin/products', icon: Package },
-  { name: 'Đơn hàng', description: 'Theo dõi và xử lý đơn', href: '/admin/orders', icon: ShoppingCart },
-  { name: 'Mã giảm giá', description: 'Chiến dịch và ưu đãi', href: '/admin/coupons', icon: Ticket },
-  { name: 'Kho hàng', description: 'Tồn kho và cảnh báo', href: '/admin/inventory', icon: Warehouse },
-  { name: 'Danh mục', description: 'Cấu trúc sản phẩm', href: '/admin/categories', icon: FolderTree },
+  { name: 'Sản phẩm', description: 'Danh mục & kho hàng bán', href: '/admin/products', icon: Package },
+  { name: 'Đơn hàng', description: 'Theo dõi & xử lý đơn COD', href: '/admin/orders', icon: ShoppingCart },
+  { name: 'Mã giảm giá', description: 'Chiến dịch & voucher', href: '/admin/coupons', icon: Ticket },
+  { name: 'Kho hàng', description: 'Tồn kho & cảnh báo', href: '/admin/inventory', icon: Warehouse },
+  { name: 'Danh mục', description: 'Cấu trúc sản phẩm Thái', href: '/admin/categories', icon: FolderTree },
 ];
 
 export function AdminLayout() {
@@ -46,139 +46,161 @@ export function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent lg:flex">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 lg:flex admin-shell">
+      {/* Mobile backdrop */}
       {isSidebarOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       ) : null}
 
+      {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[88vw] max-w-sm flex-col border-r border-white/10 sidebar-glass text-white shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:w-[320px] lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-[88vw] max-w-sm flex-col border-r border-slate-200/80 bg-white text-slate-900 shadow-xl lg:shadow-none transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:w-[290px] lg:translate-x-0',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="border-b border-white/10 p-6">
-          <div className="flex items-start justify-between gap-3">
-            <Link to="/admin" className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-sm font-bold text-slate-950">
-                TS
-              </div>
-              <div>
-                <p className="text-lg font-semibold">Thai Spray Admin</p>
-                <p className="text-sm text-white/60">Điều phối nội dung, đơn hàng và doanh thu.</p>
-              </div>
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full text-white hover:bg-white/10 hover:text-white lg:hidden"
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+        {/* Sidebar Brand Header */}
+        <div className="flex h-20 items-center justify-between border-b border-slate-100 px-6">
+          <Link to="/admin" className="flex items-center gap-3 group">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-600 text-white font-black text-base shadow-md shadow-teal-600/20 group-hover:scale-105 transition-transform">
+              TS
+            </div>
+            <div>
+              <span className="text-base font-black tracking-tight text-slate-900 block leading-tight">
+                Thai Spray <span className="text-teal-700">Admin</span>
+              </span>
+              <span className="text-[10px] text-teal-800 font-bold uppercase tracking-widest">
+                Control Platform
+              </span>
+            </div>
+          </Link>
 
-          <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.01)_100%)] p-4 text-sm text-white/70 shadow-inner">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">Phiên quản trị</p>
-            <p className="mt-3 font-semibold text-white tracking-wide">{user?.name || user?.email}</p>
-            <p className="mt-1 text-xs text-white/50 leading-relaxed">Theo dõi chỉ số quan trọng và xử lý công việc trong một luồng gọn.</p>
-          </div>
+          <button
+            type="button"
+            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-800 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        <nav className="flex-1 space-y-1.5 overflow-y-auto p-4 scrollbar-hide">
+
+        {/* Navigation links */}
+        <nav className="flex-1 space-y-1 px-4 py-3 overflow-y-auto">
           {navigation.map((item) => {
             const active = isActive(item.href);
+            const Icon = item.icon;
+
             return (
               <Link
                 key={item.name}
                 to={item.href}
                 onClick={() => setIsSidebarOpen(false)}
                 className={cn(
-                  'group flex items-start gap-3 rounded-[1.35rem] px-4 py-3 transition duration-300 border-l-4',
+                  'group flex items-center gap-3.5 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold transition-all duration-200',
                   active
-                    ? 'bg-[linear-gradient(90deg,rgba(12,84,163,0.18)_0%,rgba(12,84,163,0.04)_100%)] text-white border-primary shadow-[0_0_20px_rgba(12,84,163,0.08)]'
-                    : 'text-white/70 hover:bg-white/5 hover:text-white border-transparent',
+                    ? 'bg-gradient-to-r from-teal-50 to-emerald-50/70 text-teal-800 border border-teal-200/80 shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
                 )}
               >
                 <div
                   className={cn(
-                    'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition duration-300',
-                    active ? 'bg-primary text-white shadow-md shadow-primary/20 scale-105' : 'bg-white/5 group-hover:bg-white/10 group-hover:text-white'
+                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all',
+                    active ? 'bg-teal-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200/80 group-hover:text-slate-900',
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <Icon className="h-4 w-4" />
                 </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm leading-snug">{item.name}</p>
-                  <p className={cn('mt-0.5 text-xs transition duration-300', active ? 'text-white/60' : 'text-white/40 group-hover:text-white/50')}>{item.description}</p>
+                <div className="flex-1 min-w-0">
+                  <span className="block truncate">{item.name}</span>
+                  <span className={cn("block text-[10px] font-normal truncate", active ? "text-teal-700/80" : "text-slate-400")}>
+                    {item.description}
+                  </span>
                 </div>
               </Link>
             );
           })}
         </nav>
+
+        {/* Quick Link to Customer Store */}
+        <div className="p-4 border-t border-slate-100">
+          <a
+            href="http://192.168.1.94:5173"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-between rounded-xl bg-slate-50 hover:bg-teal-50/80 border border-slate-200/80 hover:border-teal-200 p-3 text-xs text-slate-700 hover:text-teal-800 transition-all"
+          >
+            <span className="flex items-center gap-2 font-bold">
+              <ExternalLink className="h-3.5 w-3.5 text-teal-600" />
+              Xem Cửa Hàng (Port 5173)
+            </span>
+            <span className="text-[10px] text-teal-700 font-mono font-bold">Live</span>
+          </a>
+        </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col px-3 pb-3 pt-3 md:px-4 lg:pl-4 lg:pr-6">
-        <header className="admin-surface sticky top-3 z-30 mb-4 flex min-h-[76px] items-center justify-between px-4 py-3 md:px-6">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
+        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200/80 bg-white/90 px-6 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-11 w-11 rounded-full lg:hidden"
+            <button
+              type="button"
+              className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
               onClick={() => setIsSidebarOpen(true)}
             >
-              <Menu className="h-5 w-5" />
-            </Button>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Không gian vận hành</p>
-              <h1 className="text-lg font-semibold text-foreground md:text-2xl">Bảng điều khiển Thai Spray</h1>
+              <Menu className="h-6 w-6" />
+            </button>
+            <div className="hidden sm:block">
+              <p className="text-xs text-slate-400 font-medium">Trung tâm điều hành</p>
+              <p className="text-sm font-extrabold text-slate-900">Tổng Kho Hàng Thái Lan Chính Ngạch</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="hidden rounded-full border border-border bg-secondary/70 px-4 py-2 text-sm text-muted-foreground md:block">
-              Dữ liệu đồng bộ theo phiên gần nhất
-            </div>
+          <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-11 rounded-full px-2 hover:bg-secondary">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <UserIcon className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-3.5 py-2 hover:bg-slate-50 text-left shadow-sm"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-800 font-bold text-xs">
+                    AD
                   </div>
-                  <div className="hidden text-left md:block">
-                    <p className="max-w-[180px] truncate text-sm font-semibold text-foreground">{user?.name || user?.email}</p>
-                    <p className="max-w-[180px] truncate text-xs text-muted-foreground">Quyền quản trị viên</p>
+                  <div className="hidden text-left sm:block">
+                    <p className="text-xs font-bold text-slate-900">{user?.name || 'Admin Shop'}</p>
+                    <p className="text-[10px] text-teal-700 font-semibold">Quản trị viên tối cao</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 rounded-2xl border-white/70 bg-white/95 p-2 shadow-2xl">
-                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Tài khoản
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl border-slate-200 bg-white text-slate-900 shadow-xl">
+                <DropdownMenuLabel className="text-xs font-bold text-slate-400">
+                  Tài khoản đăng nhập
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="cursor-pointer rounded-xl px-3 py-2.5 text-destructive focus:text-destructive">
+                <div className="px-2 py-1.5 text-xs">
+                  <p className="font-bold text-slate-900">{user?.name || 'Admin Shop'}</p>
+                  <p className="text-slate-500 font-mono text-[11px]">{user?.phone || '0901234567'}</p>
+                </div>
+                <DropdownMenuSeparator className="bg-slate-100" />
+                <DropdownMenuItem
+                  onClick={logout}
+                  className="cursor-pointer text-xs font-bold text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-xl m-1"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Đăng xuất
+                  Đăng xuất hệ thống
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
 
-        <main className="flex-1">
-          <Suspense
-            fallback={
-              <div className="admin-surface flex h-64 items-center justify-center">
-                <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              </div>
-            }
-          >
-            <Outlet />
-          </Suspense>
+        {/* Viewport Outlet */}
+        <main className="flex-1 p-5 sm:p-8 lg:p-10 max-w-7xl w-full mx-auto space-y-8">
+          <Outlet />
         </main>
       </div>
     </div>
