@@ -246,6 +246,7 @@ model Order {
   @@index([code])
   @@index([status])
   @@index([createdAt])
+  @@index([couponCode])
   @@map("orders")
 }
 
