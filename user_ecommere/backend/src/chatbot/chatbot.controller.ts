@@ -28,6 +28,7 @@ import {
   AgentRunner,
   AgentBusyError,
   AgentNotPendingError,
+  type AgentTranscriptMessage,
 } from './agent/agent.runner';
 import { ThreadService, type AgentActor } from './agent/thread.service';
 import type { AgentConfig } from './agent/agent.config';
@@ -200,6 +201,21 @@ export class ChatbotController {
       createdAt: thread.createdAt,
       updatedAt: thread.updatedAt,
     };
+  }
+
+  @Public()
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('threads/:threadId/messages')
+  @ApiOperation({ summary: 'Get saved messages of a chat thread' })
+  @ApiResponse({ status: 200, description: 'The saved messages' })
+  @ApiResponse({ status: 404, description: 'Thread not found or not owned' })
+  async getMessages(
+    @Req() req: Request,
+    @Param('threadId') threadId: string,
+  ): Promise<AgentTranscriptMessage[]> {
+    const actor = this.getActor(req);
+    await this.threads.assertOwned(threadId, actor);
+    return await this.runner.readTranscript(threadId);
   }
 
   @Public()
