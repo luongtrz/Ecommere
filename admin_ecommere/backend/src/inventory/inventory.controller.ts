@@ -10,6 +10,7 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Inventory')
+@Roles(Role.ADMIN)
 @Controller('inventory')
 export class InventoryController {
   constructor(private inventoryService: InventoryService) {}

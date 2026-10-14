@@ -9,6 +9,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Coupons')
+@Roles(Role.ADMIN)
 @Controller('coupons')
 export class CouponsController {
   constructor(private couponsService: CouponsService) {}

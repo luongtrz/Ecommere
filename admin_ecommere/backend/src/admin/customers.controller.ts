@@ -7,6 +7,7 @@ import { CustomerQueryDto } from './dtos/customer-query.dto';
 
 @ApiTags('admin-customers')
 @ApiBearerAuth('JWT-auth')
+@Roles(Role.ADMIN)
 @Controller('admin/customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
