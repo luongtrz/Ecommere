@@ -17,6 +17,7 @@ import {
   setCsrfTokenCookie,
   clearAuthCookies,
 } from './utils/token.util';
+import { ADMIN_JWT_AUDIENCE, ADMIN_JWT_ISSUER } from './auth.constants';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +32,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async register(registerDto: RegisterDto, response: Response) {
     const { phone, password, name, email } = registerDto;
@@ -103,12 +104,8 @@ export class AuthService {
 
     const isPasswordValid = await HashUtil.compare(password, user.passwordHash);
 
-    if (!isPasswordValid) {
+    if (!isPasswordValid || user.role !== 'ADMIN') {
       throw new UnauthorizedException('Invalid credentials');
-    }
-
-    if (user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Tài khoản không có quyền quản trị');
     }
 
     this.logger.log(`User logged in: ${phone}`);
@@ -140,7 +137,9 @@ export class AuthService {
     let payload: any;
     try {
       payload = this.jwtService.verify(oldRefreshToken, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        secret: this.configService.get('ADMIN_JWT_REFRESH_SECRET'),
+        issuer: ADMIN_JWT_ISSUER,
+        audience: ADMIN_JWT_AUDIENCE,
       });
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -179,6 +178,18 @@ export class AuthService {
     }
 
     if (tokenRecord.userId !== payload.sub || tokenRecord.tokenFamily !== payload.family) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (tokenRecord.user.role !== 'ADMIN') {
+      await this.prisma.refreshToken.updateMany({
+        where: {
+          userId: payload.sub,
+          tokenFamily: payload.family,
+        },
+        data: { revokedAt: new Date() },
+      });
+
       throw new UnauthorizedException('Invalid refresh token');
     }
 
@@ -238,10 +249,6 @@ export class AuthService {
     // 5. Check expiry
     if (tokenRecord.expiresAt < new Date()) {
       throw new UnauthorizedException('Refresh token expired');
-    }
-
-    if (tokenRecord.user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Invalid refresh token');
     }
 
     // 6. Generate and claim the replacement atomically. The old token is
@@ -366,13 +373,17 @@ export class AuthService {
     const payload = { sub: userId, phone, role };
 
     const accessToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_ACCESS_SECRET'),
+      secret: this.configService.get('ADMIN_JWT_ACCESS_SECRET'),
       expiresIn: this.configService.get('TOKEN_EXPIRES_IN'),
+      issuer: ADMIN_JWT_ISSUER,
+      audience: ADMIN_JWT_AUDIENCE,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
+      secret: this.configService.get('ADMIN_JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get('REFRESH_EXPIRES_IN'),
+      issuer: ADMIN_JWT_ISSUER,
+      audience: ADMIN_JWT_AUDIENCE,
     });
 
     return new AuthTokensEntity(
@@ -400,8 +411,10 @@ export class AuthService {
     // Generate access token (short-lived, in memory)
     const accessPayload = { sub: userId, phone, role };
     const accessToken = this.jwtService.sign(accessPayload, {
-      secret: this.configService.get('JWT_ACCESS_SECRET'),
+      secret: this.configService.get('ADMIN_JWT_ACCESS_SECRET'),
       expiresIn: this.configService.get('TOKEN_EXPIRES_IN'),
+      issuer: ADMIN_JWT_ISSUER,
+      audience: ADMIN_JWT_AUDIENCE,
     });
 
     // Generate refresh token (long-lived, in HTTP-only cookie)
@@ -412,8 +425,10 @@ export class AuthService {
       jti: generateTokenFamily(), // Unique identifier for this specific token
     };
     const refreshToken = this.jwtService.sign(refreshPayload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
+      secret: this.configService.get('ADMIN_JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get('REFRESH_EXPIRES_IN'),
+      issuer: ADMIN_JWT_ISSUER,
+      audience: ADMIN_JWT_AUDIENCE,
     });
 
     const decodedRefreshToken = this.jwtService.decode(refreshToken) as { exp?: number } | null;

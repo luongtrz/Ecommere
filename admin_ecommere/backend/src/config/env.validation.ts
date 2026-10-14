@@ -18,10 +18,10 @@ class EnvironmentVariables {
   DATABASE_URL: string;
 
   @IsString()
-  JWT_ACCESS_SECRET: string;
+  ADMIN_JWT_ACCESS_SECRET: string;
 
   @IsString()
-  JWT_REFRESH_SECRET: string;
+  ADMIN_JWT_REFRESH_SECRET: string;
 
   @IsString()
   TOKEN_EXPIRES_IN: string = '15m';

@@ -7,22 +7,34 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CsrfGuard } from '@/common/guards/csrf.guard';
+import { ADMIN_JWT_AUDIENCE, ADMIN_JWT_ISSUER } from './auth.constants';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_ACCESS_SECRET'),
-        signOptions: {
-          expiresIn: configService.get('TOKEN_EXPIRES_IN'),
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const accessSecret = configService.get<string>('ADMIN_JWT_ACCESS_SECRET');
+        const refreshSecret = configService.get<string>('ADMIN_JWT_REFRESH_SECRET');
+        if (!accessSecret || accessSecret.trim() === '') {
+          throw new Error('ADMIN_JWT_ACCESS_SECRET is required');
+        }
+        if (!refreshSecret || refreshSecret.trim() === '') {
+          throw new Error('ADMIN_JWT_REFRESH_SECRET is required');
+        }
+        return {
+          secret: accessSecret,
+          signOptions: {
+            expiresIn: configService.get('TOKEN_EXPIRES_IN'),
+            issuer: ADMIN_JWT_ISSUER,
+            audience: ADMIN_JWT_AUDIENCE,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
@@ -30,7 +42,6 @@ import { CsrfGuard } from '@/common/guards/csrf.guard';
   providers: [
     AuthService,
     JwtAccessStrategy,
-    JwtRefreshStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

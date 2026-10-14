@@ -84,14 +84,19 @@ async function bootstrap() {
     new TransformInterceptor(),
   );
 
-  // Swagger
-  setupSwagger(app);
+  // Swagger is served outside production only (the Dockerfile sets NODE_ENV=production)
+  const swaggerEnabled = configService.get('NODE_ENV') !== 'production';
+  if (swaggerEnabled) {
+    setupSwagger(app);
+  }
 
   const port = configService.get('PORT') || 4001;
   await app.listen(port);
 
   console.log(`🚀 Server running on http://localhost:${port}`);
-  console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
+  if (swaggerEnabled) {
+    console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
+  }
 }
 
 bootstrap();
