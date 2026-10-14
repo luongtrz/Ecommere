@@ -101,14 +101,23 @@ export class ReferralsService {
      * Danh sách coupon đã nhận từ referral
      */
     async getMyCouponsFromReferral(userId: string) {
-        const referrals = await this.prisma.referral.findMany({
-            where: { referrerId: userId },
-            select: { referrerCouponCode: true },
-        });
+        const [asReferrer, asReferee] = await Promise.all([
+            this.prisma.referral.findMany({
+                where: { referrerId: userId },
+                select: { referrerCouponCode: true },
+            }),
+            this.prisma.referral.findMany({
+                where: { refereeId: userId },
+                select: { refereeCouponCode: true },
+            }),
+        ]);
 
-        const couponCodes = referrals
-            .map((r) => r.referrerCouponCode)
-            .filter(Boolean) as string[];
+        const couponCodes = Array.from(
+            new Set([
+                ...asReferrer.map((r) => r.referrerCouponCode),
+                ...asReferee.map((r) => r.refereeCouponCode),
+            ].filter(Boolean) as string[]),
+        );
 
         if (couponCodes.length === 0) {
             return { data: [] };
