@@ -46,6 +46,16 @@ export class AuthService {
       throw new BadRequestException('Số điện thoại đã được đăng ký');
     }
 
+    if (email) {
+      const existingEmailUser = await this.prisma.user.findFirst({
+        where: { email },
+      });
+
+      if (existingEmailUser) {
+        throw new BadRequestException('Email đã được đăng ký');
+      }
+    }
+
     const passwordHash = await HashUtil.hash(password);
 
     let user;
@@ -69,6 +79,12 @@ export class AuthService {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        const target = Array.isArray(error.meta?.target)
+          ? error.meta.target.join(',')
+          : String(error.meta?.target ?? '');
+        if (target.includes('email')) {
+          throw new BadRequestException('Email đã được đăng ký');
+        }
         throw new BadRequestException('Số điện thoại đã được đăng ký');
       }
 
