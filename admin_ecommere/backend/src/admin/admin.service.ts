@@ -20,9 +20,16 @@ export class AdminService {
    */
   async getDashboardStats(): Promise<DashboardStatsDto> {
     const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    // Time zone Asia/Ho_Chi_Minh is UTC+7 with no DST.
+    // Shift by +7 hours to obtain current date/month in VN time.
+    const vnNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const vnYear = vnNow.getUTCFullYear();
+    const vnMonth = vnNow.getUTCMonth();
+
+    // Shift by -7 hours to obtain UTC range for DB query.
+    const firstDayOfMonth = new Date(Date.UTC(vnYear, vnMonth, 1, 0, 0, 0, 0) - 7 * 60 * 60 * 1000);
+    const firstDayOfLastMonth = new Date(Date.UTC(vnYear, vnMonth - 1, 1, 0, 0, 0, 0) - 7 * 60 * 60 * 1000);
+    const lastDayOfLastMonth = firstDayOfMonth;
 
     // Chạy tất cả queries song song
     const [
@@ -39,7 +46,7 @@ export class AdminService {
       this.getProductStats(firstDayOfMonth),
       this.getCustomerStats(firstDayOfMonth, firstDayOfLastMonth, lastDayOfLastMonth),
       this.getRecentOrders(),
-      this.getTopProducts(),
+      this.getTopProducts(firstDayOfMonth),
       this.getRevenueHistory(),
     ]);
 
@@ -60,7 +67,7 @@ export class AdminService {
   private async getRevenueStats(
     firstDayOfMonth: Date,
     firstDayOfLastMonth: Date,
-    lastDayOfLastMonth: Date,
+    lastDayOfLastMonth: Date = firstDayOfMonth,
   ): Promise<RevenueStatsDto> {
     // Doanh thu tổng (chỉ tính đơn đã thanh toán, không bao gồm CANCELED/REFUNDED)
     const totalRevenueData = await this.prisma.order.aggregate({
@@ -97,7 +104,7 @@ export class AdminService {
         },
         createdAt: {
           gte: firstDayOfLastMonth,
-          lte: lastDayOfLastMonth,
+          lt: lastDayOfLastMonth,
         },
       },
       _sum: {
@@ -127,7 +134,7 @@ export class AdminService {
   private async getOrderStats(
     firstDayOfMonth: Date,
     firstDayOfLastMonth: Date,
-    lastDayOfLastMonth: Date,
+    lastDayOfLastMonth: Date = firstDayOfMonth,
   ): Promise<OrderStatsDto> {
     // Tổng đơn hàng
     const totalOrders = await this.prisma.order.count();
@@ -146,7 +153,7 @@ export class AdminService {
       where: {
         createdAt: {
           gte: firstDayOfLastMonth,
-          lte: lastDayOfLastMonth,
+          lt: lastDayOfLastMonth,
         },
       },
     });
@@ -235,7 +242,7 @@ export class AdminService {
   private async getCustomerStats(
     firstDayOfMonth: Date,
     firstDayOfLastMonth: Date,
-    lastDayOfLastMonth: Date,
+    lastDayOfLastMonth: Date = firstDayOfMonth,
   ): Promise<CustomerStatsDto> {
     // Tổng khách hàng (không tính admin)
     const totalCustomers = await this.prisma.user.count({
@@ -260,7 +267,7 @@ export class AdminService {
         role: Role.CUSTOMER,
         createdAt: {
           gte: firstDayOfLastMonth,
-          lte: lastDayOfLastMonth,
+          lt: lastDayOfLastMonth,
         },
       },
     });
@@ -308,13 +315,16 @@ export class AdminService {
   /**
    * 5 sản phẩm bán chạy nhất
    */
-  private async getTopProducts(): Promise<TopProductDto[]> {
+  private async getTopProducts(firstDayOfMonth: Date): Promise<TopProductDto[]> {
     // Tính tổng quantity đã bán theo product (từ OrderItem với status DELIVERED)
     const topProductsData = await this.prisma.orderItem.groupBy({
       by: ['productId'],
       where: {
         order: {
           status: OrderStatus.DELIVERED,
+          createdAt: {
+            gte: firstDayOfMonth,
+          },
         },
       },
       _sum: {
@@ -389,22 +399,20 @@ export class AdminService {
   private async getRevenueHistory() {
     const months = 6;
     const history = [];
+    const now = new Date();
 
     // Loop for last 6 months including current
     for (let i = months - 1; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const lastDay = new Date(firstDay.getFullYear(), firstDay.getMonth() + 1, 0, 23, 59, 59, 999);
 
-      const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-      const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
-
-      const monthLabel = `T${date.getMonth() + 1}`;
+      const monthLabel = `T${firstDay.getMonth() + 1}`;
 
       history.push({
         firstDay,
         lastDay,
         name: monthLabel,
-        fullDate: date, // Keep date for sorting if needed, but not returned
+        fullDate: firstDay, // Keep date for sorting if needed, but not returned
       });
     }
 
