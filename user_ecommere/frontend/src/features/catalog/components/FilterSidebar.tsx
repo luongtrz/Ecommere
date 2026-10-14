@@ -14,7 +14,7 @@ import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 
 interface FilterSidebarProps {
     currentFilters: {
@@ -54,22 +54,22 @@ function CategoryTreeItem({
                     }
                     onSelect(node.slug);
                 }}
-                className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-md text-sm transition-colors hover:bg-secondary/40 ${isSelected ? 'bg-secondary text-primary font-semibold' : 'text-foreground/80'
+                className={`w-full flex items-center gap-2 py-1.5 px-2.5 rounded-lg text-xs transition-colors hover:bg-slate-100 ${isSelected ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-slate-700'
                     }`}
                 style={{ paddingLeft: `${depth * 16 + 8}px` }}
             >
                 {hasChildren ? (
                     expanded ? (
-                        <ChevronDown className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                        <ChevronDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                     ) : (
-                        <ChevronRight className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                        <ChevronRight className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                     )
                 ) : (
                     <span className="w-3.5 shrink-0" />
                 )}
                 <span className="truncate flex-1 text-left">{node.name}</span>
                 {node.productCount > 0 && (
-                    <span className="text-xs text-gray-400 shrink-0">({node.productCount})</span>
+                    <span className="text-[11px] text-slate-400 tabular-nums shrink-0">({node.productCount})</span>
                 )}
             </button>
             {hasChildren && expanded && (
@@ -197,12 +197,12 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
     return (
         <div className="space-y-1">
             {/* Header */}
-            <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center justify-between pb-3">
                 <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="h-4 w-4 text-gray-600" />
-                    <span className="font-semibold text-gray-900 text-sm">Bộ lọc</span>
+                    <SlidersHorizontal className="h-4 w-4 text-slate-700" />
+                    <span className="font-sans font-bold text-slate-900 text-sm tracking-tight">Bộ lọc</span>
                     {activeFilterCount > 0 && (
-                        <Badge variant="default" className="h-5 px-1.5 text-[10px] bg-primary">
+                        <Badge variant="default" className="h-5 px-1.5 text-[10px] font-bold bg-teal-600 text-white rounded-full">
                             {activeFilterCount}
                         </Badge>
                     )}
@@ -212,7 +212,7 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                         variant="ghost"
                         size="sm"
                         onClick={handleClearAll}
-                        className="h-7 text-xs text-gray-500 hover:text-red-600 gap-1 px-2"
+                        className="h-7 text-xs text-slate-500 hover:text-rose-600 hover:bg-rose-50 gap-1 px-2 rounded-lg transition-colors"
                     >
                         <RotateCcw className="h-3 w-3" />
                         Xóa
@@ -220,17 +220,17 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                 )}
             </div>
 
-            <Separator />
+            <Separator className="bg-slate-200" />
 
             <Accordion type="multiple" defaultValue={defaultOpenValues} className="w-full">
                 {/* Category Filter */}
                 {!hideCategoryFilter && categoryTree && categoryTree.length > 0 && (
                     <AccordionItem value="category" className="border-b-0">
-                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-bold text-slate-900 uppercase tracking-wider">
                             Danh mục
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="space-y-0.5 max-h-60 overflow-y-auto pl-1">
+                            <div className="space-y-0.5 max-h-60 overflow-y-auto pl-0.5">
                                 {categoryTree.map((node) => (
                                     <CategoryTreeItem
                                         key={node.id}
@@ -246,12 +246,12 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
 
                 {/* Price Range Filter */}
                 <AccordionItem value="price" className="border-b-0">
-                    <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                    <AccordionTrigger className="py-3 hover:no-underline text-xs font-bold text-slate-900 uppercase tracking-wider">
                         Khoảng giá
                     </AccordionTrigger>
                     <AccordionContent>
                         {/* Preset ranges */}
-                        <div className="space-y-1.5 mb-3">
+                        <div className="space-y-1 mb-3">
                             {PRICE_RANGES.map((range, idx) => {
                                 const isActive = currentFilters.minPrice === range.min &&
                                     (range.max === undefined ? !currentFilters.maxPrice : currentFilters.maxPrice === range.max);
@@ -259,9 +259,9 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                     <button
                                         key={idx}
                                         onClick={() => handlePricePreset(range.min, range.max)}
-                                        className={`w-full text-left text-xs py-1.5 px-2 rounded-md transition-colors ${isActive
-                                            ? 'bg-secondary text-primary font-semibold'
-                                            : 'text-muted-foreground hover:bg-secondary/35'
+                                        className={`w-full text-left text-xs py-2 px-2.5 rounded-lg transition-all duration-200 ${isActive
+                                            ? 'bg-teal-50 text-teal-700 font-semibold border-l-2 border-teal-600'
+                                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                                             }`}
                                     >
                                         {range.label}
@@ -282,9 +282,9 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                         handlePriceApply();
                                     }
                                 }}
-                                className="h-8 text-xs"
+                                className="h-8 text-xs bg-white border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-teal-500 focus-visible:ring-1 focus-visible:ring-teal-500"
                             />
-                            <span className="text-gray-400 text-xs shrink-0">-</span>
+                            <span className="text-slate-400 text-xs shrink-0">-</span>
                             <Input
                                 type="number"
                                 placeholder="Đến"
@@ -295,19 +295,19 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                         handlePriceApply();
                                     }
                                 }}
-                                className="h-8 text-xs"
+                                className="h-8 text-xs bg-white border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-teal-500 focus-visible:ring-1 focus-visible:ring-teal-500"
                             />
                             <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 px-2 text-xs shrink-0"
+                                className="h-8 px-3 text-xs shrink-0 rounded-lg border-slate-200 bg-white hover:bg-teal-600 hover:text-white hover:border-teal-600 text-slate-700 transition-all duration-200"
                                 onClick={handlePriceApply}
                             >
                                 Áp dụng
                             </Button>
                         </div>
                         {isPriceRangeInvalid && (
-                            <p className="text-xs text-destructive mt-1.5">
+                            <p className="text-xs text-rose-600 mt-1.5 font-medium">
                                 Giá tối thiểu phải nhỏ hơn hoặc bằng giá tối đa
                             </p>
                         )}
@@ -317,24 +317,24 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                 {/* Scent Filter */}
                 {filterOptions && filterOptions.scents.length > 0 && (
                     <AccordionItem value="scent" className="border-b-0">
-                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-bold text-slate-900 uppercase tracking-wider">
                             Hương
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                            <div className="space-y-1 max-h-48 overflow-y-auto">
                                 {filterOptions.scents.map((scentName) => {
                                     const isChecked = selectedScents.includes(scentName);
                                     return (
                                         <label
                                             key={scentName}
-                                            className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 py-0.5 px-1 rounded"
+                                            className="flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 py-1.5 px-2 rounded-lg transition-colors"
                                         >
                                             <Checkbox
                                                 checked={isChecked}
                                                 onCheckedChange={() => toggleArrayFilter('scent', scentName, selectedScents)}
-                                                className="h-3.5 w-3.5"
+                                                className="h-4 w-4 rounded border-slate-300 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600 data-[state=checked]:text-white focus-visible:ring-1 focus-visible:ring-teal-500"
                                             />
-                                            <span className={`text-xs ${isChecked ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                                            <span className={`text-xs transition-colors ${isChecked ? 'text-slate-900 font-semibold' : 'text-slate-600'}`}>
                                                 {scentName}
                                             </span>
                                         </label>
@@ -348,7 +348,7 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                 {/* Volume Filter */}
                 {filterOptions && filterOptions.volumes.length > 0 && (
                     <AccordionItem value="volume" className="border-b-0">
-                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-bold text-slate-900 uppercase tracking-wider">
                             Dung tích
                         </AccordionTrigger>
                         <AccordionContent>
@@ -359,9 +359,9 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                         <button
                                             key={vol}
                                             onClick={() => toggleArrayFilter('volumeMl', vol.toString(), selectedVolumes.map(String))}
-                                            className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${isSelected
-                                                ? 'bg-primary text-primary-foreground border-primary'
-                                                : 'bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-primary'
+                                            className={`px-3 py-1.5 rounded-lg text-xs border transition-all duration-200 tabular-nums ${isSelected
+                                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm font-semibold'
+                                                : 'bg-white text-slate-600 border-slate-200 hover:border-teal-500 hover:text-teal-600'
                                                 }`}
                                         >
                                             {vol}ml
@@ -376,24 +376,24 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                 {/* Brand Filter */}
                 {filterOptions && filterOptions.brands.length > 0 && (
                     <AccordionItem value="brand" className="border-b-0">
-                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                        <AccordionTrigger className="py-3 hover:no-underline text-xs font-bold text-slate-900 uppercase tracking-wider">
                             Thương hiệu
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                            <div className="space-y-1 max-h-48 overflow-y-auto">
                                 {filterOptions.brands.map((brandName) => {
                                     const isChecked = selectedBrands.includes(brandName);
                                     return (
                                         <label
                                             key={brandName}
-                                            className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 py-0.5 px-1 rounded"
+                                            className="flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 py-1.5 px-2 rounded-lg transition-colors"
                                         >
                                             <Checkbox
                                                 checked={isChecked}
                                                 onCheckedChange={() => toggleArrayFilter('brand', brandName, selectedBrands)}
-                                                className="h-3.5 w-3.5"
+                                                className="h-4 w-4 rounded border-slate-300 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600 data-[state=checked]:text-white focus-visible:ring-1 focus-visible:ring-teal-500"
                                             />
-                                            <span className={`text-xs ${isChecked ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                                            <span className={`text-xs transition-colors ${isChecked ? 'text-slate-900 font-semibold' : 'text-slate-600'}`}>
                                                 {brandName}
                                             </span>
                                         </label>
@@ -408,50 +408,50 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
             {/* Active Filters Tags */}
             {activeFilterCount > 0 && (
                 <>
-                    <Separator className="mt-2" />
+                    <Separator className="mt-3 bg-slate-200" />
                     <div className="py-3">
-                        <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-2">Đang lọc</h3>
+                        <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Đang lọc</h3>
                         <div className="flex flex-wrap gap-1.5">
                             {currentFilters.categorySlug && (
-                                <Badge variant="secondary" className="text-[10px] h-5 gap-1 pr-1">
+                                <Badge variant="secondary" className="text-[10px] h-6 px-2.5 gap-1.5 rounded-md border border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all">
                                     Danh mục: {currentFilters.categorySlug}
-                                    <button onClick={() => onFilterChange({ categorySlug: undefined })}>
+                                    <button onClick={() => onFilterChange({ categorySlug: undefined })} aria-label="Xóa bộ lọc danh mục" className="hover:text-rose-600 transition-colors ml-0.5">
                                         <X className="h-2.5 w-2.5" />
                                     </button>
                                 </Badge>
                             )}
                             {(currentFilters.minPrice || currentFilters.maxPrice) && (
-                                <Badge variant="secondary" className="text-[10px] h-5 gap-1 pr-1">
+                                <Badge variant="secondary" className="text-[10px] h-6 px-2.5 gap-1.5 rounded-md border border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all">
                                     Giá: {currentFilters.minPrice ? formatCurrency(currentFilters.minPrice) : '0'} - {currentFilters.maxPrice ? formatCurrency(currentFilters.maxPrice) : '...'}
                                     <button onClick={() => {
                                         setMinPriceInput('');
                                         setMaxPriceInput('');
                                         onFilterChange({ minPrice: undefined, maxPrice: undefined });
-                                    }}>
+                                    }} aria-label="Xóa bộ lọc giá" className="hover:text-rose-600 transition-colors ml-0.5">
                                         <X className="h-2.5 w-2.5" />
                                     </button>
                                 </Badge>
                             )}
                             {selectedScents.map((s) => (
-                                <Badge key={s} variant="secondary" className="text-[10px] h-5 gap-1 pr-1">
+                                <Badge key={s} variant="secondary" className="text-[10px] h-6 px-2.5 gap-1.5 rounded-md border border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all">
                                     {s}
-                                    <button onClick={() => toggleArrayFilter('scent', s, selectedScents)}>
+                                    <button onClick={() => toggleArrayFilter('scent', s, selectedScents)} aria-label={`Xóa bộ lọc ${s}`} className="hover:text-rose-600 transition-colors ml-0.5">
                                         <X className="h-2.5 w-2.5" />
                                     </button>
                                 </Badge>
                             ))}
                             {selectedVolumes.map((v) => (
-                                <Badge key={v} variant="secondary" className="text-[10px] h-5 gap-1 pr-1">
+                                <Badge key={v} variant="secondary" className="text-[10px] h-6 px-2.5 gap-1.5 rounded-md border border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all">
                                     {v}ml
-                                    <button onClick={() => toggleArrayFilter('volumeMl', v.toString(), selectedVolumes.map(String))}>
+                                    <button onClick={() => toggleArrayFilter('volumeMl', v.toString(), selectedVolumes.map(String))} aria-label={`Xóa bộ lọc ${v}ml`} className="hover:text-rose-600 transition-colors ml-0.5">
                                         <X className="h-2.5 w-2.5" />
                                     </button>
                                 </Badge>
                             ))}
                             {selectedBrands.map((b) => (
-                                <Badge key={b} variant="secondary" className="text-[10px] h-5 gap-1 pr-1">
+                                <Badge key={b} variant="secondary" className="text-[10px] h-6 px-2.5 gap-1.5 rounded-md border border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 transition-all">
                                     {b}
-                                    <button onClick={() => toggleArrayFilter('brand', b, selectedBrands)}>
+                                    <button onClick={() => toggleArrayFilter('brand', b, selectedBrands)} aria-label={`Xóa bộ lọc ${b}`} className="hover:text-rose-600 transition-colors ml-0.5">
                                         <X className="h-2.5 w-2.5" />
                                     </button>
                                 </Badge>

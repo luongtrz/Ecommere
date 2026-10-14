@@ -8,13 +8,14 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+ '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, ArrowLeft, SlidersHorizontal, Package, TrendingUp, Grid3X3, List, ShoppingBag } from 'lucide-react';
+import { Search, ArrowLeft, SlidersHorizontal, Package, TrendingUp, Grid3X3, List, ShoppingBag, Star, X } from 'lucide-react';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { formatCurrency } from '@/lib/formatters';
+import { getImageUrl } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export function SearchPage() {
@@ -136,42 +137,53 @@ export function SearchPage() {
     <>
       <SEO title={`Tìm kiếm: ${query}`} />
 
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-slate-50">
         {/* Search Header */}
-        <div className="border-b border-white/30 bg-white/30 backdrop-blur-md">
-          <div className="container py-6">
-            <div className="flex items-center gap-4 mb-4">
-              <Button variant="ghost" size="sm" asChild className="rounded-full hover:bg-secondary/60">
-                <Link to="/catalog" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+        <div className="border-b border-slate-200 bg-white/95 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+          <div className="container py-4 md:py-6">
+            <div className="flex items-center gap-4 mb-3">
+              <Button variant="ghost" size="sm" asChild className="rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900">
+                <Link to="/catalog" className="flex items-center gap-2">
                   <ArrowLeft className="h-4 w-4" />
                   Quay lại danh sách
                 </Link>
               </Button>
             </div>
 
-            {/* Search Input */}
-            <div className="section-shell p-4 md:p-6 bg-white/60 backdrop-blur-sm">
-              <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search Input Box */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm">
+              <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 pointer-events-none" />
                   <Input
                     placeholder="Tìm kiếm sản phẩm..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-11 h-12 text-sm bg-white/70 border-white/80 rounded-2xl focus:bg-white focus:ring-primary/20 transition-all"
+                    className="pl-11 pr-10 h-11 text-xs md:text-sm bg-slate-50 border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-teal-500 focus-visible:ring-1 focus-visible:ring-teal-500 transition-all"
                   />
+                  {searchInput && (
+                    <button
+                      onClick={() => setSearchInput('')}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 hover:bg-slate-100 rounded-full p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                      aria-label="Xóa tìm kiếm"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap uppercase tracking-[0.12em]">Sắp xếp:</span>
+                    <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-wider">
+                      Sắp xếp:
+                    </span>
                     <Select value={sortBy} onValueChange={handleSortChange}>
-                      <SelectTrigger className="w-[160px] h-12 rounded-2xl bg-white/70 border-white/80 text-xs font-semibold text-foreground">
+                      <SelectTrigger className="w-[150px] h-11 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-700 px-4 focus:ring-1 focus:ring-teal-500 hover:bg-slate-50">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="rounded-2xl border-white/70 bg-white/95">
+                      <SelectContent className="rounded-xl border border-slate-200 bg-white text-slate-900 shadow-md">
                         {PRODUCT_SORT_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value} className="text-xs rounded-xl">
+                          <SelectItem key={option.value} value={option.value} className="text-xs rounded-lg focus:bg-teal-50 focus:text-teal-700 cursor-pointer">
                             {option.label}
                           </SelectItem>
                         ))}
@@ -179,79 +191,94 @@ export function SearchPage() {
                     </Select>
                   </div>
 
-                  <Button variant="outline" size="lg" className="h-12 rounded-2xl border-white/80 bg-white/40 hover:bg-white/70 text-xs font-semibold text-foreground" onClick={handleFilterClick}>
-                    <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="h-11 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 px-4"
+                    onClick={handleFilterClick}
+                  >
+                    <SlidersHorizontal className="h-3.5 w-3.5 mr-2" />
                     Bộ lọc
                   </Button>
 
                   {searchInput && (
-                    <Button variant="ghost" onClick={clearSearch} className="h-12 text-xs font-semibold text-destructive hover:bg-destructive/5 rounded-2xl">
+                    <Button
+                      variant="ghost"
+                      onClick={clearSearch}
+                      className="h-11 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-lg px-4"
+                    >
                       Xóa tìm kiếm
                     </Button>
                   )}
                 </div>
               </div>
 
-                {/* Search Info */}
-                {query && (
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Search className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          Tìm kiếm cho: <span className="font-medium">"{query}"</span>
-                        </span>
-                      </div>
-                      <Badge variant="secondary" className="flex items-center gap-1">
-                        <Package className="h-3 w-3" />
-                        {data?.total || 0} kết quả
-                      </Badge>
+              {/* Search Info */}
+              {query && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-4 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <Search className="h-3.5 w-3.5 text-slate-400" />
+                      <span>
+                        Tìm kiếm cho: <span className="font-semibold text-slate-900">"{query}"</span>
+                      </span>
                     </div>
-
-                    {!isLoading && !isPlaceholderData && data?.total === 0 && (
-                      <div className="text-sm text-gray-500">
-                        Thử tìm với từ khóa khác hoặc{' '}
-                        <Link to="/catalog" className="text-primary hover:underline">
-                          xem tất cả sản phẩm
-                        </Link>
-                      </div>
-                    )}
+                    <Badge variant="secondary" className="flex items-center gap-1 rounded-md text-[10px] h-5 px-2 bg-teal-50 text-teal-700 border border-teal-200 font-medium">
+                      <Package className="h-3 w-3" />
+                      {data?.total || 0} kết quả
+                    </Badge>
                   </div>
-                )}
-              </div>
+
+                  {!isLoading && !isPlaceholderData && data?.total === 0 && (
+                    <div className="text-xs text-slate-500">
+                      Thử tìm với từ khóa khác hoặc{' '}
+                      <Link to="/catalog" className="text-teal-600 hover:text-teal-700 hover:underline font-medium">
+                        xem tất cả sản phẩm
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
+        </div>
 
         {/* Results Section */}
-        <div className="container py-8">
+        <div className="container py-8 md:py-12">
           {isInitialLoading ? (
-            <div className="py-12">
+            <div className="py-24 flex justify-center">
               <LoadingSpinner />
             </div>
           ) : data && data.total === 0 ? (
-            <div className="py-12">
-              <EmptyState
-                icon={<Search className="h-16 w-16 text-gray-300" />}
-                title="Không tìm thấy sản phẩm"
-                description={`Không có sản phẩm nào khớp với từ khóa "${query}". Hãy thử tìm kiếm với từ khóa khác.`}
-                action={
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button asChild>
-                      <Link to="/catalog" className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        Xem tất cả sản phẩm
-                      </Link>
-                    </Button>
-                    <Button variant="outline" onClick={() => setSearchParams({})}>
-                      Xóa tìm kiếm
-                    </Button>
-                  </div>
-                }
-              />
+            <div className="py-8">
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 md:p-16 text-center max-w-xl mx-auto shadow-sm">
+                <EmptyState
+                  icon={<Search className="h-12 w-12 text-slate-300" />}
+                  title="Không tìm thấy sản phẩm"
+                  description={`Không có sản phẩm nào khớp với từ khóa "${query}". Hãy thử tìm kiếm với từ khóa khác.`}
+                  action={
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                      <Button asChild className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white focus-visible:ring-2 focus-visible:ring-teal-500 px-6">
+                        <Link to="/catalog" className="flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          Xem tất cả sản phẩm
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-6"
+                        onClick={() => setSearchParams({})}
+                      >
+                        Xóa tìm kiếm
+                      </Button>
+                    </div>
+                  }
+                />
+              </div>
 
               {/* Search Suggestions */}
-              <div className="mt-8 max-w-2xl mx-auto">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Gợi ý tìm kiếm:</h3>
+              <div className="mt-12 max-w-2xl mx-auto">
+                <h3 className="text-lg font-sans font-bold text-slate-900 mb-4">Gợi ý tìm kiếm:</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     'Nước hoa chanh',
@@ -262,14 +289,14 @@ export function SearchPage() {
                     'Nước hoa lavender',
                     'Nước hoa trà xanh',
                     'Nước hoa bạc hà'
-                  ].map((suggestion) => (
+                  ].map((suggestion, idx) => (
                     <Button
-                      key={suggestion}
+                      key={idx}
                       variant="outline"
-                      className="justify-start h-auto py-3 px-4 text-left"
+                      className="justify-start h-auto py-2.5 px-3.5 text-left rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-500 text-xs text-slate-700 transition-all"
                       onClick={() => setSearchInput(suggestion)}
                     >
-                      <Search className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <Search className="h-3.5 w-3.5 mr-2 shrink-0 text-slate-400" />
                       <span className="truncate">{suggestion}</span>
                     </Button>
                   ))}
@@ -279,32 +306,44 @@ export function SearchPage() {
           ) : (
             <>
               {/* Results Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <h2 className="text-xl font-semibold text-gray-900">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+                <div className="flex items-baseline gap-3">
+                  <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900 tracking-tight">
                     Kết quả tìm kiếm
                   </h2>
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3" />
+                  <Badge variant="outline" className="flex items-center gap-1 rounded-md border-slate-200 bg-slate-50 text-slate-600 text-xs font-normal">
+                    <TrendingUp className="h-3 w-3 text-teal-600" />
                     {data?.total || 0} sản phẩm
                   </Badge>
                 </div>
 
                 {/* View Options */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
                   <Button
-                    variant={viewMode === 'grid' ? 'default' : 'outline'}
+                    variant="ghost"
                     size="sm"
                     onClick={() => handleViewToggle('grid')}
+                    aria-label="Xem lưới"
+                    className={`h-7 w-7 p-0 rounded-md transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-white shadow-sm text-teal-600 font-semibold'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
                   >
-                    <Grid3X3 className="h-4 w-4" />
+                    <Grid3X3 className="h-3.5 w-3.5" />
                   </Button>
                   <Button
-                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    variant="ghost"
                     size="sm"
                     onClick={() => handleViewToggle('list')}
+                    aria-label="Xem danh sách"
+                    className={`h-7 w-7 p-0 rounded-md transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-white shadow-sm text-teal-600 font-semibold'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
                   >
-                    <List className="h-4 w-4" />
+                    <List className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
@@ -312,7 +351,7 @@ export function SearchPage() {
               {/* Products Display */}
               <div className={`${
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
+                  ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'
                   : 'space-y-4'
               }`}>
                 {productsToShow.map((product) => (
@@ -330,78 +369,85 @@ export function SearchPage() {
                       onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                     />
                   ) : (
-                    <Card key={product.id} className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary">
-                      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                        <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm mx-auto md:mx-0">
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0 text-center md:text-left">
-                          <div className="mb-3">
-                            <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-2 leading-tight">{product.name}</h3>
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-3">
-                              <div className="flex items-center gap-1">
-                                <span className="text-yellow-400 text-base md:text-lg">★</span>
-                                <span className="text-sm font-medium text-gray-700">
-                                  {product.rating?.toFixed(1) || '0.0'}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  ({product.reviewCount || 0} đánh giá)
-                                </span>
-                              </div>
-                              <Badge variant="outline" className="text-xs">
-                                {product.variants?.length || 0} biến thể
+                    <div
+                      key={product.id}
+                      className="flex flex-col sm:flex-row gap-4 md:gap-6 bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                    >
+                      <div className="w-full sm:w-32 md:w-36 aspect-square sm:aspect-auto sm:h-36 bg-slate-50 border border-slate-100 rounded-lg overflow-hidden shrink-0">
+                        <img
+                          src={getImageUrl(product.images[0], { width: 300 })}
+                          alt={product.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0 py-1 flex flex-col justify-between">
+                        <div>
+                          <p className="uppercase tracking-wider text-[10px] font-semibold text-teal-600 mb-1">
+                            Thai Spray
+                          </p>
+                          <h3 className="font-sans font-semibold text-slate-900 truncate text-base md:text-lg mb-1">
+                            {product.name}
+                          </h3>
+                          <div className="flex flex-wrap items-center gap-2 md:gap-4 mb-2">
+                            <div className="flex items-center gap-1 text-xs">
+                              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                              <span className="font-semibold text-slate-700 tabular-nums">
+                                {product.rating?.toFixed(1) || '0.0'}
+                              </span>
+                              <span className="text-slate-500 tabular-nums">
+                                ({product.reviewCount || 0} đánh giá)
+                              </span>
+                            </div>
+                            <Badge variant="outline" className="text-[10px] h-5 rounded-md border-slate-200 bg-slate-50 text-slate-600 font-normal">
+                              {product.variants?.length || 0} biến thể
+                            </Badge>
+                          </div>
+                          {product.description && (
+                            <p className="text-slate-600 text-xs leading-relaxed mb-3 line-clamp-2">
+                              {product.description}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {product.variants?.slice(0, 3).map((variant: any, index: number) => (
+                              <Badge key={index} variant="secondary" className="text-[10px] h-5 px-2 font-normal rounded-md border border-slate-200 bg-slate-100 text-slate-700">
+                                {variant.scent} - {variant.volumeMl}ml
                               </Badge>
-                            </div>
-                            {product.description && (
-                              <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-2">
-                                {product.description}
-                              </p>
+                            ))}
+                            {product.variants && product.variants.length > 3 && (
+                              <Badge variant="outline" className="text-[10px] h-5 px-2 rounded-md border-slate-200 bg-slate-50 text-slate-500">
+                                +{product.variants.length - 3} nữa
+                              </Badge>
                             )}
-                            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                              {product.variants?.slice(0, 3).map((variant: any, index: number) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {variant.scent} - {variant.volumeMl}ml
-                                </Badge>
-                              ))}
-                              {product.variants && product.variants.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{product.variants.length - 3} nữa
-                                </Badge>
-                              )}
-                            </div>
                           </div>
-                          <div className="text-center md:text-right">
-                            <div className="text-2xl md:text-3xl font-bold text-primary mb-2">
-                              {formatCurrency(product.basePrice)}
-                            </div>
-                            <Button
-                              size="lg"
-                              className="bg-primary hover:bg-primary/95 text-primary-foreground shadow-md w-full md:w-auto"
-                              onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                            >
-                              <ShoppingBag className="h-4 w-4 mr-2" />
-                              Thêm vào giỏ
-                            </Button>
-                          </div>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                          <span className="font-sans font-bold text-rose-600 text-base md:text-lg tabular-nums">
+                            {formatCurrency(product.basePrice)}
+                          </span>
+                          <Button
+                            size="sm"
+                            className="h-9 rounded-lg px-4 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-all duration-200 active:scale-95"
+                            onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                          >
+                            <ShoppingBag className="h-3.5 w-3.5 mr-1.5" /> Thêm vào giỏ
+                          </Button>
                         </div>
                       </div>
-                    </Card>
+                    </div>
                   )
                 ))}
               </div>
 
               {/* Load More */}
               {hasNextPage && (
-                <div className="text-center mt-8">
-                  <p className="text-gray-600 mb-4">
+                <div className="text-center mt-10">
+                  <p className="text-xs text-slate-500 mb-4">
                     Hiển thị {productsToShow.length} / {data?.total || 0} sản phẩm
                   </p>
                   <Button
                     variant="outline"
+                    className="rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs px-6"
                     onClick={handleLoadMore}
                     disabled={isFetching}
                   >

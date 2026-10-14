@@ -27,22 +27,29 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
   if (totalPages <= 1) return null;
 
   return (
-    <div className={cn('flex items-center justify-center gap-2', className)}>
+    <nav role="navigation" aria-label="Phân trang" className={cn('flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 select-none py-2', className)}>
       <Button
         variant="outline"
         size="icon"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        aria-label="Trang trước"
+        className="h-8 w-8 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:border-slate-200 text-slate-600 hover:text-slate-900 transition-colors focus-visible:ring-2 focus-visible:ring-teal-500"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
       {startPage > 1 && (
         <>
-          <Button variant="outline" onClick={() => onPageChange(1)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(1)}
+            className="h-8 min-w-[2rem] px-2.5 text-xs font-semibold tabular-nums rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors focus-visible:ring-2 focus-visible:ring-teal-500"
+          >
             1
           </Button>
-          {startPage > 2 && <span className="px-2">...</span>}
+          {startPage > 2 && <span className="px-1 text-xs text-slate-400 select-none">…</span>}
         </>
       )}
 
@@ -50,7 +57,15 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
         <Button
           key={page}
           variant={currentPage === page ? 'default' : 'outline'}
+          size="sm"
           onClick={() => onPageChange(page)}
+          aria-current={currentPage === page ? 'page' : undefined}
+          className={cn(
+            'h-8 min-w-[2rem] px-2.5 text-xs font-semibold tabular-nums rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-teal-500',
+            currentPage === page
+              ? 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm border-transparent'
+              : 'border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+          )}
         >
           {page}
         </Button>
@@ -58,8 +73,13 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
 
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="px-2">...</span>}
-          <Button variant="outline" onClick={() => onPageChange(totalPages)}>
+          {endPage < totalPages - 1 && <span className="px-1 text-xs text-slate-400 select-none">…</span>}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(totalPages)}
+            className="h-8 min-w-[2rem] px-2.5 text-xs font-semibold tabular-nums rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors focus-visible:ring-2 focus-visible:ring-teal-500"
+          >
             {totalPages}
           </Button>
         </>
@@ -70,9 +90,11 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
         size="icon"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
+        aria-label="Trang sau"
+        className="h-8 w-8 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:border-slate-200 text-slate-600 hover:text-slate-900 transition-colors focus-visible:ring-2 focus-visible:ring-teal-500"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
-    </div>
+    </nav>
   );
 }
