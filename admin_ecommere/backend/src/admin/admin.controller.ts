@@ -7,6 +7,7 @@ import { Role } from '@prisma/client';
 
 @ApiTags('admin')
 @ApiBearerAuth()
+@Roles(Role.ADMIN)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}

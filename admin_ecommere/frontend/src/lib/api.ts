@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { useCartStore } from '@/features/cart/store/cartStore';
+import { useChatStore } from '@/features/chatbot/store/chatStore';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api`,
@@ -30,13 +32,49 @@ export const authToken = {
   },
 };
 
-function getCookie(name: string): string | null {
+export function getCookie(name: string): string | null {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) {
     return parts.pop()?.split(';').shift() || null;
   }
   return null;
+}
+
+let clearQueryCacheCallback: (() => void) | null = null;
+
+export function registerQueryCacheClear(clear: () => void): void {
+  clearQueryCacheCallback = clear;
+}
+
+export function clearQueryCache(): void {
+  try {
+    clearQueryCacheCallback?.();
+  } catch {
+    // Ignore clear errors to ensure redirect proceeds
+  }
+}
+
+let refreshPromise: Promise<string> | null = null;
+
+export async function refreshAccessToken(): Promise<string> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const { data } = await apiClient.post('/auth/refresh');
+      const actualData = data.data || data;
+      const newAccessToken = actualData.accessToken;
+      authToken.set(newAccessToken);
+      return newAccessToken;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 let isRefreshing = false;
@@ -80,8 +118,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh');
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest?._retry && !isRefreshRequest) {
+      // Mark before queueing: a queued replay that gets 401 again must not refresh a second time
+      originalRequest._retry = true;
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -93,15 +135,11 @@ apiClient.interceptors.response.use(
           .catch((err) => Promise.reject(err));
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const { data } = await apiClient.post('/auth/refresh');
-        const actualData = data.data || data;
-        const newAccessToken = actualData.accessToken;
+        const newAccessToken = await refreshAccessToken();
 
-        authToken.set(newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         processQueue(null, newAccessToken);
 
@@ -109,10 +147,14 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         authToken.remove();
+        useChatStore.getState().reset();
+        useCartStore.getState().clearCart();
         localStorage.removeItem('user');
 
         const toastEvent = new CustomEvent('session-expired');
         window.dispatchEvent(toastEvent);
+
+        clearQueryCache();
 
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';

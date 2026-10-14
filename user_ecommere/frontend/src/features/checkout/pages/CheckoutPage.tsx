@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { SEO } from '@/lib/seo';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useAddresses } from '@/features/users/hooks/useAddresses';
@@ -7,26 +8,45 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatters';
-import { PAYMENT_METHODS, SHIPPING_METHODS } from '@/lib/constants';
+import { PAYMENT_METHODS, SHIPPING_METHODS, QUERY_KEYS } from '@/lib/constants';
 import apiClient from '@/lib/api';
-import { ArrowLeft, Truck, CreditCard, MapPin, Shield, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
+import { ArrowLeft, Truck, CreditCard, MapPin, Shield, ChevronRight, CheckCircle2, Circle, Loader2 } from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
 import { CheckoutSteps } from '../components/CheckoutSteps';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
+
+function generateCheckoutKey(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { data: addresses } = useAddresses();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const checkoutKeyRef = useRef<{ key: string; fingerprint: string } | null>(null);
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOrdered, setIsOrdered] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
 
   // Default selections
   const [shippingMethod, setShippingMethod] = useState<string>(SHIPPING_METHODS[0].id);
   const [paymentMethod, setPaymentMethod] = useState<string>(PAYMENT_METHODS[0].id);
+
+  // Server-confirmed preview state
+  const [serverShippingFee, setServerShippingFee] = useState<number | null>(null);
+  const [serverTotal, setServerTotal] = useState<number | null>(null);
+  const [serverDiscount, setServerDiscount] = useState<number>(0);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [isPreviewConfirmed, setIsPreviewConfirmed] = useState(false);
+  const [previewRetryTrigger, setPreviewRetryTrigger] = useState(0);
 
   // Auto-select default address
   useEffect(() => {
@@ -36,14 +56,116 @@ export function CheckoutPage() {
     }
   }, [addresses, selectedAddressId]);
 
-  const selectedShipping = SHIPPING_METHODS.find(m => m.id === shippingMethod);
-  const shippingFee = selectedShipping?.price || 0;
-  const finalTotal = totalPrice + shippingFee;
   const selectedAddress = addresses?.find(addr => addr.id === selectedAddressId);
+  const selectedShipping = SHIPPING_METHODS.find(m => m.id === shippingMethod);
+  const shippingFee = serverShippingFee;
+  const finalTotal = serverTotal;
+
+  const itemsFingerprint = items.map((i) => `${i.variantId}:${i.quantity}:${i.price}`).join(',');
+
+  useEffect(() => {
+    if (!selectedAddress) {
+      setIsPreviewLoading(false);
+      setIsPreviewConfirmed(false);
+      setServerShippingFee(null);
+      setServerTotal(null);
+      setServerDiscount(0);
+      return;
+    }
+
+    let isCancelled = false;
+    const controller = new AbortController();
+
+    setIsPreviewLoading(true);
+    setIsPreviewConfirmed(false);
+
+    const fetchPreview = async () => {
+      try {
+        const previewBody = {
+          addressId: selectedAddress.id,
+          items: items.map((item) => ({
+            variantId: item.variantId,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          shippingMethod,
+        };
+
+        const response = await apiClient.post('/orders/preview', previewBody, {
+          signal: controller.signal,
+        });
+
+        if (isCancelled) return;
+
+        const resData = response.data?.data ?? response.data;
+        const fee = typeof resData?.shippingFee === 'number' ? resData.shippingFee : 0;
+        const discount = typeof resData?.discount === 'number' ? resData.discount : 0;
+        const total = typeof resData?.total === 'number'
+          ? resData.total
+          : (typeof resData?.subtotal === 'number'
+            ? resData.subtotal - discount + fee
+            : totalPrice + fee);
+
+        setServerShippingFee(fee);
+        setServerDiscount(discount);
+        setServerTotal(total);
+        setIsPreviewConfirmed(true);
+      } catch (error: any) {
+        if (
+          isCancelled ||
+          error?.name === 'CanceledError' ||
+          error?.code === 'ERR_CANCELED'
+        ) {
+          return;
+        }
+
+        console.error('Order preview failed:', error);
+        setServerShippingFee(null);
+        setServerTotal(null);
+        setServerDiscount(0);
+        setIsPreviewConfirmed(false);
+
+        const serverMessage = error?.response?.data?.message;
+        const message =
+          (Array.isArray(serverMessage)
+            ? serverMessage
+                .map((m: any) => (typeof m === 'string' ? m : String(m)))
+                .filter(Boolean)
+                .join(', ')
+            : null) ||
+          (typeof serverMessage === 'string' && serverMessage.trim()
+            ? serverMessage
+            : null) ||
+          'Không thể tính phí vận chuyển. Vui lòng thử lại.';
+
+        toast.error(message, {
+          action: {
+            label: 'Thử lại',
+            onClick: () => setPreviewRetryTrigger((prev) => prev + 1),
+          },
+        });
+      } finally {
+        if (!isCancelled) {
+          setIsPreviewLoading(false);
+        }
+      }
+    };
+
+    fetchPreview();
+
+    return () => {
+      isCancelled = true;
+      controller.abort();
+    };
+  }, [selectedAddress?.id, selectedAddress?.province, shippingMethod, itemsFingerprint, totalPrice, previewRetryTrigger]);
 
   const handleNextStep = () => {
     if (step === 1 && !selectedAddress) {
-      alert("Vui lòng chọn địa chỉ giao hàng");
+      toast.error('Vui lòng chọn địa chỉ giao hàng');
+      return;
+    }
+    if (!isPreviewConfirmed) {
+      toast.error('Phí vận chuyển chưa được xác nhận. Vui lòng thử lại.');
       return;
     }
     setStep(prev => prev + 1);
@@ -55,29 +177,70 @@ export function CheckoutPage() {
 
 
   const handleSubmit = async () => {
-    if (!selectedAddress) return;
+    if (
+      isOrdered ||
+      !selectedAddress ||
+      !isPreviewConfirmed ||
+      isPreviewLoading ||
+      shippingFee === null ||
+      finalTotal === null
+    ) {
+      return;
+    }
+
+    const fingerprint = JSON.stringify({
+      addressId: selectedAddress.id,
+      address: [
+        selectedAddress.fullName,
+        selectedAddress.phone,
+        selectedAddress.province,
+        selectedAddress.district,
+        selectedAddress.ward,
+        selectedAddress.line1,
+      ],
+      paymentMethod,
+      shippingMethod,
+      items: items.map((i) => [i.variantId, i.quantity, i.price]),
+    });
+
+    let key: string;
+    if (!checkoutKeyRef.current || checkoutKeyRef.current.fingerprint !== fingerprint) {
+      key = generateCheckoutKey();
+      checkoutKeyRef.current = { key, fingerprint };
+    } else {
+      key = checkoutKeyRef.current.key;
+    }
 
     setIsSubmitting(true);
     let orderCreated = false;
 
     try {
       const orderData = {
+        checkoutKey: key,
         addressId: selectedAddress.id,
-        items: items.map(item => ({
+        items: items.map((item) => ({
           variantId: item.variantId,
           quantity: item.quantity,
           price: item.price,
         })),
         paymentMethod,
+        shippingMethod,
         shippingFee,
         total: finalTotal,
       };
 
       await apiClient.post('/orders/checkout', orderData);
       orderCreated = true;
+      setIsOrdered(true);
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
     } catch (error) {
       console.error('Order creation failed:', error);
-      alert('Đặt hàng thất bại. Vui lòng thử lại.');
+      const serverMessage = (error as any)?.response?.data?.message;
+      const message =
+        (Array.isArray(serverMessage) ? serverMessage.map((m: any) => (typeof m === 'string' ? m : String(m))).filter(Boolean).join(', ') : null) ||
+        (typeof serverMessage === 'string' && serverMessage.trim() ? serverMessage : null) ||
+        'Đặt hàng thất bại. Vui lòng thử lại.';
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -354,7 +517,13 @@ export function CheckoutPage() {
                   )}
                   <Button
                     onClick={step < 3 ? handleNextStep : handleSubmit}
-                    disabled={step === 1 && !selectedAddress || isSubmitting}
+                    disabled={
+                      (step === 1 && !selectedAddress) ||
+                      isSubmitting ||
+                      isOrdered ||
+                      isPreviewLoading ||
+                      !isPreviewConfirmed
+                    }
                     className={`h-12 flex-1 rounded-xl text-base font-bold shadow-lg transition-all hover:scale-[1.01] ${step < 3
                       ? 'bg-primary text-primary-foreground shadow-primary/10'
                       : 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-500/25'
@@ -363,7 +532,13 @@ export function CheckoutPage() {
                     {step < 3 ? (
                       <span className="flex items-center gap-2">Tiếp tục <ChevronRight className="h-5 w-5" /></span>
                     ) : (
-                      <span className="flex items-center gap-2">{isSubmitting ? 'Đang xử lý...' : 'Xác nhận đặt hàng'}</span>
+                      <span className="flex items-center gap-2">
+                        {isSubmitting
+                          ? 'Đang xử lý...'
+                          : isPreviewLoading
+                            ? 'Đang tính phí...'
+                            : 'Xác nhận đặt hàng'}
+                      </span>
                     )}
                   </Button>
                 </div>
@@ -406,17 +581,43 @@ export function CheckoutPage() {
                       <span className="text-gray-500">Tạm tính</span>
                       <span className="font-medium text-gray-900">{formatCurrency(totalPrice)}</span>
                     </div>
+                    {serverDiscount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Giảm giá</span>
+                        <span className="font-medium text-green-600">
+                          -{formatCurrency(serverDiscount)}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Phí vận chuyển</span>
                       <span className="font-medium text-green-600">
-                        {shippingFee === 0 ? 'Miễn phí' : formatCurrency(shippingFee)}
+                        {isPreviewLoading ? (
+                          <span className="inline-flex items-center gap-1.5 text-gray-400">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Đang tính...
+                          </span>
+                        ) : shippingFee !== null ? (
+                          shippingFee === 0 ? 'Miễn phí' : formatCurrency(shippingFee)
+                        ) : (
+                          '—'
+                        )}
                       </span>
                     </div>
                     <Separator className="my-2 bg-gray-200" />
                     <div className="flex justify-between items-baseline">
                       <span className="text-base font-bold text-gray-900">Tổng thanh toán</span>
                       <span className="text-2xl font-playfair font-bold text-primary">
-                        {formatCurrency(finalTotal)}
+                        {isPreviewLoading ? (
+                          <span className="inline-flex items-center gap-1.5 text-base font-sans text-gray-400">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Đang tính...
+                          </span>
+                        ) : finalTotal !== null ? (
+                          formatCurrency(finalTotal)
+                        ) : (
+                          '—'
+                        )}
                       </span>
                     </div>
                   </div>

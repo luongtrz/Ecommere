@@ -9,7 +9,6 @@ import { RequireAdmin } from './guards/RequireAdmin';
 
 // Lazy load all pages
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import('@/features/auth/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const AccountPage = lazy(() => import('@/features/auth/pages/AccountPage').then(m => ({ default: m.AccountPage })));
 const DashboardPage = lazy(() => import('@/features/admin/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const AdminProductsPage = lazy(() => import('@/features/admin/pages/AdminProductsPage').then(m => ({ default: m.AdminProductsPage })));
@@ -19,6 +18,7 @@ const AdminOrderDetailPage = lazy(() => import('@/features/admin/pages/AdminOrde
 const AdminCouponsPage = lazy(() => import('@/features/admin/pages/AdminCouponsPage').then(m => ({ default: m.AdminCouponsPage })));
 const AdminInventoryPage = lazy(() => import('@/features/admin/pages/AdminInventoryPage').then(m => ({ default: m.AdminInventoryPage })));
 const AdminCategoriesPage = lazy(() => import('@/features/admin/pages/AdminCategoriesPage').then(m => ({ default: m.AdminCategoriesPage })));
+const AdminChatbotPage = lazy(() => import('@/features/chatbot/pages/AdminChatbotPage').then(m => ({ default: m.AdminChatbotPage })));
 const ErrorPage = lazy(() => import('@/pages/ErrorPage').then(m => ({ default: m.ErrorPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
@@ -28,14 +28,13 @@ export const router = createBrowserRouter([
     element: <Navigate to="/admin" replace />,
   },
   {
+    path: '/chatbot',
+    element: <Navigate to="/admin/chatbot" replace />,
+  },
+  {
     path: '/login',
     element: <AuthLayout />,
     children: [{ index: true, element: <LoginPage /> }],
-  },
-  {
-    path: '/register',
-    element: <AuthLayout />,
-    children: [{ index: true, element: <RegisterPage /> }],
   },
   {
     path: '/admin',
@@ -49,6 +48,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <DashboardPage /> },
+      { path: 'chatbot', element: <AdminChatbotPage /> },
       { path: 'products', element: <AdminProductsPage /> },
       { path: 'products/new', element: <AdminProductFormPage /> },
       { path: 'products/:id/edit', element: <AdminProductFormPage /> },

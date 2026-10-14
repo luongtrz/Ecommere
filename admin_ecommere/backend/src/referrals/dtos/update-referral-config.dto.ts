@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsOptional, Min, Max, ValidateIf } from 'class-validator';
 import { CouponType } from '@prisma/client';
 
 export class UpdateReferralConfigDto {
@@ -19,6 +19,8 @@ export class UpdateReferralConfigDto {
     @Type(() => Number)
     @IsInt()
     @Min(0)
+    @ValidateIf((dto) => dto.referrerCouponType === CouponType.PERCENT)
+    @Max(100)
     referrerCouponValue?: number;
 
     @ApiProperty({ required: false, description: 'Giảm tối đa cho người giới thiệu (VND)' })
@@ -38,6 +40,8 @@ export class UpdateReferralConfigDto {
     @Type(() => Number)
     @IsInt()
     @Min(0)
+    @ValidateIf((dto) => dto.refereeCouponType === CouponType.PERCENT)
+    @Max(100)
     refereeCouponValue?: number;
 
     @ApiProperty({ required: false, description: 'Giảm tối đa cho người được giới thiệu (VND)' })

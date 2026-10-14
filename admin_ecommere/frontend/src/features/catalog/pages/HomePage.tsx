@@ -24,7 +24,7 @@ export function HomePage() {
       variantId: variant.id,
       name: product.name,
       image: product.images[0],
-      price: variant.salePrice || variant.price,
+      price: variant.salePrice ?? variant.price,
       scent: variant.scent,
       volumeMl: variant.volumeMl,
     });

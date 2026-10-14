@@ -7,6 +7,7 @@ import { Role } from '@prisma/client';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 
 @ApiTags('Referrals')
+@Roles(Role.ADMIN)
 @Controller('referrals')
 export class ReferralsController {
     constructor(private referralsService: ReferralsService) { }

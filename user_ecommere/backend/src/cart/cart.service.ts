@@ -1,16 +1,20 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
 import { AddToCartDto } from './dtos/add-to-cart.dto';
 import { UpdateCartItemDto } from './dtos/update-cart-item.dto';
+import { canUserUseCoupon } from '../coupons/coupons.service';
 
 @Injectable()
 export class CartService {
   constructor(private prisma: PrismaService) {}
 
   async getCart(userId: string) {
-    let cart = await this.prisma.cart.findUnique({
+    const cart = await this.prisma.cart.upsert({
       where: { userId },
+      create: { userId },
+      update: {},
       include: {
         items: {
           include: {
@@ -32,101 +36,60 @@ export class CartService {
       },
     });
 
-    // Create cart if it doesn't exist
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: { userId },
-        include: {
-          items: {
-            include: {
-              variant: {
-                include: {
-                  product: {
-                    select: {
-                      id: true,
-                      name: true,
-                      slug: true,
-                      images: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          coupon: true,
-        },
-      });
-    }
-
     return this.calculateCartTotals(cart);
   }
 
   async addToCart(userId: string, addToCartDto: AddToCartDto) {
     const { variantId, quantity } = addToCartDto;
 
-    // Check if variant exists and has enough stock
-    const variant = await this.prisma.productVariant.findUnique({
-      where: { id: variantId },
-      include: { product: true },
-    });
-
-    if (!variant) {
-      throw new NotFoundException('Product variant not found');
-    }
-
-    if (!variant.product.active) {
-      throw new BadRequestException('Product is not available');
-    }
-
-    if (variant.stock < quantity) {
-      throw new BadRequestException(`Only ${variant.stock} units available in stock`);
-    }
-
-    // Get or create cart
-    let cart = await this.prisma.cart.findUnique({
-      where: { userId },
-    });
-
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: { userId },
+    await this.runSerializableTransaction(async (tx) => {
+      const variant = await tx.productVariant.findUnique({
+        where: { id: variantId },
+        include: { product: true },
       });
-    }
 
-    // Check if item already exists in cart
-    const existingItem = await this.prisma.cartItem.findFirst({
-      where: {
-        cartId: cart.id,
-        variantId,
-      },
-    });
+      if (!variant) {
+        throw new NotFoundException('Product variant not found');
+      }
 
-    if (existingItem) {
-      const newQuantity = existingItem.quantity + quantity;
+      if (!variant.product.active) {
+        throw new BadRequestException('Product is not available');
+      }
+
+      const cart = await tx.cart.upsert({
+        where: { userId },
+        create: { userId },
+        update: {},
+      });
+
+      const existingItem = await tx.cartItem.findFirst({
+        where: {
+          cartId: cart.id,
+          variantId,
+        },
+      });
+      const newQuantity = (existingItem?.quantity ?? 0) + quantity;
 
       if (variant.stock < newQuantity) {
         throw new BadRequestException(`Only ${variant.stock} units available in stock`);
       }
 
-      await this.prisma.cartItem.update({
-        where: { id: existingItem.id },
-        data: { quantity: newQuantity },
-      });
-    } else {
-      // Get variant price for snapshot
-      const variant = await this.prisma.productVariant.findUnique({
-        where: { id: variantId },
-      });
-
-      await this.prisma.cartItem.create({
-        data: {
-          cartId: cart.id,
-          variantId,
-          quantity,
-          priceSnapshot: variant.salePrice || variant.price,
-        },
-      });
-    }
+      if (existingItem) {
+        await tx.cartItem.update({
+          where: { id: existingItem.id },
+          data: { quantity: newQuantity },
+        });
+      } else {
+        await tx.cartItem.create({
+          data: {
+            cartId: cart.id,
+            variantId,
+            quantity,
+            priceSnapshot: variant.salePrice ?? variant.price,
+          },
+        });
+      }
+    });
 
     return this.getCart(userId);
   }
@@ -225,8 +188,45 @@ export class CartService {
       where: { code: couponCode.toUpperCase() },
     });
 
-    if (!coupon) {
+    if (!coupon || !(await canUserUseCoupon(this.prisma, coupon.code, userId))) {
       throw new NotFoundException('Coupon not found');
+    }
+
+    const now = new Date();
+    if (!coupon.active) {
+      throw new BadRequestException('Coupon is inactive');
+    }
+
+    if (coupon.validFrom && coupon.validFrom > now) {
+      throw new BadRequestException('Coupon is not yet valid');
+    }
+
+    if (coupon.validUntil && coupon.validUntil < now) {
+      throw new BadRequestException('Coupon has expired');
+    }
+
+    const currentCart = await this.getCart(userId);
+
+    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+      throw new BadRequestException('Coupon has reached maximum usage limit');
+    }
+
+    if (coupon.maxUsesPerUser) {
+      const userUsageCount = await this.prisma.order.count({
+        where: {
+          userId,
+          couponCode: coupon.code,
+          status: { not: OrderStatus.CANCELED },
+        },
+      });
+
+      if (userUsageCount >= coupon.maxUsesPerUser) {
+        throw new BadRequestException('You have already used this coupon the maximum number of times');
+      }
+    }
+
+    if (coupon.minOrder != null && currentCart.subtotal < coupon.minOrder) {
+      throw new BadRequestException(`Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`);
     }
 
     await this.prisma.cart.update({
@@ -241,7 +241,7 @@ export class CartService {
     let subtotal = 0;
 
     const items = cart.items.map((item: any) => {
-      const price = item.variant.salePrice || item.variant.price;
+      const price = item.variant.salePrice ?? item.variant.price;
       const itemTotal = price * item.quantity;
       subtotal += itemTotal;
 
@@ -254,7 +254,14 @@ export class CartService {
 
     let discount = 0;
 
-    if (cart.coupon) {
+    const now = new Date();
+    if (
+      cart.coupon &&
+      cart.coupon.active &&
+      (!cart.coupon.validFrom || cart.coupon.validFrom <= now) &&
+      (!cart.coupon.validUntil || cart.coupon.validUntil >= now) &&
+      (!cart.coupon.minOrder || subtotal >= cart.coupon.minOrder)
+    ) {
       discount = MoneyUtil.calculateDiscount(
         subtotal,
         cart.coupon.type,
@@ -305,5 +312,29 @@ export class CartService {
     }
 
     return cart;
+  }
+
+  private async runSerializableTransaction<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(operation, {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          (error.code === 'P2002' || error.code === 'P2034') &&
+          attempt < 2
+        ) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new BadRequestException('Cart update could not be completed; please retry');
   }
 }

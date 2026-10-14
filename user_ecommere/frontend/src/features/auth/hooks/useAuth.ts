@@ -4,6 +4,7 @@ import { authApi, type User } from '../api/auth.api';
 import { QUERY_KEYS } from '@/lib/constants';
 import { useToast } from '@/hooks/useToast';
 import { AxiosError } from 'axios';
+import { useChatStore } from '@/features/chatbot/store/chatStore';
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -47,15 +48,47 @@ export function useAuth() {
     },
   });
 
+  const forgotPasswordMutation = useMutation({
+    mutationFn: (email: string) => authApi.forgotPassword(email),
+    onSuccess: () => {
+      toast.success('Nếu email tồn tại, liên kết đặt lại mật khẩu sẽ được gửi');
+    },
+    onError: (error: AxiosError<any>) => {
+      const rawMessage = error.response?.data?.message;
+      const message = Array.isArray(rawMessage)
+        ? rawMessage.join(', ')
+        : (rawMessage || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+      toast.error(message);
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
+      authApi.resetPassword(token, newPassword),
+    onSuccess: () => {
+      toast.success('Đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
+      navigate('/login');
+    },
+    onError: (error: AxiosError<any>) => {
+      const rawMessage = error.response?.data?.message;
+      const message = Array.isArray(rawMessage)
+        ? rawMessage.join(', ')
+        : (rawMessage || 'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.');
+      toast.error(message);
+    },
+  });
+
   const logout = async () => {
     try {
       await authApi.logout();
+      useChatStore.getState().reset();
       queryClient.setQueryData([QUERY_KEYS.USER], null);
       queryClient.clear();
       toast.info('Đã đăng xuất thành công');
       navigate('/login');
     } catch (error) {
       // Even if logout fails, clear local state
+      useChatStore.getState().reset();
       queryClient.setQueryData([QUERY_KEYS.USER], null);
       queryClient.clear();
       navigate('/login');
@@ -66,6 +99,7 @@ export function useAuth() {
     try {
       const updatedUser = await authApi.getProfile();
       queryClient.setQueryData([QUERY_KEYS.USER], updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     } catch (error) {
       console.error('Failed to refresh user:', error);
@@ -78,11 +112,19 @@ export function useAuth() {
     isLoading,
     login: loginMutation.mutate,
     register: registerMutation.mutate,
+    forgotPassword: forgotPasswordMutation.mutate,
+    resetPassword: resetPasswordMutation.mutate,
     logout,
     refreshUser,
     isLoginLoading: loginMutation.isPending,
     isRegisterLoading: registerMutation.isPending,
+    isForgotPasswordLoading: forgotPasswordMutation.isPending,
+    isResetPasswordLoading: resetPasswordMutation.isPending,
+    isForgotPasswordSuccess: forgotPasswordMutation.isSuccess,
+    isResetPasswordSuccess: resetPasswordMutation.isSuccess,
     loginError: loginMutation.error as AxiosError<any> | null,
     registerError: registerMutation.error as AxiosError<any> | null,
+    forgotPasswordError: forgotPasswordMutation.error as AxiosError<any> | null,
+    resetPasswordError: resetPasswordMutation.error as AxiosError<any> | null,
   };
 }

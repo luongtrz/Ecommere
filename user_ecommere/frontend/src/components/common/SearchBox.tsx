@@ -1,13 +1,13 @@
 import { useDeferredValue, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, History, Search, Sparkles, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const RECENT_SEARCHES_KEY = 'recentSearches';
-const POPULAR_PRODUCTS = [
-  { id: '1', name: 'Body mist hương sạch cho hằng ngày', slug: 'nuoc-hoa-body-mist-combo-3-chai' },
-  { id: '2', name: 'Xịt phòng cho phòng khách và phòng ngủ', slug: 'tinh-dau-thom-phong' },
-  { id: '3', name: 'Xịt thơm quần áo giữ mùi nhẹ và gọn', slug: 'xit-thom-quan-ao' },
+const POPULAR_SEARCHES = [
+  { id: '1', name: 'Xịt diệt mối cho gia đình', query: 'Xịt Diệt Mối' },
+  { id: '2', name: 'Xịt đuổi động vật', query: 'Xịt Đuổi' },
+  { id: '3', name: 'Vệ sinh nhà cửa', query: 'Nước Rửa' },
 ];
 const POPULAR_KEYWORDS = ['Body mist', 'Xịt phòng', 'Phòng khách', 'Quà tặng'];
 
@@ -180,11 +180,12 @@ export function SearchBox() {
                 Lựa chọn được xem nhiều
               </p>
               <div className="space-y-2">
-                {POPULAR_PRODUCTS.map((product) => (
-                  <Link
+                {POPULAR_SEARCHES.map((product) => (
+                  <button
                     key={product.id}
-                    to={`/p/${product.slug}`}
-                    className="group flex items-center gap-3 rounded-2xl bg-white px-3 py-3 transition hover:translate-x-1 hover:shadow-lg"
+                    type="button"
+                    onClick={() => handleSearch(product.query)}
+                    className="group flex w-full items-center gap-3 rounded-2xl bg-white px-3 py-3 text-left transition hover:translate-x-1 hover:shadow-lg"
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(145deg,rgba(255,230,206,1),rgba(194,234,216,1))] text-sm font-bold text-foreground">
                       TS
@@ -194,7 +195,7 @@ export function SearchBox() {
                       <p className="text-xs text-muted-foreground">Xem chi tiết và chọn dung tích phù hợp</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" />
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>

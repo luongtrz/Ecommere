@@ -2,6 +2,8 @@ import { Controller, Get, Patch, Post, Delete, Body, Param, UseGuards } from '@n
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { CreateAddressDto } from './dtos/create-address.dto';
 import { UpdateAddressDto } from './dtos/update-address.dto';
@@ -10,6 +12,7 @@ import { AddressEntity } from './entities/address.entity';
 
 @ApiTags('Users')
 @ApiBearerAuth('JWT-auth')
+@Roles(Role.ADMIN)
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}

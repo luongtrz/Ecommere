@@ -1,18 +1,16 @@
-# Hướng dẫn Deploy Server
+# Hướng dẫn deploy server
 
-Vào thư mục:
+Stack hiện tại chạy bằng Docker Compose và Caddy. Không dùng các lệnh PM2 cũ
+trong tài liệu trước đây.
 
-Bash
+Sau khi sync source và tạo hai file production `.env`, chạy từ thư mục repo:
 
+```bash
+./setup-azure.sh
+```
 
-Cập nhật Database (đề phòng có sửa Prisma):
+Script sẽ kiểm tra cấu hình, build image, đồng bộ schema Prisma một lần rồi
+khởi động các service. PostgreSQL phải được provision riêng và không chạy seed
+destructive trên production.
 
-Bash
-
-npx prisma migrate deploy
-Khởi động lại Backend (để nhận code mới):
-
-Bash
-
-pm2 restart shopee-api --update-env
-(Frontend không cần chạy lệnh gì cả, copy lên xong là F5 web thấy ngay).
+Chi tiết biến môi trường và DNS xem [DEPLOYMENT.md](DEPLOYMENT.md).

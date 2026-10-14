@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import { StockAdjustmentDto } from './dtos/stock-adjustment.dto';
+import { LowStockQueryDto } from './dtos/low-stock-query.dto';
 import { StockMovementEntity } from './entities/stock-movement.entity';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -9,6 +10,7 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Inventory')
+@Roles(Role.ADMIN)
 @Controller('inventory')
 export class InventoryController {
   constructor(private inventoryService: InventoryService) {}
@@ -41,10 +43,12 @@ export class InventoryController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get variants with low stock (Admin only)' })
-  @ApiQuery({ name: 'threshold', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200 })
-  async getLowStockVariants(@Query('threshold') threshold?: number) {
-    return this.inventoryService.getLowStockVariants(threshold ? parseInt(threshold.toString(), 10) : 10);
+  async getLowStockVariants(@Query() query: LowStockQueryDto = new LowStockQueryDto()) {
+    const threshold = query?.threshold ?? 10;
+    const limit = query?.limit ?? 100;
+
+    return this.inventoryService.getLowStockVariants(threshold, limit);
   }
 
   @Get('stock-levels')

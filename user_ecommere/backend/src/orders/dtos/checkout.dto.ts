@@ -1,5 +1,43 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsArray, IsObject, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsObject,
+  IsNumber,
+  IsInt,
+  Min,
+  ValidateNested,
+  IsEnum,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
+
+export enum ShippingMethod {
+  STANDARD = 'STANDARD',
+  EXPRESS = 'EXPRESS',
+}
+
+export class CheckoutItemDto {
+  @ApiProperty({ example: 'variant-id' })
+  @IsString()
+  variantId!: string;
+
+  @ApiProperty({ example: 1, minimum: 1 })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  quantity!: number;
+
+  // Kept for backwards compatibility with existing clients. The API always
+  // recalculates the price from the current product variant.
+  @ApiProperty({ example: 100000, required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  price?: number;
+}
 
 export class CheckoutDto {
   @ApiProperty({ example: 'address-id', required: false })
@@ -39,10 +77,12 @@ export class CheckoutDto {
   line1?: string;
 
   // Additional fields from frontend payload
-  @ApiProperty({ example: [{ variantId: 'variant-id', quantity: 1, price: 100000 }], required: false })
+  @ApiProperty({ type: [CheckoutItemDto], required: false })
   @IsOptional()
   @IsArray()
-  items?: { variantId: string; quantity: number; price: number }[];
+  @ValidateNested({ each: true })
+  @Type(() => CheckoutItemDto)
+  items?: CheckoutItemDto[];
 
   @ApiProperty({ example: 'COD', required: false })
   @IsOptional()
@@ -56,8 +96,8 @@ export class CheckoutDto {
 
   @ApiProperty({ example: 'STANDARD', required: false })
   @IsOptional()
-  @IsString()
-  shippingMethod?: string;
+  @IsEnum(ShippingMethod)
+  shippingMethod?: ShippingMethod;
 
   @ApiProperty({ example: 50000, required: false })
   @IsOptional()
@@ -68,4 +108,11 @@ export class CheckoutDto {
   @IsOptional()
   @IsNumber()
   total?: number;
+
+  @ApiProperty({ example: 'checkout-key-12345678', required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(64)
+  checkoutKey?: string;
 }

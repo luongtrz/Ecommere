@@ -38,7 +38,7 @@ export class ProductStatsDto {
   @ApiProperty({ description: 'Sản phẩm mới tháng này' })
   newProductsThisMonth: number;
 
-  @ApiProperty({ description: 'Sản phẩm sắp hết hàng (stock < 10)' })
+  @ApiProperty({ description: 'Sản phẩm sắp hết hàng (stock <= 10)' })
   lowStockProducts: number;
 }
 

@@ -12,6 +12,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Products')
+@Roles(Role.ADMIN)
 @Controller('products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
@@ -22,6 +23,24 @@ export class ProductsController {
   @ApiResponse({ status: 200, type: [ProductEntity] })
   async findAll(@Query() filterDto: ProductFilterDto) {
     return this.productsService.findAll(filterDto);
+  }
+
+  @Get('admin/:id')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get any product by ID (Admin only)' })
+  @ApiResponse({ status: 200, type: ProductEntity })
+  async findOneForAdmin(@Param('id') id: string) {
+    return this.productsService.findOne(id, true);
+  }
+
+  @Get('admin')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get all products including inactive products (Admin only)' })
+  @ApiResponse({ status: 200, type: [ProductEntity] })
+  async findAllForAdmin(@Query() filterDto: ProductFilterDto) {
+    return this.productsService.findAll(filterDto, true);
   }
 
   @Public()

@@ -16,6 +16,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  // Caddy is the only proxy in front of this backend (see DEPLOYMENT.md), so trust
+  // exactly one hop. Without this, req.ip is Caddy's address for every client and
+  // the per-IP rate limits are shared by all of them.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   // Global prefix
   app.setGlobalPrefix('api');
 
@@ -30,7 +35,10 @@ async function bootstrap() {
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
   // CORS
-  const corsOrigins = configService.get('CORS_ORIGIN')?.split(',') || [];
+  const corsOrigins = (configService.get<string>('CORS_ORIGIN') || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
   app.enableCors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, curl, Postman)
@@ -76,14 +84,19 @@ async function bootstrap() {
     new TransformInterceptor(),
   );
 
-  // Swagger
-  setupSwagger(app);
+  // Swagger is served outside production only (the Dockerfile sets NODE_ENV=production)
+  const swaggerEnabled = configService.get('NODE_ENV') !== 'production';
+  if (swaggerEnabled) {
+    setupSwagger(app);
+  }
 
   const port = configService.get('PORT') || 4000;
   await app.listen(port);
 
   console.log(`🚀 Server running on http://localhost:${port}`);
-  console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
+  if (swaggerEnabled) {
+    console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
+  }
 }
 
 bootstrap();

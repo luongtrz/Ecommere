@@ -15,6 +15,7 @@ interface WishlistState {
     removeItem: (productId: string) => void;
     isInWishlist: (productId: string) => boolean;
     toggleItem: (item: WishlistItem) => void;
+    clearWishlist: () => void;
 }
 
 export const useWishlist = create<WishlistState>()(
@@ -40,6 +41,9 @@ export const useWishlist = create<WishlistState>()(
                 } else {
                     set({ items: [...items, item] });
                 }
+            },
+            clearWishlist: () => {
+                set({ items: [] });
             }
         }),
         {

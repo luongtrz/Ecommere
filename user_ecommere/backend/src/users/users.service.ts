@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { CreateAddressDto } from './dtos/create-address.dto';
@@ -30,21 +31,27 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, updateUserDto: UpdateUserDto) {
-    const user = await this.prisma.user.update({
-      where: { id: userId },
-      data: updateUserDto,
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        name: true,
-        phone: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: updateUserDto,
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          name: true,
+          phone: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('Số điện thoại đã được đăng ký');
+      }
 
-    return user;
+      throw error;
+    }
   }
 
   async getAddresses(userId: string) {
@@ -60,45 +67,47 @@ export class UsersService {
   async createAddress(userId: string, createAddressDto: CreateAddressDto) {
     const { isDefault, ...addressData } = createAddressDto;
 
-    // If this is set as default, unset all other defaults
-    if (isDefault) {
-      await this.prisma.address.updateMany({
-        where: { userId, isDefault: true },
-        data: { isDefault: false },
+    return this.runSerializableTransaction(async (tx) => {
+      // If this is set as default, unset all other defaults in the same transaction.
+      if (isDefault) {
+        await tx.address.updateMany({
+          where: { userId, isDefault: true },
+          data: { isDefault: false },
+        });
+      }
+
+      return tx.address.create({
+        data: {
+          ...addressData,
+          userId,
+          isDefault: isDefault || false,
+        },
       });
-    }
-
-    const address = await this.prisma.address.create({
-      data: {
-        ...addressData,
-        userId,
-        isDefault: isDefault || false,
-      },
     });
-
-    return address;
   }
 
   async updateAddress(userId: string, addressId: string, updateAddressDto: UpdateAddressDto) {
-    const address = await this.prisma.address.findFirst({
-      where: { id: addressId, userId },
-    });
-
-    if (!address) {
-      throw new NotFoundException('Address not found');
-    }
-
-    // If setting as default, unset all other defaults
-    if (updateAddressDto.isDefault) {
-      await this.prisma.address.updateMany({
-        where: { userId, isDefault: true, id: { not: addressId } },
-        data: { isDefault: false },
+    return this.runSerializableTransaction(async (tx) => {
+      const address = await tx.address.findFirst({
+        where: { id: addressId, userId },
       });
-    }
 
-    return this.prisma.address.update({
-      where: { id: addressId },
-      data: updateAddressDto,
+      if (!address) {
+        throw new NotFoundException('Address not found');
+      }
+
+      // If setting as default, unset all other defaults in the same transaction.
+      if (updateAddressDto.isDefault) {
+        await tx.address.updateMany({
+          where: { userId, isDefault: true, id: { not: addressId } },
+          data: { isDefault: false },
+        });
+      }
+
+      return tx.address.update({
+        where: { id: addressId },
+        data: updateAddressDto,
+      });
     });
   }
 
@@ -116,5 +125,29 @@ export class UsersService {
     });
 
     return { message: 'Address deleted successfully' };
+  }
+
+  private async runSerializableTransaction<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(operation, {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2034' &&
+          attempt < 2
+        ) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new BadRequestException('Address update could not be completed; please retry');
   }
 }

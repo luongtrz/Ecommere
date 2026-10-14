@@ -23,6 +23,8 @@ export function useCreateProduct() {
         mutationFn: adminProductsApi.create,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRODUCTS] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_PRODUCTS] });
+            queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-stats'] });
         },
     });
 }
@@ -38,7 +40,9 @@ export function useUpdateProduct() {
             adminProductsApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRODUCTS] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_PRODUCTS] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRODUCT_DETAIL] });
+            queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-stats'] });
         },
     });
 }
@@ -53,6 +57,8 @@ export function useDeleteProduct() {
         mutationFn: adminProductsApi.delete,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRODUCTS] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_PRODUCTS] });
+            queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-stats'] });
         },
     });
 }

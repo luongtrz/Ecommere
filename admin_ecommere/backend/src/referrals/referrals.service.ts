@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CouponType } from '@prisma/client';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
@@ -45,21 +45,33 @@ export class ReferralsService {
 
         if (!existing) {
             // Tạo mới nếu chưa có
-            return this.prisma.referralConfig.create({
-                data: {
-                    active: dto.active ?? true,
-                    referrerCouponType: dto.referrerCouponType ?? CouponType.PERCENT,
-                    referrerCouponValue: dto.referrerCouponValue ?? 10,
-                    referrerMaxDiscount: dto.referrerMaxDiscount,
-                    refereeCouponType: dto.refereeCouponType ?? CouponType.PERCENT,
-                    refereeCouponValue: dto.refereeCouponValue ?? 5,
-                    refereeMaxDiscount: dto.refereeMaxDiscount,
-                    minOrderForCoupon: dto.minOrderForCoupon,
-                    couponValidDays: dto.couponValidDays ?? 30,
-                    maxReferralsPerUser: dto.maxReferralsPerUser,
-                },
-            });
+            const data = {
+                active: dto.active ?? true,
+                referrerCouponType: dto.referrerCouponType ?? CouponType.PERCENT,
+                referrerCouponValue: dto.referrerCouponValue ?? 10,
+                referrerMaxDiscount: dto.referrerMaxDiscount,
+                refereeCouponType: dto.refereeCouponType ?? CouponType.PERCENT,
+                refereeCouponValue: dto.refereeCouponValue ?? 5,
+                refereeMaxDiscount: dto.refereeMaxDiscount,
+                minOrderForCoupon: dto.minOrderForCoupon,
+                couponValidDays: dto.couponValidDays ?? 30,
+                maxReferralsPerUser: dto.maxReferralsPerUser,
+            };
+
+            this.validateCouponConfig(data.referrerCouponType, data.referrerCouponValue, data.couponValidDays);
+            this.validateCouponConfig(data.refereeCouponType, data.refereeCouponValue, data.couponValidDays);
+
+            return this.prisma.referralConfig.create({ data });
         }
+
+        const effectiveReferrerType = dto.referrerCouponType ?? existing.referrerCouponType;
+        const effectiveReferrerValue = dto.referrerCouponValue ?? existing.referrerCouponValue;
+        const effectiveRefereeType = dto.refereeCouponType ?? existing.refereeCouponType;
+        const effectiveRefereeValue = dto.refereeCouponValue ?? existing.refereeCouponValue;
+        const effectiveValidDays = dto.couponValidDays ?? existing.couponValidDays;
+
+        this.validateCouponConfig(effectiveReferrerType, effectiveReferrerValue, effectiveValidDays);
+        this.validateCouponConfig(effectiveRefereeType, effectiveRefereeValue, effectiveValidDays);
 
         return this.prisma.referralConfig.update({
             where: { id: existing.id },
@@ -146,5 +158,15 @@ export class ReferralsService {
             hasNextPage: page < Math.ceil(total / limit),
             hasPreviousPage: page > 1,
         };
+    }
+
+    private validateCouponConfig(type: CouponType, value: number, validDays: number) {
+        if (value < 0 || (type === CouponType.PERCENT && value > 100)) {
+            throw new BadRequestException('Invalid referral coupon value');
+        }
+
+        if (validDays < 1) {
+            throw new BadRequestException('Referral coupon validity must be at least one day');
+        }
     }
 }

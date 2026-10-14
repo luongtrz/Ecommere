@@ -1,10 +1,26 @@
 import apiClient, { authToken } from '@/lib/api';
+import { useCartStore } from '@/features/cart/store/cartStore';
 import { z } from 'zod';
+
+function clearCartIfAccountChanged(nextUserId: string) {
+  const previousUser = localStorage.getItem('user');
+  if (!previousUser) return;
+
+  try {
+    const previousUserId = (JSON.parse(previousUser) as { id?: unknown }).id;
+    if (previousUserId !== nextUserId) {
+      useCartStore.getState().clearCart();
+    }
+  } catch {
+    // A malformed persisted user must not leave an unknown account's cart behind.
+    useCartStore.getState().clearCart();
+  }
+}
 
 const userSchema = z.object({
   id: z.string(),
   email: z.string().nullable().optional(),
-  name: z.string(),
+  name: z.string().nullable().optional().transform((value) => value ?? ''),
   role: z.enum(['CUSTOMER', 'ADMIN']),
   phone: z.string(),
   createdAt: z.string().optional(),
@@ -16,8 +32,6 @@ const loginResponseSchema = z.object({
   expiresIn: z.string(),
 });
 
-const registerResponseSchema = loginResponseSchema;
-
 export type User = z.infer<typeof userSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
@@ -28,11 +42,10 @@ export const authApi = {
       // Backend wraps with TransformInterceptor
       const actualData = response.data.data || response.data;
 
-      console.log('Login response actualData:', actualData);
-
       const parsed = loginResponseSchema.parse(actualData);
 
       authToken.set(parsed.accessToken);
+      clearCartIfAccountChanged(parsed.user.id);
 
       // Store non-sensitive user data
       localStorage.setItem('user', JSON.stringify(parsed.user));
@@ -40,28 +53,6 @@ export const authApi = {
       return parsed;
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
-    }
-  },
-
-  async register(name: string, phone: string, password: string, email?: string): Promise<LoginResponse> {
-    try {
-      const response = await apiClient.post('/auth/register', { name, phone, password, email });
-      // Backend wraps with TransformInterceptor
-      const actualData = response.data.data || response.data;
-
-      console.log('Register response actualData:', actualData);
-
-      const parsed = registerResponseSchema.parse(actualData);
-
-      authToken.set(parsed.accessToken);
-
-      // Store non-sensitive user data
-      localStorage.setItem('user', JSON.stringify(parsed.user));
-
-      return parsed;
-    } catch (error) {
-      console.error('Register error:', error);
       throw error;
     }
   },
@@ -82,6 +73,7 @@ export const authApi = {
     } finally {
       // Clear memory token
       authToken.remove();
+      useCartStore.getState().clearCart();
       localStorage.removeItem('user');
       // Cookies will be cleared by backend
     }

@@ -22,14 +22,17 @@ describe('OrdersService', () => {
       findFirst: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
       count: jest.fn(),
     },
     productVariant: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
     coupon: {
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     cartItem: {
       deleteMany: jest.fn(),
@@ -136,6 +139,7 @@ describe('OrdersService', () => {
       });
       mockPrismaService.order.create.mockResolvedValue(mockOrder);
       mockPrismaService.order.count.mockResolvedValue(0);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({ stock: 8 });
 
       const result = await service.checkout('user1', { addressId: 'addr1' });
 
@@ -288,7 +292,13 @@ describe('OrdersService', () => {
       };
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
-      mockPrismaService.order.update.mockResolvedValue(updatedOrder);
+      mockPrismaService.order.findUnique
+        .mockResolvedValueOnce(mockOrder)
+        .mockResolvedValueOnce(updatedOrder);
+      mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
 
       const result = await service.updateOrderStatus('order1', { status: OrderStatus.PAID });
 
@@ -349,7 +359,11 @@ describe('OrdersService', () => {
         return callback(mockPrismaService);
       });
       mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
-      mockPrismaService.order.update.mockResolvedValue(cancelledOrder);
+      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.order.findUnique
+        .mockResolvedValueOnce(mockOrder)
+        .mockResolvedValueOnce(cancelledOrder);
 
       const result = await service.cancelOrder('user1', 'order1');
 
@@ -363,7 +377,7 @@ describe('OrdersService', () => {
       await expect(service.cancelOrder('user1', 'invalid')).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw BadRequestException when order belongs to different user', async () => {
+    it('should throw NotFoundException when order belongs to different user', async () => {
       const mockOrder = {
         id: 'order1',
         userId: 'user2',
@@ -373,8 +387,8 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(BadRequestException);
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Unauthorized');
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(NotFoundException);
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Order not found');
     });
 
     it('should throw BadRequestException when order cannot be cancelled', async () => {

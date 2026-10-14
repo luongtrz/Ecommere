@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import { CreateReviewDto } from './dtos/create-review.dto';
 import { UpdateReviewDto } from './dtos/update-review.dto';
 import { ReviewFilterDto } from './dtos/review-filter.dto';
@@ -41,23 +41,31 @@ export class ReviewsService {
       throw new BadRequestException('You have already reviewed this product');
     }
 
-    return this.prisma.review.create({
-      data: {
-        userId,
-        productId,
-        rating,
-        content,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+    try {
+      return await this.prisma.review.create({
+        data: {
+          userId,
+          productId,
+          rating,
+          content,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException('You have already reviewed this product');
+      }
+
+      throw error;
+    }
   }
 
   async getProductReviews(productId: string, filterDto: ReviewFilterDto) {
@@ -80,7 +88,6 @@ export class ReviewsService {
             select: {
               id: true,
               name: true,
-              email: true,
             },
           },
         },
@@ -143,7 +150,7 @@ export class ReviewsService {
     }
 
     if (review.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new ForbiddenException('Unauthorized');
     }
 
     return this.prisma.review.update({
@@ -178,7 +185,7 @@ export class ReviewsService {
     }
 
     if (review.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new ForbiddenException('Unauthorized');
     }
 
     await this.prisma.review.delete({

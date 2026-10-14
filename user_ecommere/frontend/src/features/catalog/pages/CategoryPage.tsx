@@ -1,5 +1,5 @@
 import { useParams, useSearchParams } from 'react-router-dom';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { SEO } from '@/lib/seo';
 import { useCategoryBySlug } from '../hooks/useCategories';
 import { useProducts } from '../hooks/useProducts';
@@ -7,12 +7,13 @@ import { ProductCard } from '@/components/common/ProductCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Breadcrumb } from '@/components/common/Breadcrumb';
+import { Pagination } from '@/components/common/Pagination';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
+import { PAGINATION, PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { Search, ShoppingBag, Grid3X3, List, Filter, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { FilterSidebar } from '../components/FilterSidebar';
@@ -22,9 +23,27 @@ import { useDebounce } from '@/hooks/useDebounce';
 export function CategoryPage() {
   const { categorySlug } = useParams<{ categorySlug: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const pageParam = parseInt(searchParams.get('page') || '1', 10);
+  const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
   const searchQuery = searchParams.get('q') || '';
+
+  // Track category changes to reset page to 1
+  const prevCategorySlugRef = useRef(categorySlug);
+  const isCategoryChanged = prevCategorySlugRef.current !== categorySlug;
+  const currentPage = isCategoryChanged ? 1 : page;
+
+  useEffect(() => {
+    if (prevCategorySlugRef.current !== categorySlug) {
+      prevCategorySlugRef.current = categorySlug;
+      if (searchParams.get('page') && searchParams.get('page') !== '1') {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('page', '1');
+        setSearchParams(newParams, { replace: true });
+      }
+    }
+  }, [categorySlug, searchParams, setSearchParams]);
 
   // Debounced search: local state for input, debounce before updating URL
   const [searchInput, setSearchInput] = useState(searchQuery);
@@ -39,6 +58,8 @@ export function CategoryPage() {
 
   const { data: category, isLoading: isCategoryLoading } = useCategoryBySlug(categorySlug!);
   const { data: products, isLoading: isProductsLoading } = useProducts({
+    page: currentPage,
+    limit: PAGINATION.DEFAULT_LIMIT,
     categorySlug,
     sortBy: sortBy as any,
     search: searchQuery || undefined,
@@ -77,6 +98,10 @@ export function CategoryPage() {
     setSearchInput(searchQuery);
   }, [searchQuery]);
 
+  const handlePageChange = (newPage: number) => {
+    updateParams({ page: newPage.toString() });
+  };
+
   const handleSortChange = (value: string) => {
     updateParams({ sort: value, page: '1' });
   };
@@ -99,7 +124,7 @@ export function CategoryPage() {
       variantId: variant.id,
       name: product.name,
       image: product.images[0],
-      price: variant.salePrice || variant.price,
+      price: variant.salePrice ?? variant.price,
       scent: variant.scent,
       volumeMl: variant.volumeMl,
     });
@@ -280,6 +305,7 @@ export function CategoryPage() {
                           price={product.basePrice}
                           rating={product.rating}
                           reviewCount={product.reviewCount}
+                          variants={product.variants}
                           onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                         />
                       ) : (
@@ -316,6 +342,16 @@ export function CategoryPage() {
                       )
                     ))}
                   </div>
+
+                  {products && products.totalPages > 1 && (
+                    <div className="flex justify-center pt-8 border-t border-white/40">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={products.totalPages}
+                        onPageChange={handlePageChange}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

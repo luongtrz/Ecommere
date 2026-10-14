@@ -4,6 +4,7 @@ import { authApi, type User } from '../api/auth.api';
 import { QUERY_KEYS } from '@/lib/constants';
 import { useToast } from '@/hooks/useToast';
 import { AxiosError } from 'axios';
+import { useChatStore } from '@/features/chatbot/store/chatStore';
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -33,29 +34,17 @@ export function useAuth() {
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: ({ name, phone, password, email }: { name: string; phone: string; password: string; email?: string }) =>
-      authApi.register(name, phone, password, email),
-    onSuccess: (data) => {
-      queryClient.setQueryData([QUERY_KEYS.USER], data.user);
-      toast.success(`Đăng ký thành công! Chào mừng ${data.user.name}!`);
-      navigate('/');
-    },
-    onError: (error: AxiosError<any>) => {
-      const message = error.response?.data?.message || 'Đăng ký thất bại. Số điện thoại có thể đã được sử dụng.';
-      toast.error(message);
-    },
-  });
-
   const logout = async () => {
     try {
       await authApi.logout();
+      useChatStore.getState().reset();
       queryClient.setQueryData([QUERY_KEYS.USER], null);
       queryClient.clear();
       toast.info('Đã đăng xuất thành công');
       navigate('/login');
     } catch (error) {
       // Even if logout fails, clear local state
+      useChatStore.getState().reset();
       queryClient.setQueryData([QUERY_KEYS.USER], null);
       queryClient.clear();
       navigate('/login');
@@ -66,6 +55,7 @@ export function useAuth() {
     try {
       const updatedUser = await authApi.getProfile();
       queryClient.setQueryData([QUERY_KEYS.USER], updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     } catch (error) {
       console.error('Failed to refresh user:', error);
@@ -77,12 +67,9 @@ export function useAuth() {
     user,
     isLoading,
     login: loginMutation.mutate,
-    register: registerMutation.mutate,
     logout,
     refreshUser,
     isLoginLoading: loginMutation.isPending,
-    isRegisterLoading: registerMutation.isPending,
     loginError: loginMutation.error as AxiosError<any> | null,
-    registerError: registerMutation.error as AxiosError<any> | null,
   };
 }

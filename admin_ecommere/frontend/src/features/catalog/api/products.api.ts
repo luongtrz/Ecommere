@@ -9,6 +9,7 @@ const variantSchema = z.object({
   salePrice: z.number().optional().nullable(),
   stock: z.number(),
   sku: z.string(),
+  barcode: z.string().optional().nullable(),
 });
 
 const productSchema = z.object({
@@ -25,6 +26,7 @@ const productSchema = z.object({
   }).optional(),
   variants: z.array(variantSchema),
   basePrice: z.number(),
+  active: z.boolean(),
   averageRating: z.number().optional(), // Backend returns averageRating
   reviewCount: z.number().optional(),
   createdAt: z.string(),
@@ -58,23 +60,30 @@ export interface ProductFilters {
   sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'best_selling' | 'rating';
 }
 
+async function getAllFromPath(path: string, filters: ProductFilters = {}): Promise<ProductsResponse> {
+  const response = await apiClient.get(path, { params: filters });
+
+  // Backend wraps with TransformInterceptor: { data: <actual_data>, statusCode, timestamp }
+  const actualData = response.data.data || response.data;
+
+  const mapped = {
+    products: actualData.data || [],
+    total: actualData.total || 0,
+    page: actualData.page || 1,
+    limit: actualData.limit || 12,
+    totalPages: actualData.totalPages || 1,
+  };
+
+  return productsResponseSchema.parse(mapped);
+}
+
 export const productsApi = {
   async getAll(filters: ProductFilters = {}): Promise<ProductsResponse> {
-    const response = await apiClient.get('/products', { params: filters });
+    return getAllFromPath('/products', filters);
+  },
 
-    // Backend wraps with TransformInterceptor: { data: <actual_data>, statusCode, timestamp }
-    // Then actual_data has structure: { data: [...products], total, page, ... }
-    const actualData = response.data.data || response.data;
-
-    const mapped = {
-      products: actualData.data || [],
-      total: actualData.total || 0,
-      page: actualData.page || 1,
-      limit: actualData.limit || 12,
-      totalPages: actualData.totalPages || 1,
-    };
-
-    return productsResponseSchema.parse(mapped);
+  async getAllAdmin(filters: ProductFilters = {}): Promise<ProductsResponse> {
+    return getAllFromPath('/products/admin', filters);
   },
 
   async getBySlug(slug: string): Promise<Product> {

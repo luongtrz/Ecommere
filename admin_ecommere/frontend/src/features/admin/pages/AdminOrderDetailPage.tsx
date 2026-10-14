@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useAdminOrder, useUpdateOrderStatus } from '../hooks/useAdminOrders';
-import { formatCurrency, formatDateTime } from '@/lib/utils';
+import { formatCurrency, formatDateTime, parseShippingAddress } from '@/lib/utils';
 import { ArrowLeft, Package, User, MapPin, CreditCard, Clock, CheckCircle } from 'lucide-react';
 import type { OrderStatus } from '../api/admin-orders.api';
 import { useToast } from '@/hooks/useToast';
@@ -33,10 +33,10 @@ const ORDER_STATUS_MAP: Record<
 
 const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
     PENDING_PAYMENT: ['PAID', 'CANCELED'],
-    PAID: ['PACKING', 'CANCELED', 'REFUNDED'],
-    PACKING: ['SHIPPED', 'REFUNDED'],
-    SHIPPED: ['DELIVERED', 'REFUNDED'],
-    DELIVERED: [],
+    PAID: ['PACKING', 'CANCELED'],
+    PACKING: ['SHIPPED', 'CANCELED'],
+    SHIPPED: ['DELIVERED'],
+    DELIVERED: ['REFUNDED'],
     CANCELED: [],
     REFUNDED: [],
 };
@@ -53,7 +53,7 @@ export function AdminOrderDetailPage() {
     // Parse addressJson if it exists
     const order = rawOrder ? {
         ...rawOrder,
-        shippingAddress: rawOrder.addressJson ? JSON.parse(rawOrder.addressJson) : null
+        shippingAddress: parseShippingAddress(rawOrder.addressJson)
     } : null;
 
     const handleUpdateStatus = async (newStatus: OrderStatus) => {
@@ -182,7 +182,7 @@ export function AdminOrderDetailPage() {
                                                 <p className="font-medium text-sm">{formatCurrency(item.unitPrice)}</p>
                                                 <p className="text-xs text-muted-foreground">x{item.quantity}</p>
                                                 <p className="font-medium text-sm mt-0.5 text-primary">
-                                                    {formatCurrency(item.unitPrice * item.quantity)}
+                                                    {formatCurrency(item.lineTotal)}
                                                 </p>
                                             </div>
                                         </div>

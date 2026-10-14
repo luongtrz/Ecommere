@@ -1,11 +1,30 @@
 import { Module } from '@nestjs/common';
 import { ChatbotController } from './chatbot.controller';
-import { ChatbotService } from './chatbot.service';
-import { ChatbotHistoryService } from './chatbot-history.service';
 import { ChatbotRetrievalService } from './chatbot-retrieval.service';
+import { agentProviders } from './agent/agent.providers';
+import { CheckpointRetentionService } from './checkpoint-retention.service';
+import { ProductsModule } from '../products/products.module';
+import { CategoriesModule } from '../categories/categories.module';
+import { UsersModule } from '../users/users.module';
+import { ReferralsModule } from '../referrals/referrals.module';
+import { OrdersModule } from '../orders/orders.module';
+import { ReviewsModule } from '../reviews/reviews.module';
+import { CouponsModule } from '../coupons/coupons.module';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
+  imports: [
+    ProductsModule,
+    CategoriesModule,
+    UsersModule,
+    ReferralsModule,
+    OrdersModule,
+    ReviewsModule,
+    CouponsModule,
+    CartModule,
+  ],
   controllers: [ChatbotController],
-  providers: [ChatbotService, ChatbotHistoryService, ChatbotRetrievalService],
+  providers: [ChatbotRetrievalService, ...agentProviders],
+  exports: [CheckpointRetentionService],
 })
 export class ChatbotModule {}

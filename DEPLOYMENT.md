@@ -1,68 +1,76 @@
-# Deployment Scripts for Azure VM
+# Deployment
 
-## Quick Deploy
+The production stack is the root `compose.yaml`: Caddy, the user frontend/backend, and the admin frontend/backend. PostgreSQL is external and must be provisioned separately.
 
-### 1. Deploy from Windows to Azure VM
+## Prerequisites
+
+- Docker Engine with Docker Compose v2 on the target host.
+- A PostgreSQL database reachable by both backends.
+- Cloudinary credentials for image uploads.
+- DNS for the hostnames in `deploy/caddy/Caddyfile`.
+- An OpenAI API key for the chatbot (`OPENAI_API_KEY` in the backend environment). Without it the chat endpoints answer 503.
+
+## Deploy
+
+From the repository root, provide the target connection details without putting them in the script or in Git:
+
 ```bash
+REMOTE_USER=deploy \
+REMOTE_HOST=your-server.example.com \
+SSH_KEY=/path/to/private-key \
+REMOTE_PATH=/home/deploy/thaispray \
 ./deploy-to-azure.sh
 ```
 
-This will:
-- Sync only necessary files (excludes node_modules, dist, logs, etc.)
-- Use rsync for efficient transfer
-- Preserve file permissions
+On the target host:
 
-### 2. Setup on Azure VM
-SSH into the VM and run:
 ```bash
-ssh -i C:/Users/ADMIN/.ssh/id_rsa_azure_luong luongazure@20.2.66.240
-cd ~/shopeeThai
-chmod +x setup-azure.sh
+cd /home/deploy/thaispray
+cp user_ecommere/backend/.env.example user_ecommere/backend/.env
+cp admin_ecommere/backend/.env.example admin_ecommere/backend/.env
+# Edit both .env files with production values; never commit them.
 ./setup-azure.sh
 ```
 
-This will:
-- Install Node.js 20.x
-- Install PostgreSQL
-- Create database and user
-- Setup .env files
-- Install dependencies
-- Run migrations and seed
-- Build frontend and backend
-- Start services with PM2
+`setup-azure.sh` validates required secrets, builds the images, synchronizes the
+Prisma schema once, and starts the Compose stack. The schema sync is explicit
+and runs before the application containers start; backend restarts do not mutate
+the production schema. It does not provision PostgreSQL, generate credentials,
+seed data, or print environment files.
 
-## Manual Commands
+This repository currently does not commit Prisma migration directories, so the
+setup step uses `prisma db push` (executed in `setup-azure.sh` via
+`docker compose run --rm --no-deps backend npx prisma db push --skip-generate`).
+Review schema changes before running it against production and do not use the
+destructive seed there. The agent tables (`AgentThread` and `AgentToolLog`) are
+created by this same `prisma db push` step. On application startup, the backend
+initializes the LangGraph Postgres checkpointer, which automatically calls its
+`setup()` method to create the checkpoint tables in the PostgreSQL schema named by
+`AGENT_CHECKPOINT_SCHEMA` (defaults to `agent`).
 
-### Deploy only
+## Local seed data
+
+The Prisma seed is destructive and now requires explicit credentials:
+
 ```bash
-rsync -avz --progress \
-  -e "ssh -i C:/Users/ADMIN/.ssh/id_rsa_azure_luong -p 22" \
-  --exclude='node_modules' \
-  --exclude='dist' \
-  --exclude='.git' \
-  --exclude='uploads' \
-  --exclude='*.log' \
-  ./ luongazure@20.2.66.240:~/shopeeThai/
+SEED_DATABASE=true \
+SEED_ADMIN_PASSWORD='choose-a-local-admin-password' \
+SEED_USER_PASSWORD='choose-a-local-user-password' \
+npm run prisma:seed
 ```
 
-### Quick restart services
+Do not run the seed against production.
+
+## Operations
+
 ```bash
-ssh luongazure@20.2.66.240 "cd ~/shopeeThai && pm2 restart all"
+docker compose ps
+docker compose logs -f backend admin-backend
+docker compose restart backend admin-backend
 ```
 
-### View logs
-```bash
-ssh luongazure@20.2.66.240 "pm2 logs"
-```
+Public access is provided through the configured Caddy hostnames. Keep the backend ports private to the Docker network and terminate TLS at Caddy.
 
-## Access Points
+### Chat streaming
 
-After deployment:
-- **Frontend**: http://20.2.66.240:3000
-- **Backend API**: http://20.2.66.240:4000/api
-- **Swagger Docs**: http://20.2.66.240:4000/api
-
-## Default Credentials
-
-- **Admin**: admin@shop.local / Admin@123
-- **Customer**: user@shop.local / User@123
+The chat uses Server-Sent Events (SSE), so Caddy must not buffer them. After a deploy, send one chat message and confirm the reply arrives in pieces. If it arrives in one block, add `flush_interval -1` to the `reverse_proxy` of the `/api/chatbot/*` and `/api/admin/chatbot/*` routes in `deploy/caddy/Caddyfile`.

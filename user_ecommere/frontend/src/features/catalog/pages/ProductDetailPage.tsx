@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
 import { useProductDetail } from '../hooks/useProductDetail';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 import { useCart } from '@/features/cart/hooks/useCart';
+import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { formatCurrency, formatDiscount } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
 import { ShoppingCart, Minus, Plus, Heart, Truck, Shield, RefreshCw, ArrowLeft, Search, FileText, Info } from 'lucide-react';
@@ -19,12 +20,20 @@ export function ProductDetailPage() {
   const { productSlug } = useParams<{ productSlug: string }>();
   const { data: product, isLoading } = useProductDetail(productSlug!);
   const { addItem } = useCart();
+  const { toggleItem, isInWishlist } = useWishlist();
 
   const [selectedVariantId, setSelectedVariantId] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  useEffect(() => {
+    setSelectedVariantId('');
+    setQuantity(1);
+    setSelectedImage(0);
+  }, [productSlug]);
+
   const selectedVariant = product?.variants.find(v => v.id === selectedVariantId) || product?.variants[0];
+  const isWishlisted = product ? isInWishlist(product.id) : false;
 
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
@@ -34,13 +43,25 @@ export function ProductDetailPage() {
       variantId: selectedVariant.id,
       name: product.name,
       image: product.images[0],
-      price: selectedVariant.salePrice || selectedVariant.price,
+      price: selectedVariant.salePrice ?? selectedVariant.price,
       quantity,
       scent: selectedVariant.scent,
       volumeMl: selectedVariant.volumeMl,
     });
 
     setQuantity(1);
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+
+    toggleItem({
+      productId: product.id,
+      name: product.name,
+      slug: product.slug,
+      image: product.images[0],
+      price: selectedVariant?.salePrice ?? selectedVariant?.price ?? 0,
+    });
   };
 
   if (isLoading) {
@@ -68,9 +89,9 @@ export function ProductDetailPage() {
     );
   }
 
-  const finalPrice = selectedVariant?.salePrice || selectedVariant?.price || 0;
-  const originalPrice = selectedVariant?.price || 0;
-  const hasDiscount = selectedVariant?.salePrice && selectedVariant.salePrice < originalPrice;
+  const finalPrice = selectedVariant?.salePrice ?? selectedVariant?.price ?? 0;
+  const originalPrice = selectedVariant?.price ?? 0;
+  const hasDiscount = selectedVariant?.salePrice != null && selectedVariant.salePrice < originalPrice;
 
   return (
     <>
@@ -113,7 +134,7 @@ export function ProductDetailPage() {
                 />
                 {hasDiscount && (
                   <Badge className="absolute top-4 right-4 bg-primary text-secondary hover:bg-primary/90 px-3.5 py-1.5 text-xs font-bold shadow-lg rounded-full">
-                    -{formatDiscount(originalPrice, finalPrice)}
+                    {formatDiscount(originalPrice, finalPrice)}
                   </Badge>
                 )}
               </div>
@@ -222,8 +243,14 @@ export function ProductDetailPage() {
                       <ShoppingCart className="mr-2 h-4 w-4" />
                       {selectedVariant?.stock === 0 ? 'Tạm hết hàng' : 'Thêm vào giỏ'}
                     </Button>
-                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-full hover:text-red-500 active:scale-90 transition-all border-white/80 bg-white/40">
-                      <Heart className="h-5 w-5" />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleToggleWishlist}
+                      aria-label={isWishlisted ? 'Bỏ khỏi danh sách yêu thích' : 'Thêm vào danh sách yêu thích'}
+                      className={`h-12 w-12 rounded-full active:scale-90 transition-all border-white/80 bg-white/40 ${isWishlisted ? 'text-red-500 hover:text-red-600' : 'hover:text-red-500'}`}
+                    >
+                      <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500' : ''}`} />
                     </Button>
                   </div>
                 </div>

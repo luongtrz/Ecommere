@@ -12,16 +12,6 @@ export const PRODUCT_SCENTS = [
 
 export const PRODUCT_VOLUMES = [50, 100, 150, 200, 300, 500] as const;
 
-export const ORDER_STATUS = {
-  PENDING: 'Chờ xác nhận',
-  CONFIRMED: 'Đã xác nhận',
-  PROCESSING: 'Đang xử lý',
-  SHIPPING: 'Đang giao hàng',
-  DELIVERED: 'Đã giao hàng',
-  CANCELLED: 'Đã hủy',
-  REFUNDED: 'Đã hoàn tiền',
-} as const;
-
 export const PAYMENT_METHODS = [
   { id: 'COD', name: 'Thanh toán khi nhận hàng (COD)' },
   { id: 'BANK_TRANSFER', name: 'Chuyển khoản ngân hàng' },

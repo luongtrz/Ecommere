@@ -1,68 +1,37 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { isAxiosError } from 'axios';
-import { Bot, Loader2, SendHorizonal, Sparkles, Trash2, X, ArrowUpRight } from 'lucide-react';
-import { toast } from 'sonner';
-import { chatbotApi, type ChatbotRole, type ChatbotSource } from '../api/chatbot.api';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import {
+  Bot,
+  Loader2,
+  SendHorizonal,
+  Sparkles,
+  Plus,
+  X,
+  ArrowUpRight,
+} from 'lucide-react';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { cn, getImageUrl } from '@/lib/utils';
-import { useProductDetail } from '@/features/catalog/hooks/useProductDetail';
-import { formatCurrency } from '@/lib/formatters';
+import { useChatAgent } from '../hooks/useChatAgent';
+import { useChatStore } from '../store/chatStore';
+import { formatChatOwnerKey } from '../lib/session';
+import { ToolCallCard } from './ToolCallCard';
+import { ConfirmActionCard } from './ConfirmActionCard';
+import { ChatMarkdown } from './ChatMarkdown';
+import type { ChatSource } from '../types';
 
-interface ChatMessage {
-  id: string;
-  role: ChatbotRole;
-  content: string;
-  createdAt: string;
-  sources?: ChatbotSource[];
-}
+const MAX_MESSAGE_LENGTH = 4000;
 
-const STORAGE_KEY = 'thai-spray-chatbot-messages';
-const SESSION_STORAGE_KEY = 'thai-spray-chatbot-session-id';
 const SUGGESTIONS = [
   'Tư vấn mùi xịt phòng cho phòng khách',
   'Nên chọn dung tích nào cho gia đình?',
   'Hướng dẫn sử dụng để mùi bền hơn',
 ];
+
 const WELCOME_MESSAGE =
   'Xin chào! Tôi là chuyên gia tư vấn mùi hương của Thai Spray. Tôi có thể gợi ý mùi hương cho phòng khách, phòng ngủ, xe hơi hoặc quà tặng phù hợp nhất cho bạn.';
-const LEGACY_MESSAGE_REWRITES: Record<string, string> = {
-  'Xin chao, toi la tro ly Thai Spray. Ban co the hoi ve san pham, mui huong, cach dung hoac don hang.':
-    WELCOME_MESSAGE,
-  'Xin chào, tôi là trợ lý Thai Spray. Bạn có thể hỏi về sản phẩm, mùi hương, cách dùng hoặc đơn hàng.':
-    WELCOME_MESSAGE,
-};
 
-function createChatMessage(role: ChatbotRole, content: string, sources?: ChatbotSource[]): ChatMessage {
-  return {
-    id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    role,
-    content,
-    createdAt: new Date().toISOString(),
-    sources,
-  };
-}
-
-function ChatbotSourceItem({ source }: { source: ChatbotSource }) {
-  const { data: product, isLoading } = useProductDetail(source.slug);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-2 p-2 rounded-2xl border border-slate-100 bg-white/60 animate-pulse w-full">
-        <div className="h-10 w-10 rounded-xl bg-slate-200 shrink-0" />
-        <div className="flex-1 space-y-1.5 min-w-0">
-          <div className="h-3 bg-slate-200 rounded w-5/6" />
-          <div className="h-2.5 bg-slate-200 rounded w-1/2" />
-        </div>
-      </div>
-    );
-  }
-
-  const price = product?.variants?.[0]?.salePrice || product?.variants?.[0]?.price || product?.basePrice || 0;
-  const image = product?.images?.[0] || '';
-
+function ChatbotSourceItem({ source }: { source: ChatSource }) {
   return (
     <a
       href={`/p/${source.slug}`}
@@ -70,23 +39,15 @@ function ChatbotSourceItem({ source }: { source: ChatbotSource }) {
       rel="noopener noreferrer"
       className="flex items-center gap-2.5 p-2 rounded-2xl border border-slate-100 bg-white hover:bg-secondary/40 hover:border-primary/20 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 group w-full shadow-sm active:scale-[0.99]"
     >
-      <div className="h-10 w-10 rounded-xl overflow-hidden bg-secondary/30 border border-slate-100 shrink-0">
-        {image ? (
-          <img
-            src={getImageUrl(image, { width: 100 })}
-            alt={source.name}
-            className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
-          />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center font-bold text-[10px] text-muted-foreground">TS</div>
-        )}
+      <div className="h-10 w-10 rounded-xl overflow-hidden bg-secondary/30 border border-slate-100 shrink-0 flex items-center justify-center font-bold text-[10px] text-muted-foreground">
+        TS
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[11px] font-bold text-foreground leading-snug truncate group-hover:text-primary transition-colors">
           {source.name}
         </p>
         <p className="text-[10px] font-bold text-primary mt-0.5">
-          {price > 0 ? formatCurrency(price) : 'Xem chi tiết'}
+          Xem chi tiết
         </p>
       </div>
       <ArrowUpRight className="h-3 w-3 text-muted-foreground opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all shrink-0 mr-0.5" />
@@ -94,152 +55,81 @@ function ChatbotSourceItem({ source }: { source: ChatbotSource }) {
   );
 }
 
-function createSessionId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `chat_${crypto.randomUUID()}`;
-  }
-
-  return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function getInitialMessages(): ChatMessage[] {
-  return [createChatMessage('assistant', WELCOME_MESSAGE)];
-}
-
-function normalizeMessage(value: unknown) {
-  if (Array.isArray(value)) {
-    return value.join(', ');
-  }
-
-  if (typeof value === 'string' && value.trim()) {
-    return value;
-  }
-
-  return null;
-}
-
-function getErrorMessage(error: unknown) {
-  if (isAxiosError(error)) {
-    return (
-      normalizeMessage(error.response?.data?.message) ||
-      normalizeMessage(error.response?.data?.error) ||
-      error.message ||
-      'Không thể kết nối chatbot lúc này.'
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return 'Không thể kết nối chatbot lúc này.';
-}
-
 export function ChatbotWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { open, setOpen, messages, ownerId, claimOwner } = useChatStore();
+  const { isStreaming, send, decide, newThread } = useChatAgent();
+  const { user } = useAuth();
+  const toast = useToast();
+
   const [draft, setDraft] = useState('');
-  const [lastError, setLastError] = useState<string | null>(null);
-  const [messages, setMessages] = useLocalStorage<ChatMessage[]>(STORAGE_KEY, getInitialMessages());
-  const [sessionId, setSessionId] = useLocalStorage<string>(SESSION_STORAGE_KEY, createSessionId());
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
+  const wasOpenRef = useRef(open);
 
+  const ownerKey = formatChatOwnerKey(user ? user.id : null);
+
+  // Sync conversation ownership with signed-in user or guest session
   useEffect(() => {
-    setMessages((current) => {
-      let hasChanges = false;
-
-      const nextMessages = current.map((message) => {
-        const nextContent = LEGACY_MESSAGE_REWRITES[message.content];
-
-        if (!nextContent) {
-          return message;
-        }
-
-        hasChanges = true;
-        return {
-          ...message,
-          content: nextContent,
-        };
-      });
-
-      return hasChanges ? nextMessages : current;
-    });
-  }, [setMessages]);
-
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages(getInitialMessages());
+    if (user === undefined) return;
+    if (useChatStore.getState().ownerId !== ownerKey) {
+      newThread();
+      claimOwner(ownerKey);
     }
-  }, [messages.length, setMessages]);
+  }, [user, ownerKey, newThread, claimOwner]);
 
+  const isOwnerMatch = user !== undefined && ownerId === ownerKey;
+  const visibleMessages = isOwnerMatch ? messages : [];
+
+  // Escape closes the panel
   useEffect(() => {
-    if (!sessionId) {
-      setSessionId(createSessionId());
-    }
-  }, [sessionId, setSessionId]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [isOpen, messages]);
-
-  const mutation = useMutation({
-    mutationFn: chatbotApi.sendMessage,
-    onSuccess: (data) => {
-      setLastError(null);
-      if (data.sessionId && data.sessionId !== sessionId) {
-        setSessionId(data.sessionId);
+    if (!open) return;
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
       }
-      setMessages((current) => [...current, createChatMessage('assistant', data.message, data.sources)]);
-    },
-    onError: (error) => {
-      const message = getErrorMessage(error);
-      setLastError(message);
-      toast.error(message);
-    },
-  });
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, setOpen]);
+
+  // Return focus to toggle button when panel closes
+  useEffect(() => {
+    if (wasOpenRef.current && !open) {
+      toggleButtonRef.current?.focus();
+    }
+    wasOpenRef.current = open;
+  }, [open]);
+
+  // Scroll to bottom when messages update or streaming starts
+  useEffect(() => {
+    if (!open) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [open, visibleMessages, isStreaming]);
 
   const handleSubmit = () => {
     const prompt = draft.trim();
-
-    if (!prompt || mutation.isPending || !sessionId) {
+    if (!prompt || isStreaming) {
       return;
     }
-
-    setLastError(null);
+    if (prompt.length > MAX_MESSAGE_LENGTH) {
+      toast.error(`Tin nhắn không được vượt quá ${MAX_MESSAGE_LENGTH} ký tự.`);
+      return;
+    }
     setDraft('');
-    setMessages((current) => [...current, createChatMessage('user', prompt)]);
-    mutation.mutate({ prompt, sessionId });
+    void send(prompt);
   };
 
   const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    // Enter that confirms an IME composition (Vietnamese input methods) must not send.
+    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
       handleSubmit();
     }
   };
 
-  const handleReset = () => {
-    const previousSessionId = sessionId;
-    const nextSessionId = createSessionId();
-
-    setLastError(null);
-    setDraft('');
-    setMessages(getInitialMessages());
-    setSessionId(nextSessionId);
-
-    if (previousSessionId) {
-      void chatbotApi.clearHistory(previousSessionId).catch(() => {
-        // TTL cleanup fallback
-      });
-    }
-  };
-
   return (
     <>
-      {isOpen ? (
+      {open ? (
         <div className="fixed bottom-28 right-3 z-[60] flex h-[min(80vh,700px)] w-[calc(100vw-2rem)] max-w-[460px] flex-col overflow-hidden rounded-[28px] border border-white/60 bg-white/90 backdrop-blur-2xl shadow-[0_24px_80px_rgba(24,46,37,0.25)] animate-in slide-in-from-bottom-4 duration-300 md:bottom-6 md:right-6">
           {/* Header */}
           <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-950 via-primary to-emerald-900 px-5 py-4 text-white shadow-md">
@@ -258,32 +148,64 @@ export function ChatbotWidget() {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-white hover:bg-white/10 rounded-xl"
-                onClick={handleReset}
-                title="Làm mới hội thoại"
+                onClick={() => newThread()}
+                title="Cuộc trò chuyện mới"
+                aria-label="Cuộc trò chuyện mới"
                 type="button"
               >
-                <Trash2 className="h-4 w-4 opacity-80 hover:opacity-100" />
+                <Plus className="h-4 w-4 opacity-80 hover:opacity-100" />
+                <span className="sr-only">Cuộc trò chuyện mới</span>
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-white hover:bg-white/10 rounded-xl"
-                onClick={() => setIsOpen(false)}
+                onClick={() => setOpen(false)}
+                title="Đóng"
+                aria-label="Đóng cửa sổ trò chuyện"
                 type="button"
               >
                 <X className="h-4 w-4" />
+                <span className="sr-only">Đóng</span>
               </Button>
             </div>
           </div>
 
           {/* Chat area */}
-          <div className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-slate-50/50 to-white/70 px-4 py-4 scrollbar-hide">
-            {messages.map((message) => {
+          <div
+            role="log"
+            aria-live="polite"
+            className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-slate-50/50 to-white/70 px-4 py-4 scrollbar-hide"
+          >
+            {/* Greeting */}
+            <div className="flex items-start gap-2.5 w-full justify-start">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div className="max-w-[80%] rounded-[1.5rem] rounded-tl-[0.25rem] border border-slate-100/90 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm">
+                <div className="whitespace-pre-line text-sm">{WELCOME_MESSAGE}</div>
+              </div>
+            </div>
+
+            {/* Message list */}
+            {visibleMessages.map((message) => {
               const isUser = message.role === 'user';
+              if (!isUser) {
+                const hasAssistantContent =
+                  Boolean(message.content) ||
+                  (message.tools && message.tools.length > 0) ||
+                  Boolean(message.confirm) ||
+                  (message.sources && message.sources.length > 0) ||
+                  Boolean(message.error);
+                if (!hasAssistantContent) {
+                  return null;
+                }
+              }
+
               return (
                 <div
                   key={message.id}
-                  className={cn('flex items-start gap-2.5 w-full', isUser ? 'justify-end' : 'justify-start')}
+                  className={`flex items-start gap-2.5 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
                 >
                   {!isUser && (
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
@@ -291,25 +213,62 @@ export function ChatbotWidget() {
                     </div>
                   )}
                   <div
-                    className={cn(
-                      'max-w-[80%] rounded-[1.5rem] px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300',
+                    className={`max-w-[80%] rounded-[1.5rem] px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300 ${
                       isUser
-                        ? 'rounded-tr-[0.25rem] bg-gradient-to-tr from-primary to-emerald-950 text-white font-medium'
+                        ? 'rounded-tr-[0.25rem] bg-gradient-to-tr from-primary to-emerald-950 text-white font-medium whitespace-pre-wrap break-words'
                         : 'rounded-tl-[0.25rem] border border-slate-100/90 bg-white text-slate-800'
-                    )}
+                    }`}
                   >
-                    <div className="whitespace-pre-line text-sm">{message.content}</div>
+                    {isUser ? (
+                      <div>{message.content}</div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {/* Tools rendered as ToolCallCard rows above text */}
+                        {message.tools && message.tools.length > 0 && (
+                          <div className="space-y-1.5">
+                            {message.tools.map((step) => (
+                              <ToolCallCard key={step.id} step={step} />
+                            ))}
+                          </div>
+                        )}
 
-                    {message.role === 'assistant' && message.sources && message.sources.length > 0 && (
-                      <div className="mt-3 border-t border-dashed border-slate-150 pt-2.5">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                          <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10" /> Sản phẩm được đề xuất:
-                        </p>
-                        <div className="flex flex-col gap-2">
-                          {message.sources.map((source) => (
-                            <ChatbotSourceItem key={source.id} source={source} />
-                          ))}
-                        </div>
+                        {/* Text rendered with ChatMarkdown */}
+                        {message.content ? (
+                          <ChatMarkdown content={message.content} />
+                        ) : null}
+
+                        {/* Confirm block */}
+                        {message.confirm && (
+                          <ConfirmActionCard
+                            calls={message.confirm.calls}
+                            decided={message.confirm.decided}
+                            onSubmit={(decisions) => decide(message.id, decisions)}
+                          />
+                        )}
+
+                        {/* Sources as product cards */}
+                        {message.sources && message.sources.length > 0 && (
+                          <div className="border-t border-dashed border-slate-150 pt-2.5">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
+                              <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10" /> Sản phẩm được đề xuất:
+                            </p>
+                            <div className="flex flex-col gap-2">
+                              {message.sources.map((source) => (
+                                <ChatbotSourceItem key={source.id} source={source} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Error in visible alert with role="alert" */}
+                        {message.error && (
+                          <div
+                            role="alert"
+                            className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-xs text-destructive"
+                          >
+                            {message.error}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -317,7 +276,8 @@ export function ChatbotWidget() {
               );
             })}
 
-            {messages.length <= 1 ? (
+            {/* Quick suggestions when no conversation yet */}
+            {visibleMessages.length === 0 ? (
               <div className="space-y-2.5 px-1 pt-2">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Gợi ý nhanh</p>
                 <div className="flex flex-wrap gap-2">
@@ -325,8 +285,13 @@ export function ChatbotWidget() {
                     <button
                       key={suggestion}
                       type="button"
-                      onClick={() => setDraft(suggestion)}
-                      className="rounded-full border border-slate-200 bg-white/80 hover:bg-primary hover:text-white hover:border-primary px-4 py-2 text-left text-xs font-semibold text-slate-700 transition duration-300 shadow-sm active:scale-95"
+                      disabled={isStreaming}
+                      onClick={() => {
+                        if (!isStreaming) {
+                          void send(suggestion);
+                        }
+                      }}
+                      className="rounded-full border border-slate-200 bg-white/80 hover:bg-primary hover:text-white hover:border-primary px-4 py-2 text-left text-xs font-semibold text-slate-700 transition duration-300 shadow-sm active:scale-95 disabled:opacity-50"
                     >
                       {suggestion}
                     </button>
@@ -335,21 +300,16 @@ export function ChatbotWidget() {
               </div>
             ) : null}
 
-            {mutation.isPending ? (
+            {/* Streaming indicator */}
+            {isOwnerMatch && isStreaming ? (
               <div className="flex justify-start items-start gap-2.5">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
                   <Bot className="h-4 w-4 animate-bounce" />
                 </div>
                 <div className="flex items-center gap-2 rounded-[1.5rem] rounded-tl-[0.25rem] border border-slate-100 bg-white px-4 py-3 text-xs font-medium text-slate-500 shadow-sm">
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                  Đang pha chế mùi hương...
+                  Đang trả lời...
                 </div>
-              </div>
-            ) : null}
-
-            {lastError ? (
-              <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-xs text-destructive">
-                {lastError}
               </div>
             ) : null}
 
@@ -364,20 +324,23 @@ export function ChatbotWidget() {
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={handleComposerKeyDown}
                 placeholder="Nhập câu hỏi của bạn..."
+                aria-label="Nhập câu hỏi"
                 className="min-h-[40px] max-h-[120px] resize-none border-0 px-3 py-2 shadow-none focus-visible:ring-0 focus:outline-none w-full text-sm placeholder:text-slate-400"
-                maxLength={4000}
               />
               <Button
                 onClick={handleSubmit}
-                disabled={!draft.trim() || mutation.isPending || !sessionId}
+                disabled={!draft.trim() || isStreaming}
+                aria-label="Gửi tin nhắn"
+                title="Gửi tin nhắn"
                 size="icon"
-                className="h-9 w-9 rounded-full shrink-0 shadow-md transition-all duration-300 hover:scale-105 active:scale-95 bg-primary hover:bg-emerald-950 text-white p-0 flex items-center justify-center"
+                className="h-9 w-9 rounded-full shrink-0 shadow-md transition-all duration-300 hover:scale-105 active:scale-95 bg-primary hover:bg-emerald-950 text-white p-0 flex items-center justify-center disabled:opacity-50"
               >
-                {mutation.isPending ? (
+                {isStreaming ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <SendHorizonal className="h-4 w-4" />
                 )}
+                <span className="sr-only">Gửi tin nhắn</span>
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground text-center mt-2">
@@ -387,11 +350,13 @@ export function ChatbotWidget() {
         </div>
       ) : null}
 
-      {!isOpen ? (
+      {!open ? (
         <Button
+          ref={toggleButtonRef}
           type="button"
           size="icon"
-          onClick={() => setIsOpen(true)}
+          aria-label="Mở khung trò chuyện"
+          onClick={() => setOpen(true)}
           className="fixed bottom-28 right-4 z-[60] h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-emerald-950 text-white shadow-[0_8px_30px_rgba(24,46,37,0.4)] transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center border border-white/20 md:bottom-6 md:right-6 animate-bounce"
         >
           <div className="relative flex items-center justify-center">
@@ -400,8 +365,11 @@ export function ChatbotWidget() {
               Tư vấn
             </span>
           </div>
+          <span className="sr-only">Mở khung trò chuyện</span>
         </Button>
       ) : null}
     </>
   );
 }
+
+export default ChatbotWidget;

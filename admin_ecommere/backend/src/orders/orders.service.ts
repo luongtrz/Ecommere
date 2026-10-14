@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { randomBytes } from 'crypto';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
-import { OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
-import { CheckoutDto } from './dtos/checkout.dto';
+import { Prisma, CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
+import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
 
@@ -11,6 +12,17 @@ export class OrdersService {
   constructor(private prisma: PrismaService) { }
 
   async checkout(userId: string, checkoutDto: CheckoutDto) {
+    if (checkoutDto.checkoutKey) {
+      const existingOrder = await this.findOrderByCheckoutKey(
+        userId,
+        checkoutDto.checkoutKey,
+      );
+      if (existingOrder) {
+        await this.assertCheckoutMatchesOrder(existingOrder, checkoutDto);
+        return existingOrder;
+      }
+    }
+
     const {
       addressId,
       fullName,
@@ -21,7 +33,6 @@ export class OrdersService {
       line1,
       items,
       paymentMethod,
-      shippingAddress,
       shippingMethod,
       total,
     } = checkoutDto;
@@ -46,24 +57,15 @@ export class OrdersService {
     let itemsToUse: any[] = [];
     let couponCode: string | null = null;
     let cartId: string | null = null;
+    let cartItemIds: string[] = [];
 
-    if (cart && cart.items.length > 0) {
-      // Use cart items
-      itemsToUse = cart.items;
-      cartId = cart.id;
-
-      // Load coupon if cart has one
-      if (cart.couponId) {
-        const coupon = await this.prisma.coupon.findUnique({
-          where: { code: cart.couponId },
-        });
-        if (coupon) {
-          couponCode = coupon.code;
-        }
-      }
-    } else if (items && items.length > 0) {
-      // Use items from DTO
+    if (items && items.length > 0) {
+      // Explicit checkout items are authoritative for clients using a local cart.
       for (const item of items) {
+        if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+          throw new BadRequestException('Quantity must be a positive integer');
+        }
+
         const variant = await this.prisma.productVariant.findUnique({
           where: { id: item.variantId },
           include: { product: true },
@@ -90,8 +92,42 @@ export class OrdersService {
           priceSnapshot: item.price,
         });
       }
+    } else if (cart && cart.items.length > 0) {
+      // Fall back to the server-side cart for API clients that do not send items.
+      itemsToUse = cart.items;
+      cartId = cart.id;
+      cartItemIds = cart.items.map((item) => item.id);
+
+      if (cart.couponId) {
+        const coupon = await this.prisma.coupon.findUnique({
+          where: { code: cart.couponId },
+        });
+        if (coupon) {
+          couponCode = coupon.code;
+        }
+      }
     } else {
       throw new BadRequestException('Cart is empty or no items provided');
+    }
+
+    // Cart quantities and product availability can change after the cart was
+    // created, so validate them again immediately before pricing the order.
+    for (const item of itemsToUse) {
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+        throw new BadRequestException('Quantity must be a positive integer');
+      }
+
+      if (!item.variant?.product?.active) {
+        throw new BadRequestException(
+          `Product is no longer available: ${item.variant?.product?.name ?? 'Unknown product'}`,
+        );
+      }
+
+      if (item.variant.stock < item.quantity) {
+        throw new BadRequestException(
+          `Insufficient stock for ${item.variant.product.name} - ${item.variant.scent}. Only ${item.variant.stock} available.`,
+        );
+      }
     }
 
     // Handle address - either use existing or create new
@@ -126,7 +162,7 @@ export class OrdersService {
     // Calculate order totals
     let subtotal = 0;
     const orderItems = itemsToUse.map((item) => {
-      const price = item.variant.salePrice || item.variant.price;
+      const price = item.variant.salePrice ?? item.variant.price;
       const itemTotal = price * item.quantity;
       subtotal += itemTotal;
 
@@ -155,6 +191,10 @@ export class OrdersService {
     if (coupon) {
       // Validate coupon (date, usage limits)
       const now = new Date();
+      if (!coupon.active) {
+        throw new BadRequestException('Coupon is inactive');
+      }
+
       if (coupon.validFrom && coupon.validFrom > now) {
         throw new BadRequestException('Coupon is not yet valid');
       }
@@ -171,6 +211,7 @@ export class OrdersService {
           where: {
             userId,
             couponCode: coupon.code,
+            status: { not: OrderStatus.CANCELED },
           },
         });
 
@@ -184,16 +225,23 @@ export class OrdersService {
         throw new BadRequestException(`Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`);
       }
 
-      discount = MoneyUtil.calculateDiscount(
-        subtotal,
-        coupon.type,
-        coupon.value,
-        coupon.maxDiscount,
-      );
+      discount = coupon.type === CouponType.FREESHIP
+        ? 0
+        : MoneyUtil.calculateDiscount(
+            subtotal,
+            coupon.type,
+            coupon.value,
+            coupon.maxDiscount,
+          );
     }
 
-    // Calculate shipping fee
-    const shippingFee = checkoutDto.shippingFee || this.calculateShippingFee(address);
+    // Shipping is calculated on the server. Client-provided totals and fees
+    // are display values only and must not affect the amount charged.
+    const calculatedShippingFee = this.calculateShippingFee(
+      address,
+      shippingMethod ?? ShippingMethod.STANDARD,
+    );
+    const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
 
     const orderTotal = subtotal - discount + shippingFee;
 
@@ -201,91 +249,156 @@ export class OrdersService {
     const code = await this.generateOrderNumber();
 
     // Create order in transaction
-    const order = await this.prisma.$transaction(async (tx) => {
-      // Create order
-      const newOrder = await tx.order.create({
-        data: {
-          code,
-          user: {
-            connect: { id: userId },
+    let order;
+    try {
+      order = await this.runSerializableTransaction(async (tx) => {
+        if (couponCode && coupon && coupon.maxUsesPerUser) {
+          const userUsageCount = await tx.order.count({
+            where: {
+              userId,
+              couponCode,
+              status: { not: OrderStatus.CANCELED },
+            },
+          });
+
+          if (userUsageCount >= coupon.maxUsesPerUser) {
+            throw new BadRequestException('You have already used this coupon the maximum number of times');
+          }
+        }
+
+        // Create order
+        const newOrder = await tx.order.create({
+          data: {
+            code,
+            user: {
+              connect: { id: userId },
+            },
+            status: OrderStatus.PENDING_PAYMENT,
+            paymentStatus: PaymentStatus.PENDING,
+            subtotal,
+            discount,
+            shippingFee,
+            total: orderTotal,
+            couponCode,
+            checkoutKey: checkoutDto.checkoutKey ?? null,
+            paymentMethod: paymentMethod || 'PENDING',
+            addressJson: JSON.stringify({
+              fullName: address.fullName,
+              phone: address.phone,
+              province: address.province,
+              district: address.district,
+              ward: address.ward,
+              line1: address.line1,
+            }),
+            items: {
+              create: orderItems,
+            },
           },
-          status: OrderStatus.PENDING_PAYMENT,
-          paymentStatus: PaymentStatus.PENDING,
-          subtotal,
-          discount,
-          shippingFee,
-          total: orderTotal,
-          couponCode,
-          paymentMethod: paymentMethod || 'PENDING',
-          addressJson: JSON.stringify({
-            fullName: address.fullName,
-            phone: address.phone,
-            province: address.province,
-            district: address.district,
-            ward: address.ward,
-            line1: address.line1,
-          }),
-          items: {
-            create: orderItems,
-          },
-        },
-        include: {
-          items: {
-            include: {
-              variant: {
-                include: {
-                  product: true,
+          include: {
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: true,
+                  },
                 },
               },
             },
           },
-        },
+        });
+
+        // Reserve stock for each item
+        for (const item of itemsToUse) {
+          const stockUpdate = await tx.productVariant.updateMany({
+            where: {
+              id: item.variantId,
+              stock: { gte: item.quantity },
+            },
+            data: { stock: { decrement: item.quantity } },
+          });
+
+          if (stockUpdate.count !== 1) {
+            throw new BadRequestException(
+              `Insufficient stock for ${item.variant.product.name} - ${item.variant.scent}.`,
+            );
+          }
+
+          const updatedVariant = await tx.productVariant.findUnique({
+            where: { id: item.variantId },
+            select: { stock: true },
+          });
+
+          if (!updatedVariant) {
+            throw new NotFoundException(`Product variant not found: ${item.variantId}`);
+          }
+
+          const newStock = updatedVariant.stock;
+          const previousStock = newStock + item.quantity;
+
+          await tx.stockMovement.create({
+            data: {
+              variantId: item.variantId,
+              type: StockMovementType.OUT,
+              quantity: item.quantity,
+              previousStock,
+              newStock,
+              notes: `Reserved for order ${code}`,
+            },
+          });
+        }
+
+        // Increment coupon usage count
+        if (couponCode && coupon) {
+          const couponUsage = await tx.coupon.updateMany({
+            where: coupon.maxUses
+              ? {
+                  code: couponCode,
+                  active: true,
+                  usedCount: { lt: coupon.maxUses },
+                }
+              : { code: couponCode, active: true },
+            data: { usedCount: { increment: 1 } },
+          });
+
+          if (couponUsage.count !== 1) {
+            throw new BadRequestException('Coupon is no longer available');
+          }
+        }
+
+        // Clear cart if it was used
+        if (cartId) {
+          await tx.cartItem.deleteMany({
+            where: {
+              cartId,
+              id: { in: cartItemIds },
+            },
+          });
+
+          await tx.cart.update({
+            where: { id: cartId },
+            data: { couponId: null },
+          });
+        }
+
+        return newOrder;
       });
-
-      // Reserve stock for each item
-      for (const item of itemsToUse) {
-        const previousStock = item.variant.stock;
-        const newStock = previousStock - item.quantity;
-
-        await tx.productVariant.update({
-          where: { id: item.variantId },
-          data: { stock: newStock },
-        });
-
-        await tx.stockMovement.create({
-          data: {
-            variantId: item.variantId,
-            type: StockMovementType.OUT,
-            quantity: item.quantity,
-            previousStock,
-            newStock,
-            notes: `Reserved for order ${code}`,
-          },
-        });
+    } catch (error) {
+      if (
+        checkoutDto.checkoutKey &&
+        this.isCheckoutKeyUniqueConstraintError(error)
+      ) {
+        const existingOrder = await this.findOrderByCheckoutKey(
+          userId,
+          checkoutDto.checkoutKey,
+        );
+        if (existingOrder) {
+          await this.assertCheckoutMatchesOrder(existingOrder, checkoutDto);
+          return existingOrder;
+        }
       }
 
-      // Increment coupon usage count
-      if (couponCode && coupon) {
-        await tx.coupon.update({
-          where: { code: couponCode },
-          data: { usedCount: { increment: 1 } },
-        });
-      }
-
-      // Clear cart if it was used
-      if (cartId) {
-        await tx.cartItem.deleteMany({
-          where: { cartId },
-        });
-
-        await tx.cart.update({
-          where: { id: cartId },
-          data: { couponId: null },
-        });
-      }
-
-      return newOrder;
-    });
+      throw error;
+    }
 
     return order;
   }
@@ -366,7 +479,7 @@ export class OrdersService {
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new NotFoundException('Order not found');
     }
 
     return order;
@@ -485,48 +598,70 @@ export class OrdersService {
     // Validate status transitions
     this.validateStatusTransition(order.status, status);
 
-    // Handle stock restoration for cancelled/refunded orders
-    if (
-      (status === OrderStatus.CANCELED || status === OrderStatus.REFUNDED) &&
-      order.status !== OrderStatus.CANCELED &&
-      order.status !== OrderStatus.REFUNDED
-    ) {
-      await this.restoreStockForOrder(order);
-    }
-
     // Update payment status based on order status
     let paymentStatus = order.paymentStatus;
     if (status === OrderStatus.PAID || status === OrderStatus.PACKING || status === OrderStatus.SHIPPED) {
       paymentStatus = PaymentStatus.COMPLETED;
     } else if (status === OrderStatus.REFUNDED) {
       paymentStatus = PaymentStatus.REFUNDED;
+    } else if (status === OrderStatus.CANCELED) {
+      if (
+        order.status === OrderStatus.PAID ||
+        order.status === OrderStatus.PACKING ||
+        order.status === OrderStatus.SHIPPED
+      ) {
+        paymentStatus = PaymentStatus.REFUNDED;
+      } else {
+        paymentStatus = PaymentStatus.FAILED;
+      }
     }
 
-    return this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status,
-        paymentStatus,
-      },
-      include: {
-        items: {
-          include: {
-            variant: {
-              include: {
-                product: true,
+    return this.prisma.$transaction(async (tx) => {
+      const statusUpdate = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          status: order.status,
+        },
+        data: {
+          status,
+          paymentStatus,
+        },
+      });
+
+      if (statusUpdate.count !== 1) {
+        throw new BadRequestException('Order status changed; please retry');
+      }
+
+      if (status === OrderStatus.CANCELED) {
+        await this.restoreStockForOrder(order, tx);
+      }
+
+      if (status === OrderStatus.CANCELED && order.couponCode) {
+        await this.releaseCouponUsage(order, tx);
+      }
+
+      return tx.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: {
+            include: {
+              variant: {
+                include: {
+                  product: true,
+                },
               },
             },
           },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+            },
           },
         },
-      },
+      });
     });
   }
 
@@ -541,7 +676,7 @@ export class OrdersService {
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new NotFoundException('Order not found');
     }
 
     // Only allow cancellation for pending or paid orders (before packing)
@@ -552,16 +687,183 @@ export class OrdersService {
       throw new BadRequestException('Order cannot be cancelled at this stage');
     }
 
-    // Restore stock
-    await this.restoreStockForOrder(order);
+    return this.prisma.$transaction(async (tx) => {
+      const statusUpdate = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          userId,
+          status: {
+            in: [OrderStatus.PENDING_PAYMENT, OrderStatus.PAID],
+          },
+        },
+        data: {
+          status: OrderStatus.CANCELED,
+          paymentStatus: PaymentStatus.FAILED,
+        },
+      });
 
-    return this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: OrderStatus.CANCELED,
-        paymentStatus: PaymentStatus.FAILED,
+      if (statusUpdate.count !== 1) {
+        throw new BadRequestException('Order cannot be cancelled at this stage');
+      }
+
+      await this.restoreStockForOrder(order, tx);
+
+      if (order.status === OrderStatus.PENDING_PAYMENT) {
+        await this.releaseCouponUsage(order, tx);
+      }
+
+      return tx.order.findUnique({
+        where: { id: orderId },
+      });
+    });
+  }
+
+  private async findOrderByCheckoutKey(userId: string, checkoutKey: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { checkoutKey },
+      include: {
+        items: {
+          include: {
+            variant: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    if (!order) {
+      return null;
+    }
+
+    if (order.userId !== userId) {
+      throw new BadRequestException('Mã đặt hàng không hợp lệ');
+    }
+
+    return order;
+  }
+
+  private async assertCheckoutMatchesOrder(
+    order: any,
+    checkoutDto: CheckoutDto,
+  ): Promise<void> {
+    if (checkoutDto.items && checkoutDto.items.length > 0) {
+      const orderItems = order.items ?? [];
+      if (checkoutDto.items.length !== orderItems.length) {
+        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+      }
+
+      const sortedDtoItems = [...checkoutDto.items].sort(
+        (a, b) =>
+          (a.variantId ?? '').localeCompare(b.variantId ?? '') ||
+          (a.quantity ?? 0) - (b.quantity ?? 0),
+      );
+      const sortedOrderItems = [...orderItems].sort(
+        (a, b) =>
+          (a.variantId ?? '').localeCompare(b.variantId ?? '') ||
+          (a.quantity ?? 0) - (b.quantity ?? 0),
+      );
+
+      for (let i = 0; i < sortedDtoItems.length; i++) {
+        if (
+          sortedDtoItems[i].variantId !== sortedOrderItems[i].variantId ||
+          sortedDtoItems[i].quantity !== sortedOrderItems[i].quantity
+        ) {
+          throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        }
+      }
+    }
+
+    let orderAddress: Record<string, any> = {};
+    try {
+      orderAddress =
+        typeof order.addressJson === 'string'
+          ? JSON.parse(order.addressJson)
+          : null;
+    } catch {
+      throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+    }
+
+    if (!orderAddress || typeof orderAddress !== 'object') {
+      throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+    }
+
+    let requestAddress: {
+      fullName?: string;
+      phone?: string;
+      province?: string;
+      district?: string;
+      ward?: string;
+      line1?: string;
+    } | null = null;
+
+    if (checkoutDto.addressId) {
+      requestAddress = await this.prisma.address.findFirst({
+        where: {
+          id: checkoutDto.addressId,
+          userId: order.userId,
+        },
+      });
+      if (!requestAddress) {
+        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+      }
+    } else {
+      requestAddress = {
+        fullName: checkoutDto.fullName,
+        phone: checkoutDto.phone,
+        province: checkoutDto.province,
+        district: checkoutDto.district,
+        ward: checkoutDto.ward,
+        line1: checkoutDto.line1,
+      };
+    }
+
+    const addressFields = [
+      'fullName',
+      'phone',
+      'province',
+      'district',
+      'ward',
+      'line1',
+    ] as const;
+
+    for (const field of addressFields) {
+      if (requestAddress[field] !== orderAddress[field]) {
+        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+      }
+    }
+
+    const expectedPaymentMethod = checkoutDto.paymentMethod || 'PENDING';
+    if (expectedPaymentMethod !== order.paymentMethod) {
+      throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+    }
+  }
+
+  private isCheckoutKeyUniqueConstraintError(error: unknown): boolean {
+    const isPrismaError =
+      error instanceof Prisma.PrismaClientKnownRequestError ||
+      (typeof error === 'object' &&
+        error !== null &&
+        ((error as any).name === 'PrismaClientKnownRequestError' ||
+          (error as any).code === 'P2002'));
+
+    if (!isPrismaError || (error as any).code !== 'P2002') {
+      return false;
+    }
+
+    const target = (error as any).meta?.target;
+    if (Array.isArray(target)) {
+      return target.some(
+        (t: unknown) => typeof t === 'string' && (t === 'checkoutKey' || t.includes('checkoutKey')),
+      );
+    }
+    if (typeof target === 'string') {
+      return target === 'checkoutKey' || target.includes('checkoutKey');
+    }
+
+    return false;
   }
 
   private async generateOrderNumber(): Promise<string> {
@@ -585,13 +887,14 @@ export class OrdersService {
 
     const sequence = (todayOrderCount + 1).toString().padStart(4, '0');
 
-    // Add random suffix to prevent race condition
-    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+    // The daily count is only a display sequence; use a collision-resistant
+    // suffix because concurrent checkouts can observe the same count.
+    const random = randomBytes(4).toString('hex').toUpperCase();
 
     return `ORD${year}${month}${day}${sequence}${random}`;
   }
 
-  private calculateShippingFee(address: any): number {
+  private calculateShippingFee(address: any, shippingMethod: ShippingMethod): number {
     // Mock shipping calculation - flat rate based on province
     // In real implementation, this would integrate with shipping provider API
     const provinceLowerCase = address.province.toLowerCase();
@@ -606,8 +909,8 @@ export class OrdersService {
       return 0;
     }
 
-    // Standard shipping for other provinces
-    return 50000; // 50 THB
+    // Match the shipping options exposed by both frontends.
+    return shippingMethod === ShippingMethod.EXPRESS ? 50000 : 30000;
   }
 
   private validateStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus) {
@@ -628,21 +931,21 @@ export class OrdersService {
     }
   }
 
-  private async restoreStockForOrder(order: any) {
-    await this.prisma.$transaction(async (tx) => {
+  private async restoreStockForOrder(order: any, transactionClient?: any) {
+    const restore = async (tx: any) => {
       for (const item of order.items) {
         const variant = await tx.productVariant.findUnique({
           where: { id: item.variantId },
         });
 
         if (variant) {
-          const previousStock = variant.stock;
-          const newStock = previousStock + item.quantity;
-
-          await tx.productVariant.update({
+          const updatedVariant = await tx.productVariant.update({
             where: { id: item.variantId },
-            data: { stock: newStock },
+            data: { stock: { increment: item.quantity } },
           });
+
+          const newStock = updatedVariant.stock;
+          const previousStock = newStock - item.quantity;
 
           await tx.stockMovement.create({
             data: {
@@ -656,6 +959,50 @@ export class OrdersService {
           });
         }
       }
+    };
+
+    if (transactionClient) {
+      return restore(transactionClient);
+    }
+
+    return this.prisma.$transaction(restore);
+  }
+
+  private async releaseCouponUsage(order: any, transactionClient: any) {
+    if (!order.couponCode) {
+      return;
+    }
+
+    await transactionClient.coupon.updateMany({
+      where: {
+        code: order.couponCode,
+        usedCount: { gt: 0 },
+      },
+      data: { usedCount: { decrement: 1 } },
     });
+  }
+
+  private async runSerializableTransaction<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(operation, {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2034' &&
+          attempt < 2
+        ) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new BadRequestException('Checkout could not be completed; please retry');
   }
 }

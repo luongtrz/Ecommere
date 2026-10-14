@@ -216,7 +216,7 @@ export class ChatbotRetrievalService {
       .sort((left, right) => right.score - left.score || right.stock - left.stock)
       .slice(0, variantLimit);
 
-    const prices = product.variants.map((variant) => variant.salePrice || variant.price);
+    const prices = product.variants.map((variant) => variant.salePrice ?? variant.price);
     const minPrice = prices.length > 0 ? Math.min(...prices) : product.basePrice;
     const maxPrice = prices.length > 0 ? Math.max(...prices) : product.basePrice;
     const shortDescription = product.description.length > 180
@@ -225,7 +225,7 @@ export class ChatbotRetrievalService {
 
     const variantLines = rankedVariants.length > 0
       ? rankedVariants.map((variant) => {
-          const actualPrice = variant.salePrice || variant.price;
+          const actualPrice = variant.salePrice ?? variant.price;
           return `  * ${variant.scent} | ${variant.volumeMl}ml | ${this.formatMoney(actualPrice)} | ${variant.stock > 0 ? `còn ${variant.stock}` : 'hết hàng'} | SKU ${variant.sku}`;
         }).join('\n')
       : '  * Chưa có biến thể phù hợp được truy xuất';

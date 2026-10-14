@@ -22,18 +22,6 @@ export const loginSchema = z.object({
   password: passwordSchema,
 });
 
-export const registerSchema = z.object({
-  name: requiredString('Tên'),
-  phone: phoneSchema,
-  email: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
-  password: passwordSchema,
-  confirmPassword: z.string(),
-  referralCode: z.string().optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Mật khẩu xác nhận không khớp',
-  path: ['confirmPassword'],
-});
-
 export const addressSchema = z.object({
   fullName: requiredString('Họ tên'),
   phone: phoneSchema,
@@ -74,7 +62,6 @@ export const couponSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
-export type RegisterInput = z.infer<typeof registerSchema>;
 export type AddressInput = z.infer<typeof addressSchema>;
 export type ProductInput = z.infer<typeof productSchema>;
 export type VariantInput = z.infer<typeof variantSchema>;

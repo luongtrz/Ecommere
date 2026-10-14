@@ -127,6 +127,7 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                   price={product.basePrice}
                   rating={product.rating}
                   reviewCount={product.reviewCount}
+                  variants={product.variants}
                   onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
                 />
               </div>
@@ -145,6 +146,7 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                     price={product.basePrice}
                     rating={product.rating}
                     reviewCount={product.reviewCount}
+                    variants={product.variants}
                     onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
                   />
                 </div>
@@ -185,7 +187,7 @@ export function HomePage() {
       variantId: variant.id,
       name: product.name,
       image: product.images[0],
-      price: variant.salePrice || variant.price,
+      price: variant.salePrice ?? variant.price,
       scent: variant.scent,
       volumeMl: variant.volumeMl,
     });
@@ -339,6 +341,7 @@ export function HomePage() {
                     price={product.basePrice}
                     rating={product.rating}
                     reviewCount={product.reviewCount}
+                    variants={product.variants}
                     onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                   />
                 </div>

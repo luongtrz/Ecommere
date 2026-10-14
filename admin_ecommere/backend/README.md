@@ -184,6 +184,9 @@ npm run prisma:migrate
 
 6. **Seed the database**
 ```bash
+SEED_DATABASE=true \
+SEED_ADMIN_PASSWORD='choose-a-local-admin-password' \
+SEED_USER_PASSWORD='choose-a-local-user-password' \
 npm run prisma:seed
 ```
 
@@ -196,13 +199,9 @@ This will create:
 
 ### Seeded Accounts
 
-**Admin Account:**
-- Email: `admin@shop.local`
-- Password: `Admin@123`
-
-**Customer Account:**
-- Email: `user@shop.local`
-- Password: `User@123`
+The seed creates the documented local email addresses, but the passwords are
+the values supplied through `SEED_ADMIN_PASSWORD` and `SEED_USER_PASSWORD`.
+Never run this destructive seed against production.
 
 ### Running the Application
 
@@ -215,9 +214,9 @@ npm run build
 npm run start:prod
 ```
 
-Server runs at: `http://localhost:4000`
+Server runs at: `http://localhost:4001`
 
-Swagger documentation: `http://localhost:4000/api`
+Swagger documentation: `http://localhost:4001/api`
 
 ## 📚 API Documentation
 
@@ -225,7 +224,7 @@ Swagger documentation: `http://localhost:4000/api`
 
 Access interactive API documentation at:
 ```
-http://localhost:4000/api
+http://localhost:4001/api
 ```
 
 ### Authentication
@@ -234,8 +233,9 @@ http://localhost:4000/api
 ```bash
 POST /auth/register
 {
+  "phone": "0901234567",
   "email": "newuser@example.com",
-  "password": "Password@123",
+  "password": "<a password chosen by the user>",
   "name": "John Doe"
 }
 ```
@@ -244,8 +244,8 @@ POST /auth/register
 ```bash
 POST /auth/login
 {
-  "email": "user@shop.local",
-  "password": "User@123"
+  "phone": "0901234567",
+  "password": "<the user's password>"
 }
 ```
 
@@ -330,11 +330,11 @@ TOKEN_EXPIRES_IN="15m"
 REFRESH_EXPIRES_IN="7d"
 
 # Server
-PORT=4000
+PORT=4001
 NODE_ENV="development"
 
 # CORS
-CORS_ORIGIN="http://localhost:5173"
+CORS_ORIGIN="http://localhost:5174"
 
 # Uploads
 UPLOAD_DIR="./uploads"

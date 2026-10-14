@@ -18,7 +18,7 @@ import {
   Tags,
   Loader2
 } from 'lucide-react';
-import { useInfiniteProducts } from '@/features/catalog/hooks/useProducts';
+import { useInfiniteAdminProducts } from '@/features/catalog/hooks/useProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { formatCurrency } from '@/lib/formatters';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +44,8 @@ import {
 
 import { useDeleteProduct } from '../hooks/useAdminProducts';
 import { useToast } from '@/hooks/useToast';
+
+const STORE_URL = (import.meta.env.VITE_STORE_URL || 'http://localhost:5173').replace(/\/$/, '');
 
 export function AdminProductsPage() {
   const [search, setSearch] = useState('');
@@ -95,7 +97,7 @@ export function AdminProductsPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useInfiniteProducts({
+  } = useInfiniteAdminProducts({
     limit: 20,
     search: debouncedSearch,
     sortBy: 'newest',
@@ -104,6 +106,7 @@ export function AdminProductsPage() {
 
   const deleteProduct = useDeleteProduct();
   const toast = useToast();
+  const deletingIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -134,13 +137,20 @@ export function AdminProductsPage() {
   }, [hasNextPage, fetchNextPage]);
 
   const handleDelete = async (id: string, name: string) => {
+    if (deletingIdRef.current === id || (deleteProduct.isPending && deleteProduct.variables === id)) {
+      return;
+    }
     if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`)) {
+      deletingIdRef.current = id;
       deleteProduct.mutate(id, {
         onSuccess: () => {
           toast.success('Xóa sản phẩm thành công');
         },
         onError: () => {
           toast.error('Xóa sản phẩm thất bại. Vui lòng thử lại.');
+        },
+        onSettled: () => {
+          deletingIdRef.current = null;
         },
       });
     }
@@ -335,6 +345,7 @@ export function AdminProductsPage() {
                   <TableBody>
                     {products.map((product) => {
                       const totalStock = calculateTotalStock(product);
+                      const isDeleting = (deleteProduct.isPending && deleteProduct.variables === product.id) || deletingIdRef.current === product.id;
                       return (
                         <TableRow key={product.id} className="group hover:bg-slate-900/40 transition-colors border-b border-slate-850">
                           <TableCell>
@@ -401,9 +412,9 @@ export function AdminProductsPage() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
                                 <DropdownMenuItem asChild>
-                                  <Link to={`/p/${product.slug}`} target="_blank" className="cursor-pointer">
+                                  <a href={`${STORE_URL}/p/${product.slug}`} target="_blank" rel="noreferrer" className="cursor-pointer">
                                     <Eye className="mr-2 h-4 w-4" /> Xem chi tiết
-                                  </Link>
+                                  </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                   <Link to={`/admin/products/${product.id}/edit`} className="cursor-pointer">
@@ -412,6 +423,7 @@ export function AdminProductsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
+                                  disabled={isDeleting}
                                   className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50"
                                   onClick={() => handleDelete(product.id, product.name)}
                                 >

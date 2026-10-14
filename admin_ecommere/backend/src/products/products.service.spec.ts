@@ -1,15 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import { CategoriesService } from '@/categories/categories.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ProductSortBy } from './dtos/product-filter.dto';
+import { StockMovementType } from '@prisma/client';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let prisma: PrismaService;
 
   const mockPrismaService = {
+    $queryRaw: jest.fn().mockResolvedValue([]),
     product: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
@@ -26,15 +29,45 @@ describe('ProductsService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    stockMovement: {
+      create: jest.fn(),
+    },
+    $transaction: jest.fn().mockImplementation(async (callback) => {
+      if (typeof callback === 'function') {
+        return callback(mockPrismaService);
+      }
+      return callback;
+    }),
+    review: {
+      groupBy: jest.fn().mockResolvedValue([]),
+      aggregate: jest.fn().mockResolvedValue({
+        _avg: { rating: null },
+        _count: { rating: 0 },
+      }),
+    },
   };
 
   beforeEach(async () => {
+    mockPrismaService.$transaction.mockImplementation(async (callback) => {
+      if (typeof callback === 'function') {
+        return callback(mockPrismaService);
+      }
+      return callback;
+    });
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProductsService,
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: CategoriesService,
+          useValue: {
+            validateProductAssignment: jest.fn().mockResolvedValue(undefined),
+            getDescendantIds: jest.fn().mockResolvedValue([]),
+          },
         },
       ],
     }).compile();
@@ -65,6 +98,7 @@ describe('ProductsService', () => {
           category: { id: 'cat1', name: 'Room Spray' },
           variants: [],
           reviews: [],
+          _count: { reviews: 0 },
         },
       ];
 
@@ -132,6 +166,76 @@ describe('ProductsService', () => {
         }),
       );
     });
+
+    it('should rank products by best selling using database query', async () => {
+      mockPrismaService.$queryRaw.mockResolvedValue([{ id: '1' }]);
+      mockPrismaService.product.count.mockResolvedValue(1);
+      mockPrismaService.product.findMany.mockResolvedValue([
+        {
+          id: '1',
+          name: 'Lavender Spray',
+          slug: 'lavender-spray',
+          description: 'Test product',
+          brand: 'Thai Aroma',
+          images: ['image1.jpg'],
+          categoryId: 'cat1',
+          basePrice: 100000,
+          active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          category: { id: 'cat1', name: 'Room Spray' },
+          variants: [],
+          reviews: [],
+          _count: { reviews: 0 },
+        },
+      ]);
+
+      const result = await service.findAll({ page: 1, limit: 12, sortBy: ProductSortBy.BEST_SELLING });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(mockPrismaService.$queryRaw).toHaveBeenCalled();
+      expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: { in: ['1'] } },
+        }),
+      );
+    });
+
+    it('should rank products by rating using database query', async () => {
+      mockPrismaService.$queryRaw.mockResolvedValue([{ id: '1' }]);
+      mockPrismaService.product.count.mockResolvedValue(1);
+      mockPrismaService.product.findMany.mockResolvedValue([
+        {
+          id: '1',
+          name: 'Lavender Spray',
+          slug: 'lavender-spray',
+          description: 'Test product',
+          brand: 'Thai Aroma',
+          images: ['image1.jpg'],
+          categoryId: 'cat1',
+          basePrice: 100000,
+          active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          category: { id: 'cat1', name: 'Room Spray' },
+          variants: [],
+          reviews: [],
+          _count: { reviews: 0 },
+        },
+      ]);
+
+      const result = await service.findAll({ page: 1, limit: 12, sortBy: ProductSortBy.RATING });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(mockPrismaService.$queryRaw).toHaveBeenCalled();
+      expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: { in: ['1'] } },
+        }),
+      );
+    });
   });
 
   describe('findOne', () => {
@@ -154,6 +258,10 @@ describe('ProductsService', () => {
       };
 
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
+      mockPrismaService.review.aggregate.mockResolvedValue({
+        _avg: { rating: 4.5 },
+        _count: { rating: 2 },
+      });
 
       const result = await service.findOne('1');
 
@@ -163,7 +271,7 @@ describe('ProductsService', () => {
       expect(result.reviewCount).toBe(2);
       expect(mockPrismaService.product.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: '1' },
+          where: { id: '1', active: true },
         }),
       );
     });
@@ -224,6 +332,64 @@ describe('ProductsService', () => {
       expect(result).toBeDefined();
       expect(result.slug).toBe('new-spray');
       expect(mockPrismaService.product.create).toHaveBeenCalled();
+      expect(mockPrismaService.stockMovement.create).toHaveBeenCalledWith({
+        data: {
+          variantId: 'v1',
+          type: StockMovementType.IN,
+          quantity: 50,
+          previousStock: 0,
+          newStock: 50,
+        },
+      });
+    });
+
+    it('should not create stock movement when variant initial stock is 0', async () => {
+      const createProductDto = {
+        name: 'Zero Stock Spray',
+        description: 'Test description',
+        brand: 'Thai Aroma',
+        images: ['image1.jpg'],
+        categoryId: 'cat1',
+        basePrice: 100000,
+        active: true,
+        variants: [
+          {
+            scent: 'Lavender',
+            volumeMl: 250,
+            price: 100000,
+            stock: 0,
+          },
+        ],
+      };
+
+      const mockCategory = { id: 'cat1', name: 'Room Spray' };
+      const mockProduct = {
+        id: '1',
+        ...createProductDto,
+        slug: 'zero-stock-spray',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        category: mockCategory,
+        variants: [
+          {
+            id: 'v1',
+            sku: 'ZERO-STOCK-SPRAY-LAV-250ML',
+            scent: 'Lavender',
+            volumeMl: 250,
+            price: 100000,
+            stock: 0,
+          },
+        ],
+      };
+
+      mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
+      mockPrismaService.product.findUnique.mockResolvedValue(null);
+      mockPrismaService.product.create.mockResolvedValue(mockProduct);
+
+      const result = await service.create(createProductDto);
+
+      expect(result).toBeDefined();
+      expect(mockPrismaService.stockMovement.create).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when category not found', async () => {

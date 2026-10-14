@@ -3,15 +3,13 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dtos/create-coupon.dto';
 import { UpdateCouponDto } from './dtos/update-coupon.dto';
-import { ValidateCouponDto } from './dtos/validate-coupon.dto';
-import { CouponEntity, CouponValidationEntity } from './entities/coupon.entity';
+import { CouponEntity } from './entities/coupon.entity';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
-import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Coupons')
+@Roles(Role.ADMIN)
 @Controller('coupons')
 export class CouponsController {
   constructor(private couponsService: CouponsService) {}
@@ -59,18 +57,5 @@ export class CouponsController {
   @ApiResponse({ status: 200 })
   async remove(@Param('code') code: string) {
     return this.couponsService.remove(code);
-  }
-
-  @Post('validate')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Validate coupon code (Authenticated)' })
-  @ApiResponse({ status: 200, type: CouponValidationEntity })
-  async validateCoupon(
-    @Body() validateCouponDto: ValidateCouponDto,
-    @CurrentUser('id') userId: string,
-    @Query('orderTotal') orderTotal?: string,
-  ) {
-    const total = orderTotal ? parseInt(orderTotal, 10) : 0;
-    return this.couponsService.validateCoupon(validateCouponDto.code, userId, total);
   }
 }

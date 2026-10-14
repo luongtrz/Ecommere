@@ -19,6 +19,7 @@ interface ProductCardProps {
   salePrice?: number;
   rating?: number;
   reviewCount?: number;
+  variants?: Array<{ stock: number }>;
   onAddToCart?: () => void;
 }
 
@@ -31,15 +32,17 @@ export const ProductCard = memo(function ProductCard({
   salePrice,
   rating = 0,
   reviewCount = 0,
+  variants,
   onAddToCart,
 }: ProductCardProps) {
-  const finalPrice = salePrice || price;
-  const hasDiscount = Boolean(salePrice && salePrice < price);
+  const selectedVariant = variants?.[0];
+  const finalPrice = salePrice ?? price;
+  const hasDiscount = salePrice != null && salePrice < price;
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { toggleItem, isInWishlist } = useWishlist();
   const prefetchProduct = usePrefetchProduct();
   const isWishlisted = isInWishlist(id);
-  const discountPercent = hasDiscount && salePrice ? Math.max(1, Math.round(((price - salePrice) / price) * 100)) : 0;
+  const discountPercent = hasDiscount && salePrice != null ? Math.max(1, Math.round(((price - salePrice) / price) * 100)) : 0;
   const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = useCallback(() => {
@@ -148,7 +151,12 @@ export const ProductCard = memo(function ProductCard({
         </CardContent>
  
         <CardFooter className="p-4 pt-0">
-          <Button onClick={onAddToCart} className="h-11 w-full rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/15 active:scale-[0.98] font-bold uppercase tracking-wider text-xs" size="sm">
+          <Button
+            onClick={onAddToCart}
+            disabled={variants !== undefined && (!selectedVariant || selectedVariant.stock === 0)}
+            className="h-11 w-full rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/15 active:scale-[0.98] font-bold uppercase tracking-wider text-xs"
+            size="sm"
+          >
             <ShoppingCart className="mr-2 h-3.5 w-3.5" />
             Thêm vào giỏ
           </Button>

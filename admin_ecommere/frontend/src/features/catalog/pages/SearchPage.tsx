@@ -20,7 +20,7 @@ export function SearchPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
 
-  const { data, isLoading } = useProductSearch(query);
+  const { data, isLoading } = useProductSearch(query, { sortBy: sortBy as any });
   const { addItem } = useCart();
 
   const handleSearchChange = (newQuery: string) => {
@@ -48,7 +48,7 @@ export function SearchPage() {
       variantId: variant.id,
       name: product.name,
       image: product.images[0],
-      price: variant.salePrice || variant.price,
+      price: variant.salePrice ?? variant.price,
       scent: variant.scent,
       volumeMl: variant.volumeMl,
     });

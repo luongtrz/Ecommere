@@ -15,7 +15,7 @@ export class StockAdjustmentDto {
   @ApiProperty({ example: 10 })
   @Type(() => Number)
   @IsInt()
-  @Min(1)
+  @Min(0)
   quantity: number;
 
   @ApiProperty({ required: false, example: 'Restocked from supplier' })

@@ -37,7 +37,7 @@ ecommere-admin/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 22+
 - PostgreSQL 14+
 - npm 9+
 
@@ -67,6 +67,7 @@ CORS_ORIGIN="http://localhost:5174"
 **Frontend** (`.env`):
 ```bash
 VITE_API_BASE_URL=http://localhost:4001
+VITE_STORE_URL=http://localhost:5173
 ```
 
 ### Run Development
@@ -96,12 +97,11 @@ Access admin panel: http://localhost:5174
 - `npm run build` - Build for production  
 - `npm run preview` - Preview production build
 
-## 🔐 Default Login
+## 🔐 Local seed login
 
-```
-Email: admin@shop.local
-Password: Admin@123
-```
+The destructive Prisma seed requires explicit `SEED_ADMIN_PASSWORD` and
+`SEED_USER_PASSWORD` values. Choose local-only credentials when running it;
+there are no production default credentials.
 
 ## 🗄️ Database
 

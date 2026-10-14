@@ -11,6 +11,7 @@ export enum ProductSortBy {
   NAME_ASC = 'name_asc',
   NAME_DESC = 'name_desc',
   BEST_SELLING = 'best_selling',
+  RATING = 'rating',
 }
 
 export class ProductFilterDto extends PaginationDto {

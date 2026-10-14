@@ -36,8 +36,9 @@ export class SendChatbotMessageDto {
   prompt: string;
 
   @ApiPropertyOptional({
-    description: 'Stable chatbot session id used to load history from Redis',
-    example: 'chat_0f5f4fe8-c1e2-43ec-9e2c-85f0f7b52d10',
+    description:
+      'Thread id (UUID v4) of an existing conversation to continue. The caller must own it. Without a valid id, a new conversation is started.',
+    example: '0f5f4fe8-c1e2-43ec-9e2c-85f0f7b52d10',
   })
   @IsOptional()
   @IsString()

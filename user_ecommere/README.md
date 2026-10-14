@@ -33,12 +33,11 @@ npm run dev
 
 Port: 5173
 
-## 🔐 Test Account
+## 🔐 Local seed account
 
-```
-Email: user@shop.local
-Password: User@123
-```
+The destructive Prisma seed requires explicit `SEED_ADMIN_PASSWORD` and
+`SEED_USER_PASSWORD` values. Choose local-only credentials when running it;
+there are no production default credentials.
 
 ## 📝 License
 

@@ -1,6 +1,30 @@
 import apiClient from '@/lib/api';
 import { z } from 'zod';
 
+export function parseAddressJson(value?: unknown): any {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, any>;
+  }
+
+  if (typeof value !== 'string' || !value.trim()) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, any>;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 const orderSchema = z.object({
   id: z.string(),
   code: z.string().optional(),
@@ -16,7 +40,18 @@ const orderSchema = z.object({
 }).transform(data => ({
   ...data,
   orderNumber: data.code || data.orderNumber,
-  shippingAddress: data.addressJson ? JSON.parse(data.addressJson) : data.shippingAddress,
+  shippingAddress: (() => {
+    const address = data.addressJson ? parseAddressJson(data.addressJson) : parseAddressJson(data.shippingAddress);
+
+    if (!address) {
+      return null;
+    }
+
+    return {
+      ...address,
+      address: address.address ?? address.line1,
+    };
+  })(),
   items: data.items.map((item: any) => ({
     ...item,
     name: item.nameSnapshot,
@@ -30,6 +65,7 @@ const orderSchema = z.object({
 const ordersResponseSchema = z.object({
   orders: z.array(orderSchema),
   total: z.number(),
+  totalPages: z.number().optional(),
 });
 
 export type Order = z.infer<typeof orderSchema>;
@@ -41,6 +77,7 @@ export const ordersApi = {
     const mapped = {
       orders: actualData.data || [],
       total: actualData.total || 0,
+      totalPages: actualData.totalPages ?? Math.ceil((actualData.total || 0) / limit),
     };
     return ordersResponseSchema.parse(mapped);
   },

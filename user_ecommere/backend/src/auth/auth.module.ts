@@ -3,27 +3,42 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { JWT_ISSUER, JWT_AUDIENCE } from './constants';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CsrfGuard } from '@/common/guards/csrf.guard';
 import { ReferralsModule } from '@/referrals/referrals.module';
+import { MailModule } from '@/mail/mail.module';
 
 @Module({
   imports: [
     PassportModule,
     ReferralsModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_ACCESS_SECRET'),
-        signOptions: {
-          expiresIn: configService.get('TOKEN_EXPIRES_IN'),
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_ACCESS_SECRET');
+        if (!secret) {
+          throw new Error('JWT_ACCESS_SECRET is required');
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: configService.get('TOKEN_EXPIRES_IN'),
+            issuer: JWT_ISSUER,
+            audience: JWT_AUDIENCE,
+          },
+          verifyOptions: {
+            issuer: JWT_ISSUER,
+            audience: JWT_AUDIENCE,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
@@ -31,7 +46,6 @@ import { ReferralsModule } from '@/referrals/referrals.module';
   providers: [
     AuthService,
     JwtAccessStrategy,
-    JwtRefreshStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
@@ -43,6 +57,10 @@ import { ReferralsModule } from '@/referrals/referrals.module';
     {
       provide: APP_GUARD,
       useClass: CsrfGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
   exports: [AuthService],

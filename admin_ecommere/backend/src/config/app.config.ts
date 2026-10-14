@@ -2,12 +2,12 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('app', () => ({
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT, 10) || 4000,
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  port: parseInt(process.env.PORT, 10) || 4001,
+  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5174',
   uploadDir: process.env.UPLOAD_DIR || './uploads',
   jwt: {
-    accessSecret: process.env.JWT_ACCESS_SECRET,
-    refreshSecret: process.env.JWT_REFRESH_SECRET,
+    accessSecret: process.env.ADMIN_JWT_ACCESS_SECRET,
+    refreshSecret: process.env.ADMIN_JWT_REFRESH_SECRET,
     accessExpiresIn: process.env.TOKEN_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.REFRESH_EXPIRES_IN || '7d',
   },

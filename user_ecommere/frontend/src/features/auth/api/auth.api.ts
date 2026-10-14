@@ -1,10 +1,27 @@
 import apiClient, { authToken } from '@/lib/api';
+import { useCartStore } from '@/features/cart/store/cartStore';
+import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { z } from 'zod';
+
+function clearCartIfAccountChanged(nextUserId: string) {
+  const previousUser = localStorage.getItem('user');
+  if (!previousUser) return;
+
+  try {
+    const previousUserId = (JSON.parse(previousUser) as { id?: unknown }).id;
+    if (previousUserId !== nextUserId) {
+      useCartStore.getState().clearCart();
+    }
+  } catch {
+    // A malformed persisted user must not leave an unknown account's cart behind.
+    useCartStore.getState().clearCart();
+  }
+}
 
 const userSchema = z.object({
   id: z.string(),
   email: z.string().nullable().optional(),
-  name: z.string(),
+  name: z.string().nullable().optional().transform((value) => value ?? ''),
   role: z.enum(['CUSTOMER', 'ADMIN']),
   phone: z.string(),
   createdAt: z.string().optional(),
@@ -28,40 +45,84 @@ export const authApi = {
       // Backend wraps with TransformInterceptor
       const actualData = response.data.data || response.data;
 
-      console.log('Login response actualData:', actualData);
-
       const parsed = loginResponseSchema.parse(actualData);
 
       authToken.set(parsed.accessToken);
+      clearCartIfAccountChanged(parsed.user.id);
 
       // Store non-sensitive user data
       localStorage.setItem('user', JSON.stringify(parsed.user));
 
       return parsed;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
       throw error;
     }
   },
 
   async register(name: string, phone: string, password: string, email?: string, referralCode?: string): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post('/auth/register', { name, phone, password, email, referralCode });
+      const response = await apiClient.post('/auth/register', {
+        name,
+        phone,
+        password,
+        ...(email ? { email } : {}),
+        ...(referralCode ? { referralCode } : {}),
+      });
       // Backend wraps with TransformInterceptor
       const actualData = response.data.data || response.data;
-
-      console.log('Register response actualData:', actualData);
 
       const parsed = registerResponseSchema.parse(actualData);
 
       authToken.set(parsed.accessToken);
+      clearCartIfAccountChanged(parsed.user.id);
 
       // Store non-sensitive user data
       localStorage.setItem('user', JSON.stringify(parsed.user));
 
       return parsed;
     } catch (error) {
-      console.error('Register error:', error);
+      console.error('Register error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
+      throw error;
+    }
+  },
+
+  async forgotPassword(input: string | { email: string }): Promise<{ message: string }> {
+    const email = typeof input === 'string' ? input : input.email;
+    try {
+      const response = await apiClient.post('/auth/forgot-password', { email });
+      const actualData = response.data.data || response.data;
+      return actualData;
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
+    }
+  },
+
+  async resetPassword(
+    tokenOrPayload: string | { token: string; newPassword: string },
+    maybeNewPassword?: string
+  ): Promise<{ message: string }> {
+    const token = typeof tokenOrPayload === 'string' ? tokenOrPayload : tokenOrPayload.token;
+    const newPassword = typeof tokenOrPayload === 'string' ? maybeNewPassword! : tokenOrPayload.newPassword;
+    try {
+      const response = await apiClient.post('/auth/reset-password', { token, newPassword });
+      const actualData = response.data.data || response.data;
+      return actualData;
+    } catch (error) {
+      console.error('Reset password error:', error);
       throw error;
     }
   },
@@ -77,11 +138,19 @@ export const authApi = {
       // Call backend to revoke refresh token and clear cookies
       await apiClient.post('/auth/logout');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
       // Continue with local cleanup even if backend fails
     } finally {
       // Clear memory token
       authToken.remove();
+      useCartStore.getState().clearCart();
+      useWishlist.getState().clearWishlist();
       localStorage.removeItem('user');
       // Cookies will be cleared by backend
     }

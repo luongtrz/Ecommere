@@ -1,5 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JWT_ISSUER, JWT_AUDIENCE } from '@/auth/constants';
 
 export interface JwtPayload {
   sub: string;
@@ -16,6 +17,8 @@ export class JwtUtil {
     return jwtService.sign(payload, {
       secret: configService.get('JWT_ACCESS_SECRET'),
       expiresIn: configService.get('TOKEN_EXPIRES_IN'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
   }
 
@@ -27,6 +30,8 @@ export class JwtUtil {
     return jwtService.sign(payload, {
       secret: configService.get('JWT_REFRESH_SECRET'),
       expiresIn: configService.get('REFRESH_EXPIRES_IN'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
   }
 
@@ -37,6 +42,8 @@ export class JwtUtil {
   ): JwtPayload {
     return jwtService.verify(token, {
       secret: configService.get('JWT_ACCESS_SECRET'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
   }
 
@@ -47,6 +54,8 @@ export class JwtUtil {
   ): JwtPayload {
     return jwtService.verify(token, {
       secret: configService.get('JWT_REFRESH_SECRET'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
   }
 }

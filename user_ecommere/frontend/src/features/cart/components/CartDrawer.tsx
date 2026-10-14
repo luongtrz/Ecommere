@@ -52,7 +52,7 @@ export function CartDrawer() {
                                         <div className="flex flex-1 flex-col">
                                             <div>
                                                 <div className="flex justify-between text-base font-medium text-gray-900">
-                                                    <h3 className="line-clamp-1 mr-2"><a href="#">{item.name}</a></h3>
+                                                    <h3 className="line-clamp-1 mr-2">{item.name}</h3>
                                                     <p className="ml-4">{formatCurrency(item.price * item.quantity)}</p>
                                                 </div>
                                                 <div className="mt-1 text-xs text-gray-500 flex gap-2">
@@ -66,7 +66,13 @@ export function CartDrawer() {
                                                         <Minus className="h-3 w-3" />
                                                     </Button>
                                                     <span className="w-6 text-center text-xs font-medium">{item.quantity}</span>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md" onClick={() => updateQuantity(item.variantId, item.quantity + 1)}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-6 w-6 rounded-md"
+                                                        onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                                                        disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                                                    >
                                                         <Plus className="h-3 w-3" />
                                                     </Button>
                                                 </div>

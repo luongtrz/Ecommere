@@ -5,6 +5,7 @@ import { CreatePaymentDto } from './dtos/create-payment.dto';
 import { VerifyPaymentDto } from './dtos/verify-payment.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
+import { CsrfExempt } from '@/common/decorators/csrf-exempt.decorator';
 
 @ApiTags('Payments')
 @Controller('payments')
@@ -23,11 +24,15 @@ export class PaymentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Verify payment status (Mock)' })
   @ApiResponse({ status: 200 })
-  async verifyPayment(@Body() verifyPaymentDto: VerifyPaymentDto, @Body('method') method: string) {
-    return this.paymentsService.verifyPayment(verifyPaymentDto.paymentId, method as any);
+  async verifyPayment(@Body() verifyPaymentDto: VerifyPaymentDto) {
+    return this.paymentsService.verifyPayment(
+      verifyPaymentDto.paymentId,
+      verifyPaymentDto.method,
+    );
   }
 
   @Public()
+  @CsrfExempt()
   @Post('webhook/stripe')
   @ApiOperation({ summary: 'Stripe webhook endpoint (Mock)' })
   @ApiResponse({ status: 200 })
@@ -36,6 +41,7 @@ export class PaymentsController {
   }
 
   @Public()
+  @CsrfExempt()
   @Post('webhook/momo')
   @ApiOperation({ summary: 'MoMo webhook endpoint (Mock)' })
   @ApiResponse({ status: 200 })

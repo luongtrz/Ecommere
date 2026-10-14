@@ -4,6 +4,21 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  if (process.env.SEED_DATABASE !== 'true') {
+    throw new Error(
+      'Refusing to run the destructive seed. Set SEED_DATABASE=true and provide SEED_ADMIN_PASSWORD and SEED_USER_PASSWORD explicitly.',
+    );
+  }
+
+  const adminPasswordValue = process.env.SEED_ADMIN_PASSWORD;
+  const userPasswordValue = process.env.SEED_USER_PASSWORD;
+
+  if (!adminPasswordValue || !userPasswordValue) {
+    throw new Error(
+      'SEED_ADMIN_PASSWORD and SEED_USER_PASSWORD are required when seeding the database.',
+    );
+  }
+
   console.log('🌱 Starting seed...');
 
   // Clear existing data
@@ -13,6 +28,9 @@ async function main() {
   await prisma.cartItem.deleteMany();
   await prisma.cart.deleteMany();
   await prisma.review.deleteMany();
+  await prisma.referral.deleteMany();
+  await prisma.refreshToken.deleteMany();
+  await prisma.referralConfig.deleteMany();
   await prisma.productVariant.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
@@ -23,8 +41,8 @@ async function main() {
   console.log('✅ Cleared existing data');
 
   // Create Users
-  const adminPassword = await bcrypt.hash('Admin@123', 10);
-  const userPassword = await bcrypt.hash('User@123', 10);
+  const adminPassword = await bcrypt.hash(adminPasswordValue, 10);
+  const userPassword = await bcrypt.hash(userPasswordValue, 10);
 
   const admin = await prisma.user.create({
     data: {
@@ -509,6 +527,11 @@ async function main() {
   console.log('✅ Created products with variants:', shopeeProducts.length);
 
   // Create Coupons
+  const couponValidFrom = new Date();
+  couponValidFrom.setDate(couponValidFrom.getDate() - 1);
+  const couponValidUntil = new Date();
+  couponValidUntil.setFullYear(couponValidUntil.getFullYear() + 1);
+
   const coupons = await Promise.all([
     prisma.coupon.create({
       data: {
@@ -517,8 +540,8 @@ async function main() {
         value: 10,
         minOrder: 200000,
         maxDiscount: 50000,
-        validFrom: new Date('2024-01-01'),
-        validUntil: new Date('2025-12-31'),
+        validFrom: couponValidFrom,
+        validUntil: couponValidUntil,
         maxUses: 1000,
       },
     }),
@@ -528,8 +551,8 @@ async function main() {
         type: 'FIXED',
         value: 20000,
         minOrder: 150000,
-        validFrom: new Date('2024-01-01'),
-        validUntil: new Date('2025-12-31'),
+        validFrom: couponValidFrom,
+        validUntil: couponValidUntil,
         maxUses: 500,
       },
     }),
@@ -539,8 +562,8 @@ async function main() {
         type: 'FREESHIP',
         value: 30000,
         minOrder: 300000,
-        validFrom: new Date('2024-01-01'),
-        validUntil: new Date('2025-12-31'),
+        validFrom: couponValidFrom,
+        validUntil: couponValidUntil,
       },
     }),
   ]);

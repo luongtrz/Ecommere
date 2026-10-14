@@ -59,7 +59,7 @@ export const adminOrderSchema = z.object({
   updatedAt: z.string().transform((val) => new Date(val)),
   user: z.object({
     id: z.string(),
-    email: z.string(),
+    email: z.string().nullable().optional(),
     name: z.string().nullable().optional(),
     phone: z.string().nullable().optional(),
   }).optional(),
