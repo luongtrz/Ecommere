@@ -1,5 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ADMIN_JWT_AUDIENCE, ADMIN_JWT_ISSUER } from '@/auth/auth.constants';
 
 export interface JwtPayload {
   sub: string;
@@ -14,8 +15,10 @@ export class JwtUtil {
     payload: JwtPayload,
   ): string {
     return jwtService.sign(payload, {
-      secret: configService.get('JWT_ACCESS_SECRET'),
+      secret: configService.get('ADMIN_JWT_ACCESS_SECRET'),
       expiresIn: configService.get('TOKEN_EXPIRES_IN'),
+      issuer: ADMIN_JWT_ISSUER,
+      audience: ADMIN_JWT_AUDIENCE,
     });
   }
 
@@ -25,8 +28,10 @@ export class JwtUtil {
     payload: JwtPayload,
   ): string {
     return jwtService.sign(payload, {
-      secret: configService.get('JWT_REFRESH_SECRET'),
+      secret: configService.get('ADMIN_JWT_REFRESH_SECRET'),
       expiresIn: configService.get('REFRESH_EXPIRES_IN'),
+      issuer: ADMIN_JWT_ISSUER,
+      audience: ADMIN_JWT_AUDIENCE,
     });
   }
 
@@ -36,7 +41,9 @@ export class JwtUtil {
     token: string,
   ): JwtPayload {
     return jwtService.verify(token, {
-      secret: configService.get('JWT_ACCESS_SECRET'),
+      secret: configService.get('ADMIN_JWT_ACCESS_SECRET'),
+      issuer: ADMIN_JWT_ISSUER,
+      audience: ADMIN_JWT_AUDIENCE,
     });
   }
 
@@ -46,7 +53,9 @@ export class JwtUtil {
     token: string,
   ): JwtPayload {
     return jwtService.verify(token, {
-      secret: configService.get('JWT_REFRESH_SECRET'),
+      secret: configService.get('ADMIN_JWT_REFRESH_SECRET'),
+      issuer: ADMIN_JWT_ISSUER,
+      audience: ADMIN_JWT_AUDIENCE,
     });
   }
 }

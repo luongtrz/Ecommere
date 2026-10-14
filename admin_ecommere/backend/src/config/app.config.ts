@@ -6,8 +6,8 @@ export default registerAs('app', () => ({
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5174',
   uploadDir: process.env.UPLOAD_DIR || './uploads',
   jwt: {
-    accessSecret: process.env.JWT_ACCESS_SECRET,
-    refreshSecret: process.env.JWT_REFRESH_SECRET,
+    accessSecret: process.env.ADMIN_JWT_ACCESS_SECRET,
+    refreshSecret: process.env.ADMIN_JWT_REFRESH_SECRET,
     accessExpiresIn: process.env.TOKEN_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.REFRESH_EXPIRES_IN || '7d',
   },
