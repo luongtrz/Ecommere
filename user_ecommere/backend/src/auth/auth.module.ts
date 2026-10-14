@@ -7,6 +7,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
+import { JWT_ISSUER, JWT_AUDIENCE } from './constants';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CsrfGuard } from '@/common/guards/csrf.guard';
@@ -18,12 +19,24 @@ import { ReferralsModule } from '@/referrals/referrals.module';
     ReferralsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_ACCESS_SECRET'),
-        signOptions: {
-          expiresIn: configService.get('TOKEN_EXPIRES_IN'),
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_ACCESS_SECRET');
+        if (!secret) {
+          throw new Error('JWT_ACCESS_SECRET is required');
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: configService.get('TOKEN_EXPIRES_IN'),
+            issuer: JWT_ISSUER,
+            audience: JWT_AUDIENCE,
+          },
+          verifyOptions: {
+            issuer: JWT_ISSUER,
+            audience: JWT_AUDIENCE,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

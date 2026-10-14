@@ -18,6 +18,7 @@ import {
   setCsrfTokenCookie,
   clearAuthCookies,
 } from './utils/token.util';
+import { JWT_ISSUER, JWT_AUDIENCE } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -166,6 +167,8 @@ export class AuthService {
     try {
       payload = this.jwtService.verify(oldRefreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
+        issuer: JWT_ISSUER,
+        audience: JWT_AUDIENCE,
       });
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -391,11 +394,15 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
       expiresIn: this.configService.get('TOKEN_EXPIRES_IN'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get('REFRESH_EXPIRES_IN'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
 
     return new AuthTokensEntity(
@@ -425,6 +432,8 @@ export class AuthService {
     const accessToken = this.jwtService.sign(accessPayload, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
       expiresIn: this.configService.get('TOKEN_EXPIRES_IN'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
 
     // Generate refresh token (long-lived, in HTTP-only cookie)
@@ -437,6 +446,8 @@ export class AuthService {
     const refreshToken = this.jwtService.sign(refreshPayload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get('REFRESH_EXPIRES_IN'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
 
     const decodedRefreshToken = this.jwtService.decode(refreshToken) as { exp?: number } | null;

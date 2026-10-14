@@ -4,6 +4,8 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 
+import { JWT_ISSUER, JWT_AUDIENCE } from '../constants';
+
 export interface JwtPayload {
   sub: string;
   email: string;
@@ -20,6 +22,8 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.get('JWT_ACCESS_SECRET'),
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
   }
 
