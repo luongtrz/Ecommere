@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { AgentThread } from '@prisma/client';
 
@@ -70,16 +70,41 @@ export class ThreadService {
     });
   }
 
-  async remove(threadId: string, actor: AgentActor): Promise<void> {
+  async remove(
+    threadId: string,
+    actor: AgentActor,
+    isRunning?: () => boolean,
+  ): Promise<void> {
     await this.assertOwned(threadId, actor);
-    await this.prisma.$transaction([
-      this.prisma.agentToolLog.deleteMany({
-        where: { threadId },
-      }),
-      this.prisma.agentThread.delete({
-        where: { id: threadId },
-      }),
-    ]);
+    if (isRunning && isRunning()) {
+      throw new ConflictException(
+        'Cuộc trò chuyện đang được xử lý, vui lòng thử lại sau.',
+      );
+    }
+    if (isRunning) {
+      await this.prisma.$transaction(async (tx) => {
+        if (isRunning()) {
+          throw new ConflictException(
+            'Cuộc trò chuyện đang được xử lý, vui lòng thử lại sau.',
+          );
+        }
+        await tx.agentToolLog.deleteMany({
+          where: { threadId },
+        });
+        await tx.agentThread.delete({
+          where: { id: threadId },
+        });
+      });
+    } else {
+      await this.prisma.$transaction([
+        this.prisma.agentToolLog.deleteMany({
+          where: { threadId },
+        }),
+        this.prisma.agentThread.delete({
+          where: { id: threadId },
+        }),
+      ]);
+    }
   }
 
   async recordUsage(threadId: string, tokens: number): Promise<void> {

@@ -17,7 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+import { Throttle, type ThrottlerGetTrackerFunction } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { Role } from '@prisma/client';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -35,6 +35,12 @@ import type { ToolContext } from './tools/tool.types';
 import { SendAgentMessageDto } from './dtos/agent-message.dto';
 import { ResumeAgentDto } from './dtos/agent-resume.dto';
 import { AgentThreadQueryDto } from './dtos/agent-thread-query.dto';
+
+export const getChatbotTracker: ThrottlerGetTrackerFunction = (
+  req: Record<string, any>,
+) => {
+  return req?.user?.id || req?.user?.sub || req?.ip;
+};
 
 @ApiTags('Admin chatbot')
 @ApiBearerAuth('JWT-auth')
@@ -55,7 +61,13 @@ export class AdminChatbotController {
     this.threads = threads;
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @Throttle({
+    default: {
+      limit: 20,
+      ttl: 60000,
+      getTracker: getChatbotTracker,
+    },
+  })
   @Post('stream')
   @ApiOperation({ summary: 'Stream assistant responses using Server-Sent Events' })
   @ApiResponse({ status: 200, description: 'Server-Sent Events stream' })
@@ -99,7 +111,13 @@ export class AdminChatbotController {
     });
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @Throttle({
+    default: {
+      limit: 20,
+      ttl: 60000,
+      getTracker: getChatbotTracker,
+    },
+  })
   @Post('threads/:threadId/resume')
   @ApiOperation({ summary: 'Resume assistant execution with tool call decisions' })
   @ApiResponse({ status: 200, description: 'Server-Sent Events stream' })
@@ -220,7 +238,14 @@ export class AdminChatbotController {
       );
     }
     await this.runner.deleteCheckpoints(threadId);
-    await this.threads.remove(threadId, actor);
+    if (this.runner.isThreadRunning(threadId)) {
+      throw new ConflictException(
+        'Cuộc trò chuyện đang được xử lý, vui lòng thử lại sau.',
+      );
+    }
+    await this.threads.remove(threadId, actor, () =>
+      this.runner.isThreadRunning(threadId),
+    );
     return { deleted: true };
   }
 
@@ -242,13 +267,39 @@ export class AdminChatbotController {
       return writer;
     };
 
+    let isTerminated = false;
+    const closeStream = () => {
+      if (isTerminated) {
+        return;
+      }
+      isTerminated = true;
+      if (writer) {
+        try {
+          writer.close();
+        } catch {
+          // ignore
+        }
+      } else if (
+        !res.writableFinished &&
+        !(res as any)?.writableEnded &&
+        typeof (res as any)?.end === 'function'
+      ) {
+        try {
+          (res as any).end();
+        } catch {
+          // ignore
+        }
+      }
+    };
+
     // Listen on the response, not the request: on Node 16+ the request emits
     // 'close' as soon as its body is read, which would cancel the turn at once.
     // The response emits 'close' early only when the client has gone away.
     const abortController = new AbortController();
     const onClose = () => {
-      if (!res.writableFinished) {
+      if (!isTerminated && !res.writableFinished) {
         abortController.abort();
+        closeStream();
       }
     };
     res.on('close', onClose);
@@ -264,6 +315,9 @@ export class AdminChatbotController {
         message: options.message,
         resume: options.resume,
         sink: (event: AgentStreamEvent) => {
+          if (isTerminated || abortController.signal.aborted || res.writableFinished) {
+            return;
+          }
           const w = getWriter();
           w.send(event);
         },
@@ -286,21 +340,19 @@ export class AdminChatbotController {
     try {
       await runPromise;
     } catch {
-      const w = getWriter();
-      w.send({
-        event: 'error',
-        data: {
-          message: 'Trợ lý tạm thời không phản hồi, vui lòng thử lại sau.',
-          code: 'AGENT_ERROR',
-        },
-      });
+      if (!isTerminated && !abortController.signal.aborted && !res.writableFinished) {
+        const w = getWriter();
+        w.send({
+          event: 'error',
+          data: {
+            message: 'Trợ lý tạm thời không phản hồi, vui lòng thử lại sau.',
+            code: 'AGENT_ERROR',
+          },
+        });
+      }
     } finally {
       cleanupClose();
-      if (writer) {
-        writer.close();
-      } else if (typeof (res as any)?.end === 'function') {
-        (res as any).end();
-      }
+      closeStream();
     }
   }
 
