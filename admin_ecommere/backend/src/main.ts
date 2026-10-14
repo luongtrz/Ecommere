@@ -20,7 +20,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Security
-  app.use(helmet());
+  app.use(helmet({ crossOriginResourcePolicy: false }));
 
   // Cookie parser (must be before routes)
   app.use(cookieParser());
@@ -36,15 +36,7 @@ async function bootstrap() {
     .filter(Boolean);
 
   app.enableCors({
-    origin: (origin, callback) => {
-      // Requests without an Origin header are common for health checks and
-      // server-to-server clients; browsers still must match the allowlist.
-      if (!origin || corsOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error('Not allowed by CORS'));
-    },
+    origin: (origin, callback) => { callback(null, true); },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [

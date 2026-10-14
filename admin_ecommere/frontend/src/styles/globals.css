@@ -6,25 +6,25 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
+    --background: 210 20% 98%;       /* #F8FAFC - crisp light slate */
+    --foreground: 222 47% 11%;       /* #0F172A - deep text */
+    --card: 0 0% 100%;               /* #FFFFFF - pure white */
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 214 84% 32%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 38% 95%;
-    --muted-foreground: 215 16% 46%;
-    --accent: 193 79% 91%;
-    --accent-foreground: 222 47% 11%;
+    --primary: 168 85% 30%;          /* #0D9488 - Teal 600 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 168 45% 96%;        /* #F0FDFA - soft teal tint */
+    --secondary-foreground: 168 85% 20%;
+    --muted: 210 40% 96%;            /* #F1F5F9 */
+    --muted-foreground: 215 16% 47%; /* #64748B */
+    --accent: 168 45% 94%;
+    --accent-foreground: 168 85% 20%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 88%;
-    --input: 214 32% 88%;
-    --ring: 214 84% 32%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;           /* #E2E8F0 */
+    --input: 214 32% 91%;
+    --ring: 168 85% 30%;
     --radius: 1rem;
   }
 
@@ -34,39 +34,57 @@
 
   html {
     @apply scroll-smooth;
+    color-scheme: light;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    background-color: #F8FAFC;
     background-image:
-      radial-gradient(circle at top right, rgba(147, 197, 253, 0.24), transparent 24%),
-      radial-gradient(circle at top left, rgba(34, 211, 238, 0.18), transparent 22%),
-      linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.98));
+      radial-gradient(circle at 10% 0%, rgba(13, 148, 136, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.04) 0%, transparent 35%),
+      linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
     background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    letter-spacing: -0.02em;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.025em;
     font-weight: 700;
   }
 }
 
 @layer components {
   .admin-surface {
-    @apply rounded-[1.75rem] border border-white/85 bg-white/85 shadow-[0_12px_45px_-16px_rgba(15,23,42,0.12)] backdrop-blur-xl transition-all duration-300;
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-xs backdrop-blur-md transition-all duration-200;
   }
 
-  .sidebar-glass {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.88) 100%);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+  .sidebar-white {
+    background-color: #FFFFFF;
+    border-right: 1px solid #E2E8F0;
+  }
+
+  /* Universal clean styling for admin */
+  .admin-shell {
+    color: #0F172A;
+  }
+
+  .admin-shell table thead th {
+    background-color: #F8FAFC;
+    color: #475569;
+    border-color: #E2E8F0;
+  }
+
+  .admin-shell table tbody tr {
+    border-color: #F1F5F9;
+  }
+
+  .admin-shell table tbody tr:hover {
+    background-color: #F8FAFC;
   }
 }
 
@@ -78,14 +96,5 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
-  }
-
-  .admin-glow {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .admin-glow:hover {
-    box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 20px -2px rgba(12, 84, 163, 0.06);
-    border-color: rgba(12, 84, 163, 0.15);
   }
 }
