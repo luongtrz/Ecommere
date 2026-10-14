@@ -17,6 +17,7 @@ import { ShippingModule } from './shipping/shipping.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
     UploadsModule,
     ReferralsModule,
     ChatbotModule,
+    HealthModule,
   ],
 })
 export class AppModule { }

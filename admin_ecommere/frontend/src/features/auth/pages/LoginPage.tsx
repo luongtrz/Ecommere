@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useAuth } from '../hooks/useAuth';
-import { SEO } from '@/lib/seo';
+import { SEO } from '@/lib/seo';import { STORE_URL } from '@/lib/constants';
+
 import {
   ShieldCheck,
   Lock,
@@ -233,12 +234,12 @@ export function LoginPage() {
             {/* Direct Link back to Customer Store */}
             <div className="text-center">
               <a
-                href="http://192.168.1.94:5173"
+                href={STORE_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 transition-colors font-medium"
               >
-                <span>Chuyển sang Giao diện Cửa hàng Khách Hàng (Port 5173)</span>
+                <span>Chuyển sang Giao diện Cửa hàng Khách Hàng</span>
                 <ArrowRight className="h-3 w-3" />
               </a>
             </div>

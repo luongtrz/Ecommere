@@ -32,7 +32,7 @@ async function bootstrap() {
 
   // Serve static files (uploads)
   const express = require('express');
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   // CORS
   const corsOrigins = (configService.get<string>('CORS_ORIGIN') || '')
@@ -59,6 +59,7 @@ async function bootstrap() {
       'Accept',
       'Origin',
       'X-CSRF-Token', // Add CSRF header
+      'X-Chat-Session', // Guest chatbot thread key sent by the storefront
     ],
     exposedHeaders: ['Content-Disposition', 'X-CSRF-Token'],
   });

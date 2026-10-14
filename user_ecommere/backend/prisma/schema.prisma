@@ -169,6 +169,7 @@ model ProductVariant {
   
   @@index([productId])
   @@index([sku])
+  @@index([stock])
   @@map("product_variants")
 }
 

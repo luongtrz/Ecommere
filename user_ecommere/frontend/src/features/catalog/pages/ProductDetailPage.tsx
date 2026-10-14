@@ -358,7 +358,7 @@ export function ProductDetailPage() {
                           size="icon"
                           type="button"
                           onClick={() =>
-                            setQuantity(Math.min(selectedVariant?.stock || 999, quantity + 1))
+                            setQuantity(Math.min(selectedVariant?.stock ?? 999, quantity + 1))
                           }
                           className="h-9 w-9 rounded-lg hover:bg-slate-100 text-slate-700 active:scale-95"
                         >
@@ -367,7 +367,7 @@ export function ProductDetailPage() {
                       </div>
 
                       <span className="text-xs text-slate-500 font-medium">
-                        (Có sẵn {selectedVariant?.stock || 50} sản phẩm)
+                        (Có sẵn {selectedVariant?.stock ?? 0} sản phẩm)
                       </span>
                     </div>
                   </div>
@@ -377,7 +377,7 @@ export function ProductDetailPage() {
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
                   <Button
                     size="lg"
-                    className="flex-1 h-13 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white font-black text-sm shadow-xl shadow-teal-600/25 transition-all hover:scale-[1.01] active:scale-[0.98]"
+                    className="flex-1 h-[3.25rem] rounded-2xl bg-teal-600 hover:bg-teal-500 text-white font-black text-sm shadow-xl shadow-teal-600/25 transition-all hover:scale-[1.01] active:scale-[0.98]"
                     onClick={handleAddToCart}
                     disabled={!selectedVariant || selectedVariant.stock === 0}
                   >
@@ -388,7 +388,7 @@ export function ProductDetailPage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="h-13 rounded-2xl border-teal-600 text-teal-700 hover:bg-teal-50 font-black text-sm transition-all"
+                    className="h-[3.25rem] rounded-2xl border-teal-600 text-teal-700 hover:bg-teal-50 font-black text-sm transition-all"
                     onClick={handleBuyNow}
                     disabled={!selectedVariant || selectedVariant.stock === 0}
                   >
@@ -401,7 +401,7 @@ export function ProductDetailPage() {
                     size="icon"
                     onClick={handleToggleWishlist}
                     aria-label={isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích'}
-                    className={`h-13 w-13 rounded-2xl border-slate-200 transition-all ${
+                    className={`h-[3.25rem] w-[3.25rem] rounded-2xl border-slate-200 transition-all ${
                       isWishlisted
                         ? 'bg-rose-50 text-rose-500 border-rose-200 shadow-md shadow-rose-500/10'
                         : 'bg-white text-slate-400 hover:text-rose-500 hover:border-rose-200'

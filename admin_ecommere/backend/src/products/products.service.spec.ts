@@ -511,7 +511,7 @@ describe('ProductsService', () => {
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
 
       await expect(service.remove('1')).rejects.toThrow(BadRequestException);
-      await expect(service.remove('1')).rejects.toThrow('Cannot delete product with existing cart items or orders');
+      await expect(service.remove('1')).rejects.toThrow('Cannot delete product with existing carts, orders, or stock history');
     });
   });
 });

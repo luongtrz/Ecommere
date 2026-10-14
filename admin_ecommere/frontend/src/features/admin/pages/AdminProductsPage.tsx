@@ -44,8 +44,7 @@ import {
 
 import { useDeleteProduct } from '../hooks/useAdminProducts';
 import { useToast } from '@/hooks/useToast';
-
-const STORE_URL = (import.meta.env.VITE_STORE_URL || 'http://localhost:5173').replace(/\/$/, '');
+import { STORE_URL } from '@/lib/constants';
 
 export function AdminProductsPage() {
   const [search, setSearch] = useState('');

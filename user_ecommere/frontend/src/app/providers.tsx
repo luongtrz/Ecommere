@@ -24,7 +24,7 @@ export function AppProviders({ children }: AppProvidersProps) {
       <Toaster />
       <SonnerToaster position="top-right" richColors />
       <Suspense fallback={null}>
-        <ReactQueryDevtools initialIsOpen={false} />
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       </Suspense>
     </QueryClientProvider>
   );

@@ -28,6 +28,16 @@ fail() {
   exit 1
 }
 
+# Print the value of KEY from an env file, without surrounding quotes.
+env_value() {
+  local line
+  line="$(grep -E "^${2}=" "$1" | tail -n 1 || true)"
+  line="${line#*=}"
+  line="${line#\"}"; line="${line%\"}"
+  line="${line#\'}"; line="${line%\'}"
+  printf '%s' "$line"
+}
+
 cd "$APP_ROOT"
 
 [[ -f "$COMPOSE_FILE" ]] || fail "compose.yaml was not found"
@@ -38,11 +48,21 @@ for env_file in "${ENV_FILES[@]}"; do
   [[ -f "$env_file" ]] || fail "missing environment file: ${env_file#"$APP_ROOT/"}"
 
   for variable in "${REQUIRED_VARS[@]}"; do
-    grep -Eq "^${variable}=.+$" "$env_file" || \
-      fail "${variable} is missing from ${env_file#"$APP_ROOT/"}"
+    [[ -n "$(env_value "$env_file" "$variable")" ]] || \
+      fail "${variable} is missing or empty in ${env_file#"$APP_ROOT/"}"
   done
 
-  if grep -Eiq 'replace[-_ ]?with|change[-_ ]?in[-_ ]?production|example[-_ ]?password|demo[-_ ]?password' "$env_file"; then
+  for secret in JWT_ACCESS_SECRET JWT_REFRESH_SECRET; do
+    secret_value="$(env_value "$env_file" "$secret")"
+    (( ${#secret_value} >= 32 )) || \
+      fail "${secret} must be at least 32 characters in ${env_file#"$APP_ROOT/"}"
+  done
+
+  database_url="$(env_value "$env_file" DATABASE_URL)"
+  [[ "$database_url" != *localhost* && "$database_url" != *127.0.0.1* ]] || \
+    fail "DATABASE_URL points to localhost in ${env_file#"$APP_ROOT/"}"
+
+  if grep -Eiq 'replace[-_ ]?with|change[-_ ]?in[-_ ]?production|example[-_ ]?password|demo[-_ ]?password|changeme|user:pass|admin123|password123' "$env_file"; then
     fail "placeholder or demo credentials found in ${env_file#"$APP_ROOT/"}"
   fi
 

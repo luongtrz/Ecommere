@@ -138,7 +138,7 @@ export function DashboardPage() {
                 Bảng điều hành phân phối <span className="text-teal-700">Thai Spray</span>
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
-                Theo dõi thời gian thực lưu lượng đơn hàng, doanh số chai xịt chuột & diệt côn trùng Thái Lan chính ngạch từ cơ sở dữ liệu nội bộ trên Realme C3.
+                Theo dõi thời gian thực lưu lượng đơn hàng, doanh số chai xịt chuột & diệt côn trùng Thái Lan chính ngạch từ cơ sở dữ liệu nội bộ.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button asChild className="rounded-xl px-6 py-2.5 font-bold bg-teal-700 hover:bg-teal-800 text-white shadow-md shadow-teal-700/20 transition-all duration-200">
@@ -154,12 +154,12 @@ export function DashboardPage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-2xs">
+              <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Doanh thu toàn hệ thống</p>
                 <p className="mt-1 text-2xl font-black text-slate-900 tracking-tight">{formatCurrency(stats.revenue.totalRevenue)}</p>
                 <p className="mt-1 text-[11px] text-slate-500">Tích lũy từ mọi kênh bán hàng trực tuyến</p>
               </div>
-              <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-2xs">
+              <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Đang giao vận chuyển</p>
                 <p className="mt-1 text-2xl font-black text-teal-700 tracking-tight">{stats.orders.shippingOrders} đơn hàng</p>
                 <p className="mt-1 text-[11px] text-slate-500">Đơn hàng đang trên đường đến tay khách hàng</p>
@@ -317,7 +317,7 @@ export function DashboardPage() {
               {stats.topProducts.map((product, index) => (
                 <div key={product.id} className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-3 hover:border-slate-200 transition-colors">
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white font-bold text-xs text-teal-800 border border-slate-200 shadow-2xs">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white font-bold text-xs text-teal-800 border border-slate-200 shadow-sm">
                       #{index + 1}
                     </div>
                     <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-white border border-slate-100 shrink-0">
