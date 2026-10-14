@@ -30,6 +30,7 @@ coverage/
 pnpm-lock.yaml
 package-lock.json
 !user_ecommere/backend/package-lock.json
+!admin_ecommere/backend/package-lock.json
 yarn.lock
 # We usually keep lockfiles, but if you want to ignore them uncomment above. 
 # RECOMMENDED: Do NOT ignore lockfiles. I will leave them commented out.
