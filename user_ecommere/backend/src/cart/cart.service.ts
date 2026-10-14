@@ -4,6 +4,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
 import { AddToCartDto } from './dtos/add-to-cart.dto';
 import { UpdateCartItemDto } from './dtos/update-cart-item.dto';
+import { canUserUseCoupon } from '../coupons/coupons.service';
 
 @Injectable()
 export class CartService {
@@ -187,7 +188,7 @@ export class CartService {
       where: { code: couponCode.toUpperCase() },
     });
 
-    if (!coupon) {
+    if (!coupon || !(await canUserUseCoupon(this.prisma, coupon.code, userId))) {
       throw new NotFoundException('Coupon not found');
     }
 

@@ -7,6 +7,7 @@ import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
 import { calculateShippingFee } from '../shipping/shipping.rules';
+import { canUserUseCoupon } from '../coupons/coupons.service';
 
 @Injectable()
 export class OrdersService {
@@ -111,7 +112,7 @@ export class OrdersService {
               where: { code: trimmedCode.toUpperCase() },
             });
           }
-          if (!coupon) {
+          if (!coupon || !(await canUserUseCoupon(this.prisma, coupon.code, userId))) {
             throw new NotFoundException('Coupon not found');
           }
           couponCode = coupon.code;
@@ -127,7 +128,7 @@ export class OrdersService {
         const coupon = await this.prisma.coupon.findUnique({
           where: { code: cart.couponId },
         });
-        if (coupon) {
+        if (coupon && (await canUserUseCoupon(this.prisma, coupon.code, userId))) {
           couponCode = coupon.code;
         }
       }
@@ -215,7 +216,7 @@ export class OrdersService {
       coupon = await this.prisma.coupon.findUnique({
         where: { code: couponCode },
       });
-      if (!coupon) {
+      if (!coupon || !(await canUserUseCoupon(this.prisma, coupon.code, userId))) {
         throw new NotFoundException('Coupon not found');
       }
     }
