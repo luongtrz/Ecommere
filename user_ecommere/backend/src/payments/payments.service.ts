@@ -42,6 +42,10 @@ export class PaymentsService {
       throw new BadRequestException('Unauthorized');
     }
 
+    if (order.status !== OrderStatus.PENDING_PAYMENT) {
+      throw new BadRequestException('Order is not awaiting payment');
+    }
+
     if (order.paymentStatus !== PaymentStatus.PENDING) {
       throw new BadRequestException('Order payment is not pending');
     }
@@ -94,6 +98,10 @@ export class PaymentsService {
 
     if (order.paymentStatus !== PaymentStatus.COMPLETED) {
       throw new BadRequestException('Order has not been paid');
+    }
+
+    if (order.status !== OrderStatus.DELIVERED) {
+      throw new BadRequestException('Order has not been delivered');
     }
 
     const provider = method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;

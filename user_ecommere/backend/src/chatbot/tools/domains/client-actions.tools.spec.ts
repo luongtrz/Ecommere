@@ -403,7 +403,7 @@ describe('client-actions tools', () => {
   describe('cart_clear', () => {
     it('returns { cleared: true } without database and uiAction returns cart.clear', async () => {
       const tool = getTool('cart_clear');
-      expect(tool.risk).toBe('WRITE');
+      expect(tool.risk).toBe('DESTRUCTIVE');
 
       const parsedArgs = tool.schema.parse({});
       const result: any = await tool.handler(parsedArgs, mockContext);

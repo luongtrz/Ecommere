@@ -46,7 +46,7 @@ enum StockMovementType {
 
 model User {
   id           String    @id @default(cuid())
-  email        String?
+  email        String?   @unique
   passwordHash String
   passwordResetTokenHash String?  @unique
   passwordResetExpiresAt DateTime?
@@ -105,6 +105,7 @@ model Address {
   
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
+  @@index([userId])
   @@map("addresses")
 }
 
@@ -245,6 +246,7 @@ model Order {
   @@index([code])
   @@index([status])
   @@index([createdAt])
+  @@index([couponCode])
   @@map("orders")
 }
 

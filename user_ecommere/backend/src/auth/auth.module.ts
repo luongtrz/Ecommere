@@ -7,16 +7,17 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CsrfGuard } from '@/common/guards/csrf.guard';
 import { ReferralsModule } from '@/referrals/referrals.module';
+import { MailModule } from '@/mail/mail.module';
 
 @Module({
   imports: [
     PassportModule,
     ReferralsModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -32,7 +33,6 @@ import { ReferralsModule } from '@/referrals/referrals.module';
   providers: [
     AuthService,
     JwtAccessStrategy,
-    JwtRefreshStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

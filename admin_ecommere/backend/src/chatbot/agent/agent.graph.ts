@@ -22,6 +22,7 @@ export interface AgentModelLike {
 
 export interface AgentAuditSink {
   record(entry: ToolAuditEntry): Promise<void>;
+  findCompleted?(threadId: string, toolCallId: string): Promise<string | null>;
 }
 
 export interface AgentGraphDeps {

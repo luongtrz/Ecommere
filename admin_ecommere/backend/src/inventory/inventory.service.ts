@@ -136,12 +136,13 @@ export class InventoryService {
     };
   }
 
-  async getLowStockVariants(threshold: number = 10) {
+  async getLowStockVariants(threshold: number = 10, limit: number = 100) {
     const variants = await this.prisma.productVariant.findMany({
       where: {
         stock: { lte: threshold },
         product: { active: true },
       },
+      take: limit,
       include: {
         product: {
           select: {

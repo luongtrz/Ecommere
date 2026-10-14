@@ -12,7 +12,10 @@ import { calculateShippingFee } from '../shipping/shipping.rules';
 export class OrdersService {
   constructor(private prisma: PrismaService) { }
 
-  async checkout(userId: string, checkoutDto: CheckoutDto) {
+  async checkout(
+    userId: string,
+    checkoutDto: CheckoutDto & { couponCode?: string },
+  ) {
     if (checkoutDto.checkoutKey) {
       const existingOrder = await this.findOrderByCheckoutKey(
         userId,
@@ -92,6 +95,27 @@ export class OrdersService {
           variantId: item.variantId,
           priceSnapshot: item.price,
         });
+      }
+
+      if (checkoutDto.couponCode != null) {
+        const trimmedCode =
+          typeof checkoutDto.couponCode === 'string'
+            ? checkoutDto.couponCode.trim()
+            : '';
+        if (trimmedCode.length > 0) {
+          let coupon = await this.prisma.coupon.findUnique({
+            where: { code: trimmedCode },
+          });
+          if (!coupon) {
+            coupon = await this.prisma.coupon.findUnique({
+              where: { code: trimmedCode.toUpperCase() },
+            });
+          }
+          if (!coupon) {
+            throw new NotFoundException('Coupon not found');
+          }
+          couponCode = coupon.code;
+        }
       }
     } else if (cart && cart.items.length > 0) {
       // Fall back to the server-side cart for API clients that do not send items.
@@ -191,6 +215,9 @@ export class OrdersService {
       coupon = await this.prisma.coupon.findUnique({
         where: { code: couponCode },
       });
+      if (!coupon) {
+        throw new NotFoundException('Coupon not found');
+      }
     }
 
     if (coupon) {
@@ -290,6 +317,7 @@ export class OrdersService {
               district: address.district,
               ward: address.ward,
               line1: address.line1,
+              shippingMethod: shippingMethod ?? ShippingMethod.STANDARD,
             }),
             items: {
               create: orderItems,
@@ -378,6 +406,14 @@ export class OrdersService {
           await tx.cart.update({
             where: { id: cartId },
             data: { couponId: null },
+          });
+        } else if (items && items.length > 0 && cart) {
+          const orderedVariantIds = items.map((item) => item.variantId);
+          await tx.cartItem.deleteMany({
+            where: {
+              cartId: cart.id,
+              variantId: { in: orderedVariantIds },
+            },
           });
         }
 
@@ -577,7 +613,7 @@ export class OrdersService {
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new NotFoundException('Order not found');
     }
 
     return order;
@@ -698,6 +734,13 @@ export class OrdersService {
     let paymentStatus = order.paymentStatus;
     if (status === OrderStatus.PAID || status === OrderStatus.PACKING || status === OrderStatus.SHIPPED) {
       paymentStatus = PaymentStatus.COMPLETED;
+    } else if (status === OrderStatus.CANCELED) {
+      paymentStatus =
+        order.status === OrderStatus.PAID ||
+        order.status === OrderStatus.PACKING ||
+        order.status === OrderStatus.SHIPPED
+          ? PaymentStatus.REFUNDED
+          : PaymentStatus.FAILED;
     } else if (status === OrderStatus.REFUNDED) {
       paymentStatus = PaymentStatus.REFUNDED;
     }
@@ -722,7 +765,7 @@ export class OrdersService {
         await this.restoreStockForOrder(order, tx);
       }
 
-      if (status === OrderStatus.CANCELED && order.status === OrderStatus.PENDING_PAYMENT) {
+      if (status === OrderStatus.CANCELED && order.couponCode) {
         await this.releaseCouponUsage(order, tx);
       }
 
@@ -761,7 +804,7 @@ export class OrdersService {
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new NotFoundException('Order not found');
     }
 
     // Only allow cancellation for pending or paid orders (before packing)
@@ -773,6 +816,13 @@ export class OrdersService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      const paymentStatus =
+        order.status === OrderStatus.PAID ||
+        order.status === OrderStatus.PACKING ||
+        order.status === OrderStatus.SHIPPED
+          ? PaymentStatus.REFUNDED
+          : PaymentStatus.FAILED;
+
       const statusUpdate = await tx.order.updateMany({
         where: {
           id: orderId,
@@ -783,7 +833,7 @@ export class OrdersService {
         },
         data: {
           status: OrderStatus.CANCELED,
-          paymentStatus: PaymentStatus.FAILED,
+          paymentStatus,
         },
       });
 
@@ -793,7 +843,7 @@ export class OrdersService {
 
       await this.restoreStockForOrder(order, tx);
 
-      if (order.status === OrderStatus.PENDING_PAYMENT) {
+      if (order.couponCode) {
         await this.releaseCouponUsage(order, tx);
       }
 
@@ -935,13 +985,28 @@ export class OrdersService {
         throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
       }
     } else {
+      const shippingAddress = checkoutDto.shippingAddress as
+        | {
+            fullName?: string;
+            phone?: string;
+            province?: string;
+            district?: string;
+            ward?: string;
+            address?: string;
+            line1?: string;
+          }
+        | undefined;
+
       requestAddress = {
-        fullName: checkoutDto.fullName,
-        phone: checkoutDto.phone,
-        province: checkoutDto.province,
-        district: checkoutDto.district,
-        ward: checkoutDto.ward,
-        line1: checkoutDto.line1,
+        fullName: shippingAddress?.fullName ?? checkoutDto.fullName,
+        phone: shippingAddress?.phone ?? checkoutDto.phone,
+        province: shippingAddress?.province ?? checkoutDto.province,
+        district: shippingAddress?.district ?? checkoutDto.district,
+        ward: shippingAddress?.ward ?? checkoutDto.ward,
+        line1:
+          shippingAddress?.line1 ??
+          shippingAddress?.address ??
+          checkoutDto.line1,
       };
     }
 
@@ -963,6 +1028,13 @@ export class OrdersService {
     const expectedPaymentMethod = checkoutDto.paymentMethod || 'PENDING';
     if (expectedPaymentMethod !== order.paymentMethod) {
       throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+    }
+
+    const storedShippingMethod = orderAddress.shippingMethod;
+    if (storedShippingMethod && checkoutDto.shippingMethod) {
+      if (storedShippingMethod !== checkoutDto.shippingMethod) {
+        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+      }
     }
   }
 

@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { HashUtil } from '@/common/utils/hash.util';
 import { ReferralsService } from '@/referrals/referrals.service';
+import { MailService } from '@/mail/mail.service';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { AuthTokensEntity } from './entities/auth-tokens.entity';
@@ -33,6 +34,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private referralsService: ReferralsService,
+    private mailService: MailService,
   ) { }
 
   async register(registerDto: RegisterDto, response: Response) {
@@ -44,6 +46,16 @@ export class AuthService {
 
     if (existingUser) {
       throw new BadRequestException('Số điện thoại đã được đăng ký');
+    }
+
+    if (email) {
+      const existingEmailUser = await this.prisma.user.findFirst({
+        where: { email },
+      });
+
+      if (existingEmailUser) {
+        throw new BadRequestException('Email đã được đăng ký');
+      }
     }
 
     const passwordHash = await HashUtil.hash(password);
@@ -69,6 +81,12 @@ export class AuthService {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        const target = Array.isArray(error.meta?.target)
+          ? error.meta.target.join(',')
+          : String(error.meta?.target ?? '');
+        if (target.includes('email')) {
+          throw new BadRequestException('Email đã được đăng ký');
+        }
         throw new BadRequestException('Số điện thoại đã được đăng ký');
       }
 
@@ -313,10 +331,33 @@ export class AuthService {
 
     this.logger.log(`Password reset requested for user ${user.id}`);
 
+    const isDevelopment = this.configService.get('NODE_ENV') === 'development';
+
+    if (isDevelopment) {
+      return {
+        message: 'If email exists, reset link will be sent',
+        resetToken,
+      };
+    }
+
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ||
+      this.configService.get<string>('CORS_ORIGIN') ||
+      'http://localhost:5173';
+    const baseUrl = (frontendUrl.split(',')[0] || '').trim().replace(/\/$/, '');
+    const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+
+    try {
+      await this.mailService.sendPasswordResetEmail(user.email || email, resetLink);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send password reset email to user ${user.id}: ${error?.message || error}`,
+        error?.stack,
+      );
+    }
+
     return {
       message: 'If email exists, reset link will be sent',
-      // In dev mode, return token for testing
-      ...(this.configService.get('NODE_ENV') === 'development' && { resetToken }),
     };
   }
 

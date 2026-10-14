@@ -9,6 +9,8 @@ import { CreateAddressDto } from './dtos/create-address.dto';
 import { UpdateAddressDto } from './dtos/update-address.dto';
 import { UserEntity } from './entities/user.entity';
 import { AddressEntity } from './entities/address.entity';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @ApiTags('Users')
 @ApiBearerAuth('JWT-auth')
