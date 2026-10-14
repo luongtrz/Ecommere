@@ -9,6 +9,7 @@ import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { CsrfExempt } from '@/common/decorators/csrf-exempt.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -16,6 +17,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
+  @CsrfExempt()
   @Post('register')
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
@@ -28,6 +30,7 @@ export class AuthController {
   }
 
   @Public()
+  @CsrfExempt()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -72,6 +75,7 @@ export class AuthController {
   }
 
   @Public()
+  @CsrfExempt()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request password reset' })
@@ -81,6 +85,7 @@ export class AuthController {
   }
 
   @Public()
+  @CsrfExempt()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reset password with token' })
