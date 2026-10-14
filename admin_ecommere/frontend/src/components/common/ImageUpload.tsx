@@ -4,6 +4,9 @@ import { X, Upload, Image as ImageIcon, GripVertical } from 'lucide-react';
 import apiClient from '@/lib/api';
 import { useToast } from '@/hooks/useToast';
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
 interface ImageUploadProps {
     images: string[];
     onChange: (images: string[]) => void;
@@ -20,9 +23,32 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
+        const validFiles: File[] = [];
+        for (const file of Array.from(files)) {
+            if (file.size > MAX_FILE_SIZE) {
+                toast.error('Ảnh vượt quá 5MB');
+                continue;
+            }
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                toast.error('Chỉ chấp nhận ảnh JPEG, PNG, WebP hoặc GIF');
+                continue;
+            }
+            validFiles.push(file);
+        }
+
+        if (validFiles.length === 0) {
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+            return;
+        }
+
         const remainingSlots = maxImages - images.length;
-        if (files.length > remainingSlots) {
+        if (validFiles.length > remainingSlots) {
             toast.warning(`Chỉ có thể upload tối đa ${maxImages} ảnh. Còn ${remainingSlots} slot trống.`);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
             return;
         }
 
@@ -30,7 +56,7 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
 
         try {
             const formData = new FormData();
-            Array.from(files).forEach((file) => {
+            validFiles.forEach((file) => {
                 formData.append('files', file);
             });
 

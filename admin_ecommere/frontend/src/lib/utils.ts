@@ -58,3 +58,32 @@ export function formatCurrency(amount: number): string {
     currency: 'VND',
   }).format(amount);
 }
+
+/**
+ * Safely parses a stored shipping address (addressJson).
+ * Returns the parsed address object, or null when the value is empty, invalid JSON, or not an object.
+ */
+export function parseShippingAddress<T = any>(addressJson: unknown): T | null {
+  if (!addressJson) {
+    return null;
+  }
+  if (typeof addressJson === 'object' && !Array.isArray(addressJson)) {
+    return addressJson as T;
+  }
+  if (typeof addressJson !== 'string') {
+    return null;
+  }
+  const trimmed = addressJson.trim();
+  if (!trimmed) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      return parsed as T;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}

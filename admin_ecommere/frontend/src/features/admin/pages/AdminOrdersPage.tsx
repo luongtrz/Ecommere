@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { useAdminOrders, useUpdateOrderStatus } from '../hooks/useAdminOrders';
-import { formatCurrency, formatDateTime } from '@/lib/utils';
+import { formatCurrency, formatDateTime, parseShippingAddress } from '@/lib/utils';
 import {
   AlertCircle,
   ChevronLeft,
@@ -40,6 +40,16 @@ const ORDER_STATUS_MAP: Record<OrderStatus, { label: string; color: string; bg: 
   DELIVERED: { label: 'Giao thành công', color: 'text-slate-700', bg: 'bg-slate-100 border-slate-200' },
   CANCELED: { label: 'Đã hủy', color: 'text-red-700', bg: 'bg-red-50 border-red-200' },
   REFUNDED: { label: 'Đã hoàn tiền', color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200' },
+};
+
+const ALLOWED_NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
+  PENDING_PAYMENT: ['PAID', 'CANCELED'],
+  PAID: ['PACKING', 'CANCELED'],
+  PACKING: ['SHIPPED', 'CANCELED'],
+  SHIPPED: ['DELIVERED'],
+  DELIVERED: ['REFUNDED'],
+  CANCELED: [],
+  REFUNDED: [],
 };
 
 export function AdminOrdersPage() {
@@ -79,8 +89,11 @@ export function AdminOrdersPage() {
             </div>
           );
         },
-        onError: () => {
-          toast.error('Cập nhật thất bại. Vui lòng thử lại.');
+        onError: (error: any) => {
+          const message = typeof error?.response?.data?.message === 'string'
+            ? error.response.data.message
+            : 'Cập nhật thất bại. Vui lòng thử lại.';
+          toast.error(message);
         },
       }
     );
@@ -107,25 +120,19 @@ export function AdminOrdersPage() {
 
   // Parse address for display (safely)
   const parseAddress = (addressJson: string | null) => {
-    if (!addressJson) return '';
-    try {
-      const addr = JSON.parse(addressJson);
-      if (typeof addr === 'object' && addr !== null) {
-        const parts = [
-          addr.line1,
-          addr.ward,
-          addr.district,
-          addr.province
-        ].filter(Boolean);
+    const addr = parseShippingAddress(addressJson);
+    if (!addr) return '';
 
-        if (parts.length > 0) return parts.join(', ');
+    const parts = [
+      addr.line1,
+      addr.ward,
+      addr.district,
+      addr.province
+    ].filter(Boolean);
 
-        return addr.address || addressJson;
-      }
-      return addressJson;
-    } catch {
-      return addressJson;
-    }
+    if (parts.length > 0) return parts.join(', ');
+
+    return addr.address || '';
   };
 
 
@@ -182,7 +189,13 @@ export function AdminOrdersPage() {
           />
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => {
+              setStatusFilter(value);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-[180px] bg-gray-50 border-gray-200">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
@@ -301,16 +314,16 @@ export function AdminOrdersPage() {
                         <div className="flex items-center justify-end gap-2">
                           {/* Quick Status Update */}
                           <Select
-                            defaultValue={order.status}
+                            value={order.status}
                             onValueChange={(val) => handleUpdateStatus(order.id, val as OrderStatus, order.code)}
                           >
                             <SelectTrigger className="w-[130px] h-8 text-xs bg-white border-gray-200 shadow-none">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {Object.entries(ORDER_STATUS_MAP).map(([key, config]) => (
-                                <SelectItem key={key} value={key} className="text-xs">
-                                  {config.label}
+                              {[order.status, ...(ALLOWED_NEXT_STATUSES[order.status] || [])].map((status) => (
+                                <SelectItem key={status} value={status} className="text-xs">
+                                  {ORDER_STATUS_MAP[status]?.label || status}
                                 </SelectItem>
                               ))}
                             </SelectContent>
