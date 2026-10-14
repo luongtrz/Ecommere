@@ -81,6 +81,7 @@ describe('AgentRunner', () => {
   let readCatalogTool: AgentToolDef<{ query: string }>;
   let recommendProductsTool: AgentToolDef<{ category: string }>;
   let cancelOrderTool: AgentToolDef<{ orderId: string }>;
+  let updateVariantTool: AgentToolDef<{ variantId: string; price?: number }>;
 
   const customerCtx: ToolContext = {
     userId: 'cust-123',
@@ -136,10 +137,24 @@ describe('AgentRunner', () => {
       summarize: (args) => `Hủy đơn hàng ${args.orderId}`,
     };
 
+    updateVariantTool = {
+      name: 'update_variant',
+      domain: 'catalog',
+      description: 'Cập nhật biến thể',
+      schema: z
+        .object({ variantId: z.string(), price: z.number().optional() })
+        .passthrough(),
+      auth: 'admin',
+      risk: 'WRITE',
+      handler: jest.fn().mockResolvedValue({}),
+      summarize: (args) => `Cập nhật biến thể ${args.variantId}`,
+    };
+
     registry = new ToolRegistry([
       readCatalogTool,
       recommendProductsTool,
       cancelOrderTool,
+      updateVariantTool,
     ]);
   });
 
@@ -875,7 +890,7 @@ describe('AgentRunner', () => {
     ]);
   });
 
-  it('readTranscript skips a tool-call-only AI message, tool messages and system messages', async () => {
+  it('readTranscript keeps a tool-call-only AI message with its tool calls, but skips tool messages, system messages, and empty AI messages without tools', async () => {
     const fakeGraph = createStateGraph({
       values: {
         messages: [
@@ -901,6 +916,10 @@ describe('AgentRunner', () => {
             id: 'tool-result-1',
           }),
           new AIMessage({
+            content: '',
+            id: 'ai-empty-no-tools',
+          }),
+          new AIMessage({
             content: 'Đã hủy đơn hàng ord-100 thành công.',
             id: 'ai-2',
           }),
@@ -919,9 +938,207 @@ describe('AgentRunner', () => {
     expect(transcript).toEqual([
       { id: 'h-2', role: 'user', content: 'Hủy đơn hàng ord-100' },
       {
+        id: 'ai-tool-call',
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          {
+            id: 'call_1',
+            name: 'cancel_order',
+            args: { orderId: 'ord-100' },
+            risk: 'DESTRUCTIVE',
+            summary: 'Hủy đơn hàng ord-100',
+          },
+        ],
+      },
+      {
         id: 'ai-2',
         role: 'assistant',
         content: 'Đã hủy đơn hàng ord-100 thành công.',
+      },
+    ]);
+  });
+
+  it('readTranscript returns pending tool call for a thread waiting for confirmation', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new HumanMessage({ content: 'Cập nhật biến thể v-1', id: 'h-1' }),
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: 'call_pending',
+                name: 'update_variant',
+                args: { variantId: 'v-1', price: 200000 },
+              },
+            ],
+            id: 'ai-confirm-wait',
+          }),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-waiting-confirm');
+
+    expect(transcript).toEqual([
+      { id: 'h-1', role: 'user', content: 'Cập nhật biến thể v-1' },
+      {
+        id: 'ai-confirm-wait',
+        role: 'assistant',
+        content: '',
+        pending: true,
+        tool_calls: [
+          {
+            id: 'call_pending',
+            name: 'update_variant',
+            args: { variantId: 'v-1', price: 200000 },
+            risk: 'WRITE',
+            summary: 'Cập nhật biến thể v-1',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('readTranscript leaves risk and summary out when the registry does not know the tool', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new HumanMessage({ content: 'Chạy công cụ lạ', id: 'h-unk' }),
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: 'call_unk',
+                name: 'unregistered_tool',
+                args: { param: 123 },
+              },
+            ],
+            id: 'ai-unk',
+          }),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-unknown-tool');
+
+    expect(transcript).toEqual([
+      { id: 'h-unk', role: 'user', content: 'Chạy công cụ lạ' },
+      {
+        id: 'ai-unk',
+        role: 'assistant',
+        content: '',
+        pending: true,
+        tool_calls: [
+          {
+            id: 'call_unk',
+            name: 'unregistered_tool',
+            args: { param: 123 },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('readTranscript sets pending: true only on the last assistant message with tool calls', async () => {
+    const fakeGraph = createStateGraph({
+      values: {
+        messages: [
+          new HumanMessage({ content: 'Tìm sơn', id: 'h-1' }),
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: 'call_read_1',
+                name: 'read_catalog',
+                args: { query: 'sơn xịt' },
+              },
+            ],
+            id: 'ai-turn-1',
+          }),
+          new ToolMessage({
+            tool_call_id: 'call_read_1',
+            name: 'read_catalog',
+            content: JSON.stringify({ ok: true }),
+            id: 'tool-turn-1',
+          }),
+          new AIMessage({
+            content: 'Đã tìm thấy sản phẩm. Bạn có muốn hủy đơn cũ?',
+            id: 'ai-text-1',
+          }),
+          new HumanMessage({ content: 'Hủy đơn ord-100', id: 'h-2' }),
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: 'call_cancel_1',
+                name: 'cancel_order',
+                args: { orderId: 'ord-100' },
+              },
+            ],
+            id: 'ai-turn-2',
+          }),
+        ],
+      },
+    });
+    const runner = new AgentRunner({
+      graph: fakeGraph,
+      registry,
+      threads: createMockThreads(),
+      limits: { maxSteps: 5, timeoutMs: 5000 },
+    });
+
+    const transcript = await runner.readTranscript('thread-multiple-turns');
+
+    expect(transcript).toEqual([
+      { id: 'h-1', role: 'user', content: 'Tìm sơn' },
+      {
+        id: 'ai-turn-1',
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          {
+            id: 'call_read_1',
+            name: 'read_catalog',
+            args: { query: 'sơn xịt' },
+            risk: 'READ',
+            summary: 'Tìm kiếm sản phẩm: sơn xịt',
+          },
+        ],
+      },
+      {
+        id: 'ai-text-1',
+        role: 'assistant',
+        content: 'Đã tìm thấy sản phẩm. Bạn có muốn hủy đơn cũ?',
+      },
+      { id: 'h-2', role: 'user', content: 'Hủy đơn ord-100' },
+      {
+        id: 'ai-turn-2',
+        role: 'assistant',
+        content: '',
+        pending: true,
+        tool_calls: [
+          {
+            id: 'call_cancel_1',
+            name: 'cancel_order',
+            args: { orderId: 'ord-100' },
+            risk: 'DESTRUCTIVE',
+            summary: 'Hủy đơn hàng ord-100',
+          },
+        ],
       },
     ]);
   });

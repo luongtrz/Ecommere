@@ -293,7 +293,6 @@ export function createAdminCatalogTools(
       volumeMl: z.number().int().min(1).optional(),
       price: z.number().int().min(0).optional(),
       salePrice: z.number().int().min(0).nullable().optional(),
-      stock: z.number().int().min(0).optional(),
       barcode: z.string().min(1).max(64).optional(),
     })
     .strict();

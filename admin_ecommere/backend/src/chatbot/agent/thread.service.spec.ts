@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ThreadService, AgentActor } from './thread.service';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -468,6 +468,75 @@ describe('ThreadService', () => {
       expect(mockPrismaService.agentToolLog.deleteMany).not.toHaveBeenCalled();
       expect(mockPrismaService.agentThread.delete).not.toHaveBeenCalled();
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 ConflictException when isRunning returns true and deletes nothing', async () => {
+      const mockThread = {
+        id: 't-1',
+        userId: 'user-1',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
+
+      await expect(
+        service.remove('t-1', { userId: 'user-1', app: 'USER' }, () => true),
+      ).rejects.toThrow(ConflictException);
+
+      expect(mockPrismaService.agentToolLog.deleteMany).not.toHaveBeenCalled();
+      expect(mockPrismaService.agentThread.delete).not.toHaveBeenCalled();
+      expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 ConflictException inside transaction when isRunning becomes true', async () => {
+      const mockThread = {
+        id: 't-1',
+        userId: 'user-1',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
+      let callCount = 0;
+      const isRunning = jest.fn(() => {
+        callCount++;
+        return callCount > 1;
+      });
+
+      await expect(
+        service.remove('t-1', { userId: 'user-1', app: 'USER' }, isRunning),
+      ).rejects.toThrow(ConflictException);
+
+      expect(mockPrismaService.agentToolLog.deleteMany).not.toHaveBeenCalled();
+      expect(mockPrismaService.agentThread.delete).not.toHaveBeenCalled();
+    });
+
+    it('deletes in transaction when isRunning callback returns false', async () => {
+      const mockThread = {
+        id: 't-1',
+        userId: 'user-1',
+        app: 'USER',
+        title: null,
+        totalTokens: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
+
+      await service.remove('t-1', { userId: 'user-1', app: 'USER' }, () => false);
+
+      expect(mockPrismaService.agentToolLog.deleteMany).toHaveBeenCalledWith({
+        where: { threadId: 't-1' },
+      });
+      expect(mockPrismaService.agentThread.delete).toHaveBeenCalledWith({
+        where: { id: 't-1' },
+      });
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
     });
   });
 

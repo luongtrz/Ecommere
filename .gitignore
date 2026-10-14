@@ -29,6 +29,7 @@ coverage/
 # Backend (NestJS)
 pnpm-lock.yaml
 package-lock.json
+!user_ecommere/backend/package-lock.json
 !user_ecommere/frontend/package-lock.json
 !admin_ecommere/frontend/package-lock.json
 yarn.lock

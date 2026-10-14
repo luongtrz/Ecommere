@@ -159,13 +159,23 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
         });
     }, [onFilterChange]);
 
+    const isPriceRangeInvalid = useMemo(() => {
+        const minStr = minPriceInput.trim();
+        const maxStr = maxPriceInput.trim();
+        if (minStr === '' || maxStr === '') return false;
+        const min = Number(minStr);
+        const max = Number(maxStr);
+        return !isNaN(min) && !isNaN(max) && min > max;
+    }, [minPriceInput, maxPriceInput]);
+
     // Handle price input apply
     const handlePriceApply = useCallback(() => {
+        if (isPriceRangeInvalid) return;
         onFilterChange({
-            minPrice: minPriceInput || undefined,
-            maxPrice: maxPriceInput || undefined,
+            minPrice: minPriceInput.trim() || undefined,
+            maxPrice: maxPriceInput.trim() || undefined,
         });
-    }, [minPriceInput, maxPriceInput, onFilterChange]);
+    }, [isPriceRangeInvalid, minPriceInput, maxPriceInput, onFilterChange]);
 
     // Clear all filters
     const handleClearAll = useCallback(() => {
@@ -267,6 +277,11 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                 placeholder="Từ"
                                 value={minPriceInput}
                                 onChange={(e) => setMinPriceInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handlePriceApply();
+                                    }
+                                }}
                                 className="h-8 text-xs"
                             />
                             <span className="text-gray-400 text-xs shrink-0">-</span>
@@ -275,6 +290,11 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                 placeholder="Đến"
                                 value={maxPriceInput}
                                 onChange={(e) => setMaxPriceInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handlePriceApply();
+                                    }
+                                }}
                                 className="h-8 text-xs"
                             />
                             <Button
@@ -286,6 +306,11 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                 Áp dụng
                             </Button>
                         </div>
+                        {isPriceRangeInvalid && (
+                            <p className="text-xs text-destructive mt-1.5">
+                                Giá tối thiểu phải nhỏ hơn hoặc bằng giá tối đa
+                            </p>
+                        )}
                     </AccordionContent>
                 </AccordionItem>
 

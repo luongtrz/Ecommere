@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Calendar, Shield, ShoppingBag, Heart, Settings, LogOut, MapPin, Phone } from 'lucide-react';
+import { User, Mail, Calendar, Shield, ShoppingBag, Heart, Settings, LogOut, Phone } from 'lucide-react';
 import { SEO } from '@/lib/seo';
 import { formatDate } from '@/lib/utils';
 import { ProfileFormDialog } from '@/features/users/components/ProfileFormDialog';
@@ -118,24 +118,12 @@ export function AccountPage() {
                   <Button
                     variant="outline"
                     className="h-auto p-4 justify-start"
-                    onClick={() => navigate('/orders')}
+                    onClick={() => navigate('/admin/orders')}
                   >
                     <ShoppingBag className="h-5 w-5 mr-3" />
                     <div className="text-left">
                       <div className="font-medium">Đơn hàng của tôi</div>
                       <div className="text-sm text-muted-foreground">Xem lịch sử mua hàng</div>
-                    </div>
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    className="h-auto p-4 justify-start"
-                    onClick={() => navigate('/addresses')}
-                  >
-                    <MapPin className="h-5 w-5 mr-3" />
-                    <div className="text-left">
-                      <div className="font-medium">Sổ địa chỉ</div>
-                      <div className="text-sm text-muted-foreground">Quản lý địa chỉ giao hàng</div>
                     </div>
                   </Button>
                   

@@ -106,6 +106,7 @@ export function AdminProductsPage() {
 
   const deleteProduct = useDeleteProduct();
   const toast = useToast();
+  const deletingIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -136,13 +137,20 @@ export function AdminProductsPage() {
   }, [hasNextPage, fetchNextPage]);
 
   const handleDelete = async (id: string, name: string) => {
+    if (deletingIdRef.current === id || (deleteProduct.isPending && deleteProduct.variables === id)) {
+      return;
+    }
     if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`)) {
+      deletingIdRef.current = id;
       deleteProduct.mutate(id, {
         onSuccess: () => {
           toast.success('Xóa sản phẩm thành công');
         },
         onError: () => {
           toast.error('Xóa sản phẩm thất bại. Vui lòng thử lại.');
+        },
+        onSettled: () => {
+          deletingIdRef.current = null;
         },
       });
     }
@@ -337,6 +345,7 @@ export function AdminProductsPage() {
                   <TableBody>
                     {products.map((product) => {
                       const totalStock = calculateTotalStock(product);
+                      const isDeleting = (deleteProduct.isPending && deleteProduct.variables === product.id) || deletingIdRef.current === product.id;
                       return (
                         <TableRow key={product.id} className="group hover:bg-gray-50/50 transition-colors">
                           <TableCell>
@@ -414,6 +423,7 @@ export function AdminProductsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
+                                  disabled={isDeleting}
                                   className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50"
                                   onClick={() => handleDelete(product.id, product.name)}
                                 >
