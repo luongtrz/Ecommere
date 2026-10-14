@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
+import { IS_CSRF_EXEMPT_KEY } from '../decorators/csrf-exempt.decorator';
 
 /**
  * CSRF Guard for mutation operations
@@ -27,13 +28,13 @@ export class CsrfGuard implements CanActivate {
       return true;
     }
 
-    // Skip CSRF check for public endpoints (auth routes)
-    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    // Skip CSRF check for exempt endpoints
+    const isCsrfExempt = this.reflector.getAllAndOverride<boolean>(
+      IS_CSRF_EXEMPT_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
-    if (isPublic) {
+    if (isCsrfExempt) {
       return true;
     }
 

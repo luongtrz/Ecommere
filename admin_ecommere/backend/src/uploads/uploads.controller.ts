@@ -45,6 +45,7 @@ const multerOptions = {
 
 @ApiTags('Uploads')
 @ApiBearerAuth('JWT-auth')
+@Roles(Role.ADMIN)
 @Controller('uploads')
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
