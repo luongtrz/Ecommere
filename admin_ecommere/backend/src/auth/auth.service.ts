@@ -240,6 +240,10 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token expired');
     }
 
+    if (tokenRecord.user.role !== 'ADMIN') {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
     // 6. Generate and claim the replacement atomically. The old token is
     // conditionally updated so concurrent refresh requests cannot both win.
     const tokens = await this.prisma.$transaction(async (tx) => {
@@ -306,8 +310,6 @@ export class AuthService {
 
     return {
       message: 'If email exists, reset link will be sent',
-      // In dev mode, return token for testing
-      ...(this.configService.get('NODE_ENV') === 'development' && { resetToken }),
     };
   }
 
