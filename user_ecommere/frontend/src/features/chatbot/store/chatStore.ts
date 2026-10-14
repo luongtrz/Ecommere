@@ -68,6 +68,77 @@ const safeLocalStorage: StateStorage = {
   },
 };
 
+const PERSIST_THROTTLE_MS = 500;
+const pendingWrites = new Map<string, string>();
+let throttleTimer: ReturnType<typeof setTimeout> | null = null;
+let lastWriteTime = -Infinity;
+
+export function flushChatPersist(): void {
+  if (throttleTimer !== null) {
+    clearTimeout(throttleTimer);
+    throttleTimer = null;
+  }
+  if (pendingWrites.size === 0) {
+    return;
+  }
+  const entries = Array.from(pendingWrites.entries());
+  pendingWrites.clear();
+  for (const [key, value] of entries) {
+    safeLocalStorage.setItem(key, value);
+  }
+  lastWriteTime = Date.now();
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', () => {
+    flushChatPersist();
+  });
+  window.addEventListener('beforeunload', () => {
+    flushChatPersist();
+  });
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' || document.hidden) {
+      flushChatPersist();
+    }
+  });
+}
+
+const throttledLocalStorage: StateStorage = {
+  getItem: (name: string): string | null | Promise<string | null> => {
+    if (pendingWrites.has(name)) {
+      flushChatPersist();
+    }
+    return safeLocalStorage.getItem(name);
+  },
+  setItem: (name: string, value: string): void => {
+    pendingWrites.set(name, value);
+
+    const now = Date.now();
+    const elapsed = now - lastWriteTime;
+
+    if (elapsed >= PERSIST_THROTTLE_MS || elapsed < 0) {
+      flushChatPersist();
+    } else if (throttleTimer === null) {
+      const remaining = PERSIST_THROTTLE_MS - elapsed;
+      throttleTimer = setTimeout(() => {
+        throttleTimer = null;
+        flushChatPersist();
+      }, remaining);
+    }
+  },
+  removeItem: (name: string): void => {
+    pendingWrites.delete(name);
+    if (pendingWrites.size === 0 && throttleTimer !== null) {
+      clearTimeout(throttleTimer);
+      throttleTimer = null;
+    }
+    safeLocalStorage.removeItem(name);
+  },
+};
+
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
@@ -110,7 +181,7 @@ export const useChatStore = create<ChatState>()(
     }),
     {
       name: 'thai-spray-chat',
-      storage: createJSONStorage(() => safeLocalStorage),
+      storage: createJSONStorage(() => throttledLocalStorage),
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         const currentGuestKey = `guest:${getChatSessionId()}`;

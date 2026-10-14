@@ -41,6 +41,42 @@ export function getCookie(name: string): string | null {
   return null;
 }
 
+let clearQueryCacheCallback: (() => void) | null = null;
+
+export function registerQueryCacheClear(clear: () => void): void {
+  clearQueryCacheCallback = clear;
+}
+
+export function clearQueryCache(): void {
+  try {
+    clearQueryCacheCallback?.();
+  } catch {
+    // Ignore clear errors to ensure redirect proceeds
+  }
+}
+
+let refreshPromise: Promise<string> | null = null;
+
+export async function refreshAccessToken(): Promise<string> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const { data } = await apiClient.post('/auth/refresh');
+      const actualData = data.data || data;
+      const newAccessToken = actualData.accessToken;
+      authToken.set(newAccessToken);
+      return newAccessToken;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: any) => void;
@@ -85,6 +121,9 @@ apiClient.interceptors.response.use(
     const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh');
 
     if (error.response?.status === 401 && !originalRequest?._retry && !isRefreshRequest) {
+      // Mark before queueing: a queued replay that gets 401 again must not refresh a second time
+      originalRequest._retry = true;
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -96,15 +135,11 @@ apiClient.interceptors.response.use(
           .catch((err) => Promise.reject(err));
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const { data } = await apiClient.post('/auth/refresh');
-        const actualData = data.data || data;
-        const newAccessToken = actualData.accessToken;
+        const newAccessToken = await refreshAccessToken();
 
-        authToken.set(newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         processQueue(null, newAccessToken);
 
@@ -118,6 +153,8 @@ apiClient.interceptors.response.use(
 
         const toastEvent = new CustomEvent('session-expired');
         window.dispatchEvent(toastEvent);
+
+        clearQueryCache();
 
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';

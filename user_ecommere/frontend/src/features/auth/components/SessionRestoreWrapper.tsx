@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from 'react';
-import apiClient, { authToken } from '@/lib/api';
+import { authToken, refreshAccessToken } from '@/lib/api';
 import { useCartStore } from '@/features/cart/store/cartStore';
+import { isProtectedRoute } from '@/app/router';
 
 interface SessionRestoreWrapperProps {
   children: ReactNode;
@@ -16,15 +17,13 @@ export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) 
       if (!userStr) return;
 
       try {
-        const { data } = await apiClient.post('/auth/refresh');
-        const actualData = data.data || data;
-        authToken.set(actualData.accessToken);
+        await refreshAccessToken();
       } catch (error) {
         console.log('Session expired');
         authToken.remove();
         useCartStore.getState().clearCart();
         localStorage.removeItem('user');
-        if (window.location.pathname !== '/login') {
+        if (window.location.pathname !== '/login' && isProtectedRoute(window.location.pathname)) {
           window.location.replace('/login');
         }
       }

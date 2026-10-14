@@ -1,5 +1,6 @@
 import apiClient, { authToken } from '@/lib/api';
 import { useCartStore } from '@/features/cart/store/cartStore';
+import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { z } from 'zod';
 
 function clearCartIfAccountChanged(nextUserId: string) {
@@ -54,7 +55,13 @@ export const authApi = {
 
       return parsed;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
       throw error;
     }
   },
@@ -81,7 +88,13 @@ export const authApi = {
 
       return parsed;
     } catch (error) {
-      console.error('Register error:', error);
+      console.error('Register error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
       throw error;
     }
   },
@@ -97,12 +110,19 @@ export const authApi = {
       // Call backend to revoke refresh token and clear cookies
       await apiClient.post('/auth/logout');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout error:', {
+        status: (error as any)?.response?.status,
+        message:
+          typeof (error as any)?.response?.data?.message === 'string'
+            ? (error as any).response.data.message
+            : undefined,
+      });
       // Continue with local cleanup even if backend fails
     } finally {
       // Clear memory token
       authToken.remove();
       useCartStore.getState().clearCart();
+      useWishlist.getState().clearWishlist();
       localStorage.removeItem('user');
       // Cookies will be cleared by backend
     }

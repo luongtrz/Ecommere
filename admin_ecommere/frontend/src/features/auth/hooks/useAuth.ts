@@ -34,20 +34,6 @@ export function useAuth() {
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: ({ name, phone, password, email }: { name: string; phone: string; password: string; email?: string }) =>
-      authApi.register(name, phone, password, email),
-    onSuccess: (data) => {
-      queryClient.setQueryData([QUERY_KEYS.USER], data.user);
-      toast.success(`Đăng ký thành công! Chào mừng ${data.user.name}!`);
-      navigate('/');
-    },
-    onError: (error: AxiosError<any>) => {
-      const message = error.response?.data?.message || 'Đăng ký thất bại. Số điện thoại có thể đã được sử dụng.';
-      toast.error(message);
-    },
-  });
-
   const logout = async () => {
     try {
       await authApi.logout();
@@ -81,12 +67,9 @@ export function useAuth() {
     user,
     isLoading,
     login: loginMutation.mutate,
-    register: registerMutation.mutate,
     logout,
     refreshUser,
     isLoginLoading: loginMutation.isPending,
-    isRegisterLoading: registerMutation.isPending,
     loginError: loginMutation.error as AxiosError<any> | null,
-    registerError: registerMutation.error as AxiosError<any> | null,
   };
 }
