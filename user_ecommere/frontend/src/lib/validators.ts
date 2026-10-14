@@ -36,6 +36,25 @@ export const registerSchema = z.object({
   path: ['confirmPassword'],
 });
 
+export const forgotPasswordSchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: passwordSchema
+      .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
+        'Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt'
+      ),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Mật khẩu xác nhận không khớp',
+    path: ['confirmPassword'],
+  });
+
 export const addressSchema = z.object({
   fullName: requiredString('Họ tên'),
   phone: phoneSchema,
@@ -77,6 +96,8 @@ export const couponSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type AddressInput = z.infer<typeof addressSchema>;
 export type ProductInput = z.infer<typeof productSchema>;
 export type VariantInput = z.infer<typeof variantSchema>;

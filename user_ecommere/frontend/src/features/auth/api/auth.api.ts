@@ -99,6 +99,34 @@ export const authApi = {
     }
   },
 
+  async forgotPassword(input: string | { email: string }): Promise<{ message: string }> {
+    const email = typeof input === 'string' ? input : input.email;
+    try {
+      const response = await apiClient.post('/auth/forgot-password', { email });
+      const actualData = response.data.data || response.data;
+      return actualData;
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
+    }
+  },
+
+  async resetPassword(
+    tokenOrPayload: string | { token: string; newPassword: string },
+    maybeNewPassword?: string
+  ): Promise<{ message: string }> {
+    const token = typeof tokenOrPayload === 'string' ? tokenOrPayload : tokenOrPayload.token;
+    const newPassword = typeof tokenOrPayload === 'string' ? maybeNewPassword! : tokenOrPayload.newPassword;
+    try {
+      const response = await apiClient.post('/auth/reset-password', { token, newPassword });
+      const actualData = response.data.data || response.data;
+      return actualData;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  },
+
   async getProfile(): Promise<User> {
     const response = await apiClient.get('/users/me');
     const actualData = response.data.data || response.data;

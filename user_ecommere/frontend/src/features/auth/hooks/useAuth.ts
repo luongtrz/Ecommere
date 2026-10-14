@@ -48,6 +48,36 @@ export function useAuth() {
     },
   });
 
+  const forgotPasswordMutation = useMutation({
+    mutationFn: (email: string) => authApi.forgotPassword(email),
+    onSuccess: () => {
+      toast.success('Nếu email tồn tại, liên kết đặt lại mật khẩu sẽ được gửi');
+    },
+    onError: (error: AxiosError<any>) => {
+      const rawMessage = error.response?.data?.message;
+      const message = Array.isArray(rawMessage)
+        ? rawMessage.join(', ')
+        : (rawMessage || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+      toast.error(message);
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
+      authApi.resetPassword(token, newPassword),
+    onSuccess: () => {
+      toast.success('Đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
+      navigate('/login');
+    },
+    onError: (error: AxiosError<any>) => {
+      const rawMessage = error.response?.data?.message;
+      const message = Array.isArray(rawMessage)
+        ? rawMessage.join(', ')
+        : (rawMessage || 'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.');
+      toast.error(message);
+    },
+  });
+
   const logout = async () => {
     try {
       await authApi.logout();
@@ -82,11 +112,19 @@ export function useAuth() {
     isLoading,
     login: loginMutation.mutate,
     register: registerMutation.mutate,
+    forgotPassword: forgotPasswordMutation.mutate,
+    resetPassword: resetPasswordMutation.mutate,
     logout,
     refreshUser,
     isLoginLoading: loginMutation.isPending,
     isRegisterLoading: registerMutation.isPending,
+    isForgotPasswordLoading: forgotPasswordMutation.isPending,
+    isResetPasswordLoading: resetPasswordMutation.isPending,
+    isForgotPasswordSuccess: forgotPasswordMutation.isSuccess,
+    isResetPasswordSuccess: resetPasswordMutation.isSuccess,
     loginError: loginMutation.error as AxiosError<any> | null,
     registerError: registerMutation.error as AxiosError<any> | null,
+    forgotPasswordError: forgotPasswordMutation.error as AxiosError<any> | null,
+    resetPasswordError: resetPasswordMutation.error as AxiosError<any> | null,
   };
 }

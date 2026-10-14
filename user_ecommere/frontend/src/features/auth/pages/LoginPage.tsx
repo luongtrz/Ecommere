@@ -28,6 +28,15 @@ export function LoginPage() {
             <CardContent className="pt-6 space-y-4">
               <LoginForm onSubmit={(data) => login(data)} isLoading={isLoginLoading} />
 
+              <div className="text-center">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Quên mật khẩu?
+                </Link>
+              </div>
+
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
