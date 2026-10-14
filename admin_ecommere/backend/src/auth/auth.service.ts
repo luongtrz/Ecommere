@@ -317,8 +317,6 @@ export class AuthService {
 
     return {
       message: 'If email exists, reset link will be sent',
-      // In dev mode, return token for testing
-      ...(this.configService.get('NODE_ENV') === 'development' && { resetToken }),
     };
   }
 
