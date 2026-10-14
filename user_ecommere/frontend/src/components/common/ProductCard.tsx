@@ -19,6 +19,7 @@ interface ProductCardProps {
   salePrice?: number;
   rating?: number;
   reviewCount?: number;
+  variants?: Array<{ stock: number }>;
   onAddToCart?: () => void;
 }
 
@@ -31,8 +32,10 @@ export const ProductCard = memo(function ProductCard({
   salePrice,
   rating = 0,
   reviewCount = 0,
+  variants,
   onAddToCart,
 }: ProductCardProps) {
+  const selectedVariant = variants?.[0];
   const finalPrice = salePrice ?? price;
   const hasDiscount = salePrice != null && salePrice < price;
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -148,7 +151,12 @@ export const ProductCard = memo(function ProductCard({
         </CardContent>
 
         <CardFooter className="p-4 pt-0">
-          <Button onClick={onAddToCart} className="h-11 w-full rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]" size="sm">
+          <Button
+            onClick={onAddToCart}
+            disabled={variants !== undefined && (!selectedVariant || selectedVariant.stock === 0)}
+            className="h-11 w-full rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]"
+            size="sm"
+          >
             <ShoppingCart className="mr-2 h-4 w-4" />
             Thêm vào giỏ
           </Button>

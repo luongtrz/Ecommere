@@ -11,6 +11,7 @@ export function useCart() {
   const openCart = useCartStore((state) => state.openCart);
   const closeCart = useCartStore((state) => state.closeCart);
   const toggleCart = useCartStore((state) => state.toggleCart);
+  const replaceItems = useCartStore((state) => state.replaceItems);
 
   const totalPrice = useMemo(
     () => items.reduce((total, item) => total + item.price * item.quantity, 0),
@@ -33,5 +34,6 @@ export function useCart() {
     openCart,
     closeCart,
     toggleCart,
+    replaceItems,
   };
 }

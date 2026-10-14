@@ -2,6 +2,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { SEO } from '@/lib/seo';
 import { useProductSearch } from '../hooks/useProducts';
+import type { Product, ProductFilters } from '../api/products.api';
 import { ProductCard } from '@/components/common/ProductCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -21,11 +22,24 @@ export function SearchPage() {
   const query = searchParams.get('q') || '';
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
+  const category = searchParams.get('category') || searchParams.get('categorySlug') || undefined;
 
   const [searchInput, setSearchInput] = useState(query);
   const debouncedSearch = useDebounce(searchInput, 400);
 
-  const { data, isLoading } = useProductSearch(query, { sortBy: sortBy as any });
+  const [page, setPage] = useState(1);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+
+  const searchFilters: ProductFilters = {
+    sortBy: sortBy as any,
+    ...(category ? { categorySlug: category } : {}),
+  };
+
+  const { data, isLoading, isFetching, isPlaceholderData } = useProductSearch(
+    query,
+    searchFilters,
+    page
+  );
   const { addItem } = useCart();
 
   useEffect(() => {
@@ -43,6 +57,44 @@ export function SearchPage() {
       }
     }
   }, [debouncedSearch, query, sortBy, viewMode, setSearchParams, searchParams]);
+
+  useEffect(() => {
+    setPage(1);
+    setAllProducts([]);
+  }, [query, sortBy, category]);
+
+  useEffect(() => {
+    if (!data || isPlaceholderData) return;
+
+    if (page === 1) {
+      setAllProducts(data.products);
+    } else if (data.page === page) {
+      setAllProducts((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const nextProducts = data.products.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...nextProducts];
+      });
+    }
+  }, [data, page, isPlaceholderData]);
+
+  const productsToShow =
+    allProducts.length > 0
+      ? allProducts
+      : page === 1 && data && !isPlaceholderData
+      ? data.products
+      : [];
+
+  const hasNextPage = Boolean(
+    data &&
+    (data.hasNextPage ?? (data.page < data.totalPages)) &&
+    productsToShow.length < data.total
+  );
+
+  const handleLoadMore = () => {
+    if (!isFetching && hasNextPage) {
+      setPage((prev) => prev + 1);
+    }
+  };
 
   const handleSortChange = (value: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -76,6 +128,9 @@ export function SearchPage() {
     setSearchInput('');
     setSearchParams({});
   };
+
+  const isInitialLoading =
+    (isLoading || isPlaceholderData) && productsToShow.length === 0 && !!query;
 
   return (
     <>
@@ -153,7 +208,7 @@ export function SearchPage() {
                       </Badge>
                     </div>
 
-                    {!isLoading && data?.total === 0 && (
+                    {!isLoading && !isPlaceholderData && data?.total === 0 && (
                       <div className="text-sm text-gray-500">
                         Thử tìm với từ khóa khác hoặc{' '}
                         <Link to="/catalog" className="text-primary hover:underline">
@@ -169,11 +224,11 @@ export function SearchPage() {
 
         {/* Results Section */}
         <div className="container py-8">
-          {isLoading ? (
+          {isInitialLoading ? (
             <div className="py-12">
               <LoadingSpinner />
             </div>
-          ) : data?.products.length === 0 ? (
+          ) : data && data.total === 0 ? (
             <div className="py-12">
               <EmptyState
                 icon={<Search className="h-16 w-16 text-gray-300" />}
@@ -260,7 +315,7 @@ export function SearchPage() {
                   ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
                   : 'space-y-4'
               }`}>
-                {data?.products.map((product) => (
+                {productsToShow.map((product) => (
                   viewMode === 'grid' ? (
                     <ProductCard
                       key={product.id}
@@ -271,6 +326,7 @@ export function SearchPage() {
                       price={product.basePrice}
                       rating={product.rating}
                       reviewCount={product.reviewCount}
+                      variants={product.variants}
                       onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                     />
                   ) : (
@@ -338,13 +394,17 @@ export function SearchPage() {
                 ))}
               </div>
 
-              {/* Load More or Pagination could go here */}
-              {data && data.total > data.products.length && (
+              {/* Load More */}
+              {hasNextPage && (
                 <div className="text-center mt-8">
                   <p className="text-gray-600 mb-4">
-                    Hiển thị {data.products.length} / {data.total} sản phẩm
+                    Hiển thị {productsToShow.length} / {data?.total || 0} sản phẩm
                   </p>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={handleLoadMore}
+                    disabled={isFetching}
+                  >
                     Xem thêm sản phẩm
                   </Button>
                 </div>
