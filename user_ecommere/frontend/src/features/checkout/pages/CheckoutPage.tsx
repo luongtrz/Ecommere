@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { SEO } from '@/lib/seo';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useAddresses } from '@/features/users/hooks/useAddresses';
@@ -7,12 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatters';
-import { PAYMENT_METHODS, SHIPPING_METHODS } from '@/lib/constants';
+import { PAYMENT_METHODS, SHIPPING_METHODS, QUERY_KEYS } from '@/lib/constants';
 import apiClient from '@/lib/api';
 import { ArrowLeft, Truck, CreditCard, MapPin, Shield, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
 import { CheckoutSteps } from '../components/CheckoutSteps';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
 function generateCheckoutKey(): string {
   const bytes = new Uint8Array(16);
@@ -24,11 +26,13 @@ export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { data: addresses } = useAddresses();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const checkoutKeyRef = useRef<{ key: string; fingerprint: string } | null>(null);
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOrdered, setIsOrdered] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
 
@@ -55,7 +59,7 @@ export function CheckoutPage() {
 
   const handleNextStep = () => {
     if (step === 1 && !selectedAddress) {
-      alert("Vui lòng chọn địa chỉ giao hàng");
+      toast.error('Vui lòng chọn địa chỉ giao hàng');
       return;
     }
     setStep(prev => prev + 1);
@@ -67,7 +71,7 @@ export function CheckoutPage() {
 
 
   const handleSubmit = async () => {
-    if (!selectedAddress) return;
+    if (isOrdered || !selectedAddress) return;
 
     const fingerprint = JSON.stringify({
       addressId: selectedAddress.id,
@@ -112,10 +116,16 @@ export function CheckoutPage() {
 
       await apiClient.post('/orders/checkout', orderData);
       orderCreated = true;
-      checkoutKeyRef.current = null;
+      setIsOrdered(true);
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
     } catch (error) {
       console.error('Order creation failed:', error);
-      alert('Đặt hàng thất bại. Vui lòng thử lại.');
+      const serverMessage = (error as any)?.response?.data?.message;
+      const message =
+        (Array.isArray(serverMessage) ? serverMessage.map((m: any) => (typeof m === 'string' ? m : String(m))).filter(Boolean).join(', ') : null) ||
+        (typeof serverMessage === 'string' && serverMessage.trim() ? serverMessage : null) ||
+        'Đặt hàng thất bại. Vui lòng thử lại.';
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -392,7 +402,7 @@ export function CheckoutPage() {
                   )}
                   <Button
                     onClick={step < 3 ? handleNextStep : handleSubmit}
-                    disabled={step === 1 && !selectedAddress || isSubmitting}
+                    disabled={step === 1 && !selectedAddress || isSubmitting || isOrdered}
                     className={`h-12 flex-1 rounded-xl text-base font-bold shadow-lg transition-all hover:scale-[1.01] ${step < 3
                       ? 'bg-primary text-primary-foreground shadow-primary/10'
                       : 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-500/25'

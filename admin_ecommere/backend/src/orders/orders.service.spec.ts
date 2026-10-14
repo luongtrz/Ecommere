@@ -377,7 +377,7 @@ describe('OrdersService', () => {
       await expect(service.cancelOrder('user1', 'invalid')).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw BadRequestException when order belongs to different user', async () => {
+    it('should throw NotFoundException when order belongs to different user', async () => {
       const mockOrder = {
         id: 'order1',
         userId: 'user2',
@@ -387,8 +387,8 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(BadRequestException);
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Unauthorized');
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(NotFoundException);
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Order not found');
     });
 
     it('should throw BadRequestException when order cannot be cancelled', async () => {

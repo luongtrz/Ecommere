@@ -613,13 +613,13 @@ describe('Admin Catalog Tools', () => {
       mockProductsService.updateVariant.mockResolvedValue({
         id: 'var-1',
         price: 130000,
-        stock: 60,
+        barcode: 'BAR123',
       });
 
       const args = {
         variantId: 'var-1',
         price: 130000,
-        stock: 60,
+        barcode: 'BAR123',
       };
 
       const result = await updateVariantTool.handler(args, adminCtx);
@@ -627,13 +627,21 @@ describe('Admin Catalog Tools', () => {
       expect(mockProductsService.updateVariant).toHaveBeenCalledTimes(1);
       expect(mockProductsService.updateVariant).toHaveBeenCalledWith('var-1', {
         price: 130000,
-        stock: 60,
+        barcode: 'BAR123',
       });
       expect(result).toEqual({
         id: 'var-1',
         price: 130000,
+        barcode: 'BAR123',
+      });
+    });
+
+    it('rejects stock in input schema (audit ABA-06: stock changes must go through stock tools)', () => {
+      const res = updateVariantTool.schema.safeParse({
+        variantId: 'var-1',
         stock: 60,
       });
+      expect(res.success).toBe(false);
     });
 
     it('rejects a call with only variantId (handler check)', async () => {

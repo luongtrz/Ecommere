@@ -127,6 +127,7 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                   price={product.basePrice}
                   rating={product.rating}
                   reviewCount={product.reviewCount}
+                  variants={product.variants}
                   onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
                 />
               </div>
@@ -145,6 +146,7 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                     price={product.basePrice}
                     rating={product.rating}
                     reviewCount={product.reviewCount}
+                    variants={product.variants}
                     onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
                   />
                 </div>
@@ -339,6 +341,7 @@ export function HomePage() {
                     price={product.basePrice}
                     rating={product.rating}
                     reviewCount={product.reviewCount}
+                    variants={product.variants}
                     onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                   />
                 </div>

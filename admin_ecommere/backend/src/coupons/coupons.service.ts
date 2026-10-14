@@ -102,7 +102,7 @@ export class CouponsService {
       throw new NotFoundException('Coupon not found');
     }
 
-    const { type, value, validFrom, validUntil, active } = updateCouponDto;
+    const { type, value, validFrom, validUntil, active, maxUses } = updateCouponDto;
     const effectiveType = type ?? coupon.type;
     const effectiveValue = value ?? coupon.value;
 
@@ -116,6 +116,11 @@ export class CouponsService {
     const newValidUntil = validUntil !== undefined ? validUntil : coupon.validUntil;
     if (newValidFrom && newValidUntil && newValidFrom >= newValidUntil) {
       throw new BadRequestException('validFrom must be before validUntil');
+    }
+
+    // Validate max uses
+    if (maxUses !== undefined && maxUses !== null && maxUses < coupon.usedCount) {
+      throw new BadRequestException('maxUses cannot be less than usedCount');
     }
 
     const updateData: Prisma.CouponUpdateInput = {

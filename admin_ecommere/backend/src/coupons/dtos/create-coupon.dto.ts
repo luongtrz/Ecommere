@@ -1,11 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsString, IsEnum, IsInt, IsOptional, IsDate, Min, Max } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsString, IsEnum, IsInt, IsOptional, IsDate, IsNotEmpty, Matches, Min, Max } from 'class-validator';
 import { CouponType } from '@prisma/client';
 
 export class CreateCouponDto {
   @ApiProperty({ example: 'SUMMER2025' })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
+  @IsNotEmpty()
+  @Matches(/^[A-Za-z0-9_-]+$/, { message: 'code may contain only letters, digits, "-" and "_"' })
   code: string;
 
   @ApiProperty({ enum: CouponType, example: CouponType.PERCENT })
