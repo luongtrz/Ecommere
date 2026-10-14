@@ -84,7 +84,7 @@ export class ReferralsService {
         return {
             data: referrals.map((r) => ({
                 id: r.id,
-                refereeName: r.referee.name || r.referee.email,
+                refereeName: r.referee.name || this.maskEmail(r.referee.email),
                 refereeEmail: this.maskEmail(r.referee.email),
                 couponCode: r.referrerCouponCode,
                 createdAt: r.createdAt,
