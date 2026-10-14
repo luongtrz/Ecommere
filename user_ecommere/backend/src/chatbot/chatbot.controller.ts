@@ -22,6 +22,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { Public } from '../common/decorators/public.decorator';
+import { CsrfExempt } from '../common/decorators/csrf-exempt.decorator';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { AGENT_CONFIG } from './agent/agent.providers';
 import {
@@ -58,6 +59,7 @@ export class ChatbotController {
   }
 
   @Public()
+  @CsrfExempt()
   @UseGuards(OptionalJwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('stream')
@@ -105,6 +107,7 @@ export class ChatbotController {
   }
 
   @Public()
+  @CsrfExempt()
   @UseGuards(OptionalJwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('threads/:threadId/resume')
@@ -204,6 +207,7 @@ export class ChatbotController {
   }
 
   @Public()
+  @CsrfExempt()
   @UseGuards(OptionalJwtAuthGuard)
   @Get('threads/:threadId/messages')
   @ApiOperation({ summary: 'Get saved messages of a chat thread' })
