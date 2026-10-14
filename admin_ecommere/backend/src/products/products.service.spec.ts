@@ -12,6 +12,7 @@ describe('ProductsService', () => {
   let prisma: PrismaService;
 
   const mockPrismaService = {
+    $queryRaw: jest.fn().mockResolvedValue([]),
     product: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
@@ -162,6 +163,76 @@ describe('ProductsService', () => {
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: { basePrice: 'asc' },
+        }),
+      );
+    });
+
+    it('should rank products by best selling using database query', async () => {
+      mockPrismaService.$queryRaw.mockResolvedValue([{ id: '1' }]);
+      mockPrismaService.product.count.mockResolvedValue(1);
+      mockPrismaService.product.findMany.mockResolvedValue([
+        {
+          id: '1',
+          name: 'Lavender Spray',
+          slug: 'lavender-spray',
+          description: 'Test product',
+          brand: 'Thai Aroma',
+          images: ['image1.jpg'],
+          categoryId: 'cat1',
+          basePrice: 100000,
+          active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          category: { id: 'cat1', name: 'Room Spray' },
+          variants: [],
+          reviews: [],
+          _count: { reviews: 0 },
+        },
+      ]);
+
+      const result = await service.findAll({ page: 1, limit: 12, sortBy: ProductSortBy.BEST_SELLING });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(mockPrismaService.$queryRaw).toHaveBeenCalled();
+      expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: { in: ['1'] } },
+        }),
+      );
+    });
+
+    it('should rank products by rating using database query', async () => {
+      mockPrismaService.$queryRaw.mockResolvedValue([{ id: '1' }]);
+      mockPrismaService.product.count.mockResolvedValue(1);
+      mockPrismaService.product.findMany.mockResolvedValue([
+        {
+          id: '1',
+          name: 'Lavender Spray',
+          slug: 'lavender-spray',
+          description: 'Test product',
+          brand: 'Thai Aroma',
+          images: ['image1.jpg'],
+          categoryId: 'cat1',
+          basePrice: 100000,
+          active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          category: { id: 'cat1', name: 'Room Spray' },
+          variants: [],
+          reviews: [],
+          _count: { reviews: 0 },
+        },
+      ]);
+
+      const result = await service.findAll({ page: 1, limit: 12, sortBy: ProductSortBy.RATING });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(mockPrismaService.$queryRaw).toHaveBeenCalled();
+      expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: { in: ['1'] } },
         }),
       );
     });

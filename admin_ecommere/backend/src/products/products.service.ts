@@ -123,47 +123,99 @@ export class ProductsService {
     let total: number;
 
     if (sortBy === ProductSortBy.BEST_SELLING || sortBy === ProductSortBy.RATING) {
-      const productsForRanking = await this.prisma.product.findMany({
-        where,
-        include: {
-          category: true,
-          variants: true,
-          orderItems: {
-            where: { order: { status: OrderStatus.DELIVERED } },
-            select: { quantity: true },
+      const conditions: Prisma.Sql[] = [];
+
+      if (!includeInactive) {
+        conditions.push(Prisma.sql`p."active" = true`);
+      }
+
+      if (search) {
+        const searchPattern = `%${search}%`;
+        conditions.push(
+          Prisma.sql`(p."name" ILIKE ${searchPattern} OR p."description" ILIKE ${searchPattern} OR p."brand" ILIKE ${searchPattern})`,
+        );
+      }
+
+      if (typeof where.categoryId === 'string') {
+        conditions.push(Prisma.sql`p."categoryId" = ${where.categoryId}`);
+      } else if (where.categoryId?.in && Array.isArray(where.categoryId.in) && where.categoryId.in.length > 0) {
+        conditions.push(Prisma.sql`p."categoryId" IN (${Prisma.join(where.categoryId.in)})`);
+      }
+
+      const variantSqlConditions: Prisma.Sql[] = [Prisma.sql`pv."productId" = p."id"`];
+
+      if (minPrice !== undefined) {
+        variantSqlConditions.push(
+          Prisma.sql`(pv."salePrice" >= ${minPrice} OR (pv."salePrice" IS NULL AND pv."price" >= ${minPrice}))`,
+        );
+      }
+      if (maxPrice !== undefined) {
+        variantSqlConditions.push(
+          Prisma.sql`(pv."salePrice" <= ${maxPrice} OR (pv."salePrice" IS NULL AND pv."price" <= ${maxPrice}))`,
+        );
+      }
+
+      if (variantSqlConditions.length > 1) {
+        conditions.push(
+          Prisma.sql`EXISTS (SELECT 1 FROM "product_variants" pv WHERE ${Prisma.join(variantSqlConditions, ' AND ')})`,
+        );
+      }
+
+      const scoreExpression =
+        sortBy === ProductSortBy.BEST_SELLING
+          ? Prisma.sql`(
+              SELECT COALESCE(SUM(oi."quantity"), 0)
+              FROM "order_items" oi
+              JOIN "orders" o ON o."id" = oi."orderId"
+              WHERE oi."productId" = p."id"
+                AND o."status"::text = ${OrderStatus.DELIVERED}
+            )`
+          : Prisma.sql`(
+              SELECT COALESCE(AVG(r."rating"), 0)
+              FROM "reviews" r
+              WHERE r."productId" = p."id"
+            )`;
+
+      const takeLimit = Math.max(1, limit);
+      const offset = Math.max(0, (page - 1) * takeLimit);
+
+      const whereClause =
+        conditions.length > 0
+          ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+          : Prisma.empty;
+
+      const [rankedRows, totalCount] = await Promise.all([
+        this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+          SELECT p."id"
+          FROM "products" p
+          ${whereClause}
+          ORDER BY ${scoreExpression} DESC, p."createdAt" DESC
+          LIMIT ${takeLimit}
+          OFFSET ${offset}
+        `),
+        this.prisma.product.count({ where }),
+      ]);
+
+      total = totalCount;
+      const pageProductIds = rankedRows.map(row => row.id);
+
+      if (pageProductIds.length === 0) {
+        products = [];
+      } else {
+        const pageProducts = await this.prisma.product.findMany({
+          where: { id: { in: pageProductIds } },
+          include: {
+            category: true,
+            variants: true,
+            _count: { select: { reviews: true } },
           },
-          reviews: { select: { rating: true } },
-          _count: { select: { reviews: true } },
-        },
-      });
-
-      const rankedProducts = productsForRanking
-        .map((product) => {
-          const soldQuantity = product.orderItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-          );
-          const averageRating = product.reviews.length > 0
-            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
-            : 0;
-          const catalogProduct: any = { ...product };
-          delete catalogProduct.orderItems;
-          delete catalogProduct.reviews;
-
-          return { product: catalogProduct, soldQuantity, averageRating };
-        })
-        .sort((left, right) => {
-          const scoreDifference = sortBy === ProductSortBy.BEST_SELLING
-            ? right.soldQuantity - left.soldQuantity
-            : right.averageRating - left.averageRating;
-
-          return scoreDifference || right.product.createdAt.getTime() - left.product.createdAt.getTime();
         });
 
-      products = rankedProducts
-        .slice((page - 1) * limit, page * limit)
-        .map(({ product }) => product);
-      total = productsForRanking.length;
+        const productMap = new Map(pageProducts.map(p => [p.id, p]));
+        products = pageProductIds
+          .map(id => productMap.get(id))
+          .filter((p): p is (typeof pageProducts)[0] => p !== undefined);
+      }
     } else {
       [products, total] = await Promise.all([
         this.prisma.product.findMany({
