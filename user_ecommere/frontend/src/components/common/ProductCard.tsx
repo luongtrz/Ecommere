@@ -62,99 +62,99 @@ export const ProductCard = memo(function ProductCard({
   return (
     <>
       <Card
-        className="group flex flex-col h-full overflow-hidden rounded-[1.8rem] border border-black/[0.03] bg-white/90 shadow-luxury hover:shadow-luxury-glow hover:-translate-y-2 duration-500 ease-out transition-all"
+        className="group relative flex flex-col h-full overflow-hidden rounded-[1.8rem] border border-black/[0.03] bg-card shadow-luxury hover:shadow-luxury-glow hover:-translate-y-1.5 duration-500 ease-out transition-all"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="relative overflow-hidden">
-          <Link to={`/p/${slug}`}>
-            <div className="aspect-square overflow-hidden bg-[linear-gradient(145deg,#FAF9F5,rgba(240,236,227,0.85))]">
-              <img
-                src={getImageUrl(images[0], { width: 500 })}
-                alt={name}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-              />
-            </div>
+        <div className="relative overflow-hidden bg-secondary/40 border-b border-border/40">
+          <Link to={`/p/${slug}`} className="block aspect-square overflow-hidden p-5 flex items-center justify-center">
+            <img
+              src={getImageUrl(images[0], { width: 500 })}
+              alt={name}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
+            />
           </Link>
- 
+
           <div className="absolute left-3 top-3 flex items-center gap-2">
             {hasDiscount ? (
-              <span className="rounded-full bg-primary/95 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+              <span className="rounded-full bg-primary/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
                 Giảm {discountPercent}%
               </span>
             ) : (
-              <span className="rounded-full border border-accent/30 bg-white/80 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary backdrop-blur-md shadow-sm">
+              <span className="rounded-full border border-accent/40 bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground backdrop-blur-md shadow-sm">
                 Được chọn lọc
               </span>
             )}
           </div>
- 
+
           <button
+            type="button"
             onClick={(event) => {
               event.preventDefault();
               toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
             }}
+            aria-label="Thêm vào yêu thích"
             className={cn(
-              'absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 active:scale-90 shadow-sm border border-white/50',
+              'absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 active:scale-90 shadow-sm border border-border/40',
               isWishlisted
-                ? 'bg-red-50/95 text-red-500 shadow-md shadow-red-500/10 hover:scale-105 hover:bg-red-50'
-                : 'bg-white/80 text-primary/70 hover:bg-white hover:text-red-500 hover:scale-105 hover:shadow-md hover:shadow-black/5',
+                ? 'bg-card text-destructive border-destructive/20 shadow-sm'
+                : 'bg-card/80 text-muted-foreground hover:bg-card hover:text-destructive hover:scale-105',
             )}
           >
-            <Heart className={cn('h-4 w-4 transition-transform duration-300', isWishlisted && 'fill-red-500 scale-110')} />
+            <Heart className={cn('h-4 w-4 transition-transform duration-300', isWishlisted && 'fill-destructive text-destructive scale-110')} />
           </button>
- 
-          <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 hidden sm:block">
             <button
               type="button"
               onClick={() => setIsQuickViewOpen(true)}
-              className="pointer-events-auto w-full rounded-full bg-primary/95 hover:bg-primary text-primary-foreground backdrop-blur-md px-4 py-2.5 text-xs font-bold uppercase tracking-wider shadow-xl transition duration-300 active:scale-95 border border-white/10"
+              className="pointer-events-auto w-full rounded-full bg-primary/95 hover:bg-primary text-primary-foreground backdrop-blur-md px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-md transition duration-300 active:scale-95 border border-primary-foreground/10"
             >
               Xem nhanh
             </button>
           </div>
         </div>
- 
+
         <CardContent className="flex flex-1 flex-col p-4">
-          <div className="mb-2.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-accent-foreground/70">
-            <Sparkles className="h-3 w-3 text-accent-foreground/60 fill-accent/10" />
+          <div className="mb-2 flex items-center gap-1.5 whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.12em] text-accent-foreground/80">
+            <Sparkles className="h-3 w-3 text-accent-foreground/70 fill-accent/10" />
             Mùi hương nổi bật
           </div>
- 
+
           <Link to={`/p/${slug}`}>
-            <h3 className="min-h-[3.3rem] text-base font-bold leading-snug text-foreground transition duration-300 group-hover:text-accent-foreground/90 font-serif">
+            <h3 className="line-clamp-2 min-h-[3rem] text-base font-bold leading-snug text-foreground transition-colors duration-300 group-hover:text-accent-foreground font-serif">
               {name}
             </h3>
           </Link>
- 
+
           {reviewCount > 0 ? (
-            <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              <span>{rating.toFixed(1)}</span>
+            <div className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
               <span>·</span>
               <span>{reviewCount} đánh giá</span>
             </div>
           ) : (
-            <p className="mt-3 text-sm text-muted-foreground">Phù hợp cho nhịp sống hằng ngày và không gian gọn gàng.</p>
+            <p className="mt-2.5 text-xs text-muted-foreground">Phù hợp cho nhịp sống hằng ngày và không gian gọn gàng.</p>
           )}
- 
-          <div className="mt-auto pt-5">
-            <div className="flex items-end gap-2">
-              <span className="text-lg font-bold text-foreground">{formatCurrency(finalPrice)}</span>
+
+          <div className="mt-auto pt-4">
+            <div className="flex items-baseline gap-2">
+              <span className="text-lg font-bold text-foreground tabular-nums">{formatCurrency(finalPrice)}</span>
               {hasDiscount ? (
-                <span className="pb-0.5 text-sm text-muted-foreground line-through">{formatCurrency(price)}</span>
+                <span className="text-xs text-muted-foreground line-through tabular-nums">{formatCurrency(price)}</span>
               ) : null}
             </div>
           </div>
         </CardContent>
- 
+
         <CardFooter className="p-4 pt-0">
           <Button
             onClick={onAddToCart}
             disabled={variants !== undefined && (!selectedVariant || selectedVariant.stock === 0)}
-            className="h-11 w-full rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/15 active:scale-[0.98] font-bold uppercase tracking-wider text-xs"
+            className="h-11 w-full rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/15 active:scale-[0.98] font-bold uppercase tracking-wider text-xs disabled:opacity-50 disabled:cursor-not-allowed"
             size="sm"
           >
             <ShoppingCart className="mr-2 h-3.5 w-3.5" />

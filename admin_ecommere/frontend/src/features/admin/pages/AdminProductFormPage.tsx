@@ -231,28 +231,35 @@ export function AdminProductFormPage() {
   return (
     <>
       <SEO title={isEditMode ? `Chỉnh sửa sản phẩm - ${product?.name || ''}` : 'Thêm sản phẩm mới'} />
-      <div className="w-full max-w-[98%] mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4 mb-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
+      <div className="w-full max-w-7xl mx-auto space-y-6 pb-12">
+        {/* Dominant Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" asChild className="h-9 w-9 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground">
               <Link to="/admin/products">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>
-            <h1 className="text-2xl font-bold">
-              {isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
-            </h1>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                {isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {isEditMode ? 'Cập nhật thông tin chi tiết, hình ảnh và biến thể sản phẩm' : 'Điền đầy đủ các thông tin để tạo sản phẩm mới vào danh mục'}
+              </p>
+            </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2 self-end sm:self-auto">
             <Button
+              type="button"
               variant="outline"
               onClick={() => navigate('/admin/products')}
               disabled={isSubmitting}
+              className="border-border/80"
             >
               Hủy
             </Button>
-            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>
+            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="min-w-[130px]">
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -268,87 +275,219 @@ export function AdminProductFormPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
-            {/* Top Section: Images & Main Info */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Left Column: Images */}
-              <div className="lg:col-span-1">
-                <Card className="h-full">
-                  <CardHeader className="pb-3">
-                    <CardTitle>Hình ảnh</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <ImageUpload
-                        images={images}
-                        onChange={(newImages) => {
-                          setImages(newImages);
-                          setValue('images', newImages, { shouldValidate: true });
-                        }}
-                        maxImages={5}
-                      />
-                      {errors.images && (
-                        <p className="text-sm text-destructive">{errors.images.message}</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left 2 columns: Basic info + Variants */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Card 1: Basic Info */}
+              <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm rounded-xl">
+                <CardHeader className="pb-4 border-b border-border/40">
+                  <CardTitle className="text-lg font-semibold text-foreground">Thông tin chung</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
+                  {/* Product Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium text-foreground">
+                      Tên sản phẩm <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="Nhập tên sản phẩm"
+                      className="bg-background border-border/80"
+                      {...register('name')}
+                    />
+                    {errors.name && (
+                      <p className="text-sm text-destructive">{errors.name.message}</p>
+                    )}
+                  </div>
 
-              {/* Right Column: Main Info */}
-              <div className="lg:col-span-1">
-                <Card className="h-full">
-                  <CardHeader className="pb-3">
-                    <CardTitle>Thông tin chung</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Product Name */}
-                    <div className="space-y-2">
-                      <Label htmlFor="name">
-                        Tên sản phẩm <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="name"
-                        placeholder="Nhập tên sản phẩm"
-                        {...register('name')}
-                      />
-                      {errors.name && (
-                        <p className="text-sm text-destructive">{errors.name.message}</p>
-                      )}
-                    </div>
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-medium text-foreground">
+                      Mô tả <span className="text-destructive">*</span>
+                    </Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Nhập mô tả sản phẩm"
+                      rows={6}
+                      className="resize-none bg-background border-border/80"
+                      {...register('description')}
+                    />
+                    {errors.description && (
+                      <p className="text-sm text-destructive">{errors.description.message}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
-                    {/* Description */}
-                    <div className="space-y-2">
-                      <Label htmlFor="description">
-                        Mô tả <span className="text-destructive">*</span>
-                      </Label>
-                      <Textarea
-                        id="description"
-                        placeholder="Nhập mô tả sản phẩm"
-                        rows={6}
-                        className="resize-none"
-                        {...register('description')}
-                      />
-                      {errors.description && (
-                        <p className="text-sm text-destructive">{errors.description.message}</p>
-                      )}
+              {/* Card 2: Variants */}
+              <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-border/40">
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-foreground">Biến thể sản phẩm</CardTitle>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {isEditMode
+                        ? 'Các biến thể hiện có được hiển thị để đối chiếu.'
+                        : 'Thêm ít nhất một mùi hương và dung tích trước khi lưu sản phẩm.'}
+                    </p>
+                  </div>
+                  {!isEditMode && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-border/80"
+                      onClick={() => append({
+                        scent: '',
+                        volumeMl: 50,
+                        price: 0,
+                        salePrice: undefined,
+                        stock: 0,
+                        barcode: '',
+                      })}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Thêm biến thể
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors">
+                      <div className="mb-3 flex items-center justify-between">
+                        <p className="text-sm font-semibold text-foreground">Biến thể {index + 1}</p>
+                        {!isEditMode && fields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                            onClick={() => remove(index)}
+                            aria-label={`Xóa biến thể ${index + 1}`}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                        <div className="space-y-2">
+                          <Label htmlFor={`variants.${index}.scent`}>Mùi hương</Label>
+                          <Input
+                            id={`variants.${index}.scent`}
+                            disabled={isEditMode}
+                            className="bg-background border-border/80"
+                            {...register(`variants.${index}.scent`)}
+                          />
+                          {errors.variants?.[index]?.scent && (
+                            <p className="text-sm text-destructive">{errors.variants[index]?.scent?.message}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`variants.${index}.volumeMl`}>Dung tích (ml)</Label>
+                          <Input
+                            id={`variants.${index}.volumeMl`}
+                            type="number"
+                            disabled={isEditMode}
+                            className="bg-background border-border/80 tabular-nums"
+                            {...register(`variants.${index}.volumeMl`, { valueAsNumber: true })}
+                          />
+                          {errors.variants?.[index]?.volumeMl && (
+                            <p className="text-sm text-destructive">{errors.variants[index]?.volumeMl?.message}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`variants.${index}.stock`}>Tồn kho</Label>
+                          <Input
+                            id={`variants.${index}.stock`}
+                            type="number"
+                            disabled={isEditMode}
+                            className="bg-background border-border/80 tabular-nums"
+                            {...register(`variants.${index}.stock`, { valueAsNumber: true })}
+                          />
+                          {errors.variants?.[index]?.stock && (
+                            <p className="text-sm text-destructive">{errors.variants[index]?.stock?.message}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`variants.${index}.price`}>Giá niêm yết</Label>
+                          <Input
+                            id={`variants.${index}.price`}
+                            type="number"
+                            disabled={isEditMode}
+                            className="bg-background border-border/80 tabular-nums"
+                            {...register(`variants.${index}.price`, { valueAsNumber: true })}
+                          />
+                          {errors.variants?.[index]?.price && (
+                            <p className="text-sm text-destructive">{errors.variants[index]?.price?.message}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`variants.${index}.salePrice`}>Giá sale</Label>
+                          <Input
+                            id={`variants.${index}.salePrice`}
+                            type="number"
+                            disabled={isEditMode}
+                            className="bg-background border-border/80 tabular-nums"
+                            {...register(`variants.${index}.salePrice`, {
+                              setValueAs: (value) => value === '' ? undefined : Number(value),
+                            })}
+                          />
+                          {errors.variants?.[index]?.salePrice && (
+                            <p className="text-sm text-destructive">{errors.variants[index]?.salePrice?.message}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`variants.${index}.barcode`}>Barcode</Label>
+                          <Input
+                            id={`variants.${index}.barcode`}
+                            disabled={isEditMode}
+                            className="bg-background border-border/80 font-mono"
+                            {...register(`variants.${index}.barcode`)}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                  ))}
+                  {errors.variants?.root && (
+                    <p className="text-sm text-destructive">{errors.variants.root.message}</p>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Bottom Section: Category & Price */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle>Phân loại & Giá</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Right 1 column: Images + Category & Pricing */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Card 3: Images */}
+              <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm rounded-xl">
+                <CardHeader className="pb-4 border-b border-border/40">
+                  <CardTitle className="text-lg font-semibold text-foreground">Hình ảnh</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="space-y-2">
+                    <ImageUpload
+                      images={images}
+                      onChange={(newImages) => {
+                        setImages(newImages);
+                        setValue('images', newImages, { shouldValidate: true });
+                      }}
+                      maxImages={5}
+                    />
+                    {errors.images && (
+                      <p className="text-sm text-destructive">{errors.images.message}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Card 4: Category & Price */}
+              <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm rounded-xl">
+                <CardHeader className="pb-4 border-b border-border/40">
+                  <CardTitle className="text-lg font-semibold text-foreground">Phân loại & Giá</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
                   {/* Category */}
                   <div className="space-y-2">
-                    <Label htmlFor="categoryId">
+                    <Label htmlFor="categoryId" className="text-sm font-medium text-foreground">
                       Danh mục <span className="text-destructive">*</span>
                     </Label>
 
@@ -358,17 +497,19 @@ export function AdminProductFormPage() {
                           variant="outline"
                           role="combobox"
                           className={
-                            `w-full justify-between ${!watch('categoryId') && "text-muted-foreground"
+                            `w-full justify-between h-10 border-border/80 bg-background ${!watch('categoryId') && "text-muted-foreground"
                             }`
                           }
                         >
-                          {watch('categoryId')
-                            ? categories.find((c) => c.id === watch('categoryId'))?.displayName
-                            : (categories.length > 0 ? "Chọn danh mục" : "Đang tải danh mục...")}
+                          <span className="truncate">
+                            {watch('categoryId')
+                              ? categories.find((c) => c.id === watch('categoryId'))?.displayName
+                              : (categories.length > 0 ? "Chọn danh mục" : "Đang tải danh mục...")}
+                          </span>
                           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-[300px] max-h-[300px] overflow-y-auto" align="start">
+                      <DropdownMenuContent className="w-[300px] max-h-[300px] overflow-y-auto bg-card border-border/80" align="start">
                         {(() => {
                           const renderMenu = (nodes: any[]) => {
                             return nodes.map((node) => {
@@ -395,7 +536,7 @@ export function AdminProductFormPage() {
                                   <DropdownMenuSubTrigger className="cursor-pointer font-medium">
                                     <span>{node.name}</span>
                                   </DropdownMenuSubTrigger>
-                                  <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                                  <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto bg-card border-border/80">
                                     {renderMenu(node.children)}
                                   </DropdownMenuSubContent>
                                 </DropdownMenuSub>
@@ -414,163 +555,69 @@ export function AdminProductFormPage() {
 
                   {/* Base Price */}
                   <div className="space-y-2">
-                    <Label htmlFor="basePrice">
+                    <Label htmlFor="basePrice" className="text-sm font-medium text-foreground">
                       Giá cơ bản <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="basePrice"
                       type="number"
                       placeholder="0"
+                      className="bg-background border-border/80 tabular-nums"
                       {...register('basePrice', { valueAsNumber: true })}
                     />
                     {errors.basePrice && (
                       <p className="text-sm text-destructive">{errors.basePrice.message}</p>
                     )}
                   </div>
-                </div>
 
-                <div className="mt-4 flex items-center justify-between rounded-lg border p-4">
-                  <div>
-                    <Label htmlFor="active">Hiển thị sản phẩm</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Sản phẩm tắt sẽ không xuất hiện trong catalog công khai.
-                    </p>
+                  <div className="mt-4 flex items-center justify-between rounded-lg border border-border/60 bg-muted/10 p-4">
+                    <div>
+                      <Label htmlFor="active" className="text-sm font-medium text-foreground cursor-pointer">Hiển thị sản phẩm</Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Sản phẩm tắt sẽ không xuất hiện trong catalog công khai.
+                      </p>
+                    </div>
+                    <Switch
+                      id="active"
+                      checked={watch('active')}
+                      onCheckedChange={(checked) => setValue('active', checked, { shouldDirty: true })}
+                      aria-label="Hiển thị sản phẩm"
+                    />
                   </div>
-                  <Switch
-                    id="active"
-                    checked={watch('active')}
-                    onCheckedChange={(checked) => setValue('active', checked, { shouldDirty: true })}
-                    aria-label="Hiển thị sản phẩm"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
-            {/* Product Variants */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-3">
-                <div>
-                  <CardTitle>Biến thể sản phẩm</CardTitle>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {isEditMode
-                      ? 'Các biến thể hiện có được hiển thị để đối chiếu.'
-                      : 'Thêm ít nhất một mùi hương và dung tích trước khi lưu sản phẩm.'}
-                  </p>
-                </div>
-                {!isEditMode && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => append({
-                      scent: '',
-                      volumeMl: 50,
-                      price: 0,
-                      salePrice: undefined,
-                      stock: 0,
-                      barcode: '',
-                    })}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Thêm biến thể
-                  </Button>
+          {/* Sticky Save Bar at Bottom */}
+          <div className="sticky bottom-4 z-20 bg-card/95 backdrop-blur-md border border-border/80 shadow-xl rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">
+              {isEditMode ? `Đang chỉnh sửa: ${watch('name') || 'Sản phẩm'}` : 'Vui lòng kiểm tra kỹ thông tin trước khi lưu'}
+            </span>
+            <div className="flex items-center justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/admin/products')}
+                disabled={isSubmitting}
+                className="border-border/80"
+              >
+                Hủy
+              </Button>
+              <Button type="submit" disabled={isSubmitting} className="min-w-[130px]">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Lưu sản phẩm
+                  </>
                 )}
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="rounded-lg border p-4">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="font-medium">Biến thể {index + 1}</p>
-                      {!isEditMode && fields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(index)}
-                          aria-label={`Xóa biến thể ${index + 1}`}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                      <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.scent`}>Mùi hương</Label>
-                        <Input
-                          id={`variants.${index}.scent`}
-                          disabled={isEditMode}
-                          {...register(`variants.${index}.scent`)}
-                        />
-                        {errors.variants?.[index]?.scent && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.scent?.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.volumeMl`}>Dung tích (ml)</Label>
-                        <Input
-                          id={`variants.${index}.volumeMl`}
-                          type="number"
-                          disabled={isEditMode}
-                          {...register(`variants.${index}.volumeMl`, { valueAsNumber: true })}
-                        />
-                        {errors.variants?.[index]?.volumeMl && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.volumeMl?.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.stock`}>Tồn kho</Label>
-                        <Input
-                          id={`variants.${index}.stock`}
-                          type="number"
-                          disabled={isEditMode}
-                          {...register(`variants.${index}.stock`, { valueAsNumber: true })}
-                        />
-                        {errors.variants?.[index]?.stock && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.stock?.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.price`}>Giá niêm yết</Label>
-                        <Input
-                          id={`variants.${index}.price`}
-                          type="number"
-                          disabled={isEditMode}
-                          {...register(`variants.${index}.price`, { valueAsNumber: true })}
-                        />
-                        {errors.variants?.[index]?.price && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.price?.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.salePrice`}>Giá sale</Label>
-                        <Input
-                          id={`variants.${index}.salePrice`}
-                          type="number"
-                          disabled={isEditMode}
-                          {...register(`variants.${index}.salePrice`, {
-                            setValueAs: (value) => value === '' ? undefined : Number(value),
-                          })}
-                        />
-                        {errors.variants?.[index]?.salePrice && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.salePrice?.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.barcode`}>Barcode</Label>
-                        <Input
-                          id={`variants.${index}.barcode`}
-                          disabled={isEditMode}
-                          {...register(`variants.${index}.barcode`)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {errors.variants?.root && (
-                  <p className="text-sm text-destructive">{errors.variants.root.message}</p>
-                )}
-              </CardContent>
-            </Card>
+              </Button>
+            </div>
           </div>
         </form>
       </div>

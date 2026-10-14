@@ -28,14 +28,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const navigation = [
-  { name: 'Dashboard', description: 'Tổng quan hiệu suất', href: '/admin', icon: LayoutDashboard },
-  { name: 'Trợ lý AI', description: 'Điều hành cửa hàng bằng hội thoại', href: '/admin/chatbot', icon: Bot },
-  { name: 'Sản phẩm', description: 'Danh mục và nội dung bán hàng', href: '/admin/products', icon: Package },
-  { name: 'Đơn hàng', description: 'Theo dõi và xử lý đơn', href: '/admin/orders', icon: ShoppingCart },
-  { name: 'Mã giảm giá', description: 'Chiến dịch và ưu đãi', href: '/admin/coupons', icon: Ticket },
-  { name: 'Kho hàng', description: 'Tồn kho và cảnh báo', href: '/admin/inventory', icon: Warehouse },
-  { name: 'Danh mục', description: 'Cấu trúc sản phẩm', href: '/admin/categories', icon: FolderTree },
+  { name: 'Dashboard', description: 'Tổng quan hiệu suất', href: '/admin', icon: LayoutDashboard, group: 'Điều hành' },
+  { name: 'Trợ lý AI', description: 'Điều hành cửa hàng bằng hội thoại', href: '/admin/chatbot', icon: Bot, group: 'Điều hành' },
+  { name: 'Sản phẩm', description: 'Danh mục và nội dung bán hàng', href: '/admin/products', icon: Package, group: 'Quản lý kinh doanh' },
+  { name: 'Đơn hàng', description: 'Theo dõi và xử lý đơn', href: '/admin/orders', icon: ShoppingCart, group: 'Quản lý kinh doanh' },
+  { name: 'Mã giảm giá', description: 'Chiến dịch và ưu đãi', href: '/admin/coupons', icon: Ticket, group: 'Quản lý kinh doanh' },
+  { name: 'Kho hàng', description: 'Tồn kho và cảnh báo', href: '/admin/inventory', icon: Warehouse, group: 'Quản lý kinh doanh' },
+  { name: 'Danh mục', description: 'Cấu trúc sản phẩm', href: '/admin/categories', icon: FolderTree, group: 'Quản lý kinh doanh' },
 ];
+
+const navGroups = ['Điều hành', 'Quản lý kinh doanh'] as const;
 
 export function AdminLayout() {
   const location = useLocation();
@@ -52,134 +54,189 @@ export function AdminLayout() {
       {isSidebarOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-sm lg:hidden"
+          aria-label="Đóng thanh điều hướng"
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       ) : null}
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[88vw] max-w-sm flex-col border-r border-white/10 sidebar-glass text-white shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:w-[320px] lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-[85vw] max-w-xs flex-col border-r border-border bg-card/95 backdrop-blur-xl text-card-foreground shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:translate-x-0',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="border-b border-white/5 p-6">
-          <div className="flex items-start justify-between gap-3">
-            <Link to="/admin" className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-indigo-400 text-sm font-bold text-white shadow-lg shadow-primary/25 border border-white/10">
+        <div className="border-b border-border p-5">
+          <div className="flex items-center justify-between gap-3">
+            <Link to="/admin" className="flex items-center gap-3 group">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-lg shadow-primary/20 ring-1 ring-primary/30 transition-transform group-hover:scale-105">
                 TS
               </div>
-              <div>
-                <p className="text-lg font-semibold text-white">Thai Spray Admin</p>
-                <p className="text-sm text-white/50">Điều phối nội dung, đơn hàng và doanh thu.</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold tracking-tight text-foreground">Thai Spray Admin</p>
+                <p className="text-[11px] leading-snug text-muted-foreground">Điều phối nội dung, đơn hàng và doanh thu.</p>
               </div>
             </Link>
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full text-white hover:bg-white/10 hover:text-white lg:hidden"
+              aria-label="Đóng thanh điều hướng"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
               onClick={() => setIsSidebarOpen(false)}
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
- 
-          <div className="mt-6 rounded-[1.5rem] border border-white/5 bg-[linear-gradient(135deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.005)_100%)] p-4 text-sm text-slate-300 shadow-inner">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">Phiên quản trị</p>
-            <p className="mt-3 font-semibold text-white tracking-wide">{user?.name || user?.email}</p>
-            <p className="mt-1 text-xs text-white/40 leading-relaxed">Theo dõi chỉ số quan trọng và xử lý công việc trong một luồng gọn.</p>
-          </div>
         </div>
- 
-        <nav className="flex-1 space-y-1.5 overflow-y-auto p-4 scrollbar-hide">
-          {navigation.map((item) => {
-            const active = isActive(item.href);
+
+        <nav className="flex-1 space-y-4 overflow-y-auto p-3 scrollbar-hide">
+          {navGroups.map((group) => {
+            const items = navigation.filter((item) => item.group === group);
             return (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={() => setIsSidebarOpen(false)}
-                className={cn(
-                  'group flex items-start gap-3 rounded-[1.35rem] px-4 py-3 transition duration-300 border-l-4',
-                  active
-                    ? 'bg-[linear-gradient(90deg,rgba(124,58,237,0.15)_0%,rgba(124,58,237,0.03)_100%)] text-white border-primary shadow-[0_0_20px_rgba(124,58,237,0.1)]'
-                    : 'text-white/70 hover:bg-white/5 hover:text-white border-transparent',
-                )}
-              >
-                <div
-                  className={cn(
-                    'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition duration-300',
-                    active ? 'bg-primary text-white shadow-md shadow-primary/20 scale-105' : 'bg-white/5 group-hover:bg-white/10 group-hover:text-white'
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
+              <div key={group} className="space-y-1">
+                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70">
+                  {group}
+                </p>
+                <div className="space-y-1">
+                  {items.map((item) => {
+                    const active = isActive(item.href);
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => setIsSidebarOpen(false)}
+                        className={cn(
+                          'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200',
+                          active
+                            ? 'bg-accent text-accent-foreground font-semibold shadow-sm'
+                            : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                        )}
+                      >
+                        {active && (
+                          <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-primary" />
+                        )}
+                        <div
+                          className={cn(
+                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
+                            active
+                              ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                              : 'bg-muted/40 text-muted-foreground group-hover:bg-muted group-hover:text-foreground',
+                          )}
+                        >
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-semibold leading-tight">{item.name}</p>
+                          <p
+                            className={cn(
+                              'truncate text-[11px] leading-normal mt-0.5',
+                              active ? 'text-accent-foreground/70' : 'text-muted-foreground/70 group-hover:text-muted-foreground',
+                            )}
+                          >
+                            {item.description}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm leading-snug">{item.name}</p>
-                  <p className={cn('mt-0.5 text-xs transition duration-300', active ? 'text-white/60' : 'text-white/40 group-hover:text-white/50')}>{item.description}</p>
-                </div>
-              </Link>
+              </div>
             );
           })}
         </nav>
 
-  {/* Quick Link to Customer Store */}
-          <div className="p-4 border-t border-slate-100">
-            <a
-              href={STORE_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-between rounded-xl bg-slate-50 hover:bg-teal-50/80 border border-slate-200/80 hover:border-teal-200 p-3 text-xs text-slate-700 hover:text-teal-800 transition-all"
-            >
-              <span className="flex items-center gap-2 font-bold">
-                <ExternalLink className="h-3.5 w-3.5 text-teal-600" />
-                Xem Cửa Hàng
-              </span>
-              <span className="text-[10px] text-teal-700 font-mono font-bold">Live</span>
-            </a>
+        <div className="border-t border-border p-3 space-y-2 mt-auto">
+          {/* Quick Link to Customer Store */}
+          <a
+            href={STORE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-between rounded-xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/30 p-2.5 text-xs text-muted-foreground hover:text-foreground transition-all group"
+          >
+            <span className="flex items-center gap-2 font-medium">
+              <ExternalLink className="h-3.5 w-3.5 text-primary" />
+              Xem Cửa Hàng
+            </span>
+            <span className="rounded border border-emerald-500/25 bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[10px] font-bold text-emerald-300">Live</span>
+          </a>
+
+          {/* User Block */}
+          <div className="rounded-xl border border-border bg-card/60 p-2.5 space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70">Phiên quản trị</p>
+              <span className="rounded border border-emerald-500/25 bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[9px] font-bold text-emerald-300">Online</span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
+                  <UserIcon className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-foreground">{user?.name || user?.email}</p>
+                  <p className="truncate text-[10px] text-muted-foreground">Quyền quản trị viên</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={logout}
+                aria-label="Đăng xuất"
+                title="Đăng xuất"
+                className="h-8 w-8 shrink-0 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground/70 leading-relaxed truncate">Theo dõi chỉ số quan trọng và xử lý công việc trong một luồng gọn.</p>
           </div>
+        </div>
       </aside>
- 
+
       <div className="flex min-h-screen flex-1 flex-col px-3 pb-3 pt-3 md:px-4 lg:pl-4 lg:pr-6">
-        <header className="admin-surface sticky top-3 z-30 mb-4 flex min-h-[76px] items-center justify-between px-4 py-3 md:px-6">
+        <header className="sticky top-3 z-30 mb-4 flex min-h-[64px] items-center justify-between rounded-2xl border border-border bg-card/80 px-4 py-3 shadow-lg backdrop-blur-xl md:px-6">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-full lg:hidden"
+              aria-label="Mở thanh điều hướng"
+              className="h-9 w-9 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
               onClick={() => setIsSidebarOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </Button>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Không gian vận hành</p>
-              <h1 className="text-lg font-semibold text-foreground md:text-2xl">Bảng điều khiển Thai Spray</h1>
+              <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                <span>Admin</span>
+                <span className="text-muted-foreground/40">/</span>
+                <span>Không gian vận hành</span>
+              </div>
+              <h1 className="text-base font-bold text-foreground md:text-xl">Bảng điều khiển Thai Spray</h1>
             </div>
           </div>
- 
+
           <div className="flex items-center gap-2 md:gap-3">
-            <div className="hidden rounded-full border border-border bg-secondary/70 px-4 py-2 text-sm text-muted-foreground md:block">
+            <div className="hidden rounded-full border border-border bg-secondary/70 px-3.5 py-1.5 text-xs text-muted-foreground md:block">
               Dữ liệu đồng bộ theo phiên gần nhất
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-11 rounded-full px-2 hover:bg-secondary">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <UserIcon className="h-4 w-4" />
+                <Button variant="ghost" className="h-9 rounded-full px-2 hover:bg-secondary">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <UserIcon className="h-3.5 w-3.5" />
                   </div>
-                  <div className="hidden text-left md:block">
-                    <p className="max-w-[180px] truncate text-sm font-semibold text-foreground">{user?.name || user?.email}</p>
-                    <p className="max-w-[180px] truncate text-xs text-muted-foreground">Quyền quản trị viên</p>
+                  <div className="hidden text-left md:block ml-2">
+                    <p className="max-w-[160px] truncate text-xs font-semibold text-foreground">{user?.name || user?.email}</p>
+                    <p className="max-w-[160px] truncate text-[10px] text-muted-foreground">Quyền quản trị viên</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 rounded-2xl border-slate-800 bg-slate-950/95 p-2 shadow-2xl text-slate-200">
-                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <DropdownMenuContent align="end" className="w-52 rounded-xl border-border bg-card/95 backdrop-blur-xl p-1.5 shadow-2xl text-card-foreground">
+                <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground px-2 py-1.5">
                   Tài khoản
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="cursor-pointer rounded-xl px-3 py-2.5 text-destructive focus:text-destructive hover:bg-white/5">
-                  <LogOut className="mr-2 h-4 w-4" />
+                <DropdownMenuSeparator className="bg-border" />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-destructive focus:text-destructive focus:bg-destructive/10 hover:bg-destructive/10">
+                  <LogOut className="mr-2 h-3.5 w-3.5" />
                   Đăng xuất
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -190,7 +247,7 @@ export function AdminLayout() {
         <main className="flex-1">
           <Suspense
             fallback={
-              <div className="admin-surface flex h-64 items-center justify-center">
+              <div className="flex h-64 items-center justify-center rounded-2xl border border-border bg-card/40 backdrop-blur-sm">
                 <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               </div>
             }

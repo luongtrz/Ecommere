@@ -29,20 +29,20 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="border-b border-white/50 bg-foreground text-white">
+      <div className="border-b border-primary/20 bg-primary text-primary-foreground">
         <div className="container flex min-h-10 items-center justify-between gap-3 text-xs md:text-sm">
-          <div className="flex items-center gap-2 text-white/85">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-2 text-primary-foreground/90">
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
             <span>Hương thơm cho nhà ở, xe hơi và quà tặng mỗi ngày.</span>
           </div>
-          <div className="hidden items-center gap-4 text-white/70 md:flex">
+          <div className="hidden items-center gap-5 text-primary-foreground/75 md:flex">
             <span>Giao nhanh nội thành</span>
             <span>Đổi trả 7 ngày</span>
           </div>
         </div>
       </div>
 
-      <div className="border-b border-black/[0.02] bg-white/80 backdrop-blur-2xl transition-all duration-300 md:mx-auto md:max-w-7xl md:mt-4 md:rounded-[2.2rem] md:border md:border-black/[0.02] md:bg-white/85 md:shadow-luxury">
+      <div className="border-b border-border/70 bg-background/85 backdrop-blur-2xl transition-all duration-300 md:mx-auto md:max-w-7xl md:mt-3 md:rounded-[2rem] md:border md:border-border/80 md:bg-card/90 md:shadow-luxury">
         <div className="container py-2.5 md:py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -52,70 +52,69 @@ export function Header() {
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[86vw] max-w-sm border-white/70 bg-white/95">
+                <SheetContent side="left" className="w-[88vw] max-w-sm border-border bg-card/95 p-6 backdrop-blur-xl">
                   <div className="mt-6 flex flex-col gap-6">
                     <Link to="/" className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent font-serif text-sm font-extrabold text-white shadow-lg shadow-primary/10">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary font-serif text-sm font-bold text-primary-foreground shadow-md border border-primary/10">
                         TS
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground">Thai Spray</p>
-                        <p className="text-sm text-muted-foreground">Không gian có gu, hương thơm có dấu ấn.</p>
+                        <p className="font-serif text-lg font-bold text-foreground">Thai Spray</p>
+                        <p className="text-xs text-muted-foreground">Không gian có gu, hương thơm có dấu ấn.</p>
                       </div>
                     </Link>
- 
-                    <div className="section-shell p-4">
-                      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+
+                    <div className="rounded-2xl border border-border/70 bg-secondary/40 p-4">
+                      <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
                         Điều hướng nhanh
                       </p>
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-1.5">
                         {mobileLinks.map((link) => (
                           <Link
                             key={link.to}
                             to={link.to}
-                            className="rounded-2xl px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary"
+                            className="rounded-xl px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary"
                           >
                             {link.label}
                           </Link>
                         ))}
                       </div>
                     </div>
- 
-                    <div className="section-shell p-4 text-sm text-muted-foreground">
-                      <p className="mb-2 font-semibold text-foreground">Tài khoản</p>
-                      <div className="flex flex-col gap-2">
+
+                    <div className="rounded-2xl border border-border/70 bg-secondary/40 p-4 text-sm text-muted-foreground">
+                      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Tài khoản</p>
+                      <div className="flex flex-col gap-1.5">
                         {user ? (
                           <>
-                            <Link to="/account" className="rounded-2xl px-4 py-3 transition hover:bg-secondary">Thông tin cá nhân</Link>
-                            <Link to="/orders" className="rounded-2xl px-4 py-3 transition hover:bg-secondary">Theo dõi đơn hàng</Link>
-                            <Link to="/referral" className="rounded-2xl px-4 py-3 transition hover:bg-secondary">Mời bạn bè</Link>
+                            <Link to="/account" className="rounded-xl px-4 py-3 transition hover:bg-secondary text-foreground">Thông tin cá nhân</Link>
+                            <Link to="/orders" className="rounded-xl px-4 py-3 transition hover:bg-secondary text-foreground">Theo dõi đơn hàng</Link>
+                            <Link to="/referral" className="rounded-xl px-4 py-3 transition hover:bg-secondary text-foreground">Mời bạn bè</Link>
                             <button
                                onClick={logout}
-                               className="rounded-2xl px-4 py-3 text-left text-destructive transition hover:bg-destructive/5"
+                               className="rounded-xl px-4 py-3 text-left text-destructive transition hover:bg-destructive/10"
                             >
                                Đăng xuất
                             </button>
                           </>
                         ) : (
-                          <Link to="/login" className="rounded-2xl px-4 py-3 transition hover:bg-secondary">Đăng nhập / Đăng ký</Link>
+                          <Link to="/login" className="rounded-xl px-4 py-3 transition hover:bg-secondary text-foreground">Đăng nhập / Đăng ký</Link>
                         )}
                       </div>
                     </div>
                   </div>
                 </SheetContent>
               </Sheet>
- 
+
               <Link to="/" className="flex items-center gap-3 group">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent font-serif text-sm font-extrabold text-white shadow-lg shadow-primary/10 transition duration-300 group-hover:scale-105 border border-white/10">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary font-serif text-sm font-bold text-primary-foreground shadow-md transition duration-300 group-hover:scale-105 border border-primary/10">
                   TS
                 </div>
                 <div className="hidden min-w-0 sm:block">
-                  <p className="font-semibold leading-none text-foreground transition duration-300 group-hover:text-primary">Thai Spray</p>
+                  <p className="font-serif text-lg font-bold leading-none text-foreground transition duration-300 group-hover:text-primary">Thai Spray</p>
                   <p className="mt-1 text-xs text-muted-foreground">Mùi hương tinh gọn, hiện đại, dễ sống cùng.</p>
                 </div>
               </Link>
             </div>
-
 
             <div className="hidden flex-1 max-w-md mx-auto md:block">
               <SearchBox />
@@ -145,7 +144,7 @@ export function Header() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-11 rounded-full px-2 hover:bg-secondary">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
                         <User className="h-4 w-4" />
                       </div>
                       <div className="hidden text-left md:block">
@@ -156,7 +155,7 @@ export function Header() {
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 rounded-2xl border-white/70 bg-white/95 p-2 shadow-2xl">
+                  <DropdownMenuContent align="end" className="w-56 rounded-2xl border-border bg-card p-2 shadow-luxury">
                     <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5">
                       <Link to="/account">Tài khoản</Link>
                     </DropdownMenuItem>
@@ -176,7 +175,7 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild className="h-11 rounded-full px-5">
+                <Button asChild className="h-11 rounded-full bg-primary text-primary-foreground px-5 shadow-sm hover:bg-primary/90">
                   <Link to="/login">Đăng nhập</Link>
                 </Button>
               )}

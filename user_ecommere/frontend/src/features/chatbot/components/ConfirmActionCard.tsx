@@ -112,16 +112,16 @@ export function ConfirmActionCard({
     <div
       role="group"
       aria-label="Xác nhận thao tác"
-      className="w-full rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm space-y-3 text-xs"
+      className="w-full rounded-2xl border border-black/[0.03] bg-card p-3.5 text-card-foreground shadow-luxury space-y-3 text-xs md:text-sm transition-all duration-300"
     >
       <div className="space-y-2">
         {calls.map((call, index) => (
           <div
             key={call.id || index}
-            className="flex flex-col gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 rounded-xl border border-border/70 bg-muted/30 p-2.5 sm:flex-row sm:items-center sm:justify-between transition-colors hover:border-accent/30"
           >
             <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
-              <span className="font-medium text-foreground flex-1 break-words whitespace-pre-line">
+              <span className="font-medium text-foreground flex-1 break-words whitespace-pre-line leading-relaxed">
                 {call.summary}
               </span>
               {renderRiskBadge(call.risk)}
@@ -134,6 +134,7 @@ export function ConfirmActionCard({
                 aria-pressed={choices[call.id] === true}
                 disabled={isBusy}
                 onClick={() => handleChoice(call.id, true)}
+                className="rounded-full text-xs transition-all duration-300"
               >
                 Xác nhận
               </Button>
@@ -144,6 +145,7 @@ export function ConfirmActionCard({
                 aria-pressed={choices[call.id] === false}
                 disabled={isBusy}
                 onClick={() => handleChoice(call.id, false)}
+                className="rounded-full text-xs transition-all duration-300"
               >
                 Từ chối
               </Button>
@@ -152,7 +154,7 @@ export function ConfirmActionCard({
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-border/80">
         <div className="flex items-center gap-1.5">
           <Button
             type="button"
@@ -160,6 +162,7 @@ export function ConfirmActionCard({
             size="sm"
             disabled={isBusy}
             onClick={() => handleBulk(true)}
+            className="rounded-full text-xs hover:border-accent/40 transition-all duration-300"
           >
             Xác nhận tất cả
           </Button>
@@ -169,6 +172,7 @@ export function ConfirmActionCard({
             size="sm"
             disabled={isBusy}
             onClick={() => handleBulk(false)}
+            className="rounded-full text-xs hover:border-accent/40 transition-all duration-300"
           >
             Từ chối tất cả
           </Button>
@@ -185,6 +189,7 @@ export function ConfirmActionCard({
             size="sm"
             disabled={isBusy || !allChosen}
             onClick={handleSubmit}
+            className="rounded-full text-xs shadow-sm transition-all duration-300"
           >
             Gửi quyết định
           </Button>

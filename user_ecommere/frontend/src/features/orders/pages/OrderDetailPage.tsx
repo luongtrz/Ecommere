@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
-import { formatDateTime } from '@/lib/utils';
+import { formatDateTime, cn } from '@/lib/utils';
 import {
   ArrowLeft,
   Package,
@@ -47,7 +47,7 @@ export function OrderDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -55,14 +55,14 @@ export function OrderDetailPage() {
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-8 w-8 text-gray-400" />
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="bg-card rounded-[1.8rem] border border-border/60 shadow-luxury p-8 md:p-10 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-muted-foreground">
+            <AlertCircle className="h-8 w-8 text-muted-foreground/70" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy đơn hàng</h2>
-          <p className="text-gray-500 mb-6">Đơn hàng bạn tìm kiếm có thể không tồn tại hoặc đã bị xóa.</p>
-          <Button className="w-full rounded-xl" asChild>
+          <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Không tìm thấy đơn hàng</h2>
+          <p className="text-muted-foreground text-sm mb-6">Đơn hàng bạn tìm kiếm có thể không tồn tại hoặc đã bị xóa.</p>
+          <Button className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-11" asChild>
             <Link to="/orders">Xem tất cả đơn hàng</Link>
           </Button>
         </div>
@@ -73,21 +73,21 @@ export function OrderDetailPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING_PAYMENT':
-        return 'bg-amber-100 text-amber-700 border-amber-200 ring-amber-100';
+        return 'bg-amber-500/10 text-amber-700 border-amber-500/25';
       case 'PAID':
-        return 'bg-teal-50 text-teal-700 border-teal-200 ring-teal-100';
+        return 'bg-emerald-500/10 text-emerald-700 border-emerald-500/25';
       case 'PACKING':
-        return 'bg-purple-100 text-purple-700 border-purple-200 ring-purple-100';
+        return 'bg-amber-500/10 text-amber-700 border-amber-500/25';
       case 'SHIPPED':
-        return 'bg-indigo-100 text-indigo-700 border-indigo-200 ring-indigo-100';
+        return 'bg-secondary text-foreground border-border';
       case 'DELIVERED':
-        return 'bg-emerald-100 text-emerald-700 border-emerald-200 ring-emerald-100';
+        return 'bg-emerald-500/10 text-emerald-700 border-emerald-500/25';
       case 'CANCELED':
-        return 'bg-rose-100 text-rose-700 border-rose-200 ring-rose-100';
+        return 'bg-rose-500/10 text-rose-700 border-rose-500/25';
       case 'REFUNDED':
-        return 'bg-gray-100 text-gray-700 border-gray-200 ring-gray-100';
+        return 'bg-muted text-muted-foreground border-border';
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-200 ring-gray-100';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -133,40 +133,39 @@ export function OrderDetailPage() {
     <>
       <SEO title={`Đơn hàng #${order.orderNumber}`} />
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-50/50 to-white">
-        {/* Header Background */}
-        <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white pb-24 pt-8 px-4">
-          <div className="container max-w-6xl">
-            <Button variant="ghost" size="sm" asChild className="p-0 h-auto text-gray-300 hover:text-white mb-6">
-              <Link to="/orders" className="flex items-center gap-2">
+      <div className="min-h-screen bg-background py-8 md:py-16">
+        <div className="container max-w-6xl px-4 space-y-8">
+          {/* Header Section */}
+          <div className="space-y-4 pb-6 border-b border-border/60">
+            <Button variant="ghost" size="sm" asChild className="p-0 h-auto text-muted-foreground hover:text-foreground">
+              <Link to="/orders" className="flex items-center gap-2 text-xs uppercase tracking-wider font-semibold">
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại danh sách đơn hàng
               </Link>
             </Button>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold mb-1">Chi tiết đơn hàng</h1>
-                <div className="flex items-center gap-3 text-gray-300">
-                  <span>#{order.orderNumber}</span>
+                <span className="uppercase tracking-[0.2em] text-[10px] font-bold text-muted-foreground block mb-1">Chi tiết giao dịch</span>
+                <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground tracking-tight">Chi tiết đơn hàng</h1>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
+                  <span className="font-mono font-semibold text-foreground">#{order.orderNumber}</span>
                   <span>•</span>
                   <span>{formatDateTime(order.createdAt)}</span>
                 </div>
               </div>
-              <Badge className={`${getStatusColor(order.status)} px-4 py-2 rounded-full flex items-center gap-2 shadow-lg backdrop-blur-md bg-opacity-90`}>
+              <Badge variant="outline" className={cn("px-4 py-2 rounded-full flex items-center gap-2 border shadow-sm self-start md:self-auto", getStatusColor(order.status))}>
                 {getStatusIcon(order.status)}
-                <span className="font-semibold">{getStatusLabel(order.status)}</span>
+                <span className="font-semibold text-xs">{getStatusLabel(order.status)}</span>
               </Badge>
             </div>
           </div>
-        </div>
 
-        <div className="container py-8 max-w-6xl -mt-16 px-4">
           {/* Status Timeline */}
           {!isCancelled && (
-            <Card className="shadow-lg border-0 mb-8 overflow-hidden rounded-2xl animate-fade-in">
-              <CardContent className="p-8">
+            <Card className="shadow-luxury border border-border/60 rounded-[1.8rem] bg-card overflow-hidden">
+              <CardContent className="p-6 md:p-8">
                 <div className="relative">
-                  <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 rounded-full hidden md:block" />
+                  <div className="absolute top-1/2 left-0 w-full h-[2px] bg-border/60 -translate-y-1/2 rounded-full hidden md:block" />
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
                     {[
                       { status: 'PENDING_PAYMENT', label: 'Đặt hàng', icon: Clock },
@@ -180,18 +179,20 @@ export function OrderDetailPage() {
 
                       return (
                         <div key={step.status} className="flex md:flex-col items-center gap-4 md:gap-3 md:text-center">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm border-2 transition-all duration-300 ${isCompleted
-                            ? 'bg-primary border-primary text-primary-foreground shadow-primary/20'
-                            : 'bg-white border-gray-200 text-gray-300'
-                            }`}>
+                          <div className={cn(
+                            "w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 border-2",
+                            isCompleted
+                              ? "bg-primary border-primary text-primary-foreground shadow-luxury"
+                              : "bg-card border-border text-muted-foreground/40"
+                          )}>
                             <Icon className="h-5 w-5" />
                           </div>
                           <div>
-                            <div className={`font-semibold text-sm ${isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>
+                            <div className={cn("font-semibold text-sm", isCompleted ? "text-foreground" : "text-muted-foreground/60")}>
                               {step.label}
                             </div>
                             {isCurrent && (
-                              <div className="text-xs text-primary font-medium">Hiện tại</div>
+                              <div className="text-[10px] uppercase tracking-[0.15em] font-bold text-accent-foreground mt-0.5">Hiện tại</div>
                             )}
                           </div>
                         </div>
@@ -207,31 +208,31 @@ export function OrderDetailPage() {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Order Items */}
-              <Card className="shadow-md border border-gray-100 overflow-hidden rounded-2xl animate-fade-in" style={{ animationDelay: '100ms' }}>
-                <CardHeader className="bg-secondary/40 border-b border-gray-100 py-4">
-                  <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
+              <Card className="shadow-luxury border border-border/60 overflow-hidden rounded-[1.8rem] bg-card">
+                <CardHeader className="bg-secondary/40 border-b border-border/50 py-4 px-6">
+                  <CardTitle className="text-lg font-serif font-semibold text-foreground flex items-center gap-2.5">
                     <ShoppingBag className="h-5 w-5 text-primary" />
                     Sản phẩm ({order.items.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="divide-y divide-gray-50">
+                  <div className="divide-y divide-border/40">
                     {order.items.map((item: any, index: number) => (
-                      <div key={index} className="flex gap-4 p-5 hover:bg-gray-50/50 transition-colors">
-                        <div className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100">
+                      <div key={index} className="flex gap-4 p-5 md:p-6 hover:bg-secondary/20 transition-colors">
+                        <div className="w-20 h-20 bg-secondary/40 rounded-xl overflow-hidden flex-shrink-0 border border-border/60">
                           {/* Placeholder for item image if available in future API response */}
-                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/60">
                             <Package className="h-8 w-8" />
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-base mb-1 truncate">{item.name}</h4>
-                          <div className="text-sm text-gray-500 mb-2">Số lượng: {item.quantity}</div>
+                          <h4 className="font-semibold text-foreground text-base mb-1 truncate">{item.name}</h4>
+                          <div className="text-sm text-muted-foreground mb-2">Số lượng: {item.quantity}</div>
                           <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-muted-foreground tabular-nums">
                               {formatCurrency(item.price)}
                             </div>
-                            <div className="font-bold text-primary text-base">
+                            <div className="font-serif font-bold text-foreground text-base tabular-nums">
                               {formatCurrency(item.price * item.quantity)}
                             </div>
                           </div>
@@ -244,28 +245,28 @@ export function OrderDetailPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Shipping Address */}
-                <Card className="shadow-md border border-gray-100 overflow-hidden rounded-2xl animate-fade-in" style={{ animationDelay: '200ms' }}>
-                  <CardHeader className="bg-gradient-to-r from-green-50/50 to-emerald-50/50 border-b border-gray-100 py-4">
-                    <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
-                      <MapPin className="h-5 w-5 text-green-600" />
+                <Card className="shadow-luxury border border-border/60 overflow-hidden rounded-[1.8rem] bg-card">
+                  <CardHeader className="bg-secondary/40 border-b border-border/50 py-4 px-6">
+                    <CardTitle className="text-base font-serif font-semibold text-foreground flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
                       Địa chỉ giao hàng
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-600">
-                          <User className="h-5 w-5" />
+                        <div className="w-9 h-9 bg-secondary rounded-full flex items-center justify-center text-foreground">
+                          <User className="h-4 w-4" />
                         </div>
-                        <div className="font-semibold text-gray-900">{order.shippingAddress?.fullName}</div>
+                        <div className="font-semibold text-foreground">{order.shippingAddress?.fullName}</div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-600">
-                          <Phone className="h-5 w-5" />
+                        <div className="w-9 h-9 bg-secondary rounded-full flex items-center justify-center text-foreground">
+                          <Phone className="h-4 w-4" />
                         </div>
-                        <div className="text-gray-900">{order.shippingAddress?.phone}</div>
+                        <div className="text-foreground">{order.shippingAddress?.phone}</div>
                       </div>
-                      <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed border border-gray-100">
+                      <div className="bg-secondary/30 rounded-xl p-4 text-sm text-muted-foreground leading-relaxed border border-border/40">
                         {order.shippingAddress?.address}, {order.shippingAddress?.ward}, {order.shippingAddress?.district}, {order.shippingAddress?.province}
                       </div>
                     </div>
@@ -273,24 +274,34 @@ export function OrderDetailPage() {
                 </Card>
 
                 {/* Payment Info */}
-                <Card className="shadow-md border border-gray-100 overflow-hidden rounded-2xl animate-fade-in" style={{ animationDelay: '300ms' }}>
-                  <CardHeader className="bg-gradient-to-r from-purple-50/50 to-pink-50/50 border-b border-gray-100 py-4">
-                    <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
-                      <CreditCard className="h-5 w-5 text-purple-600" />
+                <Card className="shadow-luxury border border-border/60 overflow-hidden rounded-[1.8rem] bg-card">
+                  <CardHeader className="bg-secondary/40 border-b border-border/50 py-4 px-6">
+                    <CardTitle className="text-base font-serif font-semibold text-foreground flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-primary" />
                       Thanh toán
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600">
-                        <CreditCard className="h-6 w-6" />
+                      <div className="w-11 h-11 bg-secondary rounded-xl flex items-center justify-center text-foreground">
+                        <CreditCard className="h-5 w-5" />
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Phương thức</div>
-                        <div className="font-semibold text-gray-900 text-lg">{order.paymentMethod}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Phương thức</div>
+                        <div className="font-semibold text-foreground text-base mt-0.5">{order.paymentMethod}</div>
                       </div>
                     </div>
-                    <Badge variant="secondary" className={`${isCancelled ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'} px-3 py-1`}>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "px-3 py-1 rounded-full text-xs font-medium border",
+                        ['PAID', 'DELIVERED'].includes(order.status)
+                          ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/25"
+                          : (isCancelled
+                            ? "bg-rose-500/10 text-rose-700 border-rose-500/25"
+                            : "bg-amber-500/10 text-amber-700 border-amber-500/25")
+                      )}
+                    >
                       {['PAID', 'DELIVERED'].includes(order.status) ? 'Đã thanh toán' : (isCancelled ? 'Đã hủy' : 'Chưa thanh toán')}
                     </Badge>
                   </CardContent>
@@ -300,23 +311,23 @@ export function OrderDetailPage() {
 
             {/* Order Summary Sidebar */}
             <div className="lg:col-span-1">
-              <Card className="shadow-lg border-0 sticky top-24 overflow-hidden rounded-2xl bg-white animate-fade-in" style={{ animationDelay: '400ms' }}>
-                <CardHeader className="bg-gray-900 text-white py-5">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Package className="h-5 w-5 text-primary-foreground/85" />
+              <Card className="shadow-luxury border border-border/60 sticky top-24 overflow-hidden rounded-[1.8rem] bg-card">
+                <CardHeader className="bg-primary text-primary-foreground py-5 px-6">
+                  <CardTitle className="text-base font-serif font-semibold flex items-center gap-2">
+                    <Package className="h-5 w-5 text-primary-foreground/80" />
                     Tóm tắt chi phí
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                   {/* Order Info */}
-                  <div className="mb-6 pb-6 border-b border-gray-100">
+                  <div className="mb-6 pb-6 border-b border-border/50">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-primary">
-                        <Calendar className="h-5 w-5" />
+                      <div className="w-9 h-9 bg-secondary rounded-full flex items-center justify-center text-primary">
+                        <Calendar className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500">Ngày đặt hàng</div>
-                        <div className="text-sm font-semibold text-gray-900">{formatDateTime(order.createdAt)}</div>
+                        <div className="text-xs text-muted-foreground">Ngày đặt hàng</div>
+                        <div className="text-sm font-semibold text-foreground">{formatDateTime(order.createdAt)}</div>
                       </div>
                     </div>
                   </div>
@@ -324,20 +335,20 @@ export function OrderDetailPage() {
                   {/* Price Breakdown */}
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Tạm tính:</span>
-                      <span className="font-medium text-gray-900">{formatCurrency(order.total - order.shippingFee)}</span>
+                      <span className="text-muted-foreground">Tạm tính:</span>
+                      <span className="font-medium text-foreground tabular-nums">{formatCurrency(order.total - order.shippingFee)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Phí vận chuyển:</span>
-                      <span className="font-medium text-green-600">
+                      <span className="text-muted-foreground">Phí vận chuyển:</span>
+                      <span className="font-medium text-emerald-700 tabular-nums">
                         {order.shippingFee === 0 ? 'Miễn phí' : formatCurrency(order.shippingFee)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-gray-50 rounded-xl flex justify-between items-center mb-6">
-                    <span className="text-base font-bold text-gray-900">Tổng cộng:</span>
-                    <span className="text-2xl font-bold text-primary">
+                  <div className="p-4 bg-secondary/50 rounded-2xl flex justify-between items-baseline mb-6 border border-border/40">
+                    <span className="text-sm font-semibold text-foreground">Tổng cộng:</span>
+                    <span className="text-2xl font-serif font-bold text-foreground tabular-nums">
                       {formatCurrency(order.total)}
                     </span>
                   </div>
@@ -347,7 +358,7 @@ export function OrderDetailPage() {
                     <div className="mb-4">
                       <Button
                         variant="outline"
-                        className="w-full rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all"
+                        className="w-full rounded-full border-rose-500/30 text-rose-700 hover:bg-rose-500/10 hover:text-rose-800 transition-all h-10 text-xs"
                         onClick={() => setShowCancelConfirm(true)}
                       >
                         <XCircle className="h-4 w-4 mr-2" />
@@ -357,14 +368,14 @@ export function OrderDetailPage() {
                   )}
 
                   {showCancelConfirm && (
-                    <div className="mb-4 p-4 bg-red-50 rounded-xl border border-red-200 space-y-3">
-                      <p className="text-sm font-semibold text-red-800">Bạn chắc chắn muốn hủy đơn hàng này?</p>
-                      <p className="text-xs text-red-600">Hành động này không thể hoàn tác. Sản phẩm sẽ được hoàn lại kho.</p>
+                    <div className="mb-4 p-4 bg-rose-500/10 rounded-2xl border border-rose-500/25 space-y-3">
+                      <p className="text-sm font-semibold text-rose-900">Bạn chắc chắn muốn hủy đơn hàng này?</p>
+                      <p className="text-xs text-rose-700">Hành động này không thể hoàn tác. Sản phẩm sẽ được hoàn lại kho.</p>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 rounded-lg border-gray-200"
+                          className="flex-1 rounded-full border-border text-xs"
                           onClick={() => setShowCancelConfirm(false)}
                           disabled={cancelOrder.isPending}
                         >
@@ -372,7 +383,7 @@ export function OrderDetailPage() {
                         </Button>
                         <Button
                           size="sm"
-                          className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 text-white"
+                          className="flex-1 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs"
                           onClick={handleCancelOrder}
                           disabled={cancelOrder.isPending}
                         >
@@ -383,9 +394,9 @@ export function OrderDetailPage() {
                   )}
 
                   {/* Support */}
-                  <div className="text-center">
-                    <p className="text-sm text-gray-500 mb-3">Gặp vấn đề với đơn hàng này?</p>
-                    <Button variant="outline" className="w-full rounded-xl border-gray-200 hover:bg-gray-50" asChild>
+                  <div className="text-center pt-2">
+                    <p className="text-xs text-muted-foreground mb-3">Gặp vấn đề với đơn hàng này?</p>
+                    <Button variant="outline" className="w-full rounded-full border-border hover:bg-secondary text-foreground h-10 text-xs" asChild>
                       <Link to="/support">Gửi yêu cầu hỗ trợ</Link>
                     </Button>
                   </div>

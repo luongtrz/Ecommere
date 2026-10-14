@@ -14,8 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PAGINATION, PRODUCT_SORT_OPTIONS } from '@/lib/constants';
-import { Search, ShoppingBag, Grid3X3, List, Filter, X } from 'lucide-react';
+import { Search, ShoppingBag, Grid3X3, List, Filter, X, Star } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
+import { getImageUrl } from '@/lib/utils';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -136,7 +137,7 @@ export function CategoryPage() {
 
   if (isCategoryLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -144,8 +145,8 @@ export function CategoryPage() {
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="max-w-md w-full section-shell p-8 text-center shadow-luxury">
           <EmptyState
             title="Không tìm thấy danh mục"
             description="Danh mục không tồn tại"
@@ -174,106 +175,131 @@ export function CategoryPage() {
     <>
       <SEO title={category.name} description={category.description} />
 
-      <div className="min-h-screen">
-        {/* Compact Header - giống CatalogPage */}
-        <div className="border-b border-white/30 bg-white/30 backdrop-blur-md">
-          <div className="container py-4">
-            {/* Breadcrumb nhỏ */}
+      <div className="min-h-screen bg-background">
+        {/* Page Header */}
+        <div className="border-b border-border/40 bg-background/80 backdrop-blur-md sticky top-0 z-10">
+          <div className="container py-4 md:py-6">
             <Breadcrumb
               items={[
                 { label: 'Sản phẩm', href: '/catalog' },
                 { label: category.name },
               ]}
-              className="mb-3"
+              className="mb-3 text-xs"
             />
 
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
-                <h1 className="text-xl font-bold text-foreground">{category.name}</h1>
-                <p className="text-xs text-muted-foreground hidden md:block">{products?.total || 0} sản phẩm</p>
+                <p className="uppercase tracking-[0.2em] text-[10px] font-bold text-accent-foreground/80 mb-0.5">
+                  Danh mục
+                </p>
+                <div className="flex items-baseline gap-3">
+                  <h1 className="text-2xl md:text-3xl font-serif font-normal text-foreground tracking-tight">
+                    {category.name}
+                  </h1>
+                  <span className="text-xs text-muted-foreground font-sans">
+                    {products?.total || 0} sản phẩm
+                  </span>
+                </div>
               </div>
 
-              {/* Compact Toolbar - giống CatalogPage */}
-              <div className="flex items-center gap-2 w-full md:w-auto">
+              {/* Toolbar */}
+              <div className="flex flex-wrap items-center gap-2.5">
                 {/* Search */}
-                <div className="relative flex-1 md:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <div className="relative flex-1 sm:w-60 min-w-[140px]">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                   <Input
                     value={searchInput}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder="Tìm kiếm..."
-                    className="h-9 pl-9 text-sm bg-white/60 border-white/80 rounded-xl focus:bg-white transition-all"
+                    className="h-9 pl-9 pr-8 text-xs bg-card/70 border-border/80 rounded-full focus:bg-card focus:border-accent focus-visible:ring-1 focus-visible:ring-ring transition-all"
                   />
                   {searchInput && (
-                    <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-secondary rounded-full p-0.5">
-                      <X className="h-3 w-3 text-muted-foreground" />
+                    <button
+                      onClick={() => handleSearchChange('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 hover:bg-secondary rounded-full p-1 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Xóa tìm kiếm"
+                    >
+                      <X className="h-3 w-3" />
                     </button>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 border-l pl-2 ml-2 border-white/40">
-                  {/* Sort */}
-                  <Select value={sortBy} onValueChange={handleSortChange}>
-                    <SelectTrigger className="h-9 w-[130px] text-xs border-0 bg-transparent hover:bg-secondary/40 font-semibold text-foreground rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-white/70 bg-white/95">
-                      {PRODUCT_SORT_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value} className="text-xs rounded-lg">
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {/* Sort */}
+                <Select value={sortBy} onValueChange={handleSortChange}>
+                  <SelectTrigger className="h-9 w-[145px] text-xs border border-border/80 bg-card/70 hover:bg-secondary/60 font-medium text-foreground rounded-full px-3 focus:ring-1 focus:ring-ring">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border-border/60 bg-popover text-popover-foreground shadow-luxury">
+                    {PRODUCT_SORT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value} className="text-xs rounded-xl focus:bg-secondary cursor-pointer">
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-                  {/* View Toggle */}
-                  <div className="flex bg-secondary/55 rounded-xl p-0.5 border border-white/40">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewToggle('grid')}
-                      className={`h-7 w-7 p-0 rounded-lg ${viewMode === 'grid' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground'}`}
-                    >
-                      <Grid3X3 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewToggle('list')}
-                      className={`h-7 w-7 p-0 rounded-lg ${viewMode === 'list' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground'}`}
-                    >
-                      <List className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-
-                  {/* Mobile Filter Trigger */}
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-xl lg:hidden border-white/80 bg-white/30">
-                        <Filter className="h-4 w-4" />
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-80 overflow-y-auto border-white/70 bg-white/95">
-                      <SheetHeader>
-                        <SheetTitle className="text-foreground">Bộ lọc</SheetTitle>
-                      </SheetHeader>
-                      <div className="py-4">
-                        {filterContent}
-                      </div>
-                    </SheetContent>
-                  </Sheet>
+                {/* View Toggle */}
+                <div className="flex items-center bg-secondary/60 rounded-full p-1 border border-border/60">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewToggle('grid')}
+                    aria-label="Xem lưới"
+                    className={`h-7 w-7 p-0 rounded-full transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-card shadow-sm text-primary font-bold'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Grid3X3 className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewToggle('list')}
+                    aria-label="Xem danh sách"
+                    className={`h-7 w-7 p-0 rounded-full transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-card shadow-sm text-primary font-bold'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <List className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
+
+                {/* Mobile Filter Trigger */}
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 w-9 p-0 rounded-full lg:hidden border-border/80 bg-card/70 hover:bg-secondary text-foreground"
+                      aria-label="Mở bộ lọc"
+                    >
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[85vw] max-w-xs overflow-y-auto border-r border-border/60 bg-card/95 backdrop-blur-xl p-6">
+                    <SheetHeader className="mb-4 text-left">
+                      <SheetTitle className="font-serif text-lg text-foreground">Bộ lọc</SheetTitle>
+                    </SheetHeader>
+                    <div className="py-2">
+                      {filterContent}
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content with Sidebar - giống CatalogPage */}
-        <div className="container py-6 min-h-[60vh]">
-          <div className="flex gap-6">
+        {/* Main Content with Sidebar */}
+        <div className="container py-8 md:py-12 min-h-[60vh]">
+          <div className="flex gap-8">
             {/* Sidebar - Desktop only */}
             <aside className="hidden lg:block w-64 shrink-0">
-              <div className="sticky top-24 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/60 p-4 shadow-sm overflow-y-auto max-h-[calc(100vh-8rem)]">
+              <div className="sticky top-28 glass-panel rounded-2xl p-5 shadow-luxury overflow-y-auto max-h-[calc(100vh-8.5rem)]">
                 {filterContent}
               </div>
             </aside>
@@ -281,19 +307,30 @@ export function CategoryPage() {
             {/* Products */}
             <div className="flex-1 min-w-0">
               {isProductsLoading ? (
-                <div className="py-20 flex justify-center"><LoadingSpinner /></div>
+                <div className="py-24 flex justify-center"><LoadingSpinner /></div>
               ) : products?.products.length === 0 ? (
-                <EmptyState
-                  title="Không tìm thấy sản phẩm"
-                  description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
-                  action={<Button variant="outline" className="rounded-full" onClick={clearFilters}>Xóa bộ lọc</Button>}
-                />
+                <div className="section-shell p-8 md:p-16 text-center">
+                  <EmptyState
+                    title="Không tìm thấy sản phẩm"
+                    description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
+                    action={
+                      <Button
+                        variant="outline"
+                        className="rounded-full border-border/80 hover:bg-secondary px-6"
+                        onClick={clearFilters}
+                      >
+                        Xóa bộ lọc
+                      </Button>
+                    }
+                  />
+                </div>
               ) : (
                 <div className="space-y-8 animate-fade-in">
-                  <div className={`${viewMode === 'grid'
-                    ? 'grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6'
-                    : 'space-y-4'
-                    }`}>
+                  <div className={`${
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'
+                      : 'space-y-4'
+                  }`}>
                     {products?.products.map((product) => (
                       viewMode === 'grid' ? (
                         <ProductCard
@@ -309,31 +346,55 @@ export function CategoryPage() {
                           onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                         />
                       ) : (
-                        <div key={product.id} className="flex gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-[1.65rem] border border-white/60 hover:shadow-lg transition-all duration-300">
-                          <div className="w-24 h-24 bg-white/50 border border-white/40 rounded-xl overflow-hidden shrink-0">
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                        <div
+                          key={product.id}
+                          className="flex flex-col sm:flex-row gap-4 md:gap-6 bg-card/80 backdrop-blur-sm p-4 md:p-5 rounded-[1.8rem] border border-black/[0.03] shadow-luxury hover:-translate-y-0.5 hover:shadow-luxury-glow transition-all duration-300"
+                        >
+                          <div className="w-full sm:w-32 md:w-36 aspect-square sm:aspect-auto sm:h-36 bg-muted/30 border border-border/40 rounded-2xl overflow-hidden shrink-0">
+                            <img
+                              src={getImageUrl(product.images[0], { width: 300 })}
+                              alt={product.name}
+                              loading="lazy"
+                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            />
                           </div>
                           <div className="flex-1 min-w-0 py-1 flex flex-col justify-between">
                             <div>
-                              <h3 className="font-bold text-foreground truncate text-base">{product.name}</h3>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                                <div className="flex items-center text-amber-500 font-semibold">
-                                  <span className="mr-0.5">&#9733;</span> {product.rating?.toFixed(1)}
+                              <p className="uppercase tracking-[0.2em] text-[10px] font-bold text-accent-foreground/70 mb-1">
+                                Thai Spray
+                              </p>
+                              <h3 className="font-serif font-medium text-foreground truncate text-base md:text-lg mb-1">
+                                {product.name}
+                              </h3>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                                <div className="flex items-center gap-1 text-accent font-semibold">
+                                  <Star className="h-3.5 w-3.5 fill-accent text-accent" />
+                                  <span className="text-foreground">{product.rating?.toFixed(1) || '5.0'}</span>
                                 </div>
-                                <span>|</span>
+                                <span>·</span>
                                 <span>{product.reviewCount} đánh giá</span>
                               </div>
-                              <div className="flex flex-wrap gap-1 mb-3">
+                              <div className="flex flex-wrap gap-1.5 mb-3">
                                 {product.variants.slice(0, 3).map((v: any, i: number) => (
-                                  <Badge key={i} variant="secondary" className="text-[10px] h-5 px-2 font-normal rounded-full">
+                                  <Badge
+                                    key={i}
+                                    variant="secondary"
+                                    className="text-[10px] h-5 px-2.5 font-normal rounded-full border border-border/60 bg-secondary/80 text-secondary-foreground"
+                                  >
                                     {v.scent}
                                   </Badge>
                                 ))}
                               </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-primary text-base">{formatCurrency(product.basePrice)}</span>
-                              <Button size="sm" className="h-9 rounded-full text-xs transition-all duration-300 active:scale-95" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
+                            <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                              <span className="font-serif font-semibold text-primary text-base md:text-lg">
+                                {formatCurrency(product.basePrice)}
+                              </span>
+                              <Button
+                                size="sm"
+                                className="h-9 rounded-full px-5 text-xs font-semibold bg-primary text-primary-foreground shadow-luxury transition-all duration-300 active:scale-95 hover:bg-primary/90"
+                                onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                              >
                                 <ShoppingBag className="h-3.5 w-3.5 mr-1.5" /> Thêm vào giỏ
                               </Button>
                             </div>
@@ -344,7 +405,7 @@ export function CategoryPage() {
                   </div>
 
                   {products && products.totalPages > 1 && (
-                    <div className="flex justify-center pt-8 border-t border-white/40">
+                    <div className="flex justify-center pt-8 border-t border-border/40">
                       <Pagination
                         currentPage={currentPage}
                         totalPages={products.totalPages}

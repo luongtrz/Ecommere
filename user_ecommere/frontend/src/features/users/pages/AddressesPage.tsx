@@ -37,10 +37,13 @@ export function AddressesPage() {
 
   if (isLoading) {
     return (
-      <div className="container max-w-4xl py-20 text-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded-xl w-full max-w-2xl"></div>
+      <div className="container max-w-5xl py-12 md:py-16 px-4">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-muted rounded-2xl w-1/4 mb-4" />
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="h-44 bg-muted rounded-[1.8rem]" />
+            <div className="h-44 bg-muted rounded-[1.8rem]" />
+          </div>
         </div>
       </div>
     );
@@ -49,30 +52,31 @@ export function AddressesPage() {
   return (
     <>
       <SEO title="Quản lý địa chỉ" />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-secondary/20">
-        <div className="container max-w-5xl py-8 md:py-12">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+      <div className="min-h-screen bg-background py-8 md:py-16">
+        <div className="container max-w-5xl px-4 space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border/60">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Sổ địa chỉ</h1>
-              <p className="text-gray-600">Quản lý địa chỉ giao hàng của bạn</p>
+              <span className="uppercase tracking-[0.2em] text-[10px] font-bold text-muted-foreground block mb-1">Tài khoản cá nhân</span>
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground tracking-tight">Sổ địa chỉ</h1>
+              <p className="text-sm text-muted-foreground mt-1">Quản lý địa chỉ giao hàng của bạn</p>
             </div>
-            <Button onClick={handleAdd} className="rounded-xl shadow-lg shadow-primary/10 bg-primary text-primary-foreground hover:bg-primary/95 h-11 px-6">
-              <Plus className="h-5 w-5 mr-2" />
+            <Button onClick={handleAdd} className="rounded-full shadow-luxury bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-5 text-xs font-medium self-start md:self-auto">
+              <Plus className="h-4 w-4 mr-2" />
               Thêm địa chỉ mới
             </Button>
           </div>
 
           {!addresses || addresses.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12 text-center animate-fade-in">
-              <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <MapPin className="h-10 w-10 text-primary" />
+            <div className="bg-card rounded-[1.8rem] shadow-luxury border border-border/60 p-12 md:p-16 text-center animate-fade-in">
+              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+                <MapPin className="h-8 w-8 text-primary/80" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Chưa có địa chỉ nào</h3>
-              <p className="text-gray-500 mb-8 max-w-sm mx-auto">
+              <h3 className="text-2xl font-serif font-bold text-foreground mb-2">Chưa có địa chỉ nào</h3>
+              <p className="text-muted-foreground mb-6 text-sm max-w-sm mx-auto">
                 Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại Thai Spray Shop
               </p>
-              <Button onClick={handleAdd} size="lg" className="rounded-xl">
-                <Plus className="h-5 w-5 mr-2" />
+              <Button onClick={handleAdd} size="lg" className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-6 shadow-luxury">
+                <Plus className="h-4 w-4 mr-2" />
                 Thêm địa chỉ đầu tiên
               </Button>
             </div>
@@ -81,18 +85,18 @@ export function AddressesPage() {
               {addresses.map((address) => (
                 <Card
                   key={address.id}
-                  className={`border transition-all duration-300 rounded-2xl overflow-hidden group hover:shadow-lg ${address.isDefault ? 'border-primary bg-secondary/20 shadow-md ring-1 ring-secondary' : 'border-gray-100 shadow-sm hover:border-gray-200'}`}
+                  className={`border transition-all duration-300 rounded-[1.8rem] overflow-hidden group shadow-luxury hover:shadow-luxury-glow hover:-translate-y-0.5 bg-card ${address.isDefault ? 'border-accent/50 ring-1 ring-accent/30' : 'border-border/60'}`}
                 >
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start justify-between mb-4 gap-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${address.isDefault ? 'bg-secondary text-primary' : 'bg-gray-100 text-gray-500'}`}>
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border border-border/50 ${address.isDefault ? 'bg-accent/15 text-accent-foreground' : 'bg-secondary text-muted-foreground'}`}>
                           {address.isDefault ? <Home className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-900 text-lg">{address.fullName}</h3>
+                          <h3 className="font-serif font-bold text-foreground text-lg leading-tight">{address.fullName}</h3>
                           {address.isDefault && (
-                            <div className="flex items-center gap-1 text-xs font-semibold text-primary bg-secondary px-2 py-0.5 rounded-full w-fit mt-0.5">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-accent-foreground bg-accent/20 border border-accent/30 px-2.5 py-0.5 rounded-full w-fit mt-1">
                               <CheckCircle className="h-3 w-3" />
                               Mặc định
                             </div>
@@ -103,28 +107,30 @@ export function AddressesPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-full text-gray-400 hover:text-primary hover:bg-secondary"
+                          className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary"
                           onClick={() => handleEdit(address)}
+                          aria-label="Chỉnh sửa địa chỉ"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
+                          className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           onClick={() => handleDelete(address.id)}
                           disabled={deleteAddress.isPending}
+                          aria-label="Xóa địa chỉ"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
 
-                    <div className="space-y-3 pl-[52px]">
-                      <div className="text-gray-900 font-medium">
+                    <div className="space-y-2.5 pl-0 md:pl-14">
+                      <div className="text-foreground font-medium text-sm">
                         {address.phone}
                       </div>
-                      <div className="text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+                      <div className="text-sm text-muted-foreground leading-relaxed bg-secondary/30 p-3.5 rounded-xl border border-border/40">
                         {address.line1}, {address.ward}, {address.district}, {address.province}
                       </div>
                     </div>

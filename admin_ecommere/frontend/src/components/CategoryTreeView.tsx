@@ -21,48 +21,64 @@ function CategoryTreeNode({ category, level, onAddChild, onEdit, onDelete }: Cat
     const hasChildren = category.children && category.children.length > 0;
 
     return (
-        <div className="border-l-2 border-slate-100 hover:border-slate-200 transition-colors pl-1">
+        <div className="border-l-2 border-border/40 hover:border-border/80 transition-colors pl-1 sm:pl-2">
             <div
-                className="flex items-center gap-2 p-2 hover:bg-slate-50/80 rounded-xl transition-colors group"
+                className="flex items-center gap-2 p-2 hover:bg-muted/40 rounded-xl transition-colors group"
                 style={{ marginLeft: `${level * 12}px` }}
             >
                 {hasChildren ? (
-                    <button onClick={() => setExpanded(!expanded)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition">
+                    <button
+                        type="button"
+                        onClick={() => setExpanded(!expanded)}
+                        className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-md transition-colors"
+                    >
                         {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                     </button>
                 ) : (
-                    <div className="w-6" />
+                    <div className="w-6 shrink-0" />
                 )}
 
                 {category.isLeaf ? (
-                    <FileText className="h-4 w-4 text-slate-400" />
+                    <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                 ) : (
-                    <FolderTree className="h-4 w-4 text-amber-500" />
+                    <FolderTree className="h-4 w-4 text-amber-400 shrink-0" />
                 )}
 
-                <div className="flex-1 min-w-0">
-                    <span className="font-semibold text-slate-800 truncate">{category.name}</span>
-                    <span className="text-xs text-slate-400 ml-2 font-medium bg-slate-100 px-1.5 py-0.5 rounded-full">
+                <div className="flex-1 min-w-0 flex items-center flex-wrap gap-1.5">
+                    <span className="font-medium text-foreground truncate text-sm">{category.name}</span>
+                    <span className="text-xs text-muted-foreground font-medium bg-muted/60 border border-border/40 px-2 py-0.5 rounded-full tabular-nums">
                         {category.productCount || 0} sản phẩm
                     </span>
                     {!category.isLeaf && (
-                        <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full ml-2">
+                        <span className="text-[10px] font-medium bg-amber-500/15 text-amber-300 border border-amber-500/25 px-2 py-0.5 rounded-full">
                             Mục cha
                         </span>
                     )}
                 </div>
 
-                <div className="flex gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="ghost" className="h-8 w-8 rounded-full" onClick={() => onAddChild(category.id)} title="Thêm danh mục con">
+                <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground p-0"
+                        onClick={() => onAddChild(category.id)}
+                        title="Thêm danh mục con"
+                    >
                         <Plus className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-8 w-8 rounded-full text-slate-500 hover:text-slate-800" onClick={() => onEdit(category.id, category.name)} title="Chỉnh sửa">
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground p-0"
+                        onClick={() => onEdit(category.id, category.name)}
+                        title="Chỉnh sửa"
+                    >
                         <Edit className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                         size="sm"
                         variant="ghost"
-                        className="h-8 w-8 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="h-8 w-8 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/15 disabled:opacity-30 p-0"
                         onClick={() => onDelete(category)}
                         disabled={hasChildren || (category.productCount !== undefined && category.productCount > 0)}
                         title="Xóa"
@@ -73,7 +89,7 @@ function CategoryTreeNode({ category, level, onAddChild, onEdit, onDelete }: Cat
             </div>
 
             {expanded && hasChildren && (
-                <div className="ml-2">
+                <div className="ml-1 sm:ml-2">
                     {category.children!.map((child) => (
                         <CategoryTreeNode
                             key={child.id}
@@ -193,28 +209,28 @@ export function CategoryTreeView() {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="text-sm text-slate-500 font-medium">Đang tải sơ đồ danh mục...</span>
+                <span className="text-sm text-muted-foreground font-medium">Đang tải sơ đồ danh mục...</span>
             </div>
         );
     }
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-6 rounded-xl shadow-sm border border-border/60">
                 <div>
-                    <h2 className="text-xl font-bold text-slate-800">Cấu trúc danh mục</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Kéo sản phẩm theo nhánh cha/con để tối ưu hóa điều hướng</p>
+                    <h2 className="text-xl font-bold tracking-tight text-foreground">Cấu trúc danh mục</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">Kéo sản phẩm theo nhánh cha/con để tối ưu hóa điều hướng</p>
                 </div>
-                <Button onClick={() => openAddDialog(null)} className="rounded-xl">
+                <Button onClick={() => openAddDialog(null)} className="rounded-lg shrink-0">
                     <Plus className="h-4 w-4 mr-2" />
                     Thêm danh mục gốc
                 </Button>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm border">
+            <div className="bg-card p-4 sm:p-6 rounded-xl shadow-sm border border-border/60">
                 {categories.length === 0 ? (
-                    <div className="text-center py-12 text-slate-400">
-                        <FolderTree className="h-12 w-12 mx-auto mb-3 text-slate-200" />
+                    <div className="text-center py-12 text-muted-foreground">
+                        <FolderTree className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                         Chưa có danh mục nào. Hãy tạo danh mục đầu tiên để bắt đầu phân loại sản phẩm.
                     </div>
                 ) : (
@@ -235,30 +251,30 @@ export function CategoryTreeView() {
 
             {/* Create/Edit Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-md rounded-2xl border-0 shadow-2xl">
+                <DialogContent className="max-w-md rounded-xl border border-border/80 bg-card text-card-foreground shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle>
+                        <DialogTitle className="text-lg font-bold text-foreground">
                             {dialogMode === 'add' ? 'Thêm danh mục mới' : 'Chỉnh sửa tên danh mục'}
                         </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleDialogSubmit} className="space-y-4 pt-2">
                         <div className="space-y-2">
-                            <label htmlFor="categoryName" className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tên danh mục</label>
+                            <label htmlFor="categoryName" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tên danh mục</label>
                             <Input
                                 id="categoryName"
                                 value={categoryNameInput}
                                 onChange={(e) => setCategoryNameInput(e.target.value)}
                                 placeholder="Nhập tên danh mục..."
-                                className="h-11 rounded-xl"
+                                className="h-10 rounded-lg bg-background border-border/80 text-foreground"
                                 required
                                 autoFocus
                             />
                         </div>
-                        <DialogFooter className="pt-4 border-t border-slate-100 mt-4">
-                            <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-xl h-11">
+                        <DialogFooter className="pt-4 border-t border-border/40 mt-4 flex flex-col sm:flex-row gap-2">
+                            <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-lg h-10 hover:bg-muted text-muted-foreground hover:text-foreground">
                                 Hủy
                             </Button>
-                            <Button type="submit" disabled={isSubmitting || !categoryNameInput.trim()} className="rounded-xl h-11">
+                            <Button type="submit" disabled={isSubmitting || !categoryNameInput.trim()} className="rounded-lg h-10">
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {dialogMode === 'add' ? 'Tạo mới' : 'Cập nhật'}
                             </Button>
@@ -269,22 +285,22 @@ export function CategoryTreeView() {
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <DialogContent className="max-w-md rounded-2xl border-0 shadow-2xl">
+                <DialogContent className="max-w-md rounded-xl border border-border/80 bg-card text-card-foreground shadow-2xl">
                     <DialogHeader className="flex flex-col items-center gap-3 text-center">
-                        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                        <div className="w-12 h-12 rounded-full bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-400">
                             <AlertCircle className="h-6 w-6" />
                         </div>
-                        <DialogTitle>Xóa danh mục này?</DialogTitle>
+                        <DialogTitle className="text-lg font-bold text-foreground">Xóa danh mục này?</DialogTitle>
                     </DialogHeader>
-                    <div className="py-2 text-center text-sm text-slate-500 leading-relaxed">
-                        Bạn có chắc chắn muốn xóa danh mục <span className="font-semibold text-slate-800">"{categoryToDelete?.name}"</span>?
+                    <div className="py-2 text-center text-sm text-muted-foreground leading-relaxed">
+                        Bạn có chắc chắn muốn xóa danh mục <span className="font-semibold text-foreground">"{categoryToDelete?.name}"</span>?
                         Hành động này không thể hoàn tác và chỉ có thể thực hiện nếu danh mục không có chứa sản phẩm hoặc danh mục con nào.
                     </div>
-                    <DialogFooter className="pt-4 border-t border-slate-100 mt-2">
-                        <Button type="button" variant="ghost" onClick={() => setIsDeleteOpen(false)} className="rounded-xl h-11" disabled={isSubmitting}>
+                    <DialogFooter className="pt-4 border-t border-border/40 mt-2 flex flex-col sm:flex-row gap-2">
+                        <Button type="button" variant="ghost" onClick={() => setIsDeleteOpen(false)} className="rounded-lg h-10 hover:bg-muted text-muted-foreground hover:text-foreground" disabled={isSubmitting}>
                             Hủy
                         </Button>
-                        <Button type="button" variant="destructive" onClick={handleDeleteConfirm} className="rounded-xl h-11" disabled={isSubmitting}>
+                        <Button type="button" variant="destructive" onClick={handleDeleteConfirm} className="rounded-lg h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={isSubmitting}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Xác nhận xóa
                         </Button>

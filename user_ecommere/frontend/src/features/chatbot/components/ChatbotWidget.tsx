@@ -37,20 +37,20 @@ function ChatbotSourceItem({ source }: { source: ChatSource }) {
       href={`/p/${source.slug}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2.5 p-2 rounded-2xl border border-slate-100 bg-white hover:bg-secondary/40 hover:border-primary/20 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 group w-full shadow-sm active:scale-[0.99]"
+      className="flex items-center gap-2.5 p-2.5 rounded-2xl border border-border/70 bg-card hover:bg-secondary/40 hover:border-accent/40 hover:-translate-y-0.5 shadow-sm hover:shadow-luxury transition-all duration-300 group w-full active:scale-[0.99]"
     >
-      <div className="h-10 w-10 rounded-xl overflow-hidden bg-secondary/30 border border-slate-100 shrink-0 flex items-center justify-center font-bold text-[10px] text-muted-foreground">
+      <div className="h-10 w-10 rounded-xl overflow-hidden bg-secondary/60 border border-border/50 shrink-0 flex items-center justify-center font-bold text-[10px] text-muted-foreground font-serif">
         TS
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-bold text-foreground leading-snug truncate group-hover:text-primary transition-colors">
+        <p className="text-xs font-semibold text-foreground leading-snug truncate group-hover:text-primary transition-colors">
           {source.name}
         </p>
-        <p className="text-[10px] font-bold text-primary mt-0.5">
+        <p className="text-[10px] font-semibold text-primary mt-0.5 uppercase tracking-wider">
           Xem chi tiết
         </p>
       </div>
-      <ArrowUpRight className="h-3 w-3 text-muted-foreground opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all shrink-0 mr-0.5" />
+      <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all shrink-0 mr-0.5" />
     </a>
   );
 }
@@ -130,16 +130,16 @@ export function ChatbotWidget() {
   return (
     <>
       {open ? (
-        <div className="fixed bottom-28 right-3 z-[60] flex h-[min(80vh,700px)] w-[calc(100vw-2rem)] max-w-[460px] flex-col overflow-hidden rounded-[28px] border border-white/60 bg-white/90 backdrop-blur-2xl shadow-[0_24px_80px_rgba(24,46,37,0.25)] animate-in slide-in-from-bottom-4 duration-300 md:bottom-6 md:right-6">
+        <div className="fixed inset-x-0 bottom-0 z-[60] flex h-[85vh] max-h-[85vh] w-full flex-col overflow-hidden rounded-t-[1.8rem] rounded-b-none border-t border-border bg-card/95 backdrop-blur-2xl shadow-luxury-glow animate-in slide-in-from-bottom-4 duration-300 md:inset-auto md:bottom-6 md:right-6 md:h-[min(80vh,700px)] md:w-[440px] md:max-w-[460px] md:rounded-[1.8rem] md:border md:border-black/[0.03]">
           {/* Header */}
-          <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-950 via-primary to-emerald-900 px-5 py-4 text-white shadow-md">
+          <div className="flex items-center justify-between gap-3 bg-primary px-5 py-4 text-primary-foreground shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 backdrop-blur border border-white/10 shadow-inner">
-                <Sparkles className="h-5 w-5 text-amber-300 animate-pulse" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-foreground/10 backdrop-blur border border-primary-foreground/15 shadow-inner">
+                <Sparkles className="h-5 w-5 text-accent animate-pulse" />
               </div>
               <div>
-                <p className="text-sm font-bold tracking-wide">Chuyên gia Mùi hương</p>
-                <p className="text-[11px] text-white/80 mt-0.5 font-medium">Tư vấn mùi thơm cho nhà ở & xe hơi</p>
+                <h2 className="font-serif text-sm md:text-base font-semibold tracking-wide text-primary-foreground">Chuyên gia Mùi hương</h2>
+                <p className="text-[11px] text-primary-foreground/80 mt-0.5 font-normal">Tư vấn mùi thơm cho nhà ở & xe hơi</p>
               </div>
             </div>
 
@@ -147,7 +147,7 @@ export function ChatbotWidget() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10 rounded-xl"
+                className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/15 rounded-full transition-colors"
                 onClick={() => newThread()}
                 title="Cuộc trò chuyện mới"
                 aria-label="Cuộc trò chuyện mới"
@@ -159,7 +159,7 @@ export function ChatbotWidget() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10 rounded-xl"
+                className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/15 rounded-full transition-colors"
                 onClick={() => setOpen(false)}
                 title="Đóng"
                 aria-label="Đóng cửa sổ trò chuyện"
@@ -175,15 +175,15 @@ export function ChatbotWidget() {
           <div
             role="log"
             aria-live="polite"
-            className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-slate-50/50 to-white/70 px-4 py-4 scrollbar-hide"
+            className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-background/70 to-card px-4 py-4 scrollbar-hide"
           >
             {/* Greeting */}
             <div className="flex items-start gap-2.5 w-full justify-start">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-border shadow-sm mt-0.5">
                 <Bot className="h-4 w-4" />
               </div>
-              <div className="max-w-[80%] rounded-[1.5rem] rounded-tl-[0.25rem] border border-slate-100/90 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm">
-                <div className="whitespace-pre-line text-sm">{WELCOME_MESSAGE}</div>
+              <div className="max-w-[82%] rounded-[1.5rem] rounded-tl-[0.25rem] border border-black/[0.03] bg-card px-4 py-3 text-sm leading-relaxed text-foreground shadow-luxury">
+                <div className="whitespace-pre-line text-sm text-foreground/90 leading-relaxed">{WELCOME_MESSAGE}</div>
               </div>
             </div>
 
@@ -208,15 +208,15 @@ export function ChatbotWidget() {
                   className={`flex items-start gap-2.5 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
                 >
                   {!isUser && (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-border shadow-sm mt-0.5">
                       <Bot className="h-4 w-4" />
                     </div>
                   )}
                   <div
-                    className={`max-w-[80%] rounded-[1.5rem] px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300 ${
+                    className={`max-w-[82%] rounded-[1.5rem] px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300 ${
                       isUser
-                        ? 'rounded-tr-[0.25rem] bg-gradient-to-tr from-primary to-emerald-950 text-white font-medium whitespace-pre-wrap break-words'
-                        : 'rounded-tl-[0.25rem] border border-slate-100/90 bg-white text-slate-800'
+                        ? 'rounded-tr-[0.25rem] bg-primary text-primary-foreground font-medium whitespace-pre-wrap break-words shadow-sm'
+                        : 'rounded-tl-[0.25rem] border border-black/[0.03] bg-card text-foreground shadow-luxury'
                     }`}
                   >
                     {isUser ? (
@@ -248,9 +248,9 @@ export function ChatbotWidget() {
 
                         {/* Sources as product cards */}
                         {message.sources && message.sources.length > 0 && (
-                          <div className="border-t border-dashed border-slate-150 pt-2.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                              <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10" /> Sản phẩm được đề xuất:
+                          <div className="border-t border-dashed border-border/80 pt-2.5">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2 flex items-center gap-1.5">
+                              <Sparkles className="h-3.5 w-3.5 text-accent" /> Sản phẩm được đề xuất:
                             </p>
                             <div className="flex flex-col gap-2">
                               {message.sources.map((source) => (
@@ -264,7 +264,7 @@ export function ChatbotWidget() {
                         {message.error && (
                           <div
                             role="alert"
-                            className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-xs text-destructive"
+                            className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-xs text-destructive leading-relaxed"
                           >
                             {message.error}
                           </div>
@@ -291,7 +291,7 @@ export function ChatbotWidget() {
                           void send(suggestion);
                         }
                       }}
-                      className="rounded-full border border-slate-200 bg-white/80 hover:bg-primary hover:text-white hover:border-primary px-4 py-2 text-left text-xs font-semibold text-slate-700 transition duration-300 shadow-sm active:scale-95 disabled:opacity-50"
+                      className="rounded-full border border-border bg-card/90 hover:bg-primary hover:text-primary-foreground hover:border-primary px-4 py-2 text-left text-xs font-medium text-foreground transition-all duration-300 shadow-sm active:scale-95 disabled:opacity-50 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       {suggestion}
                     </button>
@@ -303,11 +303,11 @@ export function ChatbotWidget() {
             {/* Streaming indicator */}
             {isOwnerMatch && isStreaming ? (
               <div className="flex justify-start items-start gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
-                  <Bot className="h-4 w-4 animate-bounce" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-border shadow-sm mt-0.5">
+                  <Bot className="h-4 w-4 animate-pulse" />
                 </div>
-                <div className="flex items-center gap-2 rounded-[1.5rem] rounded-tl-[0.25rem] border border-slate-100 bg-white px-4 py-3 text-xs font-medium text-slate-500 shadow-sm">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                <div className="flex items-center gap-2 rounded-[1.5rem] rounded-tl-[0.25rem] border border-black/[0.03] bg-card px-4 py-3 text-xs font-medium text-muted-foreground shadow-luxury">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-accent" />
                   Đang trả lời...
                 </div>
               </div>
@@ -317,15 +317,15 @@ export function ChatbotWidget() {
           </div>
 
           {/* Composer Input Area */}
-          <div className="border-t bg-white/80 backdrop-blur p-4">
-            <div className="rounded-[24px] border border-slate-200 bg-white p-1.5 shadow-sm focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/5 transition-all flex items-end gap-2">
+          <div className="border-t border-border/80 bg-card/90 backdrop-blur p-3.5 pb-6 md:p-4 md:pb-4">
+            <div className="rounded-[1.5rem] border border-border bg-background p-1.5 shadow-sm focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring/20 transition-all flex items-end gap-2">
               <Textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={handleComposerKeyDown}
                 placeholder="Nhập câu hỏi của bạn..."
                 aria-label="Nhập câu hỏi"
-                className="min-h-[40px] max-h-[120px] resize-none border-0 px-3 py-2 shadow-none focus-visible:ring-0 focus:outline-none w-full text-sm placeholder:text-slate-400"
+                className="min-h-[40px] max-h-[120px] resize-none border-0 px-3.5 py-2 shadow-none focus-visible:ring-0 focus:outline-none w-full text-sm text-foreground placeholder:text-muted-foreground bg-transparent"
               />
               <Button
                 onClick={handleSubmit}
@@ -333,7 +333,7 @@ export function ChatbotWidget() {
                 aria-label="Gửi tin nhắn"
                 title="Gửi tin nhắn"
                 size="icon"
-                className="h-9 w-9 rounded-full shrink-0 shadow-md transition-all duration-300 hover:scale-105 active:scale-95 bg-primary hover:bg-emerald-950 text-white p-0 flex items-center justify-center disabled:opacity-50"
+                className="h-9 w-9 rounded-full shrink-0 shadow-sm transition-all duration-300 hover:scale-105 active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground p-0 flex items-center justify-center disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {isStreaming ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -343,7 +343,7 @@ export function ChatbotWidget() {
                 <span className="sr-only">Gửi tin nhắn</span>
               </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">
+            <p className="text-[10px] text-muted-foreground text-center mt-2 font-normal">
               Nhấn Enter để gửi · Shift+Enter để xuống dòng
             </p>
           </div>
@@ -357,11 +357,11 @@ export function ChatbotWidget() {
           size="icon"
           aria-label="Mở khung trò chuyện"
           onClick={() => setOpen(true)}
-          className="fixed bottom-28 right-4 z-[60] h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-emerald-950 text-white shadow-[0_8px_30px_rgba(24,46,37,0.4)] transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center border border-white/20 md:bottom-6 md:right-6 animate-bounce"
+          className="fixed bottom-24 right-4 z-[60] h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-luxury-glow hover:shadow-luxury transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center border border-border/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:bottom-6 md:right-6"
         >
           <div className="relative flex items-center justify-center">
             <Bot className="h-6 w-6" />
-            <span className="absolute -right-7 -top-6 hidden rounded-full bg-foreground px-2 py-1 text-[10px] font-semibold text-white sm:block">
+            <span className="absolute -right-7 -top-6 hidden rounded-full bg-foreground px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-background shadow-sm sm:block">
               Tư vấn
             </span>
           </div>

@@ -19,6 +19,7 @@ interface ProductCardProps {
   salePrice?: number;
   rating?: number;
   reviewCount?: number;
+  variants?: Array<{ stock: number }>;
   onAddToCart?: () => void;
 }
 
@@ -31,8 +32,10 @@ export const ProductCard = memo(function ProductCard({
   salePrice,
   rating = 0,
   reviewCount = 0,
+  variants,
   onAddToCart,
 }: ProductCardProps) {
+  const selectedVariant = variants?.[0];
   const finalPrice = salePrice ?? price;
   const hasDiscount = salePrice != null && salePrice < price;
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -59,59 +62,60 @@ export const ProductCard = memo(function ProductCard({
   return (
     <>
       <Card
-        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm hover:shadow-lg hover:border-teal-300 hover:-translate-y-1 transition-all duration-200"
+        className="group relative flex h-full flex-col overflow-hidden rounded-[1.8rem] border border-black/[0.03] bg-card shadow-luxury hover:shadow-luxury-glow hover:-translate-y-1.5 duration-500 ease-out transition-all"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         {/* Image Container */}
-        <div className="relative overflow-hidden bg-slate-50/70 border-b border-slate-100">
-          <Link to={`/p/${slug}`} className="block aspect-square overflow-hidden">
+        <div className="relative overflow-hidden bg-secondary/40 border-b border-border/40">
+          <Link to={`/p/${slug}`} className="block aspect-square overflow-hidden p-5 flex items-center justify-center">
             <img
               src={getImageUrl(images[0], { width: 500 })}
               alt={name}
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-contain p-4 transition-transform duration-300 ease-out group-hover:scale-105"
+              className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
             />
           </Link>
 
           {/* Badges */}
-          <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
+          <div className="absolute left-3 top-3 flex flex-col gap-1.5">
             {hasDiscount && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-rose-600 px-2.5 py-0.5 text-[11px] font-extrabold text-white shadow-sm">
-                <Flame className="h-3 w-3 fill-white" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/95 px-2.5 py-0.5 text-[10px] font-bold text-primary-foreground shadow-sm">
+                <Flame className="h-3 w-3 fill-primary-foreground" />
                 -{discountPercent}%
               </span>
             )}
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-white/95 backdrop-blur-md px-2 py-0.5 text-[10px] font-bold text-teal-800 shadow-2xs border border-teal-100">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-card/90 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-bold text-foreground border border-border/60 shadow-sm">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent"></span>
               Chính Hãng Thái Lan
             </span>
           </div>
 
           {/* Wishlist Button */}
           <button
+            type="button"
             onClick={(event) => {
               event.preventDefault();
               toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
             }}
             className={cn(
-              'absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-all duration-200 active:scale-90 shadow-2xs border',
+              'absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 active:scale-90 shadow-sm border border-border/40',
               isWishlisted
-                ? 'bg-rose-50 text-rose-500 border-rose-200 shadow-sm'
-                : 'bg-white/90 text-slate-400 border-slate-200 hover:bg-white hover:text-rose-500',
+                ? 'bg-card text-destructive border-destructive/20 shadow-sm'
+                : 'bg-card/80 text-muted-foreground hover:bg-card hover:text-destructive hover:scale-105',
             )}
             aria-label="Thêm vào yêu thích"
           >
-            <Heart className={cn('h-4 w-4 transition-transform duration-200', isWishlisted && 'fill-rose-500 scale-110')} />
+            <Heart className={cn('h-4 w-4 transition-transform duration-300', isWishlisted && 'fill-destructive text-destructive scale-110')} />
           </button>
 
           {/* Quick View Hover Action */}
-          <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 hidden sm:block">
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 hidden sm:block">
             <button
               type="button"
               onClick={() => setIsQuickViewOpen(true)}
-              className="pointer-events-auto w-full rounded-xl bg-slate-900/85 hover:bg-slate-900 text-white backdrop-blur-md py-2 text-xs font-bold shadow-md transition duration-200 active:scale-95"
+              className="pointer-events-auto w-full rounded-full bg-primary/95 hover:bg-primary text-primary-foreground backdrop-blur-md py-2 text-xs font-bold uppercase tracking-wider shadow-md transition duration-300 active:scale-95 border border-primary-foreground/10"
             >
               Xem nhanh
             </button>
@@ -120,30 +124,30 @@ export const ProductCard = memo(function ProductCard({
 
         {/* Content */}
         <CardContent className="flex flex-1 flex-col p-4">
-          <Link to={`/p/${slug}`} className="group-hover:text-teal-700 transition-colors">
-            <h3 className="line-clamp-2 text-sm font-bold text-slate-800 leading-snug min-h-[2.5rem]">
+          <Link to={`/p/${slug}`}>
+            <h3 className="line-clamp-2 min-h-[3rem] text-base font-bold leading-snug text-foreground transition-colors duration-300 group-hover:text-accent-foreground font-serif">
               {name}
             </h3>
           </Link>
 
           {/* Rating & Trust */}
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+          <div className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground">
             <div className="flex items-center gap-1 text-amber-500">
               <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              <span className="font-bold text-slate-700">{rating > 0 ? rating.toFixed(1) : '4.9'}</span>
+              <span className="font-semibold text-foreground">{rating > 0 ? rating.toFixed(1) : '4.9'}</span>
             </div>
             <span>·</span>
             <span>{reviewCount > 0 ? `${reviewCount} đánh giá` : 'Đã bán 120+'}</span>
           </div>
 
           {/* Pricing */}
-          <div className="mt-auto pt-3">
+          <div className="mt-auto pt-4">
             <div className="flex items-baseline gap-2">
-              <span className="text-base sm:text-lg font-black text-teal-700">
+              <span className="text-lg font-bold text-foreground tabular-nums">
                 {formatCurrency(finalPrice)}
               </span>
               {hasDiscount && (
-                <span className="text-xs text-slate-400 line-through">
+                <span className="text-xs text-muted-foreground line-through tabular-nums">
                   {formatCurrency(price)}
                 </span>
               )}
@@ -155,7 +159,8 @@ export const ProductCard = memo(function ProductCard({
         <CardFooter className="p-4 pt-0">
           <Button
             onClick={onAddToCart}
-            className="h-10 w-full rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold transition-all duration-200 shadow-sm active:scale-[0.98]"
+            disabled={variants !== undefined && (!selectedVariant || selectedVariant.stock === 0)}
+            className="h-11 w-full rounded-full bg-primary text-primary-foreground font-bold uppercase tracking-wider text-xs transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/15 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             size="sm"
           >
             <ShoppingCart className="mr-2 h-4 w-4" />

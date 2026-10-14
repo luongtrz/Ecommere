@@ -37,20 +37,22 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-slate-700">Họ và tên</FormLabel>
+              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Họ và tên
+              </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
                     <User className="h-4 w-4" />
                   </div>
                   <Input
                     placeholder="Nguyễn Văn A"
-                    className="pl-10 h-11 rounded-xl border-slate-200 bg-slate-50 focus:bg-white text-sm"
+                    className="pl-10 h-11 rounded-xl border border-input bg-background focus:bg-card text-foreground placeholder:text-muted-foreground text-sm focus-visible:ring-2 focus-visible:ring-ring"
                     {...field}
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs text-destructive" />
             </FormItem>
           )}
         />
@@ -60,21 +62,23 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-slate-700">Số điện thoại</FormLabel>
+              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Số điện thoại
+              </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
                     <Phone className="h-4 w-4" />
                   </div>
                   <Input
                     type="tel"
                     placeholder="0912 345 678"
-                    className="pl-10 h-11 rounded-xl border-slate-200 bg-slate-50 focus:bg-white text-sm"
+                    className="pl-10 h-11 rounded-xl border border-input bg-background focus:bg-card text-foreground placeholder:text-muted-foreground text-sm focus-visible:ring-2 focus-visible:ring-ring"
                     {...field}
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs text-destructive" />
             </FormItem>
           )}
         />
@@ -84,23 +88,23 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-slate-700">
-                Email <span className="text-slate-400 font-normal">(không bắt buộc)</span>
+              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Email <span className="text-muted-foreground/70 font-normal lowercase">(không bắt buộc)</span>
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
                     <Mail className="h-4 w-4" />
                   </div>
                   <Input
                     type="email"
                     placeholder="email@example.com"
-                    className="pl-10 h-11 rounded-xl border-slate-200 bg-slate-50 focus:bg-white text-sm"
+                    className="pl-10 h-11 rounded-xl border border-input bg-background focus:bg-card text-foreground placeholder:text-muted-foreground text-sm focus-visible:ring-2 focus-visible:ring-ring"
                     {...field}
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs text-destructive" />
             </FormItem>
           )}
         />
@@ -111,28 +115,30 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-bold text-slate-700">Mật khẩu</FormLabel>
+                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Mật khẩu
+                </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
                       <Lock className="h-4 w-4" />
                     </div>
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Ít nhất 6 ký tự"
-                      className="pl-10 pr-9 h-11 rounded-xl border-slate-200 bg-slate-50 focus:bg-white text-sm"
+                      className="pl-10 pr-9 h-11 rounded-xl border border-input bg-background focus:bg-card text-foreground placeholder:text-muted-foreground text-sm focus-visible:ring-2 focus-visible:ring-ring"
                       {...field}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-destructive" />
               </FormItem>
             )}
           />
@@ -142,28 +148,30 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-bold text-slate-700">Xác nhận</FormLabel>
+                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Xác nhận
+                </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
                       <Lock className="h-4 w-4" />
                     </div>
                     <Input
                       type={showConfirmPassword ? 'text' : 'password'}
                       placeholder="Nhập lại mật khẩu"
-                      className="pl-10 pr-9 h-11 rounded-xl border-slate-200 bg-slate-50 focus:bg-white text-sm"
+                      className="pl-10 pr-9 h-11 rounded-xl border border-input bg-background focus:bg-card text-foreground placeholder:text-muted-foreground text-sm focus-visible:ring-2 focus-visible:ring-ring"
                       {...field}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-destructive" />
               </FormItem>
             )}
           />
@@ -174,29 +182,29 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="referralCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-slate-700">
-                Mã giới thiệu <span className="text-slate-400 font-normal">(nếu có)</span>
+              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Mã giới thiệu <span className="text-muted-foreground/70 font-normal lowercase">(nếu có)</span>
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
                     <Tag className="h-4 w-4" />
                   </div>
                   <Input
                     placeholder="VD: BANBE2026"
-                    className="pl-10 h-11 rounded-xl border-slate-200 bg-slate-50 focus:bg-white text-sm uppercase"
+                    className="pl-10 h-11 rounded-xl border border-input bg-background focus:bg-card text-foreground placeholder:text-muted-foreground text-sm uppercase focus-visible:ring-2 focus-visible:ring-ring"
                     {...field}
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs text-destructive" />
             </FormItem>
           )}
         />
 
         <Button
           type="submit"
-          className="w-full h-12 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-black text-sm shadow-lg shadow-teal-600/20 transition-all hover:scale-[1.01] active:scale-[0.98] mt-2"
+          className="w-full h-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm shadow-luxury transition-all hover:-translate-y-0.5 active:translate-y-0 mt-2 focus-visible:ring-2 focus-visible:ring-ring"
           disabled={isLoading}
         >
           {isLoading ? (

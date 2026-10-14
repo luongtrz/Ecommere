@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertCircle, Home, RefreshCw, MessageCircle } from 'lucide-react';
+import { Home, RefreshCw, MessageCircle } from 'lucide-react';
 import { SEO } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
 
@@ -8,101 +8,99 @@ export function ErrorPage() {
     <>
       <SEO title="Lỗi - Đã có lỗi xảy ra" />
 
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-800 text-white">
-          <div className="container py-12">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertCircle className="h-10 w-10" />
-              </div>
-              <h1 className="text-3xl font-bold mb-4">Oops! Đã có lỗi xảy ra</h1>
-              <p className="text-xl text-red-100 max-w-2xl mx-auto">
-                Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật
-              </p>
-            </div>
+      <div className="min-h-screen w-full bg-background text-foreground flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12">
+        <div className="w-full max-w-2xl rounded-2xl border border-border bg-card/60 p-6 sm:p-10 shadow-2xl backdrop-blur-xl text-center">
+          {/* Large serif code */}
+          <div className="mb-4">
+            <span className="font-serif text-7xl font-bold tracking-tight text-destructive sm:text-8xl md:text-9xl">
+              500
+            </span>
           </div>
-        </div>
 
-        <div className="container py-16 max-w-4xl">
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-8">
-              <AlertCircle className="h-12 w-12 text-red-600" />
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl mb-3">
+            Oops! Đã có lỗi xảy ra
+          </h1>
+
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed mb-8">
+            Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật và không thể tải trang. Đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3.5 justify-center items-center mb-8">
+            <Button
+              size="lg"
+              className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+              asChild
+            >
+              <Link to="/" className="flex items-center justify-center gap-2">
+                <Home className="h-4 w-4" />
+                Về trang chủ
+              </Link>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => window.location.reload()}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 border-border text-foreground hover:bg-muted"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Thử lại
+            </Button>
+          </div>
+
+          {/* Help Section */}
+          <div className="border-t border-border pt-6">
+            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+              <MessageCircle className="h-4 w-4 text-primary" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em]">Cần hỗ trợ?</span>
             </div>
-
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Không thể tải trang</h2>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-              Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn.
-              Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.
+            <p className="text-xs text-muted-foreground mb-4">
+              Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của chúng tôi
             </p>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                asChild
-              >
-                <Link to="/" className="flex items-center gap-2">
-                  <Home className="h-5 w-5" />
-                  Về trang chủ
-                </Link>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => window.location.reload()}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className="h-5 w-5" />
-                Thử lại
-              </Button>
-            </div>
-
-            {/* Help Section */}
-            <div className="border-t pt-8">
-              <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
-                <MessageCircle className="h-5 w-5" />
-                <span className="font-medium">Cần hỗ trợ?</span>
-              </div>
-              <p className="text-sm text-gray-500 mb-4">
-                Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của chúng tôi
-              </p>
-              <Button variant="ghost" asChild>
-                <Link to="/support" className="text-blue-600 hover:text-blue-700">
-                  Liên hệ hỗ trợ
-                </Link>
-              </Button>
-            </div>
+            <Button variant="ghost" size="sm" asChild className="text-xs text-primary hover:text-primary/80 hover:bg-primary/10">
+              <Link to="/support">
+                Liên hệ hỗ trợ
+              </Link>
+            </Button>
           </div>
 
-          {/* Additional Help */}
-          <div className="mt-8 text-center">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Home className="h-6 w-6 text-blue-600" />
+          {/* Additional Help Cards */}
+          <div className="mt-6 pt-6 border-t border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Link
+                to="/"
+                className="rounded-xl border border-border bg-muted/20 p-3.5 hover:bg-muted/50 hover:border-primary/40 transition-all text-center group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary group-hover:scale-105 transition-transform">
+                  <Home className="h-4 w-4" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Về trang chủ</h3>
-                <p className="text-sm text-gray-600">Quay lại trang chủ để tiếp tục mua sắm</p>
-              </div>
+                <p className="text-xs font-semibold text-foreground mb-1">Về trang chủ</p>
+                <p className="text-[11px] text-muted-foreground">Quay lại trang chủ để tiếp tục mua sắm</p>
+              </Link>
 
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <RefreshCw className="h-6 w-6 text-green-600" />
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="rounded-xl border border-border bg-muted/20 p-3.5 hover:bg-muted/50 hover:border-primary/40 transition-all text-center group cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary group-hover:scale-105 transition-transform">
+                  <RefreshCw className="h-4 w-4" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Tải lại trang</h3>
-                <p className="text-sm text-gray-600">Thử tải lại trang để khắc phục lỗi</p>
-              </div>
+                <p className="text-xs font-semibold text-foreground mb-1">Tải lại trang</p>
+                <p className="text-[11px] text-muted-foreground">Thử tải lại trang để khắc phục lỗi</p>
+              </button>
 
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="h-6 w-6 text-purple-600" />
+              <Link
+                to="/support"
+                className="rounded-xl border border-border bg-muted/20 p-3.5 hover:bg-muted/50 hover:border-primary/40 transition-all text-center group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary group-hover:scale-105 transition-transform">
+                  <MessageCircle className="h-4 w-4" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Liên hệ hỗ trợ</h3>
-                <p className="text-sm text-gray-600">Nhận trợ giúp từ đội ngũ của chúng tôi</p>
-              </div>
+                <p className="text-xs font-semibold text-foreground mb-1">Liên hệ hỗ trợ</p>
+                <p className="text-[11px] text-muted-foreground">Nhận trợ giúp từ đội ngũ của chúng tôi</p>
+              </Link>
             </div>
           </div>
         </div>

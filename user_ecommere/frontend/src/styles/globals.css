@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,25 +6,25 @@
 
 @layer base {
   :root {
-    --background: 30 15% 98%; /* Luxurious warm silk white */
+    --background: 32 24% 98%; /* Luxurious warm silk white */
     --foreground: 20 20% 12%; /* Deep elegant charcoal */
     --card: 0 0% 100%;
     --card-foreground: 20 20% 12%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 20% 12%;
-    --primary: 24 25% 12%; /* Luxury obsidian bronze */
+    --primary: 24 24% 13%; /* Luxury obsidian bronze */
     --primary-foreground: 36 45% 97%;
-    --secondary: 30 12% 94%;
+    --secondary: 32 18% 94%;
     --secondary-foreground: 20 20% 12%;
-    --muted: 30 8% 93%;
-    --muted-foreground: 20 10% 45%;
-    --accent: 36 32% 75%; /* Champagne gold */
+    --muted: 32 14% 93%;
+    --muted-foreground: 24 10% 45%;
+    --accent: 38 34% 74%; /* Champagne gold */
     --accent-foreground: 20 20% 12%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 10% 90%; /* Soft border */
-    --input: 30 10% 90%;
-    --ring: 24 25% 12%;
+    --border: 32 14% 90%; /* Soft warm border */
+    --input: 32 14% 90%;
+    --ring: 24 24% 13%;
     --radius: 1.25rem;
   }
 
@@ -38,12 +38,14 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-feature-settings: 'ss01', 'cv11';
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    line-height: 1.6;
+    letter-spacing: -0.011em;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     background-image:
-      radial-gradient(circle at top left, rgba(197, 160, 107, 0.12), transparent 35%),
-      radial-gradient(circle at top right, rgba(120, 140, 130, 0.08), transparent 30%),
-      linear-gradient(180deg, rgba(252, 251, 249, 0.98), rgba(246, 244, 238, 0.98));
+      radial-gradient(circle at 10% 10%, rgba(197, 160, 107, 0.07), transparent 35%),
+      radial-gradient(circle at 90% 15%, rgba(212, 175, 115, 0.05), transparent 30%),
+      linear-gradient(180deg, hsl(32 24% 98%) 0%, hsl(30 18% 96%) 100%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -55,22 +57,80 @@
   h4,
   h5,
   h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Fraunces', 'Playfair Display', serif;
+    color: hsl(var(--foreground));
+  }
+
+  h1 {
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    font-weight: 600;
+  }
+
+  h2 {
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  h3 {
     letter-spacing: -0.02em;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  h4,
+  h5,
+  h6 {
+    letter-spacing: -0.015em;
+    line-height: 1.35;
+    font-weight: 600;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply border border-white/90 bg-white/85 shadow-[0_20px_48px_-16px_rgba(20,20,20,0.04)] backdrop-blur-2xl transition-all duration-300;
+    @apply border border-black/[0.03] bg-card/85 shadow-luxury backdrop-blur-2xl transition-all duration-300;
+  }
+
+  .glass-header {
+    @apply border-b border-black/[0.03] bg-background/80 shadow-sm backdrop-blur-xl transition-all duration-300;
   }
 
   .section-shell {
-    @apply rounded-[2.2rem] border border-white/90 bg-white/80 shadow-[0_24px_64px_-24px_rgba(20,20,20,0.06)] backdrop-blur transition-all duration-300;
+    @apply rounded-[2.2rem] border border-black/[0.03] bg-card/80 shadow-luxury backdrop-blur-xl transition-all duration-300;
   }
 
   .section-title {
-    @apply text-3xl font-semibold leading-tight text-foreground md:text-4xl;
+    @apply font-serif text-3xl font-semibold leading-tight tracking-tight text-foreground md:text-4xl;
+  }
+
+  .lux-eyebrow {
+    @apply uppercase tracking-[0.2em] text-[10px] font-bold text-muted-foreground;
+  }
+
+  .lux-card {
+    @apply rounded-[1.8rem] border border-black/[0.03] bg-card text-card-foreground shadow-luxury transition-all duration-500 ease-out hover:shadow-luxury-glow;
+  }
+
+  .lux-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .lux-section {
+    @apply py-12 md:py-20;
+  }
+
+  .lux-btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all duration-300 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  .lux-btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  .lux-grid {
+    @apply grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4;
   }
 }
 
@@ -89,21 +149,34 @@
   }
 
   .hover-glow {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .hover-glow:hover {
-    box-shadow: 0 20px 40px -15px rgba(20, 20, 20, 0.06), 0 0 20px -2px rgba(197, 160, 107, 0.04);
-    border-color: rgba(197, 160, 107, 0.15);
+    box-shadow: 0 24px 48px -12px rgba(20, 20, 20, 0.06), 0 0 24px -2px rgba(197, 160, 107, 0.12);
+    border-color: rgba(197, 160, 107, 0.2);
   }
 
   .glass-premium {
-    @apply border border-white/95 bg-white/75 backdrop-blur-2xl shadow-[0_20px_60px_-20px_rgba(20,20,20,0.05)] transition-all duration-300;
+    @apply rounded-[1.6rem] border border-black/[0.03] bg-card/80 backdrop-blur-2xl shadow-luxury-glow transition-all duration-300;
   }
 
   .text-gradient-emerald {
     @apply bg-gradient-to-r from-primary via-amber-700 to-amber-950 bg-clip-text text-transparent;
   }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
 @keyframes float-orb {

@@ -12,7 +12,7 @@ export function CartBadge() {
       {itemCount > 0 ? (
         <Badge
           variant="destructive"
-          className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px]"
+          className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums shadow-sm border border-card"
         >
           {itemCount > 99 ? '99+' : itemCount}
         </Badge>

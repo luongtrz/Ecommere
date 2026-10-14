@@ -16,7 +16,8 @@ import {
   AlertCircle,
   Box,
   Tags,
-  Loader2
+  Loader2,
+  Star
 } from 'lucide-react';
 import { useInfiniteAdminProducts } from '@/features/catalog/hooks/useProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -166,7 +167,7 @@ export function AdminProductsPage() {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <AlertCircle className="h-12 w-12 text-red-500" />
+        <AlertCircle className="h-12 w-12 text-rose-400" />
         <h2 className="text-lg font-semibold text-foreground">Không thể tải danh sách sản phẩm</h2>
         <Button onClick={() => window.location.reload()}>Thử lại</Button>
       </div>
@@ -221,48 +222,58 @@ export function AdminProductsPage() {
       <SEO title="Quản lý sản phẩm - Admin" />
       <div className="space-y-6">
 
+        {/* Dominant Heading */}
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Quản lý sản phẩm
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Theo dõi danh mục, trạng thái tồn kho và thông tin giá bán sản phẩm
+          </p>
+        </div>
+
         {/* Header & Stats */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+          <Card className="border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tổng sản phẩm</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Tổng sản phẩm</CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalProducts}</div>
-              <p className="text-xs text-muted-foreground">Sản phẩm có sẵn</p>
+              <div className="text-2xl font-bold tabular-nums text-foreground">{totalProducts}</div>
+              <p className="text-xs text-muted-foreground mt-1">Sản phẩm có sẵn</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Danh mục</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Danh mục</CardTitle>
               <Tags className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">--</div>
-              <p className="text-xs text-muted-foreground">Danh mục đang hoạt động</p>
+              <div className="text-2xl font-bold tabular-nums text-foreground">--</div>
+              <p className="text-xs text-muted-foreground mt-1">Danh mục đang hoạt động</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tồn kho</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Tồn kho</CardTitle>
               <Box className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">--</div>
-              <p className="text-xs text-muted-foreground">Tổng số lượng tồn kho</p>
+              <div className="text-2xl font-bold tabular-nums text-foreground">--</div>
+              <p className="text-xs text-muted-foreground mt-1">Tổng số lượng tồn kho</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Action Toolbar */}
-        <div className="flex items-center justify-between gap-4 bg-slate-900/40 p-4 rounded-lg shadow-sm border border-slate-800">
-          <div className="flex items-center gap-2 flex-1 max-w-md">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card border border-border/60 p-4 rounded-xl shadow-sm">
+          <div className="flex flex-wrap items-center gap-2 flex-1 max-w-xl">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Tìm kiếm sản phẩm..."
-                className="pl-9"
+                className="pl-9 h-10 bg-background border-border/80 text-foreground"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -270,21 +281,26 @@ export function AdminProductsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className={`gap-2 ${categoryId ? 'bg-primary/10 border-primary text-primary' : ''}`}>
+                <Button
+                  variant="outline"
+                  className={`gap-2 h-10 border-border/80 ${
+                    categoryId ? 'bg-primary/10 border-primary/40 text-primary hover:bg-primary/20' : ''
+                  }`}
+                >
                   <Filter className="h-4 w-4" />
                   <span className="hidden sm:inline">
                     {categoryId ? 'Đã lọc' : 'Lọc'}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px] max-h-[300px] overflow-y-auto">
+              <DropdownMenuContent align="start" className="w-[300px] max-h-[300px] overflow-y-auto bg-card border-border/80">
                 <DropdownMenuLabel>Lọc theo danh mục</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-border/60" />
                 <DropdownMenuItem
                   onClick={() => setCategoryId(undefined)}
                   className="cursor-pointer"
                 >
-                  <span className={!categoryId ? "font-bold" : ""}>Tất cả danh mục</span>
+                  <span className={!categoryId ? "font-bold text-primary" : ""}>Tất cả danh mục</span>
                 </DropdownMenuItem>
                 {renderCategoryMenu(categoryTree)}
               </DropdownMenuContent>
@@ -295,31 +311,31 @@ export function AdminProductsPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setCategoryId(undefined)}
-                className="h-9 px-2 text-muted-foreground hover:text-foreground"
+                className="h-10 px-2 text-muted-foreground hover:text-foreground text-xs"
                 title="Xóa bộ lọc"
               >
                 Xóa: {selectedCategoryName?.split(' > ').pop()} ✕
               </Button>
             )}
           </div>
-          <Button asChild className="gap-2">
+          <Button asChild className="gap-2 shrink-0 h-10">
             <Link to="/admin/products/new">
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Thêm mới</span>
+              <span className="inline">Thêm mới</span>
             </Link>
           </Button>
         </div>
 
         {/* Products Table */}
-        <Card className="border-0 shadow-sm overflow-hidden">
+        <Card className="border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm overflow-hidden rounded-xl">
           <div className="relative overflow-x-auto">
             {isLoading ? (
               <div className="py-20">
                 <LoadingSpinner />
               </div>
             ) : products.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <Package className="h-12 w-12 text-slate-700 mb-4" />
+              <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+                <Package className="h-12 w-12 text-muted-foreground/40 mb-4" />
                 <h3 className="text-lg font-medium text-foreground">Chưa có sản phẩm nào</h3>
                 <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-6">Create your first product to get started managing your catalog.</p>
                 <Button asChild>
@@ -331,15 +347,15 @@ export function AdminProductsPage() {
             ) : (
               <div className="relative">
                 <Table>
-                  <TableHeader className="bg-slate-900/50 sticky top-0 z-10 border-b border-slate-800">
-                    <TableRow className="hover:bg-transparent border-b border-slate-800">
-                      <TableHead className="w-[80px] text-slate-300">Hình ảnh</TableHead>
-                      <TableHead className="min-w-[200px] text-slate-300">Tên sản phẩm</TableHead>
-                      <TableHead className="text-slate-300">Danh mục</TableHead>
-                      <TableHead className="text-slate-300">Giá bán</TableHead>
-                      <TableHead className="text-center text-slate-300">Tồn kho</TableHead>
-                      <TableHead className="text-center text-slate-300">Đánh giá</TableHead>
-                      <TableHead className="text-right text-slate-300">Thao tác</TableHead>
+                  <TableHeader className="bg-card/95 backdrop-blur sticky top-0 z-10 border-b border-border/80">
+                    <TableRow className="hover:bg-transparent border-b border-border/80">
+                      <TableHead className="w-[80px] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hình ảnh</TableHead>
+                      <TableHead className="min-w-[200px] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tên sản phẩm</TableHead>
+                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Danh mục</TableHead>
+                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Giá bán</TableHead>
+                      <TableHead className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tồn kho</TableHead>
+                      <TableHead className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Đánh giá</TableHead>
+                      <TableHead className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -347,9 +363,9 @@ export function AdminProductsPage() {
                       const totalStock = calculateTotalStock(product);
                       const isDeleting = (deleteProduct.isPending && deleteProduct.variables === product.id) || deletingIdRef.current === product.id;
                       return (
-                        <TableRow key={product.id} className="group hover:bg-slate-900/40 transition-colors border-b border-slate-850">
-                          <TableCell>
-                            <div className="relative h-12 w-12 rounded-lg border border-slate-800 overflow-hidden bg-slate-950 shadow-sm group-hover:shadow-md transition-shadow">
+                        <TableRow key={product.id} className="group hover:bg-muted/40 transition-colors border-b border-border/40">
+                          <TableCell className="px-4 py-3">
+                            <div className="relative h-12 w-12 rounded-lg border border-border/60 overflow-hidden bg-muted/20 shadow-sm group-hover:border-border transition-colors shrink-0">
                               <img
                                 src={product.images[0] || 'https://placehold.co/100x100?text=No+Image'}
                                 alt={product.name}
@@ -358,11 +374,11 @@ export function AdminProductsPage() {
                               />
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
+                          <TableCell className="px-4 py-3">
+                            <div className="flex flex-col min-w-[180px]">
                               <Link
                                 to={`/admin/products/${product.id}/edit`}
-                                className="font-semibold text-slate-100 group-hover:text-primary transition-colors cursor-pointer line-clamp-2 hover:underline"
+                                className="font-medium text-foreground group-hover:text-primary transition-colors cursor-pointer line-clamp-1 hover:underline"
                                 title={product.name}
                               >
                                 {product.name}
@@ -372,44 +388,47 @@ export function AdminProductsPage() {
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="px-4 py-3">
                             {product.category ? (
-                              <Badge variant="secondary" className="font-normal">
+                              <Badge variant="secondary" className="font-normal text-xs bg-secondary/80 text-secondary-foreground border border-border/40">
                                 {product.category.name}
                               </Badge>
                             ) : (
-                              <span className="text-muted-foreground text-sm">-</span>
+                              <span className="text-muted-foreground text-xs">-</span>
                             )}
                           </TableCell>
-                          <TableCell>
-                            <div className="font-medium">
+                          <TableCell className="px-4 py-3">
+                            <div className="font-medium tabular-nums text-foreground">
                               {formatCurrency(product.basePrice)}
                             </div>
                           </TableCell>
-                          <TableCell className="text-center">
-                            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${totalStock > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                              }`}>
+                          <TableCell className="px-4 py-3 text-center">
+                            <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border tabular-nums ${
+                              totalStock > 0
+                                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25'
+                                : 'bg-rose-500/15 text-rose-300 border-rose-500/25'
+                            }`}>
                               {totalStock} sp
                             </div>
                             <div className="text-[10px] text-muted-foreground mt-0.5">
                               {product.variants?.length || 0} biến thể
                             </div>
                           </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              <span className="text-yellow-400 text-sm">★</span>
-                              <span className="font-medium text-sm text-gray-700">{product.rating?.toFixed(1) || '0.0'}</span>
+                          <TableCell className="px-4 py-3 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <Star className="h-3.5 w-3.5 fill-amber-400/80 text-amber-400" />
+                              <span className="font-medium text-sm text-foreground tabular-nums">{product.rating?.toFixed(1) || '0.0'}</span>
                               <span className="text-xs text-muted-foreground">({product.reviewCount || 0})</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="px-4 py-3 text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted text-muted-foreground hover:text-foreground">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent align="end" className="bg-card border-border/80">
                                 <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
                                 <DropdownMenuItem asChild>
                                   <a href={`${STORE_URL}/p/${product.slug}`} target="_blank" rel="noreferrer" className="cursor-pointer">
@@ -421,10 +440,10 @@ export function AdminProductsPage() {
                                     <Pencil className="mr-2 h-4 w-4" /> Chỉnh sửa
                                   </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator />
+                                <DropdownMenuSeparator className="bg-border/60" />
                                 <DropdownMenuItem
                                   disabled={isDeleting}
-                                  className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50"
+                                  className="text-rose-400 focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
                                   onClick={() => handleDelete(product.id, product.name)}
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" /> Xóa sản phẩm
@@ -439,8 +458,8 @@ export function AdminProductsPage() {
                 </Table>
 
                 {/* Sentinel for Infinite Scroll */}
-                <div ref={observerTarget} className="h-10 flex items-center justify-center p-4">
-                  {isFetchingNextPage && <Loader2 className="h-6 w-6 animate-spin text-primary" />}
+                <div ref={observerTarget} className="h-12 flex items-center justify-center p-4">
+                  {isFetchingNextPage && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
                   {!hasNextPage && products.length > 0 && (
                     <span className="text-xs text-muted-foreground">Đã hiển thị hết sản phẩm</span>
                   )}
