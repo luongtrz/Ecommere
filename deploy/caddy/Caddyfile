@@ -11,7 +11,7 @@ admin-ecommere.luongtrz.me {
   @uploads path /uploads/*
   reverse_proxy @uploads admin-backend:4001
 
-  reverse_proxy admin-frontend:80
+  reverse_proxy admin-frontend:8080
 }
 
 ecommere.luongtrz.me, luongtrz.me {
@@ -23,5 +23,5 @@ ecommere.luongtrz.me, luongtrz.me {
   @uploads path /uploads/*
   reverse_proxy @uploads backend:4000
 
-  reverse_proxy frontend:80
+  reverse_proxy frontend:8080
 }
