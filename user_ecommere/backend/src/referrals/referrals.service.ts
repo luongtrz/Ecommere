@@ -1,8 +1,9 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { Prisma, CouponType } from '@prisma/client';
+import { Prisma, CouponType, OrderStatus } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class ReferralsService {
@@ -170,26 +171,12 @@ export class ReferralsService {
                     }
 
                     this.validateCouponConfig(
-                        config.referrerCouponType,
-                        config.referrerCouponValue,
-                        config.couponValidDays,
-                    );
-                    this.validateCouponConfig(
                         config.refereeCouponType,
                         config.refereeCouponValue,
                         config.couponValidDays,
                     );
 
                     const suffix = randomBytes(8).toString('hex').toUpperCase();
-                    const referrerCouponCode = await this.createReferralCoupon(
-                        tx,
-                        `REF-ER-${suffix}`,
-                        config.referrerCouponType,
-                        config.referrerCouponValue,
-                        config.referrerMaxDiscount,
-                        config.minOrderForCoupon,
-                        config.couponValidDays,
-                    );
                     const refereeCouponCode = await this.createReferralCoupon(
                         tx,
                         `REF-EE-${suffix}`,
@@ -204,7 +191,7 @@ export class ReferralsService {
                         data: {
                             referrerId: referrer.id,
                             refereeId: newUserId,
-                            referrerCouponCode,
+                            referrerCouponCode: null,
                             refereeCouponCode,
                         },
                     });
@@ -343,5 +330,114 @@ export class ReferralsService {
         }
 
         return `${email[0]}***${email.slice(atIndex)}`;
+    }
+
+    /**
+     * Scheduled job running every 30 minutes.
+     * For each referral that has no referrerCouponCode yet and whose referee
+     * has at least one DELIVERED order, creates the referrer coupon from
+     * ReferralConfig and stores its code in referrerCouponCode.
+     */
+    @Cron(CronExpression.EVERY_30_MINUTES)
+    async grantReferrerRewards() {
+        const config = await this.prisma.referralConfig.findFirst({
+            where: { active: true },
+            orderBy: { updatedAt: 'desc' },
+        });
+
+        if (!config) {
+            this.logger.warn('No active referral config found, skipping referrer rewards job');
+            return { evaluated: 0, processed: 0, skipped: 0, errors: 0 };
+        }
+
+        try {
+            this.validateCouponConfig(
+                config.referrerCouponType,
+                config.referrerCouponValue,
+                config.couponValidDays,
+            );
+        } catch (configError) {
+            this.logger.error(
+                `Invalid referral config for referrer coupon: ${configError instanceof Error ? configError.message : String(configError)}`,
+            );
+            return { evaluated: 0, processed: 0, skipped: 0, errors: 1 };
+        }
+
+        const eligibleReferrals = await this.prisma.referral.findMany({
+            where: {
+                referrerCouponCode: null,
+                referee: {
+                    orders: {
+                        some: {
+                            status: OrderStatus.DELIVERED,
+                        },
+                    },
+                },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        let processed = 0;
+        let skipped = 0;
+        let errors = 0;
+
+        for (const referral of eligibleReferrals) {
+            try {
+                if (referral.referrerCouponCode) {
+                    skipped += 1;
+                    continue;
+                }
+
+                const granted = await this.prisma.$transaction(async (tx) => {
+                    const current = await tx.referral.findUnique({
+                        where: { id: referral.id },
+                    });
+                    if (current?.referrerCouponCode) {
+                        return false;
+                    }
+
+                    const suffix = randomBytes(8).toString('hex').toUpperCase();
+                    const referrerCouponCode = await this.createReferralCoupon(
+                        tx,
+                        `REF-ER-${suffix}`,
+                        config.referrerCouponType,
+                        config.referrerCouponValue,
+                        config.referrerMaxDiscount,
+                        config.minOrderForCoupon,
+                        config.couponValidDays,
+                    );
+
+                    await tx.referral.update({
+                        where: { id: referral.id },
+                        data: { referrerCouponCode },
+                    });
+
+                    return true;
+                });
+
+                if (granted) {
+                    processed += 1;
+                } else {
+                    skipped += 1;
+                }
+            } catch (error) {
+                errors += 1;
+                this.logger.error(
+                    `Failed to grant referrer reward for referral ${referral.id}: ${error instanceof Error ? error.message : String(error)}`,
+                    error instanceof Error ? error.stack : undefined,
+                );
+            }
+        }
+
+        this.logger.log(
+            `Referrer rewards job finished. Evaluated: ${eligibleReferrals.length}, Processed: ${processed}, Skipped: ${skipped}, Errors: ${errors}`,
+        );
+
+        return {
+            evaluated: eligibleReferrals.length,
+            processed,
+            skipped,
+            errors,
+        };
     }
 }
