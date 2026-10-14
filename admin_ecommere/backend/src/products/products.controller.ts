@@ -12,6 +12,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Products')
+@Roles(Role.ADMIN)
 @Controller('products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}

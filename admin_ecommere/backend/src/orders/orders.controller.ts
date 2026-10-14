@@ -9,6 +9,7 @@ import { Role } from '@prisma/client';
 
 @ApiTags('Orders')
 @ApiBearerAuth('JWT-auth')
+@Roles(Role.ADMIN)
 @Controller('orders')
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
