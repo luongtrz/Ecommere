@@ -258,7 +258,8 @@ export class CartService {
       cart.coupon &&
       cart.coupon.active &&
       (!cart.coupon.validFrom || cart.coupon.validFrom <= now) &&
-      (!cart.coupon.validUntil || cart.coupon.validUntil >= now)
+      (!cart.coupon.validUntil || cart.coupon.validUntil >= now) &&
+      (!cart.coupon.minOrder || subtotal >= cart.coupon.minOrder)
     ) {
       discount = MoneyUtil.calculateDiscount(
         subtotal,
