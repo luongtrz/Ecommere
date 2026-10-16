@@ -3,7 +3,7 @@
   "buildCommand": "npx prisma generate && npm run build",
   "outputDirectory": "public",
   "functions": {
-    "api/index.ts": {
+    "api/index.js": {
       "includeFiles": ["dist/**", "prisma/**"],
       "maxDuration": 30
     }

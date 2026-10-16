@@ -1,33 +1,34 @@
-import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+require('reflect-metadata');
+const { NestFactory } = require('@nestjs/core');
+const { ValidationPipe } = require('@nestjs/common');
+const { ConfigService } = require('@nestjs/config');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express, { Express, Request, Response } from 'express';
-import { AppModule } from '../dist/src/app.module';
-import { HttpExceptionFilter } from '../dist/src/common/filters/http-exception.filter';
-import { TransformInterceptor } from '../dist/src/common/interceptors/transform.interceptor';
-import { LoggingInterceptor } from '../dist/src/common/interceptors/logging.interceptor';
+const { ExpressAdapter } = require('@nestjs/platform-express');
+const express = require('express');
 
-let cachedServer: Express;
+let cachedServer;
 
-async function bootstrapServer(): Promise<Express> {
+async function bootstrapServer() {
   if (!cachedServer) {
     const server = express();
 
-    server.get('/', (_req: Request, res: Response) => {
+    server.get('/', (_req, res) => {
       res.json({
         status: 'ok',
-        service: 'thai-spray-admin-backend',
+        service: 'thai-spray-user-backend',
         timestamp: new Date().toISOString(),
       });
     });
 
-    server.get('/health', (_req: Request, res: Response) => {
+    server.get('/health', (_req, res) => {
       res.json({ status: 'ok' });
     });
+
+    const { AppModule } = require('../dist/src/app.module');
+    const { HttpExceptionFilter } = require('../dist/src/common/filters/http-exception.filter');
+    const { TransformInterceptor } = require('../dist/src/common/interceptors/transform.interceptor');
+    const { LoggingInterceptor } = require('../dist/src/common/interceptors/logging.interceptor');
 
     const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
     const configService = app.get(ConfigService);
@@ -37,7 +38,7 @@ async function bootstrapServer(): Promise<Express> {
     app.use(helmet({ crossOriginResourcePolicy: false }));
     app.use(cookieParser());
 
-    const corsOrigins = (configService.get<string>('CORS_ORIGIN') || '')
+    const corsOrigins = (configService.get('CORS_ORIGIN') || '')
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean);
@@ -85,7 +86,7 @@ async function bootstrapServer(): Promise<Express> {
   return cachedServer;
 }
 
-export default async function handler(req: Request, res: Response) {
+module.exports = async function handler(req, res) {
   const server = await bootstrapServer();
   return server(req, res);
-}
+};
