@@ -8,6 +8,8 @@ build/
 .env.*
 !.env.example
 !**/.env.example
+!.env.production
+!**/.env.production
 
 # IDEs
 .vscode/
