@@ -8,6 +8,7 @@ import { OrderFilterDto } from './dtos/order-filter.dto';
 import { OrderEntity } from './entities/order.entity';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { CsrfExempt } from '@/common/decorators/csrf-exempt.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Orders')
@@ -16,6 +17,7 @@ import { Role } from '@prisma/client';
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
 
+  @CsrfExempt()
   @Post('preview')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Preview checkout' })

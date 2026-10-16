@@ -38,6 +38,13 @@ export class CsrfGuard implements CanActivate {
       return true;
     }
 
+    // Requests authenticated via Authorization: Bearer <token> header are inherently immune to CSRF
+    // because cross-site requests cannot inject custom Authorization headers.
+    const authHeader = request.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return true;
+    }
+
     // Get CSRF token from header
     const headerToken = request.headers['x-csrf-token'] as string;
 

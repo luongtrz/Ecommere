@@ -33,8 +33,8 @@ export function getCookieOptions(
 ) {
   return {
     httpOnly: true, // Cannot be accessed by JavaScript
-    secure: true, // HTTPS only in production
-    sameSite: 'lax' as const, // CSRF protection
+    secure: isProduction, // HTTPS in production
+    sameSite: isProduction ? ('none' as const) : ('lax' as const),
     // Logout also needs the token to revoke the current token family.
     path: '/',
     maxAge,
@@ -50,8 +50,9 @@ export function getCsrfCookieOptions(
 ) {
   return {
     httpOnly: false, // Frontend needs to read this
-    secure: true,
-    sameSite: 'lax' as const,
+    secure: isProduction,
+    sameSite: isProduction ? ('none' as const) : ('lax' as const),
+    path: '/',
     maxAge,
   };
 }
@@ -83,7 +84,12 @@ export function setCsrfTokenCookie(
 /**
  * Clear authentication cookies
  */
-export function clearAuthCookies(response: Response) {
-  response.clearCookie('refreshToken', { path: '/' });
-  response.clearCookie('csrf_token');
+export function clearAuthCookies(response: Response, isProduction = false) {
+  const cookieOpts = {
+    path: '/',
+    secure: isProduction,
+    sameSite: isProduction ? ('none' as const) : ('lax' as const),
+  };
+  response.clearCookie('refreshToken', cookieOpts);
+  response.clearCookie('csrf_token', cookieOpts);
 }
