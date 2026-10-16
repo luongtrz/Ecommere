@@ -58,9 +58,11 @@ async function bootstrap() {
       'X-Requested-With',
       'Accept',
       'Origin',
-      'X-CSRF-Token', // Add CSRF header
+      'X-CSRF-Token',
+      'X-Chat-Session',
+      'x-chat-session',
     ],
-    exposedHeaders: ['Content-Disposition', 'X-CSRF-Token'],
+    exposedHeaders: ['Content-Disposition', 'X-CSRF-Token', 'X-Chat-Session'],
   });
 
   // Global pipes

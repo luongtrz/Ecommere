@@ -62,8 +62,10 @@ async function bootstrapServer() {
         'Accept',
         'Origin',
         'X-CSRF-Token',
+        'X-Chat-Session',
+        'x-chat-session',
       ],
-      exposedHeaders: ['Content-Disposition', 'X-CSRF-Token'],
+      exposedHeaders: ['Content-Disposition', 'X-CSRF-Token', 'X-Chat-Session'],
     });
 
     app.useGlobalPipes(
