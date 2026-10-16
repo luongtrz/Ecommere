@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "buildCommand": "npx prisma generate && npm run build",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "prisma/**",
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ]
+}
