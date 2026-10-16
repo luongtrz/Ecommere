@@ -4,7 +4,7 @@
   "outputDirectory": "public",
   "functions": {
     "api/index.js": {
-      "includeFiles": "{dist/**,prisma/**,node_modules/.prisma/client/**}",
+      "includeFiles": "{dist/**,prisma/**,node_modules/.prisma/client/**,node_modules/openai/**,node_modules/@langchain/**}",
       "maxDuration": 30
     }
   },

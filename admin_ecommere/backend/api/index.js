@@ -1,5 +1,7 @@
 require('reflect-metadata');
 require('@prisma/client');
+require('openai');
+try { require('@langchain/openai'); } catch (e) {}
 const { NestFactory } = require('@nestjs/core');
 const { ValidationPipe } = require('@nestjs/common');
 const { ConfigService } = require('@nestjs/config');
