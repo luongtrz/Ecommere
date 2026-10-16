@@ -1,4 +1,5 @@
 require('reflect-metadata');
+require('@prisma/client');
 const { NestFactory } = require('@nestjs/core');
 const { ValidationPipe } = require('@nestjs/common');
 const { ConfigService } = require('@nestjs/config');
