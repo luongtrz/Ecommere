@@ -87,6 +87,17 @@ async function bootstrapServer() {
 }
 
 module.exports = async function handler(req, res) {
-  const server = await bootstrapServer();
-  return server(req, res);
+  try {
+    const server = await bootstrapServer();
+    return server(req, res);
+  } catch (error) {
+    console.error('Vercel Bootstrap Error:', error);
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({
+      error: error.message,
+      stack: error.stack,
+      name: error.name,
+    }));
+  }
 };
