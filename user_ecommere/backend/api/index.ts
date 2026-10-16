@@ -6,10 +6,10 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express, { Express, Request, Response } from 'express';
-import { AppModule } from '../src/app.module';
-import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
-import { TransformInterceptor } from '../src/common/interceptors/transform.interceptor';
-import { LoggingInterceptor } from '../src/common/interceptors/logging.interceptor';
+import { AppModule } from '../dist/src/app.module';
+import { HttpExceptionFilter } from '../dist/src/common/filters/http-exception.filter';
+import { TransformInterceptor } from '../dist/src/common/interceptors/transform.interceptor';
+import { LoggingInterceptor } from '../dist/src/common/interceptors/logging.interceptor';
 
 let cachedServer: Express;
 
