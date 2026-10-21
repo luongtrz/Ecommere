@@ -74,6 +74,12 @@ jobs:
       - name: Generate Prisma client
         run: npm run prisma:generate
 
+      - name: Validate Prisma schema
+        env:
+          # prisma validate reads env("DATABASE_URL") but never connects to it
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+        run: npx prisma validate
+
       - name: Lint
         run: npm run lint -- --max-warnings 0
 
@@ -91,6 +97,60 @@ jobs:
       - name: Security audit (npm audit)
         continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
+
+  # Applies the Prisma schema to an empty Postgres and runs the seed, so schema or seed breakage fails here
+  db-schema:
+    name: db-schema (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - user_ecommere
+          - admin_ecommere
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}/backend
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      SEED_DATABASE: 'true'
+      SEED_ADMIN_PASSWORD: ci-admin-${{ github.run_id }}
+      SEED_USER_PASSWORD: ci-user-${{ github.run_id }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.app }}/backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Apply schema to an empty database
+        run: npx prisma db push --skip-generate
+
+      - name: Seed database
+        run: npm run prisma:seed
 
   frontend:
     name: frontend (${{ matrix.app }})
@@ -116,6 +176,15 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Prettier check
+        run: npx prettier --check src
+
+      - name: Type check
+        run: npx tsc --noEmit -p tsconfig.json
 
       - name: Build frontend
         env:
