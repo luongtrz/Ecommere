@@ -16,6 +16,10 @@ module.exports = {
   plugins: ['react-refresh'],
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
+    ],
     // shadcn/ui components export their cva variants next to the component on purpose
     'react-refresh/only-export-components': 'off',
   },
