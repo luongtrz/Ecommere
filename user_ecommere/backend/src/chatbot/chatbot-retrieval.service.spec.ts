@@ -235,7 +235,9 @@ describe('ChatbotRetrievalService', () => {
             },
           ],
         });
-        mockPrismaService.product.findMany.mockResolvedValue([zeroScoreProduct]);
+        mockPrismaService.product.findMany.mockResolvedValue([
+          zeroScoreProduct,
+        ]);
 
         const result = await service.buildCatalogContext(
           'lavender',
@@ -621,7 +623,9 @@ describe('ChatbotRetrievalService', () => {
         [],
       );
 
-      const hasCategoryClause = clauses.some((clause: any) => clause.categoryId);
+      const hasCategoryClause = clauses.some(
+        (clause: any) => clause.categoryId,
+      );
       expect(hasCategoryClause).toBe(false);
     });
   });
@@ -923,17 +927,13 @@ describe('ChatbotRetrievalService', () => {
         ...baseVariant,
         sku: 'VAR-100',
       };
-      expect(
-        (service as any).scoreVariant(isolatedVariant, 'rose', []),
-      ).toBe(60);
+      expect((service as any).scoreVariant(isolatedVariant, 'rose', [])).toBe(
+        60,
+      );
 
       // On baseVariant, SKU 'ROSE-100' also contains normalizedQuery 'rose' (+20):
       // scent match 'Rose' (+60) + SKU match 'ROSE-100' (+20) = 80
-      const score = (service as any).scoreVariant(
-        baseVariant,
-        'rose',
-        [],
-      );
+      const score = (service as any).scoreVariant(baseVariant, 'rose', []);
       expect(score).toBe(80);
     });
 
@@ -949,11 +949,7 @@ describe('ChatbotRetrievalService', () => {
 
       // On baseVariant, query 'rose-100' also contains volume '100' (+12):
       // SKU match 'ROSE-100' (+20) + volume match '100' in 'rose-100' (+12) = 32
-      const score = (service as any).scoreVariant(
-        baseVariant,
-        'rose-100',
-        [],
-      );
+      const score = (service as any).scoreVariant(baseVariant, 'rose-100', []);
       expect(score).toBe(32);
     });
   });
@@ -986,7 +982,9 @@ describe('ChatbotRetrievalService', () => {
 
   describe('normalize and slugify (internal)', () => {
     it('should remove Vietnamese diacritics and convert text to lowercase', () => {
-      const normalized = (service as any).normalize('Nước Hoa Oải Hương CAO CẤP');
+      const normalized = (service as any).normalize(
+        'Nước Hoa Oải Hương CAO CẤP',
+      );
       expect(normalized).toBe('nuoc hoa oai huong cao cap');
     });
 

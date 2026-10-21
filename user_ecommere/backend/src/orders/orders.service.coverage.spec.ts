@@ -174,12 +174,12 @@ describe('OrdersService - Coverage Companion', () => {
         userId: 'other-user',
       });
 
-      await expect(
-        service.getMyOrderById('user1', 'order1'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.getMyOrderById('user1', 'order1'),
-      ).rejects.toThrow('Order not found');
+      await expect(service.getMyOrderById('user1', 'order1')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.getMyOrderById('user1', 'order1')).rejects.toThrow(
+        'Order not found',
+      );
     });
   });
 

@@ -46,7 +46,9 @@ describe('ProductsService - Coverage Companion', () => {
 
   beforeEach(async () => {
     mockCategoriesService.validateProductAssignment.mockReset();
-    mockCategoriesService.validateProductAssignment.mockResolvedValue(undefined);
+    mockCategoriesService.validateProductAssignment.mockResolvedValue(
+      undefined,
+    );
     mockCategoriesService.getDescendantIds.mockReset();
     mockCategoriesService.getDescendantIds.mockResolvedValue([]);
 
@@ -107,7 +109,11 @@ describe('ProductsService - Coverage Companion', () => {
       mockPrismaService.product.findMany.mockResolvedValue([]);
       mockPrismaService.product.count.mockResolvedValue(0);
 
-      await service.findAll({ page: 1, limit: 12, categorySlug: 'room-sprays' });
+      await service.findAll({
+        page: 1,
+        limit: 12,
+        categorySlug: 'room-sprays',
+      });
 
       expect(mockPrismaService.category.findUnique).toHaveBeenCalledWith({
         where: { slug: 'room-sprays' },
@@ -133,7 +139,11 @@ describe('ProductsService - Coverage Companion', () => {
       mockPrismaService.product.findMany.mockResolvedValue([]);
       mockPrismaService.product.count.mockResolvedValue(0);
 
-      await service.findAll({ page: 1, limit: 12, categorySlug: 'room-sprays' });
+      await service.findAll({
+        page: 1,
+        limit: 12,
+        categorySlug: 'room-sprays',
+      });
 
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -301,7 +311,10 @@ describe('ProductsService - Coverage Companion', () => {
     });
 
     it('should build all raw SQL conditions when ranking by BEST_SELLING with search, categoryIds array, brand, and variant filters', async () => {
-      mockCategoriesService.getDescendantIds.mockResolvedValue(['cat1', 'cat2']);
+      mockCategoriesService.getDescendantIds.mockResolvedValue([
+        'cat1',
+        'cat2',
+      ]);
       mockPrismaService.$queryRaw.mockResolvedValue([{ id: 'p1' }]);
       mockPrismaService.product.count.mockResolvedValue(1);
 
@@ -564,7 +577,9 @@ describe('ProductsService - Coverage Companion', () => {
         id: 'cat1',
         name: 'Room Sprays',
       });
-      mockCategoriesService.validateProductAssignment.mockResolvedValue(undefined);
+      mockCategoriesService.validateProductAssignment.mockResolvedValue(
+        undefined,
+      );
       mockPrismaService.product.findUnique.mockResolvedValue(null);
       mockPrismaService.product.create.mockResolvedValue({
         id: 'p1',
@@ -627,7 +642,9 @@ describe('ProductsService - Coverage Companion', () => {
         id: 'cat1',
         name: 'Room Sprays',
       });
-      mockCategoriesService.validateProductAssignment.mockResolvedValue(undefined);
+      mockCategoriesService.validateProductAssignment.mockResolvedValue(
+        undefined,
+      );
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
       const p2002 = new Prisma.PrismaClientKnownRequestError(
@@ -663,7 +680,9 @@ describe('ProductsService - Coverage Companion', () => {
         id: 'cat1',
         name: 'Room Sprays',
       });
-      mockCategoriesService.validateProductAssignment.mockResolvedValue(undefined);
+      mockCategoriesService.validateProductAssignment.mockResolvedValue(
+        undefined,
+      );
       mockPrismaService.product.findUnique.mockResolvedValue(null);
       mockPrismaService.product.create.mockRejectedValue(
         new Error('Database disk full'),
@@ -730,7 +749,9 @@ describe('ProductsService - Coverage Companion', () => {
         id: 'cat2',
         name: 'Body Mist',
       });
-      mockCategoriesService.validateProductAssignment.mockResolvedValue(undefined);
+      mockCategoriesService.validateProductAssignment.mockResolvedValue(
+        undefined,
+      );
       mockPrismaService.product.update.mockResolvedValue({
         ...existingProduct,
         categoryId: 'cat2',
@@ -795,9 +816,9 @@ describe('ProductsService - Coverage Companion', () => {
         new Error('Connection failure'),
       );
 
-      await expect(
-        service.update('p1', { name: 'New Name' }),
-      ).rejects.toThrow('Connection failure');
+      await expect(service.update('p1', { name: 'New Name' })).rejects.toThrow(
+        'Connection failure',
+      );
     });
   });
 
@@ -922,22 +943,24 @@ describe('ProductsService - Coverage Companion', () => {
         distinct: ['brand'],
         orderBy: { brand: 'asc' },
       });
-      expect(
-        mockPrismaService.productVariant.findMany,
-      ).toHaveBeenNthCalledWith(1, {
-        where: { product: { active: true } },
-        select: { scent: true },
-        distinct: ['scent'],
-        orderBy: { scent: 'asc' },
-      });
-      expect(
-        mockPrismaService.productVariant.findMany,
-      ).toHaveBeenNthCalledWith(2, {
-        where: { product: { active: true } },
-        select: { volumeMl: true },
-        distinct: ['volumeMl'],
-        orderBy: { volumeMl: 'asc' },
-      });
+      expect(mockPrismaService.productVariant.findMany).toHaveBeenNthCalledWith(
+        1,
+        {
+          where: { product: { active: true } },
+          select: { scent: true },
+          distinct: ['scent'],
+          orderBy: { scent: 'asc' },
+        },
+      );
+      expect(mockPrismaService.productVariant.findMany).toHaveBeenNthCalledWith(
+        2,
+        {
+          where: { product: { active: true } },
+          select: { volumeMl: true },
+          distinct: ['volumeMl'],
+          orderBy: { volumeMl: 'asc' },
+        },
+      );
       expect(mockPrismaService.productVariant.aggregate).toHaveBeenCalledWith({
         where: { product: { active: true } },
         _min: { price: true },
@@ -1331,9 +1354,9 @@ describe('ProductsService - Coverage Companion', () => {
         new Error('Update failed'),
       );
 
-      await expect(
-        service.updateVariant('v1', { stock: 50 }),
-      ).rejects.toThrow('Update failed');
+      await expect(service.updateVariant('v1', { stock: 50 })).rejects.toThrow(
+        'Update failed',
+      );
     });
   });
 
@@ -1363,7 +1386,9 @@ describe('ProductsService - Coverage Companion', () => {
         },
       };
 
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
 
       await expect(service.removeVariant('v1')).rejects.toThrow(
         BadRequestException,
@@ -1387,7 +1412,9 @@ describe('ProductsService - Coverage Companion', () => {
         },
       };
 
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
 
       await expect(service.removeVariant('v1')).rejects.toThrow(
         BadRequestException,
@@ -1411,7 +1438,9 @@ describe('ProductsService - Coverage Companion', () => {
         },
       };
 
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
 
       await expect(service.removeVariant('v1')).rejects.toThrow(
         BadRequestException,
@@ -1435,7 +1464,9 @@ describe('ProductsService - Coverage Companion', () => {
         },
       };
 
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
 
       await expect(service.removeVariant('v1')).rejects.toThrow(
         BadRequestException,
@@ -1459,7 +1490,9 @@ describe('ProductsService - Coverage Companion', () => {
         },
       };
 
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
       mockPrismaService.productVariant.delete.mockResolvedValue(mockVariant);
 
       const result = await service.removeVariant('v1');

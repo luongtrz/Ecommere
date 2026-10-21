@@ -553,7 +553,9 @@ describe('CartService', () => {
         price: 100000,
         salePrice: 85000,
       });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
       mockPrismaService.cart.upsert.mockResolvedValue(createMockCart());
       mockPrismaService.cartItem.findFirst.mockResolvedValue(null);
       mockPrismaService.cartItem.create.mockResolvedValue({ id: 'item-new' });
@@ -589,7 +591,9 @@ describe('CartService', () => {
         price: 100000,
         salePrice: null,
       });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
       mockPrismaService.cart.upsert.mockResolvedValue(createMockCart());
       mockPrismaService.cartItem.findFirst.mockResolvedValue(null);
       mockPrismaService.cartItem.create.mockResolvedValue({ id: 'item-new' });
@@ -609,7 +613,9 @@ describe('CartService', () => {
 
     it('should update existing cart item quantity when item is already in cart', async () => {
       const mockVariant = createMockVariant({ stock: 10 });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
       mockPrismaService.cart.upsert.mockResolvedValue(createMockCart());
       mockPrismaService.cartItem.findFirst.mockResolvedValue({
         id: 'item-1',
@@ -632,7 +638,9 @@ describe('CartService', () => {
 
     it('should run transaction with Serializable isolation level', async () => {
       const mockVariant = createMockVariant({ stock: 10 });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
       mockPrismaService.cart.upsert.mockResolvedValue(createMockCart());
       mockPrismaService.cartItem.findFirst.mockResolvedValue(null);
 
@@ -652,10 +660,14 @@ describe('CartService', () => {
 
       mockPrismaService.$transaction
         .mockRejectedValueOnce(p2002Error)
-        .mockImplementationOnce(async (callback) => callback(mockPrismaService));
+        .mockImplementationOnce(async (callback) =>
+          callback(mockPrismaService),
+        );
 
       const mockVariant = createMockVariant({ stock: 10 });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
       mockPrismaService.cart.upsert.mockResolvedValue(createMockCart());
       mockPrismaService.cartItem.findFirst.mockResolvedValue(null);
 
@@ -673,10 +685,14 @@ describe('CartService', () => {
 
       mockPrismaService.$transaction
         .mockRejectedValueOnce(p2034Error)
-        .mockImplementationOnce(async (callback) => callback(mockPrismaService));
+        .mockImplementationOnce(async (callback) =>
+          callback(mockPrismaService),
+        );
 
       const mockVariant = createMockVariant({ stock: 10 });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrismaService.productVariant.findUnique.mockResolvedValue(
+        mockVariant,
+      );
       mockPrismaService.cart.upsert.mockResolvedValue(createMockCart());
       mockPrismaService.cartItem.findFirst.mockResolvedValue(null);
 
@@ -827,12 +843,12 @@ describe('CartService', () => {
         cart: { userId: 'other-user' },
       });
 
-      await expect(
-        service.removeCartItem('user-1', 'item-1'),
-      ).rejects.toThrow(BadRequestException);
-      await expect(
-        service.removeCartItem('user-1', 'item-1'),
-      ).rejects.toThrow('Unauthorized');
+      await expect(service.removeCartItem('user-1', 'item-1')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.removeCartItem('user-1', 'item-1')).rejects.toThrow(
+        'Unauthorized',
+      );
       expect(mockPrismaService.cartItem.delete).not.toHaveBeenCalled();
     });
 

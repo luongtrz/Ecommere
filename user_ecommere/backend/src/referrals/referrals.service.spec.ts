@@ -200,7 +200,10 @@ describe('ReferralsService', () => {
       mockPrismaService.referral.findMany.mockResolvedValue(mockReferrals);
       mockPrismaService.referral.count.mockResolvedValue(25);
 
-      const result = await service.getMyReferrals('user-1', { page: 2, limit: 10 });
+      const result = await service.getMyReferrals('user-1', {
+        page: 2,
+        limit: 10,
+      });
 
       expect(result).toEqual({
         data: [
@@ -297,7 +300,10 @@ describe('ReferralsService', () => {
       mockPrismaService.referral.findMany.mockResolvedValue(mockReferrals);
       mockPrismaService.referral.count.mockResolvedValue(5);
 
-      const result = await service.getMyReferrals('user-1', { page: 1, limit: 10 });
+      const result = await service.getMyReferrals('user-1', {
+        page: 1,
+        limit: 10,
+      });
 
       expect(result.data).toEqual([
         {
@@ -614,7 +620,10 @@ describe('ReferralsService', () => {
       mockPrismaService.referral.create.mockResolvedValue(mockCreatedReferral);
       mockPrismaService.user.update.mockResolvedValue({});
 
-      const result = await service.processReferral('  ref-valid  ', 'new-user-1');
+      const result = await service.processReferral(
+        '  ref-valid  ',
+        'new-user-1',
+      );
 
       expect(result).toEqual(mockCreatedReferral);
       expect(mockPrismaService.coupon.create).toHaveBeenCalledWith({
@@ -731,12 +740,12 @@ describe('ReferralsService', () => {
     it('should throw BadRequestException when user is not found', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.generateReferralCode('user-unknown')).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.generateReferralCode('user-unknown')).rejects.toThrow(
-        'User not found',
-      );
+      await expect(
+        service.generateReferralCode('user-unknown'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateReferralCode('user-unknown'),
+      ).rejects.toThrow('User not found');
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'user-unknown' },
         select: { referralCode: true },
@@ -971,11 +980,15 @@ describe('ReferralsService', () => {
       });
       expect(mockPrismaService.referral.update).toHaveBeenCalledWith({
         where: { id: 'ref-1' },
-        data: { referrerCouponCode: expect.stringMatching(/^REF-ER-[0-9A-F]{16}$/) },
+        data: {
+          referrerCouponCode: expect.stringMatching(/^REF-ER-[0-9A-F]{16}$/),
+        },
       });
       expect(mockPrismaService.referral.update).toHaveBeenCalledWith({
         where: { id: 'ref-2' },
-        data: { referrerCouponCode: expect.stringMatching(/^REF-ER-[0-9A-F]{16}$/) },
+        data: {
+          referrerCouponCode: expect.stringMatching(/^REF-ER-[0-9A-F]{16}$/),
+        },
       });
     });
 
@@ -1042,7 +1055,9 @@ describe('ReferralsService', () => {
       ]);
 
       mockPrismaService.$transaction
-        .mockRejectedValueOnce(new Error('Transaction failed with Error instance'))
+        .mockRejectedValueOnce(
+          new Error('Transaction failed with Error instance'),
+        )
         .mockRejectedValueOnce('Transaction rejected with string')
         .mockImplementationOnce(
           async (callback: (tx: typeof mockPrismaService) => Promise<any>) =>
@@ -1065,7 +1080,9 @@ describe('ReferralsService', () => {
       });
       expect(mockPrismaService.referral.update).toHaveBeenCalledWith({
         where: { id: 'ref-success' },
-        data: { referrerCouponCode: expect.stringMatching(/^REF-ER-[0-9A-F]{16}$/) },
+        data: {
+          referrerCouponCode: expect.stringMatching(/^REF-ER-[0-9A-F]{16}$/),
+        },
       });
     });
   });
