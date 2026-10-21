@@ -322,10 +322,16 @@ export function ProductDetailPage() {
                 {/* Variant Selector */}
                 <div className="space-y-4 mb-6">
                   <div>
-                    <label className="text-sm font-bold text-slate-900 mb-2.5 block">
+                    <label
+                      htmlFor="product-variants"
+                      className="text-sm font-bold text-slate-900 mb-2.5 block"
+                    >
                       Chọn phân loại / Dung tích:
                     </label>
-                    <div className="flex flex-wrap gap-2.5">
+                    <div
+                      id="product-variants"
+                      className="flex flex-wrap gap-2.5"
+                    >
                       {product.variants.map((v) => {
                         const isSelected = selectedVariant?.id === v.id;
                         const isOutOfStock = v.stock === 0;
@@ -366,10 +372,16 @@ export function ProductDetailPage() {
 
                   {/* Quantity Stepper */}
                   <div>
-                    <label className="text-sm font-bold text-slate-900 mb-2.5 block">
+                    <label
+                      htmlFor="product-quantity"
+                      className="text-sm font-bold text-slate-900 mb-2.5 block"
+                    >
                       Số lượng mua:
                     </label>
-                    <div className="flex items-center gap-4">
+                    <div
+                      id="product-quantity"
+                      className="flex items-center gap-4"
+                    >
                       <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
                         <Button
                           variant="ghost"

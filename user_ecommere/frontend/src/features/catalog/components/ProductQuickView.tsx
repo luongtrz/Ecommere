@@ -128,6 +128,7 @@ export function ProductQuickView({
                   >
                     <img
                       src={getImageUrl(img)}
+                      alt={`${product.name} ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -173,7 +174,10 @@ export function ProductQuickView({
 
               <div className="space-y-4 mb-8">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <label
+                    htmlFor="quickview-variant"
+                    className="text-sm font-medium text-gray-700 mb-2 block"
+                  >
                     Phiên bản:
                   </label>
                   <Select
@@ -183,7 +187,10 @@ export function ProductQuickView({
                       setQuantity(1);
                     }}
                   >
-                    <SelectTrigger className="w-full rounded-xl">
+                    <SelectTrigger
+                      id="quickview-variant"
+                      className="w-full rounded-xl"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -207,10 +214,16 @@ export function ProductQuickView({
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <label
+                    htmlFor="quickview-quantity"
+                    className="text-sm font-medium text-gray-700 mb-2 block"
+                  >
                     Số lượng:
                   </label>
-                  <div className="flex items-center h-10 w-32 bg-gray-50 rounded-lg border border-gray-200">
+                  <div
+                    id="quickview-quantity"
+                    className="flex items-center h-10 w-32 bg-gray-50 rounded-lg border border-gray-200"
+                  >
                     <Button
                       variant="ghost"
                       size="icon"

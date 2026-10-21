@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
 import {
   Bot,
   Loader2,
@@ -78,7 +84,10 @@ export function ChatbotWidget() {
   }, [user, ownerKey, newThread, claimOwner]);
 
   const isOwnerMatch = user !== undefined && ownerId === ownerKey;
-  const visibleMessages = isOwnerMatch ? messages : [];
+  const visibleMessages = useMemo(
+    () => (isOwnerMatch ? messages : []),
+    [isOwnerMatch, messages],
+  );
 
   // Escape closes the panel
   useEffect(() => {

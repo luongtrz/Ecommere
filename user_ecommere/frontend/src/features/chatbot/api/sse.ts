@@ -257,13 +257,12 @@ export async function streamAgentRequest(
   let streamError: unknown = null;
 
   try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      if (value) {
-        const chunk = decoder.decode(value, { stream: true });
+    let done = false;
+    while (!done) {
+      const result = await reader.read();
+      done = result.done;
+      if (!done && result.value) {
+        const chunk = decoder.decode(result.value, { stream: true });
         if (chunk) {
           parser.push(chunk);
         }

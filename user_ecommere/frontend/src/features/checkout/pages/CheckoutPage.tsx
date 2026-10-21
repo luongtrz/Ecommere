@@ -185,6 +185,9 @@ export function CheckoutPage() {
       isCancelled = true;
       controller.abort();
     };
+    // itemsFingerprint stands in for items: the effect re-runs only when cart content changes,
+    // not when the items array identity changes between renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedAddress?.id,
     selectedAddress?.province,
@@ -395,7 +398,15 @@ export function CheckoutPage() {
                           {addresses.map((addr) => (
                             <div
                               key={addr.id}
+                              role="button"
+                              tabIndex={0}
                               onClick={() => setSelectedAddressId(addr.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  setSelectedAddressId(addr.id);
+                                }
+                              }}
                               className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 group ${
                                 selectedAddressId === addr.id
                                   ? 'border-primary bg-white shadow-lg shadow-primary/5'
@@ -447,7 +458,15 @@ export function CheckoutPage() {
                         {SHIPPING_METHODS.map((method) => (
                           <div
                             key={method.id}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => setShippingMethod(method.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setShippingMethod(method.id);
+                              }
+                            }}
                             className={`flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all ${
                               shippingMethod === method.id
                                 ? 'border-green-500 bg-white shadow-lg shadow-green-50'
@@ -504,7 +523,19 @@ export function CheckoutPage() {
                         return (
                           <div
                             key={method.id}
+                            role="button"
+                            tabIndex={isCOD ? 0 : -1}
+                            aria-disabled={!isCOD}
                             onClick={() => isCOD && setPaymentMethod(method.id)}
+                            onKeyDown={(e) => {
+                              if (
+                                isCOD &&
+                                (e.key === 'Enter' || e.key === ' ')
+                              ) {
+                                e.preventDefault();
+                                setPaymentMethod(method.id);
+                              }
+                            }}
                             className={`relative p-6 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-4 ${
                               paymentMethod === method.id
                                 ? 'border-purple-600 bg-white shadow-xl shadow-purple-50 scale-[1.02] cursor-pointer'

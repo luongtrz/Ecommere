@@ -157,7 +157,18 @@ export function SearchBox() {
                         {recentSearches.map((term) => (
                           <div
                             key={term}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => handleSearch(term)}
+                            onKeyDown={(event) => {
+                              if (event.target !== event.currentTarget) {
+                                return;
+                              }
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                handleSearch(term);
+                              }
+                            }}
                             className="group flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
                           >
                             <span>{term}</span>
