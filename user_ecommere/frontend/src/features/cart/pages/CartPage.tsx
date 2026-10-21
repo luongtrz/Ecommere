@@ -7,7 +7,16 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/common/EmptyState';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, CreditCard, Truck, Shield } from 'lucide-react';
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingBag,
+  ArrowLeft,
+  CreditCard,
+  Truck,
+  Shield,
+} from 'lucide-react';
 
 export function CartPage() {
   useRefreshCartPrices();
@@ -24,7 +33,11 @@ export function CartPage() {
               title="Giỏ hàng của bạn đang trống"
               description="Hãy khám phá bộ sưu tập nước hoa xịt thơm của chúng tôi"
               action={
-                <Button asChild size="lg" className="w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 shadow-lg shadow-primary/10">
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 shadow-lg shadow-primary/10"
+                >
                   <Link to="/catalog">Bắt đầu mua sắm</Link>
                 </Button>
               }
@@ -44,7 +57,10 @@ export function CartPage() {
           <div className="mb-8 animate-fade-in">
             <div className="flex items-center gap-4 mb-4">
               <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
-                <Link to="/catalog" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
+                <Link
+                  to="/catalog"
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
+                >
                   <ArrowLeft className="h-4 w-4" />
                   Tiếp tục mua sắm
                 </Link>
@@ -52,10 +68,17 @@ export function CartPage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Giỏ hàng của bạn</h1>
-                <p className="text-gray-500 mt-1">{items.length} sản phẩm trong giỏ hàng</p>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Giỏ hàng của bạn
+                </h1>
+                <p className="text-gray-500 mt-1">
+                  {items.length} sản phẩm trong giỏ hàng
+                </p>
               </div>
-              <Badge variant="secondary" className="text-lg px-5 py-2 rounded-full font-bold bg-secondary text-primary">
+              <Badge
+                variant="secondary"
+                className="text-lg px-5 py-2 rounded-full font-bold bg-secondary text-primary"
+              >
                 {formatCurrency(totalPrice)}
               </Badge>
             </div>
@@ -84,12 +107,20 @@ export function CartPage() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg text-gray-900 mb-1 truncate">{item.name}</h3>
+                        <h3 className="font-semibold text-lg text-gray-900 mb-1 truncate">
+                          {item.name}
+                        </h3>
                         <div className="flex items-center gap-2 mb-3">
-                          <Badge variant="secondary" className="text-xs rounded-full">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs rounded-full"
+                          >
                             {item.scent}
                           </Badge>
-                          <Badge variant="secondary" className="text-xs rounded-full">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs rounded-full"
+                          >
                             {item.volumeMl}ml
                           </Badge>
                         </div>
@@ -115,18 +146,27 @@ export function CartPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity - 1)
+                            }
                             disabled={item.quantity <= 1}
                             className="h-8 w-8 rounded-lg"
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="w-10 text-center font-semibold">{item.quantity}</span>
+                          <span className="w-10 text-center font-semibold">
+                            {item.quantity}
+                          </span>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity + 1)
+                            }
+                            disabled={
+                              typeof item.stock === 'number' &&
+                              item.quantity >= item.stock
+                            }
                             className="h-8 w-8 rounded-lg"
                           >
                             <Plus className="h-3 w-3" />
@@ -141,7 +181,10 @@ export function CartPage() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 sticky top-32 overflow-hidden animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <div
+                className="bg-white rounded-2xl shadow-lg border border-gray-100 sticky top-32 overflow-hidden animate-fade-in"
+                style={{ animationDelay: '200ms' }}
+              >
                 <div className="bg-primary p-5 text-primary-foreground">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
@@ -151,35 +194,57 @@ export function CartPage() {
                 <div className="p-5 space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Tạm tính ({items.length} sản phẩm):</span>
-                      <span className="font-medium">{formatCurrency(totalPrice)}</span>
+                      <span className="text-gray-500">
+                        Tạm tính ({items.length} sản phẩm):
+                      </span>
+                      <span className="font-medium">
+                        {formatCurrency(totalPrice)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500 flex items-center gap-1">
                         <Truck className="h-4 w-4" />
                         Phí vận chuyển:
                       </span>
-                      <span className="text-emerald-600 font-medium">Miễn phí</span>
+                      <span className="text-emerald-600 font-medium">
+                        Miễn phí
+                      </span>
                     </div>
                   </div>
 
                   <div className="border-t pt-4">
                     <div className="flex justify-between items-center mb-5">
-                      <span className="text-base font-semibold">Tổng cộng:</span>
+                      <span className="text-base font-semibold">
+                        Tổng cộng:
+                      </span>
                       <span className="text-2xl font-bold text-primary">
                         {formatCurrency(totalPrice)}
                       </span>
                     </div>
 
-                    <Button asChild className="w-full mb-3 h-12 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/10 font-semibold" size="lg">
-                      <Link to="/checkout" className="flex items-center justify-center gap-2">
+                    <Button
+                      asChild
+                      className="w-full mb-3 h-12 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/10 font-semibold"
+                      size="lg"
+                    >
+                      <Link
+                        to="/checkout"
+                        className="flex items-center justify-center gap-2"
+                      >
                         <CreditCard className="h-4 w-4" />
                         Tiến hành thanh toán
                       </Link>
                     </Button>
 
-                    <Button asChild variant="outline" className="w-full rounded-xl border-gray-200">
-                      <Link to="/catalog" className="flex items-center justify-center gap-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full rounded-xl border-gray-200"
+                    >
+                      <Link
+                        to="/catalog"
+                        className="flex items-center justify-center gap-2"
+                      >
                         <ShoppingBag className="h-4 w-4" />
                         Tiếp tục mua sắm
                       </Link>

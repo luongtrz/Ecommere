@@ -16,7 +16,7 @@ import {
   AlertCircle,
   Box,
   Tags,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { useInfiniteAdminProducts } from '@/features/catalog/hooks/useProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -45,7 +45,9 @@ import {
 import { useDeleteProduct } from '../hooks/useAdminProducts';
 import { useToast } from '@/hooks/useToast';
 
-const STORE_URL = (import.meta.env.VITE_STORE_URL || 'http://localhost:5173').replace(/\/$/, '');
+const STORE_URL = (
+  import.meta.env.VITE_STORE_URL || 'http://localhost:5173'
+).replace(/\/$/, '');
 
 export function AdminProductsPage() {
   const [search, setSearch] = useState('');
@@ -61,19 +63,21 @@ export function AdminProductsPage() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const tree = await import('../api/categories.api').then(m => m.categoriesApi.getTree());
+        const tree = await import('../api/categories.api').then((m) =>
+          m.categoriesApi.getTree(),
+        );
         setCategoryTree(tree);
 
         // Flatten for name lookup
         const allCategories: any[] = [];
         const traverse = (nodes: any[], prefix = '') => {
-          nodes.forEach(node => {
+          nodes.forEach((node) => {
             const currentName = prefix + node.name;
             const isLeaf = !node.children || node.children.length === 0;
             allCategories.push({
               ...node,
               displayName: currentName,
-              isLeaf
+              isLeaf,
             });
 
             if (node.children?.length > 0) {
@@ -96,7 +100,7 @@ export function AdminProductsPage() {
     isError,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useInfiniteAdminProducts({
     limit: 20,
     search: debouncedSearch,
@@ -117,12 +121,12 @@ export function AdminProductsPage() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting && hasNextPage) {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (observerTarget.current) {
@@ -137,10 +141,17 @@ export function AdminProductsPage() {
   }, [hasNextPage, fetchNextPage]);
 
   const handleDelete = async (id: string, name: string) => {
-    if (deletingIdRef.current === id || (deleteProduct.isPending && deleteProduct.variables === id)) {
+    if (
+      deletingIdRef.current === id ||
+      (deleteProduct.isPending && deleteProduct.variables === id)
+    ) {
       return;
     }
-    if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`)) {
+    if (
+      window.confirm(
+        `Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`,
+      )
+    ) {
       deletingIdRef.current = id;
       deleteProduct.mutate(id, {
         onSuccess: () => {
@@ -157,7 +168,12 @@ export function AdminProductsPage() {
   };
 
   const calculateTotalStock = (product: any) => {
-    return product.variants?.reduce((acc: number, v: any) => acc + (v.stock || 0), 0) || 0;
+    return (
+      product.variants?.reduce(
+        (acc: number, v: any) => acc + (v.stock || 0),
+        0,
+      ) || 0
+    );
   };
 
   const products = data?.pages.flatMap((page) => page.products) || [];
@@ -167,14 +183,18 @@ export function AdminProductsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-lg font-semibold text-foreground">Không thể tải danh sách sản phẩm</h2>
+        <h2 className="text-lg font-semibold text-foreground">
+          Không thể tải danh sách sản phẩm
+        </h2>
         <Button onClick={() => window.location.reload()}>Thử lại</Button>
       </div>
     );
   }
 
   /* Helper to get selected category name */
-  const selectedCategoryName = categories.find(c => c.id === categoryId)?.displayName;
+  const selectedCategoryName = categories.find(
+    (c) => c.id === categoryId,
+  )?.displayName;
 
   /* Recursive render function for category menu */
   const renderCategoryMenu = (nodes: any[]) => {
@@ -188,7 +208,9 @@ export function AdminProductsPage() {
             onClick={() => setCategoryId(node.id)}
             className="cursor-pointer"
           >
-            <span className={categoryId === node.id ? "font-bold text-primary" : ""}>
+            <span
+              className={categoryId === node.id ? 'font-bold text-primary' : ''}
+            >
               {node.name}
             </span>
           </DropdownMenuItem>
@@ -198,7 +220,9 @@ export function AdminProductsPage() {
       return (
         <DropdownMenuSub key={node.id}>
           <DropdownMenuSubTrigger className="cursor-pointer">
-            <span className={categoryId === node.id ? "font-bold text-primary" : ""}>
+            <span
+              className={categoryId === node.id ? 'font-bold text-primary' : ''}
+            >
               {node.name}
             </span>
           </DropdownMenuSubTrigger>
@@ -220,12 +244,13 @@ export function AdminProductsPage() {
     <>
       <SEO title="Quản lý sản phẩm - Admin" />
       <div className="space-y-6">
-
         {/* Header & Stats */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tổng sản phẩm</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Tổng sản phẩm
+              </CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -240,7 +265,9 @@ export function AdminProductsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">--</div>
-              <p className="text-xs text-muted-foreground">Danh mục đang hoạt động</p>
+              <p className="text-xs text-muted-foreground">
+                Danh mục đang hoạt động
+              </p>
             </CardContent>
           </Card>
           <Card>
@@ -250,7 +277,9 @@ export function AdminProductsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">--</div>
-              <p className="text-xs text-muted-foreground">Tổng số lượng tồn kho</p>
+              <p className="text-xs text-muted-foreground">
+                Tổng số lượng tồn kho
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -270,21 +299,29 @@ export function AdminProductsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className={`gap-2 ${categoryId ? 'bg-primary/10 border-primary text-primary' : ''}`}>
+                <Button
+                  variant="outline"
+                  className={`gap-2 ${categoryId ? 'bg-primary/10 border-primary text-primary' : ''}`}
+                >
                   <Filter className="h-4 w-4" />
                   <span className="hidden sm:inline">
                     {categoryId ? 'Đã lọc' : 'Lọc'}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px] max-h-[300px] overflow-y-auto">
+              <DropdownMenuContent
+                align="start"
+                className="w-[300px] max-h-[300px] overflow-y-auto"
+              >
                 <DropdownMenuLabel>Lọc theo danh mục</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setCategoryId(undefined)}
                   className="cursor-pointer"
                 >
-                  <span className={!categoryId ? "font-bold" : ""}>Tất cả danh mục</span>
+                  <span className={!categoryId ? 'font-bold' : ''}>
+                    Tất cả danh mục
+                  </span>
                 </DropdownMenuItem>
                 {renderCategoryMenu(categoryTree)}
               </DropdownMenuContent>
@@ -320,12 +357,15 @@ export function AdminProductsPage() {
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <Package className="h-12 w-12 text-slate-700 mb-4" />
-                <h3 className="text-lg font-medium text-foreground">Chưa có sản phẩm nào</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-6">Create your first product to get started managing your catalog.</p>
+                <h3 className="text-lg font-medium text-foreground">
+                  Chưa có sản phẩm nào
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-6">
+                  Create your first product to get started managing your
+                  catalog.
+                </p>
                 <Button asChild>
-                  <Link to="/admin/products/new">
-                    Tạo sản phẩm
-                  </Link>
+                  <Link to="/admin/products/new">Tạo sản phẩm</Link>
                 </Button>
               </div>
             ) : (
@@ -333,25 +373,44 @@ export function AdminProductsPage() {
                 <Table>
                   <TableHeader className="bg-slate-900/50 sticky top-0 z-10 border-b border-slate-800">
                     <TableRow className="hover:bg-transparent border-b border-slate-800">
-                      <TableHead className="w-[80px] text-slate-300">Hình ảnh</TableHead>
-                      <TableHead className="min-w-[200px] text-slate-300">Tên sản phẩm</TableHead>
+                      <TableHead className="w-[80px] text-slate-300">
+                        Hình ảnh
+                      </TableHead>
+                      <TableHead className="min-w-[200px] text-slate-300">
+                        Tên sản phẩm
+                      </TableHead>
                       <TableHead className="text-slate-300">Danh mục</TableHead>
                       <TableHead className="text-slate-300">Giá bán</TableHead>
-                      <TableHead className="text-center text-slate-300">Tồn kho</TableHead>
-                      <TableHead className="text-center text-slate-300">Đánh giá</TableHead>
-                      <TableHead className="text-right text-slate-300">Thao tác</TableHead>
+                      <TableHead className="text-center text-slate-300">
+                        Tồn kho
+                      </TableHead>
+                      <TableHead className="text-center text-slate-300">
+                        Đánh giá
+                      </TableHead>
+                      <TableHead className="text-right text-slate-300">
+                        Thao tác
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {products.map((product) => {
                       const totalStock = calculateTotalStock(product);
-                      const isDeleting = (deleteProduct.isPending && deleteProduct.variables === product.id) || deletingIdRef.current === product.id;
+                      const isDeleting =
+                        (deleteProduct.isPending &&
+                          deleteProduct.variables === product.id) ||
+                        deletingIdRef.current === product.id;
                       return (
-                        <TableRow key={product.id} className="group hover:bg-slate-900/40 transition-colors border-b border-slate-850">
+                        <TableRow
+                          key={product.id}
+                          className="group hover:bg-slate-900/40 transition-colors border-b border-slate-850"
+                        >
                           <TableCell>
                             <div className="relative h-12 w-12 rounded-lg border border-slate-800 overflow-hidden bg-slate-950 shadow-sm group-hover:shadow-md transition-shadow">
                               <img
-                                src={product.images[0] || 'https://placehold.co/100x100?text=No+Image'}
+                                src={
+                                  product.images[0] ||
+                                  'https://placehold.co/100x100?text=No+Image'
+                                }
                                 alt={product.name}
                                 loading="lazy"
                                 className="w-full h-full object-cover"
@@ -374,11 +433,16 @@ export function AdminProductsPage() {
                           </TableCell>
                           <TableCell>
                             {product.category ? (
-                              <Badge variant="secondary" className="font-normal">
+                              <Badge
+                                variant="secondary"
+                                className="font-normal"
+                              >
                                 {product.category.name}
                               </Badge>
                             ) : (
-                              <span className="text-muted-foreground text-sm">-</span>
+                              <span className="text-muted-foreground text-sm">
+                                -
+                              </span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -387,8 +451,13 @@ export function AdminProductsPage() {
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
-                            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${totalStock > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                              }`}>
+                            <div
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                totalStock > 0
+                                  ? 'bg-green-50 text-green-700'
+                                  : 'bg-red-50 text-red-700'
+                              }`}
+                            >
                               {totalStock} sp
                             </div>
                             <div className="text-[10px] text-muted-foreground mt-0.5">
@@ -398,36 +467,57 @@ export function AdminProductsPage() {
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center gap-1">
                               <span className="text-yellow-400 text-sm">★</span>
-                              <span className="font-medium text-sm text-gray-700">{product.rating?.toFixed(1) || '0.0'}</span>
-                              <span className="text-xs text-muted-foreground">({product.reviewCount || 0})</span>
+                              <span className="font-medium text-sm text-gray-700">
+                                {product.rating?.toFixed(1) || '0.0'}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                ({product.reviewCount || 0})
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
                                 <DropdownMenuItem asChild>
-                                  <a href={`${STORE_URL}/p/${product.slug}`} target="_blank" rel="noreferrer" className="cursor-pointer">
-                                    <Eye className="mr-2 h-4 w-4" /> Xem chi tiết
+                                  <a
+                                    href={`${STORE_URL}/p/${product.slug}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="cursor-pointer"
+                                  >
+                                    <Eye className="mr-2 h-4 w-4" /> Xem chi
+                                    tiết
                                   </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
-                                  <Link to={`/admin/products/${product.id}/edit`} className="cursor-pointer">
-                                    <Pencil className="mr-2 h-4 w-4" /> Chỉnh sửa
+                                  <Link
+                                    to={`/admin/products/${product.id}/edit`}
+                                    className="cursor-pointer"
+                                  >
+                                    <Pencil className="mr-2 h-4 w-4" /> Chỉnh
+                                    sửa
                                   </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   disabled={isDeleting}
                                   className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50"
-                                  onClick={() => handleDelete(product.id, product.name)}
+                                  onClick={() =>
+                                    handleDelete(product.id, product.name)
+                                  }
                                 >
-                                  <Trash2 className="mr-2 h-4 w-4" /> Xóa sản phẩm
+                                  <Trash2 className="mr-2 h-4 w-4" /> Xóa sản
+                                  phẩm
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -439,10 +529,17 @@ export function AdminProductsPage() {
                 </Table>
 
                 {/* Sentinel for Infinite Scroll */}
-                <div ref={observerTarget} className="h-10 flex items-center justify-center p-4">
-                  {isFetchingNextPage && <Loader2 className="h-6 w-6 animate-spin text-primary" />}
+                <div
+                  ref={observerTarget}
+                  className="h-10 flex items-center justify-center p-4"
+                >
+                  {isFetchingNextPage && (
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  )}
                   {!hasNextPage && products.length > 0 && (
-                    <span className="text-xs text-muted-foreground">Đã hiển thị hết sản phẩm</span>
+                    <span className="text-xs text-muted-foreground">
+                      Đã hiển thị hết sản phẩm
+                    </span>
                   )}
                 </div>
               </div>

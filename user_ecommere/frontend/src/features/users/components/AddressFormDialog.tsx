@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +19,11 @@ interface AddressFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDialogProps) {
+export function AddressFormDialog({
+  address,
+  open,
+  onOpenChange,
+}: AddressFormDialogProps) {
   const isEdit = !!address;
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
@@ -80,83 +89,109 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
             <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-primary">
               <MapPin className="h-5 w-5" />
             </div>
-            <DialogTitle className="text-xl font-bold text-gray-900">{isEdit ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              {isEdit ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}
+            </DialogTitle>
           </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-gray-700 font-medium">Họ và tên <span className="text-red-500">*</span></Label>
+              <Label htmlFor="fullName" className="text-gray-700 font-medium">
+                Họ và tên <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="fullName"
                 required
                 className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
                 placeholder="Nguyễn Văn A"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-gray-700 font-medium">Số điện thoại <span className="text-red-500">*</span></Label>
+              <Label htmlFor="phone" className="text-gray-700 font-medium">
+                Số điện thoại <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="phone"
                 required
                 type="tel"
                 className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 placeholder="0912345678"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="line1" className="text-gray-700 font-medium">Địa chỉ chi tiết <span className="text-red-500">*</span></Label>
+            <Label htmlFor="line1" className="text-gray-700 font-medium">
+              Địa chỉ chi tiết <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="line1"
               required
               className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
               value={formData.line1}
-              onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, line1: e.target.value })
+              }
               placeholder="Số nhà, tên đường..."
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="space-y-2">
-              <Label htmlFor="province" className="text-gray-700 font-medium">Tỉnh/Thành phố <span className="text-red-500">*</span></Label>
+              <Label htmlFor="province" className="text-gray-700 font-medium">
+                Tỉnh/Thành phố <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="province"
                 required
                 className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.province}
-                onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, province: e.target.value })
+                }
                 placeholder="Hồ Chí Minh"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="district" className="text-gray-700 font-medium">Quận/Huyện <span className="text-red-500">*</span></Label>
+              <Label htmlFor="district" className="text-gray-700 font-medium">
+                Quận/Huyện <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="district"
                 required
                 className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.district}
-                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, district: e.target.value })
+                }
                 placeholder="Quận 1"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ward" className="text-gray-700 font-medium">Phường/Xã <span className="text-red-500">*</span></Label>
+              <Label htmlFor="ward" className="text-gray-700 font-medium">
+                Phường/Xã <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="ward"
                 required
                 className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary transition-all"
                 value={formData.ward}
-                onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, ward: e.target.value })
+                }
                 placeholder="Bến Nghé"
               />
             </div>
@@ -171,13 +206,21 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
               }
               className="w-5 h-5 rounded-md border-gray-300 text-primary focus:ring-primary"
             />
-            <Label htmlFor="isDefault" className="cursor-pointer text-gray-700 font-medium">
+            <Label
+              htmlFor="isDefault"
+              className="cursor-pointer text-gray-700 font-medium"
+            >
               Đặt làm địa chỉ mặc định
             </Label>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="h-11 rounded-xl hover:bg-gray-100">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              className="h-11 rounded-xl hover:bg-gray-100"
+            >
               Hủy
             </Button>
             <Button

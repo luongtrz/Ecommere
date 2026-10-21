@@ -13,7 +13,10 @@ if (typeof (productsApi as any).getById !== 'function') {
   };
 }
 
-function showRemovalToast(item: CartItem, reason: 'out_of_stock' | 'inactive_or_deleted') {
+function showRemovalToast(
+  item: CartItem,
+  reason: 'out_of_stock' | 'inactive_or_deleted',
+) {
   const message =
     reason === 'out_of_stock'
       ? `Sản phẩm "${item.name}" đã hết hàng và đã được xóa khỏi giỏ hàng.`
@@ -97,7 +100,9 @@ export function useRefreshCartPrices(): void {
           }
 
           // If variant doesn't exist or is inactive
-          const variants = Array.isArray(product.variants) ? product.variants : [];
+          const variants = Array.isArray(product.variants)
+            ? product.variants
+            : [];
           const variant = variants.find((v: any) => v.id === item.variantId);
 
           if (!variant || variant.active === false) {
@@ -105,7 +110,8 @@ export function useRefreshCartPrices(): void {
             continue;
           }
 
-          const currentStock = typeof variant.stock === 'number' ? variant.stock : 0;
+          const currentStock =
+            typeof variant.stock === 'number' ? variant.stock : 0;
 
           // If current stock is 0
           if (currentStock <= 0) {

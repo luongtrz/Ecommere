@@ -17,7 +17,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { useAdminOrders, useUpdateOrderStatus } from '../hooks/useAdminOrders';
-import { formatCurrency, formatDateTime, parseShippingAddress } from '@/lib/utils';
+import {
+  formatCurrency,
+  formatDateTime,
+  parseShippingAddress,
+} from '@/lib/utils';
 import {
   AlertCircle,
   ChevronLeft,
@@ -26,20 +30,51 @@ import {
   Eye,
   Package,
   Calendar,
-  Filter
+  Filter,
 } from 'lucide-react';
 import type { OrderStatus } from '../api/admin-orders.api';
 import { useToast } from '@/hooks/useToast';
 import { Link } from 'react-router-dom';
 
-const ORDER_STATUS_MAP: Record<OrderStatus, { label: string; color: string; bg: string }> = {
-  PENDING_PAYMENT: { label: 'Chờ thanh toán', color: 'text-yellow-400', bg: 'bg-yellow-950/40 border-yellow-800/30' },
-  PAID: { label: 'Đã thanh toán', color: 'text-green-400', bg: 'bg-green-950/40 border-green-800/30' },
-  PACKING: { label: 'Đang đóng gói', color: 'text-blue-400', bg: 'bg-blue-950/40 border-blue-800/30' },
-  SHIPPED: { label: 'Đang giao hàng', color: 'text-purple-400', bg: 'bg-purple-950/40 border-purple-800/30' },
-  DELIVERED: { label: 'Giao thành công', color: 'text-slate-300', bg: 'bg-slate-900 border-slate-800' },
-  CANCELED: { label: 'Đã hủy', color: 'text-red-400', bg: 'bg-red-950/40 border-red-800/30' },
-  REFUNDED: { label: 'Đã hoàn tiền', color: 'text-orange-400', bg: 'bg-orange-950/40 border-orange-800/30' },
+const ORDER_STATUS_MAP: Record<
+  OrderStatus,
+  { label: string; color: string; bg: string }
+> = {
+  PENDING_PAYMENT: {
+    label: 'Chờ thanh toán',
+    color: 'text-yellow-400',
+    bg: 'bg-yellow-950/40 border-yellow-800/30',
+  },
+  PAID: {
+    label: 'Đã thanh toán',
+    color: 'text-green-400',
+    bg: 'bg-green-950/40 border-green-800/30',
+  },
+  PACKING: {
+    label: 'Đang đóng gói',
+    color: 'text-blue-400',
+    bg: 'bg-blue-950/40 border-blue-800/30',
+  },
+  SHIPPED: {
+    label: 'Đang giao hàng',
+    color: 'text-purple-400',
+    bg: 'bg-purple-950/40 border-purple-800/30',
+  },
+  DELIVERED: {
+    label: 'Giao thành công',
+    color: 'text-slate-300',
+    bg: 'bg-slate-900 border-slate-800',
+  },
+  CANCELED: {
+    label: 'Đã hủy',
+    color: 'text-red-400',
+    bg: 'bg-red-950/40 border-red-800/30',
+  },
+  REFUNDED: {
+    label: 'Đã hoàn tiền',
+    color: 'text-orange-400',
+    bg: 'bg-orange-950/40 border-orange-800/30',
+  },
 };
 
 const ALLOWED_NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
@@ -77,32 +112,48 @@ export function AdminOrdersPage() {
 
   const updateStatusMutation = useUpdateOrderStatus();
 
-  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus, orderCode: string) => {
+  const handleUpdateStatus = async (
+    orderId: string,
+    newStatus: OrderStatus,
+    orderCode: string,
+  ) => {
     updateStatusMutation.mutate(
       { orderId, status: newStatus },
       {
         onSuccess: () => {
           toast.success(
             <div className="flex flex-col gap-1">
-              <span className="font-semibold">Cập nhật trạng thái thành công!</span>
-              <span className="text-sm">Đơn hàng #{orderCode} đã chuyển sang {ORDER_STATUS_MAP[newStatus].label}</span>
-            </div>
+              <span className="font-semibold">
+                Cập nhật trạng thái thành công!
+              </span>
+              <span className="text-sm">
+                Đơn hàng #{orderCode} đã chuyển sang{' '}
+                {ORDER_STATUS_MAP[newStatus].label}
+              </span>
+            </div>,
           );
         },
         onError: (error: any) => {
-          const message = typeof error?.response?.data?.message === 'string'
-            ? error.response.data.message
-            : 'Cập nhật thất bại. Vui lòng thử lại.';
+          const message =
+            typeof error?.response?.data?.message === 'string'
+              ? error.response.data.message
+              : 'Cập nhật thất bại. Vui lòng thử lại.';
           toast.error(message);
         },
-      }
+      },
     );
   };
 
   const StatusBadge = ({ status }: { status: OrderStatus }) => {
-    const config = ORDER_STATUS_MAP[status] || { label: status, color: 'text-gray-700', bg: 'bg-gray-100' };
+    const config = ORDER_STATUS_MAP[status] || {
+      label: status,
+      color: 'text-gray-700',
+      bg: 'bg-gray-100',
+    };
     return (
-      <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.bg} ${config.color}`}>
+      <div
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.bg} ${config.color}`}
+      >
         {config.label}
       </div>
     );
@@ -112,7 +163,9 @@ export function AdminOrdersPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-lg font-semibold text-gray-900">Không thể tải danh sách đơn hàng</h2>
+        <h2 className="text-lg font-semibold text-gray-900">
+          Không thể tải danh sách đơn hàng
+        </h2>
         <Button onClick={() => window.location.reload()}>Thử lại</Button>
       </div>
     );
@@ -123,26 +176,26 @@ export function AdminOrdersPage() {
     const addr = parseShippingAddress(addressJson);
     if (!addr) return '';
 
-    const parts = [
-      addr.line1,
-      addr.ward,
-      addr.district,
-      addr.province
-    ].filter(Boolean);
+    const parts = [addr.line1, addr.ward, addr.district, addr.province].filter(
+      Boolean,
+    );
 
     if (parts.length > 0) return parts.join(', ');
 
     return addr.address || '';
   };
 
-
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Quản lý đơn hàng</h1>
-          <p className="text-muted-foreground mt-1">Theo dõi và xử lý các đơn hàng của cửa hàng.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Quản lý đơn hàng
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Theo dõi và xử lý các đơn hàng của cửa hàng.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="hidden md:flex">
@@ -158,7 +211,9 @@ export function AdminOrdersPage() {
         <Card className="shadow-sm border-l-4 border-l-blue-500">
           <CardHeader className="pb-2">
             <CardDescription>Tổng đơn hàng tháng này</CardDescription>
-            <CardTitle className="text-2xl font-bold">{data?.total || 0}</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              {data?.total || 0}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card className="shadow-sm border-l-4 border-l-yellow-500">
@@ -172,7 +227,9 @@ export function AdminOrdersPage() {
         <Card className="shadow-sm border-l-4 border-l-green-500">
           <CardHeader className="pb-2">
             <CardDescription>Doanh thu hôm nay</CardDescription>
-            <CardTitle className="text-2xl font-bold text-green-600">--</CardTitle>
+            <CardTitle className="text-2xl font-bold text-green-600">
+              --
+            </CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -205,7 +262,9 @@ export function AdminOrdersPage() {
             <SelectContent className="bg-slate-950 border-slate-800 text-slate-200">
               <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
               {Object.entries(ORDER_STATUS_MAP).map(([key, config]) => (
-                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                <SelectItem key={key} value={key}>
+                  {config.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -216,7 +275,7 @@ export function AdminOrdersPage() {
       <div className="rounded-xl border border-slate-800 shadow-sm bg-slate-900/20 overflow-hidden">
         {isLoading ? (
           <div className="p-8 space-y-4">
-            {[1, 2, 3, 4, 5].map(i => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex items-center justify-between">
                 <Skeleton className="h-12 w-full rounded-lg" />
               </div>
@@ -238,17 +297,26 @@ export function AdminOrdersPage() {
               <tbody className="divide-y divide-slate-850">
                 {!data?.data?.length ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                    <td
+                      colSpan={6}
+                      className="px-6 py-12 text-center text-muted-foreground"
+                    >
                       <Package className="h-12 w-12 mx-auto mb-3 text-slate-700" />
                       <p>Không tìm thấy đơn hàng nào</p>
                     </td>
                   </tr>
                 ) : (
                   data?.data?.map((order) => (
-                    <tr key={order.id} className="hover:bg-slate-900/40 transition-colors group">
+                    <tr
+                      key={order.id}
+                      className="hover:bg-slate-900/40 transition-colors group"
+                    >
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <Link to={`/admin/orders/${order.id}`} className="font-semibold text-slate-100 group-hover:text-primary transition-colors">
+                          <Link
+                            to={`/admin/orders/${order.id}`}
+                            className="font-semibold text-slate-100 group-hover:text-primary transition-colors"
+                          >
                             {order.code}
                           </Link>
                           <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
@@ -276,11 +344,16 @@ export function AdminOrdersPage() {
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-slate-100 truncate" title={item.nameSnapshot}>
+                                <p
+                                  className="text-sm font-medium text-slate-100 truncate"
+                                  title={item.nameSnapshot}
+                                >
                                   {item.nameSnapshot}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  x{item.quantity} {item.scentSnapshot && `• ${item.scentSnapshot}`}
+                                  x{item.quantity}{' '}
+                                  {item.scentSnapshot &&
+                                    `• ${item.scentSnapshot}`}
                                 </p>
                               </div>
                             </div>
@@ -293,16 +366,25 @@ export function AdminOrdersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-medium text-slate-100">{order.user?.name || order.user?.email}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{order.user?.phone || 'Chưa cập nhật SĐT'}</div>
+                        <div className="font-medium text-slate-100">
+                          {order.user?.name || order.user?.email}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {order.user?.phone || 'Chưa cập nhật SĐT'}
+                        </div>
                         <div className="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap">
                           {parseAddress(order.addressJson)}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="font-bold text-slate-100">{formatCurrency(order.total)}</div>
+                        <div className="font-bold text-slate-100">
+                          {formatCurrency(order.total)}
+                        </div>
                         <div className="text-xs text-muted-foreground mt-1 flex justify-end items-center gap-1">
-                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 font-normal border-slate-800 text-slate-300">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] px-1 py-0 h-5 font-normal border-slate-800 text-slate-300"
+                          >
                             {order.paymentMethod}
                           </Badge>
                         </div>
@@ -315,21 +397,39 @@ export function AdminOrdersPage() {
                           {/* Quick Status Update */}
                           <Select
                             value={order.status}
-                            onValueChange={(val) => handleUpdateStatus(order.id, val as OrderStatus, order.code)}
+                            onValueChange={(val) =>
+                              handleUpdateStatus(
+                                order.id,
+                                val as OrderStatus,
+                                order.code,
+                              )
+                            }
                           >
                             <SelectTrigger className="w-[130px] h-8 text-xs bg-slate-950 border-slate-800 text-slate-200 shadow-none">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {[order.status, ...(ALLOWED_NEXT_STATUSES[order.status] || [])].map((status) => (
-                                <SelectItem key={status} value={status} className="text-xs">
+                              {[
+                                order.status,
+                                ...(ALLOWED_NEXT_STATUSES[order.status] || []),
+                              ].map((status) => (
+                                <SelectItem
+                                  key={status}
+                                  value={status}
+                                  className="text-xs"
+                                >
                                   {ORDER_STATUS_MAP[status]?.label || status}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
 
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-500 hover:text-primary" asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-gray-500 hover:text-primary"
+                            asChild
+                          >
                             <Link to={`/admin/orders/${order.id}`}>
                               <Eye className="h-4 w-4" />
                             </Link>
@@ -354,7 +454,7 @@ export function AdminOrdersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 className="h-8"
               >
@@ -364,7 +464,7 @@ export function AdminOrdersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
+                onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
                 disabled={page === data.totalPages}
                 className="h-8"
               >

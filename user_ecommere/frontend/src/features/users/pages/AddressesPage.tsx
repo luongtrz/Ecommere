@@ -53,10 +53,15 @@ export function AddressesPage() {
         <div className="container max-w-5xl py-8 md:py-12">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Sổ địa chỉ</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Sổ địa chỉ
+              </h1>
               <p className="text-gray-600">Quản lý địa chỉ giao hàng của bạn</p>
             </div>
-            <Button onClick={handleAdd} className="rounded-xl shadow-lg shadow-primary/10 bg-primary text-primary-foreground hover:bg-primary/95 h-11 px-6">
+            <Button
+              onClick={handleAdd}
+              className="rounded-xl shadow-lg shadow-primary/10 bg-primary text-primary-foreground hover:bg-primary/95 h-11 px-6"
+            >
               <Plus className="h-5 w-5 mr-2" />
               Thêm địa chỉ mới
             </Button>
@@ -67,9 +72,12 @@ export function AddressesPage() {
               <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <MapPin className="h-10 w-10 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Chưa có địa chỉ nào</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                Chưa có địa chỉ nào
+              </h3>
               <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-                Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại Thai Spray Shop
+                Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại
+                Thai Spray Shop
               </p>
               <Button onClick={handleAdd} size="lg" className="rounded-xl">
                 <Plus className="h-5 w-5 mr-2" />
@@ -86,11 +94,19 @@ export function AddressesPage() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${address.isDefault ? 'bg-secondary text-primary' : 'bg-gray-100 text-gray-500'}`}>
-                          {address.isDefault ? <Home className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center ${address.isDefault ? 'bg-secondary text-primary' : 'bg-gray-100 text-gray-500'}`}
+                        >
+                          {address.isDefault ? (
+                            <Home className="h-5 w-5" />
+                          ) : (
+                            <MapPin className="h-5 w-5" />
+                          )}
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-900 text-lg">{address.fullName}</h3>
+                          <h3 className="font-bold text-gray-900 text-lg">
+                            {address.fullName}
+                          </h3>
                           {address.isDefault && (
                             <div className="flex items-center gap-1 text-xs font-semibold text-primary bg-secondary px-2 py-0.5 rounded-full w-fit mt-0.5">
                               <CheckCircle className="h-3 w-3" />
@@ -125,7 +141,8 @@ export function AddressesPage() {
                         {address.phone}
                       </div>
                       <div className="text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-3 rounded-lg border border-gray-100">
-                        {address.line1}, {address.ward}, {address.district}, {address.province}
+                        {address.line1}, {address.ward}, {address.district},{' '}
+                        {address.province}
                       </div>
                     </div>
                   </CardContent>

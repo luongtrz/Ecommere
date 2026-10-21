@@ -12,7 +12,12 @@ export function MobileNav() {
   const navItems = [
     { label: 'Trang chủ', icon: Home, href: '/' },
     { label: 'Khám phá', icon: Grid3X3, href: '/catalog' },
-    { label: 'Giỏ hàng', icon: ShoppingBag, action: openCart, badge: totalItems },
+    {
+      label: 'Giỏ hàng',
+      icon: ShoppingBag,
+      action: openCart,
+      badge: totalItems,
+    },
     { label: 'Tài khoản', icon: User, href: user ? '/account' : '/login' },
   ];
 
@@ -52,7 +57,9 @@ export function MobileNav() {
               )}
             >
               <item.icon className={cn('h-5 w-5', isActive && 'scale-110')} />
-              <span className={cn('text-[11px]', isActive && 'font-semibold')}>{item.label}</span>
+              <span className={cn('text-[11px]', isActive && 'font-semibold')}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

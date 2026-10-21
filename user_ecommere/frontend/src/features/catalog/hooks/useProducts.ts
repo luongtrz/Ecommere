@@ -8,7 +8,10 @@ interface UseProductsOptions {
 
 const PRODUCT_STALE_TIME = 10 * 60 * 1000;
 
-export function useProducts(filters: ProductFilters = {}, options: UseProductsOptions = {}) {
+export function useProducts(
+  filters: ProductFilters = {},
+  options: UseProductsOptions = {},
+) {
   return useQuery({
     queryKey: [QUERY_KEYS.PRODUCTS, filters],
     queryFn: () => productsApi.getAll(filters),
@@ -18,7 +21,11 @@ export function useProducts(filters: ProductFilters = {}, options: UseProductsOp
   });
 }
 
-export function useProductSearch(query: string, filters: ProductFilters = {}, page: number = 1) {
+export function useProductSearch(
+  query: string,
+  filters: ProductFilters = {},
+  page: number = 1,
+) {
   const { page: filterPage, ...otherFilters } = filters;
   const currentPage = filterPage ?? page;
   const searchFilters = { ...otherFilters, page: currentPage };

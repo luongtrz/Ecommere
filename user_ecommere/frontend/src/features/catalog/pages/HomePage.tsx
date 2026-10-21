@@ -26,7 +26,11 @@ const HIGHLIGHTS = [
 const BENEFITS = [
   { icon: Truck, title: 'Giao nhanh', desc: 'Nội thành linh hoạt trong ngày' },
   { icon: Shield, title: 'Chính hãng', desc: 'Danh mục được chọn lọc kỹ' },
-  { icon: RefreshCw, title: 'Đổi trả rõ ràng', desc: 'Hỗ trợ trong 7 ngày đầu' },
+  {
+    icon: RefreshCw,
+    title: 'Đổi trả rõ ràng',
+    desc: 'Hỗ trợ trong 7 ngày đầu',
+  },
 ];
 
 const FEATURED_CATEGORY_LIMIT = 4;
@@ -35,7 +39,10 @@ function HomeSectionSkeleton() {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="h-[360px] animate-pulse rounded-[1.65rem] bg-white/70" />
+        <div
+          key={index}
+          className="h-[360px] animate-pulse rounded-[1.65rem] bg-white/70"
+        />
       ))}
     </div>
   );
@@ -51,7 +58,11 @@ interface CategoryProductSectionProps {
   onAddToCart: (product: any, variant: any) => void;
 }
 
-function CategoryProductSection({ category, index, onAddToCart }: CategoryProductSectionProps) {
+function CategoryProductSection({
+  category,
+  index,
+  onAddToCart,
+}: CategoryProductSectionProps) {
   const [isVisible, setIsVisible] = useState(index < 2);
   const sectionRef = useRef<HTMLElement | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -95,13 +106,21 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
   };
 
   return (
-    <section ref={sectionRef} className="section-shell overflow-hidden p-5 md:p-8">
+    <section
+      ref={sectionRef}
+      className="section-shell overflow-hidden p-5 md:p-8"
+    >
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Danh mục nổi bật</p>
-          <h2 className="section-title text-2xl md:text-3xl">{category.name}</h2>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Danh mục nổi bật
+          </p>
+          <h2 className="section-title text-2xl md:text-3xl">
+            {category.name}
+          </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Những lựa chọn được khách chọn nhiều khi cần mùi thơm gọn, dễ dùng và phù hợp sinh hoạt mỗi ngày.
+            Những lựa chọn được khách chọn nhiều khi cần mùi thơm gọn, dễ dùng
+            và phù hợp sinh hoạt mỗi ngày.
           </p>
         </div>
         <Button asChild variant="outline" className="rounded-full px-5">
@@ -118,7 +137,11 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
         <>
           <div className="hidden gap-5 md:grid md:grid-cols-2 xl:grid-cols-4">
             {productsData.products.slice(0, 4).map((product, idx) => (
-              <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${idx * 80}ms` }}>
+              <div
+                key={product.id}
+                className="animate-fade-in"
+                style={{ animationDelay: `${idx * 80}ms` }}
+              >
                 <ProductCard
                   id={product.id}
                   name={product.name}
@@ -128,14 +151,20 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                   rating={product.rating}
                   reviewCount={product.reviewCount}
                   variants={product.variants}
-                  onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                  onAddToCart={() =>
+                    product.variants[0] &&
+                    onAddToCart(product, product.variants[0])
+                  }
                 />
               </div>
             ))}
           </div>
 
           <div className="relative md:hidden">
-            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            <div
+              ref={scrollRef}
+              className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
+            >
               {productsData.products.map((product) => (
                 <div key={product.id} className="w-[265px] shrink-0">
                   <ProductCard
@@ -147,7 +176,10 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     variants={product.variants}
-                    onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                    onAddToCart={() =>
+                      product.variants[0] &&
+                      onAddToCart(product, product.variants[0])
+                    }
                   />
                 </div>
               ))}
@@ -174,12 +206,15 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
 export function HomePage() {
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { addItem } = useCart();
-  const { data: curatedProducts, isLoading: isLoadingCuratedProducts } = useProducts({
-    sortBy: 'best_selling',
-    limit: 4,
-  });
+  const { data: curatedProducts, isLoading: isLoadingCuratedProducts } =
+    useProducts({
+      sortBy: 'best_selling',
+      limit: 4,
+    });
 
-  const rootCategories = (categories?.filter((category) => !category.parentId) || []).slice(0, FEATURED_CATEGORY_LIMIT);
+  const rootCategories = (
+    categories?.filter((category) => !category.parentId) || []
+  ).slice(0, FEATURED_CATEGORY_LIMIT);
 
   const handleAddToCart = (product: any, variant: any) => {
     addItem({
@@ -202,7 +237,7 @@ export function HomePage() {
           {/* Animated Ambient Blobs */}
           <div className="absolute top-[-20%] left-[-10%] h-[350px] w-[350px] rounded-full bg-amber-300/12 blur-[80px] animate-float-orb pointer-events-none" />
           <div className="absolute bottom-[-15%] right-[-5%] h-[400px] w-[400px] rounded-full bg-neutral-400/10 blur-[90px] animate-float-orb [animation-delay:-5s] pointer-events-none" />
-          
+
           <div className="relative grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
               <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-white/80 px-4.5 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary shadow-sm hover:scale-[1.01] transition-transform duration-300 backdrop-blur-md">
@@ -210,25 +245,39 @@ export function HomePage() {
                 Hương thơm cho không gian sống hiện đại
               </p>
               <h1 className="max-w-3xl text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-7xl font-serif">
-                Chọn mùi hương khiến không gian của bạn <span className="text-gradient-emerald">trông có gu hơn</span>.
+                Chọn mùi hương khiến không gian của bạn{' '}
+                <span className="text-gradient-emerald">trông có gu hơn</span>.
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg font-medium">
-                Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết, gọn và không gắt. Bạn có thể bắt đầu từ
-                mùi bán chạy, hỏi chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay trên catalog.
+                Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết,
+                gọn và không gắt. Bạn có thể bắt đầu từ mùi bán chạy, hỏi
+                chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay
+                trên catalog.
               </p>
               <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
-                <Button asChild size="lg" className="h-[3.25rem] rounded-full px-8 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 shadow-xl shadow-primary/15 hover:shadow-primary/25 bg-primary font-bold uppercase tracking-wider text-xs">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-[3.25rem] rounded-full px-8 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 shadow-xl shadow-primary/15 hover:shadow-primary/25 bg-primary font-bold uppercase tracking-wider text-xs"
+                >
                   <Link to="/catalog">
                     Khám phá bộ sưu tập
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-[3.25rem] rounded-full px-8 border-black/[0.05] bg-white/60 hover:bg-white/95 hover:-translate-y-0.5 hover:scale-[1.03] transition-all duration-300 shadow-sm font-bold uppercase tracking-wider text-xs">
-                  <Link to="/catalog?sort=best_selling">Xem nhóm bán chạy nhất</Link>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="h-[3.25rem] rounded-full px-8 border-black/[0.05] bg-white/60 hover:bg-white/95 hover:-translate-y-0.5 hover:scale-[1.03] transition-all duration-300 shadow-sm font-bold uppercase tracking-wider text-xs"
+                >
+                  <Link to="/catalog?sort=best_selling">
+                    Xem nhóm bán chạy nhất
+                  </Link>
                 </Button>
               </div>
             </div>
- 
+
             <div className="relative aspect-square w-full max-w-[400px] mx-auto lg:max-w-none rounded-[2.2rem] border border-black/[0.02] shadow-luxury group animate-scale-in">
               <div className="h-full w-full overflow-hidden rounded-[2.2rem] bg-gradient-to-tr from-secondary/50 to-white/30 border border-white/40">
                 <img
@@ -238,17 +287,27 @@ export function HomePage() {
                 />
               </div>
               <div className="absolute inset-0 rounded-[2.2rem] bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/80">Premium Scent Collection</p>
-                <h3 className="text-lg font-bold mt-1 font-serif leading-tight">Mùi hương tinh tế cho nhịp sống hiện đại</h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/80">
+                  Premium Scent Collection
+                </p>
+                <h3 className="text-lg font-bold mt-1 font-serif leading-tight">
+                  Mùi hương tinh tế cho nhịp sống hiện đại
+                </h3>
               </div>
               <div className="absolute top-4 right-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-md px-4 py-2.5 text-white shadow-lg animate-bounce [animation-duration:4s]">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-white/80">Khuyên dùng</p>
-                <p className="text-xs font-extrabold mt-0.5 tracking-wide">Woody & Fresh</p>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-white/80">
+                  Khuyên dùng
+                </p>
+                <p className="text-xs font-extrabold mt-0.5 tracking-wide">
+                  Woody & Fresh
+                </p>
               </div>
-              
+
               {/* Scent notes overlay */}
               <div className="absolute -bottom-4 -left-4 glass-premium p-4.5 rounded-[1.6rem] max-w-[210px] border border-black/[0.02] shadow-luxury hidden sm:block hover:scale-105 duration-300">
-                <p className="text-[9px] font-extrabold uppercase tracking-widest text-primary">Olfactory Notes</p>
+                <p className="text-[9px] font-extrabold uppercase tracking-widest text-primary">
+                  Olfactory Notes
+                </p>
                 <div className="flex flex-col gap-2 mt-2.5">
                   <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
                     <span className="h-2 w-2 rounded-full bg-emerald-600 shadow-sm" />
@@ -267,24 +326,40 @@ export function HomePage() {
             </div>
           </div>
         </section>
- 
+
         <section className="grid gap-6 md:grid-cols-2">
           <div className="section-shell p-6 bg-white/60 backdrop-blur-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Điểm mạnh của shop</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">
+              Điểm mạnh của shop
+            </p>
             <div className="grid gap-3 grid-cols-3">
               {HIGHLIGHTS.map((item) => (
-                <div key={item.label} className="rounded-2xl bg-white/90 border border-black/[0.02] p-4 shadow-luxury text-center hover-glow hover:-translate-y-0.5 transition-all duration-300">
-                  <p className="text-2xl font-bold text-primary">{item.value}</p>
-                  <p className="mt-1 text-xs text-muted-foreground font-semibold leading-tight">{item.label}</p>
+                <div
+                  key={item.label}
+                  className="rounded-2xl bg-white/90 border border-black/[0.02] p-4 shadow-luxury text-center hover-glow hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  <p className="text-2xl font-bold text-primary">
+                    {item.value}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground font-semibold leading-tight">
+                    {item.label}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
           <div className="section-shell p-6 bg-white/60 backdrop-blur-sm flex flex-col justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Gợi ý bắt đầu nhanh</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">
+                Gợi ý bắt đầu nhanh
+              </p>
               <div className="flex flex-wrap gap-2 pt-1">
-                {['Xịt phòng khách', 'Body mist nhẹ', 'Quà tặng', 'Mùi sạch cho xe'].map((item) => (
+                {[
+                  'Xịt phòng khách',
+                  'Body mist nhẹ',
+                  'Quà tặng',
+                  'Mùi sạch cho xe',
+                ].map((item) => (
                   <Link
                     key={item}
                     to={`/search?q=${encodeURIComponent(item)}`}
@@ -295,19 +370,28 @@ export function HomePage() {
                 ))}
               </div>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-4">Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.</p>
+            <p className="text-[11px] text-muted-foreground mt-4">
+              Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.
+            </p>
           </div>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
           {BENEFITS.map((item) => (
-            <div key={item.title} className="section-shell flex items-start gap-4 p-5">
+            <div
+              key={item.title}
+              className="section-shell flex items-start gap-4 p-5"
+            >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-foreground">
                 <item.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-foreground">{item.title}</p>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.desc}</p>
+                <p className="text-lg font-semibold text-foreground">
+                  {item.title}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  {item.desc}
+                </p>
               </div>
             </div>
           ))}
@@ -316,10 +400,18 @@ export function HomePage() {
         <section className="section-shell p-5 md:p-8">
           <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Biên tập bởi Thai Spray</p>
-              <h2 className="section-title text-2xl md:text-3xl">Những lựa chọn đang được hỏi nhiều</h2>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                Biên tập bởi Thai Spray
+              </p>
+              <h2 className="section-title text-2xl md:text-3xl">
+                Những lựa chọn đang được hỏi nhiều
+              </h2>
             </div>
-            <Button asChild variant="ghost" className="justify-start rounded-full px-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
+            <Button
+              asChild
+              variant="ghost"
+              className="justify-start rounded-full px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
+            >
               <Link to="/catalog?sort=best_selling">
                 Xem thêm trong catalog
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -332,7 +424,11 @@ export function HomePage() {
           ) : (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {curatedProducts?.products.map((product, index) => (
-                <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 80}ms` }}>
+                <div
+                  key={product.id}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -342,7 +438,10 @@ export function HomePage() {
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     variants={product.variants}
-                    onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                    onAddToCart={() =>
+                      product.variants[0] &&
+                      handleAddToCart(product, product.variants[0])
+                    }
                   />
                 </div>
               ))}

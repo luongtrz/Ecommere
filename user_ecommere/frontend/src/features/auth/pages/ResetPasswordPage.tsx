@@ -9,7 +9,8 @@ import type { ResetPasswordInput } from '@/lib/validators';
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const { resetPassword, isResetPasswordLoading, resetPasswordError } = useAuth();
+  const { resetPassword, isResetPasswordLoading, resetPasswordError } =
+    useAuth();
 
   const isTokenMissing = !token || !token.trim();
 
@@ -28,7 +29,9 @@ export function ResetPasswordPage() {
             <div className="inline-flex items-center justify-center w-10 h-10 bg-foreground rounded-lg mb-3">
               <span className="text-white font-bold text-sm">TS</span>
             </div>
-            <h1 className="text-xl font-semibold text-foreground">Đặt lại mật khẩu</h1>
+            <h1 className="text-xl font-semibold text-foreground">
+              Đặt lại mật khẩu
+            </h1>
             <p className="text-sm text-muted-foreground mt-1">
               {isTokenMissing
                 ? 'Liên kết đặt lại mật khẩu'
@@ -43,7 +46,8 @@ export function ResetPasswordPage() {
                 <div className="space-y-4">
                   <Alert variant="destructive">
                     <AlertDescription>
-                      Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.
+                      Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác
+                      thực.
                     </AlertDescription>
                   </Alert>
 
@@ -77,14 +81,22 @@ export function ResetPasswordPage() {
                   {resetPasswordError && (
                     <Alert variant="destructive">
                       <AlertDescription>
-                        {Array.isArray(resetPasswordError.response?.data?.message)
-                          ? resetPasswordError.response?.data?.message.join(', ')
-                          : (resetPasswordError.response?.data?.message || 'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.')}
+                        {Array.isArray(
+                          resetPasswordError.response?.data?.message,
+                        )
+                          ? resetPasswordError.response?.data?.message.join(
+                              ', ',
+                            )
+                          : resetPasswordError.response?.data?.message ||
+                            'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.'}
                       </AlertDescription>
                     </Alert>
                   )}
 
-                  <ResetPasswordForm onSubmit={handleSubmit} isLoading={isResetPasswordLoading} />
+                  <ResetPasswordForm
+                    onSubmit={handleSubmit}
+                    isLoading={isResetPasswordLoading}
+                  />
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">

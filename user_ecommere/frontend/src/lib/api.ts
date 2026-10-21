@@ -3,7 +3,8 @@ import { jwtDecode } from 'jwt-decode';
 import { useCartStore } from '@/features/cart/store/cartStore';
 import { useChatStore } from '@/features/chatbot/store/chatStore';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api`,
@@ -97,7 +98,7 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 apiClient.interceptors.response.use(
@@ -106,7 +107,11 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh');
 
-    if (error.response?.status === 401 && !originalRequest?._retry && !isRefreshRequest) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest?._retry &&
+      !isRefreshRequest
+    ) {
       // Mark before queueing: a queued replay that gets 401 again must not refresh a second time
       originalRequest._retry = true;
 
@@ -148,7 +153,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

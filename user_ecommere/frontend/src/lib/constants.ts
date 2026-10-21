@@ -30,7 +30,12 @@ export const PAYMENT_METHODS = [
 ] as const;
 
 export const SHIPPING_METHODS = [
-  { id: 'STANDARD', name: 'Giao hàng tiêu chuẩn', price: 30000, days: '3-5 ngày' },
+  {
+    id: 'STANDARD',
+    name: 'Giao hàng tiêu chuẩn',
+    price: 30000,
+    days: '3-5 ngày',
+  },
   { id: 'EXPRESS', name: 'Giao hàng nhanh', price: 50000, days: '1-2 ngày' },
 ] as const;
 

@@ -7,7 +7,9 @@ import { SessionRestoreWrapper } from '@/features/auth/components/SessionRestore
 
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(() =>
-      import('@tanstack/react-query-devtools').then(m => ({ default: m.ReactQueryDevtools }))
+      import('@tanstack/react-query-devtools').then((m) => ({
+        default: m.ReactQueryDevtools,
+      })),
     )
   : () => null;
 
@@ -18,9 +20,7 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionRestoreWrapper>
-        {children}
-      </SessionRestoreWrapper>
+      <SessionRestoreWrapper>{children}</SessionRestoreWrapper>
       <Toaster />
       <SonnerToaster position="top-right" richColors />
       <Suspense fallback={null}>

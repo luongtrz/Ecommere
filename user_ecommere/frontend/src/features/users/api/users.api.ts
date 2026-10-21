@@ -22,7 +22,11 @@ const addressSchema = z.object({
 const userProfileSchema = z.object({
   id: z.string(),
   email: z.string().email().nullable().optional(),
-  name: z.string().nullable().optional().transform((value) => value ?? ''),
+  name: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => value ?? ''),
   role: z.enum(['CUSTOMER', 'ADMIN']),
   phone: z.string().nullable().optional(),
   createdAt: z.string().optional(),

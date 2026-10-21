@@ -10,11 +10,11 @@ import { Link } from 'react-router-dom';
 export function HomePage() {
   const { data: newProducts, isLoading: isLoadingNew } = useProducts({
     sortBy: 'newest',
-    limit: 8
+    limit: 8,
   });
   const { data: bestSelling, isLoading: isLoadingBest } = useProducts({
     sortBy: 'best_selling',
-    limit: 8
+    limit: 8,
   });
   const { addItem } = useCart();
 
@@ -48,19 +48,25 @@ export function HomePage() {
               <span className="block text-yellow-300">Thái Lan Chính Hãng</span>
             </h1>
             <p className="text-base md:text-lg text-blue-100 mb-6 max-w-3xl mx-auto leading-relaxed">
-              Khám phá bộ sưu tập nước hoa xịt thơm đa dạng mùi hương,
-              chất lượng cao cấp với giá tốt nhất thị trường
+              Khám phá bộ sưu tập nước hoa xịt thơm đa dạng mùi hương, chất
+              lượng cao cấp với giá tốt nhất thị trường
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild size="default" className="bg-white text-blue-600 hover:bg-blue-50 text-base px-6">
+              <Button
+                asChild
+                size="default"
+                className="bg-white text-blue-600 hover:bg-blue-50 text-base px-6"
+              >
                 <Link to="/catalog">
                   Khám phá ngay <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild size="default" className="bg-white/20 backdrop-blur-sm border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base px-6 font-medium">
-                <Link to="/search">
-                  Tìm kiếm sản phẩm
-                </Link>
+              <Button
+                asChild
+                size="default"
+                className="bg-white/20 backdrop-blur-sm border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base px-6 font-medium"
+              >
+                <Link to="/search">Tìm kiếm sản phẩm</Link>
               </Button>
             </div>
           </div>
@@ -93,7 +99,10 @@ export function HomePage() {
                 price={product.basePrice}
                 rating={product.rating}
                 reviewCount={product.reviewCount}
-                onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                onAddToCart={() =>
+                  product.variants[0] &&
+                  handleAddToCart(product, product.variants[0])
+                }
               />
             ))}
           </div>
@@ -124,7 +133,10 @@ export function HomePage() {
                   price={product.basePrice}
                   rating={product.rating}
                   reviewCount={product.reviewCount}
-                  onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                  onAddToCart={() =>
+                    product.variants[0] &&
+                    handleAddToCart(product, product.variants[0])
+                  }
                 />
               ))}
             </div>
@@ -140,21 +152,27 @@ export function HomePage() {
               <Truck className="h-7 w-7 text-blue-600" />
             </div>
             <h3 className="font-semibold mb-2">Giao hàng nhanh</h3>
-            <p className="text-sm text-muted-foreground">Giao hàng toàn quốc trong 1-3 ngày</p>
+            <p className="text-sm text-muted-foreground">
+              Giao hàng toàn quốc trong 1-3 ngày
+            </p>
           </div>
           <div className="text-center">
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
               <Shield className="h-7 w-7 text-green-600" />
             </div>
             <h3 className="font-semibold mb-2">Chính hãng 100%</h3>
-            <p className="text-sm text-muted-foreground">Cam kết sản phẩm chính hãng</p>
+            <p className="text-sm text-muted-foreground">
+              Cam kết sản phẩm chính hãng
+            </p>
           </div>
           <div className="text-center">
             <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
               <RefreshCw className="h-7 w-7 text-purple-600" />
             </div>
             <h3 className="font-semibold mb-2">Đổi trả dễ dàng</h3>
-            <p className="text-sm text-muted-foreground">Đổi trả trong 7 ngày nếu có lỗi</p>
+            <p className="text-sm text-muted-foreground">
+              Đổi trả trong 7 ngày nếu có lỗi
+            </p>
           </div>
         </div>
       </section>

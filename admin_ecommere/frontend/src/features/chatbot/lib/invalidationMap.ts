@@ -90,9 +90,7 @@ const REFERRAL_CONFIG_KEYS: QueryKey[] = [
   ['admin-referral-stats'],
 ];
 
-const CATEGORY_KEYS: QueryKey[] = [
-  ['categories'],
-];
+const CATEGORY_KEYS: QueryKey[] = [['categories']];
 
 const EMPTY_KEYS: QueryKey[] = [];
 

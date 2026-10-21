@@ -49,7 +49,9 @@ export function AddressesPage() {
       <div className="container max-w-4xl py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Sổ địa chỉ</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Sổ địa chỉ
+            </h1>
             <p className="text-gray-600">Quản lý địa chỉ giao hàng của bạn</p>
           </div>
           <Button onClick={handleAdd}>
@@ -63,7 +65,9 @@ export function AddressesPage() {
             <CardContent className="py-12">
               <div className="text-center">
                 <MapPin className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Chưa có địa chỉ nào</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Chưa có địa chỉ nào
+                </h3>
                 <p className="text-gray-600 mb-4">
                   Thêm địa chỉ để thuận tiện cho việc đặt hàng
                 </p>
@@ -77,11 +81,16 @@ export function AddressesPage() {
         ) : (
           <div className="grid gap-4">
             {addresses.map((address) => (
-              <Card key={address.id} className="shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                key={address.id}
+                className="shadow-sm hover:shadow-md transition-shadow"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg">{address.fullName}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {address.fullName}
+                      </CardTitle>
                       {address.isDefault && (
                         <Badge variant="default" className="bg-green-500">
                           <Home className="h-3 w-3 mr-1" />
@@ -115,7 +124,8 @@ export function AddressesPage() {
                       {address.phone}
                     </p>
                     <p>
-                      <span className="font-medium">Địa chỉ:</span> {address.line1}
+                      <span className="font-medium">Địa chỉ:</span>{' '}
+                      {address.line1}
                     </p>
                     <p className="text-sm text-gray-600">
                       {address.ward}, {address.district}, {address.province}

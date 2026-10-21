@@ -29,21 +29,36 @@ export function useAuth() {
       navigate('/');
     },
     onError: (error: AxiosError<any>) => {
-      const message = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại số điện thoại và mật khẩu.';
+      const message =
+        error.response?.data?.message ||
+        'Đăng nhập thất bại. Vui lòng kiểm tra lại số điện thoại và mật khẩu.';
       toast.error(message);
     },
   });
 
   const registerMutation = useMutation({
-    mutationFn: ({ name, phone, password, email, referralCode }: { name: string; phone: string; password: string; email?: string; referralCode?: string }) =>
-      authApi.register(name, phone, password, email, referralCode),
+    mutationFn: ({
+      name,
+      phone,
+      password,
+      email,
+      referralCode,
+    }: {
+      name: string;
+      phone: string;
+      password: string;
+      email?: string;
+      referralCode?: string;
+    }) => authApi.register(name, phone, password, email, referralCode),
     onSuccess: (data) => {
       queryClient.setQueryData([QUERY_KEYS.USER], data.user);
       toast.success(`Đăng ký thành công! Chào mừng ${data.user.name}!`);
       navigate('/');
     },
     onError: (error: AxiosError<any>) => {
-      const message = error.response?.data?.message || 'Đăng ký thất bại. Số điện thoại có thể đã được sử dụng.';
+      const message =
+        error.response?.data?.message ||
+        'Đăng ký thất bại. Số điện thoại có thể đã được sử dụng.';
       toast.error(message);
     },
   });
@@ -57,14 +72,19 @@ export function useAuth() {
       const rawMessage = error.response?.data?.message;
       const message = Array.isArray(rawMessage)
         ? rawMessage.join(', ')
-        : (rawMessage || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+        : rawMessage || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
       toast.error(message);
     },
   });
 
   const resetPasswordMutation = useMutation({
-    mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
-      authApi.resetPassword(token, newPassword),
+    mutationFn: ({
+      token,
+      newPassword,
+    }: {
+      token: string;
+      newPassword: string;
+    }) => authApi.resetPassword(token, newPassword),
     onSuccess: () => {
       toast.success('Đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
       navigate('/login');
@@ -73,7 +93,7 @@ export function useAuth() {
       const rawMessage = error.response?.data?.message;
       const message = Array.isArray(rawMessage)
         ? rawMessage.join(', ')
-        : (rawMessage || 'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.');
+        : rawMessage || 'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.';
       toast.error(message);
     },
   });

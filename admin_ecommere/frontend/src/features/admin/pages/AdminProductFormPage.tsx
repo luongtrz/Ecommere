@@ -19,32 +19,59 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ArrowLeft, Loader2, Save, ChevronDown, Plus, Trash2 } from 'lucide-react';
-import { useAdminProduct, useCreateProduct, useUpdateProduct } from '../hooks/useAdminProducts';
+import {
+  ArrowLeft,
+  Loader2,
+  Save,
+  ChevronDown,
+  Plus,
+  Trash2,
+} from 'lucide-react';
+import {
+  useAdminProduct,
+  useCreateProduct,
+  useUpdateProduct,
+} from '../hooks/useAdminProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ImageUpload } from '@/components/common/ImageUpload';
 import { useToast } from '@/hooks/useToast';
 
 // Form validation schema
-const variantFormSchema = z.object({
-  scent: z.string().min(1, 'Mùi hương là bắt buộc'),
-  volumeMl: z.number().int().min(1, 'Dung tích phải lớn hơn 0'),
-  price: z.number().int().min(0, 'Giá phải lớn hơn hoặc bằng 0'),
-  salePrice: z.number().int().min(0, 'Giá sale không được âm').nullable().optional(),
-  stock: z.number().int().min(0, 'Tồn kho không được âm'),
-  barcode: z.string().optional(),
-}).refine((variant) => variant.salePrice == null || variant.salePrice <= variant.price, {
-  path: ['salePrice'],
-  message: 'Giá sale không được lớn hơn giá niêm yết',
-});
+const variantFormSchema = z
+  .object({
+    scent: z.string().min(1, 'Mùi hương là bắt buộc'),
+    volumeMl: z.number().int().min(1, 'Dung tích phải lớn hơn 0'),
+    price: z.number().int().min(0, 'Giá phải lớn hơn hoặc bằng 0'),
+    salePrice: z
+      .number()
+      .int()
+      .min(0, 'Giá sale không được âm')
+      .nullable()
+      .optional(),
+    stock: z.number().int().min(0, 'Tồn kho không được âm'),
+    barcode: z.string().optional(),
+  })
+  .refine(
+    (variant) =>
+      variant.salePrice == null || variant.salePrice <= variant.price,
+    {
+      path: ['salePrice'],
+      message: 'Giá sale không được lớn hơn giá niêm yết',
+    },
+  );
 
 const productFormSchema = z.object({
   name: z.string().min(1, 'Tên sản phẩm là bắt buộc'),
   description: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
   categoryId: z.string().min(1, 'Vui lòng chọn danh mục'),
-  basePrice: z.number().int('Giá phải là số nguyên').positive('Giá phải lớn hơn 0'),
+  basePrice: z
+    .number()
+    .int('Giá phải là số nguyên')
+    .positive('Giá phải lớn hơn 0'),
   active: z.boolean(),
-  variants: z.array(variantFormSchema).min(1, 'Sản phẩm phải có ít nhất một biến thể'),
+  variants: z
+    .array(variantFormSchema)
+    .min(1, 'Sản phẩm phải có ít nhất một biến thể'),
   images: z.array(z.string()).min(1, 'Vui lòng thêm ít nhất 1 ảnh'),
 });
 
@@ -60,7 +87,9 @@ export function AdminProductFormPage() {
   const [images, setImages] = useState<string[]>([]);
 
   // Fetch product data if editing
-  const { data: product, isLoading: isLoadingProduct } = useAdminProduct(id || null);
+  const { data: product, isLoading: isLoadingProduct } = useAdminProduct(
+    id || null,
+  );
 
   // Mutations
   const createProduct = useCreateProduct();
@@ -108,12 +137,14 @@ export function AdminProductFormPage() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const tree = await import('../api/categories.api').then(m => m.categoriesApi.getTree());
+        const tree = await import('../api/categories.api').then((m) =>
+          m.categoriesApi.getTree(),
+        );
 
         // Flatten tree but only keep leaves
         const allCategories: any[] = [];
         const traverse = (nodes: any[], prefix = '') => {
-          nodes.forEach(node => {
+          nodes.forEach((node) => {
             const currentName = prefix + node.name;
             const isLeaf = !node.children || node.children.length === 0;
 
@@ -230,7 +261,13 @@ export function AdminProductFormPage() {
 
   return (
     <>
-      <SEO title={isEditMode ? `Chỉnh sửa sản phẩm - ${product?.name || ''}` : 'Thêm sản phẩm mới'} />
+      <SEO
+        title={
+          isEditMode
+            ? `Chỉnh sửa sản phẩm - ${product?.name || ''}`
+            : 'Thêm sản phẩm mới'
+        }
+      />
       <div className="w-full max-w-[98%] mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-4">
@@ -284,12 +321,16 @@ export function AdminProductFormPage() {
                         images={images}
                         onChange={(newImages) => {
                           setImages(newImages);
-                          setValue('images', newImages, { shouldValidate: true });
+                          setValue('images', newImages, {
+                            shouldValidate: true,
+                          });
                         }}
                         maxImages={5}
                       />
                       {errors.images && (
-                        <p className="text-sm text-destructive">{errors.images.message}</p>
+                        <p className="text-sm text-destructive">
+                          {errors.images.message}
+                        </p>
                       )}
                     </div>
                   </CardContent>
@@ -314,7 +355,9 @@ export function AdminProductFormPage() {
                         {...register('name')}
                       />
                       {errors.name && (
-                        <p className="text-sm text-destructive">{errors.name.message}</p>
+                        <p className="text-sm text-destructive">
+                          {errors.name.message}
+                        </p>
                       )}
                     </div>
 
@@ -331,7 +374,9 @@ export function AdminProductFormPage() {
                         {...register('description')}
                       />
                       {errors.description && (
-                        <p className="text-sm text-destructive">{errors.description.message}</p>
+                        <p className="text-sm text-destructive">
+                          {errors.description.message}
+                        </p>
                       )}
                     </div>
                   </CardContent>
@@ -357,33 +402,48 @@ export function AdminProductFormPage() {
                         <Button
                           variant="outline"
                           role="combobox"
-                          className={
-                            `w-full justify-between ${!watch('categoryId') && "text-muted-foreground"
-                            }`
-                          }
+                          className={`w-full justify-between ${
+                            !watch('categoryId') && 'text-muted-foreground'
+                          }`}
                         >
                           {watch('categoryId')
-                            ? categories.find((c) => c.id === watch('categoryId'))?.displayName
-                            : (categories.length > 0 ? "Chọn danh mục" : "Đang tải danh mục...")}
+                            ? categories.find(
+                                (c) => c.id === watch('categoryId'),
+                              )?.displayName
+                            : categories.length > 0
+                              ? 'Chọn danh mục'
+                              : 'Đang tải danh mục...'}
                           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-[300px] max-h-[300px] overflow-y-auto" align="start">
+                      <DropdownMenuContent
+                        className="w-[300px] max-h-[300px] overflow-y-auto"
+                        align="start"
+                      >
                         {(() => {
                           const renderMenu = (nodes: any[]) => {
                             return nodes.map((node) => {
-                              const isLeaf = !node.children || node.children.length === 0;
+                              const isLeaf =
+                                !node.children || node.children.length === 0;
 
                               if (isLeaf) {
                                 return (
                                   <DropdownMenuItem
                                     key={node.id}
                                     onClick={() => {
-                                      setValue('categoryId', node.id, { shouldValidate: true });
+                                      setValue('categoryId', node.id, {
+                                        shouldValidate: true,
+                                      });
                                     }}
                                     className="cursor-pointer"
                                   >
-                                    <span className={watch('categoryId') === node.id ? "font-bold text-primary" : ""}>
+                                    <span
+                                      className={
+                                        watch('categoryId') === node.id
+                                          ? 'font-bold text-primary'
+                                          : ''
+                                      }
+                                    >
                                       {node.name}
                                     </span>
                                   </DropdownMenuItem>
@@ -408,7 +468,9 @@ export function AdminProductFormPage() {
                     </DropdownMenu>
 
                     {errors.categoryId && (
-                      <p className="text-sm text-destructive">{errors.categoryId.message}</p>
+                      <p className="text-sm text-destructive">
+                        {errors.categoryId.message}
+                      </p>
                     )}
                   </div>
 
@@ -424,7 +486,9 @@ export function AdminProductFormPage() {
                       {...register('basePrice', { valueAsNumber: true })}
                     />
                     {errors.basePrice && (
-                      <p className="text-sm text-destructive">{errors.basePrice.message}</p>
+                      <p className="text-sm text-destructive">
+                        {errors.basePrice.message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -439,7 +503,9 @@ export function AdminProductFormPage() {
                   <Switch
                     id="active"
                     checked={watch('active')}
-                    onCheckedChange={(checked) => setValue('active', checked, { shouldDirty: true })}
+                    onCheckedChange={(checked) =>
+                      setValue('active', checked, { shouldDirty: true })
+                    }
                     aria-label="Hiển thị sản phẩm"
                   />
                 </div>
@@ -462,14 +528,16 @@ export function AdminProductFormPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => append({
-                      scent: '',
-                      volumeMl: 50,
-                      price: 0,
-                      salePrice: undefined,
-                      stock: 0,
-                      barcode: '',
-                    })}
+                    onClick={() =>
+                      append({
+                        scent: '',
+                        volumeMl: 50,
+                        price: 0,
+                        salePrice: undefined,
+                        stock: 0,
+                        barcode: '',
+                      })
+                    }
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Thêm biến thể
@@ -495,68 +563,97 @@ export function AdminProductFormPage() {
                     </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.scent`}>Mùi hương</Label>
+                        <Label htmlFor={`variants.${index}.scent`}>
+                          Mùi hương
+                        </Label>
                         <Input
                           id={`variants.${index}.scent`}
                           disabled={isEditMode}
                           {...register(`variants.${index}.scent`)}
                         />
                         {errors.variants?.[index]?.scent && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.scent?.message}</p>
+                          <p className="text-sm text-destructive">
+                            {errors.variants[index]?.scent?.message}
+                          </p>
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.volumeMl`}>Dung tích (ml)</Label>
+                        <Label htmlFor={`variants.${index}.volumeMl`}>
+                          Dung tích (ml)
+                        </Label>
                         <Input
                           id={`variants.${index}.volumeMl`}
                           type="number"
                           disabled={isEditMode}
-                          {...register(`variants.${index}.volumeMl`, { valueAsNumber: true })}
+                          {...register(`variants.${index}.volumeMl`, {
+                            valueAsNumber: true,
+                          })}
                         />
                         {errors.variants?.[index]?.volumeMl && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.volumeMl?.message}</p>
+                          <p className="text-sm text-destructive">
+                            {errors.variants[index]?.volumeMl?.message}
+                          </p>
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.stock`}>Tồn kho</Label>
+                        <Label htmlFor={`variants.${index}.stock`}>
+                          Tồn kho
+                        </Label>
                         <Input
                           id={`variants.${index}.stock`}
                           type="number"
                           disabled={isEditMode}
-                          {...register(`variants.${index}.stock`, { valueAsNumber: true })}
+                          {...register(`variants.${index}.stock`, {
+                            valueAsNumber: true,
+                          })}
                         />
                         {errors.variants?.[index]?.stock && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.stock?.message}</p>
+                          <p className="text-sm text-destructive">
+                            {errors.variants[index]?.stock?.message}
+                          </p>
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.price`}>Giá niêm yết</Label>
+                        <Label htmlFor={`variants.${index}.price`}>
+                          Giá niêm yết
+                        </Label>
                         <Input
                           id={`variants.${index}.price`}
                           type="number"
                           disabled={isEditMode}
-                          {...register(`variants.${index}.price`, { valueAsNumber: true })}
+                          {...register(`variants.${index}.price`, {
+                            valueAsNumber: true,
+                          })}
                         />
                         {errors.variants?.[index]?.price && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.price?.message}</p>
+                          <p className="text-sm text-destructive">
+                            {errors.variants[index]?.price?.message}
+                          </p>
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.salePrice`}>Giá sale</Label>
+                        <Label htmlFor={`variants.${index}.salePrice`}>
+                          Giá sale
+                        </Label>
                         <Input
                           id={`variants.${index}.salePrice`}
                           type="number"
                           disabled={isEditMode}
                           {...register(`variants.${index}.salePrice`, {
-                            setValueAs: (value) => value === '' ? undefined : Number(value),
+                            setValueAs: (value) =>
+                              value === '' ? undefined : Number(value),
                           })}
                         />
                         {errors.variants?.[index]?.salePrice && (
-                          <p className="text-sm text-destructive">{errors.variants[index]?.salePrice?.message}</p>
+                          <p className="text-sm text-destructive">
+                            {errors.variants[index]?.salePrice?.message}
+                          </p>
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`variants.${index}.barcode`}>Barcode</Label>
+                        <Label htmlFor={`variants.${index}.barcode`}>
+                          Barcode
+                        </Label>
                         <Input
                           id={`variants.${index}.barcode`}
                           disabled={isEditMode}
@@ -567,7 +664,9 @@ export function AdminProductFormPage() {
                   </div>
                 ))}
                 {errors.variants?.root && (
-                  <p className="text-sm text-destructive">{errors.variants.root.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.variants.root.message}
+                  </p>
                 )}
               </CardContent>
             </Card>

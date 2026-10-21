@@ -3,9 +3,9 @@ import { productsApi } from '../api/products.api';
 import { QUERY_KEYS } from '@/lib/constants';
 
 export function useFilterOptions() {
-    return useQuery({
-        queryKey: [QUERY_KEYS.PRODUCTS, 'filter-options'],
-        queryFn: () => productsApi.getFilterOptions(),
-        staleTime: 30 * 60 * 1000, // 30 minutes - filter options rarely change
-    });
+  return useQuery({
+    queryKey: [QUERY_KEYS.PRODUCTS, 'filter-options'],
+    queryFn: () => productsApi.getFilterOptions(),
+    staleTime: 30 * 60 * 1000, // 30 minutes - filter options rarely change
+  });
 }

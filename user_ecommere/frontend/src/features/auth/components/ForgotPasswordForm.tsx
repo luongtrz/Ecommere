@@ -1,16 +1,29 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validators';
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordInput,
+} from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 interface ForgotPasswordFormProps {
   onSubmit: (data: ForgotPasswordInput) => void;
   isLoading?: boolean;
 }
 
-export function ForgotPasswordForm({ onSubmit, isLoading }: ForgotPasswordFormProps) {
+export function ForgotPasswordForm({
+  onSubmit,
+  isLoading,
+}: ForgotPasswordFormProps) {
   const form = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -28,7 +41,11 @@ export function ForgotPasswordForm({ onSubmit, isLoading }: ForgotPasswordFormPr
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="email@example.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="email@example.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

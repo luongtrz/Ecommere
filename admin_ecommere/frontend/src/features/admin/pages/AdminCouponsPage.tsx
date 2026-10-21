@@ -7,10 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Settings, Users, BarChart3, Save } from 'lucide-react';
-import { adminReferralsApi, type ReferralConfig } from '../api/adminReferrals.api';
+import {
+  adminReferralsApi,
+  type ReferralConfig,
+} from '../api/adminReferrals.api';
 import { useToast } from '@/hooks/useToast';
 
 export function AdminCouponsPage() {
@@ -34,7 +43,8 @@ export function AdminCouponsPage() {
   });
 
   const updateConfigMutation = useMutation({
-    mutationFn: (data: Partial<ReferralConfig>) => adminReferralsApi.updateConfig(data),
+    mutationFn: (data: Partial<ReferralConfig>) =>
+      adminReferralsApi.updateConfig(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-referral-config'] });
       queryClient.invalidateQueries({ queryKey: ['admin-referral-stats'] });
@@ -48,21 +58,31 @@ export function AdminCouponsPage() {
   const handleSaveConfig = () => {
     const data = {
       active: configForm.active ?? config?.active,
-      referrerCouponType: configForm.referrerCouponType ?? config?.referrerCouponType,
-      referrerCouponValue: configForm.referrerCouponValue ?? config?.referrerCouponValue,
-      referrerMaxDiscount: configForm.referrerMaxDiscount ?? config?.referrerMaxDiscount,
-      refereeCouponType: configForm.refereeCouponType ?? config?.refereeCouponType,
-      refereeCouponValue: configForm.refereeCouponValue ?? config?.refereeCouponValue,
-      refereeMaxDiscount: configForm.refereeMaxDiscount ?? config?.refereeMaxDiscount,
-      minOrderForCoupon: configForm.minOrderForCoupon ?? config?.minOrderForCoupon,
+      referrerCouponType:
+        configForm.referrerCouponType ?? config?.referrerCouponType,
+      referrerCouponValue:
+        configForm.referrerCouponValue ?? config?.referrerCouponValue,
+      referrerMaxDiscount:
+        configForm.referrerMaxDiscount ?? config?.referrerMaxDiscount,
+      refereeCouponType:
+        configForm.refereeCouponType ?? config?.refereeCouponType,
+      refereeCouponValue:
+        configForm.refereeCouponValue ?? config?.refereeCouponValue,
+      refereeMaxDiscount:
+        configForm.refereeMaxDiscount ?? config?.refereeMaxDiscount,
+      minOrderForCoupon:
+        configForm.minOrderForCoupon ?? config?.minOrderForCoupon,
       couponValidDays: configForm.couponValidDays ?? config?.couponValidDays,
-      maxReferralsPerUser: configForm.maxReferralsPerUser ?? config?.maxReferralsPerUser,
+      maxReferralsPerUser:
+        configForm.maxReferralsPerUser ?? config?.maxReferralsPerUser,
     };
     updateConfigMutation.mutate(data);
   };
 
   const getFieldValue = (field: keyof ReferralConfig) => {
-    return configForm[field] !== undefined ? configForm[field] : config?.[field];
+    return configForm[field] !== undefined
+      ? configForm[field]
+      : config?.[field];
   };
 
   return (
@@ -70,7 +90,9 @@ export function AdminCouponsPage() {
       <SEO title="Quản lý mã giảm giá và Referral - Admin" />
       <div>
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Quản lý mã giảm giá và Referral</h1>
+          <h1 className="text-3xl font-bold">
+            Quản lý mã giảm giá và Referral
+          </h1>
         </div>
 
         <Tabs defaultValue="coupons" className="space-y-6">
@@ -117,8 +139,12 @@ export function AdminCouponsPage() {
                           <Users className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <p className="text-2xl font-bold">{stats?.totalReferrals || 0}</p>
-                          <p className="text-xs text-muted-foreground">Tổng lượt giới thiệu</p>
+                          <p className="text-2xl font-bold">
+                            {stats?.totalReferrals || 0}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Tổng lượt giới thiệu
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -130,8 +156,12 @@ export function AdminCouponsPage() {
                           <BarChart3 className="h-5 w-5 text-green-600" />
                         </div>
                         <div>
-                          <p className="text-2xl font-bold">{stats?.totalCouponsCreated || 0}</p>
-                          <p className="text-xs text-muted-foreground">Coupon đã tạo</p>
+                          <p className="text-2xl font-bold">
+                            {stats?.totalCouponsCreated || 0}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Coupon đã tạo
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -144,9 +174,13 @@ export function AdminCouponsPage() {
                         </div>
                         <div>
                           <p className="text-2xl font-bold">
-                            {(getFieldValue('active') as boolean) ? 'Bật' : 'Tắt'}
+                            {(getFieldValue('active') as boolean)
+                              ? 'Bật'
+                              : 'Tắt'}
                           </p>
-                          <p className="text-xs text-muted-foreground">Trạng thái</p>
+                          <p className="text-xs text-muted-foreground">
+                            Trạng thái
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -165,14 +199,21 @@ export function AdminCouponsPage() {
                     {/* Active toggle */}
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                       <div>
-                        <Label className="text-sm font-medium">Kích hoạt tính năng Referral</Label>
+                        <Label className="text-sm font-medium">
+                          Kích hoạt tính năng Referral
+                        </Label>
                         <p className="text-xs text-muted-foreground mt-1">
                           Bật/tắt chương trình giới thiệu bạn bè
                         </p>
                       </div>
                       <Switch
-                        checked={getFieldValue('active') as boolean || false}
-                        onCheckedChange={(checked) => setConfigForm((prev) => ({ ...prev, active: checked }))}
+                        checked={(getFieldValue('active') as boolean) || false}
+                        onCheckedChange={(checked) =>
+                          setConfigForm((prev) => ({
+                            ...prev,
+                            active: checked,
+                          }))
+                        }
                       />
                     </div>
 
@@ -185,14 +226,30 @@ export function AdminCouponsPage() {
                         <div className="space-y-2">
                           <Label>Loại coupon</Label>
                           <Select
-                            value={(getFieldValue('referrerCouponType') as string) || 'PERCENT'}
-                            onValueChange={(v) => setConfigForm((prev) => ({ ...prev, referrerCouponType: v as any }))}
+                            value={
+                              (getFieldValue('referrerCouponType') as string) ||
+                              'PERCENT'
+                            }
+                            onValueChange={(v) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                referrerCouponType: v as any,
+                              }))
+                            }
                           >
-                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="PERCENT">Phần trăm (%)</SelectItem>
-                              <SelectItem value="FIXED">Số tiền cố định (VND)</SelectItem>
-                              <SelectItem value="FREESHIP">Miễn phí vận chuyển</SelectItem>
+                              <SelectItem value="PERCENT">
+                                Phần trăm (%)
+                              </SelectItem>
+                              <SelectItem value="FIXED">
+                                Số tiền cố định (VND)
+                              </SelectItem>
+                              <SelectItem value="FREESHIP">
+                                Miễn phí vận chuyển
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -200,8 +257,17 @@ export function AdminCouponsPage() {
                           <Label>Giá trị</Label>
                           <Input
                             type="number"
-                            value={(getFieldValue('referrerCouponValue') as number) || 0}
-                            onChange={(e) => setConfigForm((prev) => ({ ...prev, referrerCouponValue: Number(e.target.value) }))}
+                            value={
+                              (getFieldValue(
+                                'referrerCouponValue',
+                              ) as number) || 0
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                referrerCouponValue: Number(e.target.value),
+                              }))
+                            }
                           />
                         </div>
                         <div className="space-y-2">
@@ -209,11 +275,19 @@ export function AdminCouponsPage() {
                           <Input
                             type="number"
                             placeholder="Không giới hạn"
-                            value={(getFieldValue('referrerMaxDiscount') as number) || ''}
-                            onChange={(e) => setConfigForm((prev) => ({
-                              ...prev,
-                              referrerMaxDiscount: e.target.value ? Number(e.target.value) : null,
-                            }))}
+                            value={
+                              (getFieldValue(
+                                'referrerMaxDiscount',
+                              ) as number) || ''
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                referrerMaxDiscount: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }))
+                            }
                           />
                         </div>
                       </div>
@@ -228,14 +302,30 @@ export function AdminCouponsPage() {
                         <div className="space-y-2">
                           <Label>Loại coupon</Label>
                           <Select
-                            value={(getFieldValue('refereeCouponType') as string) || 'PERCENT'}
-                            onValueChange={(v) => setConfigForm((prev) => ({ ...prev, refereeCouponType: v as any }))}
+                            value={
+                              (getFieldValue('refereeCouponType') as string) ||
+                              'PERCENT'
+                            }
+                            onValueChange={(v) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                refereeCouponType: v as any,
+                              }))
+                            }
                           >
-                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="PERCENT">Phần trăm (%)</SelectItem>
-                              <SelectItem value="FIXED">Số tiền cố định (VND)</SelectItem>
-                              <SelectItem value="FREESHIP">Miễn phí vận chuyển</SelectItem>
+                              <SelectItem value="PERCENT">
+                                Phần trăm (%)
+                              </SelectItem>
+                              <SelectItem value="FIXED">
+                                Số tiền cố định (VND)
+                              </SelectItem>
+                              <SelectItem value="FREESHIP">
+                                Miễn phí vận chuyển
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -243,8 +333,16 @@ export function AdminCouponsPage() {
                           <Label>Giá trị</Label>
                           <Input
                             type="number"
-                            value={(getFieldValue('refereeCouponValue') as number) || 0}
-                            onChange={(e) => setConfigForm((prev) => ({ ...prev, refereeCouponValue: Number(e.target.value) }))}
+                            value={
+                              (getFieldValue('refereeCouponValue') as number) ||
+                              0
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                refereeCouponValue: Number(e.target.value),
+                              }))
+                            }
                           />
                         </div>
                         <div className="space-y-2">
@@ -252,11 +350,18 @@ export function AdminCouponsPage() {
                           <Input
                             type="number"
                             placeholder="Không giới hạn"
-                            value={(getFieldValue('refereeMaxDiscount') as number) || ''}
-                            onChange={(e) => setConfigForm((prev) => ({
-                              ...prev,
-                              refereeMaxDiscount: e.target.value ? Number(e.target.value) : null,
-                            }))}
+                            value={
+                              (getFieldValue('refereeMaxDiscount') as number) ||
+                              ''
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                refereeMaxDiscount: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }))
+                            }
                           />
                         </div>
                       </div>
@@ -273,19 +378,33 @@ export function AdminCouponsPage() {
                           <Input
                             type="number"
                             placeholder="0"
-                            value={(getFieldValue('minOrderForCoupon') as number) || ''}
-                            onChange={(e) => setConfigForm((prev) => ({
-                              ...prev,
-                              minOrderForCoupon: e.target.value ? Number(e.target.value) : null,
-                            }))}
+                            value={
+                              (getFieldValue('minOrderForCoupon') as number) ||
+                              ''
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                minOrderForCoupon: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }))
+                            }
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Số ngày hiệu lực coupon</Label>
                           <Input
                             type="number"
-                            value={(getFieldValue('couponValidDays') as number) || 30}
-                            onChange={(e) => setConfigForm((prev) => ({ ...prev, couponValidDays: Number(e.target.value) }))}
+                            value={
+                              (getFieldValue('couponValidDays') as number) || 30
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                couponValidDays: Number(e.target.value),
+                              }))
+                            }
                           />
                         </div>
                         <div className="space-y-2">
@@ -293,11 +412,19 @@ export function AdminCouponsPage() {
                           <Input
                             type="number"
                             placeholder="Không giới hạn"
-                            value={(getFieldValue('maxReferralsPerUser') as number) || ''}
-                            onChange={(e) => setConfigForm((prev) => ({
-                              ...prev,
-                              maxReferralsPerUser: e.target.value ? Number(e.target.value) : null,
-                            }))}
+                            value={
+                              (getFieldValue(
+                                'maxReferralsPerUser',
+                              ) as number) || ''
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                maxReferralsPerUser: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }))
+                            }
                           />
                         </div>
                       </div>
@@ -311,7 +438,9 @@ export function AdminCouponsPage() {
                         className="bg-gradient-to-r from-blue-600 to-indigo-600"
                       >
                         <Save className="mr-2 h-4 w-4" />
-                        {updateConfigMutation.isPending ? 'Đang lưu...' : 'Lưu cấu hình'}
+                        {updateConfigMutation.isPending
+                          ? 'Đang lưu...'
+                          : 'Lưu cấu hình'}
                       </Button>
                     </div>
                   </CardContent>
@@ -321,22 +450,33 @@ export function AdminCouponsPage() {
                 {stats?.topReferrers && stats.topReferrers.length > 0 && (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Top người giới thiệu</CardTitle>
+                      <CardTitle className="text-lg">
+                        Top người giới thiệu
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
                         {stats.topReferrers.map((item, index) => (
-                          <div key={item.user?.id || index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                          <div
+                            key={item.user?.id || index}
+                            className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
+                          >
                             <div className="flex items-center gap-3">
                               <span className="w-7 h-7 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
                                 {index + 1}
                               </span>
                               <div>
-                                <p className="text-sm font-medium">{item.user?.name || item.user?.email}</p>
-                                <p className="text-xs text-muted-foreground">{item.user?.email}</p>
+                                <p className="text-sm font-medium">
+                                  {item.user?.name || item.user?.email}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {item.user?.email}
+                                </p>
                               </div>
                             </div>
-                            <Badge variant="secondary">{item.referralCount} lượt</Badge>
+                            <Badge variant="secondary">
+                              {item.referralCount} lượt
+                            </Badge>
                           </div>
                         ))}
                       </div>
@@ -369,44 +509,77 @@ export function AdminCouponsPage() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b text-left">
-                          <th className="p-3 font-medium text-muted-foreground">Người giới thiệu</th>
-                          <th className="p-3 font-medium text-muted-foreground">Người được mời</th>
-                          <th className="p-3 font-medium text-muted-foreground">Coupon Referrer</th>
-                          <th className="p-3 font-medium text-muted-foreground">Coupon Referee</th>
-                          <th className="p-3 font-medium text-muted-foreground">Ngày</th>
+                          <th className="p-3 font-medium text-muted-foreground">
+                            Người giới thiệu
+                          </th>
+                          <th className="p-3 font-medium text-muted-foreground">
+                            Người được mời
+                          </th>
+                          <th className="p-3 font-medium text-muted-foreground">
+                            Coupon Referrer
+                          </th>
+                          <th className="p-3 font-medium text-muted-foreground">
+                            Coupon Referee
+                          </th>
+                          <th className="p-3 font-medium text-muted-foreground">
+                            Ngày
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {referralList.data.map((item) => (
-                          <tr key={item.id} className="border-b last:border-0 hover:bg-gray-50">
+                          <tr
+                            key={item.id}
+                            className="border-b last:border-0 hover:bg-gray-50"
+                          >
                             <td className="p-3">
                               <div>
-                                <p className="font-medium">{item.referrer.name || item.referrer.email}</p>
-                                <p className="text-xs text-muted-foreground">{item.referrer.referralCode}</p>
+                                <p className="font-medium">
+                                  {item.referrer.name || item.referrer.email}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {item.referrer.referralCode}
+                                </p>
                               </div>
                             </td>
                             <td className="p-3">
                               <div>
-                                <p className="font-medium">{item.referee.name || item.referee.email}</p>
-                                <p className="text-xs text-muted-foreground">{item.referee.email}</p>
+                                <p className="font-medium">
+                                  {item.referee.name || item.referee.email}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {item.referee.email}
+                                </p>
                               </div>
                             </td>
                             <td className="p-3">
                               {item.referrerCouponCode ? (
-                                <Badge variant="outline" className="font-mono text-xs">{item.referrerCouponCode}</Badge>
+                                <Badge
+                                  variant="outline"
+                                  className="font-mono text-xs"
+                                >
+                                  {item.referrerCouponCode}
+                                </Badge>
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
                             </td>
                             <td className="p-3">
                               {item.refereeCouponCode ? (
-                                <Badge variant="outline" className="font-mono text-xs">{item.refereeCouponCode}</Badge>
+                                <Badge
+                                  variant="outline"
+                                  className="font-mono text-xs"
+                                >
+                                  {item.refereeCouponCode}
+                                </Badge>
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
                             </td>
                             <td className="p-3 text-muted-foreground">
-                              {new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                              {new Date(item.createdAt).toLocaleDateString(
+                                'vi-VN',
+                              )}
                             </td>
                           </tr>
                         ))}
