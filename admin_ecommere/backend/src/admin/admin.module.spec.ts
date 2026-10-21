@@ -15,7 +15,12 @@ describe('AdminModule', () => {
 
   const mockPrismaService = {
     user: { count: jest.fn(), findMany: jest.fn(), findFirst: jest.fn() },
-    order: { aggregate: jest.fn(), groupBy: jest.fn(), findMany: jest.fn(), count: jest.fn() },
+    order: {
+      aggregate: jest.fn(),
+      groupBy: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
+    },
     product: { count: jest.fn() },
     $queryRaw: jest.fn(),
   };
@@ -55,7 +60,8 @@ describe('AdminModule', () => {
     });
 
     it('should resolve CustomersService', () => {
-      const customersService = moduleRef.get<CustomersService>(CustomersService);
+      const customersService =
+        moduleRef.get<CustomersService>(CustomersService);
       expect(customersService).toBeDefined();
       expect(customersService).toBeInstanceOf(CustomersService);
     });
@@ -69,13 +75,15 @@ describe('AdminModule', () => {
     });
 
     it('should resolve ReportsController', () => {
-      const reportsController = moduleRef.get<ReportsController>(ReportsController);
+      const reportsController =
+        moduleRef.get<ReportsController>(ReportsController);
       expect(reportsController).toBeDefined();
       expect(reportsController).toBeInstanceOf(ReportsController);
     });
 
     it('should resolve CustomersController', () => {
-      const customersController = moduleRef.get<CustomersController>(CustomersController);
+      const customersController =
+        moduleRef.get<CustomersController>(CustomersController);
       expect(customersController).toBeDefined();
       expect(customersController).toBeInstanceOf(CustomersController);
     });
@@ -111,11 +119,7 @@ describe('AdminModule', () => {
     it('should have all services exported in exports metadata', () => {
       const exports = Reflect.getMetadata('exports', AdminModule);
       expect(exports).toBeDefined();
-      expect(exports).toEqual([
-        AdminService,
-        ReportsService,
-        CustomersService,
-      ]);
+      expect(exports).toEqual([AdminService, ReportsService, CustomersService]);
     });
   });
 

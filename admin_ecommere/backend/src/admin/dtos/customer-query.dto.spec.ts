@@ -146,7 +146,9 @@ describe('CustomerQueryDto', () => {
 
         const dtoNegative = plainToInstance(CustomerQueryDto, { limit: -10 });
         const errorsNegative = await validate(dtoNegative);
-        const errorNegative = errorsNegative.find((e) => e.property === 'limit');
+        const errorNegative = errorsNegative.find(
+          (e) => e.property === 'limit',
+        );
         expect(errorNegative).toBeDefined();
         expect(errorNegative?.constraints).toHaveProperty('min');
       });

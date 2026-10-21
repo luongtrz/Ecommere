@@ -349,7 +349,11 @@ describe('ReportsService', () => {
 
     it('should safely ignore DB rows whose period is outside the generated range and handle null/undefined values', async () => {
       const mockRawRows = [
-        { period: '2026-01-01', orders: null as any, revenue: undefined as any },
+        {
+          period: '2026-01-01',
+          orders: null as any,
+          revenue: undefined as any,
+        },
         { period: '2025-01-01', orders: 99, revenue: 999999 }, // not in periodMap
       ];
       mockPrismaService.$queryRaw.mockResolvedValue(mockRawRows);

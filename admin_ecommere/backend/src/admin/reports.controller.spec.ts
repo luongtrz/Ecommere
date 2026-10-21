@@ -72,7 +72,9 @@ describe('ReportsController', () => {
       const result = await controller.getSalesReport(validQuery);
 
       expect(result).toEqual(mockSalesReport);
-      expect(mockReportsService.getSalesReport).toHaveBeenCalledWith(validQuery);
+      expect(mockReportsService.getSalesReport).toHaveBeenCalledWith(
+        validQuery,
+      );
       expect(mockReportsService.getSalesReport).toHaveBeenCalledTimes(1);
     });
 
@@ -90,7 +92,9 @@ describe('ReportsController', () => {
       const result = await controller.getSalesReport(monthQuery);
 
       expect(result.groupBy).toBe('month');
-      expect(mockReportsService.getSalesReport).toHaveBeenCalledWith(monthQuery);
+      expect(mockReportsService.getSalesReport).toHaveBeenCalledWith(
+        monthQuery,
+      );
     });
 
     it('should propagate BadRequestException when date format is invalid', async () => {
@@ -110,7 +114,9 @@ describe('ReportsController', () => {
       await expect(controller.getSalesReport(invalidQuery)).rejects.toThrow(
         'Định dạng ngày phải là YYYY-MM-DD',
       );
-      expect(mockReportsService.getSalesReport).toHaveBeenCalledWith(invalidQuery);
+      expect(mockReportsService.getSalesReport).toHaveBeenCalledWith(
+        invalidQuery,
+      );
     });
 
     it('should propagate BadRequestException when date range exceeds 366 days', async () => {
@@ -170,7 +176,9 @@ describe('ReportsController', () => {
       const result = await controller.getTopProducts(validQuery);
 
       expect(result).toEqual(mockTopProducts);
-      expect(mockReportsService.getTopProducts).toHaveBeenCalledWith(validQuery);
+      expect(mockReportsService.getTopProducts).toHaveBeenCalledWith(
+        validQuery,
+      );
       expect(mockReportsService.getTopProducts).toHaveBeenCalledTimes(1);
     });
 
@@ -207,7 +215,9 @@ describe('ReportsController', () => {
       await expect(controller.getTopProducts(invalidQuery)).rejects.toThrow(
         'Ngày bắt đầu không hợp lệ',
       );
-      expect(mockReportsService.getTopProducts).toHaveBeenCalledWith(invalidQuery);
+      expect(mockReportsService.getTopProducts).toHaveBeenCalledWith(
+        invalidQuery,
+      );
     });
 
     it('should propagate unexpected service errors', async () => {

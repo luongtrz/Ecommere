@@ -212,7 +212,9 @@ describe('AdminController (Coverage)', () => {
 
     it('should propagate unexpected Error when database connection fails', async () => {
       mockAdminService.getDashboardStats.mockRejectedValue(
-        new Error('PrismaClientInitializationError: Can not reach database server'),
+        new Error(
+          'PrismaClientInitializationError: Can not reach database server',
+        ),
       );
 
       await expect(controller.getDashboardStats()).rejects.toThrow(Error);

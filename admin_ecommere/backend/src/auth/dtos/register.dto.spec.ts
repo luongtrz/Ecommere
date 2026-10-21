@@ -160,7 +160,9 @@ describe('RegisterDto', () => {
         const errors = await validate(dto);
         const phoneError = errors.find((e) => e.property === 'phone');
         expect(phoneError).toBeDefined();
-        expect(phoneError?.constraints?.matches).toBe('Số điện thoại không hợp lệ');
+        expect(phoneError?.constraints?.matches).toBe(
+          'Số điện thoại không hợp lệ',
+        );
       },
     );
   });

@@ -191,7 +191,9 @@ describe('TopProductsQueryDto', () => {
           limit: -5,
         });
         const errorsNegative = await validate(dtoNegative);
-        const errorNegative = errorsNegative.find((e) => e.property === 'limit');
+        const errorNegative = errorsNegative.find(
+          (e) => e.property === 'limit',
+        );
         expect(errorNegative).toBeDefined();
         expect(errorNegative?.constraints?.min).toBe('limit tối thiểu là 1');
       });
@@ -227,7 +229,9 @@ describe('TopProductsQueryDto', () => {
         const errorsDecimal = await validate(dtoDecimal);
         const errorDecimal = errorsDecimal.find((e) => e.property === 'limit');
         expect(errorDecimal).toBeDefined();
-        expect(errorDecimal?.constraints?.isInt).toBe('limit phải là số nguyên');
+        expect(errorDecimal?.constraints?.isInt).toBe(
+          'limit phải là số nguyên',
+        );
       });
 
       it('should fail when limit cannot be parsed as an integer', async () => {

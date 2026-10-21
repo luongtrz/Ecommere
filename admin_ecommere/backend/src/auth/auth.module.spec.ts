@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
@@ -149,7 +149,9 @@ describe('AuthModule', () => {
       await expect(useFactory(configService)).rejects.toThrow(
         'ADMIN_JWT_REFRESH_SECRET is required',
       );
-      expect(configService.get).toHaveBeenCalledWith('ADMIN_JWT_REFRESH_SECRET');
+      expect(configService.get).toHaveBeenCalledWith(
+        'ADMIN_JWT_REFRESH_SECRET',
+      );
     });
 
     it('throws Error when ADMIN_JWT_REFRESH_SECRET is an empty string', async () => {
@@ -185,8 +187,10 @@ describe('AuthModule', () => {
     it('returns the JWT configuration when valid access and refresh secrets are provided', async () => {
       const configService = {
         get: jest.fn((key: string) => {
-          if (key === 'ADMIN_JWT_ACCESS_SECRET') return 'valid-admin-access-secret';
-          if (key === 'ADMIN_JWT_REFRESH_SECRET') return 'valid-admin-refresh-secret';
+          if (key === 'ADMIN_JWT_ACCESS_SECRET')
+            return 'valid-admin-access-secret';
+          if (key === 'ADMIN_JWT_REFRESH_SECRET')
+            return 'valid-admin-refresh-secret';
           if (key === 'TOKEN_EXPIRES_IN') return '15m';
           return undefined;
         }),
@@ -203,7 +207,9 @@ describe('AuthModule', () => {
         },
       });
       expect(configService.get).toHaveBeenCalledWith('ADMIN_JWT_ACCESS_SECRET');
-      expect(configService.get).toHaveBeenCalledWith('ADMIN_JWT_REFRESH_SECRET');
+      expect(configService.get).toHaveBeenCalledWith(
+        'ADMIN_JWT_REFRESH_SECRET',
+      );
       expect(configService.get).toHaveBeenCalledWith('TOKEN_EXPIRES_IN');
     });
   });
@@ -212,8 +218,10 @@ describe('AuthModule', () => {
     it('compiles successfully with providers overridden and no real connections', async () => {
       const mockConfigService = {
         get: jest.fn((key: string) => {
-          if (key === 'ADMIN_JWT_ACCESS_SECRET') return 'compiled-access-secret';
-          if (key === 'ADMIN_JWT_REFRESH_SECRET') return 'compiled-refresh-secret';
+          if (key === 'ADMIN_JWT_ACCESS_SECRET')
+            return 'compiled-access-secret';
+          if (key === 'ADMIN_JWT_REFRESH_SECRET')
+            return 'compiled-refresh-secret';
           if (key === 'TOKEN_EXPIRES_IN') return '15m';
           return null;
         }),

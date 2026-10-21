@@ -138,7 +138,6 @@ describe('AdminService (Coverage Companion)', () => {
         },
       ]);
 
-
       const result = await service.getDashboardStats();
 
       expect(result).toBeDefined();

@@ -927,8 +927,10 @@ describe('AuthService', () => {
         if (key === 'NODE_ENV') return 'production';
         if (key === 'TOKEN_EXPIRES_IN') return '15m';
         if (key === 'REFRESH_EXPIRES_IN') return '7d';
-        if (key === 'ADMIN_JWT_REFRESH_SECRET') return 'test-admin-refresh-secret';
-        if (key === 'ADMIN_JWT_ACCESS_SECRET') return 'test-admin-access-secret';
+        if (key === 'ADMIN_JWT_REFRESH_SECRET')
+          return 'test-admin-refresh-secret';
+        if (key === 'ADMIN_JWT_ACCESS_SECRET')
+          return 'test-admin-access-secret';
         return undefined;
       });
 
@@ -1159,7 +1161,9 @@ describe('AuthService', () => {
 
       mockPrismaService.user.findFirst.mockResolvedValue(mockUser);
       mockPrismaService.user.update.mockResolvedValue(mockUser);
-      mockMailService.sendPasswordResetEmail.mockRejectedValue('Mail server unavailable');
+      mockMailService.sendPasswordResetEmail.mockRejectedValue(
+        'Mail server unavailable',
+      );
 
       const result = await service.forgotPassword('admin@example.com');
 
@@ -1427,7 +1431,8 @@ describe('AuthService', () => {
         if (k === 'TOKEN_EXPIRES_IN') return '15m';
         if (k === 'REFRESH_EXPIRES_IN') return '7d';
         if (k === 'ADMIN_JWT_ACCESS_SECRET') return 'test-admin-access-secret';
-        if (k === 'ADMIN_JWT_REFRESH_SECRET') return 'test-admin-refresh-secret';
+        if (k === 'ADMIN_JWT_REFRESH_SECRET')
+          return 'test-admin-refresh-secret';
         return undefined;
       });
 
