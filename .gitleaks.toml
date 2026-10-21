@@ -1,0 +1,8 @@
+# gitleaks config. Extends the default ruleset and allowlists test fixtures that are not secrets.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test fixture literal in auth.service.spec.ts (tokenFamily). Not a credential."
+regexes = ['''family-abc-123''']
