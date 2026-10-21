@@ -202,8 +202,7 @@ describe('UploadsService', () => {
 
     it('should successfully upload a valid WebP file', async () => {
       const webpBuffer = Buffer.from([
-        0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42,
-        0x50,
+        0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
       ]);
       const file = createMockFile({
         originalname: 'image.webp',
@@ -220,9 +219,7 @@ describe('UploadsService', () => {
     });
 
     it('should successfully upload a valid GIF87a file', async () => {
-      const gifBuffer = Buffer.from([
-        0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x00,
-      ]);
+      const gifBuffer = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x00]);
       const file = createMockFile({
         originalname: 'anim.gif',
         mimetype: 'image/gif',
@@ -238,9 +235,7 @@ describe('UploadsService', () => {
     });
 
     it('should successfully upload a valid GIF89a file', async () => {
-      const gifBuffer = Buffer.from([
-        0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x00,
-      ]);
+      const gifBuffer = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x00]);
       const file = createMockFile({
         originalname: 'anim89.gif',
         mimetype: 'image/gif',
@@ -462,9 +457,7 @@ describe('UploadsService', () => {
       // Byte mismatch
       const wrongPng = createMockFile({
         mimetype: 'image/png',
-        buffer: Buffer.from([
-          0x00, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-        ]),
+        buffer: Buffer.from([0x00, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
         size: 8,
       });
       await expect(service.uploadFile(wrongPng)).rejects.toThrow(
@@ -782,9 +775,9 @@ describe('UploadsService', () => {
         },
       );
 
-      await expect(
-        service.uploadMultipleFiles([file1, file2]),
-      ).rejects.toThrow(new BadRequestException('Upload failed'));
+      await expect(service.uploadMultipleFiles([file1, file2])).rejects.toThrow(
+        new BadRequestException('Upload failed'),
+      );
     });
   });
 
@@ -832,9 +825,7 @@ describe('UploadsService', () => {
     });
 
     it('should throw BadRequestException when filePath is empty, whitespace, null, or undefined', async () => {
-      await expect(service.deleteFile('')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.deleteFile('')).rejects.toThrow(BadRequestException);
       await expect(service.deleteFile('')).rejects.toThrow(
         'File path is required',
       );

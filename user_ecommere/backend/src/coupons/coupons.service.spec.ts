@@ -75,8 +75,16 @@ describe('CouponsService', () => {
   describe('canUserUseCoupon (helper and public method)', () => {
     it('should return true when coupon code is empty, null, or undefined without querying referral', async () => {
       const resultEmpty = await service.canUserUseCoupon('', 'user-1');
-      const resultNull = await canUserUseCoupon(mockPrismaService, null as any, 'user-1');
-      const resultUndefined = await canUserUseCoupon(mockPrismaService, undefined as any, 'user-1');
+      const resultNull = await canUserUseCoupon(
+        mockPrismaService,
+        null as any,
+        'user-1',
+      );
+      const resultUndefined = await canUserUseCoupon(
+        mockPrismaService,
+        undefined as any,
+        'user-1',
+      );
 
       expect(resultEmpty).toBe(true);
       expect(resultNull).toBe(true);
@@ -109,7 +117,10 @@ describe('CouponsService', () => {
         refereeId: 'user-referee',
       });
 
-      const result = await service.canUserUseCoupon('ref-owner', 'user-referrer');
+      const result = await service.canUserUseCoupon(
+        'ref-owner',
+        'user-referrer',
+      );
 
       expect(result).toBe(true);
       expect(mockPrismaService.referral.findFirst).toHaveBeenCalledWith({
@@ -131,7 +142,10 @@ describe('CouponsService', () => {
         refereeId: 'user-referee',
       });
 
-      const result = await service.canUserUseCoupon('ref-friend', 'user-referee');
+      const result = await service.canUserUseCoupon(
+        'ref-friend',
+        'user-referee',
+      );
 
       expect(result).toBe(true);
       expect(mockPrismaService.referral.findFirst).toHaveBeenCalledWith({
@@ -181,7 +195,10 @@ describe('CouponsService', () => {
         refereeId: 'user-referee',
       });
 
-      const resultUndefined = await service.canUserUseCoupon('REF-OWNER', undefined);
+      const resultUndefined = await service.canUserUseCoupon(
+        'REF-OWNER',
+        undefined,
+      );
       const resultNull = await service.canUserUseCoupon('REF-OWNER', null);
 
       expect(resultUndefined).toBe(false);
@@ -197,7 +214,11 @@ describe('CouponsService', () => {
         refereeId: 'user-2',
       });
 
-      const result = await canUserUseCoupon(mockPrismaService, 'UNMATCHED', 'user-1');
+      const result = await canUserUseCoupon(
+        mockPrismaService,
+        'UNMATCHED',
+        'user-1',
+      );
 
       expect(result).toBe(false);
     });
@@ -552,12 +573,12 @@ describe('CouponsService', () => {
     it('should throw NotFoundException when coupon to update is not found', async () => {
       mockPrismaService.coupon.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.update('NOTFOUND', { value: 30 }),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.update('NOTFOUND', { value: 30 }),
-      ).rejects.toThrow('Coupon not found');
+      await expect(service.update('NOTFOUND', { value: 30 })).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.update('NOTFOUND', { value: 30 })).rejects.toThrow(
+        'Coupon not found',
+      );
       expect(mockPrismaService.coupon.findUnique).toHaveBeenCalledWith({
         where: { code: 'NOTFOUND' },
       });
@@ -740,12 +761,12 @@ describe('CouponsService', () => {
       );
       mockPrismaService.coupon.update.mockRejectedValue(p2002Error);
 
-      await expect(
-        service.update('SUMMER2025', { value: 30 }),
-      ).rejects.toThrow(BadRequestException);
-      await expect(
-        service.update('SUMMER2025', { value: 30 }),
-      ).rejects.toThrow('Coupon code already exists');
+      await expect(service.update('SUMMER2025', { value: 30 })).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.update('SUMMER2025', { value: 30 })).rejects.toThrow(
+        'Coupon code already exists',
+      );
     });
 
     it('should rethrow PrismaClientKnownRequestError when update error code is not P2002', async () => {
@@ -756,9 +777,9 @@ describe('CouponsService', () => {
       );
       mockPrismaService.coupon.update.mockRejectedValue(p2025Error);
 
-      await expect(
-        service.update('SUMMER2025', { value: 30 }),
-      ).rejects.toThrow(p2025Error);
+      await expect(service.update('SUMMER2025', { value: 30 })).rejects.toThrow(
+        p2025Error,
+      );
     });
 
     it('should rethrow unexpected non-Prisma errors during update', async () => {
@@ -766,9 +787,9 @@ describe('CouponsService', () => {
       const unknownError = new Error('Database write failure');
       mockPrismaService.coupon.update.mockRejectedValue(unknownError);
 
-      await expect(
-        service.update('SUMMER2025', { value: 30 }),
-      ).rejects.toThrow(unknownError);
+      await expect(service.update('SUMMER2025', { value: 30 })).rejects.toThrow(
+        unknownError,
+      );
     });
   });
 
@@ -905,7 +926,11 @@ describe('CouponsService', () => {
         refereeId: 'user-another',
       });
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: false,
@@ -919,7 +944,11 @@ describe('CouponsService', () => {
         active: false,
       });
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: false,
@@ -934,7 +963,11 @@ describe('CouponsService', () => {
         validFrom: futureDate,
       });
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: false,
@@ -949,7 +982,11 @@ describe('CouponsService', () => {
         validUntil: pastDate,
       });
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: false,
@@ -966,7 +1003,11 @@ describe('CouponsService', () => {
         usedCount: 10,
       });
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: false,
@@ -984,11 +1025,16 @@ describe('CouponsService', () => {
       });
       mockPrismaService.order.count.mockResolvedValue(2);
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: false,
-        message: 'You have already used this coupon the maximum number of times',
+        message:
+          'You have already used this coupon the maximum number of times',
       });
       expect(mockPrismaService.order.count).toHaveBeenCalledWith({
         where: {
@@ -1009,7 +1055,11 @@ describe('CouponsService', () => {
         minOrder: 500000,
       });
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: false,
@@ -1031,7 +1081,11 @@ describe('CouponsService', () => {
       };
       mockPrismaService.coupon.findUnique.mockResolvedValue(validCoupon);
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: true,
@@ -1055,7 +1109,11 @@ describe('CouponsService', () => {
       };
       mockPrismaService.coupon.findUnique.mockResolvedValue(validCoupon);
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: true,
@@ -1079,7 +1137,11 @@ describe('CouponsService', () => {
       };
       mockPrismaService.coupon.findUnique.mockResolvedValue(validCoupon);
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: true,
@@ -1103,7 +1165,11 @@ describe('CouponsService', () => {
       };
       mockPrismaService.coupon.findUnique.mockResolvedValue(validCoupon);
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 200000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        200000,
+      );
 
       expect(result).toEqual({
         valid: true,
@@ -1128,7 +1194,11 @@ describe('CouponsService', () => {
       mockPrismaService.coupon.findUnique.mockResolvedValue(validCoupon);
       mockPrismaService.order.count.mockResolvedValue(2);
 
-      const result = await service.validateCoupon('SUMMER2025', 'user-1', 100000);
+      const result = await service.validateCoupon(
+        'SUMMER2025',
+        'user-1',
+        100000,
+      );
 
       expect(result.valid).toBe(true);
       expect(result.discountAmount).toBe(10000);

@@ -324,7 +324,9 @@ describe('PaymentsService', () => {
     });
 
     it('should propagate error when Stripe adapter createPayment fails', async () => {
-      const adapterError = new Error('Stripe API error: card processing failed');
+      const adapterError = new Error(
+        'Stripe API error: card processing failed',
+      );
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
       mockStripeAdapter.createPayment.mockRejectedValue(adapterError);
 
@@ -605,10 +607,7 @@ describe('PaymentsService', () => {
         status: OrderStatus.REFUNDED,
       });
 
-      const result = await service.refundPayment(
-        orderId,
-        PaymentMethod.STRIPE,
-      );
+      const result = await service.refundPayment(orderId, PaymentMethod.STRIPE);
 
       const expectedPaymentId = `stripe_payment_${mockOrder.id}`;
       expect(mockPrismaService.order.findUnique).toHaveBeenCalledWith({

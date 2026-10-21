@@ -6,11 +6,7 @@ import {
   InternalServerErrorException,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ToolError,
-  toToolResult,
-  toErrorMessage,
-} from './tool-result.util';
+import { ToolError, toToolResult, toErrorMessage } from './tool-result.util';
 
 describe('tool-result.util', () => {
   describe('ToolError', () => {
@@ -79,9 +75,7 @@ describe('tool-result.util', () => {
       });
 
       it('serializes primitive values (number, boolean, null, undefined)', () => {
-        expect(toToolResult(42)).toBe(
-          JSON.stringify({ ok: true, data: 42 }),
-        );
+        expect(toToolResult(42)).toBe(JSON.stringify({ ok: true, data: 42 }));
         expect(toToolResult(true)).toBe(
           JSON.stringify({ ok: true, data: true }),
         );
@@ -328,9 +322,7 @@ describe('tool-result.util', () => {
       it('returns message from ToolError instance', () => {
         const error = new ToolError('Không tìm thấy thông tin đơn hàng');
 
-        expect(toErrorMessage(error)).toBe(
-          'Không tìm thấy thông tin đơn hàng',
-        );
+        expect(toErrorMessage(error)).toBe('Không tìm thấy thông tin đơn hàng');
       });
 
       it('returns empty message if ToolError was created with empty message', () => {

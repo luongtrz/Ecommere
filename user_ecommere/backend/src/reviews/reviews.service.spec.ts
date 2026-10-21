@@ -520,9 +520,9 @@ describe('ReviewsService', () => {
       mockPrismaService.review.findMany.mockRejectedValue(dbError);
       mockPrismaService.review.count.mockResolvedValue(0);
 
-      await expect(
-        service.getProductReviews('prod-1', {}),
-      ).rejects.toThrow(dbError);
+      await expect(service.getProductReviews('prod-1', {})).rejects.toThrow(
+        dbError,
+      );
     });
 
     it('should rethrow error when review count fails (dependency failure)', async () => {
@@ -530,9 +530,9 @@ describe('ReviewsService', () => {
       mockPrismaService.review.findMany.mockResolvedValue([]);
       mockPrismaService.review.count.mockRejectedValue(dbError);
 
-      await expect(
-        service.getProductReviews('prod-1', {}),
-      ).rejects.toThrow(dbError);
+      await expect(service.getProductReviews('prod-1', {})).rejects.toThrow(
+        dbError,
+      );
     });
   });
 
@@ -816,12 +816,12 @@ describe('ReviewsService', () => {
         userId: 'other-user',
       });
 
-      await expect(
-        service.deleteReview('user-1', 'review-1'),
-      ).rejects.toThrow(ForbiddenException);
-      await expect(
-        service.deleteReview('user-1', 'review-1'),
-      ).rejects.toThrow('Unauthorized');
+      await expect(service.deleteReview('user-1', 'review-1')).rejects.toThrow(
+        ForbiddenException,
+      );
+      await expect(service.deleteReview('user-1', 'review-1')).rejects.toThrow(
+        'Unauthorized',
+      );
 
       expect(mockPrismaService.review.findUnique).toHaveBeenCalledWith({
         where: { id: 'review-1' },
@@ -874,12 +874,12 @@ describe('ReviewsService', () => {
     it('should throw NotFoundException when review does not exist', async () => {
       mockPrismaService.review.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.deleteReviewAsAdmin('review-999'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.deleteReviewAsAdmin('review-999'),
-      ).rejects.toThrow('Review not found');
+      await expect(service.deleteReviewAsAdmin('review-999')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.deleteReviewAsAdmin('review-999')).rejects.toThrow(
+        'Review not found',
+      );
 
       expect(mockPrismaService.review.findUnique).toHaveBeenCalledWith({
         where: { id: 'review-999' },
