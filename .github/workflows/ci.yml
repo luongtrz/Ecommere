@@ -1,0 +1,208 @@
+# ==============================================================================
+# CI Workflow for Thai Spray Shop
+#
+# Generic CI steps intentionally NOT included yet (repo lacks infrastructure):
+# - Frontend lint: No ESLint configuration file exists in frontend apps.
+# - Frontend accessibility (a11y) tests: No axe/a11y test infrastructure configured.
+# - Frontend component/unit tests: No test runner (Vitest/Jest) or tests exist for frontends.
+# - Contract testing (Pact): No consumer/provider contract test infrastructure configured.
+# - Database migration tests (Testcontainers): No isolated DB testcontainer setup.
+# - Visual regression testing: No visual regression tools configured.
+# - End-to-end testing (Playwright E2E): No E2E test runner or browser test suites configured.
+# ==============================================================================
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUNDLE_MAX_KB: 300
+
+jobs:
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  backend:
+    name: backend (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - user_ecommere
+          - admin_ecommere
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}/backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.app }}/backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Lint
+        run: npm run lint -- --max-warnings 0
+
+      - name: Type check
+        run: npx tsc --noEmit -p tsconfig.json
+
+      # Runs jest with coverage; the 90% global threshold in jest.config.ts fails this step below 90%
+      - name: Run unit tests with coverage gate
+        run: npm run test:cov
+
+      - name: Build backend
+        run: npm run build
+
+      # Non-blocking security audit to report high-severity vulnerabilities without failing the pipeline
+      - name: Security audit (npm audit)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+  frontend:
+    name: frontend (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - user_ecommere
+          - admin_ecommere
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}/frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.app }}/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        env:
+          VITE_API_BASE_URL: https://api.example.com
+        run: npm run build
+
+      - name: Check bundle budget
+        run: |
+          max_bytes=$(( BUNDLE_MAX_KB * 1024 ))
+          echo "Bundle budget limit: ${BUNDLE_MAX_KB} KB (${max_bytes} bytes)"
+          failed=0
+          for file in dist/assets/*.js; do
+            if [ ! -f "$file" ]; then
+              echo "Error: No JavaScript assets found matching dist/assets/*.js"
+              exit 1
+            fi
+            size=$(gzip -c "$file" | wc -c)
+            echo "File: $file - Gzip size: ${size} bytes"
+            if [ "$size" -gt "$max_bytes" ]; then
+              echo "Error: $file (${size} bytes) exceeds budget of ${max_bytes} bytes (${BUNDLE_MAX_KB} KB)"
+              failed=1
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "Bundle budget check failed."
+            exit 1
+          fi
+
+      # Non-blocking security audit to report high-severity vulnerabilities without failing the pipeline
+      - name: Security audit (npm audit)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+  docker:
+    name: docker (${{ matrix.name }})
+    needs:
+      - backend
+      - frontend
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: user_ecommere/backend
+            app: user_ecommere
+            target: backend
+            tier: backend
+            dir: user_ecommere/backend
+          - name: admin_ecommere/backend
+            app: admin_ecommere
+            target: backend
+            tier: backend
+            dir: admin_ecommere/backend
+          - name: user_ecommere/frontend
+            app: user_ecommere
+            target: frontend
+            tier: frontend
+            dir: user_ecommere/frontend
+          - name: admin_ecommere/frontend
+            app: admin_ecommere
+            target: frontend
+            tier: frontend
+            dir: admin_ecommere/frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.dir }}
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ${{ matrix.dir }}
+          format: spdx-json
+          output-file: sbom-${{ matrix.app }}-${{ matrix.target }}.spdx.json
+          upload-artifact: false
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.app }}-${{ matrix.target }}
+          path: sbom-${{ matrix.app }}-${{ matrix.target }}.spdx.json

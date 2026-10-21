@@ -47,7 +47,6 @@ yarn.lock
 .gemini/
 
 # Misc
-.github/
 cookies.txt
 
 # Local agent tooling (git worktrees and session files)
