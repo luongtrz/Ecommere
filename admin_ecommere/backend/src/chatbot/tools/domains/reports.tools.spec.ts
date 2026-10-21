@@ -1,7 +1,4 @@
-import {
-  createReportsTools,
-  ReportsToolDeps,
-} from './reports.tools';
+import { createReportsTools, ReportsToolDeps } from './reports.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import type { AdminService } from '../../../admin/admin.service';
 import type { ReportsService } from '../../../admin/reports.service';

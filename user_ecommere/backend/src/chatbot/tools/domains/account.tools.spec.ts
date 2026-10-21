@@ -1,7 +1,4 @@
-import {
-  createAccountTools,
-  AccountToolDeps,
-} from './account.tools';
+import { createAccountTools, AccountToolDeps } from './account.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import type { UsersService } from '../../../users/users.service';
 import type { ReferralsService } from '../../../referrals/referrals.service';
