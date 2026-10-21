@@ -201,7 +201,8 @@ export function AdminProductFormPage() {
   const onSubmit = async (data: ProductFormData) => {
     try {
       if (isEditMode && id) {
-        const { variants: _variants, ...productData } = data;
+        const productData = { ...data };
+        delete (productData as Partial<ProductFormData>).variants;
 
         // Update existing product
         await updateProduct.mutateAsync({

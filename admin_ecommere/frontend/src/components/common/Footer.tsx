@@ -69,12 +69,20 @@ export function Footer() {
               </li>
             </ul>
             <div className="flex gap-4 mt-4">
-              <a href="#" className="hover:text-primary">
+              <button
+                type="button"
+                className="hover:text-primary"
+                aria-label="Facebook"
+              >
                 <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="hover:text-primary">
+              </button>
+              <button
+                type="button"
+                className="hover:text-primary"
+                aria-label="Instagram"
+              >
                 <Instagram className="h-5 w-5" />
-              </a>
+              </button>
             </div>
           </div>
         </div>

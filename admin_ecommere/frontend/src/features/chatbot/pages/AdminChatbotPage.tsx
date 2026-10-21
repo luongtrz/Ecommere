@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   useQuery,
   useQueryClient,
@@ -233,7 +233,10 @@ export function AdminChatbotPage() {
 
   const currentAdminId = user ? user.id : null;
   const isOwnerMatch = user !== undefined && ownerId === currentAdminId;
-  const visibleMessages = isOwnerMatch ? messages : [];
+  const visibleMessages = useMemo(
+    () => (isOwnerMatch ? messages : []),
+    [isOwnerMatch, messages],
+  );
 
   const {
     data: threads = [],

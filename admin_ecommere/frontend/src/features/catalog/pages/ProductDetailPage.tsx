@@ -224,14 +224,17 @@ export function ProductDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-6 p-6">
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-3 block">
+                    <label
+                      htmlFor="variant-select"
+                      className="text-sm font-medium text-gray-700 mb-3 block"
+                    >
                       Biến thể sản phẩm:
                     </label>
                     <Select
                       value={selectedVariantId || product.variants[0]?.id}
                       onValueChange={setSelectedVariantId}
                     >
-                      <SelectTrigger className="h-12">
+                      <SelectTrigger id="variant-select" className="h-12">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -258,12 +261,16 @@ export function ProductDetailPage() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-3 block">
+                    <label
+                      htmlFor="product-quantity"
+                      className="text-sm font-medium text-gray-700 mb-3 block"
+                    >
                       Số lượng:
                     </label>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
                         <Button
+                          id="product-quantity"
                           variant="ghost"
                           size="icon"
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}

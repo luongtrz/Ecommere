@@ -120,6 +120,7 @@ export function AdminProductsPage() {
   }, [search]);
 
   useEffect(() => {
+    const target = observerTarget.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage) {
@@ -129,13 +130,13 @@ export function AdminProductsPage() {
       { threshold: 0.1 },
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (target) {
+      observer.observe(target);
     }
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (target) {
+        observer.unobserve(target);
       }
     };
   }, [hasNextPage, fetchNextPage]);
