@@ -12,7 +12,6 @@ import { ProductFilterDto, ProductSortBy } from './dtos/product-filter.dto';
 
 describe('ProductsController', () => {
   let controller: ProductsController;
-  let productsService: jest.Mocked<Partial<ProductsService>>;
 
   const mockProductsService = {
     findAll: jest.fn(),
@@ -46,7 +45,7 @@ describe('ProductsController', () => {
       .compile();
 
     controller = module.get<ProductsController>(ProductsController);
-    productsService = module.get(ProductsService);
+    module.get(ProductsService);
   });
 
   afterEach(() => {
@@ -92,9 +91,13 @@ describe('ProductsController', () => {
 
     it('propagates errors thrown by productsService.findAll', async () => {
       const filterDto: ProductFilterDto = { page: 1, limit: 12 };
-      mockProductsService.findAll.mockRejectedValue(new Error('Database query failure'));
+      mockProductsService.findAll.mockRejectedValue(
+        new Error('Database query failure'),
+      );
 
-      await expect(controller.findAll(filterDto)).rejects.toThrow('Database query failure');
+      await expect(controller.findAll(filterDto)).rejects.toThrow(
+        'Database query failure',
+      );
       expect(mockProductsService.findAll).toHaveBeenCalledWith(filterDto);
     });
   });
@@ -116,9 +119,13 @@ describe('ProductsController', () => {
     });
 
     it('propagates errors thrown by productsService.getFilterOptions', async () => {
-      mockProductsService.getFilterOptions.mockRejectedValue(new Error('Filter lookup failed'));
+      mockProductsService.getFilterOptions.mockRejectedValue(
+        new Error('Filter lookup failed'),
+      );
 
-      await expect(controller.getFilterOptions()).rejects.toThrow('Filter lookup failed');
+      await expect(controller.getFilterOptions()).rejects.toThrow(
+        'Filter lookup failed',
+      );
       expect(mockProductsService.getFilterOptions).toHaveBeenCalledWith();
     });
   });
@@ -143,9 +150,13 @@ describe('ProductsController', () => {
 
     it('propagates errors thrown by productsService.findOne', async () => {
       const productId = 'prod-nonexistent';
-      mockProductsService.findOne.mockRejectedValue(new Error('Product not found'));
+      mockProductsService.findOne.mockRejectedValue(
+        new Error('Product not found'),
+      );
 
-      await expect(controller.findOne(productId)).rejects.toThrow('Product not found');
+      await expect(controller.findOne(productId)).rejects.toThrow(
+        'Product not found',
+      );
       expect(mockProductsService.findOne).toHaveBeenCalledWith(productId);
     });
   });
@@ -170,9 +181,13 @@ describe('ProductsController', () => {
 
     it('propagates errors thrown by productsService.findBySlug', async () => {
       const slug = 'missing-slug';
-      mockProductsService.findBySlug.mockRejectedValue(new Error('Product not found'));
+      mockProductsService.findBySlug.mockRejectedValue(
+        new Error('Product not found'),
+      );
 
-      await expect(controller.findBySlug(slug)).rejects.toThrow('Product not found');
+      await expect(controller.findBySlug(slug)).rejects.toThrow(
+        'Product not found',
+      );
       expect(mockProductsService.findBySlug).toHaveBeenCalledWith(slug);
     });
   });
@@ -225,9 +240,13 @@ describe('ProductsController', () => {
           },
         ],
       };
-      mockProductsService.create.mockRejectedValue(new Error('Product with this name already exists'));
+      mockProductsService.create.mockRejectedValue(
+        new Error('Product with this name already exists'),
+      );
 
-      await expect(controller.create(createDto)).rejects.toThrow('Product with this name already exists');
+      await expect(controller.create(createDto)).rejects.toThrow(
+        'Product with this name already exists',
+      );
       expect(mockProductsService.create).toHaveBeenCalledWith(createDto);
     });
   });
@@ -248,17 +267,27 @@ describe('ProductsController', () => {
 
       const result = await controller.update(productId, updateDto);
 
-      expect(mockProductsService.update).toHaveBeenCalledWith(productId, updateDto);
+      expect(mockProductsService.update).toHaveBeenCalledWith(
+        productId,
+        updateDto,
+      );
       expect(result).toEqual(expectedResult);
     });
 
     it('propagates errors thrown by productsService.update', async () => {
       const productId = 'prod-100';
       const updateDto: UpdateProductDto = { name: 'Conflict Name' };
-      mockProductsService.update.mockRejectedValue(new Error('Product name already exists'));
+      mockProductsService.update.mockRejectedValue(
+        new Error('Product name already exists'),
+      );
 
-      await expect(controller.update(productId, updateDto)).rejects.toThrow('Product name already exists');
-      expect(mockProductsService.update).toHaveBeenCalledWith(productId, updateDto);
+      await expect(controller.update(productId, updateDto)).rejects.toThrow(
+        'Product name already exists',
+      );
+      expect(mockProductsService.update).toHaveBeenCalledWith(
+        productId,
+        updateDto,
+      );
     });
   });
 
@@ -277,7 +306,9 @@ describe('ProductsController', () => {
     it('propagates errors thrown by productsService.remove', async () => {
       const productId = 'prod-100';
       mockProductsService.remove.mockRejectedValue(
-        new Error('Cannot delete product with existing carts, orders, or stock history'),
+        new Error(
+          'Cannot delete product with existing carts, orders, or stock history',
+        ),
       );
 
       await expect(controller.remove(productId)).rejects.toThrow(
@@ -306,9 +337,15 @@ describe('ProductsController', () => {
       };
       mockProductsService.createVariant.mockResolvedValue(expectedResult);
 
-      const result = await controller.createVariant(productId, createVariantDto);
+      const result = await controller.createVariant(
+        productId,
+        createVariantDto,
+      );
 
-      expect(mockProductsService.createVariant).toHaveBeenCalledWith(productId, createVariantDto);
+      expect(mockProductsService.createVariant).toHaveBeenCalledWith(
+        productId,
+        createVariantDto,
+      );
       expect(result).toEqual(expectedResult);
     });
 
@@ -320,12 +357,17 @@ describe('ProductsController', () => {
         price: 180000,
         stock: 50,
       };
-      mockProductsService.createVariant.mockRejectedValue(new Error('Variant SKU already exists'));
-
-      await expect(controller.createVariant(productId, createVariantDto)).rejects.toThrow(
-        'Variant SKU already exists',
+      mockProductsService.createVariant.mockRejectedValue(
+        new Error('Variant SKU already exists'),
       );
-      expect(mockProductsService.createVariant).toHaveBeenCalledWith(productId, createVariantDto);
+
+      await expect(
+        controller.createVariant(productId, createVariantDto),
+      ).rejects.toThrow('Variant SKU already exists');
+      expect(mockProductsService.createVariant).toHaveBeenCalledWith(
+        productId,
+        createVariantDto,
+      );
     });
   });
 
@@ -345,21 +387,32 @@ describe('ProductsController', () => {
       };
       mockProductsService.updateVariant.mockResolvedValue(expectedResult);
 
-      const result = await controller.updateVariant(variantId, updateVariantDto);
+      const result = await controller.updateVariant(
+        variantId,
+        updateVariantDto,
+      );
 
-      expect(mockProductsService.updateVariant).toHaveBeenCalledWith(variantId, updateVariantDto);
+      expect(mockProductsService.updateVariant).toHaveBeenCalledWith(
+        variantId,
+        updateVariantDto,
+      );
       expect(result).toEqual(expectedResult);
     });
 
     it('propagates errors thrown by productsService.updateVariant', async () => {
       const variantId = 'var-100';
       const updateVariantDto: UpdateVariantDto = { price: 200000 };
-      mockProductsService.updateVariant.mockRejectedValue(new Error('Variant not found'));
-
-      await expect(controller.updateVariant(variantId, updateVariantDto)).rejects.toThrow(
-        'Variant not found',
+      mockProductsService.updateVariant.mockRejectedValue(
+        new Error('Variant not found'),
       );
-      expect(mockProductsService.updateVariant).toHaveBeenCalledWith(variantId, updateVariantDto);
+
+      await expect(
+        controller.updateVariant(variantId, updateVariantDto),
+      ).rejects.toThrow('Variant not found');
+      expect(mockProductsService.updateVariant).toHaveBeenCalledWith(
+        variantId,
+        updateVariantDto,
+      );
     });
   });
 

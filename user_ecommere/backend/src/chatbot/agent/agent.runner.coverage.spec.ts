@@ -1,9 +1,7 @@
-import { Command } from '@langchain/langgraph';
 import {
   AIMessage,
   AIMessageChunk,
   HumanMessage,
-  ToolMessage,
 } from '@langchain/core/messages';
 import { z } from 'zod';
 import {
@@ -11,7 +9,6 @@ import {
   AgentBusyError,
   AgentNotPendingError,
   type AgentRunnerDeps,
-  type AgentTranscriptMessage,
 } from './agent.runner';
 import type { AgentStreamEvent } from './sse.frames';
 import { ToolRegistry } from '../tools/tool.registry';
@@ -87,7 +84,9 @@ describe('AgentRunner (coverage)', () => {
 
     it('AgentNotPendingError instantiates with default and custom messages and preserves prototype', () => {
       const defaultErr = new AgentNotPendingError();
-      expect(defaultErr.message).toBe('Không có thao tác nào đang chờ xác nhận');
+      expect(defaultErr.message).toBe(
+        'Không có thao tác nào đang chờ xác nhận',
+      );
       expect(defaultErr.name).toBe('AgentNotPendingError');
       expect(defaultErr).toBeInstanceOf(AgentNotPendingError);
       expect(defaultErr).toBeInstanceOf(Error);
@@ -1290,9 +1289,9 @@ describe('AgentRunner (coverage)', () => {
       });
 
       // Too few IDs
-      await expect(
-        runner.assertResumable('th-1', ['call-1']),
-      ).rejects.toThrow(AgentNotPendingError);
+      await expect(runner.assertResumable('th-1', ['call-1'])).rejects.toThrow(
+        AgentNotPendingError,
+      );
 
       // Too many IDs
       await expect(

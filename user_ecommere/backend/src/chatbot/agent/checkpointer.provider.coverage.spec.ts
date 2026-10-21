@@ -196,9 +196,14 @@ describe('checkpointer.provider (coverage)', () => {
         await deleteExpiredCheckpoints({ query: queryEmpty }, new Date()),
       ).toBe(0);
 
-      const queryNonArrayRows = jest.fn().mockResolvedValue({ rows: 'not-array' });
+      const queryNonArrayRows = jest
+        .fn()
+        .mockResolvedValue({ rows: 'not-array' });
       expect(
-        await deleteExpiredCheckpoints({ query: queryNonArrayRows }, new Date()),
+        await deleteExpiredCheckpoints(
+          { query: queryNonArrayRows },
+          new Date(),
+        ),
       ).toBe(0);
     });
   });

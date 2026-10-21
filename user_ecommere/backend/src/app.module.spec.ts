@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 
 // Mock domain modules to prevent any real DB, network, or third-party connections
 const createMockModule = (name: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires -- required inside the jest mock factory
   const { Module } = require('@nestjs/common');
   class MockModule {}
   Object.defineProperty(MockModule, 'name', { value: name });

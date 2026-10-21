@@ -423,9 +423,9 @@ describe('ReviewsController', () => {
       const error = new NotFoundException('Review not found');
       mockReviewsService.deleteReview.mockRejectedValue(error);
 
-      await expect(controller.deleteReview('user-1', 'rev-999')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        controller.deleteReview('user-1', 'rev-999'),
+      ).rejects.toThrow(NotFoundException);
       expect(mockReviewsService.deleteReview).toHaveBeenCalledWith(
         'user-1',
         'rev-999',
@@ -466,9 +466,9 @@ describe('ReviewsController', () => {
       const error = new NotFoundException('Review not found');
       mockReviewsService.deleteReviewAsAdmin.mockRejectedValue(error);
 
-      await expect(
-        controller.deleteReviewAsAdmin('rev-999'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.deleteReviewAsAdmin('rev-999')).rejects.toThrow(
+        NotFoundException,
+      );
       expect(mockReviewsService.deleteReviewAsAdmin).toHaveBeenCalledWith(
         'rev-999',
       );

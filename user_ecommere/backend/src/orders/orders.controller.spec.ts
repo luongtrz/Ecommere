@@ -12,7 +12,6 @@ import { OrderStatus } from '@prisma/client';
 
 describe('OrdersController', () => {
   let controller: OrdersController;
-  let ordersService: jest.Mocked<Partial<OrdersService>>;
 
   const mockOrdersService = {
     previewCheckout: jest.fn(),
@@ -44,7 +43,7 @@ describe('OrdersController', () => {
       .compile();
 
     controller = module.get<OrdersController>(OrdersController);
-    ordersService = module.get(OrdersService);
+    module.get(OrdersService);
   });
 
   afterEach(() => {
@@ -74,21 +73,32 @@ describe('OrdersController', () => {
       };
       mockOrdersService.previewCheckout.mockResolvedValue(expectedResult);
 
-      const result = await controller.previewCheckout(userId, previewCheckoutDto);
+      const result = await controller.previewCheckout(
+        userId,
+        previewCheckoutDto,
+      );
 
-      expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith(userId, previewCheckoutDto);
+      expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith(
+        userId,
+        previewCheckoutDto,
+      );
       expect(result).toEqual(expectedResult);
     });
 
     it('propagates errors thrown by ordersService.previewCheckout', async () => {
       const userId = 'user-auth-1';
       const previewCheckoutDto: PreviewCheckoutDto = {};
-      mockOrdersService.previewCheckout.mockRejectedValue(new Error('Preview checkout failed'));
-
-      await expect(controller.previewCheckout(userId, previewCheckoutDto)).rejects.toThrow(
-        'Preview checkout failed',
+      mockOrdersService.previewCheckout.mockRejectedValue(
+        new Error('Preview checkout failed'),
       );
-      expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith(userId, previewCheckoutDto);
+
+      await expect(
+        controller.previewCheckout(userId, previewCheckoutDto),
+      ).rejects.toThrow('Preview checkout failed');
+      expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith(
+        userId,
+        previewCheckoutDto,
+      );
     });
   });
 
@@ -116,19 +126,27 @@ describe('OrdersController', () => {
 
       const result = await controller.checkout(userId, checkoutDto);
 
-      expect(mockOrdersService.checkout).toHaveBeenCalledWith(userId, checkoutDto);
+      expect(mockOrdersService.checkout).toHaveBeenCalledWith(
+        userId,
+        checkoutDto,
+      );
       expect(result).toEqual(expectedResult);
     });
 
     it('propagates errors thrown by ordersService.checkout', async () => {
       const userId = 'user-auth-1';
       const checkoutDto: CheckoutDto = { addressId: 'addr-invalid' };
-      mockOrdersService.checkout.mockRejectedValue(new Error('Cart is empty or no items provided'));
+      mockOrdersService.checkout.mockRejectedValue(
+        new Error('Cart is empty or no items provided'),
+      );
 
       await expect(controller.checkout(userId, checkoutDto)).rejects.toThrow(
         'Cart is empty or no items provided',
       );
-      expect(mockOrdersService.checkout).toHaveBeenCalledWith(userId, checkoutDto);
+      expect(mockOrdersService.checkout).toHaveBeenCalledWith(
+        userId,
+        checkoutDto,
+      );
     });
   });
 
@@ -160,19 +178,27 @@ describe('OrdersController', () => {
 
       const result = await controller.getMyOrders(userId, filterDto);
 
-      expect(mockOrdersService.getMyOrders).toHaveBeenCalledWith(userId, filterDto);
+      expect(mockOrdersService.getMyOrders).toHaveBeenCalledWith(
+        userId,
+        filterDto,
+      );
       expect(result).toEqual(expectedResult);
     });
 
     it('propagates errors thrown by ordersService.getMyOrders', async () => {
       const userId = 'user-auth-1';
       const filterDto: OrderFilterDto = { page: 1, limit: 10 };
-      mockOrdersService.getMyOrders.mockRejectedValue(new Error('Failed to retrieve user orders'));
+      mockOrdersService.getMyOrders.mockRejectedValue(
+        new Error('Failed to retrieve user orders'),
+      );
 
       await expect(controller.getMyOrders(userId, filterDto)).rejects.toThrow(
         'Failed to retrieve user orders',
       );
-      expect(mockOrdersService.getMyOrders).toHaveBeenCalledWith(userId, filterDto);
+      expect(mockOrdersService.getMyOrders).toHaveBeenCalledWith(
+        userId,
+        filterDto,
+      );
     });
   });
 
@@ -191,17 +217,27 @@ describe('OrdersController', () => {
 
       const result = await controller.getMyOrderById(userId, orderId);
 
-      expect(mockOrdersService.getMyOrderById).toHaveBeenCalledWith(userId, orderId);
+      expect(mockOrdersService.getMyOrderById).toHaveBeenCalledWith(
+        userId,
+        orderId,
+      );
       expect(result).toEqual(expectedResult);
     });
 
     it('propagates errors thrown by ordersService.getMyOrderById', async () => {
       const userId = 'user-auth-1';
       const orderId = 'order-missing';
-      mockOrdersService.getMyOrderById.mockRejectedValue(new Error('Order not found'));
+      mockOrdersService.getMyOrderById.mockRejectedValue(
+        new Error('Order not found'),
+      );
 
-      await expect(controller.getMyOrderById(userId, orderId)).rejects.toThrow('Order not found');
-      expect(mockOrdersService.getMyOrderById).toHaveBeenCalledWith(userId, orderId);
+      await expect(controller.getMyOrderById(userId, orderId)).rejects.toThrow(
+        'Order not found',
+      );
+      expect(mockOrdersService.getMyOrderById).toHaveBeenCalledWith(
+        userId,
+        orderId,
+      );
     });
   });
 
@@ -219,7 +255,10 @@ describe('OrdersController', () => {
 
       const result = await controller.cancelOrder(userId, orderId);
 
-      expect(mockOrdersService.cancelOrder).toHaveBeenCalledWith(userId, orderId);
+      expect(mockOrdersService.cancelOrder).toHaveBeenCalledWith(
+        userId,
+        orderId,
+      );
       expect(result).toEqual(expectedResult);
     });
 
@@ -233,7 +272,10 @@ describe('OrdersController', () => {
       await expect(controller.cancelOrder(userId, orderId)).rejects.toThrow(
         'Order cannot be cancelled at this stage',
       );
-      expect(mockOrdersService.cancelOrder).toHaveBeenCalledWith(userId, orderId);
+      expect(mockOrdersService.cancelOrder).toHaveBeenCalledWith(
+        userId,
+        orderId,
+      );
     });
   });
 
@@ -270,7 +312,9 @@ describe('OrdersController', () => {
 
     it('propagates errors thrown by ordersService.getAllOrders', async () => {
       const filterDto: OrderFilterDto = { page: 1, limit: 20 };
-      mockOrdersService.getAllOrders.mockRejectedValue(new Error('Failed to retrieve all orders'));
+      mockOrdersService.getAllOrders.mockRejectedValue(
+        new Error('Failed to retrieve all orders'),
+      );
 
       await expect(controller.getAllOrders(filterDto)).rejects.toThrow(
         'Failed to retrieve all orders',
@@ -299,9 +343,13 @@ describe('OrdersController', () => {
 
     it('propagates errors thrown by ordersService.getOrderById', async () => {
       const orderId = 'order-missing';
-      mockOrdersService.getOrderById.mockRejectedValue(new Error('Order not found'));
+      mockOrdersService.getOrderById.mockRejectedValue(
+        new Error('Order not found'),
+      );
 
-      await expect(controller.getOrderById(orderId)).rejects.toThrow('Order not found');
+      await expect(controller.getOrderById(orderId)).rejects.toThrow(
+        'Order not found',
+      );
       expect(mockOrdersService.getOrderById).toHaveBeenCalledWith(orderId);
     });
   });
@@ -319,9 +367,15 @@ describe('OrdersController', () => {
       };
       mockOrdersService.updateOrderStatus.mockResolvedValue(expectedResult);
 
-      const result = await controller.updateOrderStatus(orderId, updateOrderStatusDto);
+      const result = await controller.updateOrderStatus(
+        orderId,
+        updateOrderStatusDto,
+      );
 
-      expect(mockOrdersService.updateOrderStatus).toHaveBeenCalledWith(orderId, updateOrderStatusDto);
+      expect(mockOrdersService.updateOrderStatus).toHaveBeenCalledWith(
+        orderId,
+        updateOrderStatusDto,
+      );
       expect(result).toEqual(expectedResult);
     });
 
@@ -330,11 +384,13 @@ describe('OrdersController', () => {
       const updateOrderStatusDto: UpdateOrderStatusDto = {
         status: OrderStatus.DELIVERED,
       };
-      mockOrdersService.updateOrderStatus.mockRejectedValue(new Error('Invalid status transition'));
-
-      await expect(controller.updateOrderStatus(orderId, updateOrderStatusDto)).rejects.toThrow(
-        'Invalid status transition',
+      mockOrdersService.updateOrderStatus.mockRejectedValue(
+        new Error('Invalid status transition'),
       );
+
+      await expect(
+        controller.updateOrderStatus(orderId, updateOrderStatusDto),
+      ).rejects.toThrow('Invalid status transition');
       expect(mockOrdersService.updateOrderStatus).toHaveBeenCalledWith(
         orderId,
         updateOrderStatusDto,

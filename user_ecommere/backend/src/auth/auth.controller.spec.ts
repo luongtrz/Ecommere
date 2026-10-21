@@ -35,9 +35,7 @@ describe('AuthController', () => {
       json: jest.fn().mockReturnThis(),
     }) as unknown as Response;
 
-  const createMockRequest = (
-    cookies: Record<string, string> = {},
-  ): Request =>
+  const createMockRequest = (cookies: Record<string, string> = {}): Request =>
     ({
       cookies,
     }) as unknown as Request;
@@ -347,9 +345,9 @@ describe('AuthController', () => {
       const error = new BadRequestException('Invalid or expired reset token');
       mockAuthService.resetPassword.mockRejectedValue(error);
 
-      await expect(
-        controller.resetPassword(resetPasswordDto),
-      ).rejects.toThrow(error);
+      await expect(controller.resetPassword(resetPasswordDto)).rejects.toThrow(
+        error,
+      );
 
       expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
         resetPasswordDto.token,

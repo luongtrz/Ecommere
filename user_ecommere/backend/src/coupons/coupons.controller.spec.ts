@@ -100,7 +100,9 @@ describe('CouponsController', () => {
       expect(reflector.get(ROLES_KEY, controller.create)).toEqual([Role.ADMIN]);
       expect(reflector.get(ROLES_KEY, controller.update)).toEqual([Role.ADMIN]);
       expect(reflector.get(ROLES_KEY, controller.remove)).toEqual([Role.ADMIN]);
-      expect(reflector.get(ROLES_KEY, controller.validateCoupon)).toBeUndefined();
+      expect(
+        reflector.get(ROLES_KEY, controller.validateCoupon),
+      ).toBeUndefined();
     });
   });
 
@@ -315,7 +317,9 @@ describe('CouponsController', () => {
     };
 
     it('should delegate to couponsService.validateCoupon with parsed integer when orderTotal is provided', async () => {
-      mockCouponsService.validateCoupon.mockResolvedValue(mockValidationSuccess);
+      mockCouponsService.validateCoupon.mockResolvedValue(
+        mockValidationSuccess,
+      );
 
       const result = await controller.validateCoupon(
         validateCouponDto,
@@ -332,7 +336,9 @@ describe('CouponsController', () => {
     });
 
     it('should trim orderTotal whitespace and pass the numeric value', async () => {
-      mockCouponsService.validateCoupon.mockResolvedValue(mockValidationSuccess);
+      mockCouponsService.validateCoupon.mockResolvedValue(
+        mockValidationSuccess,
+      );
 
       const result = await controller.validateCoupon(
         validateCouponDto,
@@ -349,7 +355,9 @@ describe('CouponsController', () => {
     });
 
     it('should allow orderTotal of 0', async () => {
-      mockCouponsService.validateCoupon.mockResolvedValue(mockValidationSuccess);
+      mockCouponsService.validateCoupon.mockResolvedValue(
+        mockValidationSuccess,
+      );
 
       const result = await controller.validateCoupon(
         validateCouponDto,
@@ -366,7 +374,9 @@ describe('CouponsController', () => {
     });
 
     it('should default total to 0 when orderTotal is undefined', async () => {
-      mockCouponsService.validateCoupon.mockResolvedValue(mockValidationSuccess);
+      mockCouponsService.validateCoupon.mockResolvedValue(
+        mockValidationSuccess,
+      );
 
       const result = await controller.validateCoupon(
         validateCouponDto,
