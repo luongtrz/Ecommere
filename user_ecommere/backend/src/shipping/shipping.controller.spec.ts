@@ -183,9 +183,9 @@ describe('ShippingController', () => {
         new Error('Failed to calculate shipping fee'),
       );
 
-      await expect(
-        controller.calculateFee('Chiang Mai', 1),
-      ).rejects.toThrow('Failed to calculate shipping fee');
+      await expect(controller.calculateFee('Chiang Mai', 1)).rejects.toThrow(
+        'Failed to calculate shipping fee',
+      );
     });
   });
 
@@ -216,7 +216,9 @@ describe('ShippingController', () => {
       const result = await controller.trackShipment(trackingNumber);
 
       expect(mockShippingService.trackShipment).toHaveBeenCalledTimes(1);
-      expect(mockShippingService.trackShipment).toHaveBeenCalledWith(trackingNumber);
+      expect(mockShippingService.trackShipment).toHaveBeenCalledWith(
+        trackingNumber,
+      );
       expect(result).toEqual(mockTrackingResult);
     });
 
@@ -225,9 +227,9 @@ describe('ShippingController', () => {
         new Error('Tracking number not found'),
       );
 
-      await expect(controller.trackShipment('INVALID_TRACKING')).rejects.toThrow(
-        'Tracking number not found',
-      );
+      await expect(
+        controller.trackShipment('INVALID_TRACKING'),
+      ).rejects.toThrow('Tracking number not found');
       expect(mockShippingService.trackShipment).toHaveBeenCalledWith(
         'INVALID_TRACKING',
       );

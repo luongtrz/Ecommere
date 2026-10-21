@@ -67,12 +67,16 @@ describe('ReferralsController', () => {
     };
 
     it('delegates to referralsService.getMyReferralInfo with the authenticated user id and returns service result', async () => {
-      mockReferralsService.getMyReferralInfo.mockResolvedValue(mockReferralInfo);
+      mockReferralsService.getMyReferralInfo.mockResolvedValue(
+        mockReferralInfo,
+      );
 
       const result = await controller.getMyReferralInfo(userId);
 
       expect(mockReferralsService.getMyReferralInfo).toHaveBeenCalledTimes(1);
-      expect(mockReferralsService.getMyReferralInfo).toHaveBeenCalledWith(userId);
+      expect(mockReferralsService.getMyReferralInfo).toHaveBeenCalledWith(
+        userId,
+      );
       expect(result).toEqual(mockReferralInfo);
     });
 
@@ -84,7 +88,9 @@ describe('ReferralsController', () => {
       await expect(controller.getMyReferralInfo(userId)).rejects.toThrow(
         BadRequestException,
       );
-      expect(mockReferralsService.getMyReferralInfo).toHaveBeenCalledWith(userId);
+      expect(mockReferralsService.getMyReferralInfo).toHaveBeenCalledWith(
+        userId,
+      );
     });
   });
 
@@ -115,7 +121,9 @@ describe('ReferralsController', () => {
 
     it('delegates to referralsService.getMyReferrals with authenticated user id and default/provided paginationDto, returning service result', async () => {
       const paginationDto: PaginationDto = { page: 1, limit: 20 };
-      mockReferralsService.getMyReferrals.mockResolvedValue(mockReferralsResult);
+      mockReferralsService.getMyReferrals.mockResolvedValue(
+        mockReferralsResult,
+      );
 
       const result = await controller.getMyReferrals(userId, paginationDto);
 
@@ -210,9 +218,9 @@ describe('ReferralsController', () => {
       expect(
         mockReferralsService.getMyCouponsFromReferral,
       ).toHaveBeenCalledTimes(1);
-      expect(mockReferralsService.getMyCouponsFromReferral).toHaveBeenCalledWith(
-        userId,
-      );
+      expect(
+        mockReferralsService.getMyCouponsFromReferral,
+      ).toHaveBeenCalledWith(userId);
       expect(result).toEqual(mockCouponsResult);
     });
 
@@ -223,9 +231,9 @@ describe('ReferralsController', () => {
 
       const result = await controller.getMyCouponsFromReferral(userId);
 
-      expect(mockReferralsService.getMyCouponsFromReferral).toHaveBeenCalledWith(
-        userId,
-      );
+      expect(
+        mockReferralsService.getMyCouponsFromReferral,
+      ).toHaveBeenCalledWith(userId);
       expect(result).toEqual({ data: [] });
     });
 
@@ -237,9 +245,9 @@ describe('ReferralsController', () => {
       await expect(controller.getMyCouponsFromReferral(userId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockReferralsService.getMyCouponsFromReferral).toHaveBeenCalledWith(
-        userId,
-      );
+      expect(
+        mockReferralsService.getMyCouponsFromReferral,
+      ).toHaveBeenCalledWith(userId);
     });
   });
 });

@@ -328,9 +328,9 @@ describe('UsersController', () => {
         new NotFoundException('Address not found'),
       );
 
-      await expect(
-        controller.deleteAddress(userId, addressId),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.deleteAddress(userId, addressId)).rejects.toThrow(
+        NotFoundException,
+      );
       expect(mockUsersService.deleteAddress).toHaveBeenCalledWith(
         userId,
         addressId,

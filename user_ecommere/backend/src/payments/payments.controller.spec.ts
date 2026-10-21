@@ -114,7 +114,9 @@ describe('PaymentsController', () => {
       const error = new NotFoundException('Order not found');
       mockPaymentsService.createPayment.mockRejectedValue(error);
 
-      await expect(controller.createPayment(userId, dto)).rejects.toThrow(error);
+      await expect(controller.createPayment(userId, dto)).rejects.toThrow(
+        error,
+      );
       expect(paymentsService.createPayment).toHaveBeenCalledWith(
         userId,
         'order-nonexistent',

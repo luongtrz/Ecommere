@@ -135,7 +135,11 @@ describe('CartController', () => {
 
       const result = await controller.updateCartItem(userId, itemId, dto);
 
-      expect(cartService.updateCartItem).toHaveBeenCalledWith(userId, itemId, dto);
+      expect(cartService.updateCartItem).toHaveBeenCalledWith(
+        userId,
+        itemId,
+        dto,
+      );
       expect(cartService.updateCartItem).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockCart);
     });
@@ -147,8 +151,14 @@ describe('CartController', () => {
       const error = new NotFoundException('Cart item not found');
       mockCartService.updateCartItem.mockRejectedValue(error);
 
-      await expect(controller.updateCartItem(userId, itemId, dto)).rejects.toThrow(error);
-      expect(cartService.updateCartItem).toHaveBeenCalledWith(userId, itemId, dto);
+      await expect(
+        controller.updateCartItem(userId, itemId, dto),
+      ).rejects.toThrow(error);
+      expect(cartService.updateCartItem).toHaveBeenCalledWith(
+        userId,
+        itemId,
+        dto,
+      );
     });
   });
 
@@ -179,7 +189,9 @@ describe('CartController', () => {
       const error = new NotFoundException('Cart item not found');
       mockCartService.removeCartItem.mockRejectedValue(error);
 
-      await expect(controller.removeCartItem(userId, itemId)).rejects.toThrow(error);
+      await expect(controller.removeCartItem(userId, itemId)).rejects.toThrow(
+        error,
+      );
       expect(cartService.removeCartItem).toHaveBeenCalledWith(userId, itemId);
     });
   });
@@ -231,7 +243,10 @@ describe('CartController', () => {
 
       const result = await controller.applyCoupon(userId, dto);
 
-      expect(cartService.applyCoupon).toHaveBeenCalledWith(userId, 'SUMMER2025');
+      expect(cartService.applyCoupon).toHaveBeenCalledWith(
+        userId,
+        'SUMMER2025',
+      );
       expect(cartService.applyCoupon).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockCart);
     });

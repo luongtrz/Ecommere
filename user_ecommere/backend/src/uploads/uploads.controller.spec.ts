@@ -88,7 +88,10 @@ describe('UploadsController', () => {
       .overrideInterceptor(FilesInterceptor('files', 10))
       .useValue(stubInterceptor);
 
-    for (const interceptor of [...singleInterceptors, ...multipleInterceptors]) {
+    for (const interceptor of [
+      ...singleInterceptors,
+      ...multipleInterceptors,
+    ]) {
       moduleBuilder = moduleBuilder
         .overrideInterceptor(interceptor)
         .useValue(stubInterceptor);
@@ -284,9 +287,9 @@ describe('UploadsController', () => {
         new BadRequestException('Maximum 10 files allowed'),
       );
 
-      await expect(controller.uploadMultiple(files, 'products')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        controller.uploadMultiple(files, 'products'),
+      ).rejects.toThrow(BadRequestException);
       expect(mockUploadsService.uploadMultipleFiles).toHaveBeenCalledWith(
         files,
         'products',
