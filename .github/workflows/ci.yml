@@ -149,6 +149,42 @@ jobs:
         continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
 
+  trivy-fs:
+    name: trivy-fs (${{ matrix.dir }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir:
+          - user_ecommere/backend
+          - admin_ecommere/backend
+          - user_ecommere/frontend
+          - admin_ecommere/frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Report HIGH and CRITICAL dependency vulnerabilities from the lockfile (never fails the job)
+      - name: Trivy dependency scan (report)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: ${{ matrix.dir }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '0'
+
+      # Fail the job only on CRITICAL vulnerabilities that have a fix available
+      - name: Trivy dependency scan (block on CRITICAL)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: ${{ matrix.dir }}
+          scanners: vuln
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
   docker:
     name: docker (${{ matrix.name }})
     needs:
@@ -190,8 +226,21 @@ jobs:
         with:
           context: ${{ matrix.dir }}
           push: false
+          load: true
+          tags: local/${{ matrix.app }}-${{ matrix.target }}:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Trivy scans the built image (base OS packages and app dependencies); CRITICAL with a fix fails the job
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: local/${{ matrix.app }}-${{ matrix.target }}:ci
+          scanners: vuln
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
 
       - name: Generate SPDX SBOM
         uses: anchore/sbom-action@v0
