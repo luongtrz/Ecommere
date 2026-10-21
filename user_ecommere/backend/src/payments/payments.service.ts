@@ -81,7 +81,7 @@ export class PaymentsService {
     return verification;
   }
 
-  async processPaymentWebhook(provider: string, payload: any) {
+  async processPaymentWebhook(provider: string, _payload: any) {
     // Webhooks must be implemented per provider with signature verification
     // before this endpoint can safely accept external requests.
     throw new UnauthorizedException(

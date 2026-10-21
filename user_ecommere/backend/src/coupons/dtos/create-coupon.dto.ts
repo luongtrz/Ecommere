@@ -7,7 +7,6 @@ import {
   IsOptional,
   IsDate,
   Min,
-  Max,
 } from 'class-validator';
 import { CouponType } from '@prisma/client';
 

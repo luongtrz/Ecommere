@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 // import cookieParser from 'cookie-parser';
 import * as cookieParser from 'cookie-parser';
+import * as express from 'express';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { setupSwagger } from './swagger';
@@ -31,7 +32,6 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Serve static files (uploads)
-  const express = require('express');
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
   // CORS

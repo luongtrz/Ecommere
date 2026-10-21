@@ -17,7 +17,6 @@ import { RegisterDto } from './dtos/register.dto';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { Public } from '@/common/decorators/public.decorator';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { CsrfExempt } from '@/common/decorators/csrf-exempt.decorator';
 
 @ApiTags('Auth')

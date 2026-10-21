@@ -31,7 +31,7 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
    * an authenticated session; silently degrading to guest mode would mask authentication
    * failures and could lead to unexpected behavior or security issues.
    */
-  handleRequest(err: any, user: any, info?: any) {
+  handleRequest(err: any, user: any, _info?: any) {
     if (err) {
       throw err;
     }

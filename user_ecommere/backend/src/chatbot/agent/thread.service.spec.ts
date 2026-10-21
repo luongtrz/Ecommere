@@ -5,7 +5,6 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 describe('ThreadService', () => {
   let service: ThreadService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     agentThread: {
@@ -38,7 +37,6 @@ describe('ThreadService', () => {
     }).compile();
 
     service = module.get<ThreadService>(ThreadService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

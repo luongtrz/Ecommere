@@ -38,7 +38,7 @@ export class ShippingService implements ShippingProvider {
 
   async createShipment(
     orderId: string,
-    details: ShipmentDetails,
+    _details: ShipmentDetails,
   ): Promise<ShipmentResult> {
     // Mock shipment creation
     const trackingNumber = `THAI${Date.now().toString().slice(-8)}`;

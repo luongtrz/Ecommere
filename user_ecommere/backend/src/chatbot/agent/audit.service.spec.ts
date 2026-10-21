@@ -5,7 +5,6 @@ import { Prisma } from '@prisma/client';
 
 describe('AuditService', () => {
   let service: AuditService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     agentToolLog: {
@@ -25,7 +24,6 @@ describe('AuditService', () => {
     }).compile();
 
     service = module.get<AuditService>(AuditService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

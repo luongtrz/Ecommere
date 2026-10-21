@@ -21,7 +21,6 @@ import { UpdateCouponDto } from './dtos/update-coupon.dto';
 import { ValidateCouponDto } from './dtos/validate-coupon.dto';
 import { CouponEntity, CouponValidationEntity } from './entities/coupon.entity';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
-import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Role } from '@prisma/client';

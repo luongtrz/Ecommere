@@ -1,7 +1,6 @@
 import {
   createAccountTools,
   AccountToolDeps,
-  PHONE_REGEX,
 } from './account.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import type { UsersService } from '../../../users/users.service';
