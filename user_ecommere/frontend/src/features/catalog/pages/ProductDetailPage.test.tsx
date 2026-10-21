@@ -138,7 +138,7 @@ vi.mock('@/components/ui/tabs', async () => {
 
     return (
       <TabsContext.Provider
-        value={{ value: activeValue, onValueChange: handleChange }}
+        value={{ value: activeValue ?? '', onValueChange: handleChange }}
       >
         <div data-testid="tabs" {...props}>
           {children}

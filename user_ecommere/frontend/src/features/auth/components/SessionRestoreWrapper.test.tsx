@@ -78,7 +78,10 @@ describe('SessionRestoreWrapper', () => {
   afterEach(async () => {
     consoleLogSpy.mockRestore();
     try {
-      window.location = originalLocation;
+      Object.defineProperty(window, 'location', {
+        value: originalLocation,
+        configurable: true,
+      });
     } catch {
       try {
         Object.defineProperty(window, 'location', {

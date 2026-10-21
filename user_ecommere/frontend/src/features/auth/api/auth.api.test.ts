@@ -102,7 +102,7 @@ describe('authApi', () => {
 
   describe('login', () => {
     it('logs in successfully with backend response wrapping (.data.data) and updates token and localStorage', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -123,7 +123,7 @@ describe('authApi', () => {
     });
 
     it('logs in successfully with unwrapped response data (.data)', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: mockLoginResponse,
       });
 
@@ -141,7 +141,7 @@ describe('authApi', () => {
 
     it('clears cart when previous user ID in localStorage does not match logging in user ID', async () => {
       localStore['user'] = JSON.stringify({ id: 'different-user-id' });
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -152,7 +152,7 @@ describe('authApi', () => {
 
     it('does not clear cart when previous user ID matches logging in user ID', async () => {
       localStore['user'] = JSON.stringify({ id: mockUser.id });
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -162,7 +162,7 @@ describe('authApi', () => {
     });
 
     it('does not clear cart when there is no previous user in localStorage', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -173,7 +173,7 @@ describe('authApi', () => {
 
     it('clears cart when previous user in localStorage has malformed JSON', async () => {
       localStore['user'] = '{malformed-json';
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -187,7 +187,7 @@ describe('authApi', () => {
         ...mockLoginResponse,
         user: { ...mockUser, name: null },
       };
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: responseWithNullName },
       });
 
@@ -203,7 +203,7 @@ describe('authApi', () => {
           data: { message: 'Sai số điện thoại hoặc mật khẩu' },
         },
       };
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.login('0987654321', 'wrongpass')).rejects.toEqual(
         error,
@@ -222,7 +222,7 @@ describe('authApi', () => {
           data: { message: ['array error'] },
         },
       };
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.login('0987654321', 'pass')).rejects.toEqual(error);
 
@@ -234,7 +234,7 @@ describe('authApi', () => {
 
     it('logs error with undefined status and message when error has no response', async () => {
       const error = new Error('Network failure');
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.login('0987654321', 'pass')).rejects.toThrow(
         'Network failure',
@@ -247,7 +247,7 @@ describe('authApi', () => {
     });
 
     it('throws and logs when login response schema validation fails', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: { invalid: true } },
       });
 
@@ -262,7 +262,7 @@ describe('authApi', () => {
 
   describe('register', () => {
     it('registers successfully with all fields (name, phone, password, email, referralCode)', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -292,7 +292,7 @@ describe('authApi', () => {
     });
 
     it('registers successfully without optional email and referralCode', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: mockLoginResponse,
       });
 
@@ -311,7 +311,7 @@ describe('authApi', () => {
     });
 
     it('registers with email only', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -331,7 +331,7 @@ describe('authApi', () => {
     });
 
     it('registers with referralCode only', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -353,7 +353,7 @@ describe('authApi', () => {
 
     it('clears cart when register switches to a different user account', async () => {
       localStore['user'] = JSON.stringify({ id: 'old-acc' });
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -364,7 +364,7 @@ describe('authApi', () => {
 
     it('does not clear cart when register keeps the same account id', async () => {
       localStore['user'] = JSON.stringify({ id: mockUser.id });
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: mockLoginResponse },
       });
 
@@ -380,7 +380,7 @@ describe('authApi', () => {
           data: { message: 'Số điện thoại đã tồn tại' },
         },
       };
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.register('A', '098', 'p')).rejects.toEqual(error);
 
@@ -397,7 +397,7 @@ describe('authApi', () => {
           data: { message: {} },
         },
       };
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.register('A', '098', 'p')).rejects.toEqual(error);
 
@@ -409,7 +409,7 @@ describe('authApi', () => {
 
     it('logs error when registration throws non-response error', async () => {
       const error = new Error('Connection timeout');
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.register('A', '098', 'p')).rejects.toThrow(
         'Connection timeout',
@@ -424,7 +424,7 @@ describe('authApi', () => {
 
   describe('forgotPassword', () => {
     it('sends forgot password request with string email and wrapped response data', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: { message: 'Mã xác nhận đã gửi' } },
       });
 
@@ -438,7 +438,7 @@ describe('authApi', () => {
     });
 
     it('sends forgot password request with object input and unwrapped response data', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { message: 'Email sent successfully' },
       });
 
@@ -455,7 +455,7 @@ describe('authApi', () => {
 
     it('logs error and rethrows when forgot password request fails', async () => {
       const error = new Error('Email không tồn tại');
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(
         authApi.forgotPassword('unknown@domain.com'),
@@ -470,7 +470,7 @@ describe('authApi', () => {
 
   describe('resetPassword', () => {
     it('resets password with separate token string and new password with wrapped response', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { data: { message: 'Đặt lại mật khẩu thành công' } },
       });
 
@@ -490,7 +490,7 @@ describe('authApi', () => {
     });
 
     it('resets password with object payload and unwrapped response', async () => {
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { message: 'Password updated' },
       });
 
@@ -511,7 +511,7 @@ describe('authApi', () => {
 
     it('logs error and rethrows when reset password request fails', async () => {
       const error = new Error('Token không hợp lệ hoặc đã hết hạn');
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.resetPassword('bad-tok', 'newPass')).rejects.toThrow(
         'Token không hợp lệ hoặc đã hết hạn',
@@ -526,7 +526,7 @@ describe('authApi', () => {
 
   describe('getProfile', () => {
     it('retrieves and parses user profile with wrapped response data (.data.data)', async () => {
-      mockedApiClient.get.mockResolvedValueOnce({
+      vi.mocked(apiClient.get).mockResolvedValueOnce({
         data: { data: mockUser },
       });
 
@@ -544,7 +544,7 @@ describe('authApi', () => {
         role: 'ADMIN',
         phone: '0911223344',
       };
-      mockedApiClient.get.mockResolvedValueOnce({
+      vi.mocked(apiClient.get).mockResolvedValueOnce({
         data: rawProfile,
       });
 
@@ -555,13 +555,13 @@ describe('authApi', () => {
 
     it('throws when getProfile network request fails', async () => {
       const error = new Error('Chưa đăng nhập');
-      mockedApiClient.get.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.get).mockRejectedValueOnce(error);
 
       await expect(authApi.getProfile()).rejects.toThrow('Chưa đăng nhập');
     });
 
     it('throws when getProfile response fails schema validation', async () => {
-      mockedApiClient.get.mockResolvedValueOnce({
+      vi.mocked(apiClient.get).mockResolvedValueOnce({
         data: { data: { id: 'user-1', role: 'INVALID_ROLE' } },
       });
 
@@ -572,7 +572,7 @@ describe('authApi', () => {
   describe('logout', () => {
     it('logs out successfully and cleans up tokens, stores, and localStorage', async () => {
       localStore['user'] = JSON.stringify(mockUser);
-      mockedApiClient.post.mockResolvedValueOnce({
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
         data: { message: 'Đăng xuất thành công' },
       });
 
@@ -594,7 +594,7 @@ describe('authApi', () => {
           data: { message: 'Lỗi server đăng xuất' },
         },
       };
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.logout()).resolves.toBeUndefined();
 
@@ -611,7 +611,7 @@ describe('authApi', () => {
     it('cleans up local state when backend logout fails without response message string', async () => {
       localStore['user'] = JSON.stringify(mockUser);
       const error = new Error('Network offline');
-      mockedApiClient.post.mockRejectedValueOnce(error);
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
       await expect(authApi.logout()).resolves.toBeUndefined();
 
