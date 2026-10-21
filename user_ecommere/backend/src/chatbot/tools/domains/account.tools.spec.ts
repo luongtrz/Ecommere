@@ -367,9 +367,9 @@ describe('Account Tools', () => {
         user: { name: 'User' },
       }));
 
-      const projected = listMyAddressesTool.project!(
-        twelveAddresses,
-      ) as Array<Record<string, unknown>>;
+      const projected = listMyAddressesTool.project!(twelveAddresses) as Array<
+        Record<string, unknown>
+      >;
       expect(projected).toHaveLength(10);
       expect(projected[0].id).toBe('addr-1');
       expect(projected[9].id).toBe('addr-10');
@@ -533,10 +533,7 @@ describe('Account Tools', () => {
 
     it('rejects a call with only addressId in handler', async () => {
       await expect(
-        updateAddressTool.handler(
-          { addressId: 'addr-1' },
-          validCustomerCtx,
-        ),
+        updateAddressTool.handler({ addressId: 'addr-1' }, validCustomerCtx),
       ).rejects.toThrow('Cần ít nhất một trường để cập nhật địa chỉ');
     });
 
@@ -581,9 +578,9 @@ describe('Account Tools', () => {
     });
 
     it('summarize returns a Vietnamese string with addressId and provided fields', () => {
-      expect(
-        updateAddressTool.summarize({ addressId: 'addr-999' }),
-      ).toBe('Cập nhật địa chỉ nhận hàng addr-999');
+      expect(updateAddressTool.summarize({ addressId: 'addr-999' })).toBe(
+        'Cập nhật địa chỉ nhận hàng addr-999',
+      );
       expect(
         updateAddressTool.summarize({
           addressId: 'addr-1',
@@ -637,7 +634,8 @@ describe('Account Tools', () => {
         deleteAddressTool.schema.safeParse({ addressId: '' }).success,
       ).toBe(false);
       expect(
-        deleteAddressTool.schema.safeParse({ addressId: 'a'.repeat(65) }).success,
+        deleteAddressTool.schema.safeParse({ addressId: 'a'.repeat(65) })
+          .success,
       ).toBe(false);
       expect(
         deleteAddressTool.schema.safeParse({ addressId: 'addr-ok' }).success,
@@ -645,9 +643,9 @@ describe('Account Tools', () => {
     });
 
     it('summarize returns a Vietnamese string with addressId', () => {
-      expect(
-        deleteAddressTool.summarize({ addressId: 'addr-123' }),
-      ).toBe('Xóa địa chỉ addr-123');
+      expect(deleteAddressTool.summarize({ addressId: 'addr-123' })).toBe(
+        'Xóa địa chỉ addr-123',
+      );
     });
   });
 
@@ -707,18 +705,18 @@ describe('Account Tools', () => {
     });
 
     it('validates page (1..50) and limit (1..100) range', () => {
-      expect(
-        listMyReferralsTool.schema.safeParse({ page: 0 }).success,
-      ).toBe(false);
-      expect(
-        listMyReferralsTool.schema.safeParse({ page: 51 }).success,
-      ).toBe(false);
-      expect(
-        listMyReferralsTool.schema.safeParse({ limit: 0 }).success,
-      ).toBe(false);
-      expect(
-        listMyReferralsTool.schema.safeParse({ limit: 101 }).success,
-      ).toBe(false);
+      expect(listMyReferralsTool.schema.safeParse({ page: 0 }).success).toBe(
+        false,
+      );
+      expect(listMyReferralsTool.schema.safeParse({ page: 51 }).success).toBe(
+        false,
+      );
+      expect(listMyReferralsTool.schema.safeParse({ limit: 0 }).success).toBe(
+        false,
+      );
+      expect(listMyReferralsTool.schema.safeParse({ limit: 101 }).success).toBe(
+        false,
+      );
       expect(
         listMyReferralsTool.schema.safeParse({ page: 1, limit: 100 }).success,
       ).toBe(true);
@@ -768,12 +766,12 @@ describe('Account Tools', () => {
         validCustomerCtx,
       );
 
-      expect(mockReferralsService.getMyCouponsFromReferral).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(mockReferralsService.getMyCouponsFromReferral).toHaveBeenCalledWith(
-        'user-123',
-      );
+      expect(
+        mockReferralsService.getMyCouponsFromReferral,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockReferralsService.getMyCouponsFromReferral,
+      ).toHaveBeenCalledWith('user-123');
       expect(result).toEqual({
         data: [{ id: 'cpn-1', code: 'REF-ER-123' }],
       });

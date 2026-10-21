@@ -61,9 +61,7 @@ function createScriptedGraph(
   };
 }
 
-function createStateGraph(
-  stateOrHandler: unknown,
-): AgentRunnerDeps['graph'] {
+function createStateGraph(stateOrHandler: unknown): AgentRunnerDeps['graph'] {
   const handler =
     typeof stateOrHandler === 'function'
       ? (stateOrHandler as (config: unknown) => unknown)
@@ -132,7 +130,9 @@ describe('AgentRunner', () => {
       schema: z.object({ orderId: z.string() }).strict(),
       auth: 'customer',
       risk: 'DESTRUCTIVE',
-      handler: jest.fn().mockResolvedValue({ cancelled: true, orderId: 'ord-100' }),
+      handler: jest
+        .fn()
+        .mockResolvedValue({ cancelled: true, orderId: 'ord-100' }),
       summarize: (args) => `Hủy đơn hàng ${args.orderId}`,
     };
 
@@ -146,8 +146,14 @@ describe('AgentRunner', () => {
   it('case a: a text-only turn emits thread, token(s), done with usage, and calls recordUsage and setTitleIfEmpty', async () => {
     const threads = createMockThreads();
     const fakeGraph = createScriptedGraph([
-      ['messages', [new AIMessageChunk({ content: 'Xin ' }), { langgraph_node: 'agent' }]],
-      ['messages', [new AIMessageChunk({ content: 'chào!' }), { langgraph_node: 'agent' }]],
+      [
+        'messages',
+        [new AIMessageChunk({ content: 'Xin ' }), { langgraph_node: 'agent' }],
+      ],
+      [
+        'messages',
+        [new AIMessageChunk({ content: 'chào!' }), { langgraph_node: 'agent' }],
+      ],
       [
         'updates',
         {
@@ -191,7 +197,10 @@ describe('AgentRunner', () => {
     expect(threads.recordUsage).toHaveBeenCalledTimes(1);
     expect(threads.recordUsage).toHaveBeenCalledWith(customerCtx.threadId, 15);
     expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
-    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(customerCtx.threadId, 'Chào shop');
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(
+      customerCtx.threadId,
+      'Chào shop',
+    );
   });
 
   it('case b: a read tool call emits tool_start, tool_result ok true, and the uiAction event when the tool defines uiAction; recommend_products emits sources', async () => {
@@ -205,8 +214,16 @@ describe('AgentRunner', () => {
               new AIMessage({
                 content: '',
                 tool_calls: [
-                  { id: 'call-read-1', name: 'read_catalog', args: { query: 'sơn xịt' } },
-                  { id: 'call-rec-1', name: 'recommend_products', args: { category: 'paint' } },
+                  {
+                    id: 'call-read-1',
+                    name: 'read_catalog',
+                    args: { query: 'sơn xịt' },
+                  },
+                  {
+                    id: 'call-rec-1',
+                    name: 'recommend_products',
+                    args: { category: 'paint' },
+                  },
                 ],
               }),
             ],
@@ -221,7 +238,10 @@ describe('AgentRunner', () => {
               new ToolMessage({
                 tool_call_id: 'call-read-1',
                 name: 'read_catalog',
-                content: JSON.stringify({ ok: true, data: { items: ['Sơn lót xịt'] } }),
+                content: JSON.stringify({
+                  ok: true,
+                  data: { items: ['Sơn lót xịt'] },
+                }),
               }),
               new ToolMessage({
                 tool_call_id: 'call-rec-1',
@@ -239,7 +259,10 @@ describe('AgentRunner', () => {
       ],
       [
         'messages',
-        [new AIMessageChunk({ content: 'Đây là các sản phẩm bạn cần.' }), { langgraph_node: 'agent' }],
+        [
+          new AIMessageChunk({ content: 'Đây là các sản phẩm bạn cần.' }),
+          { langgraph_node: 'agent' },
+        ],
       ],
       [
         'updates',
@@ -329,17 +352,33 @@ describe('AgentRunner', () => {
 
   it('case c: a confirm interrupt emits confirm_required and no done; a resume with approve true then emits tool_result and done', async () => {
     const cancelHandler = cancelOrderTool.handler;
-    const audit: AgentAuditSink = { record: jest.fn().mockResolvedValue(undefined) };
+    const audit: AgentAuditSink = {
+      record: jest.fn().mockResolvedValue(undefined),
+    };
 
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_destr_1', name: 'cancel_order', args: { orderId: 'ord-100' } }],
-        usage_metadata: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
+        tool_calls: [
+          {
+            id: 'call_destr_1',
+            name: 'cancel_order',
+            args: { orderId: 'ord-100' },
+          },
+        ],
+        usage_metadata: {
+          input_tokens: 10,
+          output_tokens: 5,
+          total_tokens: 15,
+        },
       }),
       new AIMessage({
         content: 'Đã hủy đơn hàng thành công.',
-        usage_metadata: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+        usage_metadata: {
+          input_tokens: 10,
+          output_tokens: 10,
+          total_tokens: 20,
+        },
       }),
     ]);
 
@@ -401,7 +440,10 @@ describe('AgentRunner', () => {
     expect(threads.recordUsage).toHaveBeenCalledTimes(1);
     expect(threads.recordUsage).toHaveBeenCalledWith(customerCtx.threadId, 15);
     expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
-    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(customerCtx.threadId, 'Hủy đơn ord-100');
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(
+      customerCtx.threadId,
+      'Hủy đơn ord-100',
+    );
 
     // Turn 2: resume with approve: true
     const eventsTurn2: AgentStreamEvent[] = [];
@@ -412,7 +454,10 @@ describe('AgentRunner', () => {
     });
 
     expect(cancelHandler).toHaveBeenCalledTimes(1);
-    expect(cancelHandler).toHaveBeenCalledWith({ orderId: 'ord-100' }, customerCtx);
+    expect(cancelHandler).toHaveBeenCalledWith(
+      { orderId: 'ord-100' },
+      customerCtx,
+    );
 
     expect(eventsTurn2).toContainEqual({
       event: 'thread',
@@ -434,23 +479,42 @@ describe('AgentRunner', () => {
 
     // Turn 2 records usage; does not set title again on resume
     expect(threads.recordUsage).toHaveBeenCalledTimes(2);
-    expect(threads.recordUsage).toHaveBeenLastCalledWith(customerCtx.threadId, 20);
+    expect(threads.recordUsage).toHaveBeenLastCalledWith(
+      customerCtx.threadId,
+      20,
+    );
     expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
   });
 
   it('case c-decline: a resume with approve false emits tool_result ok false, does not call tool handler, and emits done', async () => {
     const cancelHandler = cancelOrderTool.handler;
-    const audit: AgentAuditSink = { record: jest.fn().mockResolvedValue(undefined) };
+    const audit: AgentAuditSink = {
+      record: jest.fn().mockResolvedValue(undefined),
+    };
 
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_destr_1', name: 'cancel_order', args: { orderId: 'ord-100' } }],
-        usage_metadata: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
+        tool_calls: [
+          {
+            id: 'call_destr_1',
+            name: 'cancel_order',
+            args: { orderId: 'ord-100' },
+          },
+        ],
+        usage_metadata: {
+          input_tokens: 10,
+          output_tokens: 5,
+          total_tokens: 15,
+        },
       }),
       new AIMessage({
         content: 'Bạn đã từ chối thao tác này.',
-        usage_metadata: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+        usage_metadata: {
+          input_tokens: 10,
+          output_tokens: 10,
+          total_tokens: 20,
+        },
       }),
     ]);
 
@@ -478,10 +542,15 @@ describe('AgentRunner', () => {
       sink: (e) => eventsTurn1.push(e),
     });
 
-    expect(eventsTurn1.find((e) => e.event === 'confirm_required')).toBeDefined();
+    expect(
+      eventsTurn1.find((e) => e.event === 'confirm_required'),
+    ).toBeDefined();
     expect(eventsTurn1.find((e) => e.event === 'done')).toBeUndefined();
     expect(threads.recordUsage).toHaveBeenCalledWith(customerCtx.threadId, 15);
-    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(customerCtx.threadId, 'Hủy đơn ord-100');
+    expect(threads.setTitleIfEmpty).toHaveBeenCalledWith(
+      customerCtx.threadId,
+      'Hủy đơn ord-100',
+    );
 
     // Turn 2: resume with approve: false
     const eventsTurn2: AgentStreamEvent[] = [];
@@ -511,7 +580,10 @@ describe('AgentRunner', () => {
       data: { usage: { totalTokens: 20 } },
     });
     expect(threads.recordUsage).toHaveBeenCalledTimes(2);
-    expect(threads.recordUsage).toHaveBeenLastCalledWith(customerCtx.threadId, 20);
+    expect(threads.recordUsage).toHaveBeenLastCalledWith(
+      customerCtx.threadId,
+      20,
+    );
     expect(threads.setTitleIfEmpty).toHaveBeenCalledTimes(1);
   });
 
@@ -708,10 +780,22 @@ describe('AgentRunner', () => {
     const abortController = new AbortController();
     const midStreamGraph: AgentRunnerDeps['graph'] = {
       async *stream() {
-        yield ['messages', [new AIMessageChunk({ content: 'Khởi đầu' }), { langgraph_node: 'agent' }]];
+        yield [
+          'messages',
+          [
+            new AIMessageChunk({ content: 'Khởi đầu' }),
+            { langgraph_node: 'agent' },
+          ],
+        ];
         abortController.abort();
         await new Promise((r) => setTimeout(r, 50));
-        yield ['messages', [new AIMessageChunk({ content: ' tiếp diễn' }), { langgraph_node: 'agent' }]];
+        yield [
+          'messages',
+          [
+            new AIMessageChunk({ content: ' tiếp diễn' }),
+            { langgraph_node: 'agent' },
+          ],
+        ];
       },
     };
 
@@ -751,7 +835,9 @@ describe('AgentRunner', () => {
       new AIMessage({ content: 'Phản hồi từ trợ lý.' }),
     ]);
 
-    const audit: AgentAuditSink = { record: jest.fn().mockResolvedValue(undefined) };
+    const audit: AgentAuditSink = {
+      record: jest.fn().mockResolvedValue(undefined),
+    };
     const realGraph = buildAgentGraph({
       model,
       registry,
@@ -810,7 +896,11 @@ describe('AgentRunner', () => {
             messages: [
               new AIMessage({
                 content: 'Xong lượt.',
-                usage_metadata: { total_tokens: 30, input_tokens: 20, output_tokens: 10 },
+                usage_metadata: {
+                  total_tokens: 30,
+                  input_tokens: 20,
+                  output_tokens: 10,
+                },
               }),
             ],
           },
@@ -933,7 +1023,8 @@ describe('AgentRunner', () => {
       threads: createMockThreads(),
       limits: { maxSteps: 5, timeoutMs: 5000 },
     });
-    const resEmptyValues = await runnerEmptyValues.readTranscript('missing-thread-1');
+    const resEmptyValues =
+      await runnerEmptyValues.readTranscript('missing-thread-1');
     expect(resEmptyValues).toEqual([]);
 
     const runnerUndefined = new AgentRunner({
@@ -942,7 +1033,8 @@ describe('AgentRunner', () => {
       threads: createMockThreads(),
       limits: { maxSteps: 5, timeoutMs: 5000 },
     });
-    const resUndefined = await runnerUndefined.readTranscript('missing-thread-2');
+    const resUndefined =
+      await runnerUndefined.readTranscript('missing-thread-2');
     expect(resUndefined).toEqual([]);
 
     const runnerNoGetState = new AgentRunner({
@@ -951,7 +1043,8 @@ describe('AgentRunner', () => {
       threads: createMockThreads(),
       limits: { maxSteps: 5, timeoutMs: 5000 },
     });
-    const resNoGetState = await runnerNoGetState.readTranscript('missing-thread-3');
+    const resNoGetState =
+      await runnerNoGetState.readTranscript('missing-thread-3');
     expect(resNoGetState).toEqual([]);
   });
 
@@ -1178,9 +1271,9 @@ describe('AgentRunner', () => {
     ).rejects.toThrow(AgentNotPendingError);
 
     // List is empty
-    await expect(
-      runner.assertResumable('thread-check', []),
-    ).rejects.toThrow(AgentNotPendingError);
+    await expect(runner.assertResumable('thread-check', [])).rejects.toThrow(
+      AgentNotPendingError,
+    );
 
     // Duplicate call id
     await expect(

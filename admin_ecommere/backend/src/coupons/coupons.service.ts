@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
@@ -47,11 +51,23 @@ export class CouponsService {
   }
 
   async create(createCouponDto: CreateCouponDto) {
-    const { code, type, value, minOrder, maxDiscount, validFrom, validUntil, maxUses, maxUsesPerUser } = createCouponDto;
+    const {
+      code,
+      type,
+      value,
+      minOrder,
+      maxDiscount,
+      validFrom,
+      validUntil,
+      maxUses,
+      maxUsesPerUser,
+    } = createCouponDto;
 
     // Validate percentage value
     if (type === CouponType.PERCENT && (value < 0 || value > 100)) {
-      throw new BadRequestException('Percentage value must be between 0 and 100');
+      throw new BadRequestException(
+        'Percentage value must be between 0 and 100',
+      );
     }
 
     // Validate date range
@@ -85,7 +101,10 @@ export class CouponsService {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('Coupon code already exists');
       }
 
@@ -102,24 +121,35 @@ export class CouponsService {
       throw new NotFoundException('Coupon not found');
     }
 
-    const { type, value, validFrom, validUntil, active, maxUses } = updateCouponDto;
+    const { type, value, validFrom, validUntil, active, maxUses } =
+      updateCouponDto;
     const effectiveType = type ?? coupon.type;
     const effectiveValue = value ?? coupon.value;
 
     // Validate percentage value
-    if (effectiveType === CouponType.PERCENT && (effectiveValue < 0 || effectiveValue > 100)) {
-      throw new BadRequestException('Percentage value must be between 0 and 100');
+    if (
+      effectiveType === CouponType.PERCENT &&
+      (effectiveValue < 0 || effectiveValue > 100)
+    ) {
+      throw new BadRequestException(
+        'Percentage value must be between 0 and 100',
+      );
     }
 
     // Validate date range
     const newValidFrom = validFrom !== undefined ? validFrom : coupon.validFrom;
-    const newValidUntil = validUntil !== undefined ? validUntil : coupon.validUntil;
+    const newValidUntil =
+      validUntil !== undefined ? validUntil : coupon.validUntil;
     if (newValidFrom && newValidUntil && newValidFrom >= newValidUntil) {
       throw new BadRequestException('validFrom must be before validUntil');
     }
 
     // Validate max uses
-    if (maxUses !== undefined && maxUses !== null && maxUses < coupon.usedCount) {
+    if (
+      maxUses !== undefined &&
+      maxUses !== null &&
+      maxUses < coupon.usedCount
+    ) {
       throw new BadRequestException('maxUses cannot be less than usedCount');
     }
 
@@ -139,7 +169,10 @@ export class CouponsService {
         data: updateData,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('Coupon code already exists');
       }
 
@@ -167,11 +200,15 @@ export class CouponsService {
     ]);
 
     if (orderCount > 0) {
-      throw new BadRequestException('Cannot delete coupon that has been used in orders');
+      throw new BadRequestException(
+        'Cannot delete coupon that has been used in orders',
+      );
     }
 
     if (cartCount > 0) {
-      throw new BadRequestException('Cannot delete coupon currently applied to carts');
+      throw new BadRequestException(
+        'Cannot delete coupon currently applied to carts',
+      );
     }
 
     try {
@@ -179,8 +216,13 @@ export class CouponsService {
         where: { code: normalizedCode },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
-        throw new BadRequestException('Cannot delete coupon currently referenced by another record');
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2003'
+      ) {
+        throw new BadRequestException(
+          'Cannot delete coupon currently referenced by another record',
+        );
       }
 
       throw error;
@@ -245,7 +287,8 @@ export class CouponsService {
       if (userUsageCount >= coupon.maxUsesPerUser) {
         return {
           valid: false,
-          message: 'You have already used this coupon the maximum number of times',
+          message:
+            'You have already used this coupon the maximum number of times',
         };
       }
     }

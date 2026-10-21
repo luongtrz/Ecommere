@@ -23,7 +23,9 @@ export class PaymentsService {
 
   private ensurePaymentProviderConfigured() {
     if (this.configService.get('NODE_ENV') === 'production') {
-      throw new ServiceUnavailableException('Payment provider is not configured');
+      throw new ServiceUnavailableException(
+        'Payment provider is not configured',
+      );
     }
   }
 
@@ -50,7 +52,8 @@ export class PaymentsService {
       throw new BadRequestException('Order payment is not pending');
     }
 
-    const provider = method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
+    const provider =
+      method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
 
     const result = await provider.createPayment(orderId, order.total, 'VND');
 
@@ -67,7 +70,8 @@ export class PaymentsService {
   async verifyPayment(paymentId: string, method: PaymentMethod) {
     this.ensurePaymentProviderConfigured();
 
-    const provider = method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
+    const provider =
+      method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
 
     const verification = await provider.verifyPayment(paymentId);
 
@@ -104,7 +108,8 @@ export class PaymentsService {
       throw new BadRequestException('Order has not been delivered');
     }
 
-    const provider = method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
+    const provider =
+      method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
 
     // Mock payment ID - in production, this would be stored with the order
     const mockPaymentId = `${method}_payment_${order.id}`;

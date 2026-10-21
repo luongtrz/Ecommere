@@ -73,7 +73,9 @@ describe('Reviews and Shipping Tools', () => {
     };
 
     tools = createReviewsShippingTools(deps);
-    getProductReviewsTool = tools.find((t) => t.name === 'get_product_reviews')!;
+    getProductReviewsTool = tools.find(
+      (t) => t.name === 'get_product_reviews',
+    )!;
     getReviewStatsTool = tools.find((t) => t.name === 'get_review_stats')!;
     quoteShippingTool = tools.find((t) => t.name === 'quote_shipping')!;
     createReviewTool = tools.find((t) => t.name === 'create_review')!;
@@ -328,7 +330,9 @@ describe('Reviews and Shipping Tools', () => {
       );
 
       expect(mockReviewsService.getProductStats).toHaveBeenCalledTimes(1);
-      expect(mockReviewsService.getProductStats).toHaveBeenCalledWith('prod-789');
+      expect(mockReviewsService.getProductStats).toHaveBeenCalledWith(
+        'prod-789',
+      );
       expect(result).toEqual(stats);
     });
 
@@ -346,9 +350,9 @@ describe('Reviews and Shipping Tools', () => {
     });
 
     it('summarize returns a Vietnamese string mentioning productId', () => {
-      expect(
-        getReviewStatsTool.summarize({ productId: 'prod-789' }),
-      ).toContain('prod-789');
+      expect(getReviewStatsTool.summarize({ productId: 'prod-789' })).toContain(
+        'prod-789',
+      );
     });
   });
 
@@ -403,9 +407,9 @@ describe('Reviews and Shipping Tools', () => {
     });
 
     it('rejects an empty province at the schema level and accepts a valid one', () => {
-      expect(
-        quoteShippingTool.schema.safeParse({ province: '' }).success,
-      ).toBe(false);
+      expect(quoteShippingTool.schema.safeParse({ province: '' }).success).toBe(
+        false,
+      );
       expect(
         quoteShippingTool.schema.safeParse({ province: 'Hồ Chí Minh' }).success,
       ).toBe(true);
@@ -433,9 +437,9 @@ describe('Reviews and Shipping Tools', () => {
     });
 
     it('summarize returns a Vietnamese string mentioning province', () => {
-      expect(
-        quoteShippingTool.summarize({ province: 'Hải Phòng' }),
-      ).toContain('Hải Phòng');
+      expect(quoteShippingTool.summarize({ province: 'Hải Phòng' })).toContain(
+        'Hải Phòng',
+      );
     });
   });
 
@@ -646,7 +650,9 @@ describe('Reviews and Shipping Tools', () => {
             threadId: 'thread-1',
           },
         ),
-      ).rejects.toThrow('Ít nhất một trong hai trường rating hoặc content phải có');
+      ).rejects.toThrow(
+        'Ít nhất một trong hai trường rating hoặc content phải có',
+      );
     });
 
     it('accepts a call with rating only', async () => {
@@ -729,9 +735,9 @@ describe('Reviews and Shipping Tools', () => {
     });
 
     it('summarize returns a Vietnamese string mentioning reviewId and provided fields without comment text', () => {
-      expect(
-        updateReviewTool.summarize({ reviewId: 'rev-100' }),
-      ).toBe('Cập nhật đánh giá rev-100');
+      expect(updateReviewTool.summarize({ reviewId: 'rev-100' })).toBe(
+        'Cập nhật đánh giá rev-100',
+      );
 
       const fullSummary = updateReviewTool.summarize({
         reviewId: 'rev-100',
@@ -757,7 +763,9 @@ describe('Reviews and Shipping Tools', () => {
         content: 'Rất ưng ý',
       });
       expect(contentSummary).not.toContain('Rất ưng ý');
-      expect(contentSummary).toBe('Cập nhật đánh giá rev-100 (nhận xét 9 ký tự)');
+      expect(contentSummary).toBe(
+        'Cập nhật đánh giá rev-100 (nhận xét 9 ký tự)',
+      );
     });
   });
 
@@ -789,9 +797,9 @@ describe('Reviews and Shipping Tools', () => {
     });
 
     it('validates reviewId constraints (1..64)', () => {
-      expect(
-        deleteReviewTool.schema.safeParse({ reviewId: '' }).success,
-      ).toBe(false);
+      expect(deleteReviewTool.schema.safeParse({ reviewId: '' }).success).toBe(
+        false,
+      );
       expect(
         deleteReviewTool.schema.safeParse({ reviewId: 'a'.repeat(65) }).success,
       ).toBe(false);
@@ -801,9 +809,9 @@ describe('Reviews and Shipping Tools', () => {
     });
 
     it('summarize returns a Vietnamese string mentioning reviewId', () => {
-      expect(
-        deleteReviewTool.summarize({ reviewId: 'rev-555' }),
-      ).toContain('rev-555');
+      expect(deleteReviewTool.summarize({ reviewId: 'rev-555' })).toContain(
+        'rev-555',
+      );
     });
   });
 
@@ -899,9 +907,9 @@ describe('Reviews and Shipping Tools', () => {
     });
 
     it('summarize returns a Vietnamese string mentioning coupon code', () => {
-      expect(
-        validateCouponTool.summarize({ code: 'SUMMER2026' }),
-      ).toContain('SUMMER2026');
+      expect(validateCouponTool.summarize({ code: 'SUMMER2026' })).toContain(
+        'SUMMER2026',
+      );
     });
   });
 });

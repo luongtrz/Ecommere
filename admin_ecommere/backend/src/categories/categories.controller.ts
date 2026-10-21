@@ -1,5 +1,18 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { UpdateCategoryDto } from './dtos/update-category.dto';
@@ -12,7 +25,7 @@ import { Role } from '@prisma/client';
 @Roles(Role.ADMIN)
 @Controller('categories')
 export class CategoriesController {
-  constructor(private categoriesService: CategoriesService) { }
+  constructor(private categoriesService: CategoriesService) {}
 
   @Public()
   @Get()
@@ -60,7 +73,10 @@ export class CategoriesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update category (Admin only)' })
   @ApiResponse({ status: 200, type: CategoryEntity })
-  async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 

@@ -90,8 +90,12 @@ describe('UsersService', () => {
     it('should throw NotFoundException when the user does not exist', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.getProfile('non-existent')).rejects.toThrow(NotFoundException);
-      await expect(service.getProfile('non-existent')).rejects.toThrow('User not found');
+      await expect(service.getProfile('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.getProfile('non-existent')).rejects.toThrow(
+        'User not found',
+      );
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'non-existent' },
         select: {
@@ -151,12 +155,12 @@ describe('UsersService', () => {
       );
       mockPrismaService.user.update.mockRejectedValue(p2002Error);
 
-      await expect(service.updateProfile('user-1', updateUserDto)).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.updateProfile('user-1', updateUserDto)).rejects.toThrow(
-        'Số điện thoại đã được đăng ký',
-      );
+      await expect(
+        service.updateProfile('user-1', updateUserDto),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.updateProfile('user-1', updateUserDto),
+      ).rejects.toThrow('Số điện thoại đã được đăng ký');
       expect(mockPrismaService.user.update).toHaveBeenCalledWith({
         where: { id: 'user-1' },
         data: updateUserDto,
@@ -173,20 +177,27 @@ describe('UsersService', () => {
     });
 
     it('should rethrow PrismaClientKnownRequestError when error code is not P2002', async () => {
-      const p2025Error = new Prisma.PrismaClientKnownRequestError('Record not found', {
-        code: 'P2025',
-        clientVersion: '5.8.0',
-      });
+      const p2025Error = new Prisma.PrismaClientKnownRequestError(
+        'Record not found',
+        {
+          code: 'P2025',
+          clientVersion: '5.8.0',
+        },
+      );
       mockPrismaService.user.update.mockRejectedValue(p2025Error);
 
-      await expect(service.updateProfile('user-1', updateUserDto)).rejects.toThrow(p2025Error);
+      await expect(
+        service.updateProfile('user-1', updateUserDto),
+      ).rejects.toThrow(p2025Error);
     });
 
     it('should rethrow unexpected non-Prisma errors', async () => {
       const unknownError = new Error('Database connection failed');
       mockPrismaService.user.update.mockRejectedValue(unknownError);
 
-      await expect(service.updateProfile('user-1', updateUserDto)).rejects.toThrow(unknownError);
+      await expect(
+        service.updateProfile('user-1', updateUserDto),
+      ).rejects.toThrow(unknownError);
     });
   });
 
@@ -373,10 +384,14 @@ describe('UsersService', () => {
       mockPrismaService.address.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.updateAddress('user-1', 'addr-999', { fullName: 'Updated Name' }),
+        service.updateAddress('user-1', 'addr-999', {
+          fullName: 'Updated Name',
+        }),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.updateAddress('user-1', 'addr-999', { fullName: 'Updated Name' }),
+        service.updateAddress('user-1', 'addr-999', {
+          fullName: 'Updated Name',
+        }),
       ).rejects.toThrow('Address not found');
 
       expect(mockPrismaService.address.findFirst).toHaveBeenCalledWith({
@@ -397,11 +412,17 @@ describe('UsersService', () => {
         ...updateAddressDto,
       };
 
-      mockPrismaService.address.findFirst.mockResolvedValue(mockExistingAddress);
+      mockPrismaService.address.findFirst.mockResolvedValue(
+        mockExistingAddress,
+      );
       mockPrismaService.address.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.address.update.mockResolvedValue(mockUpdatedAddress);
 
-      const result = await service.updateAddress('user-1', 'addr-1', updateAddressDto);
+      const result = await service.updateAddress(
+        'user-1',
+        'addr-1',
+        updateAddressDto,
+      );
 
       expect(result).toEqual(mockUpdatedAddress);
       expect(mockPrismaService.$transaction).toHaveBeenCalledWith(
@@ -432,10 +453,16 @@ describe('UsersService', () => {
         ...updateAddressDto,
       };
 
-      mockPrismaService.address.findFirst.mockResolvedValue(mockExistingAddress);
+      mockPrismaService.address.findFirst.mockResolvedValue(
+        mockExistingAddress,
+      );
       mockPrismaService.address.update.mockResolvedValue(mockUpdatedAddress);
 
-      const result = await service.updateAddress('user-1', 'addr-1', updateAddressDto);
+      const result = await service.updateAddress(
+        'user-1',
+        'addr-1',
+        updateAddressDto,
+      );
 
       expect(result).toEqual(mockUpdatedAddress);
       expect(mockPrismaService.address.findFirst).toHaveBeenCalledWith({
@@ -481,7 +508,9 @@ describe('UsersService', () => {
     });
 
     it('should delete address and return success message when address exists', async () => {
-      mockPrismaService.address.findFirst.mockResolvedValue(mockExistingAddress);
+      mockPrismaService.address.findFirst.mockResolvedValue(
+        mockExistingAddress,
+      );
       mockPrismaService.address.delete.mockResolvedValue(mockExistingAddress);
 
       const result = await service.deleteAddress('user-1', 'addr-1');
@@ -498,10 +527,13 @@ describe('UsersService', () => {
 
   describe('runSerializableTransaction (retry mechanism)', () => {
     it('should retry transaction and succeed when P2034 serialization failure occurs on initial attempt', async () => {
-      const p2034Error = new Prisma.PrismaClientKnownRequestError('Transaction conflict', {
-        code: 'P2034',
-        clientVersion: '5.8.0',
-      });
+      const p2034Error = new Prisma.PrismaClientKnownRequestError(
+        'Transaction conflict',
+        {
+          code: 'P2034',
+          clientVersion: '5.8.0',
+        },
+      );
 
       const mockAddress = {
         id: 'addr-1',
@@ -532,10 +564,13 @@ describe('UsersService', () => {
     });
 
     it('should retry up to 3 attempts and rethrow P2034 error if all attempts fail', async () => {
-      const p2034Error = new Prisma.PrismaClientKnownRequestError('Transaction conflict', {
-        code: 'P2034',
-        clientVersion: '5.8.0',
-      });
+      const p2034Error = new Prisma.PrismaClientKnownRequestError(
+        'Transaction conflict',
+        {
+          code: 'P2034',
+          clientVersion: '5.8.0',
+        },
+      );
 
       mockPrismaService.$transaction.mockRejectedValue(p2034Error);
 

@@ -141,7 +141,11 @@ describe('ProductsService', () => {
       mockPrismaService.product.findMany.mockResolvedValue([]);
       mockPrismaService.product.count.mockResolvedValue(0);
 
-      await service.findAll({ page: 1, limit: 12, sortBy: ProductSortBy.PRICE_ASC });
+      await service.findAll({
+        page: 1,
+        limit: 12,
+        sortBy: ProductSortBy.PRICE_ASC,
+      });
 
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -173,7 +177,11 @@ describe('ProductsService', () => {
         },
       ]);
 
-      const result = await service.findAll({ page: 1, limit: 12, sortBy: ProductSortBy.BEST_SELLING });
+      const result = await service.findAll({
+        page: 1,
+        limit: 12,
+        sortBy: ProductSortBy.BEST_SELLING,
+      });
 
       expect(result.data).toHaveLength(1);
       expect(result.total).toBe(1);
@@ -208,7 +216,11 @@ describe('ProductsService', () => {
         },
       ]);
 
-      const result = await service.findAll({ page: 1, limit: 12, sortBy: ProductSortBy.RATING });
+      const result = await service.findAll({
+        page: 1,
+        limit: 12,
+        sortBy: ProductSortBy.RATING,
+      });
 
       expect(result.data).toHaveLength(1);
       expect(result.total).toBe(1);
@@ -331,8 +343,12 @@ describe('ProductsService', () => {
 
       mockPrismaService.category.findUnique.mockResolvedValue(null);
 
-      await expect(service.create(createProductDto)).rejects.toThrow(BadRequestException);
-      await expect(service.create(createProductDto)).rejects.toThrow('Category not found');
+      await expect(service.create(createProductDto)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.create(createProductDto)).rejects.toThrow(
+        'Category not found',
+      );
     });
 
     it('should throw BadRequestException when product name already exists', async () => {
@@ -353,8 +369,12 @@ describe('ProductsService', () => {
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
       mockPrismaService.product.findUnique.mockResolvedValue(existingProduct);
 
-      await expect(service.create(createProductDto)).rejects.toThrow(BadRequestException);
-      await expect(service.create(createProductDto)).rejects.toThrow('Product with this name already exists');
+      await expect(service.create(createProductDto)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.create(createProductDto)).rejects.toThrow(
+        'Product with this name already exists',
+      );
     });
   });
 
@@ -398,7 +418,9 @@ describe('ProductsService', () => {
     it('should throw NotFoundException when product not found', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('999', { basePrice: 150000 })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('999', { basePrice: 150000 }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -418,7 +440,9 @@ describe('ProductsService', () => {
       const result = await service.remove('1');
 
       expect(result.message).toBe('Product deleted successfully');
-      expect(mockPrismaService.product.delete).toHaveBeenCalledWith({ where: { id: '1' } });
+      expect(mockPrismaService.product.delete).toHaveBeenCalledWith({
+        where: { id: '1' },
+      });
     });
 
     it('should throw BadRequestException when product has cart items', async () => {
@@ -436,7 +460,9 @@ describe('ProductsService', () => {
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
 
       await expect(service.remove('1')).rejects.toThrow(BadRequestException);
-      await expect(service.remove('1')).rejects.toThrow('Cannot delete product with existing carts, orders, or stock history');
+      await expect(service.remove('1')).rejects.toThrow(
+        'Cannot delete product with existing carts, orders, or stock history',
+      );
     });
   });
 });

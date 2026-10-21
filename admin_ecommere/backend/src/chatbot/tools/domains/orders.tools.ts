@@ -61,7 +61,9 @@ function projectOrdersList(result: any): any {
   return result;
 }
 
-export function createAdminOrdersTools(deps: AdminOrdersToolDeps): AgentToolDef[] {
+export function createAdminOrdersTools(
+  deps: AdminOrdersToolDeps,
+): AgentToolDef[] {
   const listOrdersTool: AgentToolDef = {
     name: 'list_orders',
     domain: 'orders',
@@ -132,7 +134,8 @@ export function createAdminOrdersTools(deps: AdminOrdersToolDeps): AgentToolDef[
         status: args.status,
       });
     },
-    summarize: (args) => `Đổi trạng thái đơn ${args.orderId} sang ${args.status}`,
+    summarize: (args) =>
+      `Đổi trạng thái đơn ${args.orderId} sang ${args.status}`,
     preview: async (args, ctx: ToolContext) => {
       if (args.status !== 'REFUNDED' && args.status !== 'CANCELED') {
         return undefined;

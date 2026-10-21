@@ -48,7 +48,8 @@ export class SendChatbotMessageDto {
 
   @ApiPropertyOptional({
     type: [ChatbotHistoryMessageDto],
-    description: 'Recent conversation history from older clients. New clients should use sessionId instead.',
+    description:
+      'Recent conversation history from older clients. New clients should use sessionId instead.',
   })
   @IsOptional()
   @IsArray()

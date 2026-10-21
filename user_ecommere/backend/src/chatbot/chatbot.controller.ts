@@ -63,7 +63,9 @@ export class ChatbotController {
   @UseGuards(OptionalJwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('stream')
-  @ApiOperation({ summary: 'Stream assistant responses using Server-Sent Events' })
+  @ApiOperation({
+    summary: 'Stream assistant responses using Server-Sent Events',
+  })
   @ApiResponse({ status: 200, description: 'Server-Sent Events stream' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
   @ApiResponse({ status: 409, description: 'Thread is busy' })
@@ -97,7 +99,9 @@ export class ChatbotController {
       role,
       app: 'USER',
       threadId,
-      ...(body.clientContext ? { clientContext: body.clientContext as any } : {}),
+      ...(body.clientContext
+        ? { clientContext: body.clientContext as any }
+        : {}),
     };
 
     await this.runSseTurn(req, res, {
@@ -111,7 +115,9 @@ export class ChatbotController {
   @UseGuards(OptionalJwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('threads/:threadId/resume')
-  @ApiOperation({ summary: 'Resume assistant execution with tool call decisions' })
+  @ApiOperation({
+    summary: 'Resume assistant execution with tool call decisions',
+  })
   @ApiResponse({ status: 200, description: 'Server-Sent Events stream' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
   @ApiResponse({ status: 409, description: 'Thread is busy' })
@@ -158,7 +164,9 @@ export class ChatbotController {
       role,
       app: 'USER',
       threadId,
-      ...(body.clientContext ? { clientContext: body.clientContext as any } : {}),
+      ...(body.clientContext
+        ? { clientContext: body.clientContext as any }
+        : {}),
     };
 
     await this.runSseTurn(req, res, {
@@ -172,10 +180,7 @@ export class ChatbotController {
   @Get('threads')
   @ApiOperation({ summary: 'List user chat threads' })
   @ApiResponse({ status: 200, description: 'List of caller threads' })
-  async listThreads(
-    @Req() req: Request,
-    @Query() query: AgentThreadQueryDto,
-  ) {
+  async listThreads(@Req() req: Request, @Query() query: AgentThreadQueryDto) {
     const actor = this.getActor(req);
     if (!actor.userId) {
       return [];
@@ -190,10 +195,7 @@ export class ChatbotController {
   @ApiOperation({ summary: 'Get thread details by ID' })
   @ApiResponse({ status: 200, description: 'Thread details' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
-  async getThread(
-    @Req() req: Request,
-    @Param('threadId') threadId: string,
-  ) {
+  async getThread(@Req() req: Request, @Param('threadId') threadId: string) {
     const actor = this.getActor(req);
     const thread = await this.threads.assertOwned(threadId, actor);
     return {
@@ -229,10 +231,7 @@ export class ChatbotController {
   @ApiResponse({ status: 200, description: 'Thread deleted' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
   @ApiResponse({ status: 409, description: 'Thread is busy' })
-  async deleteThread(
-    @Req() req: Request,
-    @Param('threadId') threadId: string,
-  ) {
+  async deleteThread(@Req() req: Request, @Param('threadId') threadId: string) {
     const actor = this.getActor(req);
     await this.threads.assertOwned(threadId, actor);
     if (this.runner.isThreadRunning(threadId)) {
@@ -244,7 +243,6 @@ export class ChatbotController {
     await this.threads.remove(threadId, actor);
     return { deleted: true };
   }
-
 
   private async runSseTurn(
     req: Request,
@@ -297,9 +295,10 @@ export class ChatbotController {
         (err instanceof AgentBusyError || err?.name === 'AgentBusyError') &&
         !writer
       ) {
-        res
-          .status(409)
-          .json({ statusCode: 409, message: 'Cuộc trò chuyện đang được xử lý' });
+        res.status(409).json({
+          statusCode: 409,
+          message: 'Cuộc trò chuyện đang được xử lý',
+        });
         return;
       }
       throw err;
@@ -334,7 +333,9 @@ export class ChatbotController {
     };
 
     const rawHeader =
-      (typeof req.header === 'function' ? req.header('x-chat-session') : undefined) ??
+      (typeof req.header === 'function'
+        ? req.header('x-chat-session')
+        : undefined) ??
       req.headers?.['x-chat-session'] ??
       req.headers?.['X-Chat-Session'] ??
       (req.headers &&

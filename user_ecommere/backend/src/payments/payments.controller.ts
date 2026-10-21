@@ -1,5 +1,10 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dtos/create-payment.dto';
 import { VerifyPaymentDto } from './dtos/verify-payment.dto';
@@ -16,8 +21,15 @@ export class PaymentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create payment for order (Mock)' })
   @ApiResponse({ status: 201 })
-  async createPayment(@CurrentUser('id') userId: string, @Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentsService.createPayment(userId, createPaymentDto.orderId, createPaymentDto.method);
+  async createPayment(
+    @CurrentUser('id') userId: string,
+    @Body() createPaymentDto: CreatePaymentDto,
+  ) {
+    return this.paymentsService.createPayment(
+      userId,
+      createPaymentDto.orderId,
+      createPaymentDto.method,
+    );
   }
 
   @Post('verify')

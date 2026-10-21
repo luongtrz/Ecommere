@@ -1,7 +1,4 @@
-import {
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ChatbotController } from './chatbot.controller';
 import { AgentBusyError, AgentNotPendingError } from './agent/agent.runner';
 import type { AgentConfig } from './agent/agent.config';
@@ -233,10 +230,13 @@ describe('ChatbotController', () => {
         controller.stream(req as any, res as any, body),
       ).rejects.toThrow(NotFoundException);
 
-      expect(mockThreads.assertOwned).toHaveBeenCalledWith('unowned-thread-id', {
-        userId: null,
-        app: 'USER',
-      });
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith(
+        'unowned-thread-id',
+        {
+          userId: null,
+          app: 'USER',
+        },
+      );
       expect(mockRunner.run).not.toHaveBeenCalled();
     });
 
@@ -451,12 +451,9 @@ describe('ChatbotController', () => {
       const req = createFakeRequest(undefined);
       const res = createFakeResponse();
 
-      await controllerWithoutKey.resume(
-        req as any,
-        res as any,
-        't1',
-        { decisions: [{ callId: 'c1', approve: true }] },
-      );
+      await controllerWithoutKey.resume(req as any, res as any, 't1', {
+        decisions: [{ callId: 'c1', approve: true }],
+      });
 
       expect(res.status).toHaveBeenCalledWith(503);
       expect(res.json).toHaveBeenCalledWith({
@@ -611,7 +608,11 @@ describe('ChatbotController', () => {
     it("the owner gets the runner's messages in order, and readTranscript is called with the same threadId", async () => {
       const messages = [
         { id: '1', role: 'user', content: 'Tìm sơn màu đen' },
-        { id: '2', role: 'assistant', content: 'Shop có sơn màu đen mờ và đen bóng.' },
+        {
+          id: '2',
+          role: 'assistant',
+          content: 'Shop có sơn màu đen mờ và đen bóng.',
+        },
       ];
       mockThreads.assertOwned.mockResolvedValue({
         id: 'thread-detail-1',
@@ -625,7 +626,10 @@ describe('ChatbotController', () => {
       mockRunner.readTranscript.mockResolvedValue(messages);
 
       const req = createFakeRequest({ id: 'user-owner-1', role: 'CUSTOMER' });
-      const result = await controller.getMessages(req as any, 'thread-detail-1');
+      const result = await controller.getMessages(
+        req as any,
+        'thread-detail-1',
+      );
 
       expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-detail-1', {
         userId: 'user-owner-1',
@@ -729,7 +733,9 @@ describe('ChatbotController', () => {
         userId: 'user-del',
         app: 'USER',
       });
-      expect(mockRunner.deleteCheckpoints).toHaveBeenCalledWith('thread-del-id');
+      expect(mockRunner.deleteCheckpoints).toHaveBeenCalledWith(
+        'thread-del-id',
+      );
       expect(mockThreads.remove).toHaveBeenCalledWith('thread-del-id', {
         userId: 'user-del',
         app: 'USER',
@@ -748,10 +754,13 @@ describe('ChatbotController', () => {
         controller.deleteThread(req as any, 'foreign-thread-id'),
       ).rejects.toThrow(NotFoundException);
 
-      expect(mockThreads.assertOwned).toHaveBeenCalledWith('foreign-thread-id', {
-        userId: 'user-del',
-        app: 'USER',
-      });
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith(
+        'foreign-thread-id',
+        {
+          userId: 'user-del',
+          app: 'USER',
+        },
+      );
       expect(mockRunner.deleteCheckpoints).not.toHaveBeenCalled();
       expect(mockThreads.remove).not.toHaveBeenCalled();
     });
@@ -779,7 +788,6 @@ describe('ChatbotController', () => {
       expect(mockThreads.remove).not.toHaveBeenCalled();
     });
   });
-
 
   describe('Route names and IDOR check', () => {
     it('the controller has no route named sessions (check the route metadata by reading the method names only)', () => {

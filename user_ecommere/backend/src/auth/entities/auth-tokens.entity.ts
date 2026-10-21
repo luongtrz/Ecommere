@@ -10,7 +10,11 @@ export class AuthTokensEntity {
   @ApiProperty()
   expiresIn: string;
 
-  constructor(accessToken: string, refreshToken: string, expiresIn: string = '15m') {
+  constructor(
+    accessToken: string,
+    refreshToken: string,
+    expiresIn: string = '15m',
+  ) {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     this.expiresIn = expiresIn;

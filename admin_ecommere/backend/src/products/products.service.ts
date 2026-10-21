@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { OrderStatus, Prisma, StockMovementType } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
@@ -14,10 +18,19 @@ export class ProductsService {
   constructor(
     private prisma: PrismaService,
     private categoriesService: CategoriesService,
-  ) { }
+  ) {}
 
   async findAll(filterDto: ProductFilterDto, includeInactive = false) {
-    const { page = 1, limit = 12, search, categoryId, categorySlug, sortBy = ProductSortBy.NEWEST, minPrice, maxPrice } = filterDto;
+    const {
+      page = 1,
+      limit = 12,
+      search,
+      categoryId,
+      categorySlug,
+      sortBy = ProductSortBy.NEWEST,
+      minPrice,
+      maxPrice,
+    } = filterDto;
 
     const where: any = includeInactive ? {} : { active: true };
 
@@ -31,7 +44,8 @@ export class ProductsService {
 
     // Handle category filtering
     if (categoryId) {
-      const categoryIds = await this.categoriesService.getDescendantIds(categoryId);
+      const categoryIds =
+        await this.categoriesService.getDescendantIds(categoryId);
       if (categoryIds.length > 0) {
         where.categoryId = { in: categoryIds };
       } else {
@@ -43,7 +57,9 @@ export class ProductsService {
         where: { slug: categorySlug },
       });
       if (category) {
-        const categoryIds = await this.categoriesService.getDescendantIds(category.id);
+        const categoryIds = await this.categoriesService.getDescendantIds(
+          category.id,
+        );
         if (categoryIds.length > 0) {
           where.categoryId = { in: categoryIds };
         } else {
@@ -122,7 +138,10 @@ export class ProductsService {
     let products: any[];
     let total: number;
 
-    if (sortBy === ProductSortBy.BEST_SELLING || sortBy === ProductSortBy.RATING) {
+    if (
+      sortBy === ProductSortBy.BEST_SELLING ||
+      sortBy === ProductSortBy.RATING
+    ) {
       const conditions: Prisma.Sql[] = [];
 
       if (!includeInactive) {
@@ -138,11 +157,19 @@ export class ProductsService {
 
       if (typeof where.categoryId === 'string') {
         conditions.push(Prisma.sql`p."categoryId" = ${where.categoryId}`);
-      } else if (where.categoryId?.in && Array.isArray(where.categoryId.in) && where.categoryId.in.length > 0) {
-        conditions.push(Prisma.sql`p."categoryId" IN (${Prisma.join(where.categoryId.in)})`);
+      } else if (
+        where.categoryId?.in &&
+        Array.isArray(where.categoryId.in) &&
+        where.categoryId.in.length > 0
+      ) {
+        conditions.push(
+          Prisma.sql`p."categoryId" IN (${Prisma.join(where.categoryId.in)})`,
+        );
       }
 
-      const variantSqlConditions: Prisma.Sql[] = [Prisma.sql`pv."productId" = p."id"`];
+      const variantSqlConditions: Prisma.Sql[] = [
+        Prisma.sql`pv."productId" = p."id"`,
+      ];
 
       if (minPrice !== undefined) {
         variantSqlConditions.push(
@@ -197,7 +224,7 @@ export class ProductsService {
       ]);
 
       total = totalCount;
-      const pageProductIds = rankedRows.map(row => row.id);
+      const pageProductIds = rankedRows.map((row) => row.id);
 
       if (pageProductIds.length === 0) {
         products = [];
@@ -211,9 +238,9 @@ export class ProductsService {
           },
         });
 
-        const productMap = new Map(pageProducts.map(p => [p.id, p]));
+        const productMap = new Map(pageProducts.map((p) => [p.id, p]));
         products = pageProductIds
-          .map(id => productMap.get(id))
+          .map((id) => productMap.get(id))
           .filter((p): p is (typeof pageProducts)[0] => p !== undefined);
       }
     } else {
@@ -234,19 +261,20 @@ export class ProductsService {
     }
 
     // Batch-fetch average ratings in one query
-    const productIds = products.map(p => p.id);
-    const ratingAggregates = productIds.length > 0
-      ? await this.prisma.review.groupBy({
-          by: ['productId'],
-          where: { productId: { in: productIds } },
-          _avg: { rating: true },
-        })
-      : [];
+    const productIds = products.map((p) => p.id);
+    const ratingAggregates =
+      productIds.length > 0
+        ? await this.prisma.review.groupBy({
+            by: ['productId'],
+            where: { productId: { in: productIds } },
+            _avg: { rating: true },
+          })
+        : [];
     const ratingMap = new Map(
-      ratingAggregates.map(r => [r.productId, r._avg.rating || 0]),
+      ratingAggregates.map((r) => [r.productId, r._avg.rating || 0]),
     );
 
-    const productsWithStats = products.map(product => ({
+    const productsWithStats = products.map((product) => ({
       ...product,
       averageRating: parseFloat((ratingMap.get(product.id) || 0).toFixed(2)),
       reviewCount: product._count.reviews,
@@ -333,7 +361,16 @@ export class ProductsService {
   }
 
   async create(createProductDto: CreateProductDto) {
-    const { name, description, brand, images, categoryId, basePrice, active = true, variants } = createProductDto;
+    const {
+      name,
+      description,
+      brand,
+      images,
+      categoryId,
+      basePrice,
+      active = true,
+      variants,
+    } = createProductDto;
     const slug = SlugifyUtil.generate(name);
 
     for (const variant of variants) {
@@ -409,8 +446,13 @@ export class ProductsService {
         return product;
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new BadRequestException('Product name or variant SKU already exists');
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new BadRequestException(
+          'Product name or variant SKU already exists',
+        );
       }
 
       throw error;
@@ -442,7 +484,9 @@ export class ProductsService {
       }
 
       // Validate that category is a leaf (no children)
-      await this.categoriesService.validateProductAssignment(updateProductDto.categoryId);
+      await this.categoriesService.validateProductAssignment(
+        updateProductDto.categoryId,
+      );
     }
 
     try {
@@ -455,7 +499,10 @@ export class ProductsService {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('Product name already exists');
       }
 
@@ -482,12 +529,18 @@ export class ProductsService {
     }
 
     // Preserve variants that have historical or active references.
-    const hasReferences = product.variants?.some(
-      v => v.cartItems.length > 0 || v.orderItems.length > 0 || v.stockMovements.length > 0
-    ) || false;
+    const hasReferences =
+      product.variants?.some(
+        (v) =>
+          v.cartItems.length > 0 ||
+          v.orderItems.length > 0 ||
+          v.stockMovements.length > 0,
+      ) || false;
 
     if (hasReferences) {
-      throw new BadRequestException('Cannot delete product with existing carts, orders, or stock history');
+      throw new BadRequestException(
+        'Cannot delete product with existing carts, orders, or stock history',
+      );
     }
 
     await this.prisma.product.delete({
@@ -507,7 +560,10 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    this.validateVariantPricing(createVariantDto.price, createVariantDto.salePrice);
+    this.validateVariantPricing(
+      createVariantDto.price,
+      createVariantDto.salePrice,
+    );
 
     const sku = `${product.slug.toUpperCase()}-${createVariantDto.scent.substring(0, 3).toUpperCase()}-${createVariantDto.volumeMl}ML`;
 
@@ -541,7 +597,10 @@ export class ProductsService {
         return variant;
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('Variant SKU already exists');
       }
 
@@ -561,7 +620,9 @@ export class ProductsService {
 
     this.validateVariantPricing(
       updateVariantDto.price ?? variant.price,
-      updateVariantDto.salePrice !== undefined ? updateVariantDto.salePrice : variant.salePrice,
+      updateVariantDto.salePrice !== undefined
+        ? updateVariantDto.salePrice
+        : variant.salePrice,
     );
 
     const data: any = { ...updateVariantDto };
@@ -579,7 +640,10 @@ export class ProductsService {
         data,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('Variant SKU already exists');
       }
 
@@ -613,7 +677,9 @@ export class ProductsService {
     }
 
     if (variant.product._count.variants <= 1) {
-      throw new BadRequestException('Cannot delete the last variant of a product');
+      throw new BadRequestException(
+        'Cannot delete the last variant of a product',
+      );
     }
 
     if (
@@ -621,7 +687,9 @@ export class ProductsService {
       variant._count.orderItems > 0 ||
       variant._count.stockMovements > 0
     ) {
-      throw new BadRequestException('Cannot delete a variant referenced by carts, orders, or stock history');
+      throw new BadRequestException(
+        'Cannot delete a variant referenced by carts, orders, or stock history',
+      );
     }
 
     await this.prisma.productVariant.delete({
@@ -633,7 +701,9 @@ export class ProductsService {
 
   private validateVariantPricing(price: number, salePrice?: number | null) {
     if (salePrice != null && salePrice > price) {
-      throw new BadRequestException('Sale price cannot exceed the regular price');
+      throw new BadRequestException(
+        'Sale price cannot exceed the regular price',
+      );
     }
   }
 }

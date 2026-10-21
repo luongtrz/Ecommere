@@ -136,12 +136,7 @@ export const agentProviders: Provider[] = [
           timeoutMs: config.timeoutMs,
         },
       }),
-    inject: [
-      AGENT_GRAPH,
-      USER_TOOL_REGISTRY,
-      ThreadService,
-      AGENT_CONFIG,
-    ],
+    inject: [AGENT_GRAPH, USER_TOOL_REGISTRY, ThreadService, AGENT_CONFIG],
   },
   CheckpointRetentionService,
 ];

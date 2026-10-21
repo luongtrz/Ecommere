@@ -139,7 +139,9 @@ describe('OrdersService', () => {
       });
       mockPrismaService.order.create.mockResolvedValue(mockOrder);
       mockPrismaService.order.count.mockResolvedValue(0);
-      mockPrismaService.productVariant.findUnique.mockResolvedValue({ stock: 8 });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        stock: 8,
+      });
 
       const result = await service.checkout('user1', { addressId: 'addr1' });
 
@@ -158,16 +160,24 @@ describe('OrdersService', () => {
 
       mockPrismaService.cart.findUnique.mockResolvedValue(emptyCart);
 
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow(BadRequestException);
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow('Cart is empty');
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow('Cart is empty');
     });
 
     it('should throw NotFoundException when address not found', async () => {
       mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
       mockPrismaService.address.findUnique.mockResolvedValue(null);
 
-      await expect(service.checkout('user1', { addressId: 'invalid' })).rejects.toThrow(NotFoundException);
-      await expect(service.checkout('user1', { addressId: 'invalid' })).rejects.toThrow('Address not found');
+      await expect(
+        service.checkout('user1', { addressId: 'invalid' }),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.checkout('user1', { addressId: 'invalid' }),
+      ).rejects.toThrow('Address not found');
     });
 
     it('should throw BadRequestException when address belongs to different user', async () => {
@@ -176,7 +186,9 @@ describe('OrdersService', () => {
       mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
       mockPrismaService.address.findUnique.mockResolvedValue(otherUserAddress);
 
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException when product is inactive', async () => {
@@ -200,8 +212,12 @@ describe('OrdersService', () => {
       mockPrismaService.cart.findUnique.mockResolvedValue(inactiveProductCart);
       mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
 
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow(BadRequestException);
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow('Product is no longer available');
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow('Product is no longer available');
     });
 
     it('should throw BadRequestException when insufficient stock', async () => {
@@ -222,8 +238,12 @@ describe('OrdersService', () => {
       mockPrismaService.cart.findUnique.mockResolvedValue(lowStockCart);
       mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
 
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow(BadRequestException);
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow('Insufficient stock');
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow('Insufficient stock');
     });
   });
 
@@ -265,7 +285,11 @@ describe('OrdersService', () => {
       mockPrismaService.order.findMany.mockResolvedValue([]);
       mockPrismaService.order.count.mockResolvedValue(0);
 
-      await service.getMyOrders('user1', { page: 1, limit: 10, status: OrderStatus.DELIVERED });
+      await service.getMyOrders('user1', {
+        page: 1,
+        limit: 10,
+        status: OrderStatus.DELIVERED,
+      });
 
       expect(mockPrismaService.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -300,7 +324,9 @@ describe('OrdersService', () => {
         return callback(mockPrismaService);
       });
 
-      const result = await service.updateOrderStatus('order1', { status: OrderStatus.PAID });
+      const result = await service.updateOrderStatus('order1', {
+        status: OrderStatus.PAID,
+      });
 
       expect(result.status).toBe(OrderStatus.PAID);
       expect(result.paymentStatus).toBe(PaymentStatus.COMPLETED);
@@ -309,9 +335,9 @@ describe('OrdersService', () => {
     it('should throw NotFoundException when order not found', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateOrderStatus('invalid', { status: OrderStatus.PAID })).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.updateOrderStatus('invalid', { status: OrderStatus.PAID }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException for invalid status transition', async () => {
@@ -324,12 +350,16 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(service.updateOrderStatus('order1', { status: OrderStatus.PENDING_PAYMENT })).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.updateOrderStatus('order1', { status: OrderStatus.PENDING_PAYMENT })).rejects.toThrow(
-        'Invalid status transition',
-      );
+      await expect(
+        service.updateOrderStatus('order1', {
+          status: OrderStatus.PENDING_PAYMENT,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.updateOrderStatus('order1', {
+          status: OrderStatus.PENDING_PAYMENT,
+        }),
+      ).rejects.toThrow('Invalid status transition');
     });
   });
 
@@ -358,8 +388,14 @@ describe('OrdersService', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         return callback(mockPrismaService);
       });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
-      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        stock: 10,
+      });
+      mockPrismaService.productVariant.update.mockResolvedValue({
+        id: 'var1',
+        stock: 12,
+      });
       mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.order.findUnique
         .mockResolvedValueOnce(mockOrder)
@@ -374,7 +410,9 @@ describe('OrdersService', () => {
     it('should throw NotFoundException when order not found', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(null);
 
-      await expect(service.cancelOrder('user1', 'invalid')).rejects.toThrow(NotFoundException);
+      await expect(service.cancelOrder('user1', 'invalid')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException when order belongs to different user', async () => {
@@ -387,8 +425,12 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(NotFoundException);
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Order not found');
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(
+        'Order not found',
+      );
     });
 
     it('should throw BadRequestException when order cannot be cancelled', async () => {
@@ -401,8 +443,12 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(BadRequestException);
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Order cannot be cancelled at this stage');
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(
+        'Order cannot be cancelled at this stage',
+      );
     });
   });
 });

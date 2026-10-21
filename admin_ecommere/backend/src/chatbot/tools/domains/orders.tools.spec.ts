@@ -48,7 +48,11 @@ describe('Admin Orders Tools', () => {
       const names = tools.map((t) => t.name);
       const uniqueNames = new Set(names);
       expect(uniqueNames.size).toBe(3);
-      expect(names).toEqual(['list_orders', 'get_order', 'update_order_status']);
+      expect(names).toEqual([
+        'list_orders',
+        'get_order',
+        'update_order_status',
+      ]);
     });
 
     it('sets auth to "admin" on all tools', () => {
@@ -104,7 +108,10 @@ describe('Admin Orders Tools', () => {
     it('does not pass userId to service calls across all handlers', async () => {
       mockOrdersService.getAllOrders.mockResolvedValue({ data: [], total: 0 });
       mockOrdersService.getOrderById.mockResolvedValue({ id: 'ord-1' });
-      mockOrdersService.updateOrderStatus.mockResolvedValue({ id: 'ord-1', status: 'PAID' });
+      mockOrdersService.updateOrderStatus.mockResolvedValue({
+        id: 'ord-1',
+        status: 'PAID',
+      });
 
       await listTool.handler({}, adminCtx);
       expect(mockOrdersService.getAllOrders).toHaveBeenCalledWith({
@@ -117,10 +124,16 @@ describe('Admin Orders Tools', () => {
       await getTool.handler({ orderId: 'ord-1' }, adminCtx);
       expect(mockOrdersService.getOrderById).toHaveBeenCalledWith('ord-1');
 
-      await updateStatusTool.handler({ orderId: 'ord-1', status: 'PAID' }, adminCtx);
-      expect(mockOrdersService.updateOrderStatus).toHaveBeenCalledWith('ord-1', {
-        status: 'PAID',
-      });
+      await updateStatusTool.handler(
+        { orderId: 'ord-1', status: 'PAID' },
+        adminCtx,
+      );
+      expect(mockOrdersService.updateOrderStatus).toHaveBeenCalledWith(
+        'ord-1',
+        {
+          status: 'PAID',
+        },
+      );
     });
   });
 
@@ -169,9 +182,15 @@ describe('Admin Orders Tools', () => {
 
     it('validates search string constraints (1..100)', () => {
       expect(listTool.schema.safeParse({ search: '' }).success).toBe(false);
-      expect(listTool.schema.safeParse({ search: 'a'.repeat(101) }).success).toBe(false);
-      expect(listTool.schema.safeParse({ search: 'ORD-123' }).success).toBe(true);
-      expect(listTool.schema.safeParse({ search: 'a'.repeat(100) }).success).toBe(true);
+      expect(
+        listTool.schema.safeParse({ search: 'a'.repeat(101) }).success,
+      ).toBe(false);
+      expect(listTool.schema.safeParse({ search: 'ORD-123' }).success).toBe(
+        true,
+      );
+      expect(
+        listTool.schema.safeParse({ search: 'a'.repeat(100) }).success,
+      ).toBe(true);
     });
 
     it('validates page and limit range (1..50)', () => {
@@ -179,7 +198,9 @@ describe('Admin Orders Tools', () => {
       expect(listTool.schema.safeParse({ page: 51 }).success).toBe(false);
       expect(listTool.schema.safeParse({ limit: 0 }).success).toBe(false);
       expect(listTool.schema.safeParse({ limit: 51 }).success).toBe(false);
-      expect(listTool.schema.safeParse({ page: 1, limit: 50 }).success).toBe(true);
+      expect(listTool.schema.safeParse({ page: 1, limit: 50 }).success).toBe(
+        true,
+      );
     });
 
     it('accepts empty filter options', () => {
@@ -193,8 +214,12 @@ describe('Admin Orders Tools', () => {
     });
 
     it('summarize returns a Vietnamese string', () => {
-      expect(listTool.summarize({})).toBe('Xem danh sách đơn hàng toàn cửa hàng');
-      expect(listTool.summarize({ status: 'PAID' })).toBe('Xem danh sách đơn hàng (PAID)');
+      expect(listTool.summarize({})).toBe(
+        'Xem danh sách đơn hàng toàn cửa hàng',
+      );
+      expect(listTool.summarize({ status: 'PAID' })).toBe(
+        'Xem danh sách đơn hàng (PAID)',
+      );
       expect(listTool.summarize({ search: 'khách hàng A' })).toBe(
         'Tìm kiếm đơn hàng "khách hàng A"',
       );
@@ -233,7 +258,9 @@ describe('Admin Orders Tools', () => {
           items: [{ id: 'item-1', variantId: 'v-1' }],
         }));
 
-        const projected = listTool.project!(rawOrders) as Array<Record<string, unknown>>;
+        const projected = listTool.project!(rawOrders) as Array<
+          Record<string, unknown>
+        >;
         expect(Array.isArray(projected)).toBe(true);
         expect(projected).toHaveLength(20);
 
@@ -327,10 +354,7 @@ describe('Admin Orders Tools', () => {
         code: 'ORD-123',
       });
 
-      const result = await getTool.handler(
-        { orderId: 'order-123' },
-        adminCtx,
-      );
+      const result = await getTool.handler({ orderId: 'order-123' }, adminCtx);
 
       expect(mockOrdersService.getOrderById).toHaveBeenCalledTimes(1);
       expect(mockOrdersService.getOrderById).toHaveBeenCalledWith('order-123');
@@ -339,8 +363,12 @@ describe('Admin Orders Tools', () => {
 
     it('validates orderId string constraints (1..64)', () => {
       expect(getTool.schema.safeParse({ orderId: '' }).success).toBe(false);
-      expect(getTool.schema.safeParse({ orderId: 'a'.repeat(65) }).success).toBe(false);
-      expect(getTool.schema.safeParse({ orderId: 'valid-id-123' }).success).toBe(true);
+      expect(
+        getTool.schema.safeParse({ orderId: 'a'.repeat(65) }).success,
+      ).toBe(false);
+      expect(
+        getTool.schema.safeParse({ orderId: 'valid-id-123' }).success,
+      ).toBe(true);
       expect(getTool.schema.safeParse({}).success).toBe(false);
     });
 
@@ -479,7 +507,9 @@ describe('Admin Orders Tools', () => {
     });
 
     it('preview returns undefined when getOrderById throws or order is not found', async () => {
-      mockOrdersService.getOrderById.mockRejectedValue(new Error('Order not found'));
+      mockOrdersService.getOrderById.mockRejectedValue(
+        new Error('Order not found'),
+      );
 
       const res = await updateStatusTool.preview!(
         { orderId: 'ord-999', status: 'REFUNDED' },

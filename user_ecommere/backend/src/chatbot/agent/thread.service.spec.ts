@@ -152,7 +152,10 @@ describe('ThreadService', () => {
       };
       mockPrismaService.agentThread.findUnique.mockResolvedValue(mockThread);
 
-      const result = await service.assertOwned('t-user', { userId: 'user-1', app: 'USER' });
+      const result = await service.assertOwned('t-user', {
+        userId: 'user-1',
+        app: 'USER',
+      });
 
       expect(result).toBe(mockThread);
       expect(mockPrismaService.agentThread.findUnique).toHaveBeenCalledWith({
@@ -201,7 +204,9 @@ describe('ThreadService', () => {
           app: 'USER',
           sessionKeyHash: 'hash-guest-2',
         }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
     });
 
     it('throws 404 NotFoundException for a guest without hash', async () => {
@@ -222,7 +227,9 @@ describe('ThreadService', () => {
           userId: null,
           app: 'USER',
         }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
     });
 
     it('throws 404 NotFoundException for a logged-in actor on guest thread', async () => {
@@ -244,7 +251,9 @@ describe('ThreadService', () => {
           app: 'USER',
           sessionKeyHash: 'hash-guest-1',
         }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
     });
 
     it('throws 404 NotFoundException for a guest thread with null sessionKeyHash (legacy)', async () => {
@@ -266,7 +275,9 @@ describe('ThreadService', () => {
           app: 'USER',
           sessionKeyHash: 'hash-guest-1',
         }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
     });
 
     it('throws 404 NotFoundException if thread is not found', async () => {
@@ -274,7 +285,9 @@ describe('ThreadService', () => {
 
       await expect(
         service.assertOwned('missing-id', { userId: 'user-1', app: 'USER' }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
     });
 
     it('throws 404 NotFoundException when thread app differs', async () => {
@@ -294,7 +307,7 @@ describe('ThreadService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('returns 404 for another user\'s thread', async () => {
+    it("returns 404 for another user's thread", async () => {
       const mockThread = {
         id: 't-1',
         userId: 'user-2',
@@ -308,7 +321,9 @@ describe('ThreadService', () => {
 
       await expect(
         service.assertOwned('t-1', { userId: 'user-1', app: 'USER' }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
     });
 
     it('returns 404 for a user reading a guest thread', async () => {
@@ -325,7 +340,9 @@ describe('ThreadService', () => {
 
       await expect(
         service.assertOwned('t-guest', { userId: 'user-1', app: 'USER' }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
     });
 
     it('returns 404 for a guest reading a user thread', async () => {
@@ -342,13 +359,18 @@ describe('ThreadService', () => {
 
       await expect(
         service.assertOwned('t-user', { userId: null, app: 'USER' }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
     });
   });
 
   describe('listForUser', () => {
     it('returns [] for a guest and never calls Prisma', async () => {
-      const result = await service.listForUser({ userId: null, app: 'USER' }, 10);
+      const result = await service.listForUser(
+        { userId: null, app: 'USER' },
+        10,
+      );
 
       expect(result).toEqual([]);
       expect(mockPrismaService.agentThread.findMany).not.toHaveBeenCalled();
@@ -368,7 +390,10 @@ describe('ThreadService', () => {
       ];
       mockPrismaService.agentThread.findMany.mockResolvedValue(mockThreads);
 
-      const result = await service.listForUser({ userId: 'user-1', app: 'USER' }, 5);
+      const result = await service.listForUser(
+        { userId: 'user-1', app: 'USER' },
+        5,
+      );
 
       expect(result).toBe(mockThreads);
       expect(mockPrismaService.agentThread.findMany).toHaveBeenCalledWith({
@@ -401,7 +426,10 @@ describe('ThreadService', () => {
 
       await service.remove('t-1', { userId: 'user-1', app: 'USER' });
 
-      expect(assertOwnedSpy).toHaveBeenCalledWith('t-1', { userId: 'user-1', app: 'USER' });
+      expect(assertOwnedSpy).toHaveBeenCalledWith('t-1', {
+        userId: 'user-1',
+        app: 'USER',
+      });
       expect(mockPrismaService.agentThread.delete).toHaveBeenCalledWith({
         where: { id: 't-1' },
       });
@@ -455,7 +483,9 @@ describe('ThreadService', () => {
 
       await expect(
         service.remove('t-foreign', { userId: 'user-1', app: 'USER' }),
-      ).rejects.toThrow(new NotFoundException('Không tìm thấy cuộc trò chuyện'));
+      ).rejects.toThrow(
+        new NotFoundException('Không tìm thấy cuộc trò chuyện'),
+      );
 
       expect(mockPrismaService.agentToolLog.deleteMany).not.toHaveBeenCalled();
       expect(mockPrismaService.agentThread.delete).not.toHaveBeenCalled();

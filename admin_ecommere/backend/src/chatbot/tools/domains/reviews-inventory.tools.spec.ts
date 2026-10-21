@@ -161,7 +161,9 @@ describe('Reviews and Inventory Admin Tools', () => {
     it('defines uiAction only for navigate_to, leaving it undefined for the other 11 tools', () => {
       expect(getTool('navigate_to').uiAction).toBeDefined();
 
-      const toolsWithoutUiAction = tools.filter((t) => t.name !== 'navigate_to');
+      const toolsWithoutUiAction = tools.filter(
+        (t) => t.name !== 'navigate_to',
+      );
       for (const tool of toolsWithoutUiAction) {
         expect(tool.uiAction).toBeUndefined();
       }
@@ -195,7 +197,10 @@ describe('Reviews and Inventory Admin Tools', () => {
 
     it('accepts minimal arguments (only productId)', async () => {
       const tool = getTool('get_product_reviews');
-      mockReviewsService.getProductReviews.mockResolvedValue({ data: [], total: 0 });
+      mockReviewsService.getProductReviews.mockResolvedValue({
+        data: [],
+        total: 0,
+      });
 
       const parsed = tool.schema.safeParse({ productId: 'prod-456' });
       expect(parsed.success).toBe(true);
@@ -212,17 +217,33 @@ describe('Reviews and Inventory Admin Tools', () => {
       const tool = getTool('get_product_reviews');
 
       expect(tool.schema.safeParse({ productId: '' }).success).toBe(false);
-      expect(tool.schema.safeParse({ productId: 'a'.repeat(65) }).success).toBe(false);
+      expect(tool.schema.safeParse({ productId: 'a'.repeat(65) }).success).toBe(
+        false,
+      );
 
-      expect(tool.schema.safeParse({ productId: 'p1', page: 0 }).success).toBe(false);
-      expect(tool.schema.safeParse({ productId: 'p1', page: 51 }).success).toBe(false);
+      expect(tool.schema.safeParse({ productId: 'p1', page: 0 }).success).toBe(
+        false,
+      );
+      expect(tool.schema.safeParse({ productId: 'p1', page: 51 }).success).toBe(
+        false,
+      );
 
-      expect(tool.schema.safeParse({ productId: 'p1', limit: 0 }).success).toBe(false);
-      expect(tool.schema.safeParse({ productId: 'p1', limit: 51 }).success).toBe(false);
+      expect(tool.schema.safeParse({ productId: 'p1', limit: 0 }).success).toBe(
+        false,
+      );
+      expect(
+        tool.schema.safeParse({ productId: 'p1', limit: 51 }).success,
+      ).toBe(false);
 
-      expect(tool.schema.safeParse({ productId: 'p1', rating: 0 }).success).toBe(false);
-      expect(tool.schema.safeParse({ productId: 'p1', rating: 6 }).success).toBe(false);
-      expect(tool.schema.safeParse({ productId: 'p1', rating: 5 }).success).toBe(true);
+      expect(
+        tool.schema.safeParse({ productId: 'p1', rating: 0 }).success,
+      ).toBe(false);
+      expect(
+        tool.schema.safeParse({ productId: 'p1', rating: 6 }).success,
+      ).toBe(false);
+      expect(
+        tool.schema.safeParse({ productId: 'p1', rating: 5 }).success,
+      ).toBe(true);
     });
 
     it('summarize returns a Vietnamese string mentioning productId', () => {
@@ -246,15 +267,21 @@ describe('Reviews and Inventory Admin Tools', () => {
       const result = await tool.handler({ productId: 'prod-789' }, adminCtx);
 
       expect(mockReviewsService.getProductStats).toHaveBeenCalledTimes(1);
-      expect(mockReviewsService.getProductStats).toHaveBeenCalledWith('prod-789');
+      expect(mockReviewsService.getProductStats).toHaveBeenCalledWith(
+        'prod-789',
+      );
       expect(result).toEqual(mockStats);
     });
 
     it('validates bounds for productId (1..64)', () => {
       const tool = getTool('get_review_stats');
       expect(tool.schema.safeParse({ productId: '' }).success).toBe(false);
-      expect(tool.schema.safeParse({ productId: 'a'.repeat(65) }).success).toBe(false);
-      expect(tool.schema.safeParse({ productId: 'prod-ok' }).success).toBe(true);
+      expect(tool.schema.safeParse({ productId: 'a'.repeat(65) }).success).toBe(
+        false,
+      );
+      expect(tool.schema.safeParse({ productId: 'prod-ok' }).success).toBe(
+        true,
+      );
     });
 
     it('summarize returns a Vietnamese string mentioning productId', () => {
@@ -283,13 +310,17 @@ describe('Reviews and Inventory Admin Tools', () => {
       await tool.handler(args, adminCtx);
 
       expect(mockReviewsService.getAllReviewsForAdmin).toHaveBeenCalledTimes(1);
-      expect(mockReviewsService.getAllReviewsForAdmin).toHaveBeenCalledWith(args);
+      expect(mockReviewsService.getAllReviewsForAdmin).toHaveBeenCalledWith(
+        args,
+      );
     });
 
     it('validates schema bounds for productId, rating, page, limit', () => {
       const tool = getTool('list_reviews');
       expect(tool.schema.safeParse({ productId: '' }).success).toBe(false);
-      expect(tool.schema.safeParse({ productId: 'a'.repeat(65) }).success).toBe(false);
+      expect(tool.schema.safeParse({ productId: 'a'.repeat(65) }).success).toBe(
+        false,
+      );
       expect(tool.schema.safeParse({ rating: 0 }).success).toBe(false);
       expect(tool.schema.safeParse({ rating: 6 }).success).toBe(false);
       expect(tool.schema.safeParse({ page: 0 }).success).toBe(false);
@@ -319,8 +350,16 @@ describe('Reviews and Inventory Admin Tools', () => {
         createdAt: new Date('2026-01-01T00:00:00Z'),
         userId: `user-${i + 1}`,
         productId: `prod-${i + 1}`,
-        user: { id: `user-${i + 1}`, name: `Khách hàng ${i + 1}`, email: 'test@example.com' },
-        product: { id: `prod-${i + 1}`, name: `Sản phẩm ${i + 1}`, slug: `san-pham-${i + 1}` },
+        user: {
+          id: `user-${i + 1}`,
+          name: `Khách hàng ${i + 1}`,
+          email: 'test@example.com',
+        },
+        product: {
+          id: `prod-${i + 1}`,
+          name: `Sản phẩm ${i + 1}`,
+          slug: `san-pham-${i + 1}`,
+        },
       }));
 
       const rawResult = {
@@ -330,7 +369,10 @@ describe('Reviews and Inventory Admin Tools', () => {
         limit: 25,
       };
 
-      const projected = tool.project!(rawResult) as { data: any[]; total: number };
+      const projected = tool.project!(rawResult) as {
+        data: any[];
+        total: number;
+      };
       expect(projected.data).toHaveLength(20);
 
       const first = projected.data[0];
@@ -369,20 +411,28 @@ describe('Reviews and Inventory Admin Tools', () => {
       const result = await tool.handler({ reviewId: 'rev-target-1' }, adminCtx);
 
       expect(mockReviewsService.deleteReviewAsAdmin).toHaveBeenCalledTimes(1);
-      expect(mockReviewsService.deleteReviewAsAdmin).toHaveBeenCalledWith('rev-target-1');
+      expect(mockReviewsService.deleteReviewAsAdmin).toHaveBeenCalledWith(
+        'rev-target-1',
+      );
       expect(result).toEqual({ message: 'Review deleted successfully' });
     });
 
     it('validates bounds for reviewId (1..64)', () => {
       const tool = getTool('delete_review');
       expect(tool.schema.safeParse({ reviewId: '' }).success).toBe(false);
-      expect(tool.schema.safeParse({ reviewId: 'a'.repeat(65) }).success).toBe(false);
-      expect(tool.schema.safeParse({ reviewId: 'rev-valid' }).success).toBe(true);
+      expect(tool.schema.safeParse({ reviewId: 'a'.repeat(65) }).success).toBe(
+        false,
+      );
+      expect(tool.schema.safeParse({ reviewId: 'rev-valid' }).success).toBe(
+        true,
+      );
     });
 
     it('summarize returns a Vietnamese string mentioning reviewId', () => {
       const tool = getTool('delete_review');
-      expect(tool.summarize({ reviewId: 'rev-target-1' })).toContain('rev-target-1');
+      expect(tool.summarize({ reviewId: 'rev-target-1' })).toContain(
+        'rev-target-1',
+      );
     });
   });
 
@@ -433,7 +483,9 @@ describe('Reviews and Inventory Admin Tools', () => {
     it('summarize returns a Vietnamese line', () => {
       const tool = getTool('get_stock_levels');
       expect(tool.summarize({})).toBe('Xem mức tồn kho sản phẩm');
-      expect(tool.summarize({ page: 2 })).toBe('Xem mức tồn kho sản phẩm (trang 2)');
+      expect(tool.summarize({ page: 2 })).toBe(
+        'Xem mức tồn kho sản phẩm (trang 2)',
+      );
     });
   });
 
@@ -476,13 +528,19 @@ describe('Reviews and Inventory Admin Tools', () => {
         total: 0,
       });
 
-      await tool.handler({ variantId: 'var-123', page: 1, limit: 10 }, adminCtx);
+      await tool.handler(
+        { variantId: 'var-123', page: 1, limit: 10 },
+        adminCtx,
+      );
 
       expect(mockInventoryService.getStockHistory).toHaveBeenCalledTimes(1);
-      expect(mockInventoryService.getStockHistory).toHaveBeenCalledWith('var-123', {
-        page: 1,
-        limit: 10,
-      });
+      expect(mockInventoryService.getStockHistory).toHaveBeenCalledWith(
+        'var-123',
+        {
+          page: 1,
+          limit: 10,
+        },
+      );
     });
 
     it('project() keeps at most 20 movements', () => {
@@ -504,11 +562,21 @@ describe('Reviews and Inventory Admin Tools', () => {
     it('validates bounds for variantId, page, limit', () => {
       const tool = getTool('get_stock_history');
       expect(tool.schema.safeParse({ variantId: '' }).success).toBe(false);
-      expect(tool.schema.safeParse({ variantId: 'a'.repeat(65) }).success).toBe(false);
-      expect(tool.schema.safeParse({ variantId: 'v1', page: 0 }).success).toBe(false);
-      expect(tool.schema.safeParse({ variantId: 'v1', page: 51 }).success).toBe(false);
-      expect(tool.schema.safeParse({ variantId: 'v1', limit: 0 }).success).toBe(false);
-      expect(tool.schema.safeParse({ variantId: 'v1', limit: 101 }).success).toBe(false);
+      expect(tool.schema.safeParse({ variantId: 'a'.repeat(65) }).success).toBe(
+        false,
+      );
+      expect(tool.schema.safeParse({ variantId: 'v1', page: 0 }).success).toBe(
+        false,
+      );
+      expect(tool.schema.safeParse({ variantId: 'v1', page: 51 }).success).toBe(
+        false,
+      );
+      expect(tool.schema.safeParse({ variantId: 'v1', limit: 0 }).success).toBe(
+        false,
+      );
+      expect(
+        tool.schema.safeParse({ variantId: 'v1', limit: 101 }).success,
+      ).toBe(false);
     });
 
     it('summarize returns a Vietnamese line mentioning variantId', () => {
@@ -528,7 +596,10 @@ describe('Reviews and Inventory Admin Tools', () => {
 
     it('sends type IN, notes with prefix "[AI:<threadId>] ", and passes ctx.userId as second argument', async () => {
       const tool = getTool('stock_add');
-      mockInventoryService.adjustStock.mockResolvedValue({ id: 'mov-1', type: 'IN' });
+      mockInventoryService.adjustStock.mockResolvedValue({
+        id: 'mov-1',
+        type: 'IN',
+      });
 
       const args = {
         variantId: 'var-100',
@@ -552,11 +623,21 @@ describe('Reviews and Inventory Admin Tools', () => {
 
     it('rejects quantity 0 and a negative quantity (schema)', () => {
       const tool = getTool('stock_add');
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 0 })).toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: -5 })).toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 10001 })).toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 1 })).not.toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 10000 })).not.toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 0 }),
+      ).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: -5 }),
+      ).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 10001 }),
+      ).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 1 }),
+      ).not.toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 10000 }),
+      ).not.toThrow();
     });
 
     it('handles omitted notes by still attaching the [AI:<threadId>] prefix', async () => {
@@ -593,7 +674,10 @@ describe('Reviews and Inventory Admin Tools', () => {
 
     it('sends type OUT, notes with prefix "[AI:<threadId>] ", and passes ctx.userId as second argument', async () => {
       const tool = getTool('stock_remove');
-      mockInventoryService.adjustStock.mockResolvedValue({ id: 'mov-2', type: 'OUT' });
+      mockInventoryService.adjustStock.mockResolvedValue({
+        id: 'mov-2',
+        type: 'OUT',
+      });
 
       const args = {
         variantId: 'var-200',
@@ -617,10 +701,18 @@ describe('Reviews and Inventory Admin Tools', () => {
 
     it('rejects quantity 0 and a negative quantity (schema)', () => {
       const tool = getTool('stock_remove');
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 0 })).toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: -1 })).toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 10001 })).toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 1 })).not.toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 0 }),
+      ).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: -1 }),
+      ).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 10001 }),
+      ).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 1 }),
+      ).not.toThrow();
     });
 
     it('summarize returns a Vietnamese string mentioning quantity and variantId', () => {
@@ -642,7 +734,10 @@ describe('Reviews and Inventory Admin Tools', () => {
 
     it('sends type ADJUST with absolute target quantity, prefixed notes, and ctx.userId as second argument', async () => {
       const tool = getTool('stock_set');
-      mockInventoryService.adjustStock.mockResolvedValue({ id: 'mov-3', type: 'ADJUST' });
+      mockInventoryService.adjustStock.mockResolvedValue({
+        id: 'mov-3',
+        type: 'ADJUST',
+      });
 
       const args = {
         variantId: 'var-300',
@@ -666,11 +761,19 @@ describe('Reviews and Inventory Admin Tools', () => {
 
     it('accepts quantity 0 (out of stock) and up to 100000, rejects negative and > 100000', () => {
       const tool = getTool('stock_set');
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 0 })).not.toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 100000 })).not.toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 0 }),
+      ).not.toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 100000 }),
+      ).not.toThrow();
 
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: -1 })).toThrow();
-      expect(() => tool.schema.parse({ variantId: 'v1', quantity: 100001 })).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: -1 }),
+      ).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'v1', quantity: 100001 }),
+      ).toThrow();
     });
 
     it('summarize returns a Vietnamese string mentioning variantId and absolute quantity', () => {
@@ -693,23 +796,34 @@ describe('Reviews and Inventory Admin Tools', () => {
         message: 'File deleted successfully',
       });
 
-      const result = await tool.handler({ publicId: 'products/sample-perfume-1' }, adminCtx);
+      const result = await tool.handler(
+        { publicId: 'products/sample-perfume-1' },
+        adminCtx,
+      );
 
       expect(mockUploadsService.deleteFile).toHaveBeenCalledTimes(1);
-      expect(mockUploadsService.deleteFile).toHaveBeenCalledWith('products/sample-perfume-1');
+      expect(mockUploadsService.deleteFile).toHaveBeenCalledWith(
+        'products/sample-perfume-1',
+      );
       expect(result).toEqual({ message: 'File deleted successfully' });
     });
 
     it('validates schema bounds for publicId (1..200)', () => {
       const tool = getTool('delete_image');
       expect(tool.schema.safeParse({ publicId: '' }).success).toBe(false);
-      expect(tool.schema.safeParse({ publicId: 'a'.repeat(201) }).success).toBe(false);
-      expect(tool.schema.safeParse({ publicId: 'products/img-123' }).success).toBe(true);
+      expect(tool.schema.safeParse({ publicId: 'a'.repeat(201) }).success).toBe(
+        false,
+      );
+      expect(
+        tool.schema.safeParse({ publicId: 'products/img-123' }).success,
+      ).toBe(true);
     });
 
     it('summarize returns a Vietnamese string mentioning publicId', () => {
       const tool = getTool('delete_image');
-      expect(tool.summarize({ publicId: 'products/img-123' })).toContain('products/img-123');
+      expect(tool.summarize({ publicId: 'products/img-123' })).toContain(
+        'products/img-123',
+      );
     });
   });
 
@@ -724,7 +838,10 @@ describe('Reviews and Inventory Admin Tools', () => {
       expect(tool.risk).toBe('WRITE');
       expect(tool.uiAction).toBeDefined();
 
-      const result = await tool.handler({ path: '/admin/orders/abc' }, adminCtx);
+      const result = await tool.handler(
+        { path: '/admin/orders/abc' },
+        adminCtx,
+      );
       expect(result).toEqual({ path: '/admin/orders/abc' });
 
       const action = tool.uiAction!(result);
@@ -778,10 +895,16 @@ describe('Reviews and Inventory Admin Tools', () => {
 
     it('rejects paths with empty segments like "/admin/orders/" or "/admin/products//edit"', async () => {
       expect(() => tool.schema.parse({ path: '/admin/orders/' })).toThrow();
-      expect(() => tool.schema.parse({ path: '/admin/products//edit' })).toThrow();
+      expect(() =>
+        tool.schema.parse({ path: '/admin/products//edit' }),
+      ).toThrow();
 
-      await expect(tool.handler({ path: '/admin/orders/' }, adminCtx)).rejects.toThrow();
-      await expect(tool.handler({ path: '/admin/products//edit' }, adminCtx)).rejects.toThrow();
+      await expect(
+        tool.handler({ path: '/admin/orders/' }, adminCtx),
+      ).rejects.toThrow();
+      await expect(
+        tool.handler({ path: '/admin/products//edit' }, adminCtx),
+      ).rejects.toThrow();
     });
 
     it('rejects path exceeding 120 characters', () => {
@@ -790,7 +913,9 @@ describe('Reviews and Inventory Admin Tools', () => {
     });
 
     it('summarize returns a Vietnamese string mentioning path', () => {
-      expect(tool.summarize({ path: '/admin/orders' })).toContain('/admin/orders');
+      expect(tool.summarize({ path: '/admin/orders' })).toContain(
+        '/admin/orders',
+      );
     });
   });
 });

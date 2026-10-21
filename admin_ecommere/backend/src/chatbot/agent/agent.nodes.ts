@@ -25,18 +25,34 @@ export const getTodayVietnam = (now = Date.now()): string =>
   new Date(now + 7 * 3600 * 1000).toISOString().slice(0, 10);
 
 export const getContext = (config?: LangGraphRunnableConfig): ToolContext =>
-  (config?.configurable?.ctx ?? { userId: null, role: 'GUEST', app: 'USER', threadId: '' }) as ToolContext;
+  (config?.configurable?.ctx ?? {
+    userId: null,
+    role: 'GUEST',
+    app: 'USER',
+    threadId: '',
+  }) as ToolContext;
 
-export const getZodErrorMessage = (error: { issues: Array<{ message: string }> }): string => {
+export const getZodErrorMessage = (error: {
+  issues: Array<{ message: string }>;
+}): string => {
   const msg = error.issues?.[0]?.message;
   return msg && VIETNAMESE_REGEX.test(msg) ? msg : 'Tham số không hợp lệ';
 };
 
-export const findLastAIMessage = (messages: BaseMessage[]): AIMessage | undefined =>
-  messages.slice().reverse().find((m) => m.getType?.() === 'ai') as AIMessage | undefined;
+export const findLastAIMessage = (
+  messages: BaseMessage[],
+): AIMessage | undefined =>
+  messages
+    .slice()
+    .reverse()
+    .find((m) => m.getType?.() === 'ai') as AIMessage | undefined;
 
 const toolError = (id: string, name: string, error: string) =>
-  new ToolMessage({ tool_call_id: id, name, content: JSON.stringify({ ok: false, error }) });
+  new ToolMessage({
+    tool_call_id: id,
+    name,
+    content: JSON.stringify({ ok: false, error }),
+  });
 
 export const SINGLE_WRITE_PER_TURN_ERROR =
   'Chỉ cho phép một thao tác ghi trong mỗi lượt. Vui lòng gửi lại thao tác này trong tin nhắn tiếp theo';
@@ -44,36 +60,59 @@ export const SINGLE_WRITE_PER_TURN_ERROR =
 const auditRole = (role: string): 'CUSTOMER' | 'ADMIN' | null =>
   role === 'GUEST' ? null : (role as 'CUSTOMER' | 'ADMIN');
 
-export function routeAfterAgent(state: typeof MessagesAnnotation.State): 'confirm' | typeof END {
-  const last = state.messages[state.messages.length - 1] as AIMessage | undefined;
-  return last && Array.isArray(last.tool_calls) && last.tool_calls.length > 0 ? 'confirm' : END;
+export function routeAfterAgent(
+  state: typeof MessagesAnnotation.State,
+): 'confirm' | typeof END {
+  const last = state.messages[state.messages.length - 1] as
+    AIMessage | undefined;
+  return last && Array.isArray(last.tool_calls) && last.tool_calls.length > 0
+    ? 'confirm'
+    : END;
 }
 
 export function createAgentNode(deps: AgentGraphDeps) {
-  return async (state: typeof MessagesAnnotation.State, config?: LangGraphRunnableConfig) => {
+  return async (
+    state: typeof MessagesAnnotation.State,
+    config?: LangGraphRunnableConfig,
+  ) => {
     const ctx = getContext(config);
     const defs = deps.registry.forContext(ctx);
     const specs = defs.map((d) =>
-      tool(async () => '', { name: d.name, description: d.description, schema: d.schema }),
+      tool(async () => '', {
+        name: d.name,
+        description: d.description,
+        schema: d.schema,
+      }),
     );
     const system = new SystemMessage(
-      buildSystemPrompt({ app: ctx.app, role: ctx.role, today: getTodayVietnam() }),
+      buildSystemPrompt({
+        app: ctx.app,
+        role: ctx.role,
+        today: getTodayVietnam(),
+      }),
     );
     const history = trimHistory(state.messages, deps.limits.historyMaxMessages);
-    const response = await deps.model.bindTools(specs).invoke([system, ...history]);
+    const response = await deps.model
+      .bindTools(specs)
+      .invoke([system, ...history]);
     return { messages: [response] };
   };
 }
 
 export function createConfirmNode(deps: AgentGraphDeps) {
-  return async (state: typeof MessagesAnnotation.State, config?: LangGraphRunnableConfig) => {
+  return async (
+    state: typeof MessagesAnnotation.State,
+    config?: LangGraphRunnableConfig,
+  ) => {
     const ctx = getContext(config);
     const last = findLastAIMessage(state.messages);
     const calls = last?.tool_calls ?? [];
 
     const pending = calls.filter((c) => {
       const def = deps.registry.get(c.name);
-      return def ? requiresConfirmation({ app: ctx.app, role: ctx.role, risk: def.risk }) : true;
+      return def
+        ? requiresConfirmation({ app: ctx.app, role: ctx.role, risk: def.risk })
+        : true;
     });
     if (pending.length === 0) return {};
 
@@ -103,16 +142,24 @@ export function createConfirmNode(deps: AgentGraphDeps) {
             summary = c.name;
           }
         }
-        return { id: c.id ?? '', name: c.name, summary, risk: def?.risk ?? 'DESTRUCTIVE' };
+        return {
+          id: c.id ?? '',
+          name: c.name,
+          summary,
+          risk: def?.risk ?? 'DESTRUCTIVE',
+        };
       }),
     );
 
     const resume = interrupt({ kind: 'confirm', calls: callsPayload }) as
-      | { decisions?: Array<{ callId: string; approve: boolean }> }
-      | undefined;
+      { decisions?: Array<{ callId: string; approve: boolean }> } | undefined;
 
     const approvedIds = new Set<string>();
-    if (resume && typeof resume === 'object' && Array.isArray(resume.decisions)) {
+    if (
+      resume &&
+      typeof resume === 'object' &&
+      Array.isArray(resume.decisions)
+    ) {
       for (const d of resume.decisions) {
         if (
           d &&
@@ -131,7 +178,13 @@ export function createConfirmNode(deps: AgentGraphDeps) {
       const id = typeof call.id === 'string' ? call.id.trim() : '';
       if (!id || !approvedIds.has(id)) {
         const def = deps.registry.get(call.name);
-        declinedMessages.push(toolError(call.id ?? '', call.name, 'Người dùng đã từ chối thao tác này'));
+        declinedMessages.push(
+          toolError(
+            call.id ?? '',
+            call.name,
+            'Người dùng đã từ chối thao tác này',
+          ),
+        );
         try {
           await deps.audit.record({
             threadId: ctx.threadId,
@@ -154,7 +207,10 @@ export function createConfirmNode(deps: AgentGraphDeps) {
 }
 
 export function createToolsNode(deps: AgentGraphDeps) {
-  return async (state: typeof MessagesAnnotation.State, config?: LangGraphRunnableConfig) => {
+  return async (
+    state: typeof MessagesAnnotation.State,
+    config?: LangGraphRunnableConfig,
+  ) => {
     const ctx = getContext(config);
     const last = findLastAIMessage(state.messages);
     const calls = last?.tool_calls ?? [];
@@ -170,7 +226,8 @@ export function createToolsNode(deps: AgentGraphDeps) {
     }
 
     const lastIdx = last ? state.messages.lastIndexOf(last) : -1;
-    const currentTurnToolMessages = lastIdx >= 0 ? state.messages.slice(lastIdx + 1) : [];
+    const currentTurnToolMessages =
+      lastIdx >= 0 ? state.messages.slice(lastIdx + 1) : [];
 
     const doneCallIndices = new Set<number>();
     for (let i = 0; i < calls.length; i++) {
@@ -208,12 +265,16 @@ export function createToolsNode(deps: AgentGraphDeps) {
         const tmsg = msg as ToolMessage;
         let isDeclined = false;
         try {
-          const parsed = typeof tmsg.content === 'string' ? JSON.parse(tmsg.content) : tmsg.content;
+          const parsed =
+            typeof tmsg.content === 'string'
+              ? JSON.parse(tmsg.content)
+              : tmsg.content;
           if (
             parsed &&
             typeof parsed === 'object' &&
             (parsed as Record<string, unknown>).ok === false &&
-            (parsed as Record<string, unknown>).error === 'Người dùng đã từ chối thao tác này'
+            (parsed as Record<string, unknown>).error ===
+              'Người dùng đã từ chối thao tác này'
           ) {
             isDeclined = true;
           }
@@ -222,7 +283,9 @@ export function createToolsNode(deps: AgentGraphDeps) {
           const tid = (tmsg as { tool_call_id?: string }).tool_call_id;
           const callName = tmsg.name || calls.find((c) => c.id === tid)?.name;
           if (callName) {
-            const def = deps.registry.forContext(ctx).find((d) => d.name === callName);
+            const def = deps.registry
+              .forContext(ctx)
+              .find((d) => d.name === callName);
             if (def && def.risk !== 'READ') {
               hasWriteCall = true;
               break;
@@ -237,16 +300,26 @@ export function createToolsNode(deps: AgentGraphDeps) {
       const call = remainingCalls[i];
       const id = typeof call.id === 'string' ? call.id.trim() : '';
       if (!id) {
-        toolMessages.push(toolError(call.id ?? '', call.name, 'Mã gọi công cụ không hợp lệ'));
+        toolMessages.push(
+          toolError(call.id ?? '', call.name, 'Mã gọi công cụ không hợp lệ'),
+        );
         continue;
       }
 
       if (i >= deps.limits.maxToolCallsPerTurn) {
-        toolMessages.push(toolError(id, call.name, 'Vượt quá số lượt gọi công cụ trong một lượt'));
+        toolMessages.push(
+          toolError(
+            id,
+            call.name,
+            'Vượt quá số lượt gọi công cụ trong một lượt',
+          ),
+        );
         continue;
       }
 
-      const def = deps.registry.forContext(ctx).find((d) => d.name === call.name);
+      const def = deps.registry
+        .forContext(ctx)
+        .find((d) => d.name === call.name);
       if (!def) {
         toolMessages.push(toolError(id, call.name, 'Công cụ không khả dụng'));
         continue;
@@ -260,7 +333,9 @@ export function createToolsNode(deps: AgentGraphDeps) {
       const isWriteTool = def.risk !== 'READ';
       if (isWriteTool) {
         if (hasWriteCall) {
-          toolMessages.push(toolError(id, call.name, SINGLE_WRITE_PER_TURN_ERROR));
+          toolMessages.push(
+            toolError(id, call.name, SINGLE_WRITE_PER_TURN_ERROR),
+          );
           continue;
         }
         hasWriteCall = true;
@@ -268,14 +343,22 @@ export function createToolsNode(deps: AgentGraphDeps) {
 
       const parsed = def.schema.safeParse(call.args);
       if (!parsed.success) {
-        toolMessages.push(toolError(id, call.name, getZodErrorMessage(parsed.error)));
+        toolMessages.push(
+          toolError(id, call.name, getZodErrorMessage(parsed.error)),
+        );
         continue;
       }
 
       if (isWriteTool && typeof deps.audit.findCompleted === 'function') {
         const storedResult = await deps.audit.findCompleted(ctx.threadId, id);
         if (storedResult) {
-          toolMessages.push(new ToolMessage({ tool_call_id: id, name: call.name, content: storedResult }));
+          toolMessages.push(
+            new ToolMessage({
+              tool_call_id: id,
+              name: call.name,
+              content: storedResult,
+            }),
+          );
           continue;
         }
       }
@@ -309,11 +392,15 @@ export function createToolsNode(deps: AgentGraphDeps) {
           durationMs,
           args: parsed.data ?? call.args,
           resultSummary: content.slice(0, 300),
-          ...(status === 'ERROR' && handlerError ? { error: handlerError } : {}),
+          ...(status === 'ERROR' && handlerError
+            ? { error: handlerError }
+            : {}),
         });
       } catch {}
 
-      toolMessages.push(new ToolMessage({ tool_call_id: id, name: call.name, content }));
+      toolMessages.push(
+        new ToolMessage({ tool_call_id: id, name: call.name, content }),
+      );
     }
 
     return { messages: toolMessages };

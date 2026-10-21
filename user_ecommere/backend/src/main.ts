@@ -97,7 +97,9 @@ async function bootstrap() {
 
   console.log(`🚀 Server running on http://localhost:${port}`);
   if (swaggerEnabled) {
-    console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
+    console.log(
+      `📚 Swagger docs available at http://localhost:${port}/api/docs`,
+    );
   }
 }
 

@@ -1,6 +1,10 @@
 export interface PaymentProvider {
   getName(): string;
-  createPayment(orderId: string, amount: number, currency: string): Promise<PaymentResult>;
+  createPayment(
+    orderId: string,
+    amount: number,
+    currency: string,
+  ): Promise<PaymentResult>;
   verifyPayment(paymentId: string): Promise<PaymentVerification>;
   refundPayment(paymentId: string, amount: number): Promise<RefundResult>;
 }

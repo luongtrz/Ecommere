@@ -75,7 +75,9 @@ describe('Catalog Tools', () => {
     it('ensures no tool schema allows userId or role', () => {
       const tools = createCatalogTools(deps);
       for (const tool of tools) {
-        const withUserId = tool.schema.safeParse({ userId: 'injected-user-id' });
+        const withUserId = tool.schema.safeParse({
+          userId: 'injected-user-id',
+        });
         expect(withUserId.success).toBe(false);
 
         const withRole = tool.schema.safeParse({ role: 'ADMIN' });
@@ -128,7 +130,9 @@ describe('Catalog Tools', () => {
       const tools = createCatalogTools(deps);
       const tool = tools.find((t) => t.name === 'search_products')!;
 
-      (mockProductsService.findAll as jest.Mock).mockResolvedValue({ data: [] });
+      (mockProductsService.findAll as jest.Mock).mockResolvedValue({
+        data: [],
+      });
 
       const parsedArgs = tool.schema.parse({ query: 'chanel' });
       expect(parsedArgs.limit).toBe(8);
@@ -177,12 +181,12 @@ describe('Catalog Tools', () => {
       expect(tool.schema.safeParse({ minPrice: -100 }).success).toBe(false);
 
       // Rejects query longer than 120 characters
-      expect(
-        tool.schema.safeParse({ query: 'a'.repeat(121) }).success,
-      ).toBe(false);
-      expect(
-        tool.schema.safeParse({ query: 'a'.repeat(120) }).success,
-      ).toBe(true);
+      expect(tool.schema.safeParse({ query: 'a'.repeat(121) }).success).toBe(
+        false,
+      );
+      expect(tool.schema.safeParse({ query: 'a'.repeat(120) }).success).toBe(
+        true,
+      );
     });
 
     it('summarize returns a short Vietnamese line', () => {
@@ -314,12 +318,16 @@ describe('Catalog Tools', () => {
         name: 'Xịt thơm body',
         slug: 'xit-thom-body',
       };
-      (mockProductsService.findBySlug as jest.Mock).mockResolvedValue(mockProduct);
+      (mockProductsService.findBySlug as jest.Mock).mockResolvedValue(
+        mockProduct,
+      );
 
       const parsedArgs = tool.schema.parse({ slug: 'xit-thom-body' });
       const result = await tool.handler(parsedArgs, dummyContext);
 
-      expect(mockProductsService.findBySlug).toHaveBeenCalledWith('xit-thom-body');
+      expect(mockProductsService.findBySlug).toHaveBeenCalledWith(
+        'xit-thom-body',
+      );
       expect(result).toBe(mockProduct);
     });
 
@@ -491,7 +499,9 @@ describe('Catalog Tools', () => {
       const tools = createCatalogTools(deps);
       const tool = tools.find((t) => t.name === 'get_product_filters')!;
 
-      expect(tool.summarize({} as any)).toBe('Xem các bộ lọc tìm kiếm sản phẩm');
+      expect(tool.summarize({} as any)).toBe(
+        'Xem các bộ lọc tìm kiếm sản phẩm',
+      );
     });
   });
 

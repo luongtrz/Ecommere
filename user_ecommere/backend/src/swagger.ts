@@ -4,7 +4,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('Thai Spray Shop API')
-    .setDescription('Backend API for Thai Spray Shop - E-commerce platform for Thai spray products')
+    .setDescription(
+      'Backend API for Thai Spray Shop - E-commerce platform for Thai spray products',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {

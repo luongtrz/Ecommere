@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, StockMovementType } from '@prisma/client';
 import { StockAdjustmentDto } from './dtos/stock-adjustment.dto';
@@ -12,7 +16,9 @@ export class InventoryService {
     const { variantId, type, quantity, notes } = adjustmentDto;
 
     if (type !== StockMovementType.ADJUST && quantity < 1) {
-      throw new BadRequestException('Quantity must be greater than zero for stock in/out');
+      throw new BadRequestException(
+        'Quantity must be greater than zero for stock in/out',
+      );
     }
 
     return this.runSerializableTransaction(async (tx) => {
@@ -47,7 +53,9 @@ export class InventoryService {
           });
 
           if (stockUpdate.count !== 1) {
-            throw new BadRequestException('Insufficient stock for this operation');
+            throw new BadRequestException(
+              'Insufficient stock for this operation',
+            );
           }
 
           updatedVariant = await tx.productVariant.findUnique({
@@ -77,7 +85,10 @@ export class InventoryService {
         data: {
           variantId,
           type,
-          quantity: type === StockMovementType.ADJUST ? Math.abs(newStock - previousStock) : quantity,
+          quantity:
+            type === StockMovementType.ADJUST
+              ? Math.abs(newStock - previousStock)
+              : quantity,
           previousStock,
           newStock,
           notes,
@@ -156,7 +167,7 @@ export class InventoryService {
       orderBy: { stock: 'asc' },
     });
 
-    return variants.map(variant => ({
+    return variants.map((variant) => ({
       id: variant.id,
       sku: variant.sku,
       scent: variant.scent,
@@ -192,7 +203,7 @@ export class InventoryService {
     ]);
 
     return {
-      data: variants.map(variant => ({
+      data: variants.map((variant) => ({
         id: variant.id,
         sku: variant.sku,
         scent: variant.scent,
@@ -231,7 +242,9 @@ export class InventoryService {
       });
 
       if (stockUpdate.count !== 1) {
-        throw new BadRequestException(`Insufficient stock for variant ${variant.sku}`);
+        throw new BadRequestException(
+          `Insufficient stock for variant ${variant.sku}`,
+        );
       }
 
       const updatedVariant = await tx.productVariant.findUnique({
@@ -259,7 +272,12 @@ export class InventoryService {
   }
 
   // Internal method used by orders service (for cancellations/refunds)
-  async restoreStock(variantId: string, quantity: number, orderId: string, reason: string) {
+  async restoreStock(
+    variantId: string,
+    quantity: number,
+    orderId: string,
+    reason: string,
+  ) {
     return this.prisma.$transaction(async (tx) => {
       const variant = await tx.productVariant.findUnique({
         where: { id: variantId },
@@ -311,6 +329,8 @@ export class InventoryService {
       }
     }
 
-    throw new BadRequestException('Stock adjustment could not be completed; please retry');
+    throw new BadRequestException(
+      'Stock adjustment could not be completed; please retry',
+    );
   }
 }

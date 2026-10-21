@@ -33,13 +33,20 @@ const ALLOWED_MIME_TYPES = new Set([
 
 const multerOptions = {
   limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_request: unknown, file: Express.Multer.File, callback: (error: Error | null, acceptFile: boolean) => void) => {
+  fileFilter: (
+    _request: unknown,
+    file: Express.Multer.File,
+    callback: (error: Error | null, acceptFile: boolean) => void,
+  ) => {
     if (ALLOWED_MIME_TYPES.has(file.mimetype)) {
       callback(null, true);
       return;
     }
 
-    callback(new BadRequestException('Invalid file type. Only images are allowed.'), false);
+    callback(
+      new BadRequestException('Invalid file type. Only images are allowed.'),
+      false,
+    );
   },
 };
 

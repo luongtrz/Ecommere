@@ -30,7 +30,11 @@ export class ProductFilterDto extends PaginationDto {
   @IsString()
   categorySlug?: string;
 
-  @ApiProperty({ required: false, enum: ProductSortBy, default: ProductSortBy.NEWEST })
+  @ApiProperty({
+    required: false,
+    enum: ProductSortBy,
+    default: ProductSortBy.NEWEST,
+  })
   @IsOptional()
   @IsEnum(ProductSortBy)
   sortBy?: ProductSortBy = ProductSortBy.NEWEST;

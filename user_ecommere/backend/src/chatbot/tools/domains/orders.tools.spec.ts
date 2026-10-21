@@ -140,12 +140,12 @@ describe('Orders Tools', () => {
       await expect(
         cancelTool.handler({ orderId: 'ord-1' }, unauthenticatedCtx),
       ).rejects.toThrow('Cần đăng nhập để dùng chức năng này');
-      await expect(checkoutTool.handler({}, unauthenticatedCtx)).rejects.toThrow(
-        ToolError,
-      );
-      await expect(checkoutTool.handler({}, unauthenticatedCtx)).rejects.toThrow(
-        'Cần đăng nhập để dùng chức năng này',
-      );
+      await expect(
+        checkoutTool.handler({}, unauthenticatedCtx),
+      ).rejects.toThrow(ToolError);
+      await expect(
+        checkoutTool.handler({}, unauthenticatedCtx),
+      ).rejects.toThrow('Cần đăng nhập để dùng chức năng này');
     });
   });
 
@@ -191,7 +191,9 @@ describe('Orders Tools', () => {
       expect(listTool.schema.safeParse({ page: 51 }).success).toBe(false);
       expect(listTool.schema.safeParse({ limit: 0 }).success).toBe(false);
       expect(listTool.schema.safeParse({ limit: 51 }).success).toBe(false);
-      expect(listTool.schema.safeParse({ page: 1, limit: 50 }).success).toBe(true);
+      expect(listTool.schema.safeParse({ page: 1, limit: 50 }).success).toBe(
+        true,
+      );
     });
 
     it('summarize returns a Vietnamese string', () => {
@@ -223,12 +225,12 @@ describe('Orders Tools', () => {
 
     it('validates orderId string constraints', () => {
       expect(getTool.schema.safeParse({ orderId: '' }).success).toBe(false);
-      expect(getTool.schema.safeParse({ orderId: 'a'.repeat(65) }).success).toBe(
-        false,
-      );
-      expect(getTool.schema.safeParse({ orderId: 'valid-id-123' }).success).toBe(
-        true,
-      );
+      expect(
+        getTool.schema.safeParse({ orderId: 'a'.repeat(65) }).success,
+      ).toBe(false);
+      expect(
+        getTool.schema.safeParse({ orderId: 'valid-id-123' }).success,
+      ).toBe(true);
     });
 
     it('summarize returns a Vietnamese line referencing orderId', () => {
@@ -293,9 +295,15 @@ describe('Orders Tools', () => {
 
     it('requires addressId as a non-empty string of max 64 chars', () => {
       expect(checkoutTool.schema.safeParse({}).success).toBe(false);
-      expect(checkoutTool.schema.safeParse({ addressId: '' }).success).toBe(false);
-      expect(checkoutTool.schema.safeParse({ addressId: 'a'.repeat(65) }).success).toBe(false);
-      expect(checkoutTool.schema.safeParse({ addressId: 'addr-123' }).success).toBe(true);
+      expect(checkoutTool.schema.safeParse({ addressId: '' }).success).toBe(
+        false,
+      );
+      expect(
+        checkoutTool.schema.safeParse({ addressId: 'a'.repeat(65) }).success,
+      ).toBe(false);
+      expect(
+        checkoutTool.schema.safeParse({ addressId: 'addr-123' }).success,
+      ).toBe(true);
     });
 
     it('defaults shippingMethod to STANDARD and paymentMethod to COD', () => {
@@ -311,12 +319,12 @@ describe('Orders Tools', () => {
         app: 'USER',
         threadId: 't-1',
       };
-      await expect(
-        checkoutTool.handler({}, missingClientCtx),
-      ).rejects.toThrow(ToolError);
-      await expect(
-        checkoutTool.handler({}, missingClientCtx),
-      ).rejects.toThrow('Giỏ hàng đang trống');
+      await expect(checkoutTool.handler({}, missingClientCtx)).rejects.toThrow(
+        ToolError,
+      );
+      await expect(checkoutTool.handler({}, missingClientCtx)).rejects.toThrow(
+        'Giỏ hàng đang trống',
+      );
 
       const nullCartCtx: ToolContext = {
         ...missingClientCtx,
@@ -378,10 +386,7 @@ describe('Orders Tools', () => {
         },
       };
 
-      await checkoutTool.handler(
-        { addressId: 'addr-001' },
-        ctxWithExtraFields,
-      );
+      await checkoutTool.handler({ addressId: 'addr-001' }, ctxWithExtraFields);
 
       expect(mockOrdersService.checkout).toHaveBeenCalledTimes(1);
       const [userIdArg, dtoArg] = mockOrdersService.checkout.mock.calls[0];
@@ -453,7 +458,10 @@ describe('Orders Tools', () => {
         extraField: 'should-be-omitted',
       };
 
-      const projected = checkoutTool.project!(rawOrder) as Record<string, unknown>;
+      const projected = checkoutTool.project!(rawOrder) as Record<
+        string,
+        unknown
+      >;
 
       expect(projected).toEqual({
         id: 'ord-999',
@@ -511,7 +519,8 @@ describe('Orders Tools', () => {
         );
 
         expect(mockOrdersService.previewCheckout).toHaveBeenCalledTimes(1);
-        const [userIdArg, inputArg] = mockOrdersService.previewCheckout.mock.calls[0];
+        const [userIdArg, inputArg] =
+          mockOrdersService.previewCheckout.mock.calls[0];
         expect(userIdArg).toBe('user-123');
         expect(inputArg.addressId).toBe('addr-001');
         expect(inputArg.shippingMethod).toBe('STANDARD');
@@ -522,7 +531,9 @@ describe('Orders Tools', () => {
         expect(inputArg.items[0]).not.toHaveProperty('total');
 
         expect(text).toBeDefined();
-        expect(text).toContain('123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội');
+        expect(text).toContain(
+          '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+        );
         expect(text).toContain('1 sản phẩm');
         expect(text).toContain(MoneyUtil.format(160000));
         expect(text).not.toContain(MoneyUtil.format(100000));
@@ -565,7 +576,9 @@ describe('Orders Tools', () => {
         );
 
         expect(text).toBeDefined();
-        expect(text).toContain('123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội');
+        expect(text).toContain(
+          '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+        );
         expect(text).toContain('1 sản phẩm');
         expect(text).toContain('một số sản phẩm không thể tính giá');
         expect(text).not.toContain('tiền hàng');
@@ -588,14 +601,21 @@ describe('Orders Tools', () => {
           validCustomerCtx,
         );
 
-        expect(text).toContain('mã giảm giá DISCOUNT10 sẽ được áp dụng khi đặt đơn');
+        expect(text).toContain(
+          'mã giảm giá DISCOUNT10 sẽ được áp dụng khi đặt đơn',
+        );
       });
 
       it('returns undefined when unauthenticated, cart is empty or missing addressId', async () => {
         expect(
-          await checkoutTool.preview!({ addressId: 'addr-001' }, unauthenticatedCtx),
+          await checkoutTool.preview!(
+            { addressId: 'addr-001' },
+            unauthenticatedCtx,
+          ),
         ).toBeUndefined();
-        expect(await checkoutTool.preview!({}, validCustomerCtx)).toBeUndefined();
+        expect(
+          await checkoutTool.preview!({}, validCustomerCtx),
+        ).toBeUndefined();
 
         const emptyCtx = { ...validCustomerCtx, clientContext: { cart: [] } };
         expect(
@@ -624,7 +644,9 @@ describe('Orders Tools', () => {
           orders: mockOrdersService as unknown as OrdersService,
           cart: mockCartService as unknown as CartService,
         });
-        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+        const checkoutWithCart = toolsWithCart.find(
+          (t) => t.name === 'checkout',
+        )!;
 
         const resumeCtx: ToolContext = {
           userId: 'user-123',
@@ -670,7 +692,9 @@ describe('Orders Tools', () => {
           orders: mockOrdersService as unknown as OrdersService,
           cart: mockCartService as unknown as CartService,
         });
-        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+        const checkoutWithCart = toolsWithCart.find(
+          (t) => t.name === 'checkout',
+        )!;
 
         mockOrdersService.checkout.mockResolvedValue({ id: 'ord-2' });
 
@@ -724,7 +748,9 @@ describe('Orders Tools', () => {
           orders: mockOrdersService as unknown as OrdersService,
           cart: mockCartService as unknown as CartService,
         });
-        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+        const checkoutWithCart = toolsWithCart.find(
+          (t) => t.name === 'checkout',
+        )!;
 
         mockOrdersService.checkout.mockResolvedValue({
           id: 'ord-fallback-1',
@@ -747,12 +773,12 @@ describe('Orders Tools', () => {
           app: 'USER',
           threadId: 't-no-client',
         };
-        await expect(
-          checkoutWithCart.handler({}, noClientCtx),
-        ).rejects.toThrow(ToolError);
-        await expect(
-          checkoutWithCart.handler({}, noClientCtx),
-        ).rejects.toThrow('Giỏ hàng đang trống');
+        await expect(checkoutWithCart.handler({}, noClientCtx)).rejects.toThrow(
+          ToolError,
+        );
+        await expect(checkoutWithCart.handler({}, noClientCtx)).rejects.toThrow(
+          'Giỏ hàng đang trống',
+        );
       });
 
       it('builds confirm preview falling back to browser cart when server cart has no items', async () => {
@@ -782,7 +808,9 @@ describe('Orders Tools', () => {
           orders: mockOrdersService as unknown as OrdersService,
           cart: mockCartService as unknown as CartService,
         });
-        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+        const checkoutWithCart = toolsWithCart.find(
+          (t) => t.name === 'checkout',
+        )!;
 
         const previewText = await checkoutWithCart.preview!(
           { addressId: 'addr-001' },
@@ -790,12 +818,17 @@ describe('Orders Tools', () => {
         );
 
         expect(mockCartService.getCart).toHaveBeenCalledWith('user-123');
-        expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith('user-123', {
-          addressId: 'addr-001',
-          shippingMethod: undefined,
-          items: [{ variantId: 'var-1', quantity: 2 }],
-        });
-        expect(previewText).toContain('123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội');
+        expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith(
+          'user-123',
+          {
+            addressId: 'addr-001',
+            shippingMethod: undefined,
+            items: [{ variantId: 'var-1', quantity: 2 }],
+          },
+        );
+        expect(previewText).toContain(
+          '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+        );
         expect(previewText).toContain('1 sản phẩm');
         expect(previewText).toContain(MoneyUtil.format(100000));
       });
@@ -812,7 +845,9 @@ describe('Orders Tools', () => {
           orders: mockOrdersService as unknown as OrdersService,
           cart: mockCartService as unknown as CartService,
         });
-        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+        const checkoutWithCart = toolsWithCart.find(
+          (t) => t.name === 'checkout',
+        )!;
 
         const noClientCtx: ToolContext = {
           userId: 'user-123',
@@ -862,7 +897,9 @@ describe('Orders Tools', () => {
           orders: mockOrdersService as unknown as OrdersService,
           cart: mockCartService as unknown as CartService,
         });
-        const checkoutWithCart = toolsWithCart.find((t) => t.name === 'checkout')!;
+        const checkoutWithCart = toolsWithCart.find(
+          (t) => t.name === 'checkout',
+        )!;
 
         const resumeCtx: ToolContext = {
           userId: 'user-123',
@@ -877,15 +914,22 @@ describe('Orders Tools', () => {
         );
 
         expect(mockCartService.getCart).toHaveBeenCalledWith('user-123');
-        expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith('user-123', {
-          addressId: 'addr-001',
-          shippingMethod: undefined,
-          items: [{ variantId: 'var-1', quantity: 2 }],
-        });
-        expect(previewText).toContain('123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội');
+        expect(mockOrdersService.previewCheckout).toHaveBeenCalledWith(
+          'user-123',
+          {
+            addressId: 'addr-001',
+            shippingMethod: undefined,
+            items: [{ variantId: 'var-1', quantity: 2 }],
+          },
+        );
+        expect(previewText).toContain(
+          '123 Đường Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội',
+        );
         expect(previewText).toContain('1 sản phẩm');
         expect(previewText).toContain(MoneyUtil.format(100000));
-        expect(previewText).toContain('mã giảm giá COUPON2026 sẽ được áp dụng khi đặt đơn');
+        expect(previewText).toContain(
+          'mã giảm giá COUPON2026 sẽ được áp dụng khi đặt đơn',
+        );
       });
     });
 
@@ -951,14 +995,19 @@ describe('Orders Tools', () => {
         const baseKey = mockOrdersService.checkout.mock.calls[0][1].checkoutKey;
 
         // Different threadId
-        const diffThreadCtx = { ...validCustomerCtx, threadId: 'thread-different' };
+        const diffThreadCtx = {
+          ...validCustomerCtx,
+          threadId: 'thread-different',
+        };
         await checkoutTool.handler({ addressId: 'addr-1' }, diffThreadCtx);
-        const diffThreadKey = mockOrdersService.checkout.mock.calls[1][1].checkoutKey;
+        const diffThreadKey =
+          mockOrdersService.checkout.mock.calls[1][1].checkoutKey;
         expect(diffThreadKey).not.toBe(baseKey);
 
         // Different addressId
         await checkoutTool.handler({ addressId: 'addr-2' }, validCustomerCtx);
-        const diffAddressKey = mockOrdersService.checkout.mock.calls[2][1].checkoutKey;
+        const diffAddressKey =
+          mockOrdersService.checkout.mock.calls[2][1].checkoutKey;
         expect(diffAddressKey).not.toBe(baseKey);
 
         // Different shippingMethod
@@ -966,7 +1015,8 @@ describe('Orders Tools', () => {
           { addressId: 'addr-1', shippingMethod: 'EXPRESS' },
           validCustomerCtx,
         );
-        const diffShippingKey = mockOrdersService.checkout.mock.calls[3][1].checkoutKey;
+        const diffShippingKey =
+          mockOrdersService.checkout.mock.calls[3][1].checkoutKey;
         expect(diffShippingKey).not.toBe(baseKey);
 
         // Different paymentMethod
@@ -974,7 +1024,8 @@ describe('Orders Tools', () => {
           { addressId: 'addr-1', paymentMethod: 'BANK_TRANSFER' },
           validCustomerCtx,
         );
-        const diffPaymentKey = mockOrdersService.checkout.mock.calls[4][1].checkoutKey;
+        const diffPaymentKey =
+          mockOrdersService.checkout.mock.calls[4][1].checkoutKey;
         expect(diffPaymentKey).not.toBe(baseKey);
 
         // Different items
@@ -985,7 +1036,8 @@ describe('Orders Tools', () => {
           },
         };
         await checkoutTool.handler({ addressId: 'addr-1' }, diffItemsCtx);
-        const diffItemsKey = mockOrdersService.checkout.mock.calls[5][1].checkoutKey;
+        const diffItemsKey =
+          mockOrdersService.checkout.mock.calls[5][1].checkoutKey;
         expect(diffItemsKey).not.toBe(baseKey);
       });
 

@@ -4,8 +4,8 @@ import { ReferralsService } from './referrals.service';
 import { AuthModule } from '@/auth/auth.module';
 
 @Module({
-    controllers: [ReferralsController],
-    providers: [ReferralsService],
-    exports: [ReferralsService],
+  controllers: [ReferralsController],
+  providers: [ReferralsService],
+  exports: [ReferralsService],
 })
-export class ReferralsModule { }
+export class ReferralsModule {}

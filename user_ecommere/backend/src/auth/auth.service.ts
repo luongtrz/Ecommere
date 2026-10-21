@@ -1,4 +1,11 @@
-import { Injectable, BadRequestException, UnauthorizedException, Logger, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  Logger,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -36,7 +43,7 @@ export class AuthService {
     private configService: ConfigService,
     private referralsService: ReferralsService,
     private mailService: MailService,
-  ) { }
+  ) {}
 
   async register(registerDto: RegisterDto, response: Response) {
     const { phone, password, name, email, referralCode } = registerDto;
@@ -81,7 +88,10 @@ export class AuthService {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         const target = Array.isArray(error.meta?.target)
           ? error.meta.target.join(',')
           : String(error.meta?.target ?? '');
@@ -100,9 +110,13 @@ export class AuthService {
     if (referralCode) {
       try {
         await this.referralsService.processReferral(referralCode, user.id);
-        this.logger.log(`Referral processed for new user ${phone} with code ${referralCode}`);
+        this.logger.log(
+          `Referral processed for new user ${phone} with code ${referralCode}`,
+        );
       } catch (error) {
-        this.logger.warn(`Failed to process referral for ${phone}: ${error.message}`);
+        this.logger.warn(
+          `Failed to process referral for ${phone}: ${error.message}`,
+        );
         // Không throw lỗi - referral thất bại không nên ảnh hưởng đăng ký
       }
     }
@@ -208,7 +222,10 @@ export class AuthService {
       );
     }
 
-    if (tokenRecord.userId !== payload.sub || tokenRecord.tokenFamily !== payload.family) {
+    if (
+      tokenRecord.userId !== payload.sub ||
+      tokenRecord.tokenFamily !== payload.family
+    ) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
@@ -249,7 +266,7 @@ export class AuthService {
       // Outside grace period - this is suspicious
       this.logger.warn(
         `Token reuse OUTSIDE grace period (${Math.round(timeSinceReplaced / 1000)}s)! ` +
-        `Revoking family: ${payload.family} for user: ${payload.sub}`,
+          `Revoking family: ${payload.family} for user: ${payload.sub}`,
       );
 
       await this.prisma.refreshToken.updateMany({
@@ -300,8 +317,16 @@ export class AuthService {
     });
 
     const isProduction = this.configService.get('NODE_ENV') === 'production';
-    const cookieMaxAge = Math.max(tokens.refreshTokenExpiresAt.getTime() - Date.now(), 0);
-    setRefreshTokenCookie(response, tokens.refreshToken, isProduction, cookieMaxAge);
+    const cookieMaxAge = Math.max(
+      tokens.refreshTokenExpiresAt.getTime() - Date.now(),
+      0,
+    );
+    setRefreshTokenCookie(
+      response,
+      tokens.refreshToken,
+      isProduction,
+      cookieMaxAge,
+    );
     setCsrfTokenCookie(response, tokens.csrfToken, isProduction, cookieMaxAge);
 
     this.logger.log(`Token refreshed for user: ${tokenRecord.user.phone}`);
@@ -328,7 +353,9 @@ export class AuthService {
       where: { id: user.id },
       data: {
         passwordResetTokenHash: hashToken(resetToken),
-        passwordResetExpiresAt: new Date(Date.now() + this.PASSWORD_RESET_TTL_MS),
+        passwordResetExpiresAt: new Date(
+          Date.now() + this.PASSWORD_RESET_TTL_MS,
+        ),
       },
     });
 
@@ -351,7 +378,10 @@ export class AuthService {
     const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
 
     try {
-      await this.mailService.sendPasswordResetEmail(user.email || email, resetLink);
+      await this.mailService.sendPasswordResetEmail(
+        user.email || email,
+        resetLink,
+      );
     } catch (error) {
       this.logger.error(
         `Failed to send password reset email to user ${user.id}: ${error?.message || error}`,
@@ -413,7 +443,11 @@ export class AuthService {
     return { message: 'Password reset successful' };
   }
 
-  private generateTokens(userId: string, phone: string, role: string): AuthTokensEntity {
+  private generateTokens(
+    userId: string,
+    phone: string,
+    role: string,
+  ): AuthTokensEntity {
     const payload = { sub: userId, phone, role };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -475,7 +509,9 @@ export class AuthService {
       audience: JWT_AUDIENCE,
     });
 
-    const decodedRefreshToken = this.jwtService.decode(refreshToken) as { exp?: number } | null;
+    const decodedRefreshToken = this.jwtService.decode(refreshToken) as {
+      exp?: number;
+    } | null;
     if (!decodedRefreshToken?.exp) {
       throw new Error('Refresh token expiry is not configured');
     }
@@ -497,7 +533,10 @@ export class AuthService {
       });
     } catch (error) {
       // If hash collision (extremely rare with jti), clean up and throw
-      this.logger.error(`Token hash collision detected for user ${userId}`, error);
+      this.logger.error(
+        `Token hash collision detected for user ${userId}`,
+        error,
+      );
       throw new Error('Failed to generate unique token. Please try again.');
     }
 
@@ -505,7 +544,10 @@ export class AuthService {
     const csrfToken = generateCsrfToken();
 
     if (setCookies) {
-      const cookieMaxAge = Math.max(refreshTokenExpiresAt.getTime() - Date.now(), 0);
+      const cookieMaxAge = Math.max(
+        refreshTokenExpiresAt.getTime() - Date.now(),
+        0,
+      );
       setRefreshTokenCookie(response, refreshToken, isProduction, cookieMaxAge);
       setCsrfTokenCookie(response, csrfToken, isProduction, cookieMaxAge);
     }
@@ -550,7 +592,9 @@ export class AuthService {
               data: { revokedAt: new Date() },
             });
 
-            this.logger.log(`Logout: Revoked token family ${tokenRecord.tokenFamily} for user ${userId}`);
+            this.logger.log(
+              `Logout: Revoked token family ${tokenRecord.tokenFamily} for user ${userId}`,
+            );
           }
         }
       } catch (error) {

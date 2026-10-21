@@ -1,5 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { DashboardStatsDto } from './dtos/dashboard-stats.dto';
 import { Roles } from '@/common/decorators/roles.decorator';

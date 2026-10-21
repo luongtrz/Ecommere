@@ -1,8 +1,19 @@
 import { randomBytes } from 'crypto';
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
-import { Prisma, CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
+import {
+  Prisma,
+  CouponType,
+  OrderStatus,
+  PaymentStatus,
+  StockMovementType,
+} from '@prisma/client';
 import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
@@ -11,7 +22,7 @@ import { canUserUseCoupon } from '../coupons/coupons.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async checkout(
     userId: string,
@@ -77,11 +88,15 @@ export class OrdersService {
         });
 
         if (!variant) {
-          throw new NotFoundException(`Product variant not found: ${item.variantId}`);
+          throw new NotFoundException(
+            `Product variant not found: ${item.variantId}`,
+          );
         }
 
         if (!variant.product.active) {
-          throw new BadRequestException(`Product is no longer available: ${variant.product.name}`);
+          throw new BadRequestException(
+            `Product is no longer available: ${variant.product.name}`,
+          );
         }
 
         if (variant.stock < item.quantity) {
@@ -112,7 +127,10 @@ export class OrdersService {
               where: { code: trimmedCode.toUpperCase() },
             });
           }
-          if (!coupon || !(await canUserUseCoupon(this.prisma, coupon.code, userId))) {
+          if (
+            !coupon ||
+            !(await canUserUseCoupon(this.prisma, coupon.code, userId))
+          ) {
             throw new NotFoundException('Coupon not found');
           }
           couponCode = coupon.code;
@@ -128,7 +146,10 @@ export class OrdersService {
         const coupon = await this.prisma.coupon.findUnique({
           where: { code: cart.couponId },
         });
-        if (coupon && (await canUserUseCoupon(this.prisma, coupon.code, userId))) {
+        if (
+          coupon &&
+          (await canUserUseCoupon(this.prisma, coupon.code, userId))
+        ) {
           couponCode = coupon.code;
         }
       }
@@ -182,15 +203,14 @@ export class OrdersService {
         },
       });
     } else {
-      throw new BadRequestException('Either addressId or complete address information must be provided');
+      throw new BadRequestException(
+        'Either addressId or complete address information must be provided',
+      );
     }
 
     // Calculate order totals
-    const { subtotal, shippingFee: calculatedShippingFee } = this.calculateSubtotalAndShipping(
-      itemsToUse,
-      address,
-      shippingMethod,
-    );
+    const { subtotal, shippingFee: calculatedShippingFee } =
+      this.calculateSubtotalAndShipping(itemsToUse, address, shippingMethod);
 
     const orderItems = itemsToUse.map((item) => {
       const price = this.getItemPrice(item.variant);
@@ -216,7 +236,10 @@ export class OrdersService {
       coupon = await this.prisma.coupon.findUnique({
         where: { code: couponCode },
       });
-      if (!coupon || !(await canUserUseCoupon(this.prisma, coupon.code, userId))) {
+      if (
+        !coupon ||
+        !(await canUserUseCoupon(this.prisma, coupon.code, userId))
+      ) {
         throw new NotFoundException('Coupon not found');
       }
     }
@@ -249,28 +272,34 @@ export class OrdersService {
         });
 
         if (userUsageCount >= coupon.maxUsesPerUser) {
-          throw new BadRequestException('You have already used this coupon the maximum number of times');
+          throw new BadRequestException(
+            'You have already used this coupon the maximum number of times',
+          );
         }
       }
 
       // Check minimum order
       if (coupon.minOrder && subtotal < coupon.minOrder) {
-        throw new BadRequestException(`Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`);
+        throw new BadRequestException(
+          `Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`,
+        );
       }
 
-      discount = coupon.type === CouponType.FREESHIP
-        ? 0
-        : MoneyUtil.calculateDiscount(
-            subtotal,
-            coupon.type,
-            coupon.value,
-            coupon.maxDiscount,
-          );
+      discount =
+        coupon.type === CouponType.FREESHIP
+          ? 0
+          : MoneyUtil.calculateDiscount(
+              subtotal,
+              coupon.type,
+              coupon.value,
+              coupon.maxDiscount,
+            );
     }
 
     // Shipping is calculated on the server. Client-provided totals and fees
     // are display values only and must not affect the amount charged.
-    const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
+    const shippingFee =
+      coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
 
     const orderTotal = subtotal - discount + shippingFee;
 
@@ -291,7 +320,9 @@ export class OrdersService {
           });
 
           if (userUsageCount >= coupon.maxUsesPerUser) {
-            throw new BadRequestException('You have already used this coupon the maximum number of times');
+            throw new BadRequestException(
+              'You have already used this coupon the maximum number of times',
+            );
           }
         }
 
@@ -359,7 +390,9 @@ export class OrdersService {
           });
 
           if (!updatedVariant) {
-            throw new NotFoundException(`Product variant not found: ${item.variantId}`);
+            throw new NotFoundException(
+              `Product variant not found: ${item.variantId}`,
+            );
           }
 
           const newStock = updatedVariant.stock;
@@ -489,7 +522,11 @@ export class OrdersService {
     }> = [];
 
     for (const item of itemsToUse) {
-      if (!item.variantId || !Number.isInteger(item.quantity) || item.quantity < 1) {
+      if (
+        !item.variantId ||
+        !Number.isInteger(item.quantity) ||
+        item.quantity < 1
+      ) {
         everyItemPriced = false;
         continue;
       }
@@ -714,7 +751,10 @@ export class OrdersService {
     return order;
   }
 
-  async updateOrderStatus(orderId: string, updateOrderStatusDto: UpdateOrderStatusDto) {
+  async updateOrderStatus(
+    orderId: string,
+    updateOrderStatusDto: UpdateOrderStatusDto,
+  ) {
     const { status } = updateOrderStatusDto;
 
     const order = await this.prisma.order.findUnique({
@@ -733,7 +773,11 @@ export class OrdersService {
 
     // Update payment status based on order status
     let paymentStatus = order.paymentStatus;
-    if (status === OrderStatus.PAID || status === OrderStatus.PACKING || status === OrderStatus.SHIPPED) {
+    if (
+      status === OrderStatus.PAID ||
+      status === OrderStatus.PACKING ||
+      status === OrderStatus.SHIPPED
+    ) {
       paymentStatus = PaymentStatus.COMPLETED;
     } else if (status === OrderStatus.CANCELED) {
       paymentStatus =
@@ -839,7 +883,9 @@ export class OrdersService {
       });
 
       if (statusUpdate.count !== 1) {
-        throw new BadRequestException('Order cannot be cancelled at this stage');
+        throw new BadRequestException(
+          'Order cannot be cancelled at this stage',
+        );
       }
 
       await this.restoreStockForOrder(order, tx);
@@ -928,7 +974,9 @@ export class OrdersService {
     if (checkoutDto.items && checkoutDto.items.length > 0) {
       const orderItems = order.items ?? [];
       if (checkoutDto.items.length !== orderItems.length) {
-        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        throw new ConflictException(
+          'Mã đặt hàng đã được dùng cho một đơn khác',
+        );
       }
 
       const sortedDtoItems = [...checkoutDto.items].sort(
@@ -947,7 +995,9 @@ export class OrdersService {
           sortedDtoItems[i].variantId !== sortedOrderItems[i].variantId ||
           sortedDtoItems[i].quantity !== sortedOrderItems[i].quantity
         ) {
-          throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+          throw new ConflictException(
+            'Mã đặt hàng đã được dùng cho một đơn khác',
+          );
         }
       }
     }
@@ -983,7 +1033,9 @@ export class OrdersService {
         },
       });
       if (!requestAddress) {
-        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        throw new ConflictException(
+          'Mã đặt hàng đã được dùng cho một đơn khác',
+        );
       }
     } else {
       const shippingAddress = checkoutDto.shippingAddress as
@@ -1022,7 +1074,9 @@ export class OrdersService {
 
     for (const field of addressFields) {
       if (requestAddress[field] !== orderAddress[field]) {
-        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        throw new ConflictException(
+          'Mã đặt hàng đã được dùng cho một đơn khác',
+        );
       }
     }
 
@@ -1034,7 +1088,9 @@ export class OrdersService {
     const storedShippingMethod = orderAddress.shippingMethod;
     if (storedShippingMethod && checkoutDto.shippingMethod) {
       if (storedShippingMethod !== checkoutDto.shippingMethod) {
-        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        throw new ConflictException(
+          'Mã đặt hàng đã được dùng cho một đơn khác',
+        );
       }
     }
   }
@@ -1054,7 +1110,9 @@ export class OrdersService {
     const target = (error as any).meta?.target;
     if (Array.isArray(target)) {
       return target.some(
-        (t: unknown) => typeof t === 'string' && (t === 'checkoutKey' || t.includes('checkoutKey')),
+        (t: unknown) =>
+          typeof t === 'string' &&
+          (t === 'checkoutKey' || t.includes('checkoutKey')),
       );
     }
     if (typeof target === 'string') {
@@ -1092,12 +1150,18 @@ export class OrdersService {
     return `ORD${year}${month}${day}${sequence}${random}`;
   }
 
-  private getItemPrice(variant: { price: number; salePrice?: number | null }): number {
+  private getItemPrice(variant: {
+    price: number;
+    salePrice?: number | null;
+  }): number {
     return variant.salePrice ?? variant.price;
   }
 
   private calculateSubtotalAndShipping(
-    items: Array<{ variant: { price: number; salePrice?: number | null }; quantity: number }>,
+    items: Array<{
+      variant: { price: number; salePrice?: number | null };
+      quantity: number;
+    }>,
     address?: any,
     shippingMethod?: ShippingMethod,
   ): { subtotal: number; shippingFee: number } {
@@ -1107,7 +1171,10 @@ export class OrdersService {
       subtotal += price * item.quantity;
     }
     const shippingFee = address
-      ? this.calculateShippingFee(address, shippingMethod ?? ShippingMethod.STANDARD)
+      ? this.calculateShippingFee(
+          address,
+          shippingMethod ?? ShippingMethod.STANDARD,
+        )
       : 0;
     return { subtotal, shippingFee };
   }
@@ -1122,7 +1189,10 @@ export class OrdersService {
     });
   }
 
-  private validateStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus) {
+  private validateStatusTransition(
+    currentStatus: OrderStatus,
+    newStatus: OrderStatus,
+  ) {
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
       [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PAID, OrderStatus.CANCELED],
       [OrderStatus.PAID]: [OrderStatus.PACKING, OrderStatus.CANCELED],
@@ -1212,6 +1282,8 @@ export class OrdersService {
       }
     }
 
-    throw new BadRequestException('Checkout could not be completed; please retry');
+    throw new BadRequestException(
+      'Checkout could not be completed; please retry',
+    );
   }
 }

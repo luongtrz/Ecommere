@@ -90,9 +90,7 @@ describe('AuditService', () => {
           secret: 'nestedSecret',
           phone: '0987654321',
         },
-        items: [
-          { token: 'arrayToken' },
-        ],
+        items: [{ token: 'arrayToken' }],
       };
 
       Object.freeze(input);

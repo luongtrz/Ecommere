@@ -6,13 +6,15 @@ import {
 
 describe('toCheckpointConnectionString', () => {
   it('removes schema=... query parameter from the connection URL', () => {
-    const input = 'postgresql://user:pass@localhost:5432/thaispray_shop?schema=public';
+    const input =
+      'postgresql://user:pass@localhost:5432/thaispray_shop?schema=public';
     const result = toCheckpointConnectionString(input);
     expect(result).toBe('postgresql://user:pass@localhost:5432/thaispray_shop');
   });
 
   it('removes schema parameter with custom schema name', () => {
-    const input = 'postgresql://user:pass@localhost:5432/thaispray_shop?schema=custom_schema';
+    const input =
+      'postgresql://user:pass@localhost:5432/thaispray_shop?schema=custom_schema';
     const result = toCheckpointConnectionString(input);
     expect(result).toBe('postgresql://user:pass@localhost:5432/thaispray_shop');
   });
@@ -40,9 +42,12 @@ describe('toCheckpointConnectionString', () => {
   });
 
   it('works with postgres:// protocol URLs', () => {
-    const input = 'postgres://user:pass@localhost:5432/db?schema=public&sslmode=prefer';
+    const input =
+      'postgres://user:pass@localhost:5432/db?schema=public&sslmode=prefer';
     const result = toCheckpointConnectionString(input);
-    expect(result).toBe('postgres://user:pass@localhost:5432/db?sslmode=prefer');
+    expect(result).toBe(
+      'postgres://user:pass@localhost:5432/db?sslmode=prefer',
+    );
   });
 });
 
@@ -132,4 +137,3 @@ describe('deleteThreadCheckpoints', () => {
     );
   });
 });
-

@@ -1,4 +1,7 @@
-import { buildUserToolRegistry, UserRegistryDeps } from './user-registry.factory';
+import {
+  buildUserToolRegistry,
+  UserRegistryDeps,
+} from './user-registry.factory';
 import { ToolContext } from './tool.types';
 import { ToolRegistry } from './tool.registry';
 

@@ -1,5 +1,20 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CheckoutDto } from './dtos/checkout.dto';
 import { PreviewCheckoutDto } from './dtos/preview-checkout.dto';
@@ -22,35 +37,50 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Preview checkout' })
   @ApiResponse({ status: 200 })
-  async previewCheckout(@CurrentUser('id') userId: string, @Body() previewCheckoutDto: PreviewCheckoutDto) {
+  async previewCheckout(
+    @CurrentUser('id') userId: string,
+    @Body() previewCheckoutDto: PreviewCheckoutDto,
+  ) {
     return this.ordersService.previewCheckout(userId, previewCheckoutDto);
   }
 
   @Post('checkout')
   @ApiOperation({ summary: 'Checkout and create order from cart' })
   @ApiResponse({ status: 201, type: OrderEntity })
-  async checkout(@CurrentUser('id') userId: string, @Body() checkoutDto: CheckoutDto) {
+  async checkout(
+    @CurrentUser('id') userId: string,
+    @Body() checkoutDto: CheckoutDto,
+  ) {
     return this.ordersService.checkout(userId, checkoutDto);
   }
 
   @Get('my')
   @ApiOperation({ summary: 'Get my orders' })
   @ApiResponse({ status: 200, type: [OrderEntity] })
-  async getMyOrders(@CurrentUser('id') userId: string, @Query() filterDto: OrderFilterDto) {
+  async getMyOrders(
+    @CurrentUser('id') userId: string,
+    @Query() filterDto: OrderFilterDto,
+  ) {
     return this.ordersService.getMyOrders(userId, filterDto);
   }
 
   @Get('my/:orderId')
   @ApiOperation({ summary: 'Get my order by ID' })
   @ApiResponse({ status: 200, type: OrderEntity })
-  async getMyOrderById(@CurrentUser('id') userId: string, @Param('orderId') orderId: string) {
+  async getMyOrderById(
+    @CurrentUser('id') userId: string,
+    @Param('orderId') orderId: string,
+  ) {
     return this.ordersService.getMyOrderById(userId, orderId);
   }
 
   @Patch('my/:orderId/cancel')
   @ApiOperation({ summary: 'Cancel my order' })
   @ApiResponse({ status: 200, type: OrderEntity })
-  async cancelOrder(@CurrentUser('id') userId: string, @Param('orderId') orderId: string) {
+  async cancelOrder(
+    @CurrentUser('id') userId: string,
+    @Param('orderId') orderId: string,
+  ) {
     return this.ordersService.cancelOrder(userId, orderId);
   }
 

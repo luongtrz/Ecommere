@@ -58,12 +58,17 @@ export class CheckpointRetentionService {
     }
   }
 
-  async cleanupExpiredCheckpoints(retentionDaysOverride?: number): Promise<number> {
+  async cleanupExpiredCheckpoints(
+    retentionDaysOverride?: number,
+  ): Promise<number> {
     try {
       const retentionDays =
         retentionDaysOverride !== undefined
           ? retentionDaysOverride
-          : parseRetentionDays(process.env.CHECKPOINT_RETENTION_DAYS, this.logger);
+          : parseRetentionDays(
+              process.env.CHECKPOINT_RETENTION_DAYS,
+              this.logger,
+            );
 
       if (retentionDays === 0) {
         this.logger.log(
@@ -107,7 +112,9 @@ export class CheckpointRetentionService {
   private resolvePool(): any {
     return (
       getCheckpointerPool(this.checkpointer) ??
-      (typeof this.checkpointer?.query === 'function' ? this.checkpointer : undefined)
+      (typeof this.checkpointer?.query === 'function'
+        ? this.checkpointer
+        : undefined)
     );
   }
 
