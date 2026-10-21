@@ -186,6 +186,10 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit -p tsconfig.json
 
+      # Vitest runs with coverage; the 90% global threshold in vite.config.ts fails this step below 90%
+      - name: Unit tests with coverage gate
+        run: npm run test:cov
+
       - name: Build frontend
         env:
           VITE_API_BASE_URL: https://api.example.com
@@ -253,6 +257,103 @@ jobs:
           severity: CRITICAL
           ignore-unfixed: true
           exit-code: '1'
+
+  # Logs in through the real UI against a live backend, DB and frontend preview (user shop only)
+  e2e:
+    name: e2e (user_ecommere)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      SEED_DATABASE: 'true'
+      SEED_ADMIN_PASSWORD: ci-admin-${{ github.run_id }}
+      SEED_USER_PASSWORD: ci-user-${{ github.run_id }}
+      E2E_USER_PASSWORD: ci-user-${{ github.run_id }}
+      JWT_ACCESS_SECRET: ci-access-${{ github.run_id }}-value
+      JWT_REFRESH_SECRET: ci-refresh-${{ github.run_id }}-value
+      CORS_ORIGIN: http://localhost:4173
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install backend dependencies
+        working-directory: user_ecommere/backend
+        run: npm ci
+
+      - name: Generate Prisma client, apply schema and seed
+        working-directory: user_ecommere/backend
+        run: |
+          npm run prisma:generate
+          npx prisma db push --skip-generate
+          npm run prisma:seed
+
+      - name: Build backend
+        working-directory: user_ecommere/backend
+        run: npm run build
+
+      - name: Start backend
+        working-directory: user_ecommere/backend
+        run: |
+          PORT=4000 node dist/src/main.js > backend.log 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:4000/api/products && exit 0; sleep 2; done
+          cat backend.log
+          exit 1
+
+      - name: Install frontend dependencies
+        working-directory: user_ecommere/frontend
+        run: npm ci
+
+      - name: Build frontend against the local backend
+        working-directory: user_ecommere/frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:4000
+        run: npm run build
+
+      - name: Serve frontend
+        working-directory: user_ecommere/frontend
+        run: |
+          npx vite preview --port 4173 --strictPort > preview.log 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:4173/ && exit 0; sleep 2; done
+          cat preview.log
+          exit 1
+
+      - name: Install Playwright browser
+        working-directory: user_ecommere/frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright smoke tests
+        working-directory: user_ecommere/frontend
+        env:
+          CI: 'true'
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            user_ecommere/frontend/playwright-report
+            user_ecommere/frontend/test-results
+          if-no-files-found: ignore
 
   docker:
     name: docker (${{ matrix.name }})
