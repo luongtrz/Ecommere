@@ -1381,7 +1381,7 @@ describe('AuthService', () => {
       mockJwtService.decode.mockReturnValueOnce({ sub: 'user-1' });
       mockPrismaService.refreshToken.findUnique.mockResolvedValue({
         id: 'tok-id-1',
-        tokenFamily: 'family-abc-123',
+        tokenFamily: 'fam-2',
       });
 
       const result = await service.logout('valid-logout-token', response);
@@ -1393,7 +1393,7 @@ describe('AuthService', () => {
       expect(mockPrismaService.refreshToken.updateMany).toHaveBeenCalledWith({
         where: {
           userId: 'user-1',
-          tokenFamily: 'family-abc-123',
+          tokenFamily: 'fam-2',
         },
         data: { revokedAt: expect.any(Date) },
       });
