@@ -85,23 +85,23 @@ interface FakeRequest {
 }
 
 function createFakeRequest(user?: { id: string; role?: string }): FakeRequest {
-  const listeners: Record<string, Function[]> = {};
+  const listeners: Record<string, ((...args: any[]) => any)[]> = {};
   const req: any = {
     headers: {},
     user,
   };
-  req.on = jest.fn((event: string, cb: Function) => {
+  req.on = jest.fn((event: string, cb: (...args: any[]) => any) => {
     listeners[event] = listeners[event] || [];
     listeners[event].push(cb);
     return req;
   });
-  req.removeListener = jest.fn((event: string, cb: Function) => {
+  req.removeListener = jest.fn((event: string, cb: (...args: any[]) => any) => {
     if (listeners[event]) {
       listeners[event] = listeners[event].filter((fn) => fn !== cb);
     }
     return req;
   });
-  req.off = jest.fn((event: string, cb: Function) => {
+  req.off = jest.fn((event: string, cb: (...args: any[]) => any) => {
     if (listeners[event]) {
       listeners[event] = listeners[event].filter((fn) => fn !== cb);
     }

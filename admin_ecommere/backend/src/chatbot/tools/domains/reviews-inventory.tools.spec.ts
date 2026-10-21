@@ -1,8 +1,6 @@
 import {
   createReviewsInventoryTools,
   ReviewsInventoryToolDeps,
-  ADMIN_NAVIGATE_PATH_REGEX,
-  isAdminAllowedPath,
 } from './reviews-inventory.tools';
 import type { AgentToolDef, ToolContext } from '../tool.types';
 import type { ReviewsService } from '../../../reviews/reviews.service';

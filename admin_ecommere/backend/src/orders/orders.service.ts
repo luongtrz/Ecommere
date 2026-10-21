@@ -45,7 +45,6 @@ export class OrdersService {
       items,
       paymentMethod,
       shippingMethod,
-      total,
     } = checkoutDto;
 
     // Get user's cart

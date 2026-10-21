@@ -136,7 +136,7 @@ export function createAdminOrdersTools(
     },
     summarize: (args) =>
       `Đổi trạng thái đơn ${args.orderId} sang ${args.status}`,
-    preview: async (args, ctx: ToolContext) => {
+    preview: async (args, _ctx: ToolContext) => {
       if (args.status !== 'REFUNDED' && args.status !== 'CANCELED') {
         return undefined;
       }

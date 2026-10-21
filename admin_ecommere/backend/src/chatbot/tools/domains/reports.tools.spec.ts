@@ -1,10 +1,6 @@
 import {
   createReportsTools,
   ReportsToolDeps,
-  DATE_REGEX,
-  GROUP_BY_OPTIONS,
-  projectCustomer,
-  projectList,
 } from './reports.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import type { AdminService } from '../../../admin/admin.service';

@@ -12,7 +12,7 @@ import { PaginationDto } from '@/common/dtos/pagination.dto';
 export class InventoryService {
   constructor(private prisma: PrismaService) {}
 
-  async adjustStock(adjustmentDto: StockAdjustmentDto, userId: string) {
+  async adjustStock(adjustmentDto: StockAdjustmentDto, _userId: string) {
     const { variantId, type, quantity, notes } = adjustmentDto;
 
     if (type !== StockMovementType.ADJUST && quantity < 1) {

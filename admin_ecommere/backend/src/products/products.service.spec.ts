@@ -2,14 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CategoriesService } from '@/categories/categories.service';
-import { SlugifyUtil } from '@/common/utils/slugify.util';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ProductSortBy } from './dtos/product-filter.dto';
 import { StockMovementType } from '@prisma/client';
 
 describe('ProductsService', () => {
   let service: ProductsService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     $queryRaw: jest.fn().mockResolvedValue([]),
@@ -73,7 +71,6 @@ describe('ProductsService', () => {
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

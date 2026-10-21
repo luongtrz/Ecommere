@@ -6,7 +6,6 @@ import { OrderStatus, PaymentStatus } from '@prisma/client';
 
 describe('OrdersService', () => {
   let service: OrdersService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     cart: {
@@ -55,7 +54,6 @@ describe('OrdersService', () => {
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

@@ -13,7 +13,6 @@ import {
   AgentBusyError,
   AgentNotPendingError,
   type AgentRunnerDeps,
-  type AgentTranscriptMessage,
 } from './agent.runner';
 import type { AgentStreamEvent } from './sse.frames';
 import {
