@@ -126,6 +126,12 @@ export class CheckoutDto {
   @IsNumber()
   total?: number;
 
+  @ApiProperty({ example: 'SUMMER2024', required: false, maxLength: 50 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  couponCode?: string;
+
   @ApiProperty({ example: 'checkout-key-12345678', required: false })
   @IsOptional()
   @IsString()
