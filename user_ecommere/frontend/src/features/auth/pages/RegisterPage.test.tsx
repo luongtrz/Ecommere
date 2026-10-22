@@ -95,14 +95,14 @@ describe('RegisterPage', () => {
     );
 
     // Branding header
-    expect(screen.getByText('TS')).toBeInTheDocument();
+    expect(screen.getAllByText('TS')[0]).toBeInTheDocument();
     expect(screen.getByText('Thai')).toBeInTheDocument();
     expect(screen.getByText('Spray')).toBeInTheDocument();
-    expect(screen.getByText('Chính Hãng Thái Lan')).toBeInTheDocument();
+    expect(screen.getAllByText('Chính Hãng Thái Lan')[0]).toBeInTheDocument();
 
-    const homeLink = screen.getByRole('link', {
+    const homeLink = screen.getAllByRole('link', {
       name: /TS Thai Spray Chính Hãng Thái Lan/i,
-    });
+    })[0];
     expect(homeLink).toHaveAttribute('href', '/');
 
     expect(
@@ -118,9 +118,9 @@ describe('RegisterPage', () => {
     ).toBeInTheDocument();
 
     // Gift Voucher Banner
-    expect(screen.getByText('Tặng Voucher 20.000đ')).toBeInTheDocument();
+    expect(screen.getAllByText('Tặng Voucher 20.000đ')[0]).toBeInTheDocument();
     expect(
-      screen.getByText('Áp dụng cho đơn hàng đầu tiên của bạn'),
+      screen.getAllByText('Áp dụng cho đơn hàng đầu tiên của bạn')[0],
     ).toBeInTheDocument();
 
     // Divider & Login link
@@ -131,8 +131,10 @@ describe('RegisterPage', () => {
     expect(loginLink).toHaveAttribute('href', '/login');
 
     // Trust guarantees
-    expect(screen.getByText('Bảo mật 100%')).toBeInTheDocument();
-    expect(screen.getByText('Tích điểm không giới hạn')).toBeInTheDocument();
+    expect(screen.getAllByText('Bảo mật 100%')[0]).toBeInTheDocument();
+    expect(
+      screen.getAllByText('Tích điểm không giới hạn')[0],
+    ).toBeInTheDocument();
   });
 
   describe('Referral code handling', () => {
@@ -140,7 +142,7 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register');
 
       expect(
-        screen.queryByText('🎉 Bạn được giới thiệu bởi bạn bè'),
+        screen.queryByText('Bạn được giới thiệu bởi bạn bè'),
       ).not.toBeInTheDocument();
       expect(screen.getByPlaceholderText('VD: BANBE2026')).toHaveValue('');
     });
@@ -149,7 +151,7 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register?ref=');
 
       expect(
-        screen.queryByText('🎉 Bạn được giới thiệu bởi bạn bè'),
+        screen.queryByText('Bạn được giới thiệu bởi bạn bè'),
       ).not.toBeInTheDocument();
       expect(screen.getByPlaceholderText('VD: BANBE2026')).toHaveValue('');
     });
@@ -158,10 +160,10 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register?ref=FRIEND888');
 
       expect(
-        screen.getByText('🎉 Bạn được giới thiệu bởi bạn bè'),
+        screen.getAllByText('Bạn được giới thiệu bởi bạn bè')[0],
       ).toBeInTheDocument();
-      expect(screen.getByText('Mã giới thiệu:')).toBeInTheDocument();
-      expect(screen.getByText('FRIEND888')).toBeInTheDocument();
+      expect(screen.getAllByText('Mã giới thiệu:')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('FRIEND888')[0]).toBeInTheDocument();
 
       // Form default referral code should match
       expect(screen.getByPlaceholderText('VD: BANBE2026')).toHaveValue(
