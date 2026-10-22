@@ -41,7 +41,10 @@ export function SearchBox() {
     setRecentSearches(readRecentSearches());
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsFocused(false);
       }
     };
@@ -51,7 +54,10 @@ export function SearchBox() {
   }, []);
 
   const saveRecentSearch = (searchTerm: string) => {
-    const nextRecent = [searchTerm, ...recentSearches.filter((item) => item !== searchTerm)].slice(0, 5);
+    const nextRecent = [
+      searchTerm,
+      ...recentSearches.filter((item) => item !== searchTerm),
+    ].slice(0, 5);
     setRecentSearches(nextRecent);
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(nextRecent));
   };
@@ -127,12 +133,16 @@ export function SearchBox() {
                   >
                     <Search className="h-4 w-4 text-teal-600" />
                     <span className="flex-1">
-                      Tìm kiếm cho <strong className="text-teal-700">“{deferredQuery}”</strong>
+                      Tìm kiếm cho{' '}
+                      <strong className="text-teal-700">
+                        “{deferredQuery}”
+                      </strong>
                     </span>
                     <ArrowRight className="h-4 w-4 text-slate-400" />
                   </button>
                   <p className="px-4 text-xs text-slate-500">
-                    Mẹo: Nhập tên sản phẩm, công dụng (đuổi chuột, diệt gián, tẩy bồn cầu) để xem nhanh.
+                    Mẹo: Nhập tên sản phẩm, công dụng (đuổi chuột, diệt gián,
+                    tẩy bồn cầu) để xem nhanh.
                   </p>
                 </div>
               ) : (
@@ -147,7 +157,18 @@ export function SearchBox() {
                         {recentSearches.map((term) => (
                           <div
                             key={term}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => handleSearch(term)}
+                            onKeyDown={(event) => {
+                              if (event.target !== event.currentTarget) {
+                                return;
+                              }
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                handleSearch(term);
+                              }
+                            }}
                             className="group flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
                           >
                             <span>{term}</span>
@@ -203,7 +224,9 @@ export function SearchBox() {
                       <p className="truncate text-xs font-bold text-slate-900 group-hover:text-teal-700">
                         {product.name}
                       </p>
-                      <p className="text-[11px] text-slate-500">Chính hãng Thái Lan</p>
+                      <p className="text-[11px] text-slate-500">
+                        Chính hãng Thái Lan
+                      </p>
                     </div>
                     <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-teal-600 transition-transform group-hover:translate-x-0.5" />
                   </button>

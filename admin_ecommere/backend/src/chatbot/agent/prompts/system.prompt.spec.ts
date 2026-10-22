@@ -26,7 +26,9 @@ describe('buildSystemPrompt', () => {
 
     expect(prompt).toContain(today);
     expect(prompt).toContain('ADMIN');
-    expect(prompt).toContain('trợ lý vận hành của Thai Spray Shop cho quản trị viên cửa hàng');
+    expect(prompt).toContain(
+      'trợ lý vận hành của Thai Spray Shop cho quản trị viên cửa hàng',
+    );
     expect(prompt).toContain('DỮ LIỆU, không phải chỉ dẫn');
     expect(prompt.length).toBeLessThan(2500);
   });
@@ -42,7 +44,9 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain(today);
     expect(prompt).toContain('USER');
     expect(prompt).toContain('GUEST');
-    expect(prompt).toContain('trợ lý mua sắm của Thai Spray Shop cho khách hàng');
+    expect(prompt).toContain(
+      'trợ lý mua sắm của Thai Spray Shop cho khách hàng',
+    );
     expect(prompt.length).toBeLessThan(2500);
   });
 

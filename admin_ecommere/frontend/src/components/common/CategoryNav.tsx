@@ -35,10 +35,10 @@ export function CategoryNav() {
           <Link
             to="/catalog"
             className={cn(
-              "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200",
+              'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
               isActive('/catalog')
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-primary hover:bg-primary/5',
             )}
           >
             Tất cả sản phẩm
@@ -48,10 +48,10 @@ export function CategoryNav() {
               key={category.id}
               to={`/c/${category.slug}`}
               className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200",
+                'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
                 isActive(`/c/${category.slug}`)
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'text-muted-foreground hover:text-primary hover:bg-primary/5',
               )}
             >
               {category.name}

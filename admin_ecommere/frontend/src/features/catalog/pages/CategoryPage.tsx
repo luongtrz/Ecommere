@@ -10,10 +10,23 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Package, Star, ShoppingBag, Grid3X3, List } from 'lucide-react';
+import {
+  ArrowLeft,
+  Package,
+  Star,
+  ShoppingBag,
+  Grid3X3,
+  List,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '@/lib/formatters';
 
@@ -23,7 +36,9 @@ export function CategoryPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
 
-  const { data: category, isLoading: isCategoryLoading } = useCategoryBySlug(categorySlug!);
+  const { data: category, isLoading: isCategoryLoading } = useCategoryBySlug(
+    categorySlug!,
+  );
   const { data: products, isLoading: isProductsLoading } = useProducts({
     categorySlug,
     sortBy: sortBy as any,
@@ -89,7 +104,10 @@ export function CategoryPage() {
 
             <div className="flex items-center gap-4 mb-4">
               <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
-                <Link to="/catalog" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/catalog"
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                >
                   <ArrowLeft className="h-4 w-4" />
                   Quay lại danh sách
                 </Link>
@@ -103,14 +121,18 @@ export function CategoryPage() {
                     <Package className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900">{category.name}</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      {category.name}
+                    </h1>
                     <Badge variant="secondary" className="mt-1">
                       {products?.total || 0} sản phẩm
                     </Badge>
                   </div>
                 </div>
                 {category.description && (
-                  <p className="text-gray-600 text-lg max-w-2xl">{category.description}</p>
+                  <p className="text-gray-600 text-lg max-w-2xl">
+                    {category.description}
+                  </p>
                 )}
               </div>
 
@@ -119,13 +141,20 @@ export function CategoryPage() {
                 <CardContent className="p-4">
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-blue-600">{products?.total || 0}</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        {products?.total || 0}
+                      </div>
                       <div className="text-sm text-gray-600">Sản phẩm</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-green-600">
                         {products?.products && products.products.length > 0
-                          ? (products.products.reduce((acc, product) => acc + (product.rating || 0), 0) / products.products.length).toFixed(1)
+                          ? (
+                              products.products.reduce(
+                                (acc, product) => acc + (product.rating || 0),
+                                0,
+                              ) / products.products.length
+                            ).toFixed(1)
                           : '0.0'}
                       </div>
                       <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
@@ -154,7 +183,9 @@ export function CategoryPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-700">Sắp xếp:</span>
+              <span className="text-sm font-medium text-gray-700">
+                Sắp xếp:
+              </span>
               <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
@@ -170,7 +201,9 @@ export function CategoryPage() {
 
               {/* View Toggle */}
               <div className="flex items-center gap-2 ml-4">
-                <span className="text-sm font-medium text-gray-700 mr-2">Xem:</span>
+                <span className="text-sm font-medium text-gray-700 mr-2">
+                  Xem:
+                </span>
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'outline'}
                   size="sm"
@@ -207,11 +240,14 @@ export function CategoryPage() {
               />
             </div>
           ) : (
-            <div className={`${viewMode === 'grid'
-                ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
-                : 'space-y-4'
-              }`}>
-              {products?.products.map((product) => (
+            <div
+              className={`${
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
+                  : 'space-y-4'
+              }`}
+            >
+              {products?.products.map((product) =>
                 viewMode === 'grid' ? (
                   <ProductCard
                     key={product.id}
@@ -222,10 +258,16 @@ export function CategoryPage() {
                     price={product.basePrice}
                     rating={product.rating}
                     reviewCount={product.reviewCount}
-                    onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                    onAddToCart={() =>
+                      product.variants[0] &&
+                      handleAddToCart(product, product.variants[0])
+                    }
                   />
                 ) : (
-                  <Card key={product.id} className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+                  <Card
+                    key={product.id}
+                    className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500"
+                  >
                     <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                       <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm mx-auto md:mx-0">
                         <img
@@ -236,10 +278,14 @@ export function CategoryPage() {
                       </div>
                       <div className="flex-1 min-w-0 text-center md:text-left">
                         <div className="mb-3">
-                          <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-2 leading-tight">{product.name}</h3>
+                          <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-2 leading-tight">
+                            {product.name}
+                          </h3>
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-3">
                             <div className="flex items-center gap-1">
-                              <span className="text-yellow-400 text-base md:text-lg">★</span>
+                              <span className="text-yellow-400 text-base md:text-lg">
+                                ★
+                              </span>
                               <span className="text-sm font-medium text-gray-700">
                                 {product.rating?.toFixed(1) || '0.0'}
                               </span>
@@ -257,16 +303,23 @@ export function CategoryPage() {
                             </p>
                           )}
                           <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                            {product.variants?.slice(0, 3).map((variant: any, index: number) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {variant.scent} - {variant.volumeMl}ml
-                              </Badge>
-                            ))}
-                            {product.variants && product.variants.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{product.variants.length - 3} nữa
-                              </Badge>
-                            )}
+                            {product.variants
+                              ?.slice(0, 3)
+                              .map((variant: any, index: number) => (
+                                <Badge
+                                  key={index}
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  {variant.scent} - {variant.volumeMl}ml
+                                </Badge>
+                              ))}
+                            {product.variants &&
+                              product.variants.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{product.variants.length - 3} nữa
+                                </Badge>
+                              )}
                           </div>
                         </div>
                         <div className="text-center md:text-right">
@@ -276,7 +329,10 @@ export function CategoryPage() {
                           <Button
                             size="lg"
                             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md w-full md:w-auto"
-                            onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                            onClick={() =>
+                              product.variants[0] &&
+                              handleAddToCart(product, product.variants[0])
+                            }
                           >
                             <ShoppingBag className="h-4 w-4 mr-2" />
                             Thêm vào giỏ
@@ -285,8 +341,8 @@ export function CategoryPage() {
                       </div>
                     </div>
                   </Card>
-                )
-              ))}
+                ),
+              )}
             </div>
           )}
         </div>

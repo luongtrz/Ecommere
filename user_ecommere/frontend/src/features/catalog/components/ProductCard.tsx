@@ -39,7 +39,10 @@ export const ProductCard = memo(function ProductCard({
   const { toggleItem, isInWishlist } = useWishlist();
   const prefetchProduct = usePrefetchProduct();
   const isWishlisted = isInWishlist(id);
-  const discountPercent = hasDiscount && salePrice != null ? Math.max(1, Math.round(((price - salePrice) / price) * 100)) : 0;
+  const discountPercent =
+    hasDiscount && salePrice != null
+      ? Math.max(1, Math.round(((price - salePrice) / price) * 100))
+      : 0;
   const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = useCallback(() => {
@@ -65,7 +68,10 @@ export const ProductCard = memo(function ProductCard({
       >
         {/* Image Container */}
         <div className="relative overflow-hidden bg-slate-50/70 border-b border-slate-100">
-          <Link to={`/p/${slug}`} className="block aspect-square overflow-hidden">
+          <Link
+            to={`/p/${slug}`}
+            className="block aspect-square overflow-hidden"
+          >
             <img
               src={getImageUrl(images[0], { width: 500 })}
               alt={name}
@@ -79,8 +85,7 @@ export const ProductCard = memo(function ProductCard({
           <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
             {hasDiscount && (
               <span className="inline-flex items-center gap-1 rounded-full bg-rose-600 px-2.5 py-0.5 text-[11px] font-extrabold text-white shadow-sm">
-                <Flame className="h-3 w-3 fill-white" />
-                -{discountPercent}%
+                <Flame className="h-3 w-3 fill-white" />-{discountPercent}%
               </span>
             )}
             <span className="inline-flex items-center gap-1.5 rounded-md bg-white/95 backdrop-blur-md px-2 py-0.5 text-[10px] font-bold text-teal-800 shadow-2xs border border-teal-100">
@@ -93,7 +98,13 @@ export const ProductCard = memo(function ProductCard({
           <button
             onClick={(event) => {
               event.preventDefault();
-              toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
+              toggleItem({
+                productId: id,
+                name,
+                slug,
+                image: images[0],
+                price: finalPrice,
+              });
             }}
             className={cn(
               'absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-all duration-200 active:scale-90 shadow-2xs border',
@@ -103,7 +114,12 @@ export const ProductCard = memo(function ProductCard({
             )}
             aria-label="Thêm vào yêu thích"
           >
-            <Heart className={cn('h-4 w-4 transition-transform duration-200', isWishlisted && 'fill-rose-500 scale-110')} />
+            <Heart
+              className={cn(
+                'h-4 w-4 transition-transform duration-200',
+                isWishlisted && 'fill-rose-500 scale-110',
+              )}
+            />
           </button>
 
           {/* Quick View Hover Action */}
@@ -120,7 +136,10 @@ export const ProductCard = memo(function ProductCard({
 
         {/* Content */}
         <CardContent className="flex flex-1 flex-col p-4">
-          <Link to={`/p/${slug}`} className="group-hover:text-teal-700 transition-colors">
+          <Link
+            to={`/p/${slug}`}
+            className="group-hover:text-teal-700 transition-colors"
+          >
             <h3 className="line-clamp-2 text-sm font-bold text-slate-800 leading-snug min-h-[2.5rem]">
               {name}
             </h3>
@@ -130,10 +149,14 @@ export const ProductCard = memo(function ProductCard({
           <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
             <div className="flex items-center gap-1 text-amber-500">
               <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              <span className="font-bold text-slate-700">{rating > 0 ? rating.toFixed(1) : '4.9'}</span>
+              <span className="font-bold text-slate-700">
+                {rating > 0 ? rating.toFixed(1) : '4.9'}
+              </span>
             </div>
             <span>·</span>
-            <span>{reviewCount > 0 ? `${reviewCount} đánh giá` : 'Đã bán 120+'}</span>
+            <span>
+              {reviewCount > 0 ? `${reviewCount} đánh giá` : 'Đã bán 120+'}
+            </span>
           </div>
 
           {/* Pricing */}
@@ -165,7 +188,11 @@ export const ProductCard = memo(function ProductCard({
       </Card>
 
       {isQuickViewOpen && (
-        <ProductQuickView slug={slug} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+        <ProductQuickView
+          slug={slug}
+          open={isQuickViewOpen}
+          onOpenChange={setIsQuickViewOpen}
+        />
       )}
     </>
   );

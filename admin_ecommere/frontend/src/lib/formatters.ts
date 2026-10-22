@@ -14,6 +14,8 @@ export function formatDiscount(price: number, salePrice: number): string {
   return `-${discount}%`;
 }
 
-export function calculateTotal(items: Array<{ price: number; quantity: number }>): number {
+export function calculateTotal(
+  items: Array<{ price: number; quantity: number }>,
+): number {
   return items.reduce((total, item) => total + item.price * item.quantity, 0);
 }

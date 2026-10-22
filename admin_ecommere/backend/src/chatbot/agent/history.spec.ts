@@ -21,10 +21,7 @@ describe('trimHistory', () => {
   });
 
   it('returns a history with length equal to the limit unchanged', () => {
-    const messages = [
-      new HumanMessage('Hello'),
-      new AIMessage('Hi there!'),
-    ];
+    const messages = [new HumanMessage('Hello'), new AIMessage('Hi there!')];
     const maxMessages = 2;
 
     const result = trimHistory(messages, maxMessages);
@@ -129,7 +126,9 @@ describe('trimHistory', () => {
     expect(result[0].getType()).toBe('human');
     expect(result[0].content).toBe('Great, I also need clear coat.');
     expect(result[1].getType()).toBe('ai');
-    expect(result[1].content).toBe('We have Gloss and Matte clear coats in stock.');
+    expect(result[1].content).toBe(
+      'We have Gloss and Matte clear coats in stock.',
+    );
   });
 
   it('keeps a complete tool round inside the window intact', () => {
@@ -254,10 +253,7 @@ describe('trimHistory', () => {
   });
 
   it('throws RangeError naming maxMessages when maxMessages is 1 or 2.5', () => {
-    const messages = [
-      new HumanMessage('Hello'),
-      new AIMessage('Hi'),
-    ];
+    const messages = [new HumanMessage('Hello'), new AIMessage('Hi')];
 
     expect(() => trimHistory(messages, 1)).toThrow(RangeError);
     expect(() => trimHistory(messages, 1)).toThrow(/maxMessages/);

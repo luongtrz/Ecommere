@@ -18,8 +18,12 @@ import { ADMIN_JWT_AUDIENCE, ADMIN_JWT_ISSUER } from './auth.constants';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const accessSecret = configService.get<string>('ADMIN_JWT_ACCESS_SECRET');
-        const refreshSecret = configService.get<string>('ADMIN_JWT_REFRESH_SECRET');
+        const accessSecret = configService.get<string>(
+          'ADMIN_JWT_ACCESS_SECRET',
+        );
+        const refreshSecret = configService.get<string>(
+          'ADMIN_JWT_REFRESH_SECRET',
+        );
         if (!accessSecret || accessSecret.trim() === '') {
           throw new Error('ADMIN_JWT_ACCESS_SECRET is required');
         }

@@ -14,7 +14,11 @@ export class StripeAdapter implements PaymentProvider {
     return 'Stripe';
   }
 
-  async createPayment(orderId: string, amount: number, currency: string): Promise<PaymentResult> {
+  async createPayment(
+    orderId: string,
+    amount: number,
+    currency: string,
+  ): Promise<PaymentResult> {
     this.logger.log(`[MOCK] Creating Stripe payment for order ${orderId}`);
     this.logger.log(`[MOCK] Amount: ${amount} ${currency}`);
 
@@ -32,7 +36,8 @@ export class StripeAdapter implements PaymentProvider {
       success: true,
       paymentId: mockPaymentId,
       paymentUrl: `https://checkout.stripe.com/pay/mock_${mockPaymentId}`,
-      message: 'Mock Stripe payment created. In production, this would return a real Stripe payment intent.',
+      message:
+        'Mock Stripe payment created. In production, this would return a real Stripe payment intent.',
       metadata: {
         provider: 'stripe',
         orderId,
@@ -57,8 +62,13 @@ export class StripeAdapter implements PaymentProvider {
     };
   }
 
-  async refundPayment(paymentId: string, amount: number): Promise<RefundResult> {
-    this.logger.log(`[MOCK] Refunding Stripe payment ${paymentId}, amount: ${amount}`);
+  async refundPayment(
+    paymentId: string,
+    amount: number,
+  ): Promise<RefundResult> {
+    this.logger.log(
+      `[MOCK] Refunding Stripe payment ${paymentId}, amount: ${amount}`,
+    );
 
     // Mock implementation - In production:
     // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);

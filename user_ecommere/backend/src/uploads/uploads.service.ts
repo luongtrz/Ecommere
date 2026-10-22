@@ -23,7 +23,10 @@ export class UploadsService {
     this.validateFile(file);
 
     try {
-      const result = await this.uploadToCloudinary(file, this.normalizeFolder(folder));
+      const result = await this.uploadToCloudinary(
+        file,
+        this.normalizeFolder(folder),
+      );
 
       return {
         filename: result.public_id,
@@ -39,7 +42,10 @@ export class UploadsService {
     }
   }
 
-  async uploadMultipleFiles(files: Express.Multer.File[], folder = DEFAULT_FOLDER) {
+  async uploadMultipleFiles(
+    files: Express.Multer.File[],
+    folder = DEFAULT_FOLDER,
+  ) {
     if (!files?.length) {
       throw new BadRequestException('No files provided');
     }
@@ -86,7 +92,9 @@ export class UploadsService {
     }
 
     if (!this.hasValidImageSignature(file.buffer, file.mimetype)) {
-      throw new BadRequestException('Invalid file type. File content does not match declared type.');
+      throw new BadRequestException(
+        'Invalid file type. File content does not match declared type.',
+      );
     }
   }
 
@@ -153,7 +161,10 @@ export class UploadsService {
     }
   }
 
-  private uploadToCloudinary(file: Express.Multer.File, folder: string): Promise<UploadApiResponse> {
+  private uploadToCloudinary(
+    file: Express.Multer.File,
+    folder: string,
+  ): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -177,7 +188,10 @@ export class UploadsService {
   private normalizeFolder(folder: string) {
     const normalized = folder?.trim() || DEFAULT_FOLDER;
 
-    if (!/^[a-z0-9][a-z0-9/_-]{0,63}$/i.test(normalized) || normalized.includes('..')) {
+    if (
+      !/^[a-z0-9][a-z0-9/_-]{0,63}$/i.test(normalized) ||
+      normalized.includes('..')
+    ) {
       throw new BadRequestException('Invalid upload folder');
     }
 

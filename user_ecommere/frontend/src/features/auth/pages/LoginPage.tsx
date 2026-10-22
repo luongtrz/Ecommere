@@ -4,7 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
 import { Link } from 'react-router-dom';
@@ -78,13 +85,13 @@ export function LoginPage() {
 
               <h1 className="text-3xl xl:text-4xl 2xl:text-5xl font-black tracking-tight leading-[1.15] text-slate-900">
                 Mua Sắm Tiết Kiệm,{' '}
-                <span className="text-teal-700">
-                  An Tâm Chuẩn Hàng Thái
-                </span>
+                <span className="text-teal-700">An Tâm Chuẩn Hàng Thái</span>
               </h1>
 
               <p className="text-sm xl:text-base text-slate-600 leading-relaxed font-normal">
-                Đăng nhập để nhận ngay ưu đãi thành viên, tích lũy điểm thưởng khi mua chai xịt đuổi chuột ARS, diệt gián kiến, tẩy rửa Magiclean và nước giặt xả Hygiene.
+                Đăng nhập để nhận ngay ưu đãi thành viên, tích lũy điểm thưởng
+                khi mua chai xịt đuổi chuột ARS, diệt gián kiến, tẩy rửa
+                Magiclean và nước giặt xả Hygiene.
               </p>
             </div>
 
@@ -96,8 +103,12 @@ export function LoginPage() {
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900">100% Nội Địa Thái</h4>
-                    <p className="text-[11px] text-slate-500">Đền 200% nếu hàng giả</p>
+                    <h4 className="text-xs font-bold text-slate-900">
+                      100% Nội Địa Thái
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Đền 200% nếu hàng giả
+                    </p>
                   </div>
                 </div>
               </div>
@@ -108,8 +119,12 @@ export function LoginPage() {
                     <Truck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900">Giao Hỏa Tốc COD</h4>
-                    <p className="text-[11px] text-slate-500">Kiểm tra hàng trước khi trả</p>
+                    <h4 className="text-xs font-bold text-slate-900">
+                      Giao Hỏa Tốc COD
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Kiểm tra hàng trước khi trả
+                    </p>
                   </div>
                 </div>
               </div>
@@ -136,8 +151,12 @@ export function LoginPage() {
                   TS
                 </div>
                 <div>
-                  <span className="text-lg font-black text-slate-900">Thai Spray</span>
-                  <span className="text-[10px] text-teal-700 block">Hàng Thái Lan Chính Hãng</span>
+                  <span className="text-lg font-black text-slate-900">
+                    Thai Spray
+                  </span>
+                  <span className="text-[10px] text-teal-700 block">
+                    Hàng Thái Lan Chính Hãng
+                  </span>
                 </div>
               </Link>
               <Link to="/" className="text-xs font-bold text-teal-700">
@@ -155,10 +174,12 @@ export function LoginPage() {
               </p>
             </div>
 
-
             {/* Login Form */}
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="phone"
@@ -193,7 +214,10 @@ export function LoginPage() {
                         <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-600">
                           Mật khẩu
                         </FormLabel>
-                        <Link to="/forgot-password" className="text-xs text-teal-700 hover:underline">
+                        <Link
+                          to="/forgot-password"
+                          className="text-xs text-teal-700 hover:underline"
+                        >
                           Quên mật khẩu?
                         </Link>
                       </div>
@@ -213,7 +237,11 @@ export function LoginPage() {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
                           >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </FormControl>
@@ -242,7 +270,10 @@ export function LoginPage() {
             {/* Bottom Register Prompt */}
             <div className="pt-2 text-center text-sm text-slate-600 border-t border-slate-100">
               Chưa có tài khoản?{' '}
-              <Link to="/register" className="font-bold text-teal-700 hover:text-teal-800 hover:underline">
+              <Link
+                to="/register"
+                className="font-bold text-teal-700 hover:text-teal-800 hover:underline"
+              >
                 Đăng ký thành viên mới
               </Link>
             </div>

@@ -49,7 +49,9 @@ function parseNumber(
   return num;
 }
 
-export function readAgentConfig(env: Record<string, string | undefined>): AgentConfig {
+export function readAgentConfig(
+  env: Record<string, string | undefined>,
+): AgentConfig {
   const apiKey =
     env.OPENAI_API_KEY !== undefined && env.OPENAI_API_KEY.trim() !== ''
       ? env.OPENAI_API_KEY.trim()
@@ -65,7 +67,13 @@ export function readAgentConfig(env: Record<string, string | undefined>): AgentC
       ? env.AGENT_MODEL.trim()
       : 'gpt-4.1-mini';
 
-  const temperature = parseNumber('AGENT_TEMPERATURE', env.AGENT_TEMPERATURE, 0.2, 0, 1);
+  const temperature = parseNumber(
+    'AGENT_TEMPERATURE',
+    env.AGENT_TEMPERATURE,
+    0.2,
+    0,
+    1,
+  );
   const maxOutputTokens = parseInteger(
     'AGENT_MAX_OUTPUT_TOKENS',
     env.AGENT_MAX_OUTPUT_TOKENS,
@@ -80,7 +88,13 @@ export function readAgentConfig(env: Record<string, string | undefined>): AgentC
     5000,
     300000,
   );
-  const maxSteps = parseInteger('AGENT_MAX_STEPS', env.AGENT_MAX_STEPS, 24, 4, 60);
+  const maxSteps = parseInteger(
+    'AGENT_MAX_STEPS',
+    env.AGENT_MAX_STEPS,
+    24,
+    4,
+    60,
+  );
   const maxToolCallsPerTurn = parseInteger(
     'AGENT_MAX_TOOL_CALLS_PER_TURN',
     env.AGENT_MAX_TOOL_CALLS_PER_TURN,
@@ -97,7 +111,10 @@ export function readAgentConfig(env: Record<string, string | undefined>): AgentC
   );
 
   let checkpointSchema = 'agent';
-  if (env.AGENT_CHECKPOINT_SCHEMA !== undefined && env.AGENT_CHECKPOINT_SCHEMA.trim() !== '') {
+  if (
+    env.AGENT_CHECKPOINT_SCHEMA !== undefined &&
+    env.AGENT_CHECKPOINT_SCHEMA.trim() !== ''
+  ) {
     const trimmedSchema = env.AGENT_CHECKPOINT_SCHEMA.trim();
     if (!CHECKPOINT_SCHEMA_REGEX.test(trimmedSchema)) {
       throw new Error(

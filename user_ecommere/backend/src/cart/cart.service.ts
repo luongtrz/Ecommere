@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
@@ -71,7 +75,9 @@ export class CartService {
       const newQuantity = (existingItem?.quantity ?? 0) + quantity;
 
       if (variant.stock < newQuantity) {
-        throw new BadRequestException(`Only ${variant.stock} units available in stock`);
+        throw new BadRequestException(
+          `Only ${variant.stock} units available in stock`,
+        );
       }
 
       if (existingItem) {
@@ -94,7 +100,11 @@ export class CartService {
     return this.getCart(userId);
   }
 
-  async updateCartItem(userId: string, itemId: string, updateCartItemDto: UpdateCartItemDto) {
+  async updateCartItem(
+    userId: string,
+    itemId: string,
+    updateCartItemDto: UpdateCartItemDto,
+  ) {
     const { quantity } = updateCartItemDto;
 
     const cartItem = await this.prisma.cartItem.findUnique({
@@ -114,7 +124,9 @@ export class CartService {
     }
 
     if (cartItem.variant.stock < quantity) {
-      throw new BadRequestException(`Only ${cartItem.variant.stock} units available in stock`);
+      throw new BadRequestException(
+        `Only ${cartItem.variant.stock} units available in stock`,
+      );
     }
 
     await this.prisma.cartItem.update({
@@ -188,7 +200,10 @@ export class CartService {
       where: { code: couponCode.toUpperCase() },
     });
 
-    if (!coupon || !(await canUserUseCoupon(this.prisma, coupon.code, userId))) {
+    if (
+      !coupon ||
+      !(await canUserUseCoupon(this.prisma, coupon.code, userId))
+    ) {
       throw new NotFoundException('Coupon not found');
     }
 
@@ -221,12 +236,16 @@ export class CartService {
       });
 
       if (userUsageCount >= coupon.maxUsesPerUser) {
-        throw new BadRequestException('You have already used this coupon the maximum number of times');
+        throw new BadRequestException(
+          'You have already used this coupon the maximum number of times',
+        );
       }
     }
 
     if (coupon.minOrder != null && currentCart.subtotal < coupon.minOrder) {
-      throw new BadRequestException(`Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`);
+      throw new BadRequestException(
+        `Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`,
+      );
     }
 
     await this.prisma.cart.update({
@@ -297,11 +316,15 @@ export class CartService {
       });
 
       if (!variant) {
-        throw new BadRequestException(`Product variant not found: ${item.variant.sku}`);
+        throw new BadRequestException(
+          `Product variant not found: ${item.variant.sku}`,
+        );
       }
 
       if (!variant.product.active) {
-        throw new BadRequestException(`Product is no longer available: ${variant.product.name}`);
+        throw new BadRequestException(
+          `Product is no longer available: ${variant.product.name}`,
+        );
       }
 
       if (variant.stock < item.quantity) {
@@ -335,6 +358,8 @@ export class CartService {
       }
     }
 
-    throw new BadRequestException('Cart update could not be completed; please retry');
+    throw new BadRequestException(
+      'Cart update could not be completed; please retry',
+    );
   }
 }

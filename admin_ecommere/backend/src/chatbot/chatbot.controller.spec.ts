@@ -85,23 +85,23 @@ interface FakeRequest {
 }
 
 function createFakeRequest(user?: { id: string; role?: string }): FakeRequest {
-  const listeners: Record<string, Function[]> = {};
+  const listeners: Record<string, ((...args: any[]) => any)[]> = {};
   const req: any = {
     headers: {},
     user,
   };
-  req.on = jest.fn((event: string, cb: Function) => {
+  req.on = jest.fn((event: string, cb: (...args: any[]) => any) => {
     listeners[event] = listeners[event] || [];
     listeners[event].push(cb);
     return req;
   });
-  req.removeListener = jest.fn((event: string, cb: Function) => {
+  req.removeListener = jest.fn((event: string, cb: (...args: any[]) => any) => {
     if (listeners[event]) {
       listeners[event] = listeners[event].filter((fn) => fn !== cb);
     }
     return req;
   });
-  req.off = jest.fn((event: string, cb: Function) => {
+  req.off = jest.fn((event: string, cb: (...args: any[]) => any) => {
     if (listeners[event]) {
       listeners[event] = listeners[event].filter((fn) => fn !== cb);
     }
@@ -233,10 +233,13 @@ describe('AdminChatbotController', () => {
         controller.stream(req as any, res as any, body),
       ).rejects.toThrow(NotFoundException);
 
-      expect(mockThreads.assertOwned).toHaveBeenCalledWith('foreign-thread-id', {
-        userId: 'admin-user-1',
-        app: 'ADMIN',
-      });
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith(
+        'foreign-thread-id',
+        {
+          userId: 'admin-user-1',
+          app: 'ADMIN',
+        },
+      );
       expect(mockRunner.run).not.toHaveBeenCalled();
     });
 
@@ -298,7 +301,10 @@ describe('AdminChatbotController', () => {
 
       const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
       const res = createFakeResponse();
-      const body: SendAgentMessageDto = { prompt: 'Tiếp tục', threadId: ownedId };
+      const body: SendAgentMessageDto = {
+        prompt: 'Tiếp tục',
+        threadId: ownedId,
+      };
 
       await controller.stream(req as any, res as any, body);
 
@@ -405,12 +411,9 @@ describe('AdminChatbotController', () => {
       const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
       const res = createFakeResponse();
 
-      await controllerWithoutKey.resume(
-        req as any,
-        res as any,
-        'thread-1',
-        { decisions: [{ callId: 'call_1', approve: true }] },
-      );
+      await controllerWithoutKey.resume(req as any, res as any, 'thread-1', {
+        decisions: [{ callId: 'call_1', approve: true }],
+      });
 
       expect(res.status).toHaveBeenCalledWith(503);
       expect(res.json).toHaveBeenCalledWith({
@@ -582,7 +585,11 @@ describe('AdminChatbotController', () => {
     it("the owner gets the runner's messages in order, and readTranscript is called with the same threadId", async () => {
       const messages = [
         { id: '1', role: 'user', content: 'Thống kê doanh thu' },
-        { id: '2', role: 'assistant', content: 'Doanh thu tháng này đạt 50 triệu.' },
+        {
+          id: '2',
+          role: 'assistant',
+          content: 'Doanh thu tháng này đạt 50 triệu.',
+        },
       ];
       mockThreads.assertOwned.mockResolvedValue({
         id: 'thread-detail-1',
@@ -596,7 +603,10 @@ describe('AdminChatbotController', () => {
       mockRunner.readTranscript.mockResolvedValue(messages);
 
       const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
-      const result = await controller.getMessages(req as any, 'thread-detail-1');
+      const result = await controller.getMessages(
+        req as any,
+        'thread-detail-1',
+      );
 
       expect(mockThreads.assertOwned).toHaveBeenCalledWith('thread-detail-1', {
         userId: 'admin-user-1',
@@ -675,7 +685,9 @@ describe('AdminChatbotController', () => {
         userId: 'admin-user-1',
         app: 'ADMIN',
       });
-      expect(mockRunner.deleteCheckpoints).toHaveBeenCalledWith('thread-del-id');
+      expect(mockRunner.deleteCheckpoints).toHaveBeenCalledWith(
+        'thread-del-id',
+      );
       expect(mockThreads.remove).toHaveBeenCalledWith(
         'thread-del-id',
         {
@@ -698,10 +710,13 @@ describe('AdminChatbotController', () => {
         controller.deleteThread(req as any, 'foreign-thread-id'),
       ).rejects.toThrow(NotFoundException);
 
-      expect(mockThreads.assertOwned).toHaveBeenCalledWith('foreign-thread-id', {
-        userId: 'admin-user-1',
-        app: 'ADMIN',
-      });
+      expect(mockThreads.assertOwned).toHaveBeenCalledWith(
+        'foreign-thread-id',
+        {
+          userId: 'admin-user-1',
+          app: 'ADMIN',
+        },
+      );
       expect(mockRunner.deleteCheckpoints).not.toHaveBeenCalled();
       expect(mockThreads.remove).not.toHaveBeenCalled();
     });
@@ -862,7 +877,9 @@ describe('AdminChatbotController', () => {
     });
 
     it('a repeated close event does not throw and does not write to closed response', async () => {
-      mockThreads.create.mockResolvedValue({ id: 'stream-repeat-close-thread' });
+      mockThreads.create.mockResolvedValue({
+        id: 'stream-repeat-close-thread',
+      });
       mockRunner.run.mockImplementation(
         async (params: { signal?: AbortSignal; sink: any }) => {
           params.sink({
@@ -894,11 +911,9 @@ describe('AdminChatbotController', () => {
     it('normal end of stream clears interval once without duplicate cleanup', async () => {
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
       mockThreads.create.mockResolvedValue({ id: 'stream-normal-thread' });
-      mockRunner.run.mockImplementation(
-        async (params: { sink: any }) => {
-          params.sink({ event: 'token', data: { text: 'done' } });
-        },
-      );
+      mockRunner.run.mockImplementation(async (params: { sink: any }) => {
+        params.sink({ event: 'token', data: { text: 'done' } });
+      });
 
       const req = createFakeRequest({ id: 'admin-user-1', role: 'ADMIN' });
       const res = createFakeResponse();

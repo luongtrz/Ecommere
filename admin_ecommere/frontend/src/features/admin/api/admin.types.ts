@@ -45,7 +45,15 @@ export const recentOrderSchema = z.object({
   orderNumber: z.string(),
   customerName: z.string(),
   totalAmount: z.number(),
-  status: z.enum(['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED', 'DELIVERED', 'CANCELED', 'REFUNDED']),
+  status: z.enum([
+    'PENDING_PAYMENT',
+    'PAID',
+    'PACKING',
+    'SHIPPED',
+    'DELIVERED',
+    'CANCELED',
+    'REFUNDED',
+  ]),
   createdAt: z.string().transform((val) => new Date(val)),
 });
 

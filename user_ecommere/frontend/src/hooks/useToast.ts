@@ -9,7 +9,7 @@ export function useToast() {
     // In production, this would trigger a toast UI component
     const prefix = type.toUpperCase();
     console.log(`[${prefix}] ${message}`);
-    
+
     // You can also use alert for critical errors
     if (type === 'error') {
       alert(message);

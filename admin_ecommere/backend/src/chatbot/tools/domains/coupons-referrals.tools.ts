@@ -121,10 +121,13 @@ export function createCouponsReferralsTools(
 
       if (args.minOrder !== undefined) dto.minOrder = args.minOrder;
       if (args.maxDiscount !== undefined) dto.maxDiscount = args.maxDiscount;
-      if (args.validFrom !== undefined) dto.validFrom = new Date(args.validFrom);
-      if (args.validUntil !== undefined) dto.validUntil = new Date(args.validUntil);
+      if (args.validFrom !== undefined)
+        dto.validFrom = new Date(args.validFrom);
+      if (args.validUntil !== undefined)
+        dto.validUntil = new Date(args.validUntil);
       if (args.maxUses !== undefined) dto.maxUses = args.maxUses;
-      if (args.maxUsesPerUser !== undefined) dto.maxUsesPerUser = args.maxUsesPerUser;
+      if (args.maxUsesPerUser !== undefined)
+        dto.maxUsesPerUser = args.maxUsesPerUser;
 
       return deps.coupons.create(dto);
     },
@@ -183,10 +186,13 @@ export function createCouponsReferralsTools(
       if (args.value !== undefined) fields.value = args.value;
       if (args.minOrder !== undefined) fields.minOrder = args.minOrder;
       if (args.maxDiscount !== undefined) fields.maxDiscount = args.maxDiscount;
-      if (args.validFrom !== undefined) fields.validFrom = new Date(args.validFrom);
-      if (args.validUntil !== undefined) fields.validUntil = new Date(args.validUntil);
+      if (args.validFrom !== undefined)
+        fields.validFrom = new Date(args.validFrom);
+      if (args.validUntil !== undefined)
+        fields.validUntil = new Date(args.validUntil);
       if (args.maxUses !== undefined) fields.maxUses = args.maxUses;
-      if (args.maxUsesPerUser !== undefined) fields.maxUsesPerUser = args.maxUsesPerUser;
+      if (args.maxUsesPerUser !== undefined)
+        fields.maxUsesPerUser = args.maxUsesPerUser;
       if (args.active !== undefined) fields.active = args.active;
 
       if (Object.keys(fields).length === 0) {
@@ -283,18 +289,29 @@ export function createCouponsReferralsTools(
       } = {};
 
       if (args.active !== undefined) fields.active = args.active;
-      if (args.referrerCouponType !== undefined) fields.referrerCouponType = args.referrerCouponType;
-      if (args.referrerCouponValue !== undefined) fields.referrerCouponValue = args.referrerCouponValue;
-      if (args.referrerMaxDiscount !== undefined) fields.referrerMaxDiscount = args.referrerMaxDiscount;
-      if (args.refereeCouponType !== undefined) fields.refereeCouponType = args.refereeCouponType;
-      if (args.refereeCouponValue !== undefined) fields.refereeCouponValue = args.refereeCouponValue;
-      if (args.refereeMaxDiscount !== undefined) fields.refereeMaxDiscount = args.refereeMaxDiscount;
-      if (args.minOrderForCoupon !== undefined) fields.minOrderForCoupon = args.minOrderForCoupon;
-      if (args.couponValidDays !== undefined) fields.couponValidDays = args.couponValidDays;
-      if (args.maxReferralsPerUser !== undefined) fields.maxReferralsPerUser = args.maxReferralsPerUser;
+      if (args.referrerCouponType !== undefined)
+        fields.referrerCouponType = args.referrerCouponType;
+      if (args.referrerCouponValue !== undefined)
+        fields.referrerCouponValue = args.referrerCouponValue;
+      if (args.referrerMaxDiscount !== undefined)
+        fields.referrerMaxDiscount = args.referrerMaxDiscount;
+      if (args.refereeCouponType !== undefined)
+        fields.refereeCouponType = args.refereeCouponType;
+      if (args.refereeCouponValue !== undefined)
+        fields.refereeCouponValue = args.refereeCouponValue;
+      if (args.refereeMaxDiscount !== undefined)
+        fields.refereeMaxDiscount = args.refereeMaxDiscount;
+      if (args.minOrderForCoupon !== undefined)
+        fields.minOrderForCoupon = args.minOrderForCoupon;
+      if (args.couponValidDays !== undefined)
+        fields.couponValidDays = args.couponValidDays;
+      if (args.maxReferralsPerUser !== undefined)
+        fields.maxReferralsPerUser = args.maxReferralsPerUser;
 
       if (Object.keys(fields).length === 0) {
-        throw new ToolError('Cần ít nhất một trường để cập nhật cấu hình giới thiệu');
+        throw new ToolError(
+          'Cần ít nhất một trường để cập nhật cấu hình giới thiệu',
+        );
       }
 
       return deps.referrals.updateConfig(fields);

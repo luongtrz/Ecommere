@@ -89,10 +89,27 @@ export class CheckoutDto {
   @IsString()
   paymentMethod?: string;
 
-  @ApiProperty({ example: { fullName: 'Nguyễn Văn A', phone: '0912345678', address: '123 Đường ABC', ward: 'Phường X', district: 'Quận Y', province: 'TP.HCM' }, required: false })
+  @ApiProperty({
+    example: {
+      fullName: 'Nguyễn Văn A',
+      phone: '0912345678',
+      address: '123 Đường ABC',
+      ward: 'Phường X',
+      district: 'Quận Y',
+      province: 'TP.HCM',
+    },
+    required: false,
+  })
   @IsOptional()
   @IsObject()
-  shippingAddress?: { fullName: string; phone: string; address: string; ward: string; district: string; province: string };
+  shippingAddress?: {
+    fullName: string;
+    phone: string;
+    address: string;
+    ward: string;
+    district: string;
+    province: string;
+  };
 
   @ApiProperty({ example: 'STANDARD', required: false })
   @IsOptional()

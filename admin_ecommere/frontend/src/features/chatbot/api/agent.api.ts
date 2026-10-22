@@ -34,7 +34,7 @@ export interface AgentThreadSummary {
 export function streamTurn(
   body: AgentTurnBody,
   onMessage: (message: SseMessage) => void,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<void> {
   return streamAgentRequest('/admin/chatbot/stream', body, onMessage, options);
 }
@@ -43,13 +43,13 @@ export function resumeTurn(
   threadId: string,
   decisions: AgentDecision[],
   onMessage: (message: SseMessage) => void,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<void> {
   return streamAgentRequest(
     `/admin/chatbot/threads/${encodeURIComponent(threadId)}/resume`,
     { decisions },
     onMessage,
-    options
+    options,
   );
 }
 
@@ -79,21 +79,21 @@ export const agentApi = {
 
   async getThread(threadId: string): Promise<AgentThreadSummary> {
     const response = await apiClient.get(
-      `/admin/chatbot/threads/${encodeURIComponent(threadId)}`
+      `/admin/chatbot/threads/${encodeURIComponent(threadId)}`,
     );
     return (response.data.data ?? response.data) as AgentThreadSummary;
   },
 
   async getTranscript(threadId: string): Promise<AgentTranscriptMessage[]> {
     const response = await apiClient.get(
-      `/admin/chatbot/threads/${encodeURIComponent(threadId)}/messages`
+      `/admin/chatbot/threads/${encodeURIComponent(threadId)}/messages`,
     );
     return (response.data.data ?? response.data) as AgentTranscriptMessage[];
   },
 
   async deleteThread(threadId: string): Promise<void> {
     const response = await apiClient.delete(
-      `/admin/chatbot/threads/${encodeURIComponent(threadId)}`
+      `/admin/chatbot/threads/${encodeURIComponent(threadId)}`,
     );
     return response.data.data ?? response.data;
   },

@@ -54,19 +54,30 @@ export class ReportsService {
     }
 
     if (from > to) {
-      throw new BadRequestException('Ngày bắt đầu không được lớn hơn ngày kết thúc');
+      throw new BadRequestException(
+        'Ngày bắt đầu không được lớn hơn ngày kết thúc',
+      );
     }
 
-    const diffDays = Math.round((toDate.getTime() - fromDate.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+    const diffDays =
+      Math.round(
+        (toDate.getTime() - fromDate.getTime()) / (24 * 60 * 60 * 1000),
+      ) + 1;
     if (diffDays > 366) {
-      throw new BadRequestException('Khoảng thời gian không được vượt quá 366 ngày');
+      throw new BadRequestException(
+        'Khoảng thời gian không được vượt quá 366 ngày',
+      );
     }
 
     // Time zone Asia/Ho_Chi_Minh is UTC+7 with no DST.
     // Range is [from 00:00:00.000 in VN time, to 23:59:59.999 in VN time].
     // Shift by -7 hours to obtain UTC range for DB query.
-    const startDateUtc = new Date(Date.UTC(fromY, fromM - 1, fromD, 0, 0, 0, 0) - 7 * 60 * 60 * 1000);
-    const endDateUtc = new Date(Date.UTC(toY, toM - 1, toD, 23, 59, 59, 999) - 7 * 60 * 60 * 1000);
+    const startDateUtc = new Date(
+      Date.UTC(fromY, fromM - 1, fromD, 0, 0, 0, 0) - 7 * 60 * 60 * 1000,
+    );
+    const endDateUtc = new Date(
+      Date.UTC(toY, toM - 1, toD, 23, 59, 59, 999) - 7 * 60 * 60 * 1000,
+    );
 
     return {
       fromY,
@@ -172,7 +183,15 @@ export class ReportsService {
     const { startDateUtc, endDateUtc, fromY, fromM, fromD, toY, toM, toD } =
       this.parseAndValidateDateRange(from, to);
 
-    const periods = this.generatePeriods(fromY, fromM, fromD, toY, toM, toD, groupBy);
+    const periods = this.generatePeriods(
+      fromY,
+      fromM,
+      fromD,
+      toY,
+      toM,
+      toD,
+      groupBy,
+    );
 
     // Revenue orders: status in PAID, PACKING, SHIPPED, DELIVERED
     const statuses = [
@@ -238,7 +257,10 @@ export class ReportsService {
     const { from, to } = query;
     const limit = query.limit ?? 5;
 
-    const { startDateUtc, endDateUtc } = this.parseAndValidateDateRange(from, to);
+    const { startDateUtc, endDateUtc } = this.parseAndValidateDateRange(
+      from,
+      to,
+    );
 
     if (limit <= 0) {
       return [];

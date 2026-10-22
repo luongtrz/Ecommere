@@ -265,8 +265,7 @@ export function createReviewsInventoryTools(
   const getStockHistoryTool: AgentToolDef = {
     name: 'get_stock_history',
     domain: 'inventory',
-    description:
-      'Xem lịch sử biến động tồn kho của một biến thể sản phẩm.',
+    description: 'Xem lịch sử biến động tồn kho của một biến thể sản phẩm.',
     schema: z
       .object({
         variantId: z.string().min(1).max(64),
@@ -297,8 +296,7 @@ export function createReviewsInventoryTools(
   const stockAddTool: AgentToolDef = {
     name: 'stock_add',
     domain: 'inventory',
-    description:
-      'Nhập thêm tồn kho cho một biến thể (cộng thêm số lượng).',
+    description: 'Nhập thêm tồn kho cho một biến thể (cộng thêm số lượng).',
     schema: z
       .object({
         variantId: z.string().min(1).max(64),

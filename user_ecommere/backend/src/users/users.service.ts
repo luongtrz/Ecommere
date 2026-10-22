@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -46,7 +50,10 @@ export class UsersService {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('Số điện thoại đã được đăng ký');
       }
 
@@ -57,10 +64,7 @@ export class UsersService {
   async getAddresses(userId: string) {
     return this.prisma.address.findMany({
       where: { userId },
-      orderBy: [
-        { isDefault: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   }
 
@@ -86,7 +90,11 @@ export class UsersService {
     });
   }
 
-  async updateAddress(userId: string, addressId: string, updateAddressDto: UpdateAddressDto) {
+  async updateAddress(
+    userId: string,
+    addressId: string,
+    updateAddressDto: UpdateAddressDto,
+  ) {
     return this.runSerializableTransaction(async (tx) => {
       const address = await tx.address.findFirst({
         where: { id: addressId, userId },
@@ -148,6 +156,8 @@ export class UsersService {
       }
     }
 
-    throw new BadRequestException('Address update could not be completed; please retry');
+    throw new BadRequestException(
+      'Address update could not be completed; please retry',
+    );
   }
 }

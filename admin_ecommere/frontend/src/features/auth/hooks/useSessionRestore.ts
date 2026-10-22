@@ -27,7 +27,7 @@ export function useSessionRestore() {
 
         // Store new access token in memory
         authToken.set(actualData.accessToken);
-        
+
         setIsAuthenticated(true);
         console.log('✅ Session restored successfully');
       } catch (error) {

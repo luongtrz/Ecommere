@@ -14,7 +14,10 @@ export class ShippingController {
   @ApiQuery({ name: 'province', example: 'Bangkok' })
   @ApiQuery({ name: 'weight', example: 1, required: false })
   @ApiResponse({ status: 200 })
-  async calculateFee(@Query('province') province: string, @Query('weight') weight?: number) {
+  async calculateFee(
+    @Query('province') province: string,
+    @Query('weight') weight?: number,
+  ) {
     const mockOrigin = {
       province: 'Bangkok',
       district: 'Chatuchak',
@@ -29,7 +32,11 @@ export class ShippingController {
       line1: 'Customer address',
     };
 
-    return this.shippingService.calculateFee(mockOrigin, destination, weight ? parseFloat(weight.toString()) : 1);
+    return this.shippingService.calculateFee(
+      mockOrigin,
+      destination,
+      weight ? parseFloat(weight.toString()) : 1,
+    );
   }
 
   @Public()

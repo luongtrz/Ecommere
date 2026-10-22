@@ -1,5 +1,19 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dtos/create-review.dto';
 import { UpdateReviewDto } from './dtos/update-review.dto';
@@ -18,9 +32,14 @@ export class ReviewsController {
 
   @Post()
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create product review (only for purchased products)' })
+  @ApiOperation({
+    summary: 'Create product review (only for purchased products)',
+  })
   @ApiResponse({ status: 201, type: ReviewEntity })
-  async createReview(@CurrentUser('id') userId: string, @Body() createReviewDto: CreateReviewDto) {
+  async createReview(
+    @CurrentUser('id') userId: string,
+    @Body() createReviewDto: CreateReviewDto,
+  ) {
     return this.reviewsService.createReview(userId, createReviewDto);
   }
 
@@ -28,7 +47,10 @@ export class ReviewsController {
   @Get('product/:productId')
   @ApiOperation({ summary: 'Get product reviews' })
   @ApiResponse({ status: 200, type: [ReviewEntity] })
-  async getProductReviews(@Param('productId') productId: string, @Query() filterDto: ReviewFilterDto) {
+  async getProductReviews(
+    @Param('productId') productId: string,
+    @Query() filterDto: ReviewFilterDto,
+  ) {
     return this.reviewsService.getProductReviews(productId, filterDto);
   }
 
@@ -44,7 +66,10 @@ export class ReviewsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get my reviews' })
   @ApiResponse({ status: 200, type: [ReviewEntity] })
-  async getMyReviews(@CurrentUser('id') userId: string, @Query() paginationDto: PaginationDto) {
+  async getMyReviews(
+    @CurrentUser('id') userId: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
     return this.reviewsService.getMyReviews(userId, paginationDto);
   }
 
@@ -64,7 +89,10 @@ export class ReviewsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete my review' })
   @ApiResponse({ status: 200 })
-  async deleteReview(@CurrentUser('id') userId: string, @Param('reviewId') reviewId: string) {
+  async deleteReview(
+    @CurrentUser('id') userId: string,
+    @Param('reviewId') reviewId: string,
+  ) {
     return this.reviewsService.deleteReview(userId, reviewId);
   }
 

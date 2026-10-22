@@ -15,9 +15,9 @@ export function CategoryNav() {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  const rootCategories = categories?.filter(c => !c.parentId) || [];
+  const rootCategories = categories?.filter((c) => !c.parentId) || [];
   const subCategories = activeCategory
-    ? categories?.filter(c => c.parentId === activeCategory.id) || []
+    ? categories?.filter((c) => c.parentId === activeCategory.id) || []
     : [];
 
   const isActive = (path: string) => {
@@ -27,7 +27,8 @@ export function CategoryNav() {
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
       setShowLeftArrow(scrollLeft > 0);
       setShowRightArrow(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
     }
@@ -110,10 +111,10 @@ export function CategoryNav() {
             <Link
               to="/catalog"
               className={cn(
-                "relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-teal-600 after:transition-transform after:duration-300",
-                isActive('/catalog') 
-                  ? "text-teal-700 after:scale-x-100" 
-                  : "text-slate-600 hover:text-teal-700 after:scale-x-0 hover:after:scale-x-100"
+                'relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-teal-600 after:transition-transform after:duration-300',
+                isActive('/catalog')
+                  ? 'text-teal-700 after:scale-x-100'
+                  : 'text-slate-600 hover:text-teal-700 after:scale-x-0 hover:after:scale-x-100',
               )}
               onMouseEnter={() => setActiveCategory(null)}
             >
@@ -126,10 +127,11 @@ export function CategoryNav() {
               <Link
                 to={`/c/${category.slug}`}
                 className={cn(
-                  "relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-teal-600 after:transition-transform after:duration-300",
-                  isActive(`/c/${category.slug}`) || activeCategory?.id === category.id
-                    ? "text-teal-700 after:scale-x-100"
-                    : "text-slate-600 hover:text-teal-700 after:scale-x-0 hover:after:scale-x-100"
+                  'relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-teal-600 after:transition-transform after:duration-300',
+                  isActive(`/c/${category.slug}`) ||
+                    activeCategory?.id === category.id
+                    ? 'text-teal-700 after:scale-x-100'
+                    : 'text-slate-600 hover:text-teal-700 after:scale-x-0 hover:after:scale-x-100',
                 )}
                 onMouseEnter={(e) => handleMouseEnter(category, e)}
               >
@@ -144,10 +146,10 @@ export function CategoryNav() {
       <div
         style={{ left: menuPosition }}
         className={cn(
-          "absolute top-full border border-slate-200 bg-white rounded-2xl shadow-xl transition-all duration-150 min-w-[210px] z-10 p-1.5 mt-1",
+          'absolute top-full border border-slate-200 bg-white rounded-2xl shadow-xl transition-all duration-150 min-w-[210px] z-10 p-1.5 mt-1',
           activeCategory
-            ? "opacity-100 visible translate-y-0"
-            : "opacity-0 invisible -translate-y-1 pointer-events-none"
+            ? 'opacity-100 visible translate-y-0'
+            : 'opacity-0 invisible -translate-y-1 pointer-events-none',
         )}
       >
         {activeCategory && (

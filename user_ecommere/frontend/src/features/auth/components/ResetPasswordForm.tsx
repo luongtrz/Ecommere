@@ -3,14 +3,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 interface ResetPasswordFormProps {
   onSubmit: (data: ResetPasswordInput) => void;
   isLoading?: boolean;
 }
 
-export function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
+export function ResetPasswordForm({
+  onSubmit,
+  isLoading,
+}: ResetPasswordFormProps) {
   const form = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {

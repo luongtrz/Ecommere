@@ -1,5 +1,18 @@
-import { Controller, Get, Patch, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -19,14 +32,22 @@ export class UsersController {
 
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Profile retrieved', type: UserEntity })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile retrieved',
+    type: UserEntity,
+  })
   async getProfile(@CurrentUser('id') userId: string) {
     return this.usersService.getProfile(userId);
   }
 
   @Patch('me')
   @ApiOperation({ summary: 'Update current user profile' })
-  @ApiResponse({ status: 200, description: 'Profile updated', type: UserEntity })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile updated',
+    type: UserEntity,
+  })
   async updateProfile(
     @CurrentUser('id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -36,14 +57,22 @@ export class UsersController {
 
   @Get('addresses')
   @ApiOperation({ summary: 'Get user addresses' })
-  @ApiResponse({ status: 200, description: 'Addresses retrieved', type: [AddressEntity] })
+  @ApiResponse({
+    status: 200,
+    description: 'Addresses retrieved',
+    type: [AddressEntity],
+  })
   async getAddresses(@CurrentUser('id') userId: string) {
     return this.usersService.getAddresses(userId);
   }
 
   @Post('addresses')
   @ApiOperation({ summary: 'Create new address' })
-  @ApiResponse({ status: 201, description: 'Address created', type: AddressEntity })
+  @ApiResponse({
+    status: 201,
+    description: 'Address created',
+    type: AddressEntity,
+  })
   async createAddress(
     @CurrentUser('id') userId: string,
     @Body() createAddressDto: CreateAddressDto,
@@ -53,7 +82,11 @@ export class UsersController {
 
   @Patch('addresses/:id')
   @ApiOperation({ summary: 'Update address' })
-  @ApiResponse({ status: 200, description: 'Address updated', type: AddressEntity })
+  @ApiResponse({
+    status: 200,
+    description: 'Address updated',
+    type: AddressEntity,
+  })
   async updateAddress(
     @CurrentUser('id') userId: string,
     @Param('id') addressId: string,

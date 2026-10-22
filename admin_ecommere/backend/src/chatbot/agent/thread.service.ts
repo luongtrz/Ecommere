@@ -1,5 +1,9 @@
 import { randomUUID } from 'crypto';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { AgentThread } from '@prisma/client';
 

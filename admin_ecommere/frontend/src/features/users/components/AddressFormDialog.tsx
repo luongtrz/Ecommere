@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +18,11 @@ interface AddressFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDialogProps) {
+export function AddressFormDialog({
+  address,
+  open,
+  onOpenChange,
+}: AddressFormDialogProps) {
   const isEdit = !!address;
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
@@ -75,7 +84,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -86,7 +97,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 id="fullName"
                 required
                 value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
                 placeholder="Nguyễn Văn A"
               />
             </div>
@@ -98,7 +111,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 placeholder="0912345678"
               />
             </div>
@@ -110,7 +125,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
               id="line1"
               required
               value={formData.line1}
-              onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, line1: e.target.value })
+              }
               placeholder="Số nhà, tên đường..."
             />
           </div>
@@ -122,7 +139,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 id="ward"
                 required
                 value={formData.ward}
-                onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, ward: e.target.value })
+                }
                 placeholder="Phường Bến Nghé"
               />
             </div>
@@ -133,7 +152,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 id="district"
                 required
                 value={formData.district}
-                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, district: e.target.value })
+                }
                 placeholder="Quận 1"
               />
             </div>
@@ -144,7 +165,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 id="province"
                 required
                 value={formData.province}
-                onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, province: e.target.value })
+                }
                 placeholder="Hồ Chí Minh"
               />
             </div>
@@ -164,7 +187,11 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Hủy
             </Button>
             <Button

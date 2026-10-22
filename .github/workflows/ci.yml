@@ -1,0 +1,427 @@
+# ==============================================================================
+# CI Workflow for Thai Spray Shop
+#
+# Generic CI steps intentionally NOT included yet (repo lacks infrastructure):
+# - Frontend lint: No ESLint configuration file exists in frontend apps.
+# - Frontend accessibility (a11y) tests: No axe/a11y test infrastructure configured.
+# - Frontend component/unit tests: No test runner (Vitest/Jest) or tests exist for frontends.
+# - Contract testing (Pact): No consumer/provider contract test infrastructure configured.
+# - Database migration tests (Testcontainers): No isolated DB testcontainer setup.
+# - Visual regression testing: No visual regression tools configured.
+# - End-to-end testing (Playwright E2E): No E2E test runner or browser test suites configured.
+# ==============================================================================
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUNDLE_MAX_KB: 300
+
+jobs:
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  backend:
+    name: backend (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - user_ecommere
+          - admin_ecommere
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}/backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.app }}/backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Validate Prisma schema
+        env:
+          # prisma validate reads env("DATABASE_URL") but never connects to it
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+        run: npx prisma validate
+
+      - name: Lint
+        run: npm run lint -- --max-warnings 0
+
+      - name: Type check
+        run: npx tsc --noEmit -p tsconfig.json
+
+      # Runs jest with coverage; the 90% global threshold in jest.config.ts fails this step below 90%
+      - name: Run unit tests with coverage gate
+        run: npm run test:cov
+
+      - name: Build backend
+        run: npm run build
+
+      # Non-blocking security audit to report high-severity vulnerabilities without failing the pipeline
+      - name: Security audit (npm audit)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+  # Applies the Prisma schema to an empty Postgres and runs the seed, so schema or seed breakage fails here
+  db-schema:
+    name: db-schema (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - user_ecommere
+          - admin_ecommere
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}/backend
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      SEED_DATABASE: 'true'
+      SEED_ADMIN_PASSWORD: ci-admin-${{ github.run_id }}
+      SEED_USER_PASSWORD: ci-user-${{ github.run_id }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.app }}/backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Apply schema to an empty database
+        run: npx prisma db push --skip-generate
+
+      - name: Seed database
+        run: npm run prisma:seed
+
+  frontend:
+    name: frontend (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - user_ecommere
+          - admin_ecommere
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}/frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.app }}/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Prettier check
+        run: npx prettier --check src
+
+      - name: Type check
+        run: npx tsc --noEmit -p tsconfig.json
+
+      # Vitest runs with coverage; the 90% global threshold in vite.config.ts fails this step below 90%
+      - name: Unit tests with coverage gate
+        run: npm run test:cov
+
+      - name: Build frontend
+        env:
+          VITE_API_BASE_URL: https://api.example.com
+        run: npm run build
+
+      - name: Check bundle budget
+        run: |
+          max_bytes=$(( BUNDLE_MAX_KB * 1024 ))
+          echo "Bundle budget limit: ${BUNDLE_MAX_KB} KB (${max_bytes} bytes)"
+          failed=0
+          for file in dist/assets/*.js; do
+            if [ ! -f "$file" ]; then
+              echo "Error: No JavaScript assets found matching dist/assets/*.js"
+              exit 1
+            fi
+            size=$(gzip -c "$file" | wc -c)
+            echo "File: $file - Gzip size: ${size} bytes"
+            if [ "$size" -gt "$max_bytes" ]; then
+              echo "Error: $file (${size} bytes) exceeds budget of ${max_bytes} bytes (${BUNDLE_MAX_KB} KB)"
+              failed=1
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "Bundle budget check failed."
+            exit 1
+          fi
+
+      # Non-blocking security audit to report high-severity vulnerabilities without failing the pipeline
+      - name: Security audit (npm audit)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+  trivy-fs:
+    name: trivy-fs (${{ matrix.dir }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir:
+          - user_ecommere/backend
+          - admin_ecommere/backend
+          - user_ecommere/frontend
+          - admin_ecommere/frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Report HIGH and CRITICAL dependency vulnerabilities from the lockfile (never fails the job)
+      - name: Trivy dependency scan (report)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: ${{ matrix.dir }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '0'
+
+      # Fail the job only on CRITICAL vulnerabilities that have a fix available
+      - name: Trivy dependency scan (block on CRITICAL)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: ${{ matrix.dir }}
+          scanners: vuln
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
+  # Logs in through the real UI against a live backend, DB and frontend preview (user shop only)
+  e2e:
+    name: e2e (user_ecommere)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      SEED_DATABASE: 'true'
+      SEED_ADMIN_PASSWORD: ci-admin-${{ github.run_id }}
+      SEED_USER_PASSWORD: ci-user-${{ github.run_id }}
+      E2E_USER_PASSWORD: ci-user-${{ github.run_id }}
+      JWT_ACCESS_SECRET: ci-access-${{ github.run_id }}-value
+      JWT_REFRESH_SECRET: ci-refresh-${{ github.run_id }}-value
+      CORS_ORIGIN: http://localhost:4173
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install backend dependencies
+        working-directory: user_ecommere/backend
+        run: npm ci
+
+      - name: Generate Prisma client, apply schema and seed
+        working-directory: user_ecommere/backend
+        run: |
+          npm run prisma:generate
+          npx prisma db push --skip-generate
+          npm run prisma:seed
+
+      - name: Build backend
+        working-directory: user_ecommere/backend
+        run: npm run build
+
+      - name: Start backend
+        working-directory: user_ecommere/backend
+        run: |
+          PORT=4000 node dist/src/main.js > backend.log 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:4000/api/products && exit 0; sleep 2; done
+          cat backend.log
+          exit 1
+
+      - name: Install frontend dependencies
+        working-directory: user_ecommere/frontend
+        run: npm ci
+
+      - name: Build frontend against the local backend
+        working-directory: user_ecommere/frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:4000
+        run: npm run build
+
+      - name: Serve frontend
+        working-directory: user_ecommere/frontend
+        run: |
+          npx vite preview --port 4173 --strictPort > preview.log 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:4173/ && exit 0; sleep 2; done
+          cat preview.log
+          exit 1
+
+      - name: Install Playwright browser
+        working-directory: user_ecommere/frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright smoke tests
+        working-directory: user_ecommere/frontend
+        env:
+          CI: 'true'
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            user_ecommere/frontend/playwright-report
+            user_ecommere/frontend/test-results
+          if-no-files-found: ignore
+
+  docker:
+    name: docker (${{ matrix.name }})
+    needs:
+      - backend
+      - frontend
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: user_ecommere/backend
+            app: user_ecommere
+            target: backend
+            tier: backend
+            dir: user_ecommere/backend
+          - name: admin_ecommere/backend
+            app: admin_ecommere
+            target: backend
+            tier: backend
+            dir: admin_ecommere/backend
+          - name: user_ecommere/frontend
+            app: user_ecommere
+            target: frontend
+            tier: frontend
+            dir: user_ecommere/frontend
+          - name: admin_ecommere/frontend
+            app: admin_ecommere
+            target: frontend
+            tier: frontend
+            dir: admin_ecommere/frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.dir }}
+          push: false
+          load: true
+          tags: local/${{ matrix.app }}-${{ matrix.target }}:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Trivy scans the built image (base OS packages and app dependencies); CRITICAL with a fix fails the job
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: local/${{ matrix.app }}-${{ matrix.target }}:ci
+          scanners: vuln
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ${{ matrix.dir }}
+          format: spdx-json
+          output-file: sbom-${{ matrix.app }}-${{ matrix.target }}.spdx.json
+          upload-artifact: false
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.app }}-${{ matrix.target }}
+          path: sbom-${{ matrix.app }}-${{ matrix.target }}.spdx.json

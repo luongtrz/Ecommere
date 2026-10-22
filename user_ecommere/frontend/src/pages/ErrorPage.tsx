@@ -16,7 +16,9 @@ export function ErrorPage() {
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <AlertCircle className="h-10 w-10" />
               </div>
-              <h1 className="text-3xl font-bold mb-4">Oops! Đã có lỗi xảy ra</h1>
+              <h1 className="text-3xl font-bold mb-4">
+                Oops! Đã có lỗi xảy ra
+              </h1>
               <p className="text-xl text-red-100 max-w-2xl mx-auto">
                 Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật
               </p>
@@ -30,7 +32,9 @@ export function ErrorPage() {
               <AlertCircle className="h-12 w-12 text-red-600" />
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Không thể tải trang</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Không thể tải trang
+            </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
               Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn.
               Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.
@@ -67,10 +71,14 @@ export function ErrorPage() {
                 <span className="font-medium">Cần hỗ trợ?</span>
               </div>
               <p className="text-sm text-gray-500 mb-4">
-                Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của chúng tôi
+                Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của
+                chúng tôi
               </p>
               <Button variant="ghost" asChild>
-                <Link to="/support" className="text-primary hover:text-primary/90">
+                <Link
+                  to="/support"
+                  className="text-primary hover:text-primary/90"
+                >
                   Liên hệ hỗ trợ
                 </Link>
               </Button>
@@ -84,24 +92,36 @@ export function ErrorPage() {
                 <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Home className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Về trang chủ</h3>
-                <p className="text-sm text-gray-600">Quay lại trang chủ để tiếp tục mua sắm</p>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Về trang chủ
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Quay lại trang chủ để tiếp tục mua sắm
+                </p>
               </div>
 
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <RefreshCw className="h-6 w-6 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Tải lại trang</h3>
-                <p className="text-sm text-gray-600">Thử tải lại trang để khắc phục lỗi</p>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Tải lại trang
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Thử tải lại trang để khắc phục lỗi
+                </p>
               </div>
 
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <MessageCircle className="h-6 w-6 text-purple-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Liên hệ hỗ trợ</h3>
-                <p className="text-sm text-gray-600">Nhận trợ giúp từ đội ngũ của chúng tôi</p>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Liên hệ hỗ trợ
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Nhận trợ giúp từ đội ngũ của chúng tôi
+                </p>
               </div>
             </div>
           </div>

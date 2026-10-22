@@ -66,10 +66,12 @@ export class AuditService {
 
   async record(entry: ToolAuditEntry): Promise<void> {
     try {
-      const redacted = entry.args !== undefined ? redactArgs(entry.args) : undefined;
-      const args = (redacted === undefined || redacted === null)
-        ? Prisma.JsonNull
-        : (redacted as Prisma.InputJsonValue);
+      const redacted =
+        entry.args !== undefined ? redactArgs(entry.args) : undefined;
+      const args =
+        redacted === undefined || redacted === null
+          ? Prisma.JsonNull
+          : (redacted as Prisma.InputJsonValue);
 
       await this.prisma.agentToolLog.create({
         data: {
@@ -81,17 +83,21 @@ export class AuditService {
           risk: entry.risk,
           status: entry.status,
           args,
-          resultSummary: entry.resultSummary !== undefined && entry.resultSummary !== null
-            ? entry.resultSummary.slice(0, 500)
-            : null,
-          error: entry.error !== undefined && entry.error !== null
-            ? entry.error.slice(0, 500)
-            : null,
+          resultSummary:
+            entry.resultSummary !== undefined && entry.resultSummary !== null
+              ? entry.resultSummary.slice(0, 500)
+              : null,
+          error:
+            entry.error !== undefined && entry.error !== null
+              ? entry.error.slice(0, 500)
+              : null,
           durationMs: entry.durationMs ?? null,
         },
       });
     } catch (error) {
-      this.logger.warn(`Failed to record tool audit log: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `Failed to record tool audit log: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

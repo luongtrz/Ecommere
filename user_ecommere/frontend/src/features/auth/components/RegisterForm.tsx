@@ -4,8 +4,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { User, Phone, Mail, Lock, Eye, EyeOff, Tag, ArrowRight } from 'lucide-react';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  User,
+  Phone,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Tag,
+  ArrowRight,
+} from 'lucide-react';
 
 interface RegisterFormProps {
   onSubmit: (data: RegisterInput) => void;
@@ -13,7 +29,11 @@ interface RegisterFormProps {
   defaultReferralCode?: string;
 }
 
-export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: RegisterFormProps) {
+export function RegisterForm({
+  onSubmit,
+  isLoading,
+  defaultReferralCode,
+}: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -37,7 +57,9 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-slate-700">Họ và tên</FormLabel>
+              <FormLabel className="text-xs font-bold text-slate-700">
+                Họ và tên
+              </FormLabel>
               <FormControl>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -60,7 +82,9 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-slate-700">Số điện thoại</FormLabel>
+              <FormLabel className="text-xs font-bold text-slate-700">
+                Số điện thoại
+              </FormLabel>
               <FormControl>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -85,7 +109,10 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs font-bold text-slate-700">
-                Email <span className="text-slate-400 font-normal">(không bắt buộc)</span>
+                Email{' '}
+                <span className="text-slate-400 font-normal">
+                  (không bắt buộc)
+                </span>
               </FormLabel>
               <FormControl>
                 <div className="relative">
@@ -111,7 +138,9 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-bold text-slate-700">Mật khẩu</FormLabel>
+                <FormLabel className="text-xs font-bold text-slate-700">
+                  Mật khẩu
+                </FormLabel>
                 <FormControl>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -128,7 +157,11 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
                     >
-                      {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      {showPassword ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
                     </button>
                   </div>
                 </FormControl>
@@ -142,7 +175,9 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-bold text-slate-700">Xác nhận</FormLabel>
+                <FormLabel className="text-xs font-bold text-slate-700">
+                  Xác nhận
+                </FormLabel>
                 <FormControl>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -156,10 +191,16 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
                     >
-                      {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
                     </button>
                   </div>
                 </FormControl>
@@ -175,7 +216,8 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs font-bold text-slate-700">
-                Mã giới thiệu <span className="text-slate-400 font-normal">(nếu có)</span>
+                Mã giới thiệu{' '}
+                <span className="text-slate-400 font-normal">(nếu có)</span>
               </FormLabel>
               <FormControl>
                 <div className="relative">

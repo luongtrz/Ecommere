@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsInt, IsEnum, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsInt, IsEnum, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 
@@ -30,7 +30,11 @@ export class ProductFilterDto extends PaginationDto {
   @IsString()
   categorySlug?: string;
 
-  @ApiProperty({ required: false, enum: ProductSortBy, default: ProductSortBy.NEWEST })
+  @ApiProperty({
+    required: false,
+    enum: ProductSortBy,
+    default: ProductSortBy.NEWEST,
+  })
   @IsOptional()
   @IsEnum(ProductSortBy)
   sortBy?: ProductSortBy = ProductSortBy.NEWEST;

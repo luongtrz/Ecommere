@@ -1,5 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from '@tanstack/react-query';
 import {
   Bot,
   Send,
@@ -107,12 +111,16 @@ function ThreadListContent({
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-8 gap-2">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Đang tải danh sách…</span>
+            <span className="text-xs text-muted-foreground">
+              Đang tải danh sách…
+            </span>
           </div>
         ) : threads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center px-3">
             <MessageSquare className="h-8 w-8 text-muted-foreground/30 mb-2" />
-            <p className="text-xs text-muted-foreground">Chưa có cuộc trò chuyện nào</p>
+            <p className="text-xs text-muted-foreground">
+              Chưa có cuộc trò chuyện nào
+            </p>
           </div>
         ) : (
           <>
@@ -134,7 +142,7 @@ function ThreadListContent({
                       'flex-1 min-w-0 rounded-xl px-3 py-2.5 text-xs text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       isSelected
                         ? 'bg-primary/10 text-primary font-medium border border-primary/20 shadow-sm'
-                        : 'hover:bg-muted/60 text-foreground/80 hover:text-foreground border border-transparent'
+                        : 'hover:bg-muted/60 text-foreground/80 hover:text-foreground border border-transparent',
                     )}
                   >
                     <p className="truncate font-medium leading-snug">{title}</p>
@@ -142,7 +150,9 @@ function ThreadListContent({
                       <p
                         className={cn(
                           'mt-1 text-[11px] truncate',
-                          isSelected ? 'text-primary/70' : 'text-muted-foreground'
+                          isSelected
+                            ? 'text-primary/70'
+                            : 'text-muted-foreground',
                         )}
                       >
                         {dateText}
@@ -172,7 +182,9 @@ function ThreadListContent({
                   onClick={onLoadMore}
                   disabled={isLoadingMore}
                 >
-                  {isLoadingMore && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                  {isLoadingMore && (
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  )}
                   <span>Tải thêm</span>
                 </Button>
               </div>
@@ -188,7 +200,8 @@ export function AdminChatbotPage() {
   const [input, setInput] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
-  const [threadToDelete, setThreadToDelete] = useState<AgentThreadSummary | null>(null);
+  const [threadToDelete, setThreadToDelete] =
+    useState<AgentThreadSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [threadError, setThreadError] = useState<string | null>(null);
   const [threadLimit, setThreadLimit] = useState(DEFAULT_THREAD_LIMIT);
@@ -220,7 +233,10 @@ export function AdminChatbotPage() {
 
   const currentAdminId = user ? user.id : null;
   const isOwnerMatch = user !== undefined && ownerId === currentAdminId;
-  const visibleMessages = isOwnerMatch ? messages : [];
+  const visibleMessages = useMemo(
+    () => (isOwnerMatch ? messages : []),
+    [isOwnerMatch, messages],
+  );
 
   const {
     data: threads = [],
@@ -232,9 +248,12 @@ export function AdminChatbotPage() {
     placeholderData: keepPreviousData,
   });
 
-  const hasMoreThreads = threads.length >= threadLimit && threadLimit < MAX_THREAD_LIMIT;
+  const hasMoreThreads =
+    threads.length >= threadLimit && threadLimit < MAX_THREAD_LIMIT;
   const handleLoadMoreThreads = () => {
-    setThreadLimit((limit) => Math.min(limit + THREAD_LIMIT_STEP, MAX_THREAD_LIMIT));
+    setThreadLimit((limit) =>
+      Math.min(limit + THREAD_LIMIT_STEP, MAX_THREAD_LIMIT),
+    );
   };
 
   useEffect(() => {
@@ -281,7 +300,9 @@ export function AdminChatbotPage() {
           };
         }
 
-        const hasContent = Boolean(msg.content && msg.content.trim().length > 0);
+        const hasContent = Boolean(
+          msg.content && msg.content.trim().length > 0,
+        );
 
         // An assistant message with no text and no card must not show as an empty chat bubble.
         if (msg.role === 'assistant' && !hasContent && !confirm) {
@@ -302,8 +323,8 @@ export function AdminChatbotPage() {
         return;
       }
       const status =
-        (err as { response?: { status?: number }; status?: number })?.response?.status ??
-        (err as { status?: number })?.status;
+        (err as { response?: { status?: number }; status?: number })?.response
+          ?.status ?? (err as { status?: number })?.status;
 
       if (status === 404) {
         toast.error('Cuộc trò chuyện không còn khả dụng.');
@@ -327,7 +348,9 @@ export function AdminChatbotPage() {
       if (threadToDelete.id === threadId) {
         startNewConversation();
       }
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'chatbot', 'threads'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['admin', 'chatbot', 'threads'],
+      });
       toast.success('Đã xóa cuộc trò chuyện thành công');
     } catch {
       toast.error('Xóa cuộc trò chuyện thất bại. Vui lòng thử lại.');
@@ -349,7 +372,9 @@ export function AdminChatbotPage() {
     try {
       await send(trimmed);
     } finally {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'chatbot', 'threads'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'chatbot', 'threads'],
+      });
     }
   };
 
@@ -363,24 +388,36 @@ export function AdminChatbotPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary shrink-0" />
-              <h1 className="text-lg font-bold text-foreground truncate">Trợ lý quản trị</h1>
+              <h1 className="text-lg font-bold text-foreground truncate">
+                Trợ lý quản trị
+              </h1>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              Điều hành cửa hàng bằng hội thoại. Mọi thao tác thay đổi dữ liệu đều cần xác nhận.
+              Điều hành cửa hàng bằng hội thoại. Mọi thao tác thay đổi dữ liệu
+              đều cần xác nhận.
             </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden gap-1.5 h-8 text-xs">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="md:hidden gap-1.5 h-8 text-xs"
+                >
                   <History className="h-3.5 w-3.5" />
                   <span>Lịch sử</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[85vw] max-w-xs p-0 flex flex-col h-full">
+              <SheetContent
+                side="left"
+                className="w-[85vw] max-w-xs p-0 flex flex-col h-full"
+              >
                 <SheetHeader className="p-4 border-b border-border/60 text-left">
-                  <SheetTitle className="text-base font-semibold">Lịch sử trò chuyện</SheetTitle>
+                  <SheetTitle className="text-base font-semibold">
+                    Lịch sử trò chuyện
+                  </SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 min-h-0 flex flex-col">
                   <ThreadListContent
@@ -430,7 +467,9 @@ export function AdminChatbotPage() {
             {isLoadingTranscript ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <p className="text-xs text-muted-foreground">Đang tải cuộc trò chuyện…</p>
+                <p className="text-xs text-muted-foreground">
+                  Đang tải cuộc trò chuyện…
+                </p>
               </div>
             ) : visibleMessages.length === 0 ? (
               /* Empty state */
@@ -442,7 +481,8 @@ export function AdminChatbotPage() {
                   Xin chào! Tôi có thể giúp gì cho bạn?
                 </h2>
                 <p className="text-xs text-muted-foreground mb-6">
-                  Chọn một trong các gợi ý bên dưới hoặc nhập yêu cầu quản trị cửa hàng của bạn.
+                  Chọn một trong các gợi ý bên dưới hoặc nhập yêu cầu quản trị
+                  cửa hàng của bạn.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
@@ -497,12 +537,14 @@ export function AdminChatbotPage() {
                     );
                   }
 
-                  const hasTools = Boolean(message.tools && message.tools.length > 0);
+                  const hasTools = Boolean(
+                    message.tools && message.tools.length > 0,
+                  );
                   const hasContent = Boolean(
-                    message.content && message.content.trim().length > 0
+                    message.content && message.content.trim().length > 0,
                   );
                   const hasConfirm = Boolean(
-                    message.confirm?.calls && message.confirm.calls.length > 0
+                    message.confirm?.calls && message.confirm.calls.length > 0,
                   );
                   const hasError = Boolean(message.error);
 
@@ -533,14 +575,20 @@ export function AdminChatbotPage() {
                             <ConfirmActionCard
                               calls={message.confirm!.calls}
                               decided={message.confirm!.decided}
-                              onSubmit={(decisions) => decide(message.id, decisions)}
+                              onSubmit={(decisions) =>
+                                decide(message.id, decisions)
+                              }
                             />
                           </div>
                         )}
 
                         {/* Error in a visible alert with role="alert" */}
                         {hasError && (
-                          <Alert variant="destructive" role="alert" className="mt-2">
+                          <Alert
+                            variant="destructive"
+                            role="alert"
+                            className="mt-2"
+                          >
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription>{message.error}</AlertDescription>
                           </Alert>
@@ -619,7 +667,10 @@ export function AdminChatbotPage() {
       </div>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={!!threadToDelete} onOpenChange={(open) => !open && setThreadToDelete(null)}>
+      <Dialog
+        open={!!threadToDelete}
+        onOpenChange={(open) => !open && setThreadToDelete(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Xóa cuộc trò chuyện</DialogTitle>

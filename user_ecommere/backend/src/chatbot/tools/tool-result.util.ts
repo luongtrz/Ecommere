@@ -23,7 +23,11 @@ function buildTruncatedResult(dataStr: string, limit: number): string {
     if (/[\uD800-\uDBFF]$/.test(slice)) {
       slice = slice.slice(0, -1);
     }
-    const candidate = JSON.stringify({ ok: true, truncated: true, data: slice });
+    const candidate = JSON.stringify({
+      ok: true,
+      truncated: true,
+      data: slice,
+    });
     if (candidate.length <= limit) {
       best = candidate;
       low = mid + 1;
@@ -42,7 +46,8 @@ export function toToolResult(value: unknown, maxChars = 6000): string {
     if (raw.length <= limit) {
       return raw;
     }
-    const dataStr = typeof value === 'string' ? value : (JSON.stringify(value) ?? '');
+    const dataStr =
+      typeof value === 'string' ? value : (JSON.stringify(value) ?? '');
     return buildTruncatedResult(dataStr, limit);
   } catch {
     try {
@@ -65,7 +70,10 @@ export function toToolResult(value: unknown, maxChars = 6000): string {
 }
 
 export function toErrorMessage(error: unknown): string {
-  if (error instanceof ToolError || (error instanceof Error && error.name === 'ToolError')) {
+  if (
+    error instanceof ToolError ||
+    (error instanceof Error && error.name === 'ToolError')
+  ) {
     return error.message;
   }
 
@@ -95,4 +103,3 @@ export function toErrorMessage(error: unknown): string {
 
   return 'Thao tác không thành công.';
 }
-
