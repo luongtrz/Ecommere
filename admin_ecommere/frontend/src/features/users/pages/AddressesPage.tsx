@@ -147,10 +147,14 @@ export function AddressesPage() {
                     <div className="space-y-2 text-sm text-slate-600">
                       <p className="flex items-center gap-2">
                         <span className="font-medium text-slate-900">SĐT:</span>
-                        <span className="tabular-nums font-semibold text-slate-900">{address.phone}</span>
+                        <span className="tabular-nums font-semibold text-slate-900">
+                          {address.phone}
+                        </span>
                       </p>
                       <p>
-                        <span className="font-medium text-slate-900">Địa chỉ:</span>{' '}
+                        <span className="font-medium text-slate-900">
+                          Địa chỉ:
+                        </span>{' '}
                         <span className="text-slate-700">{address.line1}</span>
                       </p>
                       <p className="text-xs text-slate-500 leading-relaxed">

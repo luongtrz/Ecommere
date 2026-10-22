@@ -22,7 +22,9 @@ export function NotFoundPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-md mx-auto leading-relaxed mb-8">
-            Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại. Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có thể đường dẫn không chính xác hoặc trang đã bị xóa.
+            Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại.
+            Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có
+            thể đường dẫn không chính xác hoặc trang đã bị xóa.
           </p>
 
           {/* Action Buttons */}
@@ -63,8 +65,12 @@ export function NotFoundPage() {
                   <ShoppingBag className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-slate-900 truncate">Sản phẩm</div>
-                  <div className="text-[11px] text-slate-500 truncate">Xem danh mục sản phẩm</div>
+                  <div className="text-xs font-semibold text-slate-900 truncate">
+                    Sản phẩm
+                  </div>
+                  <div className="text-[11px] text-slate-500 truncate">
+                    Xem danh mục sản phẩm
+                  </div>
                 </div>
               </Link>
 
@@ -76,8 +82,12 @@ export function NotFoundPage() {
                   <Search className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-slate-900 truncate">Danh mục</div>
-                  <div className="text-[11px] text-slate-500 truncate">Tìm theo danh mục</div>
+                  <div className="text-xs font-semibold text-slate-900 truncate">
+                    Danh mục
+                  </div>
+                  <div className="text-[11px] text-slate-500 truncate">
+                    Tìm theo danh mục
+                  </div>
                 </div>
               </Link>
 
@@ -89,8 +99,12 @@ export function NotFoundPage() {
                   <HelpCircle className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-slate-900 truncate">Hỗ trợ</div>
-                  <div className="text-[11px] text-slate-500 truncate">Liên hệ hỗ trợ</div>
+                  <div className="text-xs font-semibold text-slate-900 truncate">
+                    Hỗ trợ
+                  </div>
+                  <div className="text-[11px] text-slate-500 truncate">
+                    Liên hệ hỗ trợ
+                  </div>
                 </div>
               </Link>
             </div>
@@ -99,7 +113,9 @@ export function NotFoundPage() {
           {/* Tip Element */}
           <div className="mt-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5">
-              <span className="text-[11px] font-semibold text-slate-700">Mẹo:</span>
+              <span className="text-[11px] font-semibold text-slate-700">
+                Mẹo:
+              </span>
               <span className="text-[11px] text-slate-500">
                 Kiểm tra lại đường dẫn URL hoặc sử dụng thanh tìm kiếm
               </span>

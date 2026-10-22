@@ -19,11 +19,15 @@ export function ToolCallCard({ step }: { step: ChatToolStep }) {
         {step.status === 'error' && (
           <XCircle className="h-3.5 w-3.5 text-rose-600 shrink-0" />
         )}
-        <span className="flex-1 truncate font-medium text-slate-800">{step.summary}</span>
+        <span className="flex-1 truncate font-medium text-slate-800">
+          {step.summary}
+        </span>
         <ChevronDown className="h-3.5 w-3.5 text-slate-400 transition-transform duration-200 group-data-[state=open]:rotate-180 shrink-0" />
       </CollapsibleTrigger>
       <CollapsibleContent className="border-t border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-600 font-mono leading-relaxed whitespace-pre-wrap break-words">
-        {step.status === 'running' ? 'Đang thực hiện…' : (step.resultSummary ?? null)}
+        {step.status === 'running'
+          ? 'Đang thực hiện…'
+          : (step.resultSummary ?? null)}
       </CollapsibleContent>
     </Collapsible>
   );

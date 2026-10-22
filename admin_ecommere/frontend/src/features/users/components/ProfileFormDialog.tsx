@@ -83,28 +83,38 @@ export function ProfileFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-slate-900">
+              <Label
+                htmlFor="name"
+                className="text-sm font-medium text-slate-900"
+              >
                 Họ và tên *
               </Label>
               <Input
                 id="name"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Nguyễn Văn A"
                 className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg h-10 text-sm"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-sm font-medium text-slate-900">
+              <Label
+                htmlFor="phone"
+                className="text-sm font-medium text-slate-900"
+              >
                 Số điện thoại
               </Label>
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 placeholder="0912345678"
                 className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg h-10 tabular-nums text-sm"
               />

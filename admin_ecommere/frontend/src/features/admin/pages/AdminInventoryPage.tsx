@@ -1,6 +1,12 @@
 import { useState, useMemo } from 'react';
 import { SEO } from '@/lib/seo';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -70,7 +76,11 @@ const FALLBACK_STOCK_ITEMS: StockLevelItem[] = [
     volumeMl: 100,
     stock: 4,
     price: 320000,
-    product: { id: 'p-1', name: 'Xịt thơm phòng Lavender Dreams', slug: 'xit-thom-phong-lavender' },
+    product: {
+      id: 'p-1',
+      name: 'Xịt thơm phòng Lavender Dreams',
+      slug: 'xit-thom-phong-lavender',
+    },
   },
   {
     id: 'var-2',
@@ -79,7 +89,11 @@ const FALLBACK_STOCK_ITEMS: StockLevelItem[] = [
     volumeMl: 150,
     stock: 28,
     price: 380000,
-    product: { id: 'p-2', name: 'Xịt phòng Tinh chất Hoa Nhài Hoàng Gia', slug: 'xit-phong-hoa-nhai' },
+    product: {
+      id: 'p-2',
+      name: 'Xịt phòng Tinh chất Hoa Nhài Hoàng Gia',
+      slug: 'xit-phong-hoa-nhai',
+    },
   },
   {
     id: 'var-3',
@@ -88,7 +102,11 @@ const FALLBACK_STOCK_ITEMS: StockLevelItem[] = [
     volumeMl: 50,
     stock: 0,
     price: 190000,
-    product: { id: 'p-3', name: 'Xịt khử mùi Cam Chanh Tươi Mát', slug: 'xit-khu-mui-cam-chanh' },
+    product: {
+      id: 'p-3',
+      name: 'Xịt khử mùi Cam Chanh Tươi Mát',
+      slug: 'xit-khu-mui-cam-chanh',
+    },
   },
   {
     id: 'var-4',
@@ -97,7 +115,11 @@ const FALLBACK_STOCK_ITEMS: StockLevelItem[] = [
     volumeMl: 200,
     stock: 45,
     price: 490000,
-    product: { id: 'p-4', name: 'Nước hoa phòng Trầm Hương Quý Phái', slug: 'nuoc-hoa-phong-tram-huong' },
+    product: {
+      id: 'p-4',
+      name: 'Nước hoa phòng Trầm Hương Quý Phái',
+      slug: 'nuoc-hoa-phong-tram-huong',
+    },
   },
   {
     id: 'var-5',
@@ -106,7 +128,11 @@ const FALLBACK_STOCK_ITEMS: StockLevelItem[] = [
     volumeMl: 100,
     stock: 7,
     price: 310000,
-    product: { id: 'p-5', name: 'Xịt phòng Làn Gió Đại Dương', slug: 'xit-phong-lan-gio-dai-duong' },
+    product: {
+      id: 'p-5',
+      name: 'Xịt phòng Làn Gió Đại Dương',
+      slug: 'xit-phong-lan-gio-dai-duong',
+    },
   },
   {
     id: 'var-6',
@@ -115,7 +141,11 @@ const FALLBACK_STOCK_ITEMS: StockLevelItem[] = [
     volumeMl: 150,
     stock: 35,
     price: 360000,
-    product: { id: 'p-6', name: 'Xịt kháng khuẩn Trà Xanh Thanh Khiết', slug: 'xit-khang-khuan-tra-xanh' },
+    product: {
+      id: 'p-6',
+      name: 'Xịt kháng khuẩn Trà Xanh Thanh Khiết',
+      slug: 'xit-khang-khuan-tra-xanh',
+    },
   },
 ];
 
@@ -190,7 +220,9 @@ export function AdminInventoryPage() {
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterChip>('all');
   const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState<StockLevelItem | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<StockLevelItem | null>(
+    null,
+  );
   const [adjustType, setAdjustType] = useState<'IN' | 'OUT' | 'ADJUST'>('IN');
   const [adjustQuantity, setAdjustQuantity] = useState<number>(10);
   const [adjustNotes, setAdjustNotes] = useState('');
@@ -199,7 +231,9 @@ export function AdminInventoryPage() {
     queryKey: ['admin-inventory-stock-levels'],
     queryFn: async () => {
       try {
-        const res = await apiClient.get('/inventory/stock-levels?page=1&limit=100');
+        const res = await apiClient.get(
+          '/inventory/stock-levels?page=1&limit=100',
+        );
         const raw = res.data?.data || res.data;
         if (Array.isArray(raw?.data) && raw.data.length > 0) {
           return raw.data as StockLevelItem[];
@@ -215,14 +249,21 @@ export function AdminInventoryPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const stockItems: StockLevelItem[] = stockResponse && stockResponse.length > 0
-    ? stockResponse
-    : FALLBACK_STOCK_ITEMS;
+  const stockItems: StockLevelItem[] =
+    stockResponse && stockResponse.length > 0
+      ? stockResponse
+      : FALLBACK_STOCK_ITEMS;
 
-  const [movementList, setMovementList] = useState<StockMovementItem[]>(FALLBACK_MOVEMENTS);
+  const [movementList, setMovementList] =
+    useState<StockMovementItem[]>(FALLBACK_MOVEMENTS);
 
   const adjustMutation = useMutation({
-    mutationFn: async (payload: { variantId: string; type: 'IN' | 'OUT' | 'ADJUST'; quantity: number; notes?: string }) => {
+    mutationFn: async (payload: {
+      variantId: string;
+      type: 'IN' | 'OUT' | 'ADJUST';
+      quantity: number;
+      notes?: string;
+    }) => {
       try {
         const res = await apiClient.post('/inventory/adjust', payload);
         return res.data;
@@ -239,7 +280,8 @@ export function AdminInventoryPage() {
         let prev = target.stock;
         let next = prev;
         if (variables.type === 'IN') next = prev + variables.quantity;
-        if (variables.type === 'OUT') next = Math.max(0, prev - variables.quantity);
+        if (variables.type === 'OUT')
+          next = Math.max(0, prev - variables.quantity);
         if (variables.type === 'ADJUST') next = variables.quantity;
 
         const newMovement: StockMovementItem = {
@@ -248,16 +290,24 @@ export function AdminInventoryPage() {
           productName: target.product?.name || 'Sản phẩm',
           sku: target.sku,
           type: variables.type,
-          quantity: variables.type === 'ADJUST' ? Math.abs(next - prev) : variables.quantity,
+          quantity:
+            variables.type === 'ADJUST'
+              ? Math.abs(next - prev)
+              : variables.quantity,
           previousStock: prev,
           newStock: next,
           notes: variables.notes || 'Điều chỉnh thủ công',
-          createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          createdAt: new Date()
+            .toISOString()
+            .replace('T', ' ')
+            .substring(0, 16),
         };
         target.stock = next;
         setMovementList((prevList) => [newMovement, ...prevList]);
       }
-      queryClient.invalidateQueries({ queryKey: ['admin-inventory-stock-levels'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin-inventory-stock-levels'],
+      });
     },
     onError: () => {
       toast.error('Không thể điều chỉnh tồn kho');
@@ -267,7 +317,9 @@ export function AdminInventoryPage() {
   const stats = useMemo(() => {
     const total = stockItems.length;
     const safe = stockItems.filter((item) => item.stock > 10).length;
-    const low = stockItems.filter((item) => item.stock > 0 && item.stock <= 10).length;
+    const low = stockItems.filter(
+      (item) => item.stock > 0 && item.stock <= 10,
+    ).length;
     const out = stockItems.filter((item) => item.stock === 0).length;
     const totalUnits = stockItems.reduce((acc, item) => acc + item.stock, 0);
     return { total, safe, low, out, totalUnits };
@@ -278,7 +330,9 @@ export function AdminInventoryPage() {
       const matchSearch =
         search === '' ||
         item.sku.toLowerCase().includes(search.toLowerCase()) ||
-        (item.product?.name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (item.product?.name || '')
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
         item.scent.toLowerCase().includes(search.toLowerCase());
 
       if (!matchSearch) return false;
@@ -320,14 +374,19 @@ export function AdminInventoryPage() {
               Quản lý kho hàng
             </h1>
             <p className="text-sm text-slate-600 mt-1">
-              Theo dõi định mức tồn kho, cảnh báo hàng sắp hết và lịch sử luân chuyển kho
+              Theo dõi định mức tồn kho, cảnh báo hàng sắp hết và lịch sử luân
+              chuyển kho
             </p>
           </div>
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-inventory-stock-levels'] })}
+              onClick={() =>
+                queryClient.invalidateQueries({
+                  queryKey: ['admin-inventory-stock-levels'],
+                })
+              }
               className="gap-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm"
             >
               <RefreshCw className="h-4 w-4 text-slate-500" />
@@ -350,52 +409,85 @@ export function AdminInventoryPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Tổng mặt hàng</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-600">
+                Tổng mặt hàng
+              </CardTitle>
               <Box className="h-4 w-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-slate-900">{stats.total}</div>
+              <div className="text-2xl font-bold tabular-nums text-slate-900">
+                {stats.total}
+              </div>
               <p className="text-xs text-slate-500 mt-1">
-                Tổng cộng <span className="tabular-nums font-medium text-slate-700">{stats.totalUnits}</span> đơn vị lưu kho
+                Tổng cộng{' '}
+                <span className="tabular-nums font-medium text-slate-700">
+                  {stats.totalUnits}
+                </span>{' '}
+                đơn vị lưu kho
               </p>
             </CardContent>
           </Card>
 
           <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Tồn kho an toàn</CardTitle>
-              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-[10px] font-medium">
+              <CardTitle className="text-sm font-medium text-slate-600">
+                Tồn kho an toàn
+              </CardTitle>
+              <Badge
+                variant="outline"
+                className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-[10px] font-medium"
+              >
                 Đạt chuẩn
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-emerald-600">{stats.safe}</div>
-              <p className="text-xs text-slate-500 mt-1">Mặt hàng duy trì trên 10 đơn vị</p>
+              <div className="text-2xl font-bold tabular-nums text-emerald-600">
+                {stats.safe}
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Mặt hàng duy trì trên 10 đơn vị
+              </p>
             </CardContent>
           </Card>
 
           <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Sắp hết hàng</CardTitle>
-              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-[10px] font-medium">
+              <CardTitle className="text-sm font-medium text-slate-600">
+                Sắp hết hàng
+              </CardTitle>
+              <Badge
+                variant="outline"
+                className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-[10px] font-medium"
+              >
                 Cần nhập
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-amber-600">{stats.low}</div>
-              <p className="text-xs text-slate-500 mt-1">Mặt hàng còn từ 1 đến 10 đơn vị</p>
+              <div className="text-2xl font-bold tabular-nums text-amber-600">
+                {stats.low}
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Mặt hàng còn từ 1 đến 10 đơn vị
+              </p>
             </CardContent>
           </Card>
 
           <Card className="border border-slate-200 bg-white shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Đã hết hàng</CardTitle>
-              <Badge variant="outline" className="bg-rose-50 text-rose-700 border-0 ring-1 ring-rose-200 text-[10px] font-medium">
+              <CardTitle className="text-sm font-medium text-slate-600">
+                Đã hết hàng
+              </CardTitle>
+              <Badge
+                variant="outline"
+                className="bg-rose-50 text-rose-700 border-0 ring-1 ring-rose-200 text-[10px] font-medium"
+              >
                 Cảnh báo
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-rose-600">{stats.out}</div>
+              <div className="text-2xl font-bold tabular-nums text-rose-600">
+                {stats.out}
+              </div>
               <p className="text-xs text-slate-500 mt-1">Mặt hàng tồn bằng 0</p>
             </CardContent>
           </Card>
@@ -410,7 +502,8 @@ export function AdminInventoryPage() {
                   Mức tồn kho sản phẩm
                 </CardTitle>
                 <CardDescription className="text-xs md:text-sm text-slate-600 mt-0.5">
-                  Thanh định mức tồn kho trực quan với cảnh báo màu rose khi lượng tồn chạm mức thấp
+                  Thanh định mức tồn kho trực quan với cảnh báo màu rose khi
+                  lượng tồn chạm mức thấp
                 </CardDescription>
               </div>
 
@@ -435,7 +528,7 @@ export function AdminInventoryPage() {
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   activeFilter === 'all'
                     ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
-                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
                 )}
               >
                 <span>Tất cả</span>
@@ -444,7 +537,7 @@ export function AdminInventoryPage() {
                     'px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold',
                     activeFilter === 'all'
                       ? 'bg-teal-700 text-white'
-                      : 'bg-slate-200 text-slate-700'
+                      : 'bg-slate-200 text-slate-700',
                   )}
                 >
                   {stats.total}
@@ -458,7 +551,7 @@ export function AdminInventoryPage() {
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   activeFilter === 'low'
                     ? 'bg-amber-50 text-amber-700 border-amber-300 ring-1 ring-amber-200 shadow-sm font-semibold'
-                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
                 )}
               >
                 <span>Sắp hết hàng</span>
@@ -467,7 +560,7 @@ export function AdminInventoryPage() {
                     'px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold',
                     activeFilter === 'low'
                       ? 'bg-amber-100 text-amber-800'
-                      : 'bg-slate-200 text-slate-700'
+                      : 'bg-slate-200 text-slate-700',
                   )}
                 >
                   {stats.low}
@@ -481,7 +574,7 @@ export function AdminInventoryPage() {
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   activeFilter === 'out'
                     ? 'bg-rose-50 text-rose-700 border-rose-300 ring-1 ring-rose-200 shadow-sm font-semibold'
-                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
                 )}
               >
                 <span>Đã hết hàng</span>
@@ -490,7 +583,7 @@ export function AdminInventoryPage() {
                     'px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold',
                     activeFilter === 'out'
                       ? 'bg-rose-100 text-rose-800'
-                      : 'bg-slate-200 text-slate-700'
+                      : 'bg-slate-200 text-slate-700',
                   )}
                 >
                   {stats.out}
@@ -504,7 +597,7 @@ export function AdminInventoryPage() {
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   activeFilter === 'safe'
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-1 ring-emerald-200 shadow-sm font-semibold'
-                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
                 )}
               >
                 <span>Tồn kho an toàn</span>
@@ -513,7 +606,7 @@ export function AdminInventoryPage() {
                     'px-1.5 py-0.2 rounded-full text-[10px] tabular-nums font-semibold',
                     activeFilter === 'safe'
                       ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-slate-200 text-slate-700'
+                      : 'bg-slate-200 text-slate-700',
                   )}
                 >
                   {stats.safe}
@@ -559,18 +652,33 @@ export function AdminInventoryPage() {
                       const isLowStock = item.stock > 0 && item.stock <= 10;
                       const isOutOfStock = item.stock === 0;
                       const maxCapacity = 50;
-                      const percentage = Math.min(100, Math.max(0, Math.round((item.stock / maxCapacity) * 100)));
+                      const percentage = Math.min(
+                        100,
+                        Math.max(
+                          0,
+                          Math.round((item.stock / maxCapacity) * 100),
+                        ),
+                      );
 
                       return (
-                        <TableRow key={item.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                        <TableRow
+                          key={item.id}
+                          className="border-b border-slate-200 hover:bg-slate-50 transition-colors"
+                        >
                           <TableCell className="px-4 py-3 align-middle">
-                            <div className="font-medium text-slate-900">{item.product?.name || 'Sản phẩm'}</div>
-                            <div className="text-xs text-slate-500 font-mono mt-0.5">{item.sku}</div>
+                            <div className="font-medium text-slate-900">
+                              {item.product?.name || 'Sản phẩm'}
+                            </div>
+                            <div className="text-xs text-slate-500 font-mono mt-0.5">
+                              {item.sku}
+                            </div>
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-sm text-slate-600">
                             <span>{item.scent}</span>
                             <span className="mx-1 text-slate-400">•</span>
-                            <span className="tabular-nums">{item.volumeMl}ml</span>
+                            <span className="tabular-nums">
+                              {item.volumeMl}ml
+                            </span>
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-right font-semibold tabular-nums text-slate-900">
                             {item.stock}
@@ -578,7 +686,9 @@ export function AdminInventoryPage() {
                           <TableCell className="px-4 py-3 align-middle">
                             <div className="space-y-1.5 w-full max-w-[200px]">
                               <div className="flex items-center justify-between text-xs">
-                                <span className="text-slate-500 text-[11px]">Định mức:</span>
+                                <span className="text-slate-500 text-[11px]">
+                                  Định mức:
+                                </span>
                                 <span className="tabular-nums font-medium text-xs text-slate-900">
                                   {item.stock} / {maxCapacity}
                                 </span>
@@ -590,25 +700,36 @@ export function AdminInventoryPage() {
                                     isOutOfStock || isLowStock
                                       ? 'bg-rose-600'
                                       : item.stock <= 20
-                                      ? 'bg-amber-500'
-                                      : 'bg-emerald-600'
+                                        ? 'bg-amber-500'
+                                        : 'bg-emerald-600',
                                   )}
-                                  style={{ width: `${isOutOfStock ? 4 : Math.max(8, percentage)}%` }}
+                                  style={{
+                                    width: `${isOutOfStock ? 4 : Math.max(8, percentage)}%`,
+                                  }}
                                 />
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
                             {isOutOfStock ? (
-                              <Badge variant="outline" className="bg-rose-50 text-rose-700 border-0 ring-1 ring-rose-200 text-xs font-medium">
+                              <Badge
+                                variant="outline"
+                                className="bg-rose-50 text-rose-700 border-0 ring-1 ring-rose-200 text-xs font-medium"
+                              >
                                 Hết hàng
                               </Badge>
                             ) : isLowStock ? (
-                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium">
+                              <Badge
+                                variant="outline"
+                                className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium"
+                              >
                                 Sắp hết hàng
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs font-medium">
+                              <Badge
+                                variant="outline"
+                                className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs font-medium"
+                              >
                                 Tồn kho an toàn
                               </Badge>
                             )}
@@ -643,10 +764,14 @@ export function AdminInventoryPage() {
                   Lịch sử biến động kho
                 </CardTitle>
                 <CardDescription className="text-xs md:text-sm text-slate-600 mt-0.5">
-                  Nhật ký các lượt nhập kho, xuất kho và kiểm kê điều chỉnh gần nhất
+                  Nhật ký các lượt nhập kho, xuất kho và kiểm kê điều chỉnh gần
+                  nhất
                 </CardDescription>
               </div>
-              <Badge variant="outline" className="bg-slate-50 text-slate-700 border-0 ring-1 ring-slate-200 tabular-nums text-xs font-medium">
+              <Badge
+                variant="outline"
+                className="bg-slate-50 text-slate-700 border-0 ring-1 ring-slate-200 tabular-nums text-xs font-medium"
+              >
                 {movementList.length} giao dịch
               </Badge>
             </div>
@@ -681,36 +806,54 @@ export function AdminInventoryPage() {
                 </TableHeader>
                 <TableBody>
                   {movementList.map((mov) => (
-                    <TableRow key={mov.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                    <TableRow
+                      key={mov.id}
+                      className="border-b border-slate-200 hover:bg-slate-50 transition-colors"
+                    >
                       <TableCell className="px-4 py-3 align-middle text-xs text-slate-500 tabular-nums">
                         {mov.createdAt}
                       </TableCell>
                       <TableCell className="px-4 py-3 align-middle">
-                        <div className="font-medium text-slate-900 text-sm">{mov.productName}</div>
-                        <div className="text-xs text-slate-500 font-mono">{mov.sku}</div>
+                        <div className="font-medium text-slate-900 text-sm">
+                          {mov.productName}
+                        </div>
+                        <div className="text-xs text-slate-500 font-mono">
+                          {mov.sku}
+                        </div>
                       </TableCell>
                       <TableCell className="px-4 py-3 align-middle">
                         {mov.type === 'IN' && (
-                          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs gap-1 font-medium">
+                          <Badge
+                            variant="outline"
+                            className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs gap-1 font-medium"
+                          >
                             <ArrowDownRight className="h-3 w-3 text-emerald-600" />
                             Nhập kho
                           </Badge>
                         )}
                         {mov.type === 'OUT' && (
-                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs gap-1 font-medium">
+                          <Badge
+                            variant="outline"
+                            className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs gap-1 font-medium"
+                          >
                             <ArrowUpRight className="h-3 w-3 text-amber-600" />
                             Xuất kho
                           </Badge>
                         )}
                         {mov.type === 'ADJUST' && (
-                          <Badge variant="outline" className="bg-slate-50 text-slate-700 border-0 ring-1 ring-slate-200 text-xs gap-1 font-medium">
+                          <Badge
+                            variant="outline"
+                            className="bg-slate-50 text-slate-700 border-0 ring-1 ring-slate-200 text-xs gap-1 font-medium"
+                          >
                             <RefreshCw className="h-3 w-3 text-slate-500" />
                             Kiểm kê
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell className="px-4 py-3 align-middle text-right font-semibold tabular-nums text-slate-900">
-                        {mov.type === 'OUT' ? `-${mov.quantity}` : `+${mov.quantity}`}
+                        {mov.type === 'OUT'
+                          ? `-${mov.quantity}`
+                          : `+${mov.quantity}`}
                       </TableCell>
                       <TableCell className="px-4 py-3 align-middle text-right text-slate-500 tabular-nums">
                         {mov.previousStock}
@@ -745,7 +888,10 @@ export function AdminInventoryPage() {
 
             <form onSubmit={handleAdjustSubmit} className="p-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="adjust-type" className="text-sm font-medium text-slate-900">
+                <Label
+                  htmlFor="adjust-type"
+                  className="text-sm font-medium text-slate-900"
+                >
                   Loại điều chỉnh *
                 </Label>
                 <div className="grid grid-cols-3 gap-2">
@@ -756,7 +902,7 @@ export function AdminInventoryPage() {
                       'p-2 rounded-lg text-xs font-medium border text-center transition-colors',
                       adjustType === 'IN'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-1 ring-emerald-200'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900',
                     )}
                   >
                     Nhập kho
@@ -768,7 +914,7 @@ export function AdminInventoryPage() {
                       'p-2 rounded-lg text-xs font-medium border text-center transition-colors',
                       adjustType === 'OUT'
                         ? 'bg-amber-50 text-amber-700 border-amber-300 ring-1 ring-amber-200'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900',
                     )}
                   >
                     Xuất kho
@@ -780,7 +926,7 @@ export function AdminInventoryPage() {
                       'p-2 rounded-lg text-xs font-medium border text-center transition-colors',
                       adjustType === 'ADJUST'
                         ? 'bg-teal-50 text-teal-700 border-teal-300 ring-1 ring-teal-200'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900',
                     )}
                   >
                     Kiểm kê
@@ -789,8 +935,13 @@ export function AdminInventoryPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adjust-quantity" className="text-sm font-medium text-slate-900">
-                  {adjustType === 'ADJUST' ? 'Mức tồn thực tế mới *' : 'Số lượng thay đổi *'}
+                <Label
+                  htmlFor="adjust-quantity"
+                  className="text-sm font-medium text-slate-900"
+                >
+                  {adjustType === 'ADJUST'
+                    ? 'Mức tồn thực tế mới *'
+                    : 'Số lượng thay đổi *'}
                 </Label>
                 <Input
                   id="adjust-quantity"
@@ -803,13 +954,20 @@ export function AdminInventoryPage() {
                 />
                 {selectedVariant && (
                   <p className="text-xs text-slate-500">
-                    Tồn kho hiện tại: <span className="tabular-nums font-semibold text-slate-900">{selectedVariant.stock}</span> đơn vị
+                    Tồn kho hiện tại:{' '}
+                    <span className="tabular-nums font-semibold text-slate-900">
+                      {selectedVariant.stock}
+                    </span>{' '}
+                    đơn vị
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adjust-notes" className="text-sm font-medium text-slate-900">
+                <Label
+                  htmlFor="adjust-notes"
+                  className="text-sm font-medium text-slate-900"
+                >
                   Ghi chú lý do
                 </Label>
                 <Input

@@ -19,7 +19,12 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { useAdminOrders, useUpdateOrderStatus } from '../hooks/useAdminOrders';
-import { formatCurrency, formatDateTime, parseShippingAddress, cn } from '@/lib/utils';
+import {
+  formatCurrency,
+  formatDateTime,
+  parseShippingAddress,
+  cn,
+} from '@/lib/utils';
 import {
   AlertCircle,
   ChevronLeft,
@@ -36,7 +41,10 @@ import {
 import type { OrderStatus } from '../api/admin-orders.api';
 import { useToast } from '@/hooks/useToast';
 
-const ORDER_STATUS_MAP: Record<OrderStatus, { label: string; badgeClass: string; color: string; bg: string }> = {
+const ORDER_STATUS_MAP: Record<
+  OrderStatus,
+  { label: string; badgeClass: string; color: string; bg: string }
+> = {
   PENDING_PAYMENT: {
     label: 'Chờ thanh toán',
     badgeClass: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
@@ -138,9 +146,14 @@ export function AdminOrdersPage() {
         onSuccess: () => {
           toast.success(
             <div className="flex flex-col gap-1">
-              <span className="font-semibold">Cập nhật trạng thái thành công!</span>
-              <span className="text-sm">Đơn hàng #{orderCode} đã chuyển sang {ORDER_STATUS_MAP[newStatus]?.label || newStatus}</span>
-            </div>
+              <span className="font-semibold">
+                Cập nhật trạng thái thành công!
+              </span>
+              <span className="text-sm">
+                Đơn hàng #{orderCode} đã chuyển sang{' '}
+                {ORDER_STATUS_MAP[newStatus]?.label || newStatus}
+              </span>
+            </div>,
           );
         },
         onError: (error: any) => {
@@ -162,7 +175,12 @@ export function AdminOrdersPage() {
       bg: 'bg-slate-50',
     };
     return (
-      <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium', config.badgeClass)}>
+      <span
+        className={cn(
+          'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+          config.badgeClass,
+        )}
+      >
         {config.label}
       </span>
     );
@@ -172,8 +190,16 @@ export function AdminOrdersPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 p-8 text-center bg-white border border-slate-200 rounded-xl shadow-sm">
         <AlertCircle className="h-12 w-12 text-rose-600" />
-        <h2 className="text-lg font-semibold text-slate-900">Không thể tải danh sách đơn hàng</h2>
-        <Button onClick={() => window.location.reload()} variant="outline" className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700">Thử lại</Button>
+        <h2 className="text-lg font-semibold text-slate-900">
+          Không thể tải danh sách đơn hàng
+        </h2>
+        <Button
+          onClick={() => window.location.reload()}
+          variant="outline"
+          className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+        >
+          Thử lại
+        </Button>
       </div>
     );
   }
@@ -183,12 +209,9 @@ export function AdminOrdersPage() {
     const addr = parseShippingAddress(addressJson);
     if (!addr) return '';
 
-    const parts = [
-      addr.line1,
-      addr.ward,
-      addr.district,
-      addr.province,
-    ].filter(Boolean);
+    const parts = [addr.line1, addr.ward, addr.district, addr.province].filter(
+      Boolean,
+    );
 
     if (parts.length > 0) return parts.join(', ');
 
@@ -200,15 +223,25 @@ export function AdminOrdersPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Quản lý đơn hàng</h1>
-          <p className="text-slate-500 mt-1 text-sm">Theo dõi và xử lý các đơn hàng của cửa hàng.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+            Quản lý đơn hàng
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">
+            Theo dõi và xử lý các đơn hàng của cửa hàng.
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="hidden sm:flex border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm">
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden sm:flex border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm"
+          >
             <Calendar className="mr-2 h-4 w-4 text-teal-600" />
             Hôm nay: {new Date().toLocaleDateString('vi-VN')}
           </Button>
-          <Button className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm">+ Tạo đơn hàng</Button>
+          <Button className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm">
+            + Tạo đơn hàng
+          </Button>
         </div>
       </div>
 
@@ -224,8 +257,12 @@ export function AdminOrdersPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <CardTitle className="text-2xl font-bold tabular-nums text-slate-900">{data?.total || 0}</CardTitle>
-            <p className="text-xs text-slate-400 mt-1">Tổng đơn trong hệ thống</p>
+            <CardTitle className="text-2xl font-bold tabular-nums text-slate-900">
+              {data?.total || 0}
+            </CardTitle>
+            <p className="text-xs text-slate-400 mt-1">
+              Tổng đơn trong hệ thống
+            </p>
           </CardContent>
         </Card>
 
@@ -242,7 +279,9 @@ export function AdminOrdersPage() {
             <CardTitle className="text-2xl font-bold tabular-nums text-amber-700">
               --
             </CardTitle>
-            <p className="text-xs text-slate-400 mt-1">Cần xác nhận và đóng gói</p>
+            <p className="text-xs text-slate-400 mt-1">
+              Cần xác nhận và đóng gói
+            </p>
           </CardContent>
         </Card>
 
@@ -256,7 +295,9 @@ export function AdminOrdersPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <CardTitle className="text-2xl font-bold tabular-nums text-emerald-700">--</CardTitle>
+            <CardTitle className="text-2xl font-bold tabular-nums text-emerald-700">
+              --
+            </CardTitle>
             <p className="text-xs text-slate-400 mt-1">Ghi nhận trong ngày</p>
           </CardContent>
         </Card>
@@ -279,7 +320,7 @@ export function AdminOrdersPage() {
                   'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap',
                   isActive
                     ? 'bg-teal-600 text-white font-semibold shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50',
                 )}
               >
                 <span>{tab.label}</span>
@@ -336,7 +377,10 @@ export function AdminOrdersPage() {
         {isLoading ? (
           <div className="p-6 space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-14 w-full rounded-lg bg-slate-100" />
+              <Skeleton
+                key={i}
+                className="h-14 w-full rounded-lg bg-slate-100"
+              />
             ))}
           </div>
         ) : (
@@ -355,14 +399,20 @@ export function AdminOrdersPage() {
               <tbody className="divide-y divide-slate-100">
                 {!data?.data?.length ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
+                    <td
+                      colSpan={6}
+                      className="px-4 py-12 text-center text-slate-500"
+                    >
                       <Package className="h-12 w-12 mx-auto mb-3 text-slate-300" />
                       <p>Không tìm thấy đơn hàng nào</p>
                     </td>
                   </tr>
                 ) : (
                   data?.data?.map((order) => (
-                    <tr key={order.id} className="hover:bg-slate-50/80 transition-colors group">
+                    <tr
+                      key={order.id}
+                      className="hover:bg-slate-50/80 transition-colors group"
+                    >
                       <td className="px-4 py-3">
                         <div className="flex flex-col">
                           <Link
@@ -380,7 +430,10 @@ export function AdminOrdersPage() {
                       <td className="px-4 py-3">
                         <div className="space-y-1.5 max-w-[280px]">
                           {order.items?.slice(0, 2).map((item: any, idx) => (
-                            <div key={idx} className="flex items-center gap-2.5">
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2.5"
+                            >
                               <div className="relative w-8 h-8 rounded-lg border border-slate-200 overflow-hidden shrink-0 bg-slate-50">
                                 {item.variant?.product?.images?.[0] ? (
                                   <img
@@ -396,11 +449,16 @@ export function AdminOrdersPage() {
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-slate-900 truncate" title={item.nameSnapshot}>
+                                <p
+                                  className="text-xs font-medium text-slate-900 truncate"
+                                  title={item.nameSnapshot}
+                                >
                                   {item.nameSnapshot}
                                 </p>
                                 <p className="text-[11px] text-slate-500 tabular-nums">
-                                  x{item.quantity} {item.scentSnapshot && `• ${item.scentSnapshot}`}
+                                  x{item.quantity}{' '}
+                                  {item.scentSnapshot &&
+                                    `• ${item.scentSnapshot}`}
                                 </p>
                               </div>
                             </div>
@@ -413,16 +471,25 @@ export function AdminOrdersPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-slate-900 text-xs">{order.user?.name || order.user?.email}</div>
-                        <div className="text-[11px] text-slate-500 mt-0.5 tabular-nums">{order.user?.phone || 'Chưa cập nhật SĐT'}</div>
+                        <div className="font-medium text-slate-900 text-xs">
+                          {order.user?.name || order.user?.email}
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-0.5 tabular-nums">
+                          {order.user?.phone || 'Chưa cập nhật SĐT'}
+                        </div>
                         <div className="text-[11px] text-slate-500 mt-0.5 whitespace-pre-wrap max-w-xs truncate">
                           {parseAddress(order.addressJson)}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="font-semibold tabular-nums text-slate-900">{formatCurrency(order.total)}</div>
+                        <div className="font-semibold tabular-nums text-slate-900">
+                          {formatCurrency(order.total)}
+                        </div>
                         <div className="text-xs text-slate-400 mt-1 flex justify-end items-center gap-1">
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal border-slate-200 bg-slate-50 text-slate-600">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] px-1.5 py-0 h-4 font-normal border-slate-200 bg-slate-50 text-slate-600"
+                          >
                             {order.paymentMethod}
                           </Badge>
                         </div>
@@ -446,16 +513,31 @@ export function AdminOrdersPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
-                              {[order.status, ...(ALLOWED_NEXT_STATUSES[order.status] || [])].map((status) => (
-                                <SelectItem key={status} value={status} className="text-xs">
+                              {[
+                                order.status,
+                                ...(ALLOWED_NEXT_STATUSES[order.status] || []),
+                              ].map((status) => (
+                                <SelectItem
+                                  key={status}
+                                  value={status}
+                                  className="text-xs"
+                                >
                                   {ORDER_STATUS_MAP[status]?.label || status}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
 
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg" asChild>
-                            <Link to={`/admin/orders/${order.id}`} aria-label={`Xem chi tiết đơn hàng ${order.code}`}>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg"
+                            asChild
+                          >
+                            <Link
+                              to={`/admin/orders/${order.id}`}
+                              aria-label={`Xem chi tiết đơn hàng ${order.code}`}
+                            >
                               <Eye className="h-4 w-4" />
                             </Link>
                           </Button>
@@ -473,7 +555,11 @@ export function AdminOrdersPage() {
         {data && data?.totalPages > 1 && (
           <div className="border-t border-slate-200 px-4 py-3 flex items-center justify-between bg-slate-50/50">
             <span className="text-xs text-slate-500">
-              Trang <span className="font-semibold text-slate-900 tabular-nums">{page}</span> / {data.totalPages}
+              Trang{' '}
+              <span className="font-semibold text-slate-900 tabular-nums">
+                {page}
+              </span>{' '}
+              / {data.totalPages}
             </span>
             <div className="flex gap-2">
               <Button

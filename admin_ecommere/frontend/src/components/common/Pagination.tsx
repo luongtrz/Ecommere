@@ -32,7 +32,14 @@ export function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <nav role="navigation" aria-label="Phân trang" className={cn('flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 select-none py-2', className)}>
+    <nav
+      role="navigation"
+      aria-label="Phân trang"
+      className={cn(
+        'flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 select-none py-2',
+        className,
+      )}
+    >
       <Button
         variant="outline"
         size="icon"
@@ -54,7 +61,9 @@ export function Pagination({
           >
             1
           </Button>
-          {startPage > 2 && <span className="px-1 text-xs text-slate-400 select-none">…</span>}
+          {startPage > 2 && (
+            <span className="px-1 text-xs text-slate-400 select-none">…</span>
+          )}
         </>
       )}
 
@@ -69,7 +78,7 @@ export function Pagination({
             'h-8 min-w-[2rem] px-2.5 text-xs font-semibold tabular-nums rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-teal-500',
             currentPage === page
               ? 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm border-transparent'
-              : 'border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              : 'border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50',
           )}
         >
           {page}
@@ -78,7 +87,9 @@ export function Pagination({
 
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="px-1 text-xs text-slate-400 select-none">…</span>}
+          {endPage < totalPages - 1 && (
+            <span className="px-1 text-xs text-slate-400 select-none">…</span>
+          )}
           <Button
             variant="outline"
             size="sm"

@@ -1,6 +1,12 @@
 import { useState, useMemo } from 'react';
 import { SEO } from '@/lib/seo';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -61,7 +67,7 @@ function CategoryTreeNode({
           'flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer group border text-xs md:text-sm',
           isSelected
             ? 'bg-teal-50 border-teal-200 text-teal-900 font-medium shadow-sm'
-            : 'border-transparent hover:bg-slate-100/80 hover:border-slate-200 text-slate-800'
+            : 'border-transparent hover:bg-slate-100/80 hover:border-slate-200 text-slate-800',
         )}
         style={{ paddingLeft: `${Math.max(8, level * 16 + 8)}px` }}
         onClick={() => onSelect(category)}
@@ -75,7 +81,11 @@ function CategoryTreeNode({
             }}
             className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-md transition"
           >
-            {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            {expanded ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
           </button>
         ) : (
           <div className="w-5" />
@@ -122,7 +132,10 @@ function CategoryTreeNode({
               e.stopPropagation();
               onDelete(category);
             }}
-            disabled={hasChildren || (category.productCount !== undefined && category.productCount > 0)}
+            disabled={
+              hasChildren ||
+              (category.productCount !== undefined && category.productCount > 0)
+            }
             title="Xóa danh mục"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -154,7 +167,9 @@ export function AdminCategoriesPage() {
   const queryClient = useQueryClient();
 
   const [activePaneTab, setActivePaneTab] = useState<'tree' | 'detail'>('tree');
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null,
+  );
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [formName, setFormName] = useState('');
   const [formParentId, setFormParentId] = useState<string | null>(null);
@@ -162,9 +177,15 @@ export function AdminCategoriesPage() {
   const [treeSearch, setTreeSearch] = useState('');
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+    null,
+  );
 
-  const { data: treeData = [], isLoading, refetch } = useQuery({
+  const {
+    data: treeData = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: [QUERY_KEYS.CATEGORIES],
     queryFn: () => categoriesApi.getTree(),
   });
@@ -175,7 +196,8 @@ export function AdminCategoriesPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { name: string; parentId?: string }) => categoriesApi.create(data),
+    mutationFn: (data: { name: string; parentId?: string }) =>
+      categoriesApi.create(data),
     onSuccess: (newCat) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CATEGORIES] });
       toast.success(`Tạo danh mục "${newCat.name}" thành công`);
@@ -186,13 +208,21 @@ export function AdminCategoriesPage() {
       setActivePaneTab('detail');
     },
     onError: (error: any) => {
-      toast.error('Không thể tạo danh mục: ' + (error.response?.data?.message || error.message));
+      toast.error(
+        'Không thể tạo danh mục: ' +
+          (error.response?.data?.message || error.message),
+      );
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name?: string; parentId?: string } }) =>
-      categoriesApi.update(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; parentId?: string };
+    }) => categoriesApi.update(id, data),
     onSuccess: (updatedCat) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CATEGORIES] });
       toast.success('Cập nhật danh mục thành công');
@@ -201,7 +231,10 @@ export function AdminCategoriesPage() {
       setFormParentId(updatedCat.parentId || null);
     },
     onError: (error: any) => {
-      toast.error('Không thể cập nhật danh mục: ' + (error.response?.data?.message || error.message));
+      toast.error(
+        'Không thể cập nhật danh mục: ' +
+          (error.response?.data?.message || error.message),
+      );
     },
   });
 
@@ -220,7 +253,10 @@ export function AdminCategoriesPage() {
       }
     },
     onError: (error: any) => {
-      toast.error('Không thể xóa danh mục: ' + (error.response?.data?.message || error.message));
+      toast.error(
+        'Không thể xóa danh mục: ' +
+          (error.response?.data?.message || error.message),
+      );
     },
   });
 
@@ -280,7 +316,9 @@ export function AdminCategoriesPage() {
       return nodes
         .map((node) => {
           const matchSelf = node.name.toLowerCase().includes(lower);
-          const filteredChildren = node.children ? filterNodes(node.children) : [];
+          const filteredChildren = node.children
+            ? filterNodes(node.children)
+            : [];
           if (matchSelf || filteredChildren.length > 0) {
             return {
               ...node,
@@ -341,7 +379,7 @@ export function AdminCategoriesPage() {
               'flex-1 py-2 text-xs font-medium rounded-md transition-colors text-center',
               activePaneTab === 'tree'
                 ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-slate-600 hover:text-slate-900',
             )}
           >
             Cây danh mục ({totalCategoriesCount})
@@ -353,14 +391,14 @@ export function AdminCategoriesPage() {
               'flex-1 py-2 text-xs font-medium rounded-md transition-colors text-center',
               activePaneTab === 'detail'
                 ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-slate-600 hover:text-slate-900',
             )}
           >
             {isCreatingNew
               ? 'Tạo danh mục mới'
               : selectedCategory
-              ? `Chi tiết: ${selectedCategory.name}`
-              : 'Chi tiết danh mục'}
+                ? `Chi tiết: ${selectedCategory.name}`
+                : 'Chi tiết danh mục'}
           </button>
         </div>
 
@@ -370,7 +408,7 @@ export function AdminCategoriesPage() {
           <div
             className={cn(
               'lg:col-span-5 space-y-4',
-              activePaneTab === 'detail' ? 'hidden lg:block' : 'block'
+              activePaneTab === 'detail' ? 'hidden lg:block' : 'block',
             )}
           >
             <Card className="border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden">
@@ -380,7 +418,10 @@ export function AdminCategoriesPage() {
                     <CardTitle className="text-base font-semibold text-slate-900">
                       Cây phân cấp danh mục
                     </CardTitle>
-                    <Badge variant="outline" className="bg-teal-50 text-teal-700 border-0 ring-1 ring-teal-200 tabular-nums text-xs font-medium">
+                    <Badge
+                      variant="outline"
+                      className="bg-teal-50 text-teal-700 border-0 ring-1 ring-teal-200 tabular-nums text-xs font-medium"
+                    >
                       {totalCategoriesCount}
                     </Badge>
                   </div>
@@ -415,7 +456,8 @@ export function AdminCategoriesPage() {
                 ) : filteredTree.length === 0 ? (
                   <div className="text-center py-12 text-slate-500 text-xs">
                     <FolderTree className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                    Chưa có danh mục nào phù hợp. Hãy tạo danh mục đầu tiên để bắt đầu phân loại sản phẩm.
+                    Chưa có danh mục nào phù hợp. Hãy tạo danh mục đầu tiên để
+                    bắt đầu phân loại sản phẩm.
                   </div>
                 ) : (
                   <div className="space-y-1">
@@ -443,7 +485,7 @@ export function AdminCategoriesPage() {
           <div
             className={cn(
               'lg:col-span-7 space-y-4',
-              activePaneTab === 'tree' ? 'hidden lg:block' : 'block'
+              activePaneTab === 'tree' ? 'hidden lg:block' : 'block',
             )}
           >
             {/* Mobile Back Button */}
@@ -469,23 +511,29 @@ export function AdminCategoriesPage() {
                           ? `Thêm danh mục con cho "${parentNameHint}"`
                           : 'Thêm danh mục gốc mới'
                         : selectedCategory
-                        ? `Chỉnh sửa danh mục: ${selectedCategory.name}`
-                        : 'Chi tiết danh mục'}
+                          ? `Chỉnh sửa danh mục: ${selectedCategory.name}`
+                          : 'Chi tiết danh mục'}
                     </CardTitle>
                     <CardDescription className="text-xs text-slate-600 mt-0.5">
                       {isCreatingNew
                         ? 'Nhập tên và cấu hình vị trí nhánh cho danh mục mới'
                         : selectedCategory
-                        ? 'Chỉnh sửa thông tin phân cấp và tên hiển thị của danh mục'
-                        : 'Chọn một danh mục từ cây bên trái để xem chi tiết hoặc chỉnh sửa'}
+                          ? 'Chỉnh sửa thông tin phân cấp và tên hiển thị của danh mục'
+                          : 'Chọn một danh mục từ cây bên trái để xem chi tiết hoặc chỉnh sửa'}
                     </CardDescription>
                   </div>
                   {isCreatingNew ? (
-                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs font-medium">
+                    <Badge
+                      variant="outline"
+                      className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs font-medium"
+                    >
                       Tạo mới
                     </Badge>
                   ) : selectedCategory ? (
-                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium">
+                    <Badge
+                      variant="outline"
+                      className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium"
+                    >
                       Chỉnh sửa
                     </Badge>
                   ) : null}
@@ -497,9 +545,12 @@ export function AdminCategoriesPage() {
                   <div className="text-center py-16 space-y-4">
                     <FolderTree className="h-12 w-12 mx-auto text-slate-300" />
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900">Chưa chọn danh mục</h3>
+                      <h3 className="text-base font-semibold text-slate-900">
+                        Chưa chọn danh mục
+                      </h3>
                       <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto">
-                        Nhấn vào một danh mục bất kỳ ở cây bên trái để xem thông tin chi tiết, hoặc bấm nút dưới đây để tạo mới.
+                        Nhấn vào một danh mục bất kỳ ở cây bên trái để xem thông
+                        tin chi tiết, hoặc bấm nút dưới đây để tạo mới.
                       </p>
                     </div>
                     <Button
@@ -519,7 +570,10 @@ export function AdminCategoriesPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="categoryName" className="text-sm font-medium text-slate-900">
+                        <Label
+                          htmlFor="categoryName"
+                          className="text-sm font-medium text-slate-900"
+                        >
                           Tên danh mục *
                         </Label>
                         <Input
@@ -534,7 +588,10 @@ export function AdminCategoriesPage() {
 
                       {selectedCategory && (
                         <div className="space-y-2">
-                          <Label htmlFor="categorySlug" className="text-sm font-medium text-slate-900">
+                          <Label
+                            htmlFor="categorySlug"
+                            className="text-sm font-medium text-slate-900"
+                          >
                             Đường dẫn (Slug)
                           </Label>
                           <Input
@@ -555,18 +612,29 @@ export function AdminCategoriesPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="parentCategory" className="text-sm font-medium text-slate-900">
+                        <Label
+                          htmlFor="parentCategory"
+                          className="text-sm font-medium text-slate-900"
+                        >
                           Danh mục cha
                         </Label>
                         <select
                           id="parentCategory"
                           value={formParentId || ''}
-                          onChange={(e) => setFormParentId(e.target.value || null)}
+                          onChange={(e) =>
+                            setFormParentId(e.target.value || null)
+                          }
                           className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                         >
-                          <option value="">-- Là danh mục gốc (không có mục cha) --</option>
+                          <option value="">
+                            -- Là danh mục gốc (không có mục cha) --
+                          </option>
                           {flatCategories
-                            .filter((c) => !selectedCategory || c.id !== selectedCategory.id)
+                            .filter(
+                              (c) =>
+                                !selectedCategory ||
+                                c.id !== selectedCategory.id,
+                            )
                             .map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}
@@ -590,22 +658,34 @@ export function AdminCategoriesPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                            <span className="text-xs text-slate-500">Sản phẩm liên kết</span>
+                            <span className="text-xs text-slate-500">
+                              Sản phẩm liên kết
+                            </span>
                             <div className="text-xl font-bold tabular-nums text-slate-900 mt-1">
                               {selectedCategory.productCount || 0}
                             </div>
                           </div>
 
                           <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                            <span className="text-xs text-slate-500">Cấu trúc nhánh</span>
+                            <span className="text-xs text-slate-500">
+                              Cấu trúc nhánh
+                            </span>
                             <div className="mt-1">
                               {selectedCategory.isLeaf ? (
-                                <Badge variant="outline" className="bg-slate-100 text-slate-700 border-0 ring-1 ring-slate-200 text-xs font-medium">
+                                <Badge
+                                  variant="outline"
+                                  className="bg-slate-100 text-slate-700 border-0 ring-1 ring-slate-200 text-xs font-medium"
+                                >
                                   Mục lá (Không có con)
                                 </Badge>
                               ) : (
-                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium">
-                                  Mục cha ({selectedCategory.children?.length || 0} mục con)
+                                <Badge
+                                  variant="outline"
+                                  className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium"
+                                >
+                                  Mục cha (
+                                  {selectedCategory.children?.length || 0} mục
+                                  con)
                                 </Badge>
                               )}
                             </div>
@@ -627,8 +707,10 @@ export function AdminCategoriesPage() {
                               setIsDeleteOpen(true);
                             }}
                             disabled={
-                              (selectedCategory.children && selectedCategory.children.length > 0) ||
-                              (selectedCategory.productCount !== undefined && selectedCategory.productCount > 0)
+                              (selectedCategory.children &&
+                                selectedCategory.children.length > 0) ||
+                              (selectedCategory.productCount !== undefined &&
+                                selectedCategory.productCount > 0)
                             }
                             className="rounded-lg text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 disabled:opacity-40"
                           >
@@ -664,7 +746,8 @@ export function AdminCategoriesPage() {
                           }
                           className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 text-xs font-medium gap-1.5 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500"
                         >
-                          {(createMutation.isPending || updateMutation.isPending) && (
+                          {(createMutation.isPending ||
+                            updateMutation.isPending) && (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           )}
                           <Save className="h-3.5 w-3.5" />
@@ -700,8 +783,11 @@ export function AdminCategoriesPage() {
 
             <div className="p-6 text-sm text-slate-600 leading-relaxed">
               Bạn có chắc chắn muốn xóa danh mục{' '}
-              <span className="font-semibold text-slate-900">"{categoryToDelete?.name}"</span>?
-              Thao tác này chỉ thực hiện được khi danh mục không có chứa sản phẩm hoặc danh mục con nào.
+              <span className="font-semibold text-slate-900">
+                "{categoryToDelete?.name}"
+              </span>
+              ? Thao tác này chỉ thực hiện được khi danh mục không có chứa sản
+              phẩm hoặc danh mục con nào.
             </div>
 
             <DialogFooter className="px-6 py-4 border-t border-slate-200 bg-slate-50 gap-2">
@@ -719,11 +805,15 @@ export function AdminCategoriesPage() {
                 type="button"
                 variant="destructive"
                 size="sm"
-                onClick={() => categoryToDelete && deleteMutation.mutate(categoryToDelete.id)}
+                onClick={() =>
+                  categoryToDelete && deleteMutation.mutate(categoryToDelete.id)
+                }
                 disabled={deleteMutation.isPending}
                 className="rounded-lg bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium focus-visible:ring-2 focus-visible:ring-rose-500 gap-1.5"
               >
-                {deleteMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {deleteMutation.isPending && (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                )}
                 Xác nhận xóa
               </Button>
             </DialogFooter>

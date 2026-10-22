@@ -8,10 +8,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-teal-600 text-white shadow-sm hover:bg-teal-700 active:bg-teal-800',
-        destructive: 'bg-rose-600 text-white shadow-sm hover:bg-rose-700 active:bg-rose-800 focus-visible:ring-rose-500',
-        outline: 'border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900',
-        secondary: 'border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900',
+        default:
+          'bg-teal-600 text-white shadow-sm hover:bg-teal-700 active:bg-teal-800',
+        destructive:
+          'bg-rose-600 text-white shadow-sm hover:bg-rose-700 active:bg-rose-800 focus-visible:ring-rose-500',
+        outline:
+          'border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900',
+        secondary:
+          'border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900',
         ghost: 'text-slate-700 hover:bg-slate-100 hover:text-slate-900',
         link: 'text-teal-600 underline-offset-4 hover:underline hover:text-teal-700',
       },

@@ -116,7 +116,9 @@ function ThreadListContent({
         ) : threads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center px-3">
             <MessageSquare className="h-8 w-8 text-slate-300 mb-2" />
-            <p className="text-xs text-slate-500">Chưa có cuộc trò chuyện nào</p>
+            <p className="text-xs text-slate-500">
+              Chưa có cuộc trò chuyện nào
+            </p>
           </div>
         ) : (
           <>
@@ -138,7 +140,7 @@ function ThreadListContent({
                       'flex-1 min-w-0 rounded-lg px-3 py-2 text-xs text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-teal-500',
                       isSelected
                         ? 'bg-teal-50 text-teal-700 font-semibold border-l-2 border-l-teal-600 border-t border-r border-b border-teal-200/60 shadow-sm'
-                        : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-transparent'
+                        : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-transparent',
                     )}
                   >
                     <p className="truncate font-medium leading-snug">{title}</p>
@@ -146,7 +148,9 @@ function ThreadListContent({
                       <p
                         className={cn(
                           'mt-1 text-[11px] truncate tabular-nums',
-                          isSelected ? 'text-teal-600 font-normal' : 'text-slate-400'
+                          isSelected
+                            ? 'text-teal-600 font-normal'
+                            : 'text-slate-400',
                         )}
                       >
                         {dateText}
@@ -176,7 +180,9 @@ function ThreadListContent({
                   onClick={onLoadMore}
                   disabled={isLoadingMore}
                 >
-                  {isLoadingMore && <Loader2 className="h-4 w-4 animate-spin text-teal-600" />}
+                  {isLoadingMore && (
+                    <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+                  )}
                   <span>Tải thêm</span>
                 </Button>
               </div>
@@ -382,9 +388,12 @@ export function AdminChatbotPage() {
               <Bot className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">Trợ lý quản trị</h1>
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
+                Trợ lý quản trị
+              </h1>
               <p className="text-xs text-slate-500 mt-0.5 truncate">
-                Điều hành cửa hàng bằng hội thoại. Mọi thao tác thay đổi dữ liệu đều cần xác nhận.
+                Điều hành cửa hàng bằng hội thoại. Mọi thao tác thay đổi dữ liệu
+                đều cần xác nhận.
               </p>
             </div>
           </div>
@@ -392,14 +401,23 @@ export function AdminChatbotPage() {
           <div className="flex items-center gap-2 shrink-0">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden gap-1.5 h-8 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-teal-500">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="md:hidden gap-1.5 h-8 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-teal-500"
+                >
                   <History className="h-3.5 w-3.5" />
                   <span>Lịch sử</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[85vw] max-w-xs p-0 flex flex-col h-full bg-white border-r border-slate-200 text-slate-900">
+              <SheetContent
+                side="left"
+                className="w-[85vw] max-w-xs p-0 flex flex-col h-full bg-white border-r border-slate-200 text-slate-900"
+              >
                 <SheetHeader className="p-4 border-b border-slate-200 text-left bg-slate-50">
-                  <SheetTitle className="text-base font-semibold text-slate-900 tracking-tight">Lịch sử trò chuyện</SheetTitle>
+                  <SheetTitle className="text-base font-semibold text-slate-900 tracking-tight">
+                    Lịch sử trò chuyện
+                  </SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 min-h-0 flex flex-col">
                   <ThreadListContent
@@ -451,7 +469,9 @@ export function AdminChatbotPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-teal-100 bg-teal-50 text-teal-600 shadow-sm">
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-                <p className="text-xs font-medium text-slate-500">Đang tải cuộc trò chuyện…</p>
+                <p className="text-xs font-medium text-slate-500">
+                  Đang tải cuộc trò chuyện…
+                </p>
               </div>
             ) : visibleMessages.length === 0 ? (
               /* Empty state */
@@ -463,7 +483,8 @@ export function AdminChatbotPage() {
                   Xin chào! Tôi có thể giúp gì cho bạn?
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 mb-6 max-w-sm">
-                  Chọn một trong các gợi ý bên dưới hoặc nhập yêu cầu quản trị cửa hàng của bạn.
+                  Chọn một trong các gợi ý bên dưới hoặc nhập yêu cầu quản trị
+                  cửa hàng của bạn.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
@@ -491,7 +512,11 @@ export function AdminChatbotPage() {
                 className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scrollbar-hide"
               >
                 {threadError && (
-                  <Alert variant="destructive" role="alert" className="mb-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700">
+                  <Alert
+                    variant="destructive"
+                    role="alert"
+                    className="mb-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700"
+                  >
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription className="flex items-center justify-between">
                       <span>{threadError}</span>
@@ -534,7 +559,10 @@ export function AdminChatbotPage() {
                   }
 
                   return (
-                    <div key={message.id} className="flex items-start gap-2.5 justify-start">
+                    <div
+                      key={message.id}
+                      className="flex items-start gap-2.5 justify-start"
+                    >
                       <div className="hidden sm:flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-teal-100 bg-teal-50 text-teal-600 shadow-sm mt-0.5">
                         <Bot className="h-4 w-4" />
                       </div>
@@ -568,7 +596,11 @@ export function AdminChatbotPage() {
 
                         {/* Error in a visible alert with role="alert" */}
                         {hasError && (
-                          <Alert variant="destructive" role="alert" className="mt-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-700">
+                          <Alert
+                            variant="destructive"
+                            role="alert"
+                            className="mt-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-700"
+                          >
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription>{message.error}</AlertDescription>
                           </Alert>
@@ -583,7 +615,9 @@ export function AdminChatbotPage() {
                   <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs text-slate-600 w-fit shadow-sm">
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-600" />
-                      <span className="font-medium text-slate-800">Trợ lý đang phản hồi…</span>
+                      <span className="font-medium text-slate-800">
+                        Trợ lý đang phản hồi…
+                      </span>
                     </div>
                     <Button
                       type="button"
@@ -647,10 +681,15 @@ export function AdminChatbotPage() {
       </div>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={!!threadToDelete} onOpenChange={(open) => !open && setThreadToDelete(null)}>
+      <Dialog
+        open={!!threadToDelete}
+        onOpenChange={(open) => !open && setThreadToDelete(null)}
+      >
         <DialogContent className="rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-xl sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-base font-semibold text-slate-900 tracking-tight">Xóa cuộc trò chuyện</DialogTitle>
+            <DialogTitle className="text-base font-semibold text-slate-900 tracking-tight">
+              Xóa cuộc trò chuyện
+            </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm text-slate-500">
               Xóa cuộc trò chuyện này? Lịch sử sẽ không còn xem lại được.
             </DialogDescription>

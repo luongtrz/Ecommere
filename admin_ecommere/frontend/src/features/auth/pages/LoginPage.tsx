@@ -87,14 +87,19 @@ export function LoginPage() {
               </h1>
 
               <p className="text-sm xl:text-base text-slate-600 leading-relaxed font-normal">
-                Tối ưu hóa quy trình xuất nhập kho các dòng chai xịt đuổi chuột ARS, diệt côn trùng, tẩy rửa sinh học và đồng bộ hóa đơn hàng đa kênh.
+                Tối ưu hóa quy trình xuất nhập kho các dòng chai xịt đuổi chuột
+                ARS, diệt côn trùng, tẩy rửa sinh học và đồng bộ hóa đơn hàng đa
+                kênh.
               </p>
             </div>
           </div>
 
           {/* Bottom Security Footer */}
           <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-200">
-            <span>&copy; {new Date().getFullYear()} Thai Spray Việt Nam • Control Platform</span>
+            <span>
+              &copy; {new Date().getFullYear()} Thai Spray Việt Nam • Control
+              Platform
+            </span>
             <span className="flex items-center gap-1.5 font-medium text-slate-700">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
               Bảo mật SSL / TLS
@@ -111,8 +116,12 @@ export function LoginPage() {
                 TS
               </div>
               <div>
-                <p className="text-lg font-bold text-slate-900">Thai Spray Admin</p>
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Cổng Quản Trị Hệ Thống</p>
+                <p className="text-lg font-bold text-slate-900">
+                  Thai Spray Admin
+                </p>
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+                  Cổng Quản Trị Hệ Thống
+                </p>
               </div>
             </div>
 
@@ -126,14 +135,18 @@ export function LoginPage() {
                 Đăng Nhập Quản Trị
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
-                Vui lòng nhập số điện thoại quản trị viên và mật khẩu bảo mật để truy cập bảng điều khiển.
+                Vui lòng nhập số điện thoại quản trị viên và mật khẩu bảo mật để
+                truy cập bảng điều khiển.
               </p>
             </div>
 
             {/* Auth Form Card */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={form.control}
                     name="phone"

@@ -32,7 +32,10 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 font-sans">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 font-sans"
+      >
         <FormField
           control={form.control}
           name="phone"

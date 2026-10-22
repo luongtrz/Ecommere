@@ -17,7 +17,7 @@ import {
   Box,
   Tags,
   Loader2,
-  Star
+  Star,
 } from 'lucide-react';
 import { useInfiniteAdminProducts } from '@/features/catalog/hooks/useProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -185,8 +185,15 @@ export function AdminProductsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <AlertCircle className="h-12 w-12 text-rose-600" />
-        <h2 className="text-lg font-semibold text-slate-900">Không thể tải danh sách sản phẩm</h2>
-        <Button onClick={() => window.location.reload()} className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500">Thử lại</Button>
+        <h2 className="text-lg font-semibold text-slate-900">
+          Không thể tải danh sách sản phẩm
+        </h2>
+        <Button
+          onClick={() => window.location.reload()}
+          className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+        >
+          Thử lại
+        </Button>
       </div>
     );
   }
@@ -208,7 +215,11 @@ export function AdminProductsPage() {
             onClick={() => setCategoryId(node.id)}
             className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
           >
-            <span className={categoryId === node.id ? "font-bold text-teal-600" : ""}>
+            <span
+              className={
+                categoryId === node.id ? 'font-bold text-teal-600' : ''
+              }
+            >
               {node.name}
             </span>
           </DropdownMenuItem>
@@ -218,7 +229,11 @@ export function AdminProductsPage() {
       return (
         <DropdownMenuSub key={node.id}>
           <DropdownMenuSubTrigger className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700">
-            <span className={categoryId === node.id ? "font-bold text-teal-600" : ""}>
+            <span
+              className={
+                categoryId === node.id ? 'font-bold text-teal-600' : ''
+              }
+            >
               {node.name}
             </span>
           </DropdownMenuSubTrigger>
@@ -240,7 +255,6 @@ export function AdminProductsPage() {
     <>
       <SEO title="Quản lý sản phẩm - Admin" />
       <div className="space-y-6">
-
         {/* Dominant Heading */}
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -255,32 +269,48 @@ export function AdminProductsPage() {
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
           <Card className="border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">Tổng sản phẩm</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-500">
+                Tổng sản phẩm
+              </CardTitle>
               <Package className="h-4 w-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-slate-900">{totalProducts}</div>
+              <div className="text-2xl font-bold tabular-nums text-slate-900">
+                {totalProducts}
+              </div>
               <p className="text-xs text-slate-400 mt-1">Sản phẩm có sẵn</p>
             </CardContent>
           </Card>
           <Card className="border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">Danh mục</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-500">
+                Danh mục
+              </CardTitle>
               <Tags className="h-4 w-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-slate-900">--</div>
-              <p className="text-xs text-slate-400 mt-1">Danh mục đang hoạt động</p>
+              <div className="text-2xl font-bold tabular-nums text-slate-900">
+                --
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Danh mục đang hoạt động
+              </p>
             </CardContent>
           </Card>
           <Card className="border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">Tồn kho</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-500">
+                Tồn kho
+              </CardTitle>
               <Box className="h-4 w-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold tabular-nums text-slate-900">--</div>
-              <p className="text-xs text-slate-400 mt-1">Tổng số lượng tồn kho</p>
+              <div className="text-2xl font-bold tabular-nums text-slate-900">
+                --
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Tổng số lượng tồn kho
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -303,7 +333,9 @@ export function AdminProductsPage() {
                 <Button
                   variant="outline"
                   className={`gap-2 h-10 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 ${
-                    categoryId ? 'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100' : ''
+                    categoryId
+                      ? 'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100'
+                      : ''
                   }`}
                 >
                   <Filter className="h-4 w-4" />
@@ -312,14 +344,23 @@ export function AdminProductsPage() {
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px] max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-md">
-                <DropdownMenuLabel className="text-slate-900">Lọc theo danh mục</DropdownMenuLabel>
+              <DropdownMenuContent
+                align="start"
+                className="w-[300px] max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-md"
+              >
+                <DropdownMenuLabel className="text-slate-900">
+                  Lọc theo danh mục
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-slate-200" />
                 <DropdownMenuItem
                   onClick={() => setCategoryId(undefined)}
                   className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
                 >
-                  <span className={!categoryId ? "font-bold text-teal-600" : ""}>Tất cả danh mục</span>
+                  <span
+                    className={!categoryId ? 'font-bold text-teal-600' : ''}
+                  >
+                    Tất cả danh mục
+                  </span>
                 </DropdownMenuItem>
                 {renderCategoryMenu(categoryTree)}
               </DropdownMenuContent>
@@ -337,7 +378,10 @@ export function AdminProductsPage() {
               </Button>
             )}
           </div>
-          <Button asChild className="gap-2 shrink-0 h-10 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500">
+          <Button
+            asChild
+            className="gap-2 shrink-0 h-10 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+          >
             <Link to="/admin/products/new">
               <Plus className="h-4 w-4" />
               <span className="inline">Thêm mới</span>
@@ -355,12 +399,18 @@ export function AdminProductsPage() {
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center px-4">
                 <Package className="h-12 w-12 text-slate-300 mb-4" />
-                <h3 className="text-lg font-medium text-slate-900">Chưa có sản phẩm nào</h3>
-                <p className="text-sm text-slate-500 max-w-sm mt-1 mb-6">Create your first product to get started managing your catalog.</p>
-                <Button asChild className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500">
-                  <Link to="/admin/products/new">
-                    Tạo sản phẩm
-                  </Link>
+                <h3 className="text-lg font-medium text-slate-900">
+                  Chưa có sản phẩm nào
+                </h3>
+                <p className="text-sm text-slate-500 max-w-sm mt-1 mb-6">
+                  Create your first product to get started managing your
+                  catalog.
+                </p>
+                <Button
+                  asChild
+                  className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+                >
+                  <Link to="/admin/products/new">Tạo sản phẩm</Link>
                 </Button>
               </div>
             ) : (
@@ -368,13 +418,27 @@ export function AdminProductsPage() {
                 <Table>
                   <TableHeader className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
                     <TableRow className="hover:bg-transparent border-b border-slate-200">
-                      <TableHead className="w-[80px] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Hình ảnh</TableHead>
-                      <TableHead className="min-w-[200px] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Tên sản phẩm</TableHead>
-                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Danh mục</TableHead>
-                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Giá bán</TableHead>
-                      <TableHead className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Tồn kho</TableHead>
-                      <TableHead className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Đánh giá</TableHead>
-                      <TableHead className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Thao tác</TableHead>
+                      <TableHead className="w-[80px] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Hình ảnh
+                      </TableHead>
+                      <TableHead className="min-w-[200px] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Tên sản phẩm
+                      </TableHead>
+                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Danh mục
+                      </TableHead>
+                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Giá bán
+                      </TableHead>
+                      <TableHead className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Tồn kho
+                      </TableHead>
+                      <TableHead className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Đánh giá
+                      </TableHead>
+                      <TableHead className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Thao tác
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -385,7 +449,10 @@ export function AdminProductsPage() {
                           deleteProduct.variables === product.id) ||
                         deletingIdRef.current === product.id;
                       return (
-                        <TableRow key={product.id} className="group hover:bg-slate-50 transition-colors border-b border-slate-100">
+                        <TableRow
+                          key={product.id}
+                          className="group hover:bg-slate-50 transition-colors border-b border-slate-100"
+                        >
                           <TableCell className="px-4 py-3">
                             <div className="relative h-12 w-12 rounded-lg border border-slate-200 overflow-hidden bg-slate-100 shadow-sm shrink-0">
                               <img
@@ -415,7 +482,10 @@ export function AdminProductsPage() {
                           </TableCell>
                           <TableCell className="px-4 py-3">
                             {product.category ? (
-                              <Badge variant="outline" className="font-normal text-xs bg-slate-50 text-slate-700 border-slate-200">
+                              <Badge
+                                variant="outline"
+                                className="font-normal text-xs bg-slate-50 text-slate-700 border-slate-200"
+                              >
                                 {product.category.name}
                               </Badge>
                             ) : (
@@ -428,11 +498,13 @@ export function AdminProductsPage() {
                             </div>
                           </TableCell>
                           <TableCell className="px-4 py-3 text-center">
-                            <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium tabular-nums ${
-                              totalStock > 0
-                                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-                                : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
-                            }`}>
+                            <div
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium tabular-nums ${
+                                totalStock > 0
+                                  ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                  : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+                              }`}
+                            >
                               {totalStock} sp
                             </div>
                             <div className="text-[10px] text-slate-400 mt-0.5">
@@ -442,34 +514,59 @@ export function AdminProductsPage() {
                           <TableCell className="px-4 py-3 text-center">
                             <div className="flex items-center justify-center gap-1.5">
                               <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                              <span className="font-semibold text-sm text-slate-900 tabular-nums">{product.rating?.toFixed(1) || '0.0'}</span>
-                              <span className="text-xs text-slate-400">({product.reviewCount || 0})</span>
+                              <span className="font-semibold text-sm text-slate-900 tabular-nums">
+                                {product.rating?.toFixed(1) || '0.0'}
+                              </span>
+                              <span className="text-xs text-slate-400">
+                                ({product.reviewCount || 0})
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell className="px-4 py-3 text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-100 text-slate-500 hover:text-slate-900">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                                >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-white border-slate-200 shadow-md">
-                                <DropdownMenuLabel className="text-slate-900">Thao tác</DropdownMenuLabel>
+                              <DropdownMenuContent
+                                align="end"
+                                className="bg-white border-slate-200 shadow-md"
+                              >
+                                <DropdownMenuLabel className="text-slate-900">
+                                  Thao tác
+                                </DropdownMenuLabel>
                                 <DropdownMenuItem asChild>
-                                  <a href={`${STORE_URL}/p/${product.slug}`} target="_blank" rel="noreferrer" className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700">
-                                    <Eye className="mr-2 h-4 w-4" /> Xem chi tiết
+                                  <a
+                                    href={`${STORE_URL}/p/${product.slug}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
+                                  >
+                                    <Eye className="mr-2 h-4 w-4" /> Xem chi
+                                    tiết
                                   </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
-                                  <Link to={`/admin/products/${product.id}/edit`} className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700">
-                                    <Pencil className="mr-2 h-4 w-4" /> Chỉnh sửa
+                                  <Link
+                                    to={`/admin/products/${product.id}/edit`}
+                                    className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
+                                  >
+                                    <Pencil className="mr-2 h-4 w-4" /> Chỉnh
+                                    sửa
                                   </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-slate-200" />
                                 <DropdownMenuItem
                                   disabled={isDeleting}
                                   className="text-rose-600 focus:text-rose-700 focus:bg-rose-50 cursor-pointer"
-                                  onClick={() => handleDelete(product.id, product.name)}
+                                  onClick={() =>
+                                    handleDelete(product.id, product.name)
+                                  }
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" /> Xóa sản
                                   phẩm
@@ -484,10 +581,17 @@ export function AdminProductsPage() {
                 </Table>
 
                 {/* Sentinel for Infinite Scroll */}
-                <div ref={observerTarget} className="h-12 flex items-center justify-center p-4">
-                  {isFetchingNextPage && <Loader2 className="h-5 w-5 animate-spin text-teal-600" />}
+                <div
+                  ref={observerTarget}
+                  className="h-12 flex items-center justify-center p-4"
+                >
+                  {isFetchingNextPage && (
+                    <Loader2 className="h-5 w-5 animate-spin text-teal-600" />
+                  )}
                   {!hasNextPage && products.length > 0 && (
-                    <span className="text-xs text-slate-400">Đã hiển thị hết sản phẩm</span>
+                    <span className="text-xs text-slate-400">
+                      Đã hiển thị hết sản phẩm
+                    </span>
                   )}
                 </div>
               </div>

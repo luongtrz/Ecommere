@@ -7,8 +7,10 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-slate-200 bg-white text-slate-900 shadow-sm [&>svg]:text-slate-600',
-        destructive: 'border-rose-200 bg-rose-50 text-rose-700 [&>svg]:text-rose-600',
+        default:
+          'border-slate-200 bg-white text-slate-900 shadow-sm [&>svg]:text-slate-600',
+        destructive:
+          'border-rose-200 bg-rose-50 text-rose-700 [&>svg]:text-rose-600',
       },
     },
     defaultVariants: {
@@ -30,18 +32,31 @@ const Alert = React.forwardRef<
 ));
 Alert.displayName = 'Alert';
 
-const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h5 ref={ref} className={cn('mb-1 font-semibold leading-none tracking-tight text-slate-900', className)} {...props} />
-  )
-);
+const AlertTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h5
+    ref={ref}
+    className={cn(
+      'mb-1 font-semibold leading-none tracking-tight text-slate-900',
+      className,
+    )}
+    {...props}
+  />
+));
 AlertTitle.displayName = 'AlertTitle';
 
-const AlertDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('text-sm text-slate-600 [&_p]:leading-relaxed', className)} {...props} />
-  )
-);
+const AlertDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn('text-sm text-slate-600 [&_p]:leading-relaxed', className)}
+    {...props}
+  />
+));
 AlertDescription.displayName = 'AlertDescription';
 
 export { Alert, AlertTitle, AlertDescription };

@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SEO } from '@/lib/seo';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,8 +21,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Settings, Users, BarChart3, Save, Ticket, Percent, Truck } from 'lucide-react';
-import { adminReferralsApi, type ReferralConfig } from '../api/adminReferrals.api';
+import {
+  Plus,
+  Settings,
+  Users,
+  BarChart3,
+  Save,
+  Ticket,
+  Percent,
+  Truck,
+} from 'lucide-react';
+import {
+  adminReferralsApi,
+  type ReferralConfig,
+} from '../api/adminReferrals.api';
 import { useToast } from '@/hooks/useToast';
 import { formatCurrency, cn } from '@/lib/utils';
 
@@ -147,7 +165,10 @@ export function AdminCouponsPage() {
       : config?.[field];
   };
 
-  const renderTypeBadge = (type: 'PERCENT' | 'FIXED' | 'FREESHIP', value?: number) => {
+  const renderTypeBadge = (
+    type: 'PERCENT' | 'FIXED' | 'FREESHIP',
+    value?: number,
+  ) => {
     switch (type) {
       case 'PERCENT':
         return (
@@ -187,7 +208,8 @@ export function AdminCouponsPage() {
               Quản lý mã giảm giá và Referral
             </h1>
             <p className="text-slate-500 mt-1 text-sm">
-              Thiết lập mã khuyến mãi, chiết khấu và chương trình giới thiệu khách hàng.
+              Thiết lập mã khuyến mãi, chiết khấu và chương trình giới thiệu
+              khách hàng.
             </p>
           </div>
         </div>
@@ -220,7 +242,9 @@ export function AdminCouponsPage() {
           <TabsContent value="coupons" className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg md:text-xl font-bold tracking-tight text-slate-900">Danh sách mã giảm giá</h2>
+                <h2 className="text-lg md:text-xl font-bold tracking-tight text-slate-900">
+                  Danh sách mã giảm giá
+                </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Các mã giảm giá đang áp dụng trên toàn hệ thống cửa hàng.
                 </p>
@@ -243,8 +267,12 @@ export function AdminCouponsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardTitle className="text-2xl font-bold tabular-nums text-slate-900">{totalCouponsCount}</CardTitle>
-                  <p className="text-xs text-slate-400 mt-1">Đã khởi tạo trong kho ưu đãi</p>
+                  <CardTitle className="text-2xl font-bold tabular-nums text-slate-900">
+                    {totalCouponsCount}
+                  </CardTitle>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Đã khởi tạo trong kho ưu đãi
+                  </p>
                 </CardContent>
               </Card>
 
@@ -258,8 +286,12 @@ export function AdminCouponsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardTitle className="text-2xl font-bold tabular-nums text-emerald-700">{activeCouponsCount}</CardTitle>
-                  <p className="text-xs text-slate-400 mt-1">Sẵn sàng để khách hàng áp dụng</p>
+                  <CardTitle className="text-2xl font-bold tabular-nums text-emerald-700">
+                    {activeCouponsCount}
+                  </CardTitle>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Sẵn sàng để khách hàng áp dụng
+                  </p>
                 </CardContent>
               </Card>
 
@@ -273,8 +305,12 @@ export function AdminCouponsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardTitle className="text-2xl font-bold tabular-nums text-amber-700">{totalUsesCount}</CardTitle>
-                  <p className="text-xs text-slate-400 mt-1">Lượt dùng coupon thành công</p>
+                  <CardTitle className="text-2xl font-bold tabular-nums text-amber-700">
+                    {totalUsesCount}
+                  </CardTitle>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Lượt dùng coupon thành công
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -301,9 +337,17 @@ export function AdminCouponsPage() {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {coupons.map((coupon) => {
-                          const usagePercent = coupon.maxUses > 0 ? Math.round((coupon.usedCount / coupon.maxUses) * 100) : 0;
+                          const usagePercent =
+                            coupon.maxUses > 0
+                              ? Math.round(
+                                  (coupon.usedCount / coupon.maxUses) * 100,
+                                )
+                              : 0;
                           return (
-                            <tr key={coupon.id} className="hover:bg-slate-50/80 transition-colors">
+                            <tr
+                              key={coupon.id}
+                              className="hover:bg-slate-50/80 transition-colors"
+                            >
                               <td className="px-4 py-3">
                                 <div className="flex flex-col">
                                   <span className="font-mono text-sm font-bold text-slate-900 tracking-wider">
@@ -311,7 +355,8 @@ export function AdminCouponsPage() {
                                   </span>
                                   {coupon.maxDiscount && (
                                     <span className="text-[11px] text-slate-500 mt-0.5 tabular-nums">
-                                      Tối đa: {formatCurrency(coupon.maxDiscount)}
+                                      Tối đa:{' '}
+                                      {formatCurrency(coupon.maxDiscount)}
                                     </span>
                                   )}
                                 </div>
@@ -320,39 +365,65 @@ export function AdminCouponsPage() {
                                 {renderTypeBadge(coupon.type, coupon.value)}
                               </td>
                               <td className="px-4 py-3 tabular-nums text-slate-600">
-                                {coupon.minOrder > 0 ? formatCurrency(coupon.minOrder) : 'Không giới hạn'}
+                                {coupon.minOrder > 0
+                                  ? formatCurrency(coupon.minOrder)
+                                  : 'Không giới hạn'}
                               </td>
                               <td className="px-4 py-3">
                                 <div className="w-48 space-y-1">
                                   <div className="flex justify-between text-xs text-slate-500">
                                     <span className="tabular-nums">
-                                      <strong className="text-slate-900">{coupon.usedCount}</strong> / {coupon.maxUses}
+                                      <strong className="text-slate-900">
+                                        {coupon.usedCount}
+                                      </strong>{' '}
+                                      / {coupon.maxUses}
                                     </span>
-                                    <span className="tabular-nums font-medium text-slate-900">{usagePercent}%</span>
+                                    <span className="tabular-nums font-medium text-slate-900">
+                                      {usagePercent}%
+                                    </span>
                                   </div>
                                   <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                                     <div
                                       className="h-full rounded-full bg-teal-600 transition-all duration-300"
-                                      style={{ width: `${Math.min(100, usagePercent)}%` }}
+                                      style={{
+                                        width: `${Math.min(100, usagePercent)}%`,
+                                      }}
                                     />
                                   </div>
                                 </div>
                               </td>
                               <td className="px-4 py-3 text-slate-500 tabular-nums text-xs">
-                                {new Date(coupon.validUntil).toLocaleDateString('vi-VN')}
+                                {new Date(coupon.validUntil).toLocaleDateString(
+                                  'vi-VN',
+                                )}
                               </td>
                               <td className="px-4 py-3 text-right">
                                 <div className="inline-flex items-center gap-2 justify-end">
-                                  <span className={cn('text-xs font-medium', coupon.active ? 'text-emerald-700' : 'text-slate-400')}>
+                                  <span
+                                    className={cn(
+                                      'text-xs font-medium',
+                                      coupon.active
+                                        ? 'text-emerald-700'
+                                        : 'text-slate-400',
+                                    )}
+                                  >
                                     {coupon.active ? 'Bật' : 'Tắt'}
                                   </span>
                                   <Switch
                                     checked={coupon.active}
                                     onCheckedChange={(checked) => {
                                       setCoupons((prev) =>
-                                        prev.map((c) => (c.id === coupon.id ? { ...c, active: checked } : c))
+                                        prev.map((c) =>
+                                          c.id === coupon.id
+                                            ? { ...c, active: checked }
+                                            : c,
+                                        ),
                                       );
-                                      toast.success(checked ? `Đã kích hoạt mã ${coupon.code}` : `Đã tắt mã ${coupon.code}`);
+                                      toast.success(
+                                        checked
+                                          ? `Đã kích hoạt mã ${coupon.code}`
+                                          : `Đã tắt mã ${coupon.code}`,
+                                      );
                                     }}
                                     aria-label={`Trạng thái mã ${coupon.code}`}
                                   />
@@ -374,7 +445,10 @@ export function AdminCouponsPage() {
             {configLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+                  <div
+                    key={i}
+                    className="h-24 bg-slate-100 rounded-xl animate-pulse"
+                  />
                 ))}
               </div>
             ) : (
@@ -388,8 +462,12 @@ export function AdminCouponsPage() {
                           <Users className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="text-2xl font-bold tabular-nums text-slate-900">{stats?.totalReferrals || 0}</p>
-                          <p className="text-xs text-slate-500">Tổng lượt giới thiệu</p>
+                          <p className="text-2xl font-bold tabular-nums text-slate-900">
+                            {stats?.totalReferrals || 0}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            Tổng lượt giới thiệu
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -401,8 +479,12 @@ export function AdminCouponsPage() {
                           <BarChart3 className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="text-2xl font-bold tabular-nums text-emerald-700">{stats?.totalCouponsCreated || 0}</p>
-                          <p className="text-xs text-slate-500">Coupon đã tạo</p>
+                          <p className="text-2xl font-bold tabular-nums text-emerald-700">
+                            {stats?.totalCouponsCreated || 0}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            Coupon đã tạo
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -415,7 +497,9 @@ export function AdminCouponsPage() {
                         </div>
                         <div>
                           <p className="text-2xl font-bold text-amber-700">
-                            {(getFieldValue('active') as boolean) ? 'Bật' : 'Tắt'}
+                            {(getFieldValue('active') as boolean)
+                              ? 'Bật'
+                              : 'Tắt'}
                           </p>
                           <p className="text-xs text-slate-500">Trạng thái</p>
                         </div>
@@ -436,14 +520,21 @@ export function AdminCouponsPage() {
                     {/* Active toggle */}
                     <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200/60 rounded-xl">
                       <div>
-                        <Label className="text-sm font-medium text-slate-900">Kích hoạt tính năng Referral</Label>
+                        <Label className="text-sm font-medium text-slate-900">
+                          Kích hoạt tính năng Referral
+                        </Label>
                         <p className="text-xs text-slate-500 mt-1">
                           Bật/tắt chương trình giới thiệu bạn bè
                         </p>
                       </div>
                       <Switch
                         checked={(getFieldValue('active') as boolean) || false}
-                        onCheckedChange={(checked) => setConfigForm((prev) => ({ ...prev, active: checked }))}
+                        onCheckedChange={(checked) =>
+                          setConfigForm((prev) => ({
+                            ...prev,
+                            active: checked,
+                          }))
+                        }
                       />
                     </div>
 
@@ -454,7 +545,9 @@ export function AdminCouponsPage() {
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Loại coupon</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Loại coupon
+                          </Label>
                           <Select
                             value={
                               (getFieldValue('referrerCouponType') as string) ||
@@ -467,34 +560,63 @@ export function AdminCouponsPage() {
                               }))
                             }
                           >
-                            <SelectTrigger className="bg-white border-slate-200 text-slate-900 rounded-lg shadow-none text-sm"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="bg-white border-slate-200 text-slate-900 rounded-lg shadow-none text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
                             <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
-                              <SelectItem value="PERCENT">Phần trăm (%)</SelectItem>
-                              <SelectItem value="FIXED">Số tiền cố định (VND)</SelectItem>
-                              <SelectItem value="FREESHIP">Miễn phí vận chuyển</SelectItem>
+                              <SelectItem value="PERCENT">
+                                Phần trăm (%)
+                              </SelectItem>
+                              <SelectItem value="FIXED">
+                                Số tiền cố định (VND)
+                              </SelectItem>
+                              <SelectItem value="FREESHIP">
+                                Miễn phí vận chuyển
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Giá trị</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Giá trị
+                          </Label>
                           <Input
                             type="number"
                             className="bg-white border-slate-200 text-slate-900 tabular-nums focus-visible:ring-1 focus-visible:ring-teal-500 rounded-lg text-sm"
-                            value={(getFieldValue('referrerCouponValue') as number) || 0}
-                            onChange={(e) => setConfigForm((prev) => ({ ...prev, referrerCouponValue: Number(e.target.value) }))}
+                            value={
+                              (getFieldValue(
+                                'referrerCouponValue',
+                              ) as number) || 0
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                referrerCouponValue: Number(e.target.value),
+                              }))
+                            }
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Giảm tối đa (VND)</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Giảm tối đa (VND)
+                          </Label>
                           <Input
                             type="number"
                             placeholder="Không giới hạn"
                             className="bg-white border-slate-200 text-slate-900 tabular-nums placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-teal-500 rounded-lg text-sm"
-                            value={(getFieldValue('referrerMaxDiscount') as number) || ''}
-                            onChange={(e) => setConfigForm((prev) => ({
-                              ...prev,
-                              referrerMaxDiscount: e.target.value ? Number(e.target.value) : null,
-                            }))}
+                            value={
+                              (getFieldValue(
+                                'referrerMaxDiscount',
+                              ) as number) || ''
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                referrerMaxDiscount: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }))
+                            }
                           />
                         </div>
                       </div>
@@ -507,7 +629,9 @@ export function AdminCouponsPage() {
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Loại coupon</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Loại coupon
+                          </Label>
                           <Select
                             value={
                               (getFieldValue('refereeCouponType') as string) ||
@@ -520,34 +644,61 @@ export function AdminCouponsPage() {
                               }))
                             }
                           >
-                            <SelectTrigger className="bg-white border-slate-200 text-slate-900 rounded-lg shadow-none text-sm"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="bg-white border-slate-200 text-slate-900 rounded-lg shadow-none text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
                             <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
-                              <SelectItem value="PERCENT">Phần trăm (%)</SelectItem>
-                              <SelectItem value="FIXED">Số tiền cố định (VND)</SelectItem>
-                              <SelectItem value="FREESHIP">Miễn phí vận chuyển</SelectItem>
+                              <SelectItem value="PERCENT">
+                                Phần trăm (%)
+                              </SelectItem>
+                              <SelectItem value="FIXED">
+                                Số tiền cố định (VND)
+                              </SelectItem>
+                              <SelectItem value="FREESHIP">
+                                Miễn phí vận chuyển
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Giá trị</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Giá trị
+                          </Label>
                           <Input
                             type="number"
                             className="bg-white border-slate-200 text-slate-900 tabular-nums focus-visible:ring-1 focus-visible:ring-teal-500 rounded-lg text-sm"
-                            value={(getFieldValue('refereeCouponValue') as number) || 0}
-                            onChange={(e) => setConfigForm((prev) => ({ ...prev, refereeCouponValue: Number(e.target.value) }))}
+                            value={
+                              (getFieldValue('refereeCouponValue') as number) ||
+                              0
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                refereeCouponValue: Number(e.target.value),
+                              }))
+                            }
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Giảm tối đa (VND)</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Giảm tối đa (VND)
+                          </Label>
                           <Input
                             type="number"
                             placeholder="Không giới hạn"
                             className="bg-white border-slate-200 text-slate-900 tabular-nums placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-teal-500 rounded-lg text-sm"
-                            value={(getFieldValue('refereeMaxDiscount') as number) || ''}
-                            onChange={(e) => setConfigForm((prev) => ({
-                              ...prev,
-                              refereeMaxDiscount: e.target.value ? Number(e.target.value) : null,
-                            }))}
+                            value={
+                              (getFieldValue('refereeMaxDiscount') as number) ||
+                              ''
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                refereeMaxDiscount: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }))
+                            }
                           />
                         </div>
                       </div>
@@ -560,38 +711,66 @@ export function AdminCouponsPage() {
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Đơn hàng tối thiểu (VND)</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Đơn hàng tối thiểu (VND)
+                          </Label>
                           <Input
                             type="number"
                             placeholder="0"
                             className="bg-white border-slate-200 text-slate-900 tabular-nums placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-teal-500 rounded-lg text-sm"
-                            value={(getFieldValue('minOrderForCoupon') as number) || ''}
-                            onChange={(e) => setConfigForm((prev) => ({
-                              ...prev,
-                              minOrderForCoupon: e.target.value ? Number(e.target.value) : null,
-                            }))}
+                            value={
+                              (getFieldValue('minOrderForCoupon') as number) ||
+                              ''
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                minOrderForCoupon: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }))
+                            }
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Số ngày hiệu lực coupon</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Số ngày hiệu lực coupon
+                          </Label>
                           <Input
                             type="number"
                             className="bg-white border-slate-200 text-slate-900 tabular-nums focus-visible:ring-1 focus-visible:ring-teal-500 rounded-lg text-sm"
-                            value={(getFieldValue('couponValidDays') as number) || 30}
-                            onChange={(e) => setConfigForm((prev) => ({ ...prev, couponValidDays: Number(e.target.value) }))}
+                            value={
+                              (getFieldValue('couponValidDays') as number) || 30
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                couponValidDays: Number(e.target.value),
+                              }))
+                            }
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 text-xs font-medium">Giới hạn lượt mời/user</Label>
+                          <Label className="text-slate-700 text-xs font-medium">
+                            Giới hạn lượt mời/user
+                          </Label>
                           <Input
                             type="number"
                             placeholder="Không giới hạn"
                             className="bg-white border-slate-200 text-slate-900 tabular-nums placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-teal-500 rounded-lg text-sm"
-                            value={(getFieldValue('maxReferralsPerUser') as number) || ''}
-                            onChange={(e) => setConfigForm((prev) => ({
-                              ...prev,
-                              maxReferralsPerUser: e.target.value ? Number(e.target.value) : null,
-                            }))}
+                            value={
+                              (getFieldValue(
+                                'maxReferralsPerUser',
+                              ) as number) || ''
+                            }
+                            onChange={(e) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                maxReferralsPerUser: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }))
+                            }
                           />
                         </div>
                       </div>
@@ -617,7 +796,9 @@ export function AdminCouponsPage() {
                 {stats?.topReferrers && stats.topReferrers.length > 0 && (
                   <Card className="bg-white border-slate-200 shadow-sm rounded-xl">
                     <CardHeader className="border-b border-slate-200 bg-slate-50 py-4 px-6 rounded-t-xl">
-                      <CardTitle className="text-base md:text-lg font-semibold text-slate-900">Top người giới thiệu</CardTitle>
+                      <CardTitle className="text-base md:text-lg font-semibold text-slate-900">
+                        Top người giới thiệu
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                       <div className="space-y-2.5">
@@ -631,11 +812,20 @@ export function AdminCouponsPage() {
                                 {index + 1}
                               </span>
                               <div>
-                                <p className="text-sm font-medium text-slate-900">{item.user?.name || item.user?.email}</p>
-                                <p className="text-xs text-slate-500">{item.user?.email}</p>
+                                <p className="text-sm font-medium text-slate-900">
+                                  {item.user?.name || item.user?.email}
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {item.user?.email}
+                                </p>
                               </div>
                             </div>
-                            <Badge variant="secondary" className="border-slate-200 bg-white text-slate-700 tabular-nums shadow-none">{item.referralCount} lượt</Badge>
+                            <Badge
+                              variant="secondary"
+                              className="border-slate-200 bg-white text-slate-700 tabular-nums shadow-none"
+                            >
+                              {item.referralCount} lượt
+                            </Badge>
                           </div>
                         ))}
                       </div>
@@ -650,13 +840,18 @@ export function AdminCouponsPage() {
           <TabsContent value="referral-list">
             <Card className="bg-white border-slate-200 shadow-sm rounded-xl overflow-hidden">
               <CardHeader className="border-b border-slate-200 bg-slate-50 py-4 px-6">
-                <CardTitle className="text-base md:text-lg font-semibold text-slate-900">Danh sách giới thiệu</CardTitle>
+                <CardTitle className="text-base md:text-lg font-semibold text-slate-900">
+                  Danh sách giới thiệu
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 {listLoading ? (
                   <div className="p-6 space-y-3">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="h-14 bg-slate-100 rounded-lg animate-pulse" />
+                      <div
+                        key={i}
+                        className="h-14 bg-slate-100 rounded-lg animate-pulse"
+                      />
                     ))}
                   </div>
                 ) : !referralList || referralList.data.length === 0 ? (
@@ -677,22 +872,36 @@ export function AdminCouponsPage() {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {referralList.data.map((item) => (
-                          <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                          <tr
+                            key={item.id}
+                            className="hover:bg-slate-50/80 transition-colors"
+                          >
                             <td className="px-4 py-3">
                               <div>
-                                <p className="font-medium text-slate-900">{item.referrer.name || item.referrer.email}</p>
-                                <p className="text-xs text-slate-500 font-mono">{item.referrer.referralCode}</p>
+                                <p className="font-medium text-slate-900">
+                                  {item.referrer.name || item.referrer.email}
+                                </p>
+                                <p className="text-xs text-slate-500 font-mono">
+                                  {item.referrer.referralCode}
+                                </p>
                               </div>
                             </td>
                             <td className="px-4 py-3">
                               <div>
-                                <p className="font-medium text-slate-900">{item.referee.name || item.referee.email}</p>
-                                <p className="text-xs text-slate-500">{item.referee.email}</p>
+                                <p className="font-medium text-slate-900">
+                                  {item.referee.name || item.referee.email}
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {item.referee.email}
+                                </p>
                               </div>
                             </td>
                             <td className="px-4 py-3">
                               {item.referrerCouponCode ? (
-                                <Badge variant="outline" className="font-mono text-xs border-slate-200 bg-slate-50 text-slate-700">
+                                <Badge
+                                  variant="outline"
+                                  className="font-mono text-xs border-slate-200 bg-slate-50 text-slate-700"
+                                >
                                   {item.referrerCouponCode}
                                 </Badge>
                               ) : (
@@ -701,7 +910,10 @@ export function AdminCouponsPage() {
                             </td>
                             <td className="px-4 py-3">
                               {item.refereeCouponCode ? (
-                                <Badge variant="outline" className="font-mono text-xs border-slate-200 bg-slate-50 text-slate-700">
+                                <Badge
+                                  variant="outline"
+                                  className="font-mono text-xs border-slate-200 bg-slate-50 text-slate-700"
+                                >
                                   {item.refereeCouponCode}
                                 </Badge>
                               ) : (
@@ -709,7 +921,9 @@ export function AdminCouponsPage() {
                               )}
                             </td>
                             <td className="px-4 py-3 text-slate-500 tabular-nums text-xs text-right">
-                              {new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                              {new Date(item.createdAt).toLocaleDateString(
+                                'vi-VN',
+                              )}
                             </td>
                           </tr>
                         ))}

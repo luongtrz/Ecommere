@@ -22,7 +22,9 @@ export function ErrorPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-md mx-auto leading-relaxed mb-8">
-            Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật và không thể tải trang. Đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.
+            Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật và không thể tải trang.
+            Đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử
+            lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.
           </p>
 
           {/* Action Buttons */}
@@ -53,15 +55,21 @@ export function ErrorPage() {
           <div className="border-t border-slate-200 pt-6">
             <div className="flex items-center justify-center gap-2 text-slate-400 mb-2">
               <MessageCircle className="h-4 w-4 text-teal-600" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em]">Cần hỗ trợ?</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+                Cần hỗ trợ?
+              </span>
             </div>
             <p className="text-xs text-slate-500 mb-4">
-              Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của chúng tôi
+              Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của
+              chúng tôi
             </p>
-            <Button variant="ghost" size="sm" asChild className="text-xs font-medium text-teal-600 hover:text-teal-700 hover:bg-teal-50">
-              <Link to="/support">
-                Liên hệ hỗ trợ
-              </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-xs font-medium text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+            >
+              <Link to="/support">Liên hệ hỗ trợ</Link>
             </Button>
           </div>
 
@@ -75,8 +83,12 @@ export function ErrorPage() {
                 <div className="w-8 h-8 rounded-lg bg-teal-50 border border-teal-200 flex items-center justify-center mx-auto mb-2 text-teal-700 group-hover:scale-105 transition-transform">
                   <Home className="h-4 w-4" />
                 </div>
-                <p className="text-xs font-semibold text-slate-900 mb-1">Về trang chủ</p>
-                <p className="text-[11px] text-slate-500">Quay lại trang chủ để tiếp tục mua sắm</p>
+                <p className="text-xs font-semibold text-slate-900 mb-1">
+                  Về trang chủ
+                </p>
+                <p className="text-[11px] text-slate-500">
+                  Quay lại trang chủ để tiếp tục mua sắm
+                </p>
               </Link>
 
               <button
@@ -87,8 +99,12 @@ export function ErrorPage() {
                 <div className="w-8 h-8 rounded-lg bg-teal-50 border border-teal-200 flex items-center justify-center mx-auto mb-2 text-teal-700 group-hover:scale-105 transition-transform">
                   <RefreshCw className="h-4 w-4" />
                 </div>
-                <p className="text-xs font-semibold text-slate-900 mb-1">Tải lại trang</p>
-                <p className="text-[11px] text-slate-500">Thử tải lại trang để khắc phục lỗi</p>
+                <p className="text-xs font-semibold text-slate-900 mb-1">
+                  Tải lại trang
+                </p>
+                <p className="text-[11px] text-slate-500">
+                  Thử tải lại trang để khắc phục lỗi
+                </p>
               </button>
 
               <Link
@@ -98,8 +114,12 @@ export function ErrorPage() {
                 <div className="w-8 h-8 rounded-lg bg-teal-50 border border-teal-200 flex items-center justify-center mx-auto mb-2 text-teal-700 group-hover:scale-105 transition-transform">
                   <MessageCircle className="h-4 w-4" />
                 </div>
-                <p className="text-xs font-semibold text-slate-900 mb-1">Liên hệ hỗ trợ</p>
-                <p className="text-[11px] text-slate-500">Nhận trợ giúp từ đội ngũ của chúng tôi</p>
+                <p className="text-xs font-semibold text-slate-900 mb-1">
+                  Liên hệ hỗ trợ
+                </p>
+                <p className="text-[11px] text-slate-500">
+                  Nhận trợ giúp từ đội ngũ của chúng tôi
+                </p>
               </Link>
             </div>
           </div>

@@ -6,8 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useAdminOrder, useUpdateOrderStatus } from '../hooks/useAdminOrders';
-import { formatCurrency, formatDateTime, parseShippingAddress, cn } from '@/lib/utils';
-import { ArrowLeft, Package, User, MapPin, CreditCard, Clock, CheckCircle } from 'lucide-react';
+import {
+  formatCurrency,
+  formatDateTime,
+  parseShippingAddress,
+  cn,
+} from '@/lib/utils';
+import {
+  ArrowLeft,
+  Package,
+  User,
+  MapPin,
+  CreditCard,
+  Clock,
+  CheckCircle,
+} from 'lucide-react';
 import type { OrderStatus } from '../api/admin-orders.api';
 import { useToast } from '@/hooks/useToast';
 import {
@@ -20,7 +33,12 @@ import {
 
 const ORDER_STATUS_MAP: Record<
   string,
-  { label: string; badgeClass: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }
+  {
+    label: string;
+    badgeClass: string;
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+    icon: any;
+  }
 > = {
   PENDING_PAYMENT: {
     label: 'Chờ thanh toán',
@@ -86,10 +104,12 @@ export function AdminOrderDetailPage() {
   const updateStatus = useUpdateOrderStatus();
 
   // Parse addressJson if it exists
-  const order = rawOrder ? {
-    ...rawOrder,
-    shippingAddress: parseShippingAddress(rawOrder.addressJson)
-  } : null;
+  const order = rawOrder
+    ? {
+        ...rawOrder,
+        shippingAddress: parseShippingAddress(rawOrder.addressJson),
+      }
+    : null;
 
   const handleUpdateStatus = async (newStatus: OrderStatus) => {
     if (!order) return;
@@ -104,7 +124,7 @@ export function AdminOrderDetailPage() {
         error: (err) => {
           return `Không thể cập nhật đơn hàng: ${err?.message || 'Lỗi không xác định'}`;
         },
-      }
+      },
     );
   };
 
@@ -119,8 +139,14 @@ export function AdminOrderDetailPage() {
   if (!order) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-8 text-center bg-white border border-slate-200 rounded-xl shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900">Không tìm thấy đơn hàng</h1>
-        <Button asChild variant="outline" className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm rounded-lg">
+        <h1 className="text-2xl font-bold text-slate-900">
+          Không tìm thấy đơn hàng
+        </h1>
+        <Button
+          asChild
+          variant="outline"
+          className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm rounded-lg"
+        >
           <Link to="/admin/orders">Quay lại danh sách</Link>
         </Button>
       </div>
@@ -138,7 +164,12 @@ export function AdminOrderDetailPage() {
         {/* Header with status and actions */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" asChild className="text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg">
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg"
+            >
               <Link to="/admin/orders" aria-label="Quay lại danh sách đơn hàng">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
@@ -154,7 +185,12 @@ export function AdminOrderDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <span className={cn('inline-flex items-center px-3 py-1 rounded-full text-xs font-medium', ORDER_STATUS_MAP[order.status]?.badgeClass)}>
+            <span
+              className={cn(
+                'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
+                ORDER_STATUS_MAP[order.status]?.badgeClass,
+              )}
+            >
               <StatusIcon className="h-3.5 w-3.5 mr-1.5" />
               {ORDER_STATUS_MAP[order.status]?.label}
             </span>
@@ -204,7 +240,10 @@ export function AdminOrderDetailPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {order.items?.map((item: any, index: number) => (
-                        <tr key={index} className="hover:bg-slate-50/80 transition-colors">
+                        <tr
+                          key={index}
+                          className="hover:bg-slate-50/80 transition-colors"
+                        >
                           <td className="px-4 py-3">
                             <div className="flex gap-3 items-center">
                               <div className="w-12 h-12 bg-slate-50 rounded-lg flex-shrink-0 border border-slate-200 overflow-hidden">
@@ -222,13 +261,19 @@ export function AdminOrderDetailPage() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="font-medium text-sm text-slate-900 truncate" title={item.variant?.product?.name}>
+                                <p
+                                  className="font-medium text-sm text-slate-900 truncate"
+                                  title={item.variant?.product?.name}
+                                >
                                   {item.variant?.product?.name}
                                 </p>
                                 <p className="text-xs text-slate-500 mt-0.5">
-                                  Phân loại: {item.variant?.scent} - {item.variant?.volumeMl}ml
+                                  Phân loại: {item.variant?.scent} -{' '}
+                                  {item.variant?.volumeMl}ml
                                 </p>
-                                <p className="text-xs text-slate-400 font-mono">SKU: {item.variant?.sku}</p>
+                                <p className="text-xs text-slate-400 font-mono">
+                                  SKU: {item.variant?.sku}
+                                </p>
                               </div>
                             </div>
                           </td>
@@ -264,7 +309,9 @@ export function AdminOrderDetailPage() {
                     <p className="font-medium text-xs text-slate-400 mb-0.5 tabular-nums">
                       {formatDateTime(order.createdAt)}
                     </p>
-                    <p className="text-sm font-medium text-slate-900">Đơn hàng được tạo</p>
+                    <p className="text-sm font-medium text-slate-900">
+                      Đơn hàng được tạo
+                    </p>
                   </div>
 
                   {order.updatedAt !== order.createdAt && (
@@ -273,9 +320,19 @@ export function AdminOrderDetailPage() {
                       <p className="font-medium text-xs text-slate-400 mb-0.5 tabular-nums">
                         {formatDateTime(order.updatedAt)}
                       </p>
-                      <p className="text-sm font-medium text-slate-900">Cập nhật gần nhất</p>
+                      <p className="text-sm font-medium text-slate-900">
+                        Cập nhật gần nhất
+                      </p>
                       <p className="text-xs text-slate-500 mt-1">
-                        Trạng thái: <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ml-1', ORDER_STATUS_MAP[order.status]?.badgeClass)}>{ORDER_STATUS_MAP[order.status]?.label}</span>
+                        Trạng thái:{' '}
+                        <span
+                          className={cn(
+                            'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ml-1',
+                            ORDER_STATUS_MAP[order.status]?.badgeClass,
+                          )}
+                        >
+                          {ORDER_STATUS_MAP[order.status]?.label}
+                        </span>
                       </p>
                     </div>
                   )}
@@ -297,11 +354,21 @@ export function AdminOrderDetailPage() {
                 {/* Payment method & status */}
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Phương thức</span>
-                  <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700 font-mono text-xs">{order.paymentMethod}</Badge>
+                  <Badge
+                    variant="outline"
+                    className="border-slate-200 bg-slate-50 text-slate-700 font-mono text-xs"
+                  >
+                    {order.paymentMethod}
+                  </Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Trạng thái</span>
-                  <Badge variant="secondary" className="border-slate-200 bg-slate-100 text-slate-700 text-xs shadow-none">{order.paymentStatus}</Badge>
+                  <Badge
+                    variant="secondary"
+                    className="border-slate-200 bg-slate-100 text-slate-700 text-xs shadow-none"
+                  >
+                    {order.paymentStatus}
+                  </Badge>
                 </div>
                 <Separator className="bg-slate-200" />
 
@@ -309,22 +376,30 @@ export function AdminOrderDetailPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Tạm tính</span>
-                    <span className="tabular-nums text-slate-900">{formatCurrency(order.subtotal)}</span>
+                    <span className="tabular-nums text-slate-900">
+                      {formatCurrency(order.subtotal)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Phí vận chuyển</span>
-                    <span className="tabular-nums text-slate-900">{formatCurrency(order.shippingFee)}</span>
+                    <span className="tabular-nums text-slate-900">
+                      {formatCurrency(order.shippingFee)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Giảm giá</span>
-                    <span className="tabular-nums text-rose-600 font-medium">-{formatCurrency(order.discount)}</span>
+                    <span className="tabular-nums text-rose-600 font-medium">
+                      -{formatCurrency(order.discount)}
+                    </span>
                   </div>
                 </div>
 
                 <Separator className="bg-slate-200" />
                 <div className="flex justify-between items-baseline text-base font-bold">
                   <span className="text-slate-900">Tổng cộng</span>
-                  <span className="tabular-nums text-xl text-teal-600 font-bold">{formatCurrency(order.total)}</span>
+                  <span className="tabular-nums text-xl text-teal-600 font-bold">
+                    {formatCurrency(order.total)}
+                  </span>
                 </div>
 
                 <Separator className="bg-slate-200 my-2" />
@@ -336,13 +411,19 @@ export function AdminOrderDetailPage() {
                     Giao hàng
                   </div>
                   <div className="space-y-1 bg-slate-50 p-3.5 rounded-lg border border-slate-200/60 text-xs">
-                    <p className="font-semibold text-slate-900 text-sm">{order.shippingAddress?.fullName}</p>
-                    <p className="text-slate-500 tabular-nums">{order.shippingAddress?.phone}</p>
+                    <p className="font-semibold text-slate-900 text-sm">
+                      {order.shippingAddress?.fullName}
+                    </p>
+                    <p className="text-slate-500 tabular-nums">
+                      {order.shippingAddress?.phone}
+                    </p>
                     <p className="text-slate-600 leading-relaxed mt-1">
                       {order.shippingAddress?.line1}
-                      {order.shippingAddress?.line2 && `, ${order.shippingAddress.line2}`},
-                      {' '}{order.shippingAddress?.ward}, {order.shippingAddress?.district},
-                      {' '}{order.shippingAddress?.province}
+                      {order.shippingAddress?.line2 &&
+                        `, ${order.shippingAddress.line2}`}
+                      , {order.shippingAddress?.ward},{' '}
+                      {order.shippingAddress?.district},{' '}
+                      {order.shippingAddress?.province}
                     </p>
                   </div>
                 </div>
@@ -358,15 +439,21 @@ export function AdminOrderDetailPage() {
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-slate-500">Tên:</span>
-                      <span className="font-medium text-slate-900">{order.user?.name || 'N/A'}</span>
+                      <span className="font-medium text-slate-900">
+                        {order.user?.name || 'N/A'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Email:</span>
-                      <span className="font-medium text-slate-900 truncate ml-2">{order.user?.email || 'N/A'}</span>
+                      <span className="font-medium text-slate-900 truncate ml-2">
+                        {order.user?.email || 'N/A'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">SĐT:</span>
-                      <span className="font-medium text-slate-900 tabular-nums">{order.user?.phone || 'N/A'}</span>
+                      <span className="font-medium text-slate-900 tabular-nums">
+                        {order.user?.phone || 'N/A'}
+                      </span>
                     </div>
                   </div>
                 </div>

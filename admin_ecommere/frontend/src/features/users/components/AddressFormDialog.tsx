@@ -103,21 +103,29 @@ export function AddressFormDialog({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-sm font-medium text-slate-900">
+                <Label
+                  htmlFor="fullName"
+                  className="text-sm font-medium text-slate-900"
+                >
                   Họ và tên *
                 </Label>
                 <Input
                   id="fullName"
                   required
                   value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, fullName: e.target.value })
+                  }
                   placeholder="Nguyễn Văn A"
                   className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg h-10 text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium text-slate-900">
+                <Label
+                  htmlFor="phone"
+                  className="text-sm font-medium text-slate-900"
+                >
                   Số điện thoại *
                 </Label>
                 <Input
@@ -125,7 +133,9 @@ export function AddressFormDialog({
                   required
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   placeholder="0912345678"
                   className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg h-10 tabular-nums text-sm"
                 />
@@ -140,14 +150,19 @@ export function AddressFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="line1" className="text-sm font-medium text-slate-900">
+              <Label
+                htmlFor="line1"
+                className="text-sm font-medium text-slate-900"
+              >
                 Địa chỉ chi tiết *
               </Label>
               <Input
                 id="line1"
                 required
                 value={formData.line1}
-                onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, line1: e.target.value })
+                }
                 placeholder="Số nhà, tên đường..."
                 className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg h-10 text-sm"
               />
@@ -155,42 +170,57 @@ export function AddressFormDialog({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="ward" className="text-sm font-medium text-slate-900">
+                <Label
+                  htmlFor="ward"
+                  className="text-sm font-medium text-slate-900"
+                >
                   Phường/Xã *
                 </Label>
                 <Input
                   id="ward"
                   required
                   value={formData.ward}
-                  onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, ward: e.target.value })
+                  }
                   placeholder="Phường Bến Nghé"
                   className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg h-10 text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="district" className="text-sm font-medium text-slate-900">
+                <Label
+                  htmlFor="district"
+                  className="text-sm font-medium text-slate-900"
+                >
                   Quận/Huyện *
                 </Label>
                 <Input
                   id="district"
                   required
                   value={formData.district}
-                  onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, district: e.target.value })
+                  }
                   placeholder="Quận 1"
                   className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg h-10 text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="province" className="text-sm font-medium text-slate-900">
+                <Label
+                  htmlFor="province"
+                  className="text-sm font-medium text-slate-900"
+                >
                   Tỉnh/Thành phố *
                 </Label>
                 <Input
                   id="province"
                   required
                   value={formData.province}
-                  onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, province: e.target.value })
+                  }
                   placeholder="Hồ Chí Minh"
                   className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg h-10 text-sm"
                 />
@@ -209,7 +239,10 @@ export function AddressFormDialog({
                 }
                 className="border-slate-300 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600 text-white"
               />
-              <Label htmlFor="isDefault" className="cursor-pointer text-sm font-medium text-slate-900">
+              <Label
+                htmlFor="isDefault"
+                className="cursor-pointer text-sm font-medium text-slate-900"
+              >
                 Đặt làm địa chỉ mặc định
               </Label>
             </div>

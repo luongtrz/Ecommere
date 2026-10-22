@@ -151,7 +151,7 @@ export function ConfirmActionCard({
                   'h-7 px-2.5 text-xs rounded-lg font-medium transition-all focus-visible:ring-2 focus-visible:ring-teal-500',
                   choices[call.id] === true
                     ? 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm border-transparent'
-                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900',
                 )}
               >
                 Xác nhận
@@ -167,7 +167,7 @@ export function ConfirmActionCard({
                   'h-7 px-2.5 text-xs rounded-lg font-medium transition-all focus-visible:ring-2 focus-visible:ring-rose-500',
                   choices[call.id] === false
                     ? 'bg-rose-600 text-white hover:bg-rose-700 shadow-sm border-transparent'
-                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900',
                 )}
               >
                 Từ chối
