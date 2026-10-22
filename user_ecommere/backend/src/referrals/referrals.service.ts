@@ -125,12 +125,24 @@ export class ReferralsService {
       return { data: [] };
     }
 
+    const now = new Date();
     const coupons = await this.prisma.coupon.findMany({
-      where: { code: { in: couponCodes } },
+      where: {
+        code: { in: couponCodes },
+        active: true,
+        validUntil: { gte: now },
+      },
       orderBy: { createdAt: 'desc' },
     });
 
-    return { data: coupons };
+    const activeCoupons = coupons.filter(
+      (c) =>
+        c.active &&
+        (!c.validUntil || new Date(c.validUntil) >= now) &&
+        (c.maxUses === null || c.usedCount < c.maxUses),
+    );
+
+    return { data: activeCoupons };
   }
 
   /**

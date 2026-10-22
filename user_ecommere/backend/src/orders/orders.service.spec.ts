@@ -7,8 +7,10 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { CouponType, OrderStatus, PaymentStatus } from '@prisma/client';
-import { ShippingMethod } from './dtos/checkout.dto';
+import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { ShippingService } from '../shipping/shipping.service';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -1828,6 +1830,44 @@ describe('OrdersService', () => {
       expect(result.itemCount).toBe(1);
       expect(result.subtotal).toBe(200000);
       expect(result.everyItemPriced).toBe(true);
+    });
+  });
+
+  describe('CheckoutDto - couponCode validation', () => {
+    it('should accept valid couponCode up to 50 characters', async () => {
+      const dto = plainToInstance(CheckoutDto, {
+        couponCode: 'SUMMER2024',
+      });
+      const errors = await validate(dto);
+      const couponErrors = errors.filter((e) => e.property === 'couponCode');
+      expect(couponErrors).toHaveLength(0);
+    });
+
+    it('should allow optional couponCode when undefined', async () => {
+      const dto = plainToInstance(CheckoutDto, {});
+      const errors = await validate(dto);
+      const couponErrors = errors.filter((e) => e.property === 'couponCode');
+      expect(couponErrors).toHaveLength(0);
+    });
+
+    it('should reject couponCode exceeding 50 characters', async () => {
+      const dto = plainToInstance(CheckoutDto, {
+        couponCode: 'A'.repeat(51),
+      });
+      const errors = await validate(dto);
+      const couponErrors = errors.filter((e) => e.property === 'couponCode');
+      expect(couponErrors).toHaveLength(1);
+      expect(couponErrors[0].constraints).toHaveProperty('maxLength');
+    });
+
+    it('should reject couponCode when not a string', async () => {
+      const dto = plainToInstance(CheckoutDto, {
+        couponCode: 12345 as any,
+      });
+      const errors = await validate(dto);
+      const couponErrors = errors.filter((e) => e.property === 'couponCode');
+      expect(couponErrors).toHaveLength(1);
+      expect(couponErrors[0].constraints).toHaveProperty('isString');
     });
   });
 });

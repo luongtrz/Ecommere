@@ -25,10 +25,7 @@ import { canUserUseCoupon } from '../coupons/coupons.service';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
-  async checkout(
-    userId: string,
-    checkoutDto: CheckoutDto & { couponCode?: string },
-  ) {
+  async checkout(userId: string, checkoutDto: CheckoutDto) {
     if (checkoutDto.checkoutKey) {
       const existingOrder = await this.findOrderByCheckoutKey(
         userId,

@@ -1110,6 +1110,47 @@ describe('OrdersService - Gap Coverage', () => {
         service.cancelOrder('user1', 'ord-cancel-race'),
       ).rejects.toThrow('Order cannot be cancelled at this stage');
     });
+
+    it('sets paymentStatus to REFUNDED and releases coupon when canceling a PAID order', async () => {
+      const paidOrder = {
+        id: 'ord-paid-cancel',
+        userId: 'user1',
+        status: OrderStatus.PAID,
+        paymentStatus: PaymentStatus.COMPLETED,
+        couponCode: 'DISCOUNT20',
+        items: [],
+      };
+      mockPrismaService.order.findUnique
+        .mockResolvedValueOnce(paidOrder)
+        .mockResolvedValueOnce({
+          ...paidOrder,
+          status: OrderStatus.CANCELED,
+          paymentStatus: PaymentStatus.REFUNDED,
+        });
+      mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.coupon.updateMany.mockResolvedValue({ count: 1 });
+
+      await service.cancelOrder('user1', 'ord-paid-cancel');
+
+      expect(mockPrismaService.order.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'ord-paid-cancel',
+          userId: 'user1',
+          status: { in: [OrderStatus.PENDING_PAYMENT, OrderStatus.PAID] },
+        },
+        data: {
+          status: OrderStatus.CANCELED,
+          paymentStatus: PaymentStatus.REFUNDED,
+        },
+      });
+      expect(mockPrismaService.coupon.updateMany).toHaveBeenCalledWith({
+        where: {
+          code: 'DISCOUNT20',
+          usedCount: { gt: 0 },
+        },
+        data: { usedCount: { decrement: 1 } },
+      });
+    });
   });
 
   describe('quoteShippingFee - non-string and whitespace province validation', () => {

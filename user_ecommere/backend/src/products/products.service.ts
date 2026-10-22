@@ -585,7 +585,7 @@ export class ProductsService {
    * Get dynamic filter options from existing products data
    */
   async getFilterOptions() {
-    const [brands, scents, volumes, priceRange] = await Promise.all([
+    const [brands, scents, volumes, variants] = await Promise.all([
       // Get distinct brands
       this.prisma.product.findMany({
         where: { active: true, brand: { not: null } },
@@ -607,21 +607,38 @@ export class ProductsService {
         distinct: ['volumeMl'],
         orderBy: { volumeMl: 'asc' },
       }),
-      // Get price range
-      this.prisma.productVariant.aggregate({
+      // Get variants for price range
+      this.prisma.productVariant.findMany({
         where: { product: { active: true } },
-        _min: { price: true },
-        _max: { price: true },
+        select: { price: true, salePrice: true },
       }),
     ]);
+
+    let minPrice = 0;
+    let maxPrice = 0;
+
+    if (variants.length > 0) {
+      minPrice = Infinity;
+      maxPrice = -Infinity;
+      for (const variant of variants) {
+        const effectivePrice =
+          variant.salePrice != null && variant.salePrice < variant.price
+            ? variant.salePrice
+            : variant.price;
+        if (effectivePrice < minPrice) minPrice = effectivePrice;
+        if (effectivePrice > maxPrice) maxPrice = effectivePrice;
+      }
+      if (minPrice === Infinity) minPrice = 0;
+      if (maxPrice === -Infinity) maxPrice = 0;
+    }
 
     return {
       brands: brands.map((b) => b.brand).filter(Boolean),
       scents: scents.map((s) => s.scent),
       volumes: volumes.map((v) => v.volumeMl),
       priceRange: {
-        min: priceRange._min.price || 0,
-        max: priceRange._max.price || 0,
+        min: minPrice,
+        max: maxPrice,
       },
     };
   }

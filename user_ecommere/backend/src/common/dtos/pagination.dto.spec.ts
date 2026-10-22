@@ -190,7 +190,7 @@ describe('Pagination DTOs', () => {
       expect(response.limit).toBe(10);
       expect(response.totalPages).toBe(5);
       expect(response.hasNextPage).toBe(true);
-      expect(response.hasPrevPage).toBe(false);
+      expect(response.hasPreviousPage).toBe(false);
     });
 
     it('should correctly construct response for middle page', () => {
@@ -204,7 +204,7 @@ describe('Pagination DTOs', () => {
       expect(response.data).toEqual(items);
       expect(response.totalPages).toBe(5);
       expect(response.hasNextPage).toBe(true);
-      expect(response.hasPrevPage).toBe(true);
+      expect(response.hasPreviousPage).toBe(true);
     });
 
     it('should correctly construct response for last page', () => {
@@ -218,7 +218,7 @@ describe('Pagination DTOs', () => {
       expect(response.data).toEqual(items);
       expect(response.totalPages).toBe(5);
       expect(response.hasNextPage).toBe(false);
-      expect(response.hasPrevPage).toBe(true);
+      expect(response.hasPreviousPage).toBe(true);
     });
 
     it('should correctly construct response for single page dataset (total <= limit)', () => {
@@ -231,7 +231,7 @@ describe('Pagination DTOs', () => {
 
       expect(response.totalPages).toBe(1);
       expect(response.hasNextPage).toBe(false);
-      expect(response.hasPrevPage).toBe(false);
+      expect(response.hasPreviousPage).toBe(false);
     });
 
     it('should correctly construct response for empty dataset (total = 0)', () => {
@@ -246,7 +246,7 @@ describe('Pagination DTOs', () => {
       expect(response.total).toBe(0);
       expect(response.totalPages).toBe(0);
       expect(response.hasNextPage).toBe(false);
-      expect(response.hasPrevPage).toBe(false);
+      expect(response.hasPreviousPage).toBe(false);
     });
 
     it('should correctly calculate totalPages using Math.ceil when total is not evenly divisible by limit', () => {
@@ -269,7 +269,7 @@ describe('Pagination DTOs', () => {
 
       expect(response.totalPages).toBe(3);
       expect(response.hasNextPage).toBe(false);
-      expect(response.hasPrevPage).toBe(true);
+      expect(response.hasPreviousPage).toBe(true);
     });
 
     it('should correctly handle page number 0 or negative', () => {
@@ -281,7 +281,13 @@ describe('Pagination DTOs', () => {
 
       expect(response.totalPages).toBe(2);
       expect(response.hasNextPage).toBe(true);
-      expect(response.hasPrevPage).toBe(false);
+      expect(response.hasPreviousPage).toBe(false);
+    });
+
+    it('should expose hasPreviousPage and not expose hasPrevPage', () => {
+      const response = new PaginatedResponseDto(['test'], 10, 2, 5);
+      expect(response.hasPreviousPage).toBe(true);
+      expect((response as any).hasPrevPage).toBeUndefined();
     });
   });
 });
