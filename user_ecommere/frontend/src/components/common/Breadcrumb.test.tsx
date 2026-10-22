@@ -71,12 +71,7 @@ describe('Breadcrumb', () => {
     // 2 SVGs: Home icon and 1 ChevronRight icon
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(2);
-    expect(svgs[1]).toHaveClass(
-      'h-3.5',
-      'w-3.5',
-      'text-slate-400',
-      'shrink-0',
-    );
+    expect(svgs[1]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
   });
 
   it('renders breadcrumb item without href as a non-clickable span with font-medium class', () => {
@@ -122,24 +117,9 @@ describe('Breadcrumb', () => {
     // SVGs: 1 Home + 3 ChevronRight separators
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(4);
-    expect(svgs[1]).toHaveClass(
-      'h-3.5',
-      'w-3.5',
-      'text-slate-400',
-      'shrink-0',
-    );
-    expect(svgs[2]).toHaveClass(
-      'h-3.5',
-      'w-3.5',
-      'text-slate-400',
-      'shrink-0',
-    );
-    expect(svgs[3]).toHaveClass(
-      'h-3.5',
-      'w-3.5',
-      'text-slate-400',
-      'shrink-0',
-    );
+    expect(svgs[1]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
+    expect(svgs[2]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
+    expect(svgs[3]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
   });
 
   it('applies custom className to the nav element', () => {

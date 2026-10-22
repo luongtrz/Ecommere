@@ -103,7 +103,9 @@ describe('ToolCallCard', () => {
       const { container } = render(<ToolCallCard step={step} />);
 
       expect(screen.getByText('Xóa toàn bộ giỏ hàng')).toBeInTheDocument();
-      expect(container.querySelector('svg.text-emerald-600')).toBeInTheDocument();
+      expect(
+        container.querySelector('svg.text-emerald-600'),
+      ).toBeInTheDocument();
 
       const trigger = screen.getByRole('button');
       await user.click(trigger);
@@ -153,9 +155,7 @@ describe('ToolCallCard', () => {
       expect(
         screen.getByText('Hủy đơn hàng không thành công'),
       ).toBeInTheDocument();
-      expect(
-        container.querySelector('svg.text-rose-600'),
-      ).toBeInTheDocument();
+      expect(container.querySelector('svg.text-rose-600')).toBeInTheDocument();
 
       const trigger = screen.getByRole('button');
       await user.click(trigger);

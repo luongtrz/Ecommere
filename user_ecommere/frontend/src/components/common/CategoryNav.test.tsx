@@ -170,7 +170,9 @@ describe('CategoryNav', () => {
     renderCategoryNav('/catalog');
 
     const allLink = screen.getByRole('link', { name: 'Tất cả' });
-    expect(allLink.className).toContain('text-teal-700 bg-teal-50 font-semibold');
+    expect(allLink.className).toContain(
+      'text-teal-700 bg-teal-50 font-semibold',
+    );
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
     expect(cat1Link.className).toContain('text-slate-600 hover:text-teal-700');
@@ -185,7 +187,9 @@ describe('CategoryNav', () => {
     renderCategoryNav('/c/xit-thom-phong');
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
-    expect(cat1Link.className).toContain('text-teal-700 bg-teal-50 font-semibold');
+    expect(cat1Link.className).toContain(
+      'text-teal-700 bg-teal-50 font-semibold',
+    );
 
     const allLink = screen.getByRole('link', { name: 'Tất cả' });
     expect(allLink.className).toContain('text-slate-600 hover:text-teal-700');
@@ -200,7 +204,9 @@ describe('CategoryNav', () => {
     renderCategoryNav('/c/xit-thom-phong/detail');
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
-    expect(cat1Link.className).toContain('text-teal-700 bg-teal-50 font-semibold');
+    expect(cat1Link.className).toContain(
+      'text-teal-700 bg-teal-50 font-semibold',
+    );
   });
 
   it('shows subcategories dropdown on mouse hover and allows viewing all', () => {

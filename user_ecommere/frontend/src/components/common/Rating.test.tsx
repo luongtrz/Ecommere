@@ -33,9 +33,19 @@ describe('Rating', () => {
     );
 
     // 2 empty stars
-    expect(svgs[3]).toHaveClass('h-4', 'w-4', 'text-slate-200', 'fill-slate-100');
+    expect(svgs[3]).toHaveClass(
+      'h-4',
+      'w-4',
+      'text-slate-200',
+      'fill-slate-100',
+    );
     expect(svgs[3]).not.toHaveClass('fill-amber-400');
-    expect(svgs[4]).toHaveClass('h-4', 'w-4', 'text-slate-200', 'fill-slate-100');
+    expect(svgs[4]).toHaveClass(
+      'h-4',
+      'w-4',
+      'text-slate-200',
+      'fill-slate-100',
+    );
     expect(svgs[4]).not.toHaveClass('fill-amber-400');
 
     // showValue is false by default
