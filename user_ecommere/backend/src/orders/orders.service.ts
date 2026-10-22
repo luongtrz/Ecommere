@@ -4,6 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
@@ -650,7 +651,7 @@ export class OrdersService {
     }
 
     if (order.userId !== userId) {
-      throw new NotFoundException('Order not found');
+      throw new ForbiddenException('Unauthorized');
     }
 
     return order;

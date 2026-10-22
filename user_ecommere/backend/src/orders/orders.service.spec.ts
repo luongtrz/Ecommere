@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CouponType, OrderStatus, PaymentStatus } from '@prisma/client';
 import { ShippingMethod } from './dtos/checkout.dto';
 import { ShippingService } from '../shipping/shipping.service';
@@ -911,6 +915,92 @@ describe('OrdersService', () => {
           where: { userId: 'user1', status: OrderStatus.DELIVERED },
         }),
       );
+    });
+  });
+
+  describe('getMyOrderById', () => {
+    const mockOrder = {
+      id: 'order1',
+      code: 'ORD25102800001',
+      userId: 'user1',
+      status: OrderStatus.PENDING_PAYMENT,
+      paymentStatus: PaymentStatus.PENDING,
+      subtotal: 100000,
+      discount: 0,
+      shippingFee: 0,
+      total: 100000,
+      items: [
+        {
+          id: 'item1',
+          variantId: 'var1',
+          variant: {
+            product: {
+              id: 'prod1',
+              name: 'Lavender Spray',
+              slug: 'lavender-spray',
+              images: ['lavender.jpg'],
+            },
+          },
+        },
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('should return the order when it exists and belongs to the user', async () => {
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
+
+      const result = await service.getMyOrderById('user1', 'order1');
+
+      expect(result).toEqual(mockOrder);
+      expect(mockPrismaService.order.findUnique).toHaveBeenCalledWith({
+        where: { id: 'order1' },
+        include: {
+          items: {
+            include: {
+              variant: {
+                include: {
+                  product: {
+                    select: {
+                      id: true,
+                      name: true,
+                      slug: true,
+                      images: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should throw NotFoundException when order is not found', async () => {
+      mockPrismaService.order.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.getMyOrderById('user1', 'invalid-order'),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getMyOrderById('user1', 'invalid-order'),
+      ).rejects.toThrow('Order not found');
+    });
+
+    it('should throw ForbiddenException when order belongs to a different user', async () => {
+      const foreignOrder = {
+        ...mockOrder,
+        userId: 'user2',
+      };
+
+      mockPrismaService.order.findUnique.mockResolvedValue(foreignOrder);
+
+      await expect(
+        service.getMyOrderById('user1', 'order1'),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.getMyOrderById('user1', 'order1'),
+      ).rejects.toThrow('Unauthorized');
     });
   });
 
