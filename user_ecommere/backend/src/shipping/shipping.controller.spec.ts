@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ShippingController } from './shipping.controller';
 import { ShippingService } from './shipping.service';
+import { ShippingMethod } from '@/orders/dtos/checkout.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CsrfGuard } from '@/common/guards/csrf.guard';
@@ -70,7 +71,10 @@ describe('ShippingController', () => {
       };
       mockShippingService.calculateFee.mockResolvedValue(mockFeeResult);
 
-      const result = await controller.calculateFee('Chiang Mai', 2.5);
+      const result = await controller.calculateFee({
+        province: 'Chiang Mai',
+        weight: 2.5,
+      });
 
       expect(mockShippingService.calculateFee).toHaveBeenCalledTimes(1);
       expect(mockShippingService.calculateFee).toHaveBeenCalledWith(
@@ -82,6 +86,7 @@ describe('ShippingController', () => {
           line1: 'Customer address',
         },
         2.5,
+        ShippingMethod.STANDARD,
       );
       expect(result).toEqual(mockFeeResult);
     });
@@ -94,7 +99,7 @@ describe('ShippingController', () => {
       };
       mockShippingService.calculateFee.mockResolvedValue(mockFeeResult);
 
-      const result = await controller.calculateFee(undefined as any, undefined);
+      const result = await controller.calculateFee({} as any);
 
       expect(mockShippingService.calculateFee).toHaveBeenCalledWith(
         expectedMockOrigin,
@@ -105,6 +110,7 @@ describe('ShippingController', () => {
           line1: 'Customer address',
         },
         1,
+        ShippingMethod.STANDARD,
       );
       expect(result).toEqual(mockFeeResult);
     });
@@ -117,7 +123,7 @@ describe('ShippingController', () => {
       };
       mockShippingService.calculateFee.mockResolvedValue(mockFeeResult);
 
-      const result = await controller.calculateFee('', 1);
+      const result = await controller.calculateFee({ province: '', weight: 1 });
 
       expect(mockShippingService.calculateFee).toHaveBeenCalledWith(
         expectedMockOrigin,
@@ -128,6 +134,7 @@ describe('ShippingController', () => {
           line1: 'Customer address',
         },
         1,
+        ShippingMethod.STANDARD,
       );
       expect(result).toEqual(mockFeeResult);
     });
@@ -140,7 +147,10 @@ describe('ShippingController', () => {
       };
       mockShippingService.calculateFee.mockResolvedValue(mockFeeResult);
 
-      const result = await controller.calculateFee('Phuket', 0);
+      const result = await controller.calculateFee({
+        province: 'Phuket',
+        weight: 0,
+      });
 
       expect(mockShippingService.calculateFee).toHaveBeenCalledWith(
         expectedMockOrigin,
@@ -151,6 +161,7 @@ describe('ShippingController', () => {
           line1: 'Customer address',
         },
         1,
+        ShippingMethod.STANDARD,
       );
       expect(result).toEqual(mockFeeResult);
     });
@@ -163,7 +174,10 @@ describe('ShippingController', () => {
       };
       mockShippingService.calculateFee.mockResolvedValue(mockFeeResult);
 
-      const result = await controller.calculateFee('Nonthaburi', '4.75' as any);
+      const result = await controller.calculateFee({
+        province: 'Nonthaburi',
+        weight: '4.75' as any,
+      });
 
       expect(mockShippingService.calculateFee).toHaveBeenCalledWith(
         expectedMockOrigin,
@@ -174,6 +188,59 @@ describe('ShippingController', () => {
           line1: 'Customer address',
         },
         4.75,
+        ShippingMethod.STANDARD,
+      );
+      expect(result).toEqual(mockFeeResult);
+    });
+
+    it('passes method EXPRESS to shippingService.calculateFee when provided in query', async () => {
+      const mockFeeResult = {
+        fee: 50000,
+        estimatedDays: 3,
+        currency: 'VND',
+      };
+      mockShippingService.calculateFee.mockResolvedValue(mockFeeResult);
+
+      const result = await controller.calculateFee({
+        province: 'Chiang Mai',
+        method: ShippingMethod.EXPRESS,
+        weight: 2,
+      });
+
+      expect(mockShippingService.calculateFee).toHaveBeenCalledWith(
+        expectedMockOrigin,
+        {
+          province: 'Chiang Mai',
+          district: 'Unknown',
+          ward: 'Unknown',
+          line1: 'Customer address',
+        },
+        2,
+        ShippingMethod.EXPRESS,
+      );
+      expect(result).toEqual(mockFeeResult);
+    });
+
+    it('defaults all values when query is omitted or undefined', async () => {
+      const mockFeeResult = {
+        fee: 0,
+        estimatedDays: 1,
+        currency: 'VND',
+      };
+      mockShippingService.calculateFee.mockResolvedValue(mockFeeResult);
+
+      const result = await controller.calculateFee(undefined as any);
+
+      expect(mockShippingService.calculateFee).toHaveBeenCalledWith(
+        expectedMockOrigin,
+        {
+          province: 'Bangkok',
+          district: 'Unknown',
+          ward: 'Unknown',
+          line1: 'Customer address',
+        },
+        1,
+        ShippingMethod.STANDARD,
       );
       expect(result).toEqual(mockFeeResult);
     });
@@ -183,9 +250,9 @@ describe('ShippingController', () => {
         new Error('Failed to calculate shipping fee'),
       );
 
-      await expect(controller.calculateFee('Chiang Mai', 1)).rejects.toThrow(
-        'Failed to calculate shipping fee',
-      );
+      await expect(
+        controller.calculateFee({ province: 'Chiang Mai', weight: 1 }),
+      ).rejects.toThrow('Failed to calculate shipping fee');
     });
   });
 
