@@ -97,9 +97,10 @@ export function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
             {/* Cart Items */}
             <div className="lg:col-span-7 xl:col-span-8 space-y-4">
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <div
                   key={item.variantId}
+                  style={{ animationDelay: `${index * 80}ms` }}
                   className="bg-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border border-slate-200 group p-4 sm:p-5"
                 >
                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-start sm:items-center">
