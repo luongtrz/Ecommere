@@ -69,13 +69,13 @@ export function ForgotPasswordPage() {
 
               <h2 className="text-3xl xl:text-4xl 2xl:text-5xl font-bold tracking-tight leading-[1.2] text-slate-900">
                 Lấy Lại Mật Khẩu,{' '}
-                <span className="text-teal-600">
-                  Tiếp Tục Trải Nghiệm
-                </span>
+                <span className="text-teal-600">Tiếp Tục Trải Nghiệm</span>
               </h2>
 
               <p className="text-sm xl:text-base text-slate-600 leading-relaxed font-normal">
-                Nhập email đã đăng ký của bạn. Hệ thống sẽ tự động gửi hướng dẫn và đường dẫn bảo mật để bạn thiết lập lại mật khẩu trong giây lát.
+                Nhập email đã đăng ký của bạn. Hệ thống sẽ tự động gửi hướng dẫn
+                và đường dẫn bảo mật để bạn thiết lập lại mật khẩu trong giây
+                lát.
               </p>
             </div>
 
@@ -87,8 +87,12 @@ export function ForgotPasswordPage() {
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-900">Bảo Mật Tuyệt Đối</h4>
-                    <p className="text-[11px] text-slate-500">Mã hóa xác thực an toàn</p>
+                    <h4 className="text-xs font-semibold text-slate-900">
+                      Bảo Mật Tuyệt Đối
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Mã hóa xác thực an toàn
+                    </p>
                   </div>
                 </div>
               </div>
@@ -99,8 +103,12 @@ export function ForgotPasswordPage() {
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-900">Hỗ Trợ Nhanh Chóng</h4>
-                    <p className="text-[11px] text-slate-500">Xác nhận email tức thì</p>
+                    <h4 className="text-xs font-semibold text-slate-900">
+                      Hỗ Trợ Nhanh Chóng
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Xác nhận email tức thì
+                    </p>
                   </div>
                 </div>
               </div>
@@ -127,11 +135,18 @@ export function ForgotPasswordPage() {
                   TS
                 </div>
                 <div>
-                  <span className="text-lg font-bold text-slate-900">Thai Spray</span>
-                  <span className="text-[10px] text-slate-500 block uppercase tracking-wider">Hàng Thái Lan Chính Hãng</span>
+                  <span className="text-lg font-bold text-slate-900">
+                    Thai Spray
+                  </span>
+                  <span className="text-[10px] text-slate-500 block uppercase tracking-wider">
+                    Hàng Thái Lan Chính Hãng
+                  </span>
                 </div>
               </Link>
-              <Link to="/" className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+              <Link
+                to="/"
+                className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+              >
                 Trang chủ →
               </Link>
             </div>

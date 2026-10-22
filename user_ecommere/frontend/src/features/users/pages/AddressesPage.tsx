@@ -56,11 +56,20 @@ export function AddressesPage() {
         <div className="container max-w-5xl px-4 space-y-6 md:space-y-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-slate-200">
             <div>
-              <span className="uppercase tracking-wider text-xs font-semibold text-teal-600 block mb-1">Tài khoản cá nhân</span>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Sổ địa chỉ</h1>
-              <p className="text-sm text-slate-500 mt-1">Quản lý địa chỉ giao hàng của bạn</p>
+              <span className="uppercase tracking-wider text-xs font-semibold text-teal-600 block mb-1">
+                Tài khoản cá nhân
+              </span>
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+                Sổ địa chỉ
+              </h1>
+              <p className="text-sm text-slate-500 mt-1">
+                Quản lý địa chỉ giao hàng của bạn
+              </p>
             </div>
-            <Button onClick={handleAdd} className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 h-10 px-5 text-sm font-medium shadow-sm transition-colors self-start md:self-auto">
+            <Button
+              onClick={handleAdd}
+              className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 h-10 px-5 text-sm font-medium shadow-sm transition-colors self-start md:self-auto"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Thêm địa chỉ mới
             </Button>
@@ -71,11 +80,18 @@ export function AddressesPage() {
               <div className="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-teal-600">
                 <MapPin className="h-8 w-8 text-teal-600" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-2">Chưa có địa chỉ nào</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-2">
+                Chưa có địa chỉ nào
+              </h3>
               <p className="text-slate-500 mb-6 text-sm max-w-sm mx-auto">
-                Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại Thai Spray Shop
+                Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại
+                Thai Spray Shop
               </p>
-              <Button onClick={handleAdd} size="lg" className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 h-11 px-6 text-sm font-medium shadow-sm transition-colors">
+              <Button
+                onClick={handleAdd}
+                size="lg"
+                className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 h-11 px-6 text-sm font-medium shadow-sm transition-colors"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Thêm địa chỉ đầu tiên
               </Button>
@@ -90,11 +106,19 @@ export function AddressesPage() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4 gap-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${address.isDefault ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                          {address.isDefault ? <Home className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
+                        <div
+                          className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${address.isDefault ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}
+                        >
+                          {address.isDefault ? (
+                            <Home className="h-5 w-5" />
+                          ) : (
+                            <MapPin className="h-5 w-5" />
+                          )}
                         </div>
                         <div>
-                          <h3 className="font-bold text-slate-900 text-base leading-tight">{address.fullName}</h3>
+                          <h3 className="font-bold text-slate-900 text-base leading-tight">
+                            {address.fullName}
+                          </h3>
                           {address.isDefault && (
                             <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-0.5 rounded-full w-fit mt-1">
                               <CheckCircle className="h-3 w-3" />
@@ -131,7 +155,8 @@ export function AddressesPage() {
                         {address.phone}
                       </div>
                       <div className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-lg border border-slate-200/80">
-                        {address.line1}, {address.ward}, {address.district}, {address.province}
+                        {address.line1}, {address.ward}, {address.district},{' '}
+                        {address.province}
                       </div>
                     </div>
                   </CardContent>

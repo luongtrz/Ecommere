@@ -71,7 +71,10 @@ export const ProductCard = memo(function ProductCard({
       >
         {/* Image Container */}
         <div className="relative overflow-hidden bg-slate-50 border-b border-slate-100">
-          <Link to={`/p/${slug}`} className="block aspect-square overflow-hidden p-4 flex items-center justify-center">
+          <Link
+            to={`/p/${slug}`}
+            className="block aspect-square overflow-hidden p-4 flex items-center justify-center"
+          >
             <img
               src={getImageUrl(images[0], { width: 500 })}
               alt={name}
@@ -85,8 +88,7 @@ export const ProductCard = memo(function ProductCard({
           <div className="absolute left-3 top-3 flex flex-col gap-1.5">
             {hasDiscount && (
               <span className="inline-flex items-center gap-1 rounded-md bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
-                <Flame className="h-3 w-3 fill-white" />
-                -{discountPercent}%
+                <Flame className="h-3 w-3 fill-white" />-{discountPercent}%
               </span>
             )}
             <span className="inline-flex items-center gap-1.5 rounded-md bg-white/95 backdrop-blur-sm px-2 py-0.5 text-xs font-medium text-slate-700 border border-slate-200 shadow-sm">
@@ -116,7 +118,12 @@ export const ProductCard = memo(function ProductCard({
                 : 'text-slate-400 hover:text-rose-600 hover:border-slate-300',
             )}
           >
-            <Heart className={cn('h-4 w-4 transition-colors', isWishlisted && 'fill-rose-600 text-rose-600')} />
+            <Heart
+              className={cn(
+                'h-4 w-4 transition-colors',
+                isWishlisted && 'fill-rose-600 text-rose-600',
+              )}
+            />
           </button>
 
           {/* Quick View Hover Action */}
@@ -143,16 +150,25 @@ export const ProductCard = memo(function ProductCard({
           <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
             <div className="flex items-center gap-1 text-amber-500">
               <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              <span className="font-semibold text-slate-900 tabular-nums">{rating > 0 ? rating.toFixed(1) : '4.9'}</span>
+              <span className="font-semibold text-slate-900 tabular-nums">
+                {rating > 0 ? rating.toFixed(1) : '4.9'}
+              </span>
             </div>
             <span>·</span>
-            <span className="text-slate-500">{reviewCount > 0 ? `${reviewCount} đánh giá` : 'Đã bán 120+'}</span>
+            <span className="text-slate-500">
+              {reviewCount > 0 ? `${reviewCount} đánh giá` : 'Đã bán 120+'}
+            </span>
           </div>
 
           {/* Pricing */}
           <div className="mt-auto pt-3">
             <div className="flex items-baseline gap-2">
-              <span className={cn('text-base md:text-lg font-semibold tabular-nums', hasDiscount ? 'text-rose-600' : 'text-slate-900')}>
+              <span
+                className={cn(
+                  'text-base md:text-lg font-semibold tabular-nums',
+                  hasDiscount ? 'text-rose-600' : 'text-slate-900',
+                )}
+              >
                 {formatCurrency(finalPrice)}
               </span>
               {hasDiscount && (
@@ -168,7 +184,10 @@ export const ProductCard = memo(function ProductCard({
         <CardFooter className="p-4 pt-0">
           <Button
             onClick={onAddToCart}
-            disabled={variants !== undefined && (!selectedVariant || selectedVariant.stock === 0)}
+            disabled={
+              variants !== undefined &&
+              (!selectedVariant || selectedVariant.stock === 0)
+            }
             className="h-10 w-full rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 text-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
             size="sm"
           >

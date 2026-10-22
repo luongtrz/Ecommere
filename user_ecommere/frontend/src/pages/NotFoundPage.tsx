@@ -19,8 +19,8 @@ export function NotFoundPage() {
               Không tìm thấy trang
             </h1>
             <p className="text-sm md:text-base text-slate-600 mb-8 max-w-md mx-auto leading-relaxed font-sans">
-              Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm.
-              Có thể đường dẫn không chính xác hoặc trang đã bị xóa.
+              Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có
+              thể đường dẫn không chính xác hoặc trang đã bị xóa.
             </p>
 
             {/* Action Buttons */}
@@ -61,8 +61,12 @@ export function NotFoundPage() {
                     <ShoppingBag className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="font-semibold text-sm text-slate-900 font-sans">Sản phẩm</div>
-                    <div className="text-xs text-slate-500 font-sans">Xem danh mục sản phẩm</div>
+                    <div className="font-semibold text-sm text-slate-900 font-sans">
+                      Sản phẩm
+                    </div>
+                    <div className="text-xs text-slate-500 font-sans">
+                      Xem danh mục sản phẩm
+                    </div>
                   </div>
                 </Link>
 
@@ -74,8 +78,12 @@ export function NotFoundPage() {
                     <Search className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="font-semibold text-sm text-slate-900 font-sans">Danh mục</div>
-                    <div className="text-xs text-slate-500 font-sans">Tìm theo danh mục</div>
+                    <div className="font-semibold text-sm text-slate-900 font-sans">
+                      Danh mục
+                    </div>
+                    <div className="text-xs text-slate-500 font-sans">
+                      Tìm theo danh mục
+                    </div>
                   </div>
                 </Link>
 
@@ -87,8 +95,12 @@ export function NotFoundPage() {
                     <HelpCircle className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="font-semibold text-sm text-slate-900 font-sans">Hỗ trợ</div>
-                    <div className="text-xs text-slate-500 font-sans">Liên hệ hỗ trợ</div>
+                    <div className="font-semibold text-sm text-slate-900 font-sans">
+                      Hỗ trợ
+                    </div>
+                    <div className="text-xs text-slate-500 font-sans">
+                      Liên hệ hỗ trợ
+                    </div>
                   </div>
                 </Link>
               </div>
@@ -98,7 +110,9 @@ export function NotFoundPage() {
           {/* Tip Element without emoji */}
           <div className="mt-6 text-center">
             <div className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-1.5 shadow-sm">
-              <span className="text-xs font-bold text-teal-600 font-sans">Mẹo:</span>
+              <span className="text-xs font-bold text-teal-600 font-sans">
+                Mẹo:
+              </span>
               <span className="text-xs text-slate-600 font-medium font-sans">
                 Kiểm tra lại đường dẫn URL hoặc sử dụng thanh tìm kiếm
               </span>

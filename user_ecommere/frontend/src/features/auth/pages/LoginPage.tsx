@@ -89,9 +89,7 @@ export function LoginPage() {
 
               <h2 className="text-3xl xl:text-4xl 2xl:text-5xl font-bold tracking-tight leading-[1.2] text-slate-900">
                 Mua Sắm Tiết Kiệm,{' '}
-                <span className="text-teal-600">
-                  An Tâm Chuẩn Hàng Thái
-                </span>
+                <span className="text-teal-600">An Tâm Chuẩn Hàng Thái</span>
               </h2>
 
               <p className="text-sm xl:text-base text-slate-600 leading-relaxed font-normal">
@@ -109,8 +107,12 @@ export function LoginPage() {
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-900">100% Nội Địa Thái</h4>
-                    <p className="text-[11px] text-slate-500">Đền 200% nếu hàng giả</p>
+                    <h4 className="text-xs font-semibold text-slate-900">
+                      100% Nội Địa Thái
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Đền 200% nếu hàng giả
+                    </p>
                   </div>
                 </div>
               </div>
@@ -121,8 +123,12 @@ export function LoginPage() {
                     <Truck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-900">Giao Hỏa Tốc COD</h4>
-                    <p className="text-[11px] text-slate-500">Kiểm tra hàng trước khi trả</p>
+                    <h4 className="text-xs font-semibold text-slate-900">
+                      Giao Hỏa Tốc COD
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Kiểm tra hàng trước khi trả
+                    </p>
                   </div>
                 </div>
               </div>
@@ -149,11 +155,18 @@ export function LoginPage() {
                   TS
                 </div>
                 <div>
-                  <span className="text-lg font-bold text-slate-900">Thai Spray</span>
-                  <span className="text-[10px] text-slate-500 block uppercase tracking-wider">Hàng Thái Lan Chính Hãng</span>
+                  <span className="text-lg font-bold text-slate-900">
+                    Thai Spray
+                  </span>
+                  <span className="text-[10px] text-slate-500 block uppercase tracking-wider">
+                    Hàng Thái Lan Chính Hãng
+                  </span>
                 </div>
               </Link>
-              <Link to="/" className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+              <Link
+                to="/"
+                className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+              >
                 Trang chủ →
               </Link>
             </div>
@@ -175,7 +188,10 @@ export function LoginPage() {
 
               {/* Login Form */}
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={form.control}
                     name="phone"
@@ -210,7 +226,10 @@ export function LoginPage() {
                           <FormLabel className="text-xs font-semibold uppercase tracking-wider text-slate-700">
                             Mật khẩu
                           </FormLabel>
-                          <Link to="/forgot-password" className="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors">
+                          <Link
+                            to="/forgot-password"
+                            className="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
+                          >
                             Quên mật khẩu?
                           </Link>
                         </div>
@@ -229,9 +248,15 @@ export function LoginPage() {
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                              aria-label={
+                                showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                              }
                             >
-                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
                             </button>
                           </div>
                         </FormControl>
@@ -260,7 +285,10 @@ export function LoginPage() {
               {/* Bottom Register Prompt */}
               <div className="pt-4 text-center text-sm text-slate-600 border-t border-slate-200">
                 Chưa có tài khoản?{' '}
-                <Link to="/register" className="font-semibold text-teal-600 hover:text-teal-700 hover:underline transition-colors">
+                <Link
+                  to="/register"
+                  className="font-semibold text-teal-600 hover:text-teal-700 hover:underline transition-colors"
+                >
                   Đăng ký thành viên mới
                 </Link>
               </div>

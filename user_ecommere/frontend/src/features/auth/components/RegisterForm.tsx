@@ -109,7 +109,10 @@ export function RegisterForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs font-semibold uppercase tracking-wider text-slate-700">
-                Email <span className="text-slate-400 font-normal lowercase">(không bắt buộc)</span>
+                Email{' '}
+                <span className="text-slate-400 font-normal lowercase">
+                  (không bắt buộc)
+                </span>
               </FormLabel>
               <FormControl>
                 <div className="relative">
@@ -153,7 +156,9 @@ export function RegisterForm({
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                      aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                      aria-label={
+                        showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                      }
                     >
                       {showPassword ? (
                         <EyeOff className="h-3.5 w-3.5" />
@@ -189,9 +194,13 @@ export function RegisterForm({
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                      aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                      aria-label={
+                        showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                      }
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="h-3.5 w-3.5" />
@@ -213,7 +222,10 @@ export function RegisterForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs font-semibold uppercase tracking-wider text-slate-700">
-                Mã giới thiệu <span className="text-slate-400 font-normal lowercase">(nếu có)</span>
+                Mã giới thiệu{' '}
+                <span className="text-slate-400 font-normal lowercase">
+                  (nếu có)
+                </span>
               </FormLabel>
               <FormControl>
                 <div className="relative">

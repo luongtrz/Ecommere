@@ -154,8 +154,12 @@ export function ChatbotWidget() {
                 <Sparkles className="h-5 w-5 text-amber-300" />
               </div>
               <div>
-                <h2 className="font-sans text-sm md:text-base font-semibold tracking-tight text-white">Chuyên gia Mùi hương</h2>
-                <p className="text-[11px] text-teal-100 mt-0.5 font-normal">Tư vấn mùi thơm cho nhà ở & xe hơi</p>
+                <h2 className="font-sans text-sm md:text-base font-semibold tracking-tight text-white">
+                  Chuyên gia Mùi hương
+                </h2>
+                <p className="text-[11px] text-teal-100 mt-0.5 font-normal">
+                  Tư vấn mùi thơm cho nhà ở & xe hơi
+                </p>
               </div>
             </div>
 
@@ -199,7 +203,9 @@ export function ChatbotWidget() {
                 <Bot className="h-4 w-4" />
               </div>
               <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm">
-                <div className="whitespace-pre-line text-sm text-slate-700 leading-relaxed">{WELCOME_MESSAGE}</div>
+                <div className="whitespace-pre-line text-sm text-slate-700 leading-relaxed">
+                  {WELCOME_MESSAGE}
+                </div>
               </div>
             </div>
 
@@ -268,7 +274,8 @@ export function ChatbotWidget() {
                         {message.sources && message.sources.length > 0 && (
                           <div className="border-t border-slate-200 pt-2.5">
                             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
-                              <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Sản phẩm được đề xuất:
+                              <Sparkles className="h-3.5 w-3.5 text-amber-500" />{' '}
+                              Sản phẩm được đề xuất:
                             </p>
                             <div className="flex flex-col gap-2">
                               {message.sources.map((source) => (
@@ -300,7 +307,9 @@ export function ChatbotWidget() {
             {/* Quick suggestions when no conversation yet */}
             {visibleMessages.length === 0 ? (
               <div className="space-y-2.5 px-1 pt-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Gợi ý nhanh</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Gợi ý nhanh
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {SUGGESTIONS.map((suggestion) => (
                     <button

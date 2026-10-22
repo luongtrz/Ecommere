@@ -68,7 +68,12 @@ export function ProfileFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-5 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-slate-900 text-sm font-medium">Họ và tên *</Label>
+            <Label
+              htmlFor="name"
+              className="text-slate-900 text-sm font-medium"
+            >
+              Họ và tên *
+            </Label>
             <Input
               id="name"
               required
@@ -82,7 +87,12 @@ export function ProfileFormDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-slate-900 text-sm font-medium">Số điện thoại</Label>
+            <Label
+              htmlFor="phone"
+              className="text-slate-900 text-sm font-medium"
+            >
+              Số điện thoại
+            </Label>
             <Input
               id="phone"
               type="tel"
@@ -96,7 +106,12 @@ export function ProfileFormDialog({
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="h-11 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-6 text-sm font-medium transition-colors">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="h-11 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-6 text-sm font-medium transition-colors"
+            >
               Hủy
             </Button>
             <Button

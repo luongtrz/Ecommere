@@ -4,7 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 
 interface ResetPasswordFormProps {
@@ -12,7 +19,10 @@ interface ResetPasswordFormProps {
   isLoading?: boolean;
 }
 
-export function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
+export function ResetPasswordForm({
+  onSubmit,
+  isLoading,
+}: ResetPasswordFormProps) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -50,9 +60,15 @@ export function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProp
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                    aria-label={
+                      showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                    }
                   >
-                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </FormControl>
@@ -83,9 +99,15 @@ export function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProp
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                    aria-label={
+                      showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                    }
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </FormControl>

@@ -25,11 +25,26 @@ export function Rating({
   const stars = [];
   for (let i = 1; i <= max; i++) {
     if (value >= i) {
-      stars.push(<Star key={i} className={cn(sizeClasses[size], 'fill-amber-400 text-amber-400')} />);
+      stars.push(
+        <Star
+          key={i}
+          className={cn(sizeClasses[size], 'fill-amber-400 text-amber-400')}
+        />,
+      );
     } else if (value >= i - 0.5) {
-      stars.push(<StarHalf key={i} className={cn(sizeClasses[size], 'fill-amber-400 text-amber-400')} />);
+      stars.push(
+        <StarHalf
+          key={i}
+          className={cn(sizeClasses[size], 'fill-amber-400 text-amber-400')}
+        />,
+      );
     } else {
-      stars.push(<Star key={i} className={cn(sizeClasses[size], 'text-slate-200 fill-slate-100')} />);
+      stars.push(
+        <Star
+          key={i}
+          className={cn(sizeClasses[size], 'text-slate-200 fill-slate-100')}
+        />,
+      );
     }
   }
 

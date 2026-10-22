@@ -43,7 +43,9 @@ export function MobileNav() {
                     </span>
                   ) : null}
                 </div>
-                <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
+                <span className="text-[10px] font-medium tracking-wide">
+                  {item.label}
+                </span>
               </button>
             );
           }
@@ -54,11 +56,23 @@ export function MobileNav() {
               to={item.href!}
               className={cn(
                 'flex h-full w-full min-h-[48px] flex-col items-center justify-center gap-1 rounded-xl transition active:scale-95 font-sans',
-                isActive ? 'text-teal-600 font-semibold' : 'text-slate-500 hover:text-slate-900',
+                isActive
+                  ? 'text-teal-600 font-semibold'
+                  : 'text-slate-500 hover:text-slate-900',
               )}
             >
-              <item.icon className={cn('h-5 w-5 transition-transform', isActive && 'scale-110 text-teal-600')} />
-              <span className={cn('text-[10px] tracking-wide', isActive ? 'font-bold' : 'font-medium')}>
+              <item.icon
+                className={cn(
+                  'h-5 w-5 transition-transform',
+                  isActive && 'scale-110 text-teal-600',
+                )}
+              />
+              <span
+                className={cn(
+                  'text-[10px] tracking-wide',
+                  isActive ? 'font-bold' : 'font-medium',
+                )}
+              >
                 {item.label}
               </span>
             </Link>

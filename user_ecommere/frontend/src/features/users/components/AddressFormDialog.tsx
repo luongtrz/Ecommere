@@ -103,7 +103,12 @@ export function AddressFormDialog({
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-slate-900 text-sm font-medium">Họ và tên <span className="text-rose-600">*</span></Label>
+              <Label
+                htmlFor="fullName"
+                className="text-slate-900 text-sm font-medium"
+              >
+                Họ và tên <span className="text-rose-600">*</span>
+              </Label>
               <Input
                 id="fullName"
                 required
@@ -117,7 +122,12 @@ export function AddressFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-slate-900 text-sm font-medium">Số điện thoại <span className="text-rose-600">*</span></Label>
+              <Label
+                htmlFor="phone"
+                className="text-slate-900 text-sm font-medium"
+              >
+                Số điện thoại <span className="text-rose-600">*</span>
+              </Label>
               <Input
                 id="phone"
                 required
@@ -133,7 +143,12 @@ export function AddressFormDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="line1" className="text-slate-900 text-sm font-medium">Địa chỉ chi tiết <span className="text-rose-600">*</span></Label>
+            <Label
+              htmlFor="line1"
+              className="text-slate-900 text-sm font-medium"
+            >
+              Địa chỉ chi tiết <span className="text-rose-600">*</span>
+            </Label>
             <Input
               id="line1"
               required
@@ -148,7 +163,12 @@ export function AddressFormDialog({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="space-y-2">
-              <Label htmlFor="province" className="text-slate-900 text-sm font-medium">Tỉnh/Thành phố <span className="text-rose-600">*</span></Label>
+              <Label
+                htmlFor="province"
+                className="text-slate-900 text-sm font-medium"
+              >
+                Tỉnh/Thành phố <span className="text-rose-600">*</span>
+              </Label>
               <Input
                 id="province"
                 required
@@ -162,7 +182,12 @@ export function AddressFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="district" className="text-slate-900 text-sm font-medium">Quận/Huyện <span className="text-rose-600">*</span></Label>
+              <Label
+                htmlFor="district"
+                className="text-slate-900 text-sm font-medium"
+              >
+                Quận/Huyện <span className="text-rose-600">*</span>
+              </Label>
               <Input
                 id="district"
                 required
@@ -176,7 +201,12 @@ export function AddressFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ward" className="text-slate-900 text-sm font-medium">Phường/Xã <span className="text-rose-600">*</span></Label>
+              <Label
+                htmlFor="ward"
+                className="text-slate-900 text-sm font-medium"
+              >
+                Phường/Xã <span className="text-rose-600">*</span>
+              </Label>
               <Input
                 id="ward"
                 required
@@ -199,13 +229,21 @@ export function AddressFormDialog({
               }
               className="w-5 h-5 rounded border-slate-300 text-teal-600 focus-visible:ring-teal-500 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600"
             />
-            <Label htmlFor="isDefault" className="cursor-pointer text-slate-900 text-sm font-medium">
+            <Label
+              htmlFor="isDefault"
+              className="cursor-pointer text-slate-900 text-sm font-medium"
+            >
               Đặt làm địa chỉ mặc định
             </Label>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="h-11 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-6 text-sm font-medium transition-colors">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="h-11 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-6 text-sm font-medium transition-colors"
+            >
               Hủy
             </Button>
             <Button

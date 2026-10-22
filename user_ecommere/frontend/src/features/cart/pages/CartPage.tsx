@@ -29,11 +29,17 @@ export function CartPage() {
         <div className="min-h-[70vh] bg-slate-50 flex items-center justify-center p-4 py-12 md:py-20">
           <div className="max-w-md w-full bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center">
             <EmptyState
-              icon={<ShoppingBag className="h-16 w-16 text-slate-400 mx-auto" />}
+              icon={
+                <ShoppingBag className="h-16 w-16 text-slate-400 mx-auto" />
+              }
               title="Giỏ hàng của bạn đang trống"
               description="Hãy khám phá bộ sưu tập nước hoa xịt thơm của chúng tôi"
               action={
-                <Button asChild size="lg" className="w-full rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-sm font-medium h-11 mt-2 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-teal-500">
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-sm font-medium h-11 mt-2 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-teal-500"
+                >
                   <Link to="/catalog">Bắt đầu mua sắm</Link>
                 </Button>
               }
@@ -52,8 +58,16 @@ export function CartPage() {
           {/* Header */}
           <div className="mb-8 md:mb-10">
             <div className="flex items-center gap-4 mb-4">
-              <Button variant="ghost" size="sm" asChild className="p-0 h-auto hover:bg-transparent">
-                <Link to="/catalog" className="inline-flex items-center gap-2 text-xs uppercase tracking-wider font-semibold text-slate-500 hover:text-teal-600 transition-colors group">
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="p-0 h-auto hover:bg-transparent"
+              >
+                <Link
+                  to="/catalog"
+                  className="inline-flex items-center gap-2 text-xs uppercase tracking-wider font-semibold text-slate-500 hover:text-teal-600 transition-colors group"
+                >
                   <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                   Tiếp tục mua sắm
                 </Link>
@@ -67,9 +81,14 @@ export function CartPage() {
                 <h1 className="text-2xl md:text-3xl font-sans font-bold text-slate-900 tracking-tight">
                   Giỏ hàng của bạn
                 </h1>
-                <p className="text-sm text-slate-500 mt-1.5">{items.length} sản phẩm trong giỏ hàng</p>
+                <p className="text-sm text-slate-500 mt-1.5">
+                  {items.length} sản phẩm trong giỏ hàng
+                </p>
               </div>
-              <Badge variant="secondary" className="self-start sm:self-auto text-base md:text-lg px-4 py-1.5 rounded-lg font-sans font-semibold bg-white text-slate-900 border border-slate-200 shadow-sm tabular-nums">
+              <Badge
+                variant="secondary"
+                className="self-start sm:self-auto text-base md:text-lg px-4 py-1.5 rounded-lg font-sans font-semibold bg-white text-slate-900 border border-slate-200 shadow-sm tabular-nums"
+              >
                 {formatCurrency(totalPrice)}
               </Badge>
             </div>
@@ -103,12 +122,18 @@ export function CartPage() {
                       </h3>
                       <div className="flex items-center gap-1.5 mb-2.5 flex-wrap">
                         {item.scent && (
-                          <Badge variant="secondary" className="text-xs rounded-md px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 font-medium">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs rounded-md px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 font-medium"
+                          >
                             {item.scent}
                           </Badge>
                         )}
                         {item.volumeMl ? (
-                          <Badge variant="secondary" className="text-xs rounded-md px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 font-medium">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs rounded-md px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 font-medium"
+                          >
                             {item.volumeMl}ml
                           </Badge>
                         ) : null}
@@ -136,7 +161,9 @@ export function CartPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                          onClick={() =>
+                            updateQuantity(item.variantId, item.quantity - 1)
+                          }
                           disabled={item.quantity <= 1}
                           className="h-7 w-7 rounded-md hover:bg-white text-slate-700 transition-colors"
                         >
@@ -148,8 +175,13 @@ export function CartPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                          disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                          onClick={() =>
+                            updateQuantity(item.variantId, item.quantity + 1)
+                          }
+                          disabled={
+                            typeof item.stock === 'number' &&
+                            item.quantity >= item.stock
+                          }
                           className="h-7 w-7 rounded-md hover:bg-white text-slate-700 transition-colors"
                         >
                           <Plus className="h-3 w-3" />
@@ -177,34 +209,54 @@ export function CartPage() {
                   <div className="space-y-3.5 text-sm">
                     <div className="flex justify-between text-slate-600">
                       <span>Tạm tính ({items.length} sản phẩm):</span>
-                      <span className="font-semibold text-slate-900 tabular-nums">{formatCurrency(totalPrice)}</span>
+                      <span className="font-semibold text-slate-900 tabular-nums">
+                        {formatCurrency(totalPrice)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-slate-600">
                       <span className="flex items-center gap-1.5">
                         <Truck className="h-4 w-4 text-teal-600" />
                         Phí vận chuyển:
                       </span>
-                      <span className="text-emerald-600 font-semibold">Miễn phí</span>
+                      <span className="text-emerald-600 font-semibold">
+                        Miễn phí
+                      </span>
                     </div>
                   </div>
 
                   <div className="border-t border-slate-200 pt-5 space-y-4">
                     <div className="flex justify-between items-baseline mb-2">
-                      <span className="text-sm font-semibold text-slate-900">Tổng cộng:</span>
+                      <span className="text-sm font-semibold text-slate-900">
+                        Tổng cộng:
+                      </span>
                       <span className="text-2xl font-sans font-bold text-slate-900 tabular-nums">
                         {formatCurrency(totalPrice)}
                       </span>
                     </div>
 
-                    <Button asChild className="w-full h-11 rounded-lg bg-teal-600 hover:bg-teal-700 text-white shadow-sm font-medium text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-teal-500" size="lg">
-                      <Link to="/checkout" className="flex items-center justify-center gap-2">
+                    <Button
+                      asChild
+                      className="w-full h-11 rounded-lg bg-teal-600 hover:bg-teal-700 text-white shadow-sm font-medium text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-teal-500"
+                      size="lg"
+                    >
+                      <Link
+                        to="/checkout"
+                        className="flex items-center justify-center gap-2"
+                      >
                         <CreditCard className="h-4 w-4" />
                         Tiến hành thanh toán
                       </Link>
                     </Button>
 
-                    <Button asChild variant="outline" className="w-full h-11 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors duration-200">
-                      <Link to="/catalog" className="flex items-center justify-center gap-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full h-11 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors duration-200"
+                    >
+                      <Link
+                        to="/catalog"
+                        className="flex items-center justify-center gap-2"
+                      >
                         <ShoppingBag className="h-4 w-4" />
                         Tiếp tục mua sắm
                       </Link>

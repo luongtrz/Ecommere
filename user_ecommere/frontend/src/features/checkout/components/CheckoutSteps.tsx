@@ -18,25 +18,41 @@ export function CheckoutSteps({ currentStep }: CheckoutStepsProps) {
         const isCurrent = currentStep === step.id;
 
         return (
-          <div key={step.id} className="flex items-center flex-1 last:flex-none">
+          <div
+            key={step.id}
+            className="flex items-center flex-1 last:flex-none"
+          >
             {/* Step Circle */}
             <div className="flex flex-col items-center gap-1.5 relative">
               <div
                 className={`
                   w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200
-                  ${isCurrent
-                    ? 'bg-teal-600 text-white ring-4 ring-teal-50 shadow-sm'
-                    : isCompleted
-                      ? 'bg-teal-600 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-400 border border-slate-200'
+                  ${
+                    isCurrent
+                      ? 'bg-teal-600 text-white ring-4 ring-teal-50 shadow-sm'
+                      : isCompleted
+                        ? 'bg-teal-600 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-400 border border-slate-200'
                   }
                 `}
               >
-                {isCompleted ? <CheckCircle className="h-5 w-5 text-white" /> : <span className="font-sans font-semibold text-xs">{step.id}</span>}
+                {isCompleted ? (
+                  <CheckCircle className="h-5 w-5 text-white" />
+                ) : (
+                  <span className="font-sans font-semibold text-xs">
+                    {step.id}
+                  </span>
+                )}
               </div>
-              <span className={`text-[11px] sm:text-xs transition-colors ${
-                isCurrent ? 'text-teal-700 font-semibold' : isCompleted ? 'text-slate-800 font-medium' : 'text-slate-400 font-normal'
-              }`}>
+              <span
+                className={`text-[11px] sm:text-xs transition-colors ${
+                  isCurrent
+                    ? 'text-teal-700 font-semibold'
+                    : isCompleted
+                      ? 'text-slate-800 font-medium'
+                      : 'text-slate-400 font-normal'
+                }`}
+              >
                 {step.label}
               </span>
             </div>

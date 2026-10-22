@@ -43,8 +43,12 @@ export function Footer() {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <h4 className="font-sans font-semibold text-slate-900 text-sm">100% Chính Hãng</h4>
-                <p className="text-xs text-slate-500 mt-0.5 font-sans">Cam kết hàng Thái Lan nội địa</p>
+                <h4 className="font-sans font-semibold text-slate-900 text-sm">
+                  100% Chính Hãng
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5 font-sans">
+                  Cam kết hàng Thái Lan nội địa
+                </p>
               </div>
             </div>
 
@@ -53,8 +57,12 @@ export function Footer() {
                 <Truck className="h-6 w-6" />
               </div>
               <div>
-                <h4 className="font-sans font-semibold text-slate-900 text-sm">Giao Hàng Toàn Quốc</h4>
-                <p className="text-xs text-slate-500 mt-0.5 font-sans">Đóng gói chống sốc an toàn</p>
+                <h4 className="font-sans font-semibold text-slate-900 text-sm">
+                  Giao Hàng Toàn Quốc
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5 font-sans">
+                  Đóng gói chống sốc an toàn
+                </p>
               </div>
             </div>
 
@@ -63,8 +71,12 @@ export function Footer() {
                 <RefreshCw className="h-6 w-6" />
               </div>
               <div>
-                <h4 className="font-sans font-semibold text-slate-900 text-sm">Đổi Trả 7 Ngày</h4>
-                <p className="text-xs text-slate-500 mt-0.5 font-sans">Miễn phí nếu vỡ hoặc lỗi tem</p>
+                <h4 className="font-sans font-semibold text-slate-900 text-sm">
+                  Đổi Trả 7 Ngày
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5 font-sans">
+                  Miễn phí nếu vỡ hoặc lỗi tem
+                </p>
               </div>
             </div>
 
@@ -73,8 +85,12 @@ export function Footer() {
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div>
-                <h4 className="font-sans font-semibold text-slate-900 text-sm">Kiểm Tra Hàng</h4>
-                <p className="text-xs text-slate-500 mt-0.5 font-sans">Đồng kiểm trước khi thanh toán</p>
+                <h4 className="font-sans font-semibold text-slate-900 text-sm">
+                  Kiểm Tra Hàng
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5 font-sans">
+                  Đồng kiểm trước khi thanh toán
+                </p>
               </div>
             </div>
           </div>
@@ -100,7 +116,9 @@ export function Footer() {
               </div>
             </div>
             <p className="text-sm leading-relaxed text-slate-600 font-sans">
-              Chuyên phân phối sỉ &amp; lẻ các dòng chai xịt gia dụng, xịt côn trùng, tẩy rửa sinh học và tinh dầu thơm phòng nhập khẩu trực tiếp từ Thái Lan.
+              Chuyên phân phối sỉ &amp; lẻ các dòng chai xịt gia dụng, xịt côn
+              trùng, tẩy rửa sinh học và tinh dầu thơm phòng nhập khẩu trực tiếp
+              từ Thái Lan.
             </p>
             <div className="pt-1 flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs text-slate-700 font-sans font-medium shadow-sm">
@@ -116,11 +134,16 @@ export function Footer() {
           {/* Column 2: Navigation & Policies */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-6">
             <div>
-              <h4 className="mb-4 font-sans text-sm font-semibold uppercase tracking-wider text-slate-900">Danh Mục Sản Phẩm</h4>
+              <h4 className="mb-4 font-sans text-sm font-semibold uppercase tracking-wider text-slate-900">
+                Danh Mục Sản Phẩm
+              </h4>
               <ul className="space-y-2.5 text-sm text-slate-600 font-sans">
                 {shoppingLinks.map((item) => (
                   <li key={item.to}>
-                    <Link to={item.to} className="transition-colors hover:text-teal-600">
+                    <Link
+                      to={item.to}
+                      className="transition-colors hover:text-teal-600"
+                    >
                       {item.label}
                     </Link>
                   </li>
@@ -129,11 +152,16 @@ export function Footer() {
             </div>
 
             <div>
-              <h4 className="mb-4 font-sans text-sm font-semibold uppercase tracking-wider text-slate-900">Hỗ Trợ Khách Hàng</h4>
+              <h4 className="mb-4 font-sans text-sm font-semibold uppercase tracking-wider text-slate-900">
+                Hỗ Trợ Khách Hàng
+              </h4>
               <ul className="space-y-2.5 text-sm text-slate-600 font-sans">
                 {policyLinks.map((item) => (
                   <li key={item.to}>
-                    <Link to={item.to} className="transition-colors hover:text-teal-600">
+                    <Link
+                      to={item.to}
+                      className="transition-colors hover:text-teal-600"
+                    >
                       {item.label}
                     </Link>
                   </li>
@@ -144,13 +172,19 @@ export function Footer() {
 
           {/* Column 3: Contact Details */}
           <div>
-            <h4 className="mb-4 font-sans text-sm font-semibold uppercase tracking-wider text-slate-900">Thông Tin Liên Hệ</h4>
+            <h4 className="mb-4 font-sans text-sm font-semibold uppercase tracking-wider text-slate-900">
+              Thông Tin Liên Hệ
+            </h4>
             <ul className="space-y-3.5 text-sm text-slate-600 font-sans">
               <li className="flex items-start gap-3">
                 <Phone className="mt-1 h-4 w-4 shrink-0 text-teal-600" />
                 <div>
-                  <span className="block text-slate-900 font-medium font-sans">0987.654.321</span>
-                  <span className="text-xs text-slate-500 font-sans">Hỗ trợ tư vấn Zalo / Hotline (8h - 22h)</span>
+                  <span className="block text-slate-900 font-medium font-sans">
+                    0987.654.321
+                  </span>
+                  <span className="text-xs text-slate-500 font-sans">
+                    Hỗ trợ tư vấn Zalo / Hotline (8h - 22h)
+                  </span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
@@ -159,7 +193,10 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="mt-1 h-4 w-4 shrink-0 text-teal-600" />
-                <span className="leading-relaxed font-sans">Kho tổng: 128 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh (Giao toàn quốc)</span>
+                <span className="leading-relaxed font-sans">
+                  Kho tổng: 128 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh (Giao toàn
+                  quốc)
+                </span>
               </li>
             </ul>
           </div>
@@ -169,10 +206,23 @@ export function Footer() {
       {/* Bottom Copyright */}
       <div className="border-t border-slate-200 bg-white">
         <div className="container mx-auto px-4 py-5 flex flex-col gap-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between font-sans">
-          <p>&copy; {new Date().getFullYear()} Thai Spray Việt Nam - Chuyên Hàng Gia Dụng &amp; Chai Xịt Thái Lan Cao Cấp.</p>
+          <p>
+            &copy; {new Date().getFullYear()} Thai Spray Việt Nam - Chuyên Hàng
+            Gia Dụng &amp; Chai Xịt Thái Lan Cao Cấp.
+          </p>
           <div className="flex items-center gap-5">
-            <Link to="/policy/privacy" className="hover:text-teal-600 transition-colors">Bảo mật</Link>
-            <Link to="/policy/terms" className="hover:text-teal-600 transition-colors">Điều khoản</Link>
+            <Link
+              to="/policy/privacy"
+              className="hover:text-teal-600 transition-colors"
+            >
+              Bảo mật
+            </Link>
+            <Link
+              to="/policy/terms"
+              className="hover:text-teal-600 transition-colors"
+            >
+              Điều khoản
+            </Link>
             <span className="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 font-medium flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

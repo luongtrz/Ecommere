@@ -35,11 +35,16 @@ export function WishlistPage() {
               <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-100">
                 <Heart className="h-8 w-8 text-rose-500" />
               </div>
-              <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900">Danh sách trống</h2>
+              <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900">
+                Danh sách trống
+              </h2>
               <p className="text-sm text-slate-600 mt-2 mb-6 max-w-sm mx-auto">
                 Bạn chưa lưu sản phẩm nào vào danh sách yêu thích.
               </p>
-              <Button asChild className="rounded-lg px-8 bg-teal-600 hover:bg-teal-700 text-white focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200">
+              <Button
+                asChild
+                className="rounded-lg px-8 bg-teal-600 hover:bg-teal-700 text-white focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200"
+              >
                 <Link to="/catalog">Khám phá sản phẩm ngay</Link>
               </Button>
             </div>
@@ -50,7 +55,10 @@ export function WishlistPage() {
                   key={item.productId}
                   className="group overflow-hidden border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col h-full bg-white rounded-xl"
                 >
-                  <Link to={`/p/${item.slug}`} className="relative overflow-hidden aspect-square block bg-slate-50 border-b border-slate-100">
+                  <Link
+                    to={`/p/${item.slug}`}
+                    className="relative overflow-hidden aspect-square block bg-slate-50 border-b border-slate-100"
+                  >
                     <img
                       src={getImageUrl(item.image)}
                       alt={item.name}
@@ -83,7 +91,10 @@ export function WishlistPage() {
                     </div>
                   </CardContent>
                   <CardFooter className="p-4 pt-0">
-                    <Button asChild className="w-full rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold h-9 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-all duration-200 active:scale-95">
+                    <Button
+                      asChild
+                      className="w-full rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold h-9 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-all duration-200 active:scale-95"
+                    >
                       <Link to={`/p/${item.slug}`}>
                         <ShoppingBag className="h-3.5 w-3.5 mr-2" />
                         Xem chi tiết

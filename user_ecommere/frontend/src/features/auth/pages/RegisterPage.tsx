@@ -2,7 +2,14 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { RegisterForm } from '../components/RegisterForm';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
-import { Gift, ShieldCheck, Sparkles, UserCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
+import {
+  Gift,
+  ShieldCheck,
+  Sparkles,
+  UserCheck,
+  ArrowRight,
+  CheckCircle2,
+} from 'lucide-react';
 
 export function RegisterPage() {
   const { register, isRegisterLoading } = useAuth();
@@ -55,13 +62,12 @@ export function RegisterPage() {
 
               <h2 className="text-3xl xl:text-4xl 2xl:text-5xl font-bold tracking-tight leading-[1.2] text-slate-900">
                 Tạo Tài Khoản Khách Hàng,{' '}
-                <span className="text-teal-600">
-                  Nhận Ngay Ưu Đãi
-                </span>
+                <span className="text-teal-600">Nhận Ngay Ưu Đãi</span>
               </h2>
 
               <p className="text-sm xl:text-base text-slate-600 leading-relaxed font-normal">
-                Đăng ký thành viên để nhận voucher và ưu đãi độc quyền khi mua sắm các sản phẩm chăm sóc nhà cửa chính hãng từ Thái Lan.
+                Đăng ký thành viên để nhận voucher và ưu đãi độc quyền khi mua
+                sắm các sản phẩm chăm sóc nhà cửa chính hãng từ Thái Lan.
               </p>
             </div>
 
@@ -72,8 +78,12 @@ export function RegisterPage() {
                   <Gift className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-900">Tặng Voucher 20.000đ</h4>
-                  <p className="text-[11px] text-slate-600">Áp dụng cho đơn hàng đầu tiên của bạn</p>
+                  <h4 className="text-xs font-semibold text-slate-900">
+                    Tặng Voucher 20.000đ
+                  </h4>
+                  <p className="text-[11px] text-slate-600">
+                    Áp dụng cho đơn hàng đầu tiên của bạn
+                  </p>
                 </div>
               </div>
 
@@ -84,8 +94,12 @@ export function RegisterPage() {
                       <ShieldCheck className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-semibold text-slate-900">Bảo mật 100%</h4>
-                      <p className="text-[11px] text-slate-500">Thông tin bảo mật tuyệt đối</p>
+                      <h4 className="text-xs font-semibold text-slate-900">
+                        Bảo mật 100%
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Thông tin bảo mật tuyệt đối
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -96,8 +110,12 @@ export function RegisterPage() {
                       <Sparkles className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-semibold text-slate-900">Tích điểm không giới hạn</h4>
-                      <p className="text-[11px] text-slate-500">Quy đổi cho mọi đơn hàng</p>
+                      <h4 className="text-xs font-semibold text-slate-900">
+                        Tích điểm không giới hạn
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Quy đổi cho mọi đơn hàng
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -109,7 +127,10 @@ export function RegisterPage() {
                     Bạn được giới thiệu bởi bạn bè
                   </p>
                   <p className="text-[11px] text-slate-600 font-medium mt-0.5">
-                    Mã giới thiệu: <span className="font-mono font-bold text-slate-900">{referralCode}</span>
+                    Mã giới thiệu:{' '}
+                    <span className="font-mono font-bold text-slate-900">
+                      {referralCode}
+                    </span>
                   </p>
                 </div>
               )}
@@ -136,11 +157,18 @@ export function RegisterPage() {
                   TS
                 </div>
                 <div>
-                  <span className="text-lg font-bold text-slate-900">Thai Spray</span>
-                  <span className="text-[10px] text-slate-500 block uppercase tracking-wider">Chính Hãng Thái Lan</span>
+                  <span className="text-lg font-bold text-slate-900">
+                    Thai Spray
+                  </span>
+                  <span className="text-[10px] text-slate-500 block uppercase tracking-wider">
+                    Chính Hãng Thái Lan
+                  </span>
                 </div>
               </Link>
-              <Link to="/" className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+              <Link
+                to="/"
+                className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+              >
                 Trang chủ →
               </Link>
             </div>
@@ -151,8 +179,12 @@ export function RegisterPage() {
                 <Gift className="h-5 w-5" />
               </div>
               <div className="text-xs">
-                <p className="font-semibold text-slate-900">Tặng Voucher 20.000đ</p>
-                <p className="text-slate-600">Áp dụng cho đơn hàng đầu tiên của bạn</p>
+                <p className="font-semibold text-slate-900">
+                  Tặng Voucher 20.000đ
+                </p>
+                <p className="text-slate-600">
+                  Áp dụng cho đơn hàng đầu tiên của bạn
+                </p>
               </div>
             </div>
 
@@ -163,7 +195,10 @@ export function RegisterPage() {
                   Bạn được giới thiệu bởi bạn bè
                 </p>
                 <p className="text-[11px] text-slate-600 font-medium mt-0.5">
-                  Mã giới thiệu: <span className="font-mono font-bold text-slate-900">{referralCode}</span>
+                  Mã giới thiệu:{' '}
+                  <span className="font-mono font-bold text-slate-900">
+                    {referralCode}
+                  </span>
                 </p>
               </div>
             )}

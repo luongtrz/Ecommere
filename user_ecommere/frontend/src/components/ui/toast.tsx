@@ -27,7 +27,8 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: 'border-slate-200 bg-white text-slate-900',
-        destructive: 'destructive group border-rose-200 bg-rose-50 text-rose-900',
+        destructive:
+          'destructive group border-rose-200 bg-rose-50 text-rose-900',
       },
     },
     defaultVariants: {
@@ -59,7 +60,7 @@ const ToastAction = React.forwardRef<
     ref={ref}
     className={cn(
       'inline-flex h-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-transparent px-3 text-xs font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-rose-300 group-[.destructive]:text-rose-900 group-[.destructive]:hover:bg-rose-100 group-[.destructive]:focus:ring-rose-500',
-      className
+      className,
     )}
     {...props}
   />
@@ -74,7 +75,7 @@ const ToastClose = React.forwardRef<
     ref={ref}
     className={cn(
       'absolute right-2 top-2 rounded-lg p-1 text-slate-400 opacity-0 transition-opacity hover:text-slate-600 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-teal-500 group-hover:opacity-100 group-[.destructive]:text-rose-400 group-[.destructive]:hover:text-rose-700 group-[.destructive]:focus:ring-rose-500',
-      className
+      className,
     )}
     toast-close=""
     {...props}
@@ -88,7 +89,14 @@ const ToastTitle = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Title>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
 >(({ className, ...props }, ref) => (
-  <ToastPrimitives.Title ref={ref} className={cn('text-sm font-semibold tracking-tight text-slate-900 group-[.destructive]:text-rose-900', className)} {...props} />
+  <ToastPrimitives.Title
+    ref={ref}
+    className={cn(
+      'text-sm font-semibold tracking-tight text-slate-900 group-[.destructive]:text-rose-900',
+      className,
+    )}
+    {...props}
+  />
 ));
 ToastTitle.displayName = ToastPrimitives.Title.displayName;
 
@@ -96,7 +104,14 @@ const ToastDescription = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Description>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
 >(({ className, ...props }, ref) => (
-  <ToastPrimitives.Description ref={ref} className={cn('text-sm text-slate-500 leading-relaxed group-[.destructive]:text-rose-700', className)} {...props} />
+  <ToastPrimitives.Description
+    ref={ref}
+    className={cn(
+      'text-sm text-slate-500 leading-relaxed group-[.destructive]:text-rose-700',
+      className,
+    )}
+    {...props}
+  />
 ));
 ToastDescription.displayName = ToastPrimitives.Description.displayName;
 

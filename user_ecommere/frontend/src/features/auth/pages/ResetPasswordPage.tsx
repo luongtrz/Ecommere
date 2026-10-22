@@ -65,13 +65,12 @@ export function ResetPasswordPage() {
 
               <h2 className="text-3xl xl:text-4xl 2xl:text-5xl font-bold tracking-tight leading-[1.2] text-slate-900">
                 Đặt Lại Mật Khẩu,{' '}
-                <span className="text-teal-600">
-                  Bảo Vệ Tài Khoản
-                </span>
+                <span className="text-teal-600">Bảo Vệ Tài Khoản</span>
               </h2>
 
               <p className="text-sm xl:text-base text-slate-600 leading-relaxed font-normal">
-                Thiết lập mật khẩu an toàn mới để tiếp tục trải nghiệm mua sắm tiện lợi tại Thai Spray Shop.
+                Thiết lập mật khẩu an toàn mới để tiếp tục trải nghiệm mua sắm
+                tiện lợi tại Thai Spray Shop.
               </p>
             </div>
 
@@ -83,8 +82,12 @@ export function ResetPasswordPage() {
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-900">Mã Hóa Chuẩn Quốc Tế</h4>
-                    <p className="text-[11px] text-slate-500">Bảo vệ thông tin cá nhân</p>
+                    <h4 className="text-xs font-semibold text-slate-900">
+                      Mã Hóa Chuẩn Quốc Tế
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Bảo vệ thông tin cá nhân
+                    </p>
                   </div>
                 </div>
               </div>
@@ -95,8 +98,12 @@ export function ResetPasswordPage() {
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-900">Khuyến Nghị Bảo Mật</h4>
-                    <p className="text-[11px] text-slate-500">Kết hợp chữ, số và ký tự</p>
+                    <h4 className="text-xs font-semibold text-slate-900">
+                      Khuyến Nghị Bảo Mật
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Kết hợp chữ, số và ký tự
+                    </p>
                   </div>
                 </div>
               </div>
@@ -123,11 +130,18 @@ export function ResetPasswordPage() {
                   TS
                 </div>
                 <div>
-                  <span className="text-lg font-bold text-slate-900">Thai Spray</span>
-                  <span className="text-[10px] text-slate-500 block uppercase tracking-wider">Hàng Thái Lan Chính Hãng</span>
+                  <span className="text-lg font-bold text-slate-900">
+                    Thai Spray
+                  </span>
+                  <span className="text-[10px] text-slate-500 block uppercase tracking-wider">
+                    Hàng Thái Lan Chính Hãng
+                  </span>
                 </div>
               </Link>
-              <Link to="/" className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+              <Link
+                to="/"
+                className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+              >
                 Trang chủ →
               </Link>
             </div>

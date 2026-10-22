@@ -81,9 +81,16 @@ export function AccountPage() {
                     {getInitials(user.name)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="text-lg font-bold text-slate-900 truncate font-sans">{user.name}</h2>
-                    <Badge variant="outline" className={`${getRoleColor(user.role)} px-2.5 py-0.5 rounded-full text-[10px] mt-1 font-semibold tracking-wider uppercase border`}>
-                      {user.role === 'ADMIN' ? 'Quản trị viên' : 'Khách hàng thân thiết'}
+                    <h2 className="text-lg font-bold text-slate-900 truncate font-sans">
+                      {user.name}
+                    </h2>
+                    <Badge
+                      variant="outline"
+                      className={`${getRoleColor(user.role)} px-2.5 py-0.5 rounded-full text-[10px] mt-1 font-semibold tracking-wider uppercase border`}
+                    >
+                      {user.role === 'ADMIN'
+                        ? 'Quản trị viên'
+                        : 'Khách hàng thân thiết'}
                     </Badge>
                   </div>
                   <Button
@@ -107,9 +114,17 @@ export function AccountPage() {
                 </CardHeader>
                 <CardContent className="p-3 space-y-1">
                   {[
-                    { icon: ShoppingBag, label: 'Đơn hàng của tôi', path: '/orders' },
+                    {
+                      icon: ShoppingBag,
+                      label: 'Đơn hàng của tôi',
+                      path: '/orders',
+                    },
                     { icon: MapPin, label: 'Sổ địa chỉ', path: '/addresses' },
-                    { icon: Heart, label: 'Danh sách yêu thích', path: '/wishlist' },
+                    {
+                      icon: Heart,
+                      label: 'Danh sách yêu thích',
+                      path: '/wishlist',
+                    },
                     { icon: Shield, label: 'Bảo mật tài khoản', path: '#' },
                   ].map((item, idx) => (
                     <button
@@ -148,8 +163,12 @@ export function AccountPage() {
                         <Mail className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Email</p>
-                        <p className="font-medium text-sm text-slate-900 truncate">{user.email || 'Chưa cập nhật'}</p>
+                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                          Email
+                        </p>
+                        <p className="font-medium text-sm text-slate-900 truncate">
+                          {user.email || 'Chưa cập nhật'}
+                        </p>
                       </div>
                     </div>
 
@@ -158,8 +177,12 @@ export function AccountPage() {
                         <Phone className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Số điện thoại</p>
-                        <p className="font-medium text-sm text-slate-900">{user.phone}</p>
+                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                          Số điện thoại
+                        </p>
+                        <p className="font-medium text-sm text-slate-900">
+                          {user.phone}
+                        </p>
                       </div>
                     </div>
 
@@ -168,9 +191,13 @@ export function AccountPage() {
                         <Calendar className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Ngày tham gia</p>
+                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                          Ngày tham gia
+                        </p>
                         <p className="font-medium text-sm text-slate-900">
-                          {user.createdAt ? formatDate(user.createdAt) : 'Không rõ'}
+                          {user.createdAt
+                            ? formatDate(user.createdAt)
+                            : 'Không rõ'}
                         </p>
                       </div>
                     </div>
@@ -180,10 +207,14 @@ export function AccountPage() {
                         <Shield className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Trạng thái</p>
+                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                          Trạng thái
+                        </p>
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                          <p className="font-medium text-sm text-emerald-700">Đang hoạt động</p>
+                          <p className="font-medium text-sm text-emerald-700">
+                            Đang hoạt động
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -197,12 +228,20 @@ export function AccountPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-slate-50 rounded-xl p-5 text-center border border-slate-200 transition-all duration-200 hover:shadow-sm">
-                        <div className="font-semibold text-3xl text-slate-900 tabular-nums">0</div>
-                        <div className="text-xs text-slate-500 font-normal mt-1">Đơn hàng</div>
+                        <div className="font-semibold text-3xl text-slate-900 tabular-nums">
+                          0
+                        </div>
+                        <div className="text-xs text-slate-500 font-normal mt-1">
+                          Đơn hàng
+                        </div>
                       </div>
                       <div className="bg-slate-50 rounded-xl p-5 text-center border border-slate-200 transition-all duration-200 hover:shadow-sm">
-                        <div className="font-semibold text-3xl text-slate-900 tabular-nums">0</div>
-                        <div className="text-xs text-slate-500 font-normal mt-1">Đánh giá</div>
+                        <div className="font-semibold text-3xl text-slate-900 tabular-nums">
+                          0
+                        </div>
+                        <div className="text-xs text-slate-500 font-normal mt-1">
+                          Đánh giá
+                        </div>
                       </div>
                     </div>
                   </div>

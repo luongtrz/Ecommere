@@ -133,12 +133,16 @@ export function SearchBox() {
                   >
                     <Search className="h-4 w-4 text-teal-600" />
                     <span className="flex-1">
-                      Tìm kiếm cho <strong className="text-teal-600 font-bold">“{deferredQuery}”</strong>
+                      Tìm kiếm cho{' '}
+                      <strong className="text-teal-600 font-bold">
+                        “{deferredQuery}”
+                      </strong>
                     </span>
                     <ArrowRight className="h-4 w-4 text-slate-400" />
                   </button>
                   <p className="px-3.5 text-xs text-slate-400 font-sans">
-                    Mẹo: Nhập tên sản phẩm, công dụng (đuổi chuột, diệt gián, tẩy bồn cầu) để xem nhanh.
+                    Mẹo: Nhập tên sản phẩm, công dụng (đuổi chuột, diệt gián,
+                    tẩy bồn cầu) để xem nhanh.
                   </p>
                 </div>
               ) : (
@@ -211,7 +215,9 @@ export function SearchBox() {
                       <p className="truncate text-xs font-semibold text-slate-900 group-hover:text-teal-600 font-sans">
                         {product.name}
                       </p>
-                      <p className="text-[11px] text-slate-500 font-sans">Chính hãng Thái Lan</p>
+                      <p className="text-[11px] text-slate-500 font-sans">
+                        Chính hãng Thái Lan
+                      </p>
                     </div>
                     <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-teal-600 transition-transform group-hover:translate-x-0.5" />
                   </button>

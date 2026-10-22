@@ -16,7 +16,11 @@ export function LoadingSpinner({
   };
 
   return (
-    <div className="flex items-center justify-center p-2" role="status" aria-label="Loading">
+    <div
+      className="flex items-center justify-center p-2"
+      role="status"
+      aria-label="Loading"
+    >
       <div
         className={cn(
           'rounded-full border-teal-100 border-t-teal-600 animate-spin',

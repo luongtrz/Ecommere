@@ -7,25 +7,37 @@ function renderRiskBadge(risk: ChatConfirmCall['risk']) {
   switch (risk) {
     case 'WRITE':
       return (
-        <Badge variant="secondary" className="shrink-0 rounded-lg bg-slate-100 text-slate-700 border-slate-200 text-xs font-medium">
+        <Badge
+          variant="secondary"
+          className="shrink-0 rounded-lg bg-slate-100 text-slate-700 border-slate-200 text-xs font-medium"
+        >
           Thay đổi dữ liệu
         </Badge>
       );
     case 'SENSITIVE':
       return (
-        <Badge variant="outline" className="shrink-0 rounded-lg bg-amber-50 text-amber-700 border-amber-200 text-xs font-medium">
+        <Badge
+          variant="outline"
+          className="shrink-0 rounded-lg bg-amber-50 text-amber-700 border-amber-200 text-xs font-medium"
+        >
           Cần xác nhận
         </Badge>
       );
     case 'DESTRUCTIVE':
       return (
-        <Badge variant="destructive" className="shrink-0 rounded-lg bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 text-xs font-medium">
+        <Badge
+          variant="destructive"
+          className="shrink-0 rounded-lg bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 text-xs font-medium"
+        >
           Không thể hoàn tác
         </Badge>
       );
     default:
       return (
-        <Badge variant="secondary" className="shrink-0 rounded-lg bg-slate-100 text-slate-700 border-slate-200 text-xs font-medium">
+        <Badge
+          variant="secondary"
+          className="shrink-0 rounded-lg bg-slate-100 text-slate-700 border-slate-200 text-xs font-medium"
+        >
           {risk}
         </Badge>
       );

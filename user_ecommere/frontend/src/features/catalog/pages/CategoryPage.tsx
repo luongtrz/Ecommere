@@ -12,13 +12,33 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PAGINATION, PRODUCT_SORT_OPTIONS } from '@/lib/constants';
-import { Search, ShoppingBag, Grid3X3, List, Filter, X, Star } from 'lucide-react';
+import {
+  Search,
+  ShoppingBag,
+  Grid3X3,
+  List,
+  Filter,
+  X,
+  Star,
+} from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
 import { FilterSidebar } from '../components/FilterSidebar';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export function CategoryPage() {
@@ -51,13 +71,19 @@ export function CategoryPage() {
   const debouncedSearch = useDebounce(searchInput, 400);
 
   // Filter params
-  const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
-  const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
+  const minPrice = searchParams.get('minPrice')
+    ? parseInt(searchParams.get('minPrice')!)
+    : undefined;
+  const maxPrice = searchParams.get('maxPrice')
+    ? parseInt(searchParams.get('maxPrice')!)
+    : undefined;
   const scent = searchParams.get('scent') || undefined;
   const volumeMl = searchParams.get('volumeMl') || undefined;
   const brand = searchParams.get('brand') || undefined;
 
-  const { data: category, isLoading: isCategoryLoading } = useCategoryBySlug(categorySlug!);
+  const { data: category, isLoading: isCategoryLoading } = useCategoryBySlug(
+    categorySlug!,
+  );
   const { data: products, isLoading: isProductsLoading } = useProducts({
     page: currentPage,
     limit: PAGINATION.DEFAULT_LIMIT,
@@ -72,20 +98,23 @@ export function CategoryPage() {
   });
   const { addItem } = useCart();
 
-  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (!('page' in updates)) {
-      newParams.set('page', '1');
-    }
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === undefined || value === '') {
-        newParams.delete(key);
-      } else {
-        newParams.set(key, value);
+  const updateParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      const newParams = new URLSearchParams(searchParams);
+      if (!('page' in updates)) {
+        newParams.set('page', '1');
       }
-    });
-    setSearchParams(newParams);
-  }, [searchParams, setSearchParams]);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === undefined || value === '') {
+          newParams.delete(key);
+        } else {
+          newParams.set(key, value);
+        }
+      });
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams],
+  );
 
   // Apply debounced search to URL params
   useEffect(() => {
@@ -115,9 +144,12 @@ export function CategoryPage() {
     updateParams({ view: mode });
   };
 
-  const handleFilterChange = useCallback((filters: Record<string, string | undefined>) => {
-    updateParams({ ...filters, page: '1' });
-  }, [updateParams]);
+  const handleFilterChange = useCallback(
+    (filters: Record<string, string | undefined>) => {
+      updateParams({ ...filters, page: '1' });
+    },
+    [updateParams],
+  );
 
   const handleAddToCart = (product: any, variant: any) => {
     addItem({
@@ -231,7 +263,11 @@ export function CategoryPage() {
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border border-slate-200 bg-white text-slate-900 shadow-md">
                     {PRODUCT_SORT_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs rounded-lg focus:bg-teal-50 focus:text-teal-700 cursor-pointer">
+                      <SelectItem
+                        key={opt.value}
+                        value={opt.value}
+                        className="text-xs rounded-lg focus:bg-teal-50 focus:text-teal-700 cursor-pointer"
+                      >
                         {opt.label}
                       </SelectItem>
                     ))}
@@ -280,13 +316,16 @@ export function CategoryPage() {
                       <Filter className="h-4 w-4" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-[85vw] max-w-xs overflow-y-auto border-r border-slate-200 bg-white p-6">
+                  <SheetContent
+                    side="left"
+                    className="w-[85vw] max-w-xs overflow-y-auto border-r border-slate-200 bg-white p-6"
+                  >
                     <SheetHeader className="mb-4 text-left">
-                      <SheetTitle className="font-sans font-bold text-lg text-slate-900">Bộ lọc</SheetTitle>
+                      <SheetTitle className="font-sans font-bold text-lg text-slate-900">
+                        Bộ lọc
+                      </SheetTitle>
                     </SheetHeader>
-                    <div className="py-2">
-                      {filterContent}
-                    </div>
+                    <div className="py-2">{filterContent}</div>
                   </SheetContent>
                 </Sheet>
               </div>
@@ -307,7 +346,9 @@ export function CategoryPage() {
             {/* Products */}
             <div className="flex-1 min-w-0">
               {isProductsLoading ? (
-                <div className="py-24 flex justify-center"><LoadingSpinner /></div>
+                <div className="py-24 flex justify-center">
+                  <LoadingSpinner />
+                </div>
               ) : products?.products.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-8 md:p-16 text-center shadow-sm">
                   <EmptyState
@@ -326,12 +367,14 @@ export function CategoryPage() {
                 </div>
               ) : (
                 <div className="space-y-8 animate-fade-in">
-                  <div className={`${
-                    viewMode === 'grid'
-                      ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'
-                      : 'space-y-4'
-                  }`}>
-                    {products?.products.map((product) => (
+                  <div
+                    className={`${
+                      viewMode === 'grid'
+                        ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'
+                        : 'space-y-4'
+                    }`}
+                  >
+                    {products?.products.map((product) =>
                       viewMode === 'grid' ? (
                         <ProductCard
                           key={product.id}
@@ -343,7 +386,10 @@ export function CategoryPage() {
                           rating={product.rating}
                           reviewCount={product.reviewCount}
                           variants={product.variants}
-                          onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                          onAddToCart={() =>
+                            product.variants[0] &&
+                            handleAddToCart(product, product.variants[0])
+                          }
                         />
                       ) : (
                         <div
@@ -352,7 +398,9 @@ export function CategoryPage() {
                         >
                           <div className="w-full sm:w-32 md:w-36 aspect-square sm:aspect-auto sm:h-36 bg-slate-50 border border-slate-100 rounded-lg overflow-hidden shrink-0">
                             <img
-                              src={getImageUrl(product.images[0], { width: 300 })}
+                              src={getImageUrl(product.images[0], {
+                                width: 300,
+                              })}
                               alt={product.name}
                               loading="lazy"
                               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
@@ -369,21 +417,27 @@ export function CategoryPage() {
                               <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
                                 <div className="flex items-center gap-1 text-amber-500 font-semibold">
                                   <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                                  <span className="text-slate-700 tabular-nums">{product.rating?.toFixed(1) || '5.0'}</span>
+                                  <span className="text-slate-700 tabular-nums">
+                                    {product.rating?.toFixed(1) || '5.0'}
+                                  </span>
                                 </div>
                                 <span>·</span>
-                                <span className="tabular-nums">{product.reviewCount} đánh giá</span>
+                                <span className="tabular-nums">
+                                  {product.reviewCount} đánh giá
+                                </span>
                               </div>
                               <div className="flex flex-wrap gap-1.5 mb-3">
-                                {product.variants.slice(0, 3).map((v: any, i: number) => (
-                                  <Badge
-                                    key={i}
-                                    variant="secondary"
-                                    className="text-[10px] h-5 px-2 font-normal rounded-md border border-slate-200 bg-slate-100 text-slate-700"
-                                  >
-                                    {v.scent}
-                                  </Badge>
-                                ))}
+                                {product.variants
+                                  .slice(0, 3)
+                                  .map((v: any, i: number) => (
+                                    <Badge
+                                      key={i}
+                                      variant="secondary"
+                                      className="text-[10px] h-5 px-2 font-normal rounded-md border border-slate-200 bg-slate-100 text-slate-700"
+                                    >
+                                      {v.scent}
+                                    </Badge>
+                                  ))}
                               </div>
                             </div>
                             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
@@ -393,15 +447,19 @@ export function CategoryPage() {
                               <Button
                                 size="sm"
                                 className="h-9 rounded-lg px-4 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-all duration-200 active:scale-95"
-                                onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                                onClick={() =>
+                                  product.variants[0] &&
+                                  handleAddToCart(product, product.variants[0])
+                                }
                               >
-                                <ShoppingBag className="h-3.5 w-3.5 mr-1.5" /> Thêm vào giỏ
+                                <ShoppingBag className="h-3.5 w-3.5 mr-1.5" />{' '}
+                                Thêm vào giỏ
                               </Button>
                             </div>
                           </div>
                         </div>
-                      )
-                    ))}
+                      ),
+                    )}
                   </div>
 
                   {products && products.totalPages > 1 && (

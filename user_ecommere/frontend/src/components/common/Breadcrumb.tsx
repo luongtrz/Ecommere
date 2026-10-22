@@ -14,7 +14,13 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items, className }: BreadcrumbProps) {
   return (
-    <nav className={cn('flex flex-wrap items-center gap-1.5 text-xs md:text-sm text-slate-500 font-sans', className)} aria-label="Breadcrumb">
+    <nav
+      className={cn(
+        'flex flex-wrap items-center gap-1.5 text-xs md:text-sm text-slate-500 font-sans',
+        className,
+      )}
+      aria-label="Breadcrumb"
+    >
       <Link
         to="/"
         className="inline-flex items-center justify-center p-1 rounded-md text-slate-400 hover:text-teal-600 hover:bg-slate-100 transition-colors"
@@ -25,7 +31,10 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
         <div key={index} className="flex items-center gap-1.5">
           <ChevronRight className="h-3.5 w-3.5 text-slate-400 shrink-0" />
           {item.href ? (
-            <Link to={item.href} className="font-medium text-slate-600 hover:text-teal-600 transition-colors">
+            <Link
+              to={item.href}
+              className="font-medium text-slate-600 hover:text-teal-600 transition-colors"
+            >
               {item.label}
             </Link>
           ) : (

@@ -329,13 +329,18 @@ export function CheckoutPage() {
         {/* Modern Header */}
         <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
           <div className="container max-w-7xl py-3.5 flex items-center justify-between px-4">
-            <Link to="/cart" className="flex items-center gap-2 text-slate-600 hover:text-teal-600 transition-colors group">
+            <Link
+              to="/cart"
+              className="flex items-center gap-2 text-slate-600 hover:text-teal-600 transition-colors group"
+            >
               <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 transition-transform group-hover:-translate-x-0.5">
                 <ArrowLeft className="h-4 w-4" />
               </div>
               <span className="font-medium text-sm">Quay lại giỏ hàng</span>
             </Link>
-            <div className="font-sans font-bold text-lg md:text-xl tracking-tight text-slate-900">Thanh toán</div>
+            <div className="font-sans font-bold text-lg md:text-xl tracking-tight text-slate-900">
+              Thanh toán
+            </div>
             <div className="w-32 flex justify-end">
               <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
                 <Shield className="h-3.5 w-3.5 text-emerald-600" />
@@ -349,7 +354,6 @@ export function CheckoutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             {/* LEFT COLUMN: MAIN PROCESS */}
             <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6 md:gap-8">
-
               {/* Steps Indicator */}
               <div className="bg-white rounded-xl p-5 md:p-6 shadow-sm border border-slate-200">
                 <CheckoutSteps currentStep={step} />
@@ -357,7 +361,6 @@ export function CheckoutPage() {
 
               {/* Step Content */}
               <div>
-
                 {/* STEP 1: ADDRESS & SHIPPING */}
                 {step === 1 && (
                   <div className="space-y-6">
@@ -383,7 +386,9 @@ export function CheckoutPage() {
                           <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
                             <MapPin className="h-7 w-7" />
                           </div>
-                          <p className="text-sm text-slate-500 mb-4">Bạn chưa có địa chỉ nào</p>
+                          <p className="text-sm text-slate-500 mb-4">
+                            Bạn chưa có địa chỉ nào
+                          </p>
                           <Button
                             onClick={() => setIsAddressDialogOpen(true)}
                             className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 font-medium text-sm shadow-sm h-10 px-5 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-teal-500"
@@ -406,20 +411,28 @@ export function CheckoutPage() {
                               }`}
                             >
                               <div className="flex justify-between items-start mb-2">
-                                <div className="font-sans font-semibold text-slate-900">{addr.fullName}</div>
+                                <div className="font-sans font-semibold text-slate-900">
+                                  {addr.fullName}
+                                </div>
                                 {selectedAddressId === addr.id ? (
                                   <CheckCircle2 className="h-5 w-5 text-teal-600 shrink-0" />
                                 ) : (
                                   <Circle className="h-5 w-5 text-slate-300 group-hover:text-slate-400 shrink-0" />
                                 )}
                               </div>
-                              <div className="text-sm text-slate-500 mb-2">{addr.phone}</div>
+                              <div className="text-sm text-slate-500 mb-2">
+                                {addr.phone}
+                              </div>
                               <div className="text-sm text-slate-700 leading-relaxed min-h-[40px]">
-                                {addr.line1}, {addr.ward}, {addr.district}, {addr.province}
+                                {addr.line1}, {addr.ward}, {addr.district},{' '}
+                                {addr.province}
                               </div>
                               {addr.isDefault && (
                                 <div className="mt-3">
-                                  <Badge variant="secondary" className="bg-slate-100 text-slate-700 font-medium rounded-md px-2 py-0.5 text-[10px] border border-slate-200">
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-slate-100 text-slate-700 font-medium rounded-md px-2 py-0.5 text-[10px] border border-slate-200"
+                                  >
                                     Mặc định
                                   </Badge>
                                 </div>
@@ -452,20 +465,32 @@ export function CheckoutPage() {
                             }`}
                           >
                             <div className="flex items-center gap-3.5">
-                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                                shippingMethod === method.id ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-500'
-                              }`}>
+                              <div
+                                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                                  shippingMethod === method.id
+                                    ? 'bg-teal-600 text-white'
+                                    : 'bg-slate-100 text-slate-500'
+                                }`}
+                              >
                                 <Truck className="h-5 w-5" />
                               </div>
                               <div>
-                                <div className="font-sans font-semibold text-slate-900 text-sm sm:text-base">{method.name}</div>
-                                <div className="text-xs sm:text-sm text-slate-500">Nhận hàng trong {method.days}</div>
+                                <div className="font-sans font-semibold text-slate-900 text-sm sm:text-base">
+                                  {method.name}
+                                </div>
+                                <div className="text-xs sm:text-sm text-slate-500">
+                                  Nhận hàng trong {method.days}
+                                </div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-sans font-semibold text-slate-900 tabular-nums text-sm sm:text-base">{formatCurrency(method.price)}</div>
+                              <div className="font-sans font-semibold text-slate-900 tabular-nums text-sm sm:text-base">
+                                {formatCurrency(method.price)}
+                              </div>
                               {shippingMethod === method.id && (
-                                <div className="text-[10px] text-teal-700 font-semibold uppercase tracking-wider mt-0.5">Đã chọn</div>
+                                <div className="text-[10px] text-teal-700 font-semibold uppercase tracking-wider mt-0.5">
+                                  Đã chọn
+                                </div>
                               )}
                             </div>
                           </div>
@@ -501,21 +526,34 @@ export function CheckoutPage() {
                                   : 'border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed'
                             }`}
                           >
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                              paymentMethod === method.id ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-500'
-                            }`}>
-                              {method.id === 'COD' ? <Truck className="h-6 w-6" /> : <CreditCard className="h-6 w-6" />}
+                            <div
+                              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                                paymentMethod === method.id
+                                  ? 'bg-teal-600 text-white'
+                                  : 'bg-slate-100 text-slate-500'
+                              }`}
+                            >
+                              {method.id === 'COD' ? (
+                                <Truck className="h-6 w-6" />
+                              ) : (
+                                <CreditCard className="h-6 w-6" />
+                              )}
                             </div>
 
                             <div>
-                              <div className={`font-sans font-semibold text-base mb-1 ${paymentMethod === method.id ? 'text-teal-900' : 'text-slate-900'}`}>
+                              <div
+                                className={`font-sans font-semibold text-base mb-1 ${paymentMethod === method.id ? 'text-teal-900' : 'text-slate-900'}`}
+                              >
                                 {method.name}
                               </div>
                               <div className="text-xs sm:text-sm text-slate-500">
-                                {method.id === 'COD'
-                                  ? 'Thanh toán khi nhận hàng'
-                                  : <span className="text-rose-600 font-medium text-xs bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">Đang bảo trì</span>
-                                }
+                                {method.id === 'COD' ? (
+                                  'Thanh toán khi nhận hàng'
+                                ) : (
+                                  <span className="text-rose-600 font-medium text-xs bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">
+                                    Đang bảo trì
+                                  </span>
+                                )}
                               </div>
                             </div>
 
@@ -538,33 +576,58 @@ export function CheckoutPage() {
                       <div className="w-14 h-14 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4 text-teal-600 border border-teal-100">
                         <CheckCircle2 className="h-7 w-7" />
                       </div>
-                      <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900 mb-2 tracking-tight">Sẵn sàng đặt hàng!</h2>
-                      <p className="text-slate-600 max-w-md mx-auto text-sm">Vui lòng kiểm tra lại thông tin đơn hàng lần cuối trước khi xác nhận.</p>
+                      <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900 mb-2 tracking-tight">
+                        Sẵn sàng đặt hàng!
+                      </h2>
+                      <p className="text-slate-600 max-w-md mx-auto text-sm">
+                        Vui lòng kiểm tra lại thông tin đơn hàng lần cuối trước
+                        khi xác nhận.
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200">
-                        <span className="text-xs font-semibold text-teal-600 uppercase tracking-wider block mb-3">Giao tới</span>
-                        <div className="font-sans font-semibold text-slate-900 text-base mb-1">{selectedAddress?.fullName}</div>
-                        <div className="text-slate-500 text-sm mb-2">{selectedAddress?.phone}</div>
-                        <div className="text-slate-700 text-sm leading-relaxed">{selectedAddress?.line1}, {selectedAddress?.ward}, {selectedAddress?.district}, {selectedAddress?.province}</div>
+                        <span className="text-xs font-semibold text-teal-600 uppercase tracking-wider block mb-3">
+                          Giao tới
+                        </span>
+                        <div className="font-sans font-semibold text-slate-900 text-base mb-1">
+                          {selectedAddress?.fullName}
+                        </div>
+                        <div className="text-slate-500 text-sm mb-2">
+                          {selectedAddress?.phone}
+                        </div>
+                        <div className="text-slate-700 text-sm leading-relaxed">
+                          {selectedAddress?.line1}, {selectedAddress?.ward},{' '}
+                          {selectedAddress?.district},{' '}
+                          {selectedAddress?.province}
+                        </div>
                       </div>
 
                       <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200">
-                        <span className="text-xs font-semibold text-teal-600 uppercase tracking-wider block mb-3">Thanh toán & Vận chuyển</span>
+                        <span className="text-xs font-semibold text-teal-600 uppercase tracking-wider block mb-3">
+                          Thanh toán & Vận chuyển
+                        </span>
                         <div className="space-y-3.5">
                           <div>
-                            <div className="text-xs text-slate-500 mb-1">Phương thức vận chuyển</div>
+                            <div className="text-xs text-slate-500 mb-1">
+                              Phương thức vận chuyển
+                            </div>
                             <div className="font-medium text-slate-900 flex items-center gap-2 text-sm">
                               <Truck className="h-4 w-4 text-teal-600" />
                               {selectedShipping?.name}
                             </div>
                           </div>
                           <div>
-                            <div className="text-xs text-slate-500 mb-1">Phương thức thanh toán</div>
+                            <div className="text-xs text-slate-500 mb-1">
+                              Phương thức thanh toán
+                            </div>
                             <div className="font-medium text-slate-900 flex items-center gap-2 text-sm">
                               <CreditCard className="h-4 w-4 text-teal-600" />
-                              {PAYMENT_METHODS.find(p => p.id === paymentMethod)?.name}
+                              {
+                                PAYMENT_METHODS.find(
+                                  (p) => p.id === paymentMethod,
+                                )?.name
+                              }
                             </div>
                           </div>
                         </div>
@@ -622,22 +685,40 @@ export function CheckoutPage() {
                   <div className="p-4 sm:p-5 bg-slate-50 border-b border-slate-200">
                     <h3 className="font-sans font-semibold text-base sm:text-lg text-slate-900 flex items-center justify-between tracking-tight">
                       <span>Đơn hàng của bạn</span>
-                      <Badge variant="secondary" className="bg-white text-slate-700 border-slate-200 rounded-md px-2 py-0.5 text-xs font-medium tabular-nums">{items.length} sản phẩm</Badge>
+                      <Badge
+                        variant="secondary"
+                        className="bg-white text-slate-700 border-slate-200 rounded-md px-2 py-0.5 text-xs font-medium tabular-nums"
+                      >
+                        {items.length} sản phẩm
+                      </Badge>
                     </h3>
                   </div>
 
                   <div className="p-4 sm:p-5 max-h-[380px] overflow-y-auto divide-y divide-slate-100">
                     <div className="space-y-4">
                       {items.map((item) => (
-                        <div key={item.variantId} className="flex gap-3.5 group items-center">
+                        <div
+                          key={item.variantId}
+                          className="flex gap-3.5 group items-center"
+                        >
                           <div className="w-14 h-14 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 shadow-sm shrink-0 p-1">
-                            <img src={item.image} alt={item.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200" />
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
+                            />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-slate-900 line-clamp-2 text-xs sm:text-sm mb-1">{item.name}</div>
+                            <div className="font-medium text-slate-900 line-clamp-2 text-xs sm:text-sm mb-1">
+                              {item.name}
+                            </div>
                             <div className="flex justify-between items-end">
-                              <div className="text-slate-500 text-xs bg-slate-100 px-2 py-0.5 rounded-md font-medium">Sl: {item.quantity}</div>
-                              <div className="font-sans font-semibold text-slate-900 text-sm tabular-nums">{formatCurrency(item.price * item.quantity)}</div>
+                              <div className="text-slate-500 text-xs bg-slate-100 px-2 py-0.5 rounded-md font-medium">
+                                Sl: {item.quantity}
+                              </div>
+                              <div className="font-sans font-semibold text-slate-900 text-sm tabular-nums">
+                                {formatCurrency(item.price * item.quantity)}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -648,7 +729,9 @@ export function CheckoutPage() {
                   <div className="p-4 sm:p-5 bg-white space-y-3.5 border-t border-slate-200">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-600">Tạm tính</span>
-                      <span className="font-semibold text-slate-900 tabular-nums">{formatCurrency(totalPrice)}</span>
+                      <span className="font-semibold text-slate-900 tabular-nums">
+                        {formatCurrency(totalPrice)}
+                      </span>
                     </div>
                     {serverDiscount > 0 && (
                       <div className="flex justify-between text-sm">
@@ -667,7 +750,13 @@ export function CheckoutPage() {
                             Đang tính...
                           </span>
                         ) : shippingFee !== null ? (
-                          shippingFee === 0 ? <span className="text-emerald-600 font-semibold">Miễn phí</span> : formatCurrency(shippingFee)
+                          shippingFee === 0 ? (
+                            <span className="text-emerald-600 font-semibold">
+                              Miễn phí
+                            </span>
+                          ) : (
+                            formatCurrency(shippingFee)
+                          )
                         ) : (
                           '—'
                         )}
@@ -675,7 +764,9 @@ export function CheckoutPage() {
                     </div>
                     <Separator className="my-2 bg-slate-200" />
                     <div className="flex justify-between items-baseline">
-                      <span className="text-sm font-semibold text-slate-900">Tổng thanh toán</span>
+                      <span className="text-sm font-semibold text-slate-900">
+                        Tổng thanh toán
+                      </span>
                       <span className="text-xl sm:text-2xl font-sans font-bold text-slate-900 tabular-nums">
                         {isPreviewLoading ? (
                           <span className="inline-flex items-center gap-1.5 text-base font-sans text-slate-400">

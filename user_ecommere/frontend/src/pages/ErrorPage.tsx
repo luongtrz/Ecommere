@@ -51,15 +51,20 @@ export function ErrorPage() {
             <div className="border-t border-slate-200 pt-6">
               <div className="flex items-center justify-center gap-2 text-slate-900 mb-2">
                 <MessageCircle className="h-4 w-4 text-teal-600" />
-                <span className="font-semibold text-sm font-sans">Cần hỗ trợ?</span>
+                <span className="font-semibold text-sm font-sans">
+                  Cần hỗ trợ?
+                </span>
               </div>
               <p className="text-xs text-slate-500 mb-4 max-w-sm mx-auto leading-relaxed font-sans">
-                Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của chúng tôi
+                Nếu bạn tiếp tục gặp vấn đề, hãy liên hệ với đội ngũ hỗ trợ của
+                chúng tôi
               </p>
-              <Button variant="ghost" asChild className="rounded-lg text-sm font-medium text-teal-600 hover:bg-teal-50 hover:text-teal-700">
-                <Link to="/support">
-                  Liên hệ hỗ trợ
-                </Link>
+              <Button
+                variant="ghost"
+                asChild
+                className="rounded-lg text-sm font-medium text-teal-600 hover:bg-teal-50 hover:text-teal-700"
+              >
+                <Link to="/support">Liên hệ hỗ trợ</Link>
               </Button>
             </div>
           </div>
@@ -71,24 +76,36 @@ export function ErrorPage() {
                 <div className="w-9 h-9 bg-slate-50 rounded-lg flex items-center justify-center mb-2.5 text-teal-600 border border-slate-100">
                   <Home className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-sm text-slate-900 mb-0.5 font-sans">Về trang chủ</h3>
-                <p className="text-xs text-slate-500 font-sans">Quay lại trang chủ để tiếp tục mua sắm</p>
+                <h3 className="font-semibold text-sm text-slate-900 mb-0.5 font-sans">
+                  Về trang chủ
+                </h3>
+                <p className="text-xs text-slate-500 font-sans">
+                  Quay lại trang chủ để tiếp tục mua sắm
+                </p>
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm text-left transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                 <div className="w-9 h-9 bg-slate-50 rounded-lg flex items-center justify-center mb-2.5 text-slate-700 border border-slate-100">
                   <RefreshCw className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-sm text-slate-900 mb-0.5 font-sans">Tải lại trang</h3>
-                <p className="text-xs text-slate-500 font-sans">Thử tải lại trang để khắc phục lỗi</p>
+                <h3 className="font-semibold text-sm text-slate-900 mb-0.5 font-sans">
+                  Tải lại trang
+                </h3>
+                <p className="text-xs text-slate-500 font-sans">
+                  Thử tải lại trang để khắc phục lỗi
+                </p>
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm text-left transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                 <div className="w-9 h-9 bg-slate-50 rounded-lg flex items-center justify-center mb-2.5 text-teal-600 border border-slate-100">
                   <MessageCircle className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-sm text-slate-900 mb-0.5 font-sans">Liên hệ hỗ trợ</h3>
-                <p className="text-xs text-slate-500 font-sans">Nhận trợ giúp từ đội ngũ của chúng tôi</p>
+                <h3 className="font-semibold text-sm text-slate-900 mb-0.5 font-sans">
+                  Liên hệ hỗ trợ
+                </h3>
+                <p className="text-xs text-slate-500 font-sans">
+                  Nhận trợ giúp từ đội ngũ của chúng tôi
+                </p>
               </div>
             </div>
           </div>

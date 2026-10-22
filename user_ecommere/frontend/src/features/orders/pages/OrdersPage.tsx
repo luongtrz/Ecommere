@@ -28,21 +28,59 @@ import { cn } from '@/lib/utils';
 const getStatusConfig = (status: string) => {
   switch (status) {
     case 'PENDING_PAYMENT':
-      return { label: 'Chờ thanh toán', color: 'text-amber-700 bg-amber-50 border-amber-200 ring-1 ring-amber-200', icon: Clock };
+      return {
+        label: 'Chờ thanh toán',
+        color:
+          'text-amber-700 bg-amber-50 border-amber-200 ring-1 ring-amber-200',
+        icon: Clock,
+      };
     case 'PAID':
-      return { label: 'Đã thanh toán', color: 'text-emerald-700 bg-emerald-50 border-emerald-200 ring-1 ring-emerald-200', icon: CheckCircle2 };
+      return {
+        label: 'Đã thanh toán',
+        color:
+          'text-emerald-700 bg-emerald-50 border-emerald-200 ring-1 ring-emerald-200',
+        icon: CheckCircle2,
+      };
     case 'PACKING':
-      return { label: 'Đang đóng gói', color: 'text-amber-700 bg-amber-50 border-amber-200 ring-1 ring-amber-200', icon: Package };
+      return {
+        label: 'Đang đóng gói',
+        color:
+          'text-amber-700 bg-amber-50 border-amber-200 ring-1 ring-amber-200',
+        icon: Package,
+      };
     case 'SHIPPED':
-      return { label: 'Đang giao hàng', color: 'text-teal-700 bg-teal-50 border-teal-200 ring-1 ring-teal-200', icon: Truck };
+      return {
+        label: 'Đang giao hàng',
+        color: 'text-teal-700 bg-teal-50 border-teal-200 ring-1 ring-teal-200',
+        icon: Truck,
+      };
     case 'DELIVERED':
-      return { label: 'Giao thành công', color: 'text-emerald-700 bg-emerald-50 border-emerald-200 ring-1 ring-emerald-200', icon: CheckCircle2 };
+      return {
+        label: 'Giao thành công',
+        color:
+          'text-emerald-700 bg-emerald-50 border-emerald-200 ring-1 ring-emerald-200',
+        icon: CheckCircle2,
+      };
     case 'CANCELED':
-      return { label: 'Đã hủy', color: 'text-rose-700 bg-rose-50 border-rose-200 ring-1 ring-rose-200', icon: XCircle };
+      return {
+        label: 'Đã hủy',
+        color: 'text-rose-700 bg-rose-50 border-rose-200 ring-1 ring-rose-200',
+        icon: XCircle,
+      };
     case 'REFUNDED':
-      return { label: 'Đã hoàn tiền', color: 'text-slate-700 bg-slate-50 border-slate-200 ring-1 ring-slate-200', icon: RotateCcw };
+      return {
+        label: 'Đã hoàn tiền',
+        color:
+          'text-slate-700 bg-slate-50 border-slate-200 ring-1 ring-slate-200',
+        icon: RotateCcw,
+      };
     default:
-      return { label: status, color: 'text-slate-700 bg-slate-50 border-slate-200 ring-1 ring-slate-200', icon: AlertCircle };
+      return {
+        label: status,
+        color:
+          'text-slate-700 bg-slate-50 border-slate-200 ring-1 ring-slate-200',
+        icon: AlertCircle,
+      };
   }
 };
 
@@ -117,9 +155,15 @@ export function OrdersPage() {
           {/* Header Section */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200">
             <div>
-              <span className="uppercase tracking-wider text-xs font-semibold text-teal-600 block mb-1">Tài khoản cá nhân</span>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Đơn hàng của tôi</h1>
-              <p className="text-slate-500 text-sm mt-1">Quản lý và theo dõi đơn hàng</p>
+              <span className="uppercase tracking-wider text-xs font-semibold text-teal-600 block mb-1">
+                Tài khoản cá nhân
+              </span>
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+                Đơn hàng của tôi
+              </h1>
+              <p className="text-slate-500 text-sm mt-1">
+                Quản lý và theo dõi đơn hàng
+              </p>
             </div>
 
             {/* Filter Tabs */}
@@ -130,10 +174,10 @@ export function OrdersPage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      "px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500",
+                      'px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500',
                       activeTab === tab.id
-                        ? "bg-white text-teal-700 shadow-sm font-semibold"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                        ? 'bg-white text-teal-700 shadow-sm font-semibold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60',
                     )}
                   >
                     {tab.label}
@@ -147,25 +191,48 @@ export function OrdersPage() {
           {totalOrders > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                <div className="uppercase tracking-wider text-xs font-medium text-slate-500">Tổng đơn</div>
-                <div className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">{totalOrders}</div>
+                <div className="uppercase tracking-wider text-xs font-medium text-slate-500">
+                  Tổng đơn
+                </div>
+                <div className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">
+                  {totalOrders}
+                </div>
               </div>
               <div className="rounded-xl border border-amber-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                <div className="uppercase tracking-wider text-xs font-medium text-amber-700">Đang xử lý</div>
+                <div className="uppercase tracking-wider text-xs font-medium text-amber-700">
+                  Đang xử lý
+                </div>
                 <div className="text-2xl font-bold text-amber-600 mt-1 tabular-nums">
-                  {allOrders.filter(o => ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'].includes(o.status)).length}
+                  {
+                    allOrders.filter((o) =>
+                      [
+                        'PENDING_PAYMENT',
+                        'PAID',
+                        'PACKING',
+                        'SHIPPED',
+                      ].includes(o.status),
+                    ).length
+                  }
                 </div>
               </div>
               <div className="rounded-xl border border-emerald-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                <div className="uppercase tracking-wider text-xs font-medium text-emerald-700">Hoàn thành</div>
+                <div className="uppercase tracking-wider text-xs font-medium text-emerald-700">
+                  Hoàn thành
+                </div>
                 <div className="text-2xl font-bold text-emerald-600 mt-1 tabular-nums">
-                  {allOrders.filter(o => o.status === 'DELIVERED').length}
+                  {allOrders.filter((o) => o.status === 'DELIVERED').length}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                <div className="uppercase tracking-wider text-xs font-medium text-slate-500">Chi tiêu</div>
+                <div className="uppercase tracking-wider text-xs font-medium text-slate-500">
+                  Chi tiêu
+                </div>
                 <div className="text-lg md:text-xl font-bold text-teal-700 mt-1 truncate tabular-nums">
-                  {formatCurrency(allOrders.filter(o => o.status !== 'CANCELED').reduce((acc, curr) => acc + curr.total, 0))}
+                  {formatCurrency(
+                    allOrders
+                      .filter((o) => o.status !== 'CANCELED')
+                      .reduce((acc, curr) => acc + curr.total, 0),
+                  )}
                 </div>
               </div>
             </div>
@@ -186,7 +253,11 @@ export function OrdersPage() {
                   : 'Không tìm thấy đơn hàng trong mục này.'}
               </p>
               {activeTab === 'ALL' && (
-                <Button size="sm" className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 px-6 h-10 text-xs font-medium shadow-sm transition-colors" asChild>
+                <Button
+                  size="sm"
+                  className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 px-6 h-10 text-xs font-medium shadow-sm transition-colors"
+                  asChild
+                >
                   <Link to="/catalog">Khám phá ngay</Link>
                 </Button>
               )}
@@ -197,25 +268,32 @@ export function OrdersPage() {
                 {filteredOrders.map((order) => {
                   const status = getStatusConfig(order.status);
                   const StatusIcon = status.icon;
-                  const canCancel = ['PENDING_PAYMENT', 'PAID'].includes(order.status);
+                  const canCancel = ['PENDING_PAYMENT', 'PAID'].includes(
+                    order.status,
+                  );
 
                   return (
-                    <div
-                      key={order.id}
-                      className="transition-all duration-200"
-                    >
+                    <div key={order.id} className="transition-all duration-200">
                       <Card className="overflow-hidden border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 bg-white rounded-xl group">
                         {/* Header */}
                         <div className="px-5 md:px-6 py-3.5 border-b border-slate-100 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <span className="font-mono font-bold text-slate-900 text-sm md:text-base tracking-wider">#{order.orderNumber}</span>
+                            <span className="font-mono font-bold text-slate-900 text-sm md:text-base tracking-wider">
+                              #{order.orderNumber}
+                            </span>
                             <span className="text-slate-300">|</span>
                             <div className="flex items-center gap-1.5 text-xs text-slate-500">
                               <Calendar className="w-3.5 h-3.5" />
                               <span>{formatDateTime(order.createdAt)}</span>
                             </div>
                           </div>
-                          <Badge variant="outline" className={cn("px-3 py-1 rounded-full border shadow-sm flex items-center gap-1.5 text-xs font-medium pointer-events-none", status.color)}>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              'px-3 py-1 rounded-full border shadow-sm flex items-center gap-1.5 text-xs font-medium pointer-events-none',
+                              status.color,
+                            )}
+                          >
                             <StatusIcon className="w-3.5 h-3.5" />
                             {status.label}
                           </Badge>
@@ -227,10 +305,17 @@ export function OrdersPage() {
                           <div className="mb-4">
                             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                               {order.items.map((item: any, idx: number) => (
-                                <div key={idx} className="flex-shrink-0 w-[240px] flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 hover:border-slate-300 transition-colors">
+                                <div
+                                  key={idx}
+                                  className="flex-shrink-0 w-[240px] flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 hover:border-slate-300 transition-colors"
+                                >
                                   <div className="w-12 h-12 rounded-lg bg-white overflow-hidden flex-shrink-0 border border-slate-200">
                                     {item.image ? (
-                                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                      <img
+                                        src={item.image}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                      />
                                     ) : (
                                       <div className="w-full h-full flex items-center justify-center text-slate-400">
                                         <Package className="w-5 h-5" />
@@ -238,7 +323,10 @@ export function OrdersPage() {
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-                                    <h4 className="font-medium text-slate-900 text-xs truncate w-full" title={item.productName || item.name}>
+                                    <h4
+                                      className="font-medium text-slate-900 text-xs truncate w-full"
+                                      title={item.productName || item.name}
+                                    >
                                       {item.productName || item.name}
                                     </h4>
                                     <div className="text-xs text-slate-500">
@@ -252,15 +340,17 @@ export function OrdersPage() {
 
                           <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
                             <div className="flex items-baseline gap-2">
-                              <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">Tổng tiền:</span>
+                              <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">
+                                Tổng tiền:
+                              </span>
                               <span className="text-base md:text-lg font-bold text-slate-900 tabular-nums">
                                 {formatCurrency(order.total)}
                               </span>
                             </div>
 
                             <div className="flex items-center gap-2">
-                              {canCancel && (
-                                cancellingId === order.id ? (
+                              {canCancel &&
+                                (cancellingId === order.id ? (
                                   <div className="flex items-center gap-2">
                                     <Button
                                       variant="ghost"
@@ -277,7 +367,9 @@ export function OrdersPage() {
                                       onClick={() => handleCancel(order.id)}
                                       disabled={cancelOrder.isPending}
                                     >
-                                      {cancelOrder.isPending ? '...' : 'Xác nhận'}
+                                      {cancelOrder.isPending
+                                        ? '...'
+                                        : 'Xác nhận'}
                                     </Button>
                                   </div>
                                 ) : (
@@ -289,11 +381,17 @@ export function OrdersPage() {
                                   >
                                     Hủy đơn
                                   </Button>
-                                )
-                              )}
+                                ))}
 
-                              <Button size="sm" className="h-8 px-4 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-medium shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-colors" asChild>
-                                <Link to={`/orders/${order.id}`} className="flex items-center gap-1.5">
+                              <Button
+                                size="sm"
+                                className="h-8 px-4 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-medium shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-colors"
+                                asChild
+                              >
+                                <Link
+                                  to={`/orders/${order.id}`}
+                                  className="flex items-center gap-1.5"
+                                >
                                   Chi tiết
                                   <ArrowRight className="w-3.5 h-3.5" />
                                 </Link>

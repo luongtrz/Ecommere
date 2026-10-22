@@ -32,7 +32,13 @@ export function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <nav aria-label="Pagination" className={cn('flex items-center justify-center gap-1.5 md:gap-2 py-6 font-sans', className)}>
+    <nav
+      aria-label="Pagination"
+      className={cn(
+        'flex items-center justify-center gap-1.5 md:gap-2 py-6 font-sans',
+        className,
+      )}
+    >
       <Button
         variant="outline"
         size="icon"
@@ -52,7 +58,11 @@ export function Pagination({
           >
             1
           </Button>
-          {startPage > 2 && <span className="flex h-9 w-6 items-center justify-center text-xs font-sans text-slate-400 select-none">...</span>}
+          {startPage > 2 && (
+            <span className="flex h-9 w-6 items-center justify-center text-xs font-sans text-slate-400 select-none">
+              ...
+            </span>
+          )}
         </>
       )}
 
@@ -65,7 +75,7 @@ export function Pagination({
             'h-9 w-9 rounded-lg p-0 text-sm font-semibold tabular-nums transition-colors',
             currentPage === page
               ? 'bg-teal-600 text-white shadow-sm hover:bg-teal-700'
-              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900',
           )}
         >
           {page}
@@ -74,7 +84,11 @@ export function Pagination({
 
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="flex h-9 w-6 items-center justify-center text-xs font-sans text-slate-400 select-none">...</span>}
+          {endPage < totalPages - 1 && (
+            <span className="flex h-9 w-6 items-center justify-center text-xs font-sans text-slate-400 select-none">
+              ...
+            </span>
+          )}
           <Button
             variant="outline"
             onClick={() => onPageChange(totalPages)}

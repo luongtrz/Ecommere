@@ -114,10 +114,15 @@ function CategoryProductSection({
     >
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal-600">Danh mục nổi bật</p>
-          <h2 className="font-sans text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">{category.name}</h2>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal-600">
+            Danh mục nổi bật
+          </p>
+          <h2 className="font-sans text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+            {category.name}
+          </h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
-            Những lựa chọn được khách chọn nhiều khi cần mùi thơm gọn, dễ dùng và phù hợp sinh hoạt mỗi ngày.
+            Những lựa chọn được khách chọn nhiều khi cần mùi thơm gọn, dễ dùng
+            và phù hợp sinh hoạt mỗi ngày.
           </p>
         </div>
         <Button
@@ -162,7 +167,10 @@ function CategoryProductSection({
           </div>
 
           <div className="relative md:hidden">
-            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            <div
+              ref={scrollRef}
+              className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+            >
               {productsData.products.map((product) => (
                 <div key={product.id} className="w-[260px] shrink-0">
                   <ProductCard
@@ -252,8 +260,10 @@ export function HomePage() {
               </h1>
 
               <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">
-                Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết, gọn và không gắt. Bạn có thể bắt đầu từ
-                mùi bán chạy, hỏi chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay trên catalog.
+                Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết,
+                gọn và không gắt. Bạn có thể bắt đầu từ mùi bán chạy, hỏi
+                chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay
+                trên catalog.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -273,7 +283,9 @@ export function HomePage() {
                   size="lg"
                   className="rounded-lg border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-teal-500"
                 >
-                  <Link to="/catalog?sort=best_selling">Xem nhóm bán chạy nhất</Link>
+                  <Link to="/catalog?sort=best_selling">
+                    Xem nhóm bán chạy nhất
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -290,20 +302,30 @@ export function HomePage() {
 
                   {/* Recommendation pill at top right */}
                   <div className="absolute top-4 right-4 rounded-full border border-slate-200 bg-white/90 px-3.5 py-1.5 shadow-sm backdrop-blur-sm">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Khuyên dùng</p>
-                    <p className="text-xs font-bold text-slate-900">Woody & Fresh</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      Khuyên dùng
+                    </p>
+                    <p className="text-xs font-bold text-slate-900">
+                      Woody & Fresh
+                    </p>
                   </div>
 
                   {/* Caption text of the hero image */}
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent p-6 text-white">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-200">Premium Scent Collection</p>
-                    <p className="mt-1 font-sans text-base sm:text-lg font-semibold leading-tight text-white">Mùi hương tinh tế cho nhịp sống hiện đại</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-200">
+                      Premium Scent Collection
+                    </p>
+                    <p className="mt-1 font-sans text-base sm:text-lg font-semibold leading-tight text-white">
+                      Mùi hương tinh tế cho nhịp sống hiện đại
+                    </p>
                   </div>
                 </div>
 
                 {/* Scent notes card */}
                 <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-teal-600">Olfactory Notes</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-teal-600">
+                    Olfactory Notes
+                  </p>
                   <div className="mt-2.5 flex flex-wrap gap-3 sm:gap-5">
                     <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
                       <span className="h-2 w-2 rounded-full bg-teal-600" />
@@ -328,10 +350,18 @@ export function HomePage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
           <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal-600">Biên tập bởi Thai Spray</p>
-              <h2 className="font-sans text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">Những lựa chọn đang được hỏi nhiều</h2>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal-600">
+                Biên tập bởi Thai Spray
+              </p>
+              <h2 className="font-sans text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+                Những lựa chọn đang được hỏi nhiều
+              </h2>
             </div>
-            <Button asChild variant="ghost" className="justify-start rounded-lg px-3 py-2 text-sm font-medium text-teal-600 hover:bg-teal-50 hover:text-teal-700">
+            <Button
+              asChild
+              variant="ghost"
+              className="justify-start rounded-lg px-3 py-2 text-sm font-medium text-teal-600 hover:bg-teal-50 hover:text-teal-700"
+            >
               <Link to="/catalog?sort=best_selling">
                 Xem thêm trong catalog
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -374,15 +404,21 @@ export function HomePage() {
           {/* Highlights */}
           <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <div>
-              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Điểm mạnh của shop</p>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Điểm mạnh của shop
+              </p>
               <div className="grid grid-cols-3 gap-3 md:gap-4">
                 {HIGHLIGHTS.map((item) => (
                   <div
                     key={item.label}
                     className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <p className="font-sans text-2xl font-bold tabular-nums text-teal-600 md:text-3xl">{item.value}</p>
-                    <p className="mt-1 text-xs font-medium leading-snug text-slate-600">{item.label}</p>
+                    <p className="font-sans text-2xl font-bold tabular-nums text-teal-600 md:text-3xl">
+                      {item.value}
+                    </p>
+                    <p className="mt-1 text-xs font-medium leading-snug text-slate-600">
+                      {item.label}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -392,9 +428,16 @@ export function HomePage() {
           {/* Quick start chips */}
           <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <div>
-              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Gợi ý bắt đầu nhanh</p>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Gợi ý bắt đầu nhanh
+              </p>
               <div className="flex flex-wrap gap-2.5 pt-1">
-                {['Xịt phòng khách', 'Body mist nhẹ', 'Quà tặng', 'Mùi sạch cho xe'].map((item) => (
+                {[
+                  'Xịt phòng khách',
+                  'Body mist nhẹ',
+                  'Quà tặng',
+                  'Mùi sạch cho xe',
+                ].map((item) => (
                   <Link
                     key={item}
                     to={`/search?q=${encodeURIComponent(item)}`}
@@ -405,7 +448,9 @@ export function HomePage() {
                 ))}
               </div>
             </div>
-            <p className="mt-4 text-xs text-slate-400">Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.</p>
+            <p className="mt-4 text-xs text-slate-400">
+              Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.
+            </p>
           </div>
         </section>
 
@@ -420,8 +465,12 @@ export function HomePage() {
                 <item.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-sans text-base font-semibold text-slate-900 md:text-lg">{item.title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-slate-600">{item.desc}</p>
+                <p className="font-sans text-base font-semibold text-slate-900 md:text-lg">
+                  {item.title}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                  {item.desc}
+                </p>
               </div>
             </div>
           ))}

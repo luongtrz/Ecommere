@@ -111,10 +111,10 @@ export function CategoryNav() {
             <Link
               to="/catalog"
               className={cn(
-                "relative inline-flex items-center px-3 py-1.5 rounded-lg text-xs md:text-sm transition-colors whitespace-nowrap font-sans",
-                isActive('/catalog') 
-                  ? "text-teal-700 bg-teal-50 font-semibold" 
-                  : "text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-medium"
+                'relative inline-flex items-center px-3 py-1.5 rounded-lg text-xs md:text-sm transition-colors whitespace-nowrap font-sans',
+                isActive('/catalog')
+                  ? 'text-teal-700 bg-teal-50 font-semibold'
+                  : 'text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-medium',
               )}
               onMouseEnter={() => setActiveCategory(null)}
             >
@@ -127,10 +127,11 @@ export function CategoryNav() {
               <Link
                 to={`/c/${category.slug}`}
                 className={cn(
-                  "relative inline-flex items-center px-3 py-1.5 rounded-lg text-xs md:text-sm transition-colors whitespace-nowrap font-sans",
-                  isActive(`/c/${category.slug}`) || activeCategory?.id === category.id
-                    ? "text-teal-700 bg-teal-50 font-semibold"
-                    : "text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-medium"
+                  'relative inline-flex items-center px-3 py-1.5 rounded-lg text-xs md:text-sm transition-colors whitespace-nowrap font-sans',
+                  isActive(`/c/${category.slug}`) ||
+                    activeCategory?.id === category.id
+                    ? 'text-teal-700 bg-teal-50 font-semibold'
+                    : 'text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-medium',
                 )}
                 onMouseEnter={(e) => handleMouseEnter(category, e)}
               >
@@ -145,7 +146,7 @@ export function CategoryNav() {
       <div
         style={{ left: menuPosition }}
         className={cn(
-          "absolute top-full border border-slate-200 bg-white rounded-xl shadow-md transition-all duration-150 min-w-[200px] z-20 p-1.5 mt-1",
+          'absolute top-full border border-slate-200 bg-white rounded-xl shadow-md transition-all duration-150 min-w-[200px] z-20 p-1.5 mt-1',
           activeCategory
             ? 'opacity-100 visible translate-y-0'
             : 'opacity-0 invisible -translate-y-1 pointer-events-none',

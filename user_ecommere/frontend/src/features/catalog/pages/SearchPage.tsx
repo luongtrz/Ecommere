@@ -8,11 +8,28 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
- '@/components/ui/card';
+('@/components/ui/card');
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, ArrowLeft, SlidersHorizontal, Package, TrendingUp, Grid3X3, List, ShoppingBag, Star, X } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Search,
+  ArrowLeft,
+  SlidersHorizontal,
+  Package,
+  TrendingUp,
+  Grid3X3,
+  List,
+  ShoppingBag,
+  Star,
+  X,
+} from 'lucide-react';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
@@ -153,7 +170,12 @@ export function SearchPage() {
         <div className="border-b border-slate-200 bg-white/95 backdrop-blur-md sticky top-0 z-10 shadow-sm">
           <div className="container py-4 md:py-6">
             <div className="flex items-center gap-4 mb-3">
-              <Button variant="ghost" size="sm" asChild className="rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900">
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900"
+              >
                 <Link to="/catalog" className="flex items-center gap-2">
                   <ArrowLeft className="h-4 w-4" />
                   Quay lại danh sách
@@ -194,7 +216,11 @@ export function SearchPage() {
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border border-slate-200 bg-white text-slate-900 shadow-md">
                         {PRODUCT_SORT_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value} className="text-xs rounded-lg focus:bg-teal-50 focus:text-teal-700 cursor-pointer">
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="text-xs rounded-lg focus:bg-teal-50 focus:text-teal-700 cursor-pointer"
+                          >
                             {option.label}
                           </SelectItem>
                         ))}
@@ -231,10 +257,16 @@ export function SearchPage() {
                     <div className="flex items-center gap-1.5 text-xs text-slate-500">
                       <Search className="h-3.5 w-3.5 text-slate-400" />
                       <span>
-                        Tìm kiếm cho: <span className="font-semibold text-slate-900">"{query}"</span>
+                        Tìm kiếm cho:{' '}
+                        <span className="font-semibold text-slate-900">
+                          "{query}"
+                        </span>
                       </span>
                     </div>
-                    <Badge variant="secondary" className="flex items-center gap-1 rounded-md text-[10px] h-5 px-2 bg-teal-50 text-teal-700 border border-teal-200 font-medium">
+                    <Badge
+                      variant="secondary"
+                      className="flex items-center gap-1 rounded-md text-[10px] h-5 px-2 bg-teal-50 text-teal-700 border border-teal-200 font-medium"
+                    >
                       <Package className="h-3 w-3" />
                       {data?.total || 0} kết quả
                     </Badge>
@@ -243,7 +275,10 @@ export function SearchPage() {
                   {!isLoading && !isPlaceholderData && data?.total === 0 && (
                     <div className="text-xs text-slate-500">
                       Thử tìm với từ khóa khác hoặc{' '}
-                      <Link to="/catalog" className="text-teal-600 hover:text-teal-700 hover:underline font-medium">
+                      <Link
+                        to="/catalog"
+                        className="text-teal-600 hover:text-teal-700 hover:underline font-medium"
+                      >
                         xem tất cả sản phẩm
                       </Link>
                     </div>
@@ -269,7 +304,10 @@ export function SearchPage() {
                   description={`Không có sản phẩm nào khớp với từ khóa "${query}". Hãy thử tìm kiếm với từ khóa khác.`}
                   action={
                     <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                      <Button asChild className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white focus-visible:ring-2 focus-visible:ring-teal-500 px-6">
+                      <Button
+                        asChild
+                        className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white focus-visible:ring-2 focus-visible:ring-teal-500 px-6"
+                      >
                         <Link to="/catalog" className="flex items-center gap-2">
                           <Package className="h-4 w-4" />
                           Xem tất cả sản phẩm
@@ -289,7 +327,9 @@ export function SearchPage() {
 
               {/* Search Suggestions */}
               <div className="mt-12 max-w-2xl mx-auto">
-                <h3 className="text-lg font-sans font-bold text-slate-900 mb-4">Gợi ý tìm kiếm:</h3>
+                <h3 className="text-lg font-sans font-bold text-slate-900 mb-4">
+                  Gợi ý tìm kiếm:
+                </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     'Nước hoa chanh',
@@ -299,7 +339,7 @@ export function SearchPage() {
                     'Nước hoa vanilla',
                     'Nước hoa lavender',
                     'Nước hoa trà xanh',
-                    'Nước hoa bạc hà'
+                    'Nước hoa bạc hà',
                   ].map((suggestion, idx) => (
                     <Button
                       key={idx}
@@ -322,7 +362,10 @@ export function SearchPage() {
                   <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900 tracking-tight">
                     Kết quả tìm kiếm
                   </h2>
-                  <Badge variant="outline" className="flex items-center gap-1 rounded-md border-slate-200 bg-slate-50 text-slate-600 text-xs font-normal">
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 rounded-md border-slate-200 bg-slate-50 text-slate-600 text-xs font-normal"
+                  >
                     <TrendingUp className="h-3 w-3 text-teal-600" />
                     {data?.total || 0} sản phẩm
                   </Badge>
@@ -360,12 +403,14 @@ export function SearchPage() {
               </div>
 
               {/* Products Display */}
-              <div className={`${
-                viewMode === 'grid'
-                  ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'
-                  : 'space-y-4'
-              }`}>
-                {productsToShow.map((product) => (
+              <div
+                className={`${
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'
+                    : 'space-y-4'
+                }`}
+              >
+                {productsToShow.map((product) =>
                   viewMode === 'grid' ? (
                     <ProductCard
                       key={product.id}
@@ -413,7 +458,10 @@ export function SearchPage() {
                                 ({product.reviewCount || 0} đánh giá)
                               </span>
                             </div>
-                            <Badge variant="outline" className="text-[10px] h-5 rounded-md border-slate-200 bg-slate-50 text-slate-600 font-normal">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] h-5 rounded-md border-slate-200 bg-slate-50 text-slate-600 font-normal"
+                            >
                               {product.variants?.length || 0} biến thể
                             </Badge>
                           </div>
@@ -423,16 +471,26 @@ export function SearchPage() {
                             </p>
                           )}
                           <div className="flex flex-wrap gap-1.5 mb-3">
-                            {product.variants?.slice(0, 3).map((variant: any, index: number) => (
-                              <Badge key={index} variant="secondary" className="text-[10px] h-5 px-2 font-normal rounded-md border border-slate-200 bg-slate-100 text-slate-700">
-                                {variant.scent} - {variant.volumeMl}ml
-                              </Badge>
-                            ))}
-                            {product.variants && product.variants.length > 3 && (
-                              <Badge variant="outline" className="text-[10px] h-5 px-2 rounded-md border-slate-200 bg-slate-50 text-slate-500">
-                                +{product.variants.length - 3} nữa
-                              </Badge>
-                            )}
+                            {product.variants
+                              ?.slice(0, 3)
+                              .map((variant: any, index: number) => (
+                                <Badge
+                                  key={index}
+                                  variant="secondary"
+                                  className="text-[10px] h-5 px-2 font-normal rounded-md border border-slate-200 bg-slate-100 text-slate-700"
+                                >
+                                  {variant.scent} - {variant.volumeMl}ml
+                                </Badge>
+                              ))}
+                            {product.variants &&
+                              product.variants.length > 3 && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] h-5 px-2 rounded-md border-slate-200 bg-slate-50 text-slate-500"
+                                >
+                                  +{product.variants.length - 3} nữa
+                                </Badge>
+                              )}
                           </div>
                         </div>
                         <div className="flex items-center justify-between pt-3 border-t border-slate-100">
@@ -442,22 +500,27 @@ export function SearchPage() {
                           <Button
                             size="sm"
                             className="h-9 rounded-lg px-4 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-all duration-200 active:scale-95"
-                            onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                            onClick={() =>
+                              product.variants[0] &&
+                              handleAddToCart(product, product.variants[0])
+                            }
                           >
-                            <ShoppingBag className="h-3.5 w-3.5 mr-1.5" /> Thêm vào giỏ
+                            <ShoppingBag className="h-3.5 w-3.5 mr-1.5" /> Thêm
+                            vào giỏ
                           </Button>
                         </div>
                       </div>
                     </div>
-                  )
-                ))}
+                  ),
+                )}
               </div>
 
               {/* Load More */}
               {hasNextPage && (
                 <div className="text-center mt-10">
                   <p className="text-xs text-slate-500 mb-4">
-                    Hiển thị {productsToShow.length} / {data?.total || 0} sản phẩm
+                    Hiển thị {productsToShow.length} / {data?.total || 0} sản
+                    phẩm
                   </p>
                   <Button
                     variant="outline"

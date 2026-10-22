@@ -54,14 +54,22 @@ export function CartDrawer() {
             <div className="flex items-center gap-2 font-medium text-slate-600">
               <Truck className="h-4 w-4 text-teal-600" />
               {freeshipRemaining === 0 ? (
-                <span className="font-semibold text-emerald-600">Bạn đã đủ điều kiện FREESHIP!</span>
+                <span className="font-semibold text-emerald-600">
+                  Bạn đã đủ điều kiện FREESHIP!
+                </span>
               ) : (
                 <span>
-                  Mua thêm <strong className="text-slate-900 font-semibold">{formatCurrency(freeshipRemaining)}</strong> để được Freeship
+                  Mua thêm{' '}
+                  <strong className="text-slate-900 font-semibold">
+                    {formatCurrency(freeshipRemaining)}
+                  </strong>{' '}
+                  để được Freeship
                 </span>
               )}
             </div>
-            <span className="font-sans font-semibold text-slate-900 tabular-nums">{freeshipProgress}%</span>
+            <span className="font-sans font-semibold text-slate-900 tabular-nums">
+              {freeshipProgress}%
+            </span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
             <div
@@ -78,9 +86,12 @@ export function CartDrawer() {
                 <ShoppingBag className="h-8 w-8" />
               </div>
               <div>
-                <h3 className="font-sans font-bold text-slate-900 text-base tracking-tight">Giỏ hàng của bạn đang trống</h3>
+                <h3 className="font-sans font-bold text-slate-900 text-base tracking-tight">
+                  Giỏ hàng của bạn đang trống
+                </h3>
                 <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Hãy khám phá các dòng chai xịt Thái Lan đuổi chuột, diệt côn trùng và tẩy rửa tiện ích.
+                  Hãy khám phá các dòng chai xịt Thái Lan đuổi chuột, diệt côn
+                  trùng và tẩy rửa tiện ích.
                 </p>
               </div>
               <Button
@@ -96,7 +107,10 @@ export function CartDrawer() {
           <>
             <div className="flex-1 px-6 overflow-y-auto divide-y divide-slate-100">
               {items.map((item) => (
-                <div key={item.variantId} className="py-4 flex gap-3.5 items-center group">
+                <div
+                  key={item.variantId}
+                  className="py-4 flex gap-3.5 items-center group"
+                >
                   <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm transition-transform duration-200 group-hover:scale-[1.02]">
                     <img
                       src={getImageUrl(item.image)}
@@ -112,7 +126,10 @@ export function CartDrawer() {
                       </h4>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {item.scent && (
-                          <Badge variant="secondary" className="px-2 py-0 text-[10px] font-medium bg-slate-100 text-slate-700 border-slate-200 rounded-md">
+                          <Badge
+                            variant="secondary"
+                            className="px-2 py-0 text-[10px] font-medium bg-slate-100 text-slate-700 border-slate-200 rounded-md"
+                          >
                             {item.scent}
                           </Badge>
                         )}
@@ -135,7 +152,9 @@ export function CartDrawer() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 rounded-md hover:bg-white text-slate-700 transition-colors"
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity - 1)
+                            }
                             disabled={item.quantity <= 1}
                           >
                             <Minus className="h-3 w-3" />
@@ -147,8 +166,13 @@ export function CartDrawer() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 rounded-md hover:bg-white text-slate-700 transition-colors"
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity + 1)
+                            }
+                            disabled={
+                              typeof item.stock === 'number' &&
+                              item.quantity >= item.stock
+                            }
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -173,17 +197,31 @@ export function CartDrawer() {
               <div className="space-y-2">
                 <div className="flex justify-between text-xs text-slate-600">
                   <span>Tạm tính ({items.length} sản phẩm):</span>
-                  <span className="font-semibold text-slate-900 tabular-nums">{formatCurrency(totalPrice)}</span>
+                  <span className="font-semibold text-slate-900 tabular-nums">
+                    {formatCurrency(totalPrice)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-600">
                   <span>Vận chuyển:</span>
-                  <span className={freeshipRemaining === 0 ? 'text-emerald-600 font-semibold' : 'text-slate-900 font-medium'}>
-                    {freeshipRemaining === 0 ? 'Miễn phí' : 'Tính khi thanh toán'}
+                  <span
+                    className={
+                      freeshipRemaining === 0
+                        ? 'text-emerald-600 font-semibold'
+                        : 'text-slate-900 font-medium'
+                    }
+                  >
+                    {freeshipRemaining === 0
+                      ? 'Miễn phí'
+                      : 'Tính khi thanh toán'}
                   </span>
                 </div>
                 <div className="pt-2.5 border-t border-slate-200 flex justify-between items-baseline">
-                  <span className="text-sm font-semibold text-slate-900">Tổng cộng:</span>
-                  <span className="text-xl font-sans font-bold text-slate-900 tabular-nums">{formatCurrency(totalPrice)}</span>
+                  <span className="text-sm font-semibold text-slate-900">
+                    Tổng cộng:
+                  </span>
+                  <span className="text-xl font-sans font-bold text-slate-900 tabular-nums">
+                    {formatCurrency(totalPrice)}
+                  </span>
                 </div>
               </div>
 

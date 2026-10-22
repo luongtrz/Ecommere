@@ -50,19 +50,30 @@ export function Header() {
             <div className="flex items-center gap-3">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 md:hidden">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 md:hidden"
+                  >
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[88vw] max-w-sm border-r border-slate-200 bg-white p-6">
+                <SheetContent
+                  side="left"
+                  className="w-[88vw] max-w-sm border-r border-slate-200 bg-white p-6"
+                >
                   <div className="mt-6 flex flex-col gap-6">
                     <Link to="/" className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 font-sans text-sm font-bold text-white shadow-sm">
                         TS
                       </div>
                       <div>
-                        <p className="font-sans text-base font-bold text-slate-900 tracking-tight">Thai Spray</p>
-                        <p className="text-xs text-slate-500 font-sans">Không gian có gu, hương thơm có dấu ấn.</p>
+                        <p className="font-sans text-base font-bold text-slate-900 tracking-tight">
+                          Thai Spray
+                        </p>
+                        <p className="text-xs text-slate-500 font-sans">
+                          Không gian có gu, hương thơm có dấu ấn.
+                        </p>
                       </div>
                     </Link>
 
@@ -84,13 +95,30 @@ export function Header() {
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">Tài khoản</p>
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">
+                        Tài khoản
+                      </p>
                       <div className="flex flex-col gap-1.5">
                         {user ? (
                           <>
-                            <Link to="/account" className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium">Thông tin cá nhân</Link>
-                            <Link to="/orders" className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium">Theo dõi đơn hàng</Link>
-                            <Link to="/referral" className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium">Mời bạn bè</Link>
+                            <Link
+                              to="/account"
+                              className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium"
+                            >
+                              Thông tin cá nhân
+                            </Link>
+                            <Link
+                              to="/orders"
+                              className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium"
+                            >
+                              Theo dõi đơn hàng
+                            </Link>
+                            <Link
+                              to="/referral"
+                              className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium"
+                            >
+                              Mời bạn bè
+                            </Link>
                             <button
                               onClick={logout}
                               className="rounded-lg px-3.5 py-2.5 text-left text-rose-600 font-medium transition hover:bg-rose-50"
@@ -99,7 +127,12 @@ export function Header() {
                             </button>
                           </>
                         ) : (
-                          <Link to="/login" className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium">Đăng nhập / Đăng ký</Link>
+                          <Link
+                            to="/login"
+                            className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium"
+                          >
+                            Đăng nhập / Đăng ký
+                          </Link>
                         )}
                       </div>
                     </div>
@@ -112,8 +145,12 @@ export function Header() {
                   TS
                 </div>
                 <div className="hidden min-w-0 sm:block">
-                  <p className="font-sans text-base font-bold leading-none text-slate-900 transition duration-200 group-hover:text-teal-600 tracking-tight">Thai Spray</p>
-                  <p className="mt-1 text-xs text-slate-500 font-sans">Mùi hương tinh gọn, hiện đại, dễ sống cùng.</p>
+                  <p className="font-sans text-base font-bold leading-none text-slate-900 transition duration-200 group-hover:text-teal-600 tracking-tight">
+                    Thai Spray
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 font-sans">
+                    Mùi hương tinh gọn, hiện đại, dễ sống cùng.
+                  </p>
                 </div>
               </Link>
             </div>
@@ -145,7 +182,10 @@ export function Header() {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-10 rounded-lg px-2 hover:bg-slate-100">
+                    <Button
+                      variant="ghost"
+                      className="h-10 rounded-lg px-2 hover:bg-slate-100"
+                    >
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-50 text-teal-700 border border-teal-200/60 shadow-sm">
                         <User className="h-4 w-4" />
                       </div>
@@ -153,18 +193,32 @@ export function Header() {
                         <p className="max-w-[140px] truncate text-sm font-semibold text-slate-900">
                           {user.name || 'Tài khoản'}
                         </p>
-                        <p className="max-w-[140px] truncate text-xs text-slate-500">{user.email}</p>
+                        <p className="max-w-[140px] truncate text-xs text-slate-500">
+                          {user.email}
+                        </p>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-md">
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-md"
+                  >
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700"
+                    >
                       <Link to="/account">Tài khoản</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700"
+                    >
                       <Link to="/orders">Đơn hàng</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700"
+                    >
                       <Link to="/referral">Mời bạn bè</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="my-1 bg-slate-100" />
@@ -177,7 +231,10 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild className="h-9 rounded-lg bg-teal-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500">
+                <Button
+                  asChild
+                  className="h-9 rounded-lg bg-teal-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+                >
                   <Link to="/login">Đăng nhập</Link>
                 </Button>
               )}
