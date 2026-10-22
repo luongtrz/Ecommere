@@ -379,11 +379,16 @@ export function ProductDetailPage() {
                 {/* Variant Selector */}
                 <div className="space-y-5 mb-6">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-2.5">
+                    <span
+                      id="product-variants-label"
+                      className="block text-xs font-semibold text-slate-700 mb-2.5"
+                    >
                       Chọn phân loại / Dung tích:
-                    </label>
+                    </span>
                     <div
                       id="product-variants"
+                      role="group"
+                      aria-labelledby="product-variants-label"
                       className="flex flex-wrap gap-2.5"
                     >
                       {product.variants.map((v) => {
@@ -432,11 +437,18 @@ export function ProductDetailPage() {
 
                   {/* Quantity Stepper */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-2.5">
+                    <span
+                      id="quantity-label"
+                      className="block text-xs font-semibold text-slate-700 mb-2.5"
+                    >
                       Số lượng mua:
-                    </label>
+                    </span>
                     <div className="flex items-center gap-4 flex-wrap">
-                      <div className="flex items-center rounded-lg border border-slate-200 bg-white shadow-sm">
+                      <div
+                        role="group"
+                        aria-labelledby="quantity-label"
+                        className="flex items-center rounded-lg border border-slate-200 bg-white shadow-sm"
+                      >
                         <Button
                           variant="ghost"
                           size="icon"
