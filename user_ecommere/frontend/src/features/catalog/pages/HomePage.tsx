@@ -41,8 +41,18 @@ function HomeSectionSkeleton() {
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
-          className="h-[360px] animate-pulse rounded-xl border border-slate-200 bg-slate-100"
-        />
+          className="h-[360px] animate-pulse rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm flex flex-col justify-between"
+        >
+          <div className="aspect-square w-full rounded-lg bg-slate-100" />
+          <div className="space-y-2 pt-3">
+            <div className="h-3.5 w-3/4 rounded bg-slate-100" />
+            <div className="h-3 w-1/2 rounded bg-slate-100" />
+          </div>
+          <div className="mt-auto pt-3">
+            <div className="mb-3 h-4 w-1/3 rounded bg-slate-100" />
+            <div className="h-9 w-full rounded-lg bg-slate-100" />
+          </div>
+        </div>
       ))}
     </div>
   );
@@ -108,15 +118,18 @@ function CategoryProductSection({
   return (
     <section
       ref={sectionRef}
-      className={`rounded-2xl border border-slate-200 p-6 shadow-sm transition-all duration-200 md:p-8 ${
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
+      className={`rounded-2xl border border-slate-200/90 p-5 shadow-sm transition-all duration-200 hover:shadow-md md:p-8 ${
+        index % 2 === 0
+          ? 'bg-white'
+          : 'bg-gradient-to-br from-slate-50/90 via-white to-teal-50/20'
       }`}
     >
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal-600">
-            Danh mục nổi bật
-          </p>
+          <div className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-teal-600">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Danh mục nổi bật</span>
+          </div>
           <h2 className="font-sans text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
             {category.name}
           </h2>
@@ -128,7 +141,7 @@ function CategoryProductSection({
         <Button
           asChild
           variant="outline"
-          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+          className="self-start sm:self-auto rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-teal-200 hover:bg-teal-50/60 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
         >
           <Link to={`/c/${category.slug}`}>
             Xem toàn bộ danh mục
@@ -169,10 +182,10 @@ function CategoryProductSection({
           <div className="relative md:hidden">
             <div
               ref={scrollRef}
-              className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+              className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-hide snap-x snap-mandatory"
             >
               {productsData.products.map((product) => (
-                <div key={product.id} className="w-[260px] shrink-0">
+                <div key={product.id} className="w-[260px] shrink-0 snap-start">
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -194,7 +207,7 @@ function CategoryProductSection({
               type="button"
               onClick={() => scroll('left')}
               aria-label="Cuộn sang trái"
-              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-md transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-teal-500"
+              className="absolute left-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200/90 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 active:scale-95"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -202,7 +215,7 @@ function CategoryProductSection({
               type="button"
               onClick={() => scroll('right')}
               aria-label="Cuộn sang phải"
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-md transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-teal-500"
+              className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200/90 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 active:scale-95"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -242,19 +255,23 @@ export function HomePage() {
     <>
       <SEO />
 
-      <div className="container space-y-8 py-8 md:space-y-12 md:py-12">
+      <div className="container space-y-10 px-4 py-8 sm:px-6 md:space-y-14 md:py-12">
         {/* Banner Hero Section */}
-        <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-teal-50/40 p-6 shadow-sm md:p-10 lg:p-12">
-          <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
+        <section className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-slate-50 via-white to-teal-50/40 p-6 shadow-sm transition-all duration-200 hover:shadow-md md:p-10 lg:p-12">
+          {/* Decorative ambient background accents */}
+          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-teal-100/50 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-slate-100/60 blur-3xl" />
+
+          <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1.5 text-teal-700 shadow-sm">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-200/80 bg-teal-50/90 px-3.5 py-1.5 text-teal-800 shadow-xs backdrop-blur-xs">
                 <Sparkles className="h-3.5 w-3.5 text-teal-600" />
                 <span className="text-xs font-semibold tracking-wide">
                   Hương thơm cho không gian sống hiện đại
                 </span>
               </div>
 
-              <h1 className="font-sans text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+              <h1 className="font-sans text-3xl font-extrabold leading-[1.15] tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
                 Chọn mùi hương khiến không gian của bạn{' '}
                 <span className="text-teal-600">trông có gu hơn</span>.
               </h1>
@@ -270,7 +287,7 @@ export function HomePage() {
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-lg bg-teal-600 px-6 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+                  className="rounded-xl bg-teal-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-teal-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                 >
                   <Link to="/catalog">
                     Khám phá bộ sưu tập
@@ -281,7 +298,7 @@ export function HomePage() {
                   asChild
                   variant="outline"
                   size="lg"
-                  className="rounded-lg border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-teal-500"
+                  className="rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                 >
                   <Link to="/catalog?sort=best_selling">
                     Xem nhóm bán chạy nhất
@@ -293,7 +310,7 @@ export function HomePage() {
             <div className="lg:col-span-5">
               <div className="mx-auto w-full max-w-[420px] lg:max-w-none">
                 {/* Main Hero Image Card */}
-                <div className="relative aspect-[4/5] sm:aspect-square w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm group">
+                <div className="group relative aspect-[4/5] sm:aspect-square w-full overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm transition-all duration-300 hover:shadow-md">
                   <img
                     src="/hero-fragrance.png"
                     alt="Thai Spray Luxury Fragrance"
@@ -301,7 +318,7 @@ export function HomePage() {
                   />
 
                   {/* Recommendation pill at top right */}
-                  <div className="absolute top-4 right-4 rounded-full border border-slate-200 bg-white/90 px-3.5 py-1.5 shadow-sm backdrop-blur-sm">
+                  <div className="absolute right-4 top-4 rounded-full border border-slate-200/80 bg-white/95 px-3.5 py-1.5 shadow-sm backdrop-blur-md">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                       Khuyên dùng
                     </p>
@@ -311,31 +328,31 @@ export function HomePage() {
                   </div>
 
                   {/* Caption text of the hero image */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent p-6 text-white">
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent p-6 text-white">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-200">
                       Premium Scent Collection
                     </p>
-                    <p className="mt-1 font-sans text-base sm:text-lg font-semibold leading-tight text-white">
+                    <p className="mt-1 font-sans text-base font-semibold leading-tight text-white sm:text-lg">
                       Mùi hương tinh tế cho nhịp sống hiện đại
                     </p>
                   </div>
                 </div>
 
                 {/* Scent notes card */}
-                <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="mt-4 rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-teal-600">
                     Olfactory Notes
                   </p>
-                  <div className="mt-2.5 flex flex-wrap gap-3 sm:gap-5">
-                    <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
+                  <div className="mt-2.5 flex flex-wrap gap-2.5 sm:gap-4">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700">
                       <span className="h-2 w-2 rounded-full bg-teal-600" />
                       <span>Gỗ thông rừng</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700">
                       <span className="h-2 w-2 rounded-full bg-amber-500" />
                       <span>Xô thơm quýt</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700">
                       <span className="h-2 w-2 rounded-full bg-slate-400" />
                       <span>Bạc hà lạnh</span>
                     </div>
@@ -347,12 +364,13 @@ export function HomePage() {
         </section>
 
         {/* Bestseller strip / Curated products */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md md:p-8">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal-600">
-                Biên tập bởi Thai Spray
-              </p>
+              <div className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-teal-600">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Biên tập bởi Thai Spray</span>
+              </div>
               <h2 className="font-sans text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
                 Những lựa chọn đang được hỏi nhiều
               </h2>
@@ -360,7 +378,7 @@ export function HomePage() {
             <Button
               asChild
               variant="ghost"
-              className="justify-start rounded-lg px-3 py-2 text-sm font-medium text-teal-600 hover:bg-teal-50 hover:text-teal-700"
+              className="group -ml-3 self-start rounded-lg px-3 py-2 text-sm font-semibold text-teal-600 transition-colors duration-200 hover:bg-teal-50 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 sm:ml-0 sm:self-auto"
             >
               <Link to="/catalog?sort=best_selling">
                 Xem thêm trong catalog
@@ -402,18 +420,18 @@ export function HomePage() {
         {/* Highlights and Quick start row */}
         <section className="grid gap-6 md:grid-cols-2">
           {/* Highlights */}
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md md:p-8">
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Điểm mạnh của shop
               </p>
-              <div className="grid grid-cols-3 gap-3 md:gap-4">
+              <div className="grid grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
                 {HIGHLIGHTS.map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                    className="flex flex-col items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-200 hover:bg-white hover:shadow-sm"
                   >
-                    <p className="font-sans text-2xl font-bold tabular-nums text-teal-600 md:text-3xl">
+                    <p className="font-sans text-2xl font-bold tabular-nums tracking-tight text-teal-600 md:text-3xl">
                       {item.value}
                     </p>
                     <p className="mt-1 text-xs font-medium leading-snug text-slate-600">
@@ -426,7 +444,7 @@ export function HomePage() {
           </div>
 
           {/* Quick start chips */}
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md md:p-8">
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Gợi ý bắt đầu nhanh
@@ -441,14 +459,14 @@ export function HomePage() {
                   <Link
                     key={item}
                     to={`/search?q=${encodeURIComponent(item)}`}
-                    className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 transition-all duration-200 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                   >
                     {item}
                   </Link>
                 ))}
               </div>
             </div>
-            <p className="mt-4 text-xs text-slate-400">
+            <p className="mt-4 text-xs leading-relaxed text-slate-400">
               Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.
             </p>
           </div>
@@ -459,13 +477,13 @@ export function HomePage() {
           {BENEFITS.map((item) => (
             <div
               key={item.title}
-              className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md md:p-6"
+              className="group flex items-start gap-4 rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-100 hover:shadow-md md:p-6"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-teal-100 bg-teal-50 text-teal-600 transition-colors duration-200 group-hover:bg-teal-600 group-hover:text-white">
                 <item.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-sans text-base font-semibold text-slate-900 md:text-lg">
+                <p className="font-sans text-base font-bold tracking-tight text-slate-900 md:text-lg">
                   {item.title}
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-slate-600">
@@ -479,7 +497,7 @@ export function HomePage() {
         {/* Category product sections */}
         <div className="space-y-8 md:space-y-12">
           {isLoadingCategories ? (
-            <div className="flex justify-center py-12">
+            <div className="flex items-center justify-center rounded-2xl border border-slate-200/90 bg-white py-16 shadow-sm">
               <LoadingSpinner />
             </div>
           ) : (
