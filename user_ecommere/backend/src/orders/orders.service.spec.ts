@@ -995,12 +995,12 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(foreignOrder);
 
-      await expect(
-        service.getMyOrderById('user1', 'order1'),
-      ).rejects.toThrow(ForbiddenException);
-      await expect(
-        service.getMyOrderById('user1', 'order1'),
-      ).rejects.toThrow('Unauthorized');
+      await expect(service.getMyOrderById('user1', 'order1')).rejects.toThrow(
+        ForbiddenException,
+      );
+      await expect(service.getMyOrderById('user1', 'order1')).rejects.toThrow(
+        'Unauthorized',
+      );
     });
   });
 

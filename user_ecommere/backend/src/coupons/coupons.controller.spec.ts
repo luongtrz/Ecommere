@@ -408,11 +408,7 @@ describe('CouponsController', () => {
         mockValidationSuccess,
       );
 
-      const result = await controller.validateCoupon(
-        couponCode,
-        'user-1',
-        '0',
-      );
+      const result = await controller.validateCoupon(couponCode, 'user-1', '0');
 
       expect(result).toEqual(mockValidationSuccess);
       expect(mockCouponsService.validateCoupon).toHaveBeenCalledWith(

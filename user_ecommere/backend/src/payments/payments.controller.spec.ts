@@ -188,7 +188,9 @@ describe('PaymentsController', () => {
       const error = new BadRequestException('Verification failed');
       mockPaymentsService.verifyPayment.mockRejectedValue(error);
 
-      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(error);
+      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(
+        error,
+      );
       expect(paymentsService.verifyPayment).toHaveBeenCalledWith(
         userId,
         'bad_payment_id',
@@ -206,7 +208,9 @@ describe('PaymentsController', () => {
       const error = new ForbiddenException('Unauthorized');
       mockPaymentsService.verifyPayment.mockRejectedValue(error);
 
-      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(error);
+      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(
+        error,
+      );
       expect(paymentsService.verifyPayment).toHaveBeenCalledWith(
         userId,
         'pi_test_123',
@@ -224,7 +228,9 @@ describe('PaymentsController', () => {
       const error = new NotFoundException('Order not found');
       mockPaymentsService.verifyPayment.mockRejectedValue(error);
 
-      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(error);
+      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(
+        error,
+      );
       expect(paymentsService.verifyPayment).toHaveBeenCalledWith(
         userId,
         'pi_test_123',
