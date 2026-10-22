@@ -404,6 +404,12 @@ export function CheckoutPage() {
                               role="button"
                               tabIndex={0}
                               onClick={() => setSelectedAddressId(addr.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  setSelectedAddressId(addr.id);
+                                }
+                              }}
                               className={`relative p-4 sm:p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 group ${
                                 selectedAddressId === addr.id
                                   ? 'border-teal-600 bg-teal-50/40 shadow-sm ring-1 ring-teal-600/20'
@@ -458,6 +464,12 @@ export function CheckoutPage() {
                             role="button"
                             tabIndex={0}
                             onClick={() => setShippingMethod(method.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setShippingMethod(method.id);
+                              }
+                            }}
                             className={`flex items-center justify-between p-4 sm:p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                               shippingMethod === method.id
                                 ? 'border-teal-600 bg-teal-50/40 shadow-sm ring-1 ring-teal-600/20'
@@ -518,6 +530,15 @@ export function CheckoutPage() {
                             tabIndex={isCOD ? 0 : -1}
                             aria-disabled={!isCOD}
                             onClick={() => isCOD && setPaymentMethod(method.id)}
+                            onKeyDown={(e) => {
+                              if (
+                                isCOD &&
+                                (e.key === 'Enter' || e.key === ' ')
+                              ) {
+                                e.preventDefault();
+                                setPaymentMethod(method.id);
+                              }
+                            }}
                             className={`relative p-5 sm:p-6 rounded-xl border-2 transition-all duration-200 flex flex-col items-center text-center gap-3.5 ${
                               paymentMethod === method.id
                                 ? 'border-teal-600 bg-teal-50/40 shadow-sm ring-1 ring-teal-600/20 cursor-pointer'
