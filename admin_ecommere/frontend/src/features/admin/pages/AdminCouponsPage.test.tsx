@@ -256,9 +256,7 @@ describe('AdminCouponsPage', () => {
       expect(addBtn).toBeInTheDocument();
       await user.click(addBtn);
 
-      expect(
-        screen.getByText('Danh sách mã giảm giá sẽ hiển thị tại đây'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('CHAOBANMOI')).toBeInTheDocument();
     });
   });
 
@@ -281,9 +279,7 @@ describe('AdminCouponsPage', () => {
 
       const couponsTab = screen.getByRole('tab', { name: 'Mã giảm giá' });
       await user.click(couponsTab);
-      expect(
-        screen.getByText('Danh sách mã giảm giá sẽ hiển thị tại đây'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('CHAOBANMOI')).toBeInTheDocument();
     });
   });
 

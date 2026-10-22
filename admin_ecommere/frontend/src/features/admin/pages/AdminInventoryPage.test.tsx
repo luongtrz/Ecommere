@@ -60,21 +60,28 @@ describe('AdminInventoryPage', () => {
       name: 'Quản lý kho hàng',
     });
     expect(heading).toBeInTheDocument();
-    expect(heading).toHaveClass('text-3xl', 'font-bold', 'mb-8');
+    expect(heading).toHaveClass(
+      'text-2xl',
+      'md:text-3xl',
+      'font-bold',
+      'tracking-tight',
+      'text-slate-900',
+    );
   });
 
   it('renders the placeholder message within the card container', () => {
     renderWithProviders(<AdminInventoryPage />);
 
     const placeholder = screen.getByText(
-      'Danh sách kho hàng sẽ hiển thị tại đây',
+      'Thanh định mức tồn kho trực quan với cảnh báo màu rose khi lượng tồn chạm mức thấp',
     );
     expect(placeholder).toBeInTheDocument();
     expect(placeholder.tagName).toBe('P');
     expect(placeholder).toHaveClass(
-      'text-muted-foreground',
-      'text-center',
-      'py-12',
+      'text-xs',
+      'md:text-sm',
+      'text-slate-600',
+      'mt-0.5',
     );
   });
 
@@ -82,7 +89,7 @@ describe('AdminInventoryPage', () => {
     const { container } = renderWithProviders(<AdminInventoryPage />);
 
     const card = container.querySelector<HTMLElement>(
-      '.rounded-lg.border.bg-card',
+      '.rounded-xl.border.bg-white',
     );
     expect(card).toBeInTheDocument();
 
