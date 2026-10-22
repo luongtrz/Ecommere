@@ -150,7 +150,15 @@ export function ImageUpload({
 
       {images.length === 0 ? (
         <div
+          role="button"
+          tabIndex={0}
           onClick={() => !isUploading && fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (!isUploading) fileInputRef.current?.click();
+            }
+          }}
           className="border-2 border-dashed border-slate-200 hover:border-teal-500 bg-slate-50/60 hover:bg-teal-50/30 rounded-xl p-8 text-center cursor-pointer transition-colors"
         >
           <ImageIcon className="h-10 w-10 mx-auto text-slate-400 mb-2" />
@@ -209,7 +217,15 @@ export function ImageUpload({
 
           {images.length < maxImages && (
             <div
+              role="button"
+              tabIndex={0}
               onClick={() => !isUploading && fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  if (!isUploading) fileInputRef.current?.click();
+                }
+              }}
               className="border border-dashed border-slate-200 hover:border-teal-500 bg-slate-50/60 hover:bg-teal-50/30 rounded-xl p-3 text-center cursor-pointer transition-colors"
             >
               <p className="text-xs text-slate-500">
