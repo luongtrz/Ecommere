@@ -12,7 +12,7 @@ describe('Skeleton', () => {
     const skeleton = getByTestId('skeleton-default');
     expect(skeleton).toBeInTheDocument();
     expect(skeleton.tagName).toBe('DIV');
-    expect(skeleton).toHaveClass('animate-pulse', 'rounded-md', 'bg-muted');
+    expect(skeleton).toHaveClass('animate-pulse', 'rounded-lg', 'bg-slate-200');
   });
 
   it('merges custom className with default classes', () => {
@@ -24,7 +24,7 @@ describe('Skeleton', () => {
     );
     const skeleton = getByTestId('skeleton-custom');
     expect(skeleton).toHaveClass('h-12', 'w-12', 'rounded-full');
-    expect(skeleton).toHaveClass('animate-pulse', 'bg-muted');
+    expect(skeleton).toHaveClass('animate-pulse', 'bg-slate-200');
   });
 
   it('renders without custom className (undefined className)', () => {
@@ -32,7 +32,7 @@ describe('Skeleton', () => {
       <Skeleton data-testid="skeleton-undefined" />,
     );
     const skeleton = getByTestId('skeleton-undefined');
-    expect(skeleton).toHaveClass('animate-pulse', 'rounded-md', 'bg-muted');
+    expect(skeleton).toHaveClass('animate-pulse', 'rounded-lg', 'bg-slate-200');
   });
 
   it('passes through style and other HTML attributes', () => {

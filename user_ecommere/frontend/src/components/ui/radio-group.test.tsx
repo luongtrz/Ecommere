@@ -69,12 +69,12 @@ describe('RadioGroupItem', () => {
     expect(item).toBeInTheDocument();
     expect(item).toHaveClass(
       'aspect-square',
-      'h-4',
-      'w-4',
+      'h-4.5',
+      'w-4.5',
       'rounded-full',
       'border',
-      'border-primary',
-      'text-primary',
+      'border-slate-300',
+      'text-teal-600',
     );
   });
 
@@ -94,8 +94,8 @@ describe('RadioGroupItem', () => {
       'custom-item-class',
       'm-2',
       'aspect-square',
-      'h-4',
-      'w-4',
+      'h-4.5',
+      'w-4.5',
     );
   });
 
@@ -137,8 +137,8 @@ describe('RadioGroupItem', () => {
     expect(checkedSvg).toHaveClass(
       'h-2.5',
       'w-2.5',
-      'fill-current',
-      'text-current',
+      'fill-teal-600',
+      'text-teal-600',
     );
 
     // The unchecked item does not contain the SVG circle indicator
