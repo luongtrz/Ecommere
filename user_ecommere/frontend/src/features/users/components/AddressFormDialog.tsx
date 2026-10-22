@@ -69,13 +69,18 @@ export function AddressFormDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isEdit) {
-      await updateAddress.mutateAsync({
-        id: address.id,
-        data: formData,
-      });
-    } else {
-      await createAddress.mutateAsync(formData);
+    try {
+      if (isEdit) {
+        await updateAddress.mutateAsync({
+          id: address.id,
+          data: formData,
+        });
+      } else {
+        await createAddress.mutateAsync(formData);
+      }
+    } catch {
+      // Keep the dialog open on failure. This form has no error toast yet, so the rejection is only stopped here.
+      return;
     }
 
     onOpenChange(false);

@@ -54,7 +54,11 @@ export function ProfileFormDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile.mutateAsync(formData);
+    try {
+      await updateProfile.mutateAsync(formData);
+    } catch {
+      // The failure is already shown by the mutation's onError toast; just stop the rejection escaping the handler.
+    }
   };
 
   return (
