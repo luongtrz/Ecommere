@@ -183,14 +183,16 @@ export function AdminProductsPage() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <AlertCircle className="h-12 w-12 text-rose-600" />
-        <h2 className="text-lg font-semibold text-slate-900">
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 p-8 text-center bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="h-12 w-12 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
+          <AlertCircle className="h-6 w-6" />
+        </div>
+        <h2 className="text-lg font-bold text-slate-900 tracking-tight">
           Không thể tải danh sách sản phẩm
         </h2>
         <Button
           onClick={() => window.location.reload()}
-          className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+          className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm font-medium transition-all duration-200 hover:shadow"
         >
           Thử lại
         </Button>
@@ -213,7 +215,7 @@ export function AdminProductsPage() {
           <DropdownMenuItem
             key={node.id}
             onClick={() => setCategoryId(node.id)}
-            className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
+            className="cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
           >
             <span
               className={
@@ -228,7 +230,7 @@ export function AdminProductsPage() {
 
       return (
         <DropdownMenuSub key={node.id}>
-          <DropdownMenuSubTrigger className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700">
+          <DropdownMenuSubTrigger className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors">
             <span
               className={
                 categoryId === node.id ? 'font-bold text-teal-600' : ''
@@ -237,10 +239,10 @@ export function AdminProductsPage() {
               {node.name}
             </span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-md">
+          <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-lg rounded-xl p-1.5">
             <DropdownMenuItem
               onClick={() => setCategoryId(node.id)}
-              className="cursor-pointer font-medium border-b border-slate-100 mb-1 text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
+              className="cursor-pointer font-medium border-b border-slate-100 mb-1 rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
             >
               Xem tất cả {node.name}
             </DropdownMenuItem>
@@ -254,7 +256,7 @@ export function AdminProductsPage() {
   return (
     <>
       <SEO title="Quản lý sản phẩm - Admin" />
-      <div className="space-y-6">
+      <div className="space-y-6 md:space-y-8 animate-in fade-in duration-200">
         {/* Dominant Heading */}
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -272,7 +274,9 @@ export function AdminProductsPage() {
               <CardTitle className="text-sm font-medium text-slate-500">
                 Tổng sản phẩm
               </CardTitle>
-              <Package className="h-4 w-4 text-slate-400" />
+              <div className="h-8 w-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
+                <Package className="h-4 w-4" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold tabular-nums text-slate-900">
@@ -286,7 +290,9 @@ export function AdminProductsPage() {
               <CardTitle className="text-sm font-medium text-slate-500">
                 Danh mục
               </CardTitle>
-              <Tags className="h-4 w-4 text-slate-400" />
+              <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-center text-slate-600 shrink-0">
+                <Tags className="h-4 w-4" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold tabular-nums text-slate-900">
@@ -302,7 +308,9 @@ export function AdminProductsPage() {
               <CardTitle className="text-sm font-medium text-slate-500">
                 Tồn kho
               </CardTitle>
-              <Box className="h-4 w-4 text-slate-400" />
+              <div className="h-8 w-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                <Box className="h-4 w-4" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold tabular-nums text-slate-900">
@@ -322,7 +330,7 @@ export function AdminProductsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Tìm kiếm sản phẩm..."
-                className="pl-9 h-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-teal-500"
+                className="pl-9 h-10 bg-slate-50/60 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-teal-500 transition-colors text-sm rounded-lg"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -332,9 +340,9 @@ export function AdminProductsPage() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className={`gap-2 h-10 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 ${
+                  className={`gap-2 h-10 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium transition-colors ${
                     categoryId
-                      ? 'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100'
+                      ? 'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 ring-1 ring-teal-200/50'
                       : ''
                   }`}
                 >
@@ -346,15 +354,15 @@ export function AdminProductsPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="w-[300px] max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-md"
+                className="w-[300px] max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-lg rounded-xl p-1.5"
               >
-                <DropdownMenuLabel className="text-slate-900">
+                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wider text-slate-500 px-2 py-1.5">
                   Lọc theo danh mục
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-slate-200" />
+                <DropdownMenuSeparator className="bg-slate-100 my-1" />
                 <DropdownMenuItem
                   onClick={() => setCategoryId(undefined)}
-                  className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
+                  className="cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
                 >
                   <span
                     className={!categoryId ? 'font-bold text-teal-600' : ''}
@@ -371,7 +379,7 @@ export function AdminProductsPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setCategoryId(undefined)}
-                className="h-10 px-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 text-xs"
+                className="h-10 px-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-medium transition-colors border border-transparent hover:border-slate-200"
                 title="Xóa bộ lọc"
               >
                 Xóa: {selectedCategoryName?.split(' > ').pop()} ✕
@@ -380,7 +388,7 @@ export function AdminProductsPage() {
           </div>
           <Button
             asChild
-            className="gap-2 shrink-0 h-10 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+            className="gap-2 shrink-0 h-10 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200 hover:shadow font-medium"
           >
             <Link to="/admin/products/new">
               <Plus className="h-4 w-4" />
@@ -393,13 +401,15 @@ export function AdminProductsPage() {
         <div className="border border-slate-200 bg-white shadow-sm overflow-hidden rounded-xl">
           <div className="relative overflow-x-auto">
             {isLoading ? (
-              <div className="py-20">
+              <div className="py-20 flex items-center justify-center">
                 <LoadingSpinner />
               </div>
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-                <Package className="h-12 w-12 text-slate-300 mb-4" />
-                <h3 className="text-lg font-medium text-slate-900">
+                <div className="h-16 w-16 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 mb-4 shadow-sm">
+                  <Package className="h-8 w-8" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">
                   Chưa có sản phẩm nào
                 </h3>
                 <p className="text-sm text-slate-500 max-w-sm mt-1 mb-6">
@@ -408,7 +418,7 @@ export function AdminProductsPage() {
                 </p>
                 <Button
                   asChild
-                  className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
+                  className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200 hover:shadow font-medium"
                 >
                   <Link to="/admin/products/new">Tạo sản phẩm</Link>
                 </Button>
@@ -418,25 +428,25 @@ export function AdminProductsPage() {
                 <Table>
                   <TableHeader className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
                     <TableRow className="hover:bg-transparent border-b border-slate-200">
-                      <TableHead className="w-[80px] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="w-[80px] px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Hình ảnh
                       </TableHead>
-                      <TableHead className="min-w-[200px] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="min-w-[200px] px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Tên sản phẩm
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Danh mục
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Giá bán
                       </TableHead>
-                      <TableHead className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Tồn kho
                       </TableHead>
-                      <TableHead className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Đánh giá
                       </TableHead>
-                      <TableHead className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Thao tác
                       </TableHead>
                     </TableRow>
@@ -451,7 +461,7 @@ export function AdminProductsPage() {
                       return (
                         <TableRow
                           key={product.id}
-                          className="group hover:bg-slate-50 transition-colors border-b border-slate-100"
+                          className="group hover:bg-slate-50/80 transition-colors border-b border-slate-100"
                         >
                           <TableCell className="px-4 py-3">
                             <div className="relative h-12 w-12 rounded-lg border border-slate-200 overflow-hidden bg-slate-100 shadow-sm shrink-0">
@@ -462,7 +472,7 @@ export function AdminProductsPage() {
                                 }
                                 alt={product.name}
                                 loading="lazy"
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                               />
                             </div>
                           </TableCell>
@@ -470,7 +480,7 @@ export function AdminProductsPage() {
                             <div className="flex flex-col min-w-[180px]">
                               <Link
                                 to={`/admin/products/${product.id}/edit`}
-                                className="font-medium text-slate-900 group-hover:text-teal-600 transition-colors cursor-pointer line-clamp-1 hover:underline"
+                                className="font-semibold text-slate-900 group-hover:text-teal-600 transition-colors cursor-pointer line-clamp-1 hover:underline text-sm"
                                 title={product.name}
                               >
                                 {product.name}
@@ -484,7 +494,7 @@ export function AdminProductsPage() {
                             {product.category ? (
                               <Badge
                                 variant="outline"
-                                className="font-normal text-xs bg-slate-50 text-slate-700 border-slate-200"
+                                className="font-medium text-xs bg-slate-50 text-slate-700 border-slate-200 rounded-md"
                               >
                                 {product.category.name}
                               </Badge>
@@ -493,7 +503,7 @@ export function AdminProductsPage() {
                             )}
                           </TableCell>
                           <TableCell className="px-4 py-3">
-                            <div className="font-semibold tabular-nums text-slate-900">
+                            <div className="font-bold tabular-nums text-slate-900 text-sm">
                               {formatCurrency(product.basePrice)}
                             </div>
                           </TableCell>
@@ -507,7 +517,7 @@ export function AdminProductsPage() {
                             >
                               {totalStock} sp
                             </div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">
+                            <div className="text-[10px] text-slate-400 mt-0.5 font-medium">
                               {product.variants?.length || 0} biến thể
                             </div>
                           </TableCell>
@@ -528,16 +538,16 @@ export function AdminProductsPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                                  className="h-8 w-8 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
                                 >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent
                                 align="end"
-                                className="bg-white border-slate-200 shadow-md"
+                                className="w-44 bg-white border-slate-200 shadow-lg rounded-xl p-1.5"
                               >
-                                <DropdownMenuLabel className="text-slate-900">
+                                <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 py-1.5">
                                   Thao tác
                                 </DropdownMenuLabel>
                                 <DropdownMenuItem asChild>
@@ -545,25 +555,25 @@ export function AdminProductsPage() {
                                     href={`${STORE_URL}/p/${product.slug}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
+                                    className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
                                   >
-                                    <Eye className="mr-2 h-4 w-4" /> Xem chi
-                                    tiết
+                                    <Eye className="mr-2 h-4 w-4 text-slate-400" />{' '}
+                                    Xem chi tiết
                                   </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                   <Link
                                     to={`/admin/products/${product.id}/edit`}
-                                    className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
+                                    className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
                                   >
-                                    <Pencil className="mr-2 h-4 w-4" /> Chỉnh
-                                    sửa
+                                    <Pencil className="mr-2 h-4 w-4 text-slate-400" />{' '}
+                                    Chỉnh sửa
                                   </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-slate-200" />
+                                <DropdownMenuSeparator className="bg-slate-100 my-1" />
                                 <DropdownMenuItem
                                   disabled={isDeleting}
-                                  className="text-rose-600 focus:text-rose-700 focus:bg-rose-50 cursor-pointer"
+                                  className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-rose-600 focus:text-rose-700 focus:bg-rose-50 hover:bg-rose-50 transition-colors disabled:opacity-50"
                                   onClick={() =>
                                     handleDelete(product.id, product.name)
                                   }
@@ -583,13 +593,13 @@ export function AdminProductsPage() {
                 {/* Sentinel for Infinite Scroll */}
                 <div
                   ref={observerTarget}
-                  className="h-12 flex items-center justify-center p-4"
+                  className="h-14 flex items-center justify-center p-4 border-t border-slate-100"
                 >
                   {isFetchingNextPage && (
                     <Loader2 className="h-5 w-5 animate-spin text-teal-600" />
                   )}
                   {!hasNextPage && products.length > 0 && (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 font-medium">
                       Đã hiển thị hết sản phẩm
                     </span>
                   )}
