@@ -19,18 +19,34 @@ describe('Breadcrumb', () => {
       name: 'Breadcrumb',
     });
     expect(nav).toBeInTheDocument();
-    expect(nav).toHaveClass('flex', 'items-center', 'gap-2', 'text-sm');
+    expect(nav).toHaveClass(
+      'flex',
+      'flex-wrap',
+      'items-center',
+      'gap-1.5',
+      'text-xs',
+      'md:text-sm',
+      'text-slate-500',
+      'font-sans',
+    );
 
     const homeLink = within(container).getByRole('link');
     expect(homeLink).toHaveAttribute('href', '/');
     expect(homeLink).toHaveClass(
-      'text-muted-foreground',
-      'hover:text-foreground',
+      'inline-flex',
+      'items-center',
+      'justify-center',
+      'p-1',
+      'rounded-md',
+      'text-slate-400',
+      'hover:text-teal-600',
+      'hover:bg-slate-100',
+      'transition-colors',
     );
 
     const homeSvg = homeLink.querySelector('svg');
     expect(homeSvg).toBeInTheDocument();
-    expect(homeSvg).toHaveClass('h-4', 'w-4');
+    expect(homeSvg).toHaveClass('h-3.5', 'w-3.5');
 
     // No ChevronRight icons rendered when items is empty
     expect(container.querySelectorAll('svg')).toHaveLength(1);
@@ -46,14 +62,16 @@ describe('Breadcrumb', () => {
     expect(categoryLink).toBeInTheDocument();
     expect(categoryLink).toHaveAttribute('href', '/categories');
     expect(categoryLink).toHaveClass(
-      'text-muted-foreground',
-      'hover:text-foreground',
+      'font-medium',
+      'text-slate-600',
+      'hover:text-teal-600',
+      'transition-colors',
     );
 
     // 2 SVGs: Home icon and 1 ChevronRight icon
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(2);
-    expect(svgs[1]).toHaveClass('h-4', 'w-4', 'text-muted-foreground');
+    expect(svgs[1]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
   });
 
   it('renders breadcrumb item without href as a non-clickable span with font-medium class', () => {
@@ -63,7 +81,7 @@ describe('Breadcrumb', () => {
     const activeSpan = within(container).getByText('Chi tiết sản phẩm');
     expect(activeSpan).toBeInTheDocument();
     expect(activeSpan.tagName).toBe('SPAN');
-    expect(activeSpan).toHaveClass('font-medium');
+    expect(activeSpan).toHaveClass('font-semibold', 'text-slate-900');
 
     // Only 1 link exists (the Home link)
     expect(within(container).getAllByRole('link')).toHaveLength(1);
@@ -94,14 +112,14 @@ describe('Breadcrumb', () => {
     // Last item is a span
     const terminalItem = within(container).getByText('iPhone 15 Pro Max 256GB');
     expect(terminalItem.tagName).toBe('SPAN');
-    expect(terminalItem).toHaveClass('font-medium');
+    expect(terminalItem).toHaveClass('font-semibold', 'text-slate-900');
 
     // SVGs: 1 Home + 3 ChevronRight separators
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(4);
-    expect(svgs[1]).toHaveClass('h-4', 'w-4', 'text-muted-foreground');
-    expect(svgs[2]).toHaveClass('h-4', 'w-4', 'text-muted-foreground');
-    expect(svgs[3]).toHaveClass('h-4', 'w-4', 'text-muted-foreground');
+    expect(svgs[1]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
+    expect(svgs[2]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
+    expect(svgs[3]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
   });
 
   it('applies custom className to the nav element', () => {
@@ -117,9 +135,13 @@ describe('Breadcrumb', () => {
     });
     expect(nav).toHaveClass(
       'flex',
+      'flex-wrap',
       'items-center',
-      'gap-2',
-      'text-sm',
+      'gap-1.5',
+      'text-xs',
+      'md:text-sm',
+      'text-slate-500',
+      'font-sans',
       'custom-breadcrumb-container',
       'px-4',
       'py-2',

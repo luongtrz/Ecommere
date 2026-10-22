@@ -206,7 +206,7 @@ describe('ProductQuickView', () => {
       expect(screen.getByText('Xịt Phòng Tinh Dầu')).toBeInTheDocument();
       expect(
         screen.getByText('Xịt Thơm Phòng Tự Nhiên', {
-          selector: 'h2.text-2xl',
+          selector: 'h2.text-xl',
         }),
       ).toBeInTheDocument();
       expect(
@@ -271,7 +271,7 @@ describe('ProductQuickView', () => {
 
       expect(
         screen.getByText('Xịt Thơm Phòng Tự Nhiên', {
-          selector: 'h2.text-2xl',
+          selector: 'h2.text-xl',
         }),
       ).toBeInTheDocument();
       expect(screen.queryByText('Xịt Phòng Tinh Dầu')).not.toBeInTheDocument();
@@ -303,14 +303,14 @@ describe('ProductQuickView', () => {
 
       const thumbBtn1 = thumb1.closest('button')!;
       const thumbBtn2 = thumb2.closest('button')!;
-      expect(thumbBtn1).toHaveClass('border-primary');
-      expect(thumbBtn2).not.toHaveClass('border-primary');
+      expect(thumbBtn1).toHaveClass('border-teal-600');
+      expect(thumbBtn2).not.toHaveClass('border-teal-600');
 
       // Click second thumbnail
       fireEvent.click(thumbBtn2);
 
-      expect(thumbBtn2).toHaveClass('border-primary');
-      expect(thumbBtn1).not.toHaveClass('border-primary');
+      expect(thumbBtn2).toHaveClass('border-teal-600');
+      expect(thumbBtn1).not.toHaveClass('border-teal-600');
       expect(mainImage).toHaveAttribute(
         'src',
         getImageUrl('/images/spray-2.jpg'),
@@ -319,7 +319,7 @@ describe('ProductQuickView', () => {
       // Click third thumbnail
       const thumbBtn3 = thumb3.closest('button')!;
       fireEvent.click(thumbBtn3);
-      expect(thumbBtn3).toHaveClass('border-primary');
+      expect(thumbBtn3).toHaveClass('border-teal-600');
       expect(mainImage).toHaveAttribute(
         'src',
         getImageUrl('/images/spray-3.jpg'),
@@ -406,7 +406,7 @@ describe('ProductQuickView', () => {
     it('increments quantity up to variant stock and decrements down to 1', () => {
       renderProductQuickView();
 
-      const quantityWrapper = document.getElementById('quickview-quantity')!;
+      const quantityWrapper = screen.getByRole('group', { name: 'Số lượng:' });
       const [decreaseBtn, increaseBtn] =
         quantityWrapper.querySelectorAll('button');
 
@@ -456,7 +456,7 @@ describe('ProductQuickView', () => {
 
       renderProductQuickView();
 
-      const quantityWrapper = document.getElementById('quickview-quantity')!;
+      const quantityWrapper = screen.getByRole('group', { name: 'Số lượng:' });
       const [, increaseBtn] = quantityWrapper.querySelectorAll('button');
 
       fireEvent.click(increaseBtn);
@@ -469,7 +469,7 @@ describe('ProductQuickView', () => {
       const handleOpenChange = vi.fn();
       renderProductQuickView({ onOpenChange: handleOpenChange });
 
-      const quantityWrapper = document.getElementById('quickview-quantity')!;
+      const quantityWrapper = screen.getByRole('group', { name: 'Số lượng:' });
       const [, increaseBtn] = quantityWrapper.querySelectorAll('button');
       fireEvent.click(increaseBtn); // quantity = 2
 
@@ -540,8 +540,8 @@ describe('ProductQuickView', () => {
       const heartIcon = document.querySelector('svg.lucide-heart')!;
       const wishlistBtn = heartIcon.closest('button')!;
 
-      expect(wishlistBtn).toHaveClass('text-gray-400');
-      expect(heartIcon).not.toHaveClass('fill-rose-500');
+      expect(wishlistBtn).toHaveClass('text-slate-400');
+      expect(heartIcon).not.toHaveClass('fill-rose-600');
 
       fireEvent.click(wishlistBtn);
 
@@ -561,8 +561,8 @@ describe('ProductQuickView', () => {
       const heartIcon = document.querySelector('svg.lucide-heart')!;
       const wishlistBtn = heartIcon.closest('button')!;
 
-      expect(wishlistBtn).toHaveClass('text-rose-500');
-      expect(heartIcon).toHaveClass('fill-rose-500');
+      expect(wishlistBtn).toHaveClass('text-rose-600');
+      expect(heartIcon).toHaveClass('fill-rose-600');
     });
 
     it('calls toggleItem with regular price when salePrice is absent', () => {

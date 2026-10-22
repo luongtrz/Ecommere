@@ -16,7 +16,7 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -58,6 +58,7 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+
       keyframes: {
         'accordion-down': {
           from: { height: '0' },

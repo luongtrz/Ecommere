@@ -43,10 +43,10 @@ describe('Pagination', () => {
 
     // Active page has default variant styling
     const page1Button = screen.getByRole('button', { name: '1' });
-    expect(page1Button).toHaveClass('bg-primary');
+    expect(page1Button).toHaveClass('bg-teal-600');
 
     const page2Button = screen.getByRole('button', { name: '2' });
-    expect(page2Button).not.toHaveClass('bg-primary');
+    expect(page2Button).not.toHaveClass('bg-teal-600');
 
     fireEvent.click(nextButton);
     expect(onPageChange).toHaveBeenCalledWith(2);
@@ -82,7 +82,7 @@ describe('Pagination', () => {
       />,
     );
 
-    const ellipses = screen.getAllByText('...');
+    const ellipses = screen.getAllByText('…');
     expect(ellipses).toHaveLength(2);
 
     const firstPageBtn = screen.getByRole('button', { name: '1' });
@@ -112,7 +112,7 @@ describe('Pagination', () => {
     expect(screen.getByRole('button', { name: '1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '10' })).toBeInTheDocument();
 
-    const ellipses = screen.getAllByText('...');
+    const ellipses = screen.getAllByText('…');
     expect(ellipses).toHaveLength(1);
   });
 
@@ -130,7 +130,7 @@ describe('Pagination', () => {
     expect(screen.getByRole('button', { name: '1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '10' })).toBeInTheDocument();
 
-    const ellipses = screen.getAllByText('...');
+    const ellipses = screen.getAllByText('…');
     expect(ellipses).toHaveLength(1);
   });
 
@@ -148,7 +148,7 @@ describe('Pagination', () => {
     expect(screen.getByRole('button', { name: '6' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '10' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '1' })).toBeInTheDocument();
-    expect(screen.getAllByText('...')).toHaveLength(1);
+    expect(screen.getAllByText('…')).toHaveLength(1);
   });
 
   it('handles small totalPages where totalPages is greater than 1 but less than showPages', () => {
@@ -160,7 +160,7 @@ describe('Pagination', () => {
     expect(screen.getByRole('button', { name: '1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '2' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '3' })).toBeInTheDocument();
-    expect(screen.queryByText('...')).not.toBeInTheDocument();
+    expect(screen.queryByText('…')).not.toBeInTheDocument();
   });
 
   it('applies custom className to container', () => {

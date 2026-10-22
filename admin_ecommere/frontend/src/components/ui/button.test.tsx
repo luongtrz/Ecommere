@@ -15,8 +15,8 @@ describe('Button component', () => {
 
     expect(button).toBeInTheDocument();
     expect(button.tagName.toLowerCase()).toBe('button');
-    expect(button).toHaveClass('bg-primary');
-    expect(button).toHaveClass('text-primary-foreground');
+    expect(button).toHaveClass('bg-teal-600');
+    expect(button).toHaveClass('text-white');
     expect(button).toHaveClass('h-10');
     expect(button).toHaveClass('px-4');
     expect(button).toHaveClass('py-2');
@@ -24,11 +24,11 @@ describe('Button component', () => {
 
   it('renders with all variant options correctly', () => {
     const variants = [
-      { variant: 'default', expectedClass: 'bg-primary' },
-      { variant: 'destructive', expectedClass: 'bg-destructive' },
-      { variant: 'outline', expectedClass: 'border-input' },
-      { variant: 'secondary', expectedClass: 'bg-secondary' },
-      { variant: 'ghost', expectedClass: 'hover:bg-accent' },
+      { variant: 'default', expectedClass: 'bg-teal-600' },
+      { variant: 'destructive', expectedClass: 'bg-rose-600' },
+      { variant: 'outline', expectedClass: 'border-slate-200' },
+      { variant: 'secondary', expectedClass: 'border-slate-200' },
+      { variant: 'ghost', expectedClass: 'hover:bg-slate-100' },
       { variant: 'link', expectedClass: 'underline-offset-4' },
     ] as const;
 
@@ -46,7 +46,7 @@ describe('Button component', () => {
     const sizes = [
       { size: 'default', expectedClass: 'h-10 px-4 py-2' },
       { size: 'sm', expectedClass: 'h-9 rounded-md px-3' },
-      { size: 'lg', expectedClass: 'h-11 rounded-md px-8' },
+      { size: 'lg', expectedClass: 'h-11 rounded-lg px-8' },
       { size: 'icon', expectedClass: 'h-10 w-10' },
     ] as const;
 
@@ -69,7 +69,7 @@ describe('Button component', () => {
     const button = screen.getByRole('button', { name: 'Tùy chỉnh' });
     expect(button).toHaveClass('custom-test-class');
     expect(button).toHaveClass('shadow-lg');
-    expect(button).toHaveClass('bg-primary');
+    expect(button).toHaveClass('bg-teal-600');
   });
 
   it('handles user click event when enabled', async () => {
@@ -120,7 +120,7 @@ describe('Button component', () => {
     expect(link).toBeInTheDocument();
     expect(link.tagName.toLowerCase()).toBe('a');
     expect(link).toHaveAttribute('href', '/admin/products');
-    expect(link).toHaveClass('bg-primary');
+    expect(link).toHaveClass('bg-teal-600');
     expect(ref.current).toBeInstanceOf(HTMLAnchorElement);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(container.querySelector('button')).toBeNull();
@@ -151,13 +151,13 @@ describe('Button component', () => {
 describe('buttonVariants function', () => {
   it('returns default classes when invoked with no arguments', () => {
     const classes = buttonVariants();
-    expect(classes).toContain('bg-primary');
+    expect(classes).toContain('bg-teal-600');
     expect(classes).toContain('h-10 px-4 py-2');
   });
 
   it('returns default classes when invoked with empty object', () => {
     const classes = buttonVariants({});
-    expect(classes).toContain('bg-primary');
+    expect(classes).toContain('bg-teal-600');
     expect(classes).toContain('h-10 px-4 py-2');
   });
 
@@ -167,7 +167,7 @@ describe('buttonVariants function', () => {
       size: 'sm',
       className: 'extra-class',
     });
-    expect(classes).toContain('bg-destructive');
+    expect(classes).toContain('bg-rose-600');
     expect(classes).toContain('h-9');
     expect(classes).toContain('extra-class');
   });
@@ -177,8 +177,8 @@ describe('buttonVariants function', () => {
       variant: 'outline',
       size: 'lg',
     });
-    expect(classes).toContain('border-input');
-    expect(classes).toContain('h-11 rounded-md px-8');
+    expect(classes).toContain('border-slate-200');
+    expect(classes).toContain('h-11 rounded-lg px-8');
   });
 
   it('returns correct classes for ghost variant and icon size', () => {
@@ -186,7 +186,7 @@ describe('buttonVariants function', () => {
       variant: 'ghost',
       size: 'icon',
     });
-    expect(classes).toContain('hover:bg-accent');
+    expect(classes).toContain('hover:bg-slate-100');
     expect(classes).toContain('h-10 w-10');
   });
 
@@ -195,6 +195,6 @@ describe('buttonVariants function', () => {
     expect(linkClasses).toContain('underline-offset-4');
 
     const secondaryClasses = buttonVariants({ variant: 'secondary' });
-    expect(secondaryClasses).toContain('bg-secondary');
+    expect(secondaryClasses).toContain('border-slate-200');
   });
 });

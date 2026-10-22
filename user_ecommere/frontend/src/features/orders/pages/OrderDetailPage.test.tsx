@@ -370,7 +370,7 @@ describe('OrderDetailPage', () => {
       const statusBadge = screen.getByText('Chờ thanh toán');
       expect(statusBadge).toBeInTheDocument();
       expect(statusBadge.closest('div')).toHaveClass(
-        'bg-amber-100',
+        'bg-amber-50',
         'text-amber-700',
       );
     });
@@ -384,10 +384,10 @@ describe('OrderDetailPage', () => {
       expect(screen.getByText('Giao hàng')).toBeInTheDocument();
 
       expect(screen.getByText('Hiện tại')).toBeInTheDocument();
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Đóng gói')).toHaveClass('text-gray-400');
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-gray-400');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-gray-400');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Đóng gói')).toHaveClass('text-slate-400');
+      expect(screen.getByText('Vận chuyển')).toHaveClass('text-slate-400');
+      expect(screen.getByText('Giao hàng')).toHaveClass('text-slate-400');
     });
 
     it('renders order items list correctly', () => {
@@ -430,7 +430,7 @@ describe('OrderDetailPage', () => {
 
       const paymentBadge = screen.getByText('Chưa thanh toán');
       expect(paymentBadge).toBeInTheDocument();
-      expect(paymentBadge).toHaveClass('bg-green-50', 'text-green-600');
+      expect(paymentBadge).toHaveClass('bg-amber-50', 'text-amber-700');
     });
 
     it('renders order cost summary sidebar and cancel button', () => {
@@ -481,23 +481,22 @@ describe('OrderDetailPage', () => {
       const paidBadges = screen.getAllByText('Đã thanh toán');
       expect(paidBadges).toHaveLength(2);
 
-      const headerStatusBadge = paidBadges.find((el) =>
-        el.closest('.bg-teal-50'),
-      );
+      const headerStatusBadge = paidBadges[0];
       expect(headerStatusBadge).toBeDefined();
-
-      const paymentBadge = paidBadges.find(
-        (el) =>
-          el.classList.contains('bg-green-50') || el.closest('.bg-green-50'),
+      expect(headerStatusBadge.closest('div')).toHaveClass(
+        'bg-emerald-50',
+        'text-emerald-700',
       );
+
+      const paymentBadge = paidBadges[1];
       expect(paymentBadge).toBeDefined();
-      expect(paymentBadge).toHaveClass('text-green-600');
+      expect(paymentBadge).toHaveClass('bg-emerald-50', 'text-emerald-700');
 
       expect(screen.getByText('Miễn phí')).toBeInTheDocument();
 
       // Timeline has current step at 0
       expect(screen.getByText('Hiện tại')).toBeInTheDocument();
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-gray-900');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
 
       // Cancel button is available for PAID orders
       expect(
@@ -523,15 +522,15 @@ describe('OrderDetailPage', () => {
       const statusBadge = screen.getByText('Đang đóng gói');
       expect(statusBadge).toBeInTheDocument();
       expect(statusBadge.closest('div')).toHaveClass(
-        'bg-purple-100',
-        'text-purple-700',
+        'bg-amber-50',
+        'text-amber-700',
       );
 
       // Timeline step 1 (Đóng gói) is current
-      expect(screen.getByText('Đóng gói')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-gray-400');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-gray-400');
+      expect(screen.getByText('Đóng gói')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Vận chuyển')).toHaveClass('text-slate-400');
+      expect(screen.getByText('Giao hàng')).toHaveClass('text-slate-400');
 
       // Payment badge is Chưa thanh toán
       expect(screen.getByText('Chưa thanh toán')).toBeInTheDocument();
@@ -557,15 +556,15 @@ describe('OrderDetailPage', () => {
       const statusBadge = screen.getByText('Đang giao hàng');
       expect(statusBadge).toBeInTheDocument();
       expect(statusBadge.closest('div')).toHaveClass(
-        'bg-indigo-100',
-        'text-indigo-700',
+        'bg-teal-50',
+        'text-teal-700',
       );
 
       // Timeline step 2 (Vận chuyển) is current
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Đóng gói')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-gray-400');
+      expect(screen.getByText('Vận chuyển')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Đóng gói')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Giao hàng')).toHaveClass('text-slate-400');
 
       expect(screen.getByText('Chưa thanh toán')).toBeInTheDocument();
       expect(
@@ -588,19 +587,19 @@ describe('OrderDetailPage', () => {
       const statusBadge = screen.getByText('Giao thành công');
       expect(statusBadge).toBeInTheDocument();
       expect(statusBadge.closest('div')).toHaveClass(
-        'bg-emerald-100',
+        'bg-emerald-50',
         'text-emerald-700',
       );
 
       // All timeline steps completed, Giao hàng is current
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Đóng gói')).toHaveClass('text-gray-900');
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-gray-900');
+      expect(screen.getByText('Giao hàng')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Vận chuyển')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Đóng gói')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
 
       const paymentBadge = screen.getByText('Đã thanh toán');
       expect(paymentBadge).toBeInTheDocument();
-      expect(paymentBadge).toHaveClass('bg-green-50', 'text-green-600');
+      expect(paymentBadge).toHaveClass('bg-emerald-50', 'text-emerald-700');
 
       expect(
         screen.queryByRole('button', { name: /Hủy đơn hàng/i }),
@@ -622,16 +621,16 @@ describe('OrderDetailPage', () => {
       const canceledBadges = screen.getAllByText('Đã hủy');
       expect(canceledBadges).toHaveLength(2);
 
-      const headerStatusBadge = canceledBadges.find((el) =>
-        el.closest('.bg-rose-100'),
-      );
+      const headerStatusBadge = canceledBadges[0];
       expect(headerStatusBadge).toBeDefined();
-
-      const paymentBadge = canceledBadges.find(
-        (el) => el.classList.contains('bg-red-50') || el.closest('.bg-red-50'),
+      expect(headerStatusBadge.closest('div')).toHaveClass(
+        'bg-rose-50',
+        'text-rose-600',
       );
+
+      const paymentBadge = canceledBadges[1];
       expect(paymentBadge).toBeDefined();
-      expect(paymentBadge).toHaveClass('text-red-600');
+      expect(paymentBadge).toHaveClass('bg-rose-50', 'text-rose-600');
 
       expect(
         screen.queryByRole('button', { name: /Hủy đơn hàng/i }),
@@ -653,8 +652,8 @@ describe('OrderDetailPage', () => {
       const statusBadge = screen.getByText('Đã hoàn tiền');
       expect(statusBadge).toBeInTheDocument();
       expect(statusBadge.closest('div')).toHaveClass(
-        'bg-gray-100',
-        'text-gray-700',
+        'bg-slate-50',
+        'text-slate-700',
       );
 
       // Timeline hidden
@@ -662,7 +661,7 @@ describe('OrderDetailPage', () => {
 
       const paymentBadge = screen.getByText('Đã hủy');
       expect(paymentBadge).toBeInTheDocument();
-      expect(paymentBadge).toHaveClass('bg-red-50', 'text-red-600');
+      expect(paymentBadge).toHaveClass('bg-rose-50', 'text-rose-600');
     });
   });
 
@@ -680,8 +679,8 @@ describe('OrderDetailPage', () => {
       const statusBadge = screen.getByText('UNKNOWN_STATUS');
       expect(statusBadge).toBeInTheDocument();
       expect(statusBadge.closest('div')).toHaveClass(
-        'bg-gray-100',
-        'text-gray-700',
+        'bg-slate-50',
+        'text-slate-700',
       );
 
       // Timeline renders with step 0 as default current

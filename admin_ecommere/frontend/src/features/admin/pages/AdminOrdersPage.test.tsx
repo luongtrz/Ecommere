@@ -516,7 +516,7 @@ describe('AdminOrdersPage', () => {
     expect(screen.getByText('Doanh thu hôm nay')).toBeInTheDocument();
 
     // Total should display 0
-    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.getAllByText('0')[0]).toBeInTheDocument();
 
     // Pagination not rendered
     expect(screen.queryByText(/Trang \d+ \//)).not.toBeInTheDocument();
@@ -548,7 +548,7 @@ describe('AdminOrdersPage', () => {
     ).toBeInTheDocument();
 
     // Stats
-    expect(screen.getByText('4')).toBeInTheDocument();
+    expect(screen.getAllByText('4')[0]).toBeInTheDocument();
 
     // Table Headers
     expect(screen.getByText('Mã đơn')).toBeInTheDocument();
@@ -622,7 +622,9 @@ describe('AdminOrdersPage', () => {
     expect(within(row4).getByText('COD')).toBeInTheDocument();
 
     // Detail action eye buttons
-    const viewLink = within(row1).getByRole('link', { name: '' });
+    const viewLink = within(row1).getByRole('link', {
+      name: 'Xem chi tiết đơn hàng ORD-001',
+    });
     expect(viewLink).toHaveAttribute('href', '/admin/orders/ord-1');
   });
 
@@ -978,7 +980,12 @@ describe('AdminOrdersPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('Trang 1 / 3')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_content, element) =>
+          element?.textContent?.replace(/\s+/g, ' ').trim() === 'Trang 1 / 3',
+      ),
+    ).toBeInTheDocument();
     const prevButton = screen.getByRole('button', { name: /Trước/ });
     const nextButton = screen.getByRole('button', { name: /Sau/ });
 

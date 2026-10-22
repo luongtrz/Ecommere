@@ -121,11 +121,7 @@ describe('AccountPage', () => {
     // CUSTOMER role badge
     const badge = screen.getByText('Khách hàng thân thiết');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass(
-      'bg-indigo-100',
-      'text-indigo-700',
-      'border-indigo-200',
-    );
+    expect(badge).toHaveClass('bg-teal-50', 'text-teal-700', 'border-teal-200');
 
     // Category section
     expect(screen.getByText('Danh mục')).toBeInTheDocument();
@@ -176,7 +172,7 @@ describe('AccountPage', () => {
 
     const badge = screen.getByText('Quản trị viên');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass('bg-red-100', 'text-red-700', 'border-red-200');
+    expect(badge).toHaveClass('bg-rose-50', 'text-rose-700', 'border-rose-200');
   });
 
   it('renders fallback values when email or createdAt is not provided', () => {

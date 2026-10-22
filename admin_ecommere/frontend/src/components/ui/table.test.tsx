@@ -198,8 +198,10 @@ describe('Table UI components', () => {
       expect(footer.tagName).toBe('TFOOT');
       expect(footer).toHaveClass(
         'border-t',
-        'bg-muted/50',
+        'border-slate-200',
+        'bg-slate-50',
         'font-medium',
+        'text-slate-900',
         '[&>tr]:last:border-b-0',
       );
     });
@@ -215,7 +217,7 @@ describe('Table UI components', () => {
       );
       const footer = screen.getByTestId('footer-custom-class');
 
-      expect(footer).toHaveClass('custom-footer', 'border-t', 'bg-muted/50');
+      expect(footer).toHaveClass('custom-footer', 'border-t', 'bg-slate-50');
     });
 
     it('forwards ref to HTMLTableSectionElement', () => {
@@ -248,9 +250,10 @@ describe('Table UI components', () => {
       expect(row.tagName).toBe('TR');
       expect(row).toHaveClass(
         'border-b',
+        'border-slate-200',
         'transition-colors',
-        'hover:bg-muted/50',
-        'data-[state=selected]:bg-muted',
+        'hover:bg-slate-50',
+        'data-[state=selected]:bg-slate-100',
       );
     });
 
@@ -324,12 +327,16 @@ describe('Table UI components', () => {
       expect(head).toBeInTheDocument();
       expect(head.tagName).toBe('TH');
       expect(head).toHaveClass(
-        'h-12',
+        'h-11',
         'px-4',
+        'py-3',
         'text-left',
         'align-middle',
-        'font-medium',
-        'text-muted-foreground',
+        'text-xs',
+        'font-semibold',
+        'uppercase',
+        'tracking-wider',
+        'text-slate-500',
         '[&:has([role=checkbox])]:pr-0',
       );
       expect(head).toHaveTextContent('Header title');
@@ -354,7 +361,7 @@ describe('Table UI components', () => {
       );
       const head = screen.getByTestId('head-custom-class');
 
-      expect(head).toHaveClass('custom-head', 'h-12', 'px-4');
+      expect(head).toHaveClass('custom-head', 'h-11', 'px-4');
       expect(head).toHaveAttribute('scope', 'col');
       expect(head).toHaveAttribute('colspan', '2');
     });
@@ -394,8 +401,11 @@ describe('Table UI components', () => {
       expect(cell).toBeInTheDocument();
       expect(cell.tagName).toBe('TD');
       expect(cell).toHaveClass(
-        'p-4',
+        'px-4',
+        'py-3',
         'align-middle',
+        'text-slate-700',
+        'tabular-nums',
         '[&:has([role=checkbox])]:pr-0',
       );
       expect(cell).toHaveTextContent('Cell text');
@@ -419,7 +429,7 @@ describe('Table UI components', () => {
       );
       const cell = screen.getByTestId('cell-custom-class');
 
-      expect(cell).toHaveClass('custom-cell', 'p-4', 'align-middle');
+      expect(cell).toHaveClass('custom-cell', 'px-4', 'py-3', 'align-middle');
       expect(cell).toHaveAttribute('colspan', '3');
     });
 
@@ -455,7 +465,7 @@ describe('Table UI components', () => {
 
       expect(caption).toBeInTheDocument();
       expect(caption.tagName).toBe('CAPTION');
-      expect(caption).toHaveClass('mt-4', 'text-sm', 'text-muted-foreground');
+      expect(caption).toHaveClass('mt-4', 'text-sm', 'text-slate-400');
       expect(caption).toHaveTextContent('A list of recent invoices');
     });
 

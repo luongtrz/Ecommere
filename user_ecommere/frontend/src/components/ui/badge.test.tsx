@@ -23,8 +23,8 @@ describe('Badge Component', () => {
       'font-semibold',
       'transition-colors',
       'border-transparent',
-      'bg-primary',
-      'text-primary-foreground',
+      'bg-teal-600',
+      'text-white',
     );
   });
 
@@ -34,8 +34,8 @@ describe('Badge Component', () => {
     const badge = screen.getByText('Mặc định');
     expect(badge).toHaveClass(
       'border-transparent',
-      'bg-primary',
-      'text-primary-foreground',
+      'bg-teal-600',
+      'text-white',
     );
   });
 
@@ -44,9 +44,9 @@ describe('Badge Component', () => {
 
     const badge = screen.getByText('Đang xử lý');
     expect(badge).toHaveClass(
-      'border-transparent',
-      'bg-secondary',
-      'text-secondary-foreground',
+      'border-slate-200',
+      'bg-slate-100',
+      'text-slate-700',
     );
   });
 
@@ -54,23 +54,19 @@ describe('Badge Component', () => {
     render(<Badge variant="destructive">Đã hủy</Badge>);
 
     const badge = screen.getByText('Đã hủy');
-    expect(badge).toHaveClass(
-      'border-transparent',
-      'bg-destructive',
-      'text-destructive-foreground',
-    );
+    expect(badge).toHaveClass('border-rose-200', 'bg-rose-50', 'text-rose-600');
   });
 
   it('renders with variant="outline"', () => {
     render(<Badge variant="outline">Hết hàng</Badge>);
 
     const badge = screen.getByText('Hết hàng');
-    expect(badge).toHaveClass('text-foreground');
+    expect(badge).toHaveClass('text-slate-700');
     expect(badge).not.toHaveClass(
       'border-transparent',
-      'bg-primary',
-      'bg-secondary',
-      'bg-destructive',
+      'bg-teal-600',
+      'bg-slate-100',
+      'bg-rose-50',
     );
   });
 
@@ -89,7 +85,7 @@ describe('Badge Component', () => {
     expect(badge).toHaveClass(
       'custom-extra-class',
       'shadow-sm',
-      'bg-secondary',
+      'bg-slate-100',
     );
   });
 
@@ -120,33 +116,33 @@ describe('Badge Component', () => {
 describe('badgeVariants helper function', () => {
   it('returns default variant classes when invoked without arguments', () => {
     const classes = badgeVariants();
-    expect(classes).toContain('bg-primary');
-    expect(classes).toContain('text-primary-foreground');
+    expect(classes).toContain('bg-teal-600');
+    expect(classes).toContain('text-white');
     expect(classes).toContain('rounded-full');
   });
 
   it('returns default variant classes when variant is explicitly "default"', () => {
     const classes = badgeVariants({ variant: 'default' });
-    expect(classes).toContain('bg-primary');
+    expect(classes).toContain('bg-teal-600');
     expect(classes).toContain('border-transparent');
   });
 
   it('returns secondary variant classes', () => {
     const classes = badgeVariants({ variant: 'secondary' });
-    expect(classes).toContain('bg-secondary');
-    expect(classes).toContain('text-secondary-foreground');
+    expect(classes).toContain('bg-slate-100');
+    expect(classes).toContain('text-slate-700');
   });
 
   it('returns destructive variant classes', () => {
     const classes = badgeVariants({ variant: 'destructive' });
-    expect(classes).toContain('bg-destructive');
-    expect(classes).toContain('text-destructive-foreground');
+    expect(classes).toContain('bg-rose-50');
+    expect(classes).toContain('text-rose-600');
   });
 
   it('returns outline variant classes', () => {
     const classes = badgeVariants({ variant: 'outline' });
-    expect(classes).toContain('text-foreground');
-    expect(classes).not.toContain('bg-primary');
+    expect(classes).toContain('text-slate-700');
+    expect(classes).not.toContain('bg-teal-600');
     expect(classes).not.toContain('border-transparent');
   });
 
@@ -157,6 +153,6 @@ describe('badgeVariants helper function', () => {
     });
     expect(classes).toContain('uppercase');
     expect(classes).toContain('tracking-wider');
-    expect(classes).toContain('text-foreground');
+    expect(classes).toContain('text-slate-700');
   });
 });

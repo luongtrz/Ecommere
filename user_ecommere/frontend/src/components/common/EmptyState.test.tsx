@@ -15,12 +15,20 @@ describe('EmptyState', () => {
       name: 'Không có dữ liệu',
     });
     expect(heading).toBeInTheDocument();
-    expect(heading).toHaveClass('text-lg', 'font-semibold', 'mb-2');
+    expect(heading).toHaveClass(
+      'font-sans',
+      'text-xl',
+      'md:text-2xl',
+      'font-bold',
+      'text-slate-900',
+      'mb-2',
+      'tracking-tight',
+    );
 
     // Default icon
     const iconSvg = container.querySelector('svg');
     expect(iconSvg).toBeInTheDocument();
-    expect(iconSvg).toHaveClass('h-16', 'w-16');
+    expect(iconSvg).toHaveClass('h-8', 'w-8');
 
     // No description or action rendered
     expect(container.querySelector('p')).not.toBeInTheDocument();
@@ -69,9 +77,11 @@ describe('EmptyState', () => {
     expect(desc.tagName).toBe('P');
     expect(desc).toHaveClass(
       'text-sm',
-      'text-muted-foreground',
-      'mb-4',
+      'text-slate-600',
+      'mb-6',
       'max-w-sm',
+      'leading-relaxed',
+      'font-sans',
     );
   });
 

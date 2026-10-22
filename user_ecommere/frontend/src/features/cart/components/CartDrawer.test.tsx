@@ -207,7 +207,7 @@ describe('CartDrawer', () => {
 
     const shippingFee = screen.getByText('Tính khi thanh toán');
     expect(shippingFee).toBeInTheDocument();
-    expect(shippingFee).toHaveClass('text-slate-700');
+    expect(shippingFee).toHaveClass('text-slate-900');
     expect(shippingFee).not.toHaveClass('text-emerald-600');
 
     expect(screen.getByText('Tổng cộng:')).toBeInTheDocument();
@@ -245,7 +245,7 @@ describe('CartDrawer', () => {
 
     // Freeship meter qualified
     expect(
-      screen.getByText('🎉 Bạn đã đủ điều kiện FREESHIP!'),
+      screen.getByText('Bạn đã đủ điều kiện FREESHIP!'),
     ).toBeInTheDocument();
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.queryByText(/Mua thêm/i)).not.toBeInTheDocument();
@@ -253,7 +253,7 @@ describe('CartDrawer', () => {
     // Footer shipping qualified
     const freeShipping = screen.getByText('Miễn phí');
     expect(freeShipping).toBeInTheDocument();
-    expect(freeShipping).toHaveClass('text-emerald-600 font-bold');
+    expect(freeShipping).toHaveClass('text-emerald-600 font-semibold');
   });
 
   it('handles quantity reduction via minus button', () => {

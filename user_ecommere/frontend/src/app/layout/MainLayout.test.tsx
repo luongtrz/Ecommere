@@ -67,7 +67,7 @@ describe('MainLayout', () => {
     expect(screen.getByTestId('mock-chatbot')).toBeInTheDocument();
 
     const mainElement = screen.getByRole('main');
-    expect(mainElement).toHaveClass('flex-1', 'pb-16', 'md:pb-0');
+    expect(mainElement).toHaveClass('flex-1', 'pb-24', 'md:pb-12', 'lg:pb-16');
     expect(screen.getByText('Nội dung trang chủ')).toBeInTheDocument();
     expect(mainElement).toContainElement(
       screen.getByText('Nội dung trang chủ'),

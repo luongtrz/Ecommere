@@ -12,7 +12,12 @@ describe('Separator', () => {
     expect(separator).toBeInTheDocument();
     expect(separator).toHaveAttribute('data-orientation', 'horizontal');
     expect(separator).toHaveAttribute('role', 'none');
-    expect(separator).toHaveClass('shrink-0', 'bg-border', 'h-[1px]', 'w-full');
+    expect(separator).toHaveClass(
+      'shrink-0',
+      'bg-slate-200',
+      'h-[1px]',
+      'w-full',
+    );
   });
 
   it('renders with explicit horizontal orientation', () => {
@@ -34,7 +39,12 @@ describe('Separator', () => {
 
     expect(separator).toBeInTheDocument();
     expect(separator).toHaveAttribute('data-orientation', 'vertical');
-    expect(separator).toHaveClass('shrink-0', 'bg-border', 'h-full', 'w-[1px]');
+    expect(separator).toHaveClass(
+      'shrink-0',
+      'bg-slate-200',
+      'h-full',
+      'w-[1px]',
+    );
     expect(separator).not.toHaveClass('h-[1px]', 'w-full');
   });
 
@@ -74,7 +84,7 @@ describe('Separator', () => {
       'custom-sep',
       'my-4',
       'shrink-0',
-      'bg-border',
+      'bg-slate-200',
     );
   });
 

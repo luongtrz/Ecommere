@@ -164,7 +164,7 @@ describe('ImageUpload', () => {
 
       // Start dragging index 0
       fireEvent.dragStart(cards[0]);
-      expect(cards[0]).toHaveClass('opacity-50');
+      expect(cards[0]).toHaveClass('opacity-40');
 
       // Dragging over itself should do nothing
       fireEvent.dragOver(cards[0]);
@@ -180,7 +180,7 @@ describe('ImageUpload', () => {
 
       // End dragging
       fireEvent.dragEnd(cards[0]);
-      expect(cards[0]).not.toHaveClass('opacity-50');
+      expect(cards[0]).not.toHaveClass('opacity-40');
     });
 
     it('ignores dragOver if no drag was started (draggedIndex is null)', () => {
@@ -331,7 +331,7 @@ describe('ImageUpload', () => {
       });
 
       expect(mockToast.success).toHaveBeenCalledWith(
-        '✅ Đã upload 2 ảnh thành công!',
+        'Đã upload 2 ảnh thành công!',
       );
     });
 
@@ -393,7 +393,7 @@ describe('ImageUpload', () => {
 
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalledWith(
-          '❌ Upload thất bại: Network error 500',
+          'Upload thất bại: Network error 500',
         );
       });
 
@@ -422,7 +422,7 @@ describe('ImageUpload', () => {
 
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalledWith(
-          '❌ Upload thất bại: Lỗi không xác định',
+          'Upload thất bại: Lỗi không xác định',
         );
       });
 
@@ -470,7 +470,7 @@ describe('ImageUpload', () => {
       });
 
       expect(mockToast.success).toHaveBeenCalledWith(
-        '✅ Đã upload 1 ảnh thành công!',
+        'Đã upload 1 ảnh thành công!',
       );
     });
   });

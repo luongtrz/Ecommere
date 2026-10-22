@@ -66,7 +66,7 @@ describe('ForgotPasswordPage', () => {
   it('renders all static UI elements correctly', () => {
     renderPage();
 
-    expect(screen.getByText('TS')).toBeInTheDocument();
+    expect(screen.getAllByText('TS')[0]).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { level: 1, name: 'Quên mật khẩu' }),
     ).toBeInTheDocument();

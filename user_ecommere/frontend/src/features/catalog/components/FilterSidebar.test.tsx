@@ -354,15 +354,15 @@ describe('FilterSidebar', () => {
 
       const selectedBtn = screen.getByRole('button', { name: /Nước hoa nam/i });
       expect(selectedBtn).toHaveClass(
-        'bg-secondary',
-        'text-primary',
+        'bg-teal-50',
+        'text-teal-700',
         'font-semibold',
       );
 
       const unselectedBtn = screen.getByRole('button', {
         name: /Nước hoa nữ/i,
       });
-      expect(unselectedBtn).toHaveClass('text-foreground/80');
+      expect(unselectedBtn).toHaveClass('text-slate-700');
 
       fireEvent.click(selectedBtn);
       expect(onFilterChange).toHaveBeenCalledWith({ categorySlug: undefined });
@@ -445,13 +445,13 @@ describe('FilterSidebar', () => {
       });
 
       expect(screen.getByRole('button', { name: 'Dưới 50.000đ' })).toHaveClass(
-        'bg-secondary',
-        'text-primary',
+        'bg-teal-50',
+        'text-teal-700',
         'font-semibold',
       );
       expect(
         screen.getByRole('button', { name: '50.000đ - 100.000đ' }),
-      ).not.toHaveClass('bg-secondary');
+      ).not.toHaveClass('bg-teal-50');
 
       // Preset 5 (min 500000, no max)
       rerender(
@@ -469,7 +469,7 @@ describe('FilterSidebar', () => {
         </QueryClientProvider>,
       );
       expect(screen.getByRole('button', { name: 'Trên 500.000đ' })).toHaveClass(
-        'bg-secondary',
+        'bg-teal-50',
       );
 
       // Preset 5 with maxPrice should not be active
@@ -489,7 +489,7 @@ describe('FilterSidebar', () => {
       );
       expect(
         screen.getByRole('button', { name: 'Trên 500.000đ' }),
-      ).not.toHaveClass('bg-secondary');
+      ).not.toHaveClass('bg-teal-50');
 
       // Arbitrary prices do not highlight presets
       rerender(
@@ -508,7 +508,7 @@ describe('FilterSidebar', () => {
       );
       expect(
         screen.getByRole('button', { name: 'Dưới 50.000đ' }),
-      ).not.toHaveClass('bg-secondary');
+      ).not.toHaveClass('bg-teal-50');
     });
   });
 
@@ -683,8 +683,8 @@ describe('FilterSidebar', () => {
       expect(roseCheckbox).toHaveAttribute('data-state', 'checked');
       expect(citrusCheckbox).toHaveAttribute('data-state', 'unchecked');
 
-      expect(getFilterOptionSpan('Gỗ')).toHaveClass('font-medium');
-      expect(getFilterOptionSpan('Cam chanh')).toHaveClass('text-gray-600');
+      expect(getFilterOptionSpan('Gỗ')).toHaveClass('font-semibold');
+      expect(getFilterOptionSpan('Cam chanh')).toHaveClass('text-slate-600');
     });
 
     it('toggles scent selection on and off', () => {
@@ -739,9 +739,9 @@ describe('FilterSidebar', () => {
       const vol50 = screen.getByRole('button', { name: '50ml' });
       const vol100 = screen.getByRole('button', { name: '100ml' });
 
-      expect(vol50).toHaveClass('bg-primary');
-      expect(vol30).toHaveClass('bg-card');
-      expect(vol100).toHaveClass('bg-card');
+      expect(vol50).toHaveClass('bg-teal-600');
+      expect(vol30).toHaveClass('bg-white');
+      expect(vol100).toHaveClass('bg-white');
     });
 
     it('toggles volume selection on and off', () => {
@@ -776,13 +776,13 @@ describe('FilterSidebar', () => {
       });
 
       expect(screen.getByRole('button', { name: '30ml' })).toHaveClass(
-        'bg-primary',
+        'bg-teal-600',
       );
       expect(screen.getByRole('button', { name: '50ml' })).toHaveClass(
-        'bg-primary',
+        'bg-teal-600',
       );
       expect(screen.getByRole('button', { name: '100ml' })).not.toHaveClass(
-        'bg-primary',
+        'bg-teal-600',
       );
     });
   });
@@ -798,8 +798,8 @@ describe('FilterSidebar', () => {
 
       expect(chanelCb).toHaveAttribute('data-state', 'checked');
       expect(diorCb).toHaveAttribute('data-state', 'unchecked');
-      expect(getFilterOptionSpan('Chanel')).toHaveClass('font-medium');
-      expect(getFilterOptionSpan('Dior')).toHaveClass('text-gray-600');
+      expect(getFilterOptionSpan('Chanel')).toHaveClass('font-semibold');
+      expect(getFilterOptionSpan('Dior')).toHaveClass('text-slate-600');
     });
 
     it('toggles brand selection on and off', () => {
@@ -953,7 +953,7 @@ describe('FilterSidebar', () => {
         },
       });
 
-      const clearAllBtn = screen.getByRole('button', { name: /Xóa/i });
+      const clearAllBtn = screen.getByRole('button', { name: 'Xóa' });
       fireEvent.click(clearAllBtn);
 
       expect(onFilterChange).toHaveBeenCalledWith({

@@ -95,8 +95,8 @@ describe('RadioGroupItem', () => {
       'w-4',
       'rounded-full',
       'border',
-      'border-primary',
-      'text-primary',
+      'border-slate-300',
+      'text-teal-600',
     );
   });
 
@@ -158,8 +158,8 @@ describe('RadioGroupItem', () => {
     expect(checkedSvg).toHaveClass(
       'h-2.5',
       'w-2.5',
-      'fill-current',
-      'text-current',
+      'fill-teal-600',
+      'text-teal-600',
     );
 
     expect(uncheckedItem.querySelector('svg')).toBeNull();

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { LoginForm } from './LoginForm';
 
 // Mock API modules to ensure axios and real network never run
@@ -38,7 +39,11 @@ describe('LoginForm', () => {
   });
 
   it('renders all fields, labels, placeholders, and buttons', () => {
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByText('Số điện thoại')).toBeInTheDocument();
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
@@ -46,11 +51,11 @@ describe('LoginForm', () => {
     expect(phoneInput).toHaveAttribute('type', 'tel');
 
     expect(screen.getByText('Mật khẩu')).toBeInTheDocument();
-    const forgotPasswordBtn = screen.getByRole('button', {
+    const forgotPasswordLink = screen.getByRole('link', {
       name: 'Quên mật khẩu?',
     });
-    expect(forgotPasswordBtn).toBeInTheDocument();
-    expect(forgotPasswordBtn).toHaveAttribute('type', 'button');
+    expect(forgotPasswordLink).toBeInTheDocument();
+    expect(forgotPasswordLink).toHaveAttribute('href', '/forgot-password');
 
     const passwordInput = screen.getByPlaceholderText('Nhập mật khẩu của bạn');
     expect(passwordInput).toBeInTheDocument();
@@ -65,7 +70,11 @@ describe('LoginForm', () => {
 
   it('toggles password visibility when the eye button is clicked', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
     const passwordInput = screen.getByPlaceholderText('Nhập mật khẩu của bạn');
     expect(passwordInput).toHaveAttribute('type', 'password');
@@ -85,7 +94,11 @@ describe('LoginForm', () => {
 
   it('displays validation errors and prevents submit when fields are empty', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
     const submitButton = screen.getByRole('button', {
       name: /Đăng Nhập Ngay/i,
@@ -103,7 +116,11 @@ describe('LoginForm', () => {
 
   it('displays validation error when phone number format is invalid', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByPlaceholderText('Nhập mật khẩu của bạn');
@@ -123,7 +140,11 @@ describe('LoginForm', () => {
 
   it('displays validation error when password is shorter than 6 characters', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByPlaceholderText('Nhập mật khẩu của bạn');
@@ -143,7 +164,11 @@ describe('LoginForm', () => {
 
   it('displays validation error when password exceeds 50 characters', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByPlaceholderText('Nhập mật khẩu của bạn');
@@ -163,7 +188,11 @@ describe('LoginForm', () => {
 
   it('submits valid phone starting with 0 and password', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByPlaceholderText('Nhập mật khẩu của bạn');
@@ -188,7 +217,11 @@ describe('LoginForm', () => {
 
   it('submits valid international phone format (+84) and password', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByPlaceholderText('Nhập mật khẩu của bạn');
@@ -212,7 +245,11 @@ describe('LoginForm', () => {
   });
 
   it('displays loading state and disables submit button when isLoading is true', () => {
-    render(<LoginForm onSubmit={mockOnSubmit} isLoading={true} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} isLoading={true} />
+      </MemoryRouter>,
+    );
 
     const loadingButton = screen.getByRole('button', {
       name: 'Đang xử lý đăng nhập...',
@@ -223,7 +260,11 @@ describe('LoginForm', () => {
   });
 
   it('enables submit button when isLoading is false', () => {
-    render(<LoginForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} isLoading={false} />
+      </MemoryRouter>,
+    );
 
     const submitButton = screen.getByRole('button', {
       name: /Đăng Nhập Ngay/i,
@@ -234,12 +275,16 @@ describe('LoginForm', () => {
 
   it('does not trigger onSubmit when clicking "Quên mật khẩu?" button', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={mockOnSubmit} />);
+    render(
+      <MemoryRouter>
+        <LoginForm onSubmit={mockOnSubmit} />
+      </MemoryRouter>,
+    );
 
-    const forgotPasswordBtn = screen.getByRole('button', {
+    const forgotPasswordLink = screen.getByRole('link', {
       name: 'Quên mật khẩu?',
     });
-    await user.click(forgotPasswordBtn);
+    await user.click(forgotPasswordLink);
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });

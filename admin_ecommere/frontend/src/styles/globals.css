@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%; /* Deep Space Navy/Black */
-    --foreground: 213 31% 91%;
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 213 31% 91%;
-    --primary: 263 90% 60%; /* Cyber Indigo/Purple */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 222 47% 12%;
-    --secondary-foreground: 213 31% 91%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 66.9%;
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 222 47% 12%;
-    --input: 222 47% 12%;
-    --ring: 263 90% 60%;
-    --radius: 1.25rem;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 175 84% 32%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 215 25% 27%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 166 76% 97%;
+    --accent-foreground: 175 77% 26%;
+    --destructive: 347 77% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 175 84% 32%;
+    --radius: 0.5rem;
   }
 
   * {
@@ -38,20 +38,10 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background-image:
-      radial-gradient(
-        circle at top right,
-        rgba(124, 58, 237, 0.08),
-        transparent 30%
-      ),
-      radial-gradient(
-        circle at top left,
-        rgba(99, 102, 241, 0.08),
-        transparent 28%
-      ),
-      linear-gradient(180deg, hsl(224, 71%, 4%), hsl(222, 47%, 2%));
-    background-attachment: fixed;
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
@@ -60,25 +50,88 @@
   h4,
   h5,
   h6 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    letter-spacing: -0.02em;
-    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.025em;
+    font-weight: 600;
   }
 }
 
 @layer components {
+  /* Surface and layout container classes */
   .admin-surface {
-    @apply rounded-[1.75rem] border border-white/5 bg-slate-950/40 shadow-[0_24px_64px_-24px_rgba(0,0,0,0.4)] backdrop-blur-xl transition-all duration-300;
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200;
   }
 
   .sidebar-glass {
-    background: linear-gradient(
-      135deg,
-      rgba(10, 12, 18, 0.96) 0%,
-      rgba(5, 6, 8, 0.92) 100%
-    );
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    @apply bg-white border-r border-slate-200;
+  }
+
+  .sidebar-white {
+    @apply bg-white border-r border-slate-200 text-slate-900;
+  }
+
+  .admin-shell {
+    @apply text-slate-900 bg-slate-50 min-h-screen;
+  }
+
+  .admin-shell table thead th {
+    @apply sticky top-0 z-10 bg-slate-50 text-slate-600 border-b border-slate-200 px-4 py-3 text-xs font-semibold uppercase tracking-wider;
+  }
+
+  .admin-shell table tbody tr {
+    @apply border-b border-slate-200 transition-colors hover:bg-slate-50;
+  }
+
+  .admin-shell table tbody tr:hover {
+    @apply bg-slate-50;
+  }
+
+  .admin-shell table tbody td {
+    @apply px-4 py-3 text-sm text-slate-900;
+  }
+
+  /* Modern console utility classes */
+  .lux-card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  .lux-card-header {
+    @apply p-6 pb-2 border-b border-slate-200;
+  }
+
+  .lux-table {
+    @apply w-full text-sm text-slate-900;
+  }
+
+  .lux-table-header,
+  .lux-th {
+    @apply sticky top-0 z-10 bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 border-b border-slate-200;
+  }
+
+  .lux-table-row {
+    @apply border-b border-slate-200 hover:bg-slate-50 transition-colors;
+  }
+
+  .lux-table-cell,
+  .lux-td {
+    @apply px-4 py-3 align-middle text-sm text-slate-900;
+  }
+
+  /* Status badge styles */
+  .lux-badge-success {
+    @apply inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200 px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .lux-badge-pending {
+    @apply inline-flex items-center rounded-full bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200 px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .lux-badge-danger {
+    @apply inline-flex items-center rounded-full bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200 px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .lux-badge-neutral {
+    @apply inline-flex items-center rounded-full bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-200 px-2.5 py-0.5 text-xs font-medium;
   }
 }
 
@@ -92,14 +145,15 @@
     display: none;
   }
 
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
   .admin-glow {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply transition-all duration-200;
   }
 
   .admin-glow:hover {
-    box-shadow:
-      0 24px 48px -12px rgba(0, 0, 0, 0.3),
-      0 0 24px -2px rgba(99, 102, 241, 0.15);
-    border-color: rgba(99, 102, 241, 0.25);
+    @apply shadow-md border-slate-300;
   }
 }

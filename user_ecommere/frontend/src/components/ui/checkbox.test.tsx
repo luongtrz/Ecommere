@@ -27,12 +27,12 @@ describe('Checkbox', () => {
     expect(checkbox.querySelector('svg')).toBeNull();
     expect(checkbox).toHaveClass(
       'peer',
-      'h-4',
-      'w-4',
+      'h-4.5',
+      'w-4.5',
       'shrink-0',
-      'rounded-sm',
+      'rounded',
       'border',
-      'border-primary',
+      'border-slate-300',
     );
   });
 
@@ -169,7 +169,7 @@ describe('Checkbox', () => {
     );
     const checkbox = screen.getByRole('checkbox', { name: 'Tùy chỉnh class' });
 
-    expect(checkbox).toHaveClass('custom-check-class', 'm-2', 'h-4', 'w-4');
+    expect(checkbox).toHaveClass('custom-check-class', 'm-2', 'h-4.5', 'w-4.5');
   });
 
   it('forwards ref to the underlying button element', () => {

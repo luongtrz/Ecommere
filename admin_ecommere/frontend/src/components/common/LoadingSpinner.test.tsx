@@ -16,7 +16,13 @@ describe('LoadingSpinner', () => {
 
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('animate-spin', 'text-primary', 'h-8', 'w-8');
+    expect(svg).toHaveClass(
+      'animate-spin',
+      'text-teal-600',
+      'transition-colors',
+      'h-8',
+      'w-8',
+    );
   });
 
   it('renders with small size (sm)', () => {
@@ -24,7 +30,13 @@ describe('LoadingSpinner', () => {
 
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('animate-spin', 'text-primary', 'h-4', 'w-4');
+    expect(svg).toHaveClass(
+      'animate-spin',
+      'text-teal-600',
+      'transition-colors',
+      'h-4',
+      'w-4',
+    );
     expect(svg).not.toHaveClass('h-8', 'w-8', 'h-12', 'w-12');
   });
 
@@ -33,7 +45,13 @@ describe('LoadingSpinner', () => {
 
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('animate-spin', 'text-primary', 'h-8', 'w-8');
+    expect(svg).toHaveClass(
+      'animate-spin',
+      'text-teal-600',
+      'transition-colors',
+      'h-8',
+      'w-8',
+    );
     expect(svg).not.toHaveClass('h-4', 'w-4', 'h-12', 'w-12');
   });
 
@@ -42,7 +60,13 @@ describe('LoadingSpinner', () => {
 
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('animate-spin', 'text-primary', 'h-12', 'w-12');
+    expect(svg).toHaveClass(
+      'animate-spin',
+      'text-teal-600',
+      'transition-colors',
+      'h-12',
+      'w-12',
+    );
     expect(svg).not.toHaveClass('h-4', 'w-4', 'h-8', 'w-8');
   });
 
@@ -71,7 +95,8 @@ describe('LoadingSpinner', () => {
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveClass(
       'animate-spin',
-      'text-primary',
+      'text-teal-600',
+      'transition-colors',
       'h-4',
       'w-4',
       'opacity-75',

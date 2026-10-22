@@ -751,7 +751,7 @@ describe('CatalogPage', () => {
     it('toggles desktop filter visibility and adjusts grid classes', () => {
       renderCatalogPage('/catalog');
 
-      const toggleBtn = screen.getByRole('button', { name: /bộ lọc/i });
+      const toggleBtn = screen.getAllByRole('button', { name: /bộ lọc/i })[0];
       expect(toggleBtn).toHaveTextContent('Ẩn bộ lọc');
       expect(screen.getByTestId('mock-filter-sidebar')).toBeInTheDocument();
 
@@ -763,12 +763,12 @@ describe('CatalogPage', () => {
       expect(
         screen.queryByTestId('mock-filter-sidebar'),
       ).not.toBeInTheDocument();
-      expect(toggleBtn.className).toContain('border-dashed');
+      expect(toggleBtn.className).toContain('bg-white');
 
       // Click again to show filters
       fireEvent.click(toggleBtn);
       expect(toggleBtn).toHaveTextContent('Ẩn bộ lọc');
-      expect(toggleBtn.className).toContain('bg-secondary');
+      expect(toggleBtn.className).toContain('bg-teal-50');
       expect(screen.getByTestId('mock-filter-sidebar')).toBeInTheDocument();
     });
 

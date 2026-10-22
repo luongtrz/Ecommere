@@ -926,7 +926,7 @@ describe('CategoryPage', () => {
         .querySelector('svg.lucide-list')
         ?.closest('button');
       expect(gridBtn).toHaveClass('bg-white');
-      expect(listBtn).toHaveClass('text-muted-foreground');
+      expect(listBtn).toHaveClass('text-slate-500');
 
       expect(screen.getByTestId('product-card-prod-1')).toBeInTheDocument();
       expect(screen.getByTestId('product-card-prod-2')).toBeInTheDocument();

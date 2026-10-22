@@ -15,12 +15,25 @@ describe('EmptyState', () => {
       name: 'Không có dữ liệu',
     });
     expect(heading).toBeInTheDocument();
-    expect(heading).toHaveClass('text-lg', 'font-semibold', 'mb-2');
+    expect(heading).toHaveClass(
+      'text-base',
+      'sm:text-lg',
+      'font-bold',
+      'text-slate-900',
+      'mb-1.5',
+      'tracking-tight',
+    );
 
     // Default PackageOpen svg icon
     const iconSvg = container.querySelector('svg');
     expect(iconSvg).toBeInTheDocument();
-    expect(iconSvg).toHaveClass('h-16', 'w-16');
+    expect(iconSvg).toHaveClass(
+      'h-8',
+      'w-8',
+      'sm:h-10',
+      'sm:w-10',
+      'text-teal-600',
+    );
 
     // No description paragraph or action rendered
     expect(container.querySelector('p')).not.toBeInTheDocument();
@@ -32,7 +45,9 @@ describe('EmptyState', () => {
       'flex-col',
       'items-center',
       'justify-center',
-      'py-12',
+      'p-8',
+      'sm:p-12',
+      'md:p-16',
       'text-center',
     );
   });
@@ -68,10 +83,12 @@ describe('EmptyState', () => {
     expect(desc).toBeInTheDocument();
     expect(desc.tagName).toBe('P');
     expect(desc).toHaveClass(
-      'text-sm',
-      'text-muted-foreground',
-      'mb-4',
+      'text-xs',
+      'sm:text-sm',
+      'text-slate-500',
+      'mb-5',
       'max-w-sm',
+      'leading-relaxed',
     );
   });
 
@@ -125,7 +142,9 @@ describe('EmptyState', () => {
       'flex-col',
       'items-center',
       'justify-center',
-      'py-12',
+      'p-8',
+      'sm:p-12',
+      'md:p-16',
       'text-center',
       'my-custom-empty-class',
       'border',

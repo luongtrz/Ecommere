@@ -39,226 +39,222 @@ export function AccountPage() {
 
   const getRoleColor = (role: string) => {
     return role === 'ADMIN'
-      ? 'bg-red-100 text-red-700 border-red-200'
-      : 'bg-indigo-100 text-indigo-700 border-indigo-200';
+      ? 'bg-rose-50 text-rose-700 border-rose-200'
+      : 'bg-teal-50 text-teal-700 border-teal-200';
   };
 
   return (
     <>
       <SEO title="Tài khoản" />
-      <div className="container py-4 max-w-6xl h-[calc(100vh-64px)] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="mb-4 shrink-0 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-primary">
-              Tài khoản của tôi
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Quản lý thông tin và hoạt động của bạn
-            </p>
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+        <div className="container max-w-6xl py-8 md:py-12 flex flex-col space-y-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-200">
+            <div>
+              <span className="uppercase tracking-wider text-[11px] font-semibold text-teal-600 block mb-1">
+                Trung tâm tài khoản
+              </span>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 font-sans">
+                Tài khoản của tôi
+              </h1>
+              <p className="text-sm text-slate-600 mt-0.5 font-normal">
+                Quản lý thông tin và hoạt động của bạn
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={logout}
+              className="self-start sm:self-auto rounded-lg border border-slate-200 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 hover:border-rose-200 px-4 py-2 font-medium text-xs transition-colors shadow-sm"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Đăng xuất
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            onClick={logout}
-            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Đăng xuất
-          </Button>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-h-0 pb-4">
-          {/* Left Column: Profile & Menu */}
-          <div className="lg:col-span-4 flex flex-col gap-4 h-full overflow-y-auto pr-1">
-            {/* Quick Profile */}
-            <Card className="shadow-sm border border-gray-100 overflow-hidden shrink-0">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="h-16 w-16 bg-gradient-to-br from-primary to-accent text-white rounded-full flex items-center justify-center text-xl font-bold shadow-md shrink-0">
-                  {getInitials(user.name)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-bold text-gray-900 truncate">
-                    {user.name}
-                  </h2>
-                  <Badge
-                    variant="secondary"
-                    className={`${getRoleColor(user.role)} px-2 py-0.5 rounded-full text-[10px] mt-1`}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 flex-1">
+            {/* Left Column: Profile & Menu */}
+            <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-6">
+              {/* Quick Profile */}
+              <Card className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 bg-teal-600 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-sm shrink-0 font-sans">
+                    {getInitials(user.name)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg font-bold text-slate-900 truncate font-sans">
+                      {user.name}
+                    </h2>
+                    <Badge
+                      variant="outline"
+                      className={`${getRoleColor(user.role)} px-2.5 py-0.5 rounded-full text-[10px] mt-1 font-semibold tracking-wider uppercase border`}
+                    >
+                      {user.role === 'ADMIN'
+                        ? 'Quản trị viên'
+                        : 'Khách hàng thân thiết'}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 shrink-0"
+                    onClick={() => setIsProfileDialogOpen(true)}
+                    aria-label="Cài đặt thông tin"
                   >
-                    {user.role === 'ADMIN'
-                      ? 'Quản trị viên'
-                      : 'Khách hàng thân thiết'}
-                  </Badge>
+                    <Settings className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0"
-                  onClick={() => setIsProfileDialogOpen(true)}
-                >
-                  <Settings className="h-4 w-4 text-gray-400" />
-                </Button>
-              </CardContent>
-            </Card>
+              </Card>
 
-            {/* Menu */}
-            <Card className="shadow-sm border border-gray-100 flex-1 flex flex-col min-h-0">
-              <CardHeader className="py-3 px-4 border-b bg-gray-50/50">
-                <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-                  Danh mục
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 space-y-1 flex-1 overflow-y-auto">
-                {[
-                  {
-                    icon: ShoppingBag,
-                    label: 'Đơn hàng của tôi',
-                    path: '/orders',
-                    color: 'text-primary bg-secondary',
-                  },
-                  {
-                    icon: MapPin,
-                    label: 'Sổ địa chỉ',
-                    path: '/addresses',
-                    color: 'text-green-600 bg-green-50',
-                  },
-                  {
-                    icon: Heart,
-                    label: 'Danh sách yêu thích',
-                    path: '/wishlist',
-                    color: 'text-rose-600 bg-rose-50',
-                  },
-                  {
-                    icon: Shield,
-                    label: 'Bảo mật tài khoản',
-                    path: '#',
-                    color: 'text-primary bg-secondary',
-                  },
-                ].map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => item.path !== '#' && navigate(item.path)}
-                    className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}
-                      >
-                        <item.icon className="h-4 w-4" />
+              {/* Menu */}
+              <Card className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                <CardHeader className="py-3.5 px-5 border-b border-slate-200 bg-slate-50/70">
+                  <CardTitle className="font-sans text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Danh mục
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 space-y-1">
+                  {[
+                    {
+                      icon: ShoppingBag,
+                      label: 'Đơn hàng của tôi',
+                      path: '/orders',
+                    },
+                    { icon: MapPin, label: 'Sổ địa chỉ', path: '/addresses' },
+                    {
+                      icon: Heart,
+                      label: 'Danh sách yêu thích',
+                      path: '/wishlist',
+                    },
+                    { icon: Shield, label: 'Bảo mật tài khoản', path: '#' },
+                  ].map((item, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => item.path !== '#' && navigate(item.path)}
+                      className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-all duration-200 group text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-slate-100 text-slate-600 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors border border-slate-200/60">
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        <span className="font-medium text-sm text-slate-700 group-hover:text-slate-900 transition-colors font-sans">
+                          {item.label}
+                        </span>
                       </div>
-                      <span className="font-medium text-sm text-gray-700 group-hover:text-gray-900">
-                        {item.label}
-                      </span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
-                  </button>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+                      <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                    </button>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Right Column: Details */}
-          <div className="lg:col-span-8 flex flex-col h-full overflow-y-auto pr-1">
-            <Card className="shadow-sm border border-gray-100 h-full flex flex-col">
-              <CardHeader className="py-4 px-6 border-b bg-gray-50/30 shrink-0">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <User className="h-5 w-5 text-primary" />
-                  Thông tin cá nhân
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 overflow-y-auto">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:border-primary/20 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary shrink-0">
-                      <Mail className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-gray-500 mb-1">
-                        Email
-                      </p>
-                      <p className="font-semibold text-sm text-gray-900 truncate">
-                        {user.email || 'Chưa cập nhật'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:border-green-100 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
-                      <Phone className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-gray-500 mb-1">
-                        Số điện thoại
-                      </p>
-                      <p className="font-semibold text-sm text-gray-900">
-                        {user.phone}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:border-purple-100 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
-                      <Calendar className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-gray-500 mb-1">
-                        Ngày tham gia
-                      </p>
-                      <p className="font-semibold text-sm text-gray-900">
-                        {user.createdAt
-                          ? formatDate(user.createdAt)
-                          : 'Không rõ'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:border-amber-100 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                      <Shield className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-gray-500 mb-1">
-                        Trạng thái
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500" />
-                        <p className="font-semibold text-sm text-gray-900">
-                          Đang hoạt động
+            {/* Right Column: Details */}
+            <div className="md:col-span-7 lg:col-span-8 flex flex-col gap-6">
+              <Card className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                <CardHeader className="py-4 px-6 sm:px-8 border-b border-slate-200 bg-slate-50/70">
+                  <CardTitle className="font-sans flex items-center gap-2.5 text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                    <User className="h-5 w-5 text-teal-600" />
+                    Thông tin cá nhân
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 sm:p-8 space-y-8">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                      <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 border border-teal-100">
+                        <Mail className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                          Email
+                        </p>
+                        <p className="font-medium text-sm text-slate-900 truncate">
+                          {user.email || 'Chưa cập nhật'}
                         </p>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="mt-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium text-sm text-gray-900">
-                      Thống kê hoạt động
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
-                      <div className="text-2xl font-bold text-gray-900">0</div>
-                      <div className="text-xs text-gray-500 font-medium mt-1">
-                        Đơn hàng
+                    <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                      <div className="w-10 h-10 rounded-lg bg-teal-600/10 text-teal-600 flex items-center justify-center shrink-0 border border-teal-100">
+                        <Phone className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                          Số điện thoại
+                        </p>
+                        <p className="font-medium text-sm text-slate-900">
+                          {user.phone}
+                        </p>
                       </div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
-                      <div className="text-2xl font-bold text-gray-900">0</div>
-                      <div className="text-xs text-gray-500 font-medium mt-1">
-                        Đánh giá
+
+                    <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                      <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 border border-teal-100">
+                        <Calendar className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                          Ngày tham gia
+                        </p>
+                        <p className="font-medium text-sm text-slate-900">
+                          {user.createdAt
+                            ? formatDate(user.createdAt)
+                            : 'Không rõ'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                      <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 border border-teal-100">
+                        <Shield className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                          Trạng thái
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <p className="font-medium text-sm text-emerald-700">
+                            Đang hoạt động
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        Thống kê hoạt động
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-slate-50 rounded-xl p-5 text-center border border-slate-200 transition-all duration-200 hover:shadow-sm">
+                        <div className="font-semibold text-3xl text-slate-900 tabular-nums">
+                          0
+                        </div>
+                        <div className="text-xs text-slate-500 font-normal mt-1">
+                          Đơn hàng
+                        </div>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-5 text-center border border-slate-200 transition-all duration-200 hover:shadow-sm">
+                        <div className="font-semibold text-3xl text-slate-900 tabular-nums">
+                          0
+                        </div>
+                        <div className="text-xs text-slate-500 font-normal mt-1">
+                          Đánh giá
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
 
-        <ProfileFormDialog
-          open={isProfileDialogOpen}
-          onOpenChange={setIsProfileDialogOpen}
-        />
+          <ProfileFormDialog
+            open={isProfileDialogOpen}
+            onOpenChange={setIsProfileDialogOpen}
+          />
+        </div>
       </div>
     </>
   );

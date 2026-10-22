@@ -167,7 +167,7 @@ describe('WishlistPage', () => {
       const { container } = renderWishlistPage();
 
       const removeButtons = container.querySelectorAll(
-        'button.absolute.top-2.right-2',
+        'button.absolute.top-2\\.5.right-2\\.5',
       );
       expect(removeButtons).toHaveLength(2);
 
@@ -189,7 +189,7 @@ describe('WishlistPage', () => {
       const { container } = renderWishlistPage();
 
       const removeButtons = container.querySelectorAll(
-        'button.absolute.top-2.right-2',
+        'button.absolute.top-2\\.5.right-2\\.5',
       );
       const secondRemoveBtn = removeButtons[1];
 
@@ -204,7 +204,7 @@ describe('WishlistPage', () => {
       const { container } = renderWishlistPage();
 
       const removeButtons = container.querySelectorAll(
-        'button.absolute.top-2.right-2',
+        'button.absolute.top-2\\.5.right-2\\.5',
       );
       await user.click(removeButtons[0]);
 

@@ -45,8 +45,7 @@ describe('Footer', () => {
     renderFooter();
 
     expect(screen.getByText('TS')).toBeInTheDocument();
-    expect(screen.getByText('Thai')).toBeInTheDocument();
-    expect(screen.getByText('Spray')).toBeInTheDocument();
+    expect(screen.getByText('Thai Spray')).toBeInTheDocument();
     expect(screen.getByText('Hàng Thái Chính Hãng')).toBeInTheDocument();
     expect(
       screen.getByText(

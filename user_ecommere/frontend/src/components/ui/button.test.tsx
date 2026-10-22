@@ -14,8 +14,8 @@ describe('Button component', () => {
     const button = screen.getByRole('button', { name: 'Bấm vào đây' });
     expect(button).toBeInTheDocument();
     expect(button.tagName.toLowerCase()).toBe('button');
-    expect(button).toHaveClass('bg-primary');
-    expect(button).toHaveClass('text-primary-foreground');
+    expect(button).toHaveClass('bg-teal-600');
+    expect(button).toHaveClass('text-white');
     expect(button).toHaveClass('h-10');
     expect(button).toHaveClass('px-4');
     expect(button).toHaveClass('py-2');
@@ -23,11 +23,11 @@ describe('Button component', () => {
 
   it('renders with all variant options correctly', () => {
     const variants = [
-      { variant: 'default', expectedClass: 'bg-primary' },
-      { variant: 'destructive', expectedClass: 'bg-destructive' },
-      { variant: 'outline', expectedClass: 'border-input' },
-      { variant: 'secondary', expectedClass: 'bg-secondary' },
-      { variant: 'ghost', expectedClass: 'hover:bg-accent' },
+      { variant: 'default', expectedClass: 'bg-teal-600' },
+      { variant: 'destructive', expectedClass: 'bg-rose-600' },
+      { variant: 'outline', expectedClass: 'border-slate-200' },
+      { variant: 'secondary', expectedClass: 'text-slate-900' },
+      { variant: 'ghost', expectedClass: 'hover:bg-slate-100' },
       { variant: 'link', expectedClass: 'underline-offset-4' },
     ] as const;
 
@@ -44,8 +44,8 @@ describe('Button component', () => {
   it('renders with all size options correctly', () => {
     const sizes = [
       { size: 'default', expectedClass: 'h-10 px-4 py-2' },
-      { size: 'sm', expectedClass: 'h-9 rounded-md px-3' },
-      { size: 'lg', expectedClass: 'h-11 rounded-md px-8' },
+      { size: 'sm', expectedClass: 'h-9 rounded-lg px-3' },
+      { size: 'lg', expectedClass: 'h-11 rounded-lg px-8' },
       { size: 'icon', expectedClass: 'h-10 w-10' },
     ] as const;
 
@@ -68,7 +68,7 @@ describe('Button component', () => {
     const button = screen.getByRole('button', { name: 'Tùy chỉnh' });
     expect(button).toHaveClass('custom-test-class');
     expect(button).toHaveClass('shadow-lg');
-    expect(button).toHaveClass('bg-primary');
+    expect(button).toHaveClass('bg-teal-600');
   });
 
   it('handles user click event', async () => {
@@ -118,7 +118,7 @@ describe('Button component', () => {
     expect(link).toBeInTheDocument();
     expect(link.tagName.toLowerCase()).toBe('a');
     expect(link).toHaveAttribute('href', '/trang-chu');
-    expect(link).toHaveClass('bg-primary');
+    expect(link).toHaveClass('bg-teal-600');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(container.querySelector('button')).toBeNull();
   });
@@ -147,7 +147,7 @@ describe('Button component', () => {
 describe('buttonVariants function', () => {
   it('returns default classes when invoked with no arguments', () => {
     const classes = buttonVariants();
-    expect(classes).toContain('bg-primary');
+    expect(classes).toContain('bg-teal-600');
     expect(classes).toContain('h-10 px-4 py-2');
   });
 
@@ -157,7 +157,7 @@ describe('buttonVariants function', () => {
       size: 'sm',
       className: 'extra-class',
     });
-    expect(classes).toContain('bg-destructive');
+    expect(classes).toContain('bg-rose-600');
     expect(classes).toContain('h-9');
     expect(classes).toContain('extra-class');
   });

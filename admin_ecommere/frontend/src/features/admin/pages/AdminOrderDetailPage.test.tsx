@@ -387,7 +387,7 @@ describe('AdminOrderDetailPage', () => {
       expect(
         screen.getByText(matchText(formatCurrency(250000))),
       ).toBeInTheDocument();
-      expect(screen.getByText('x2')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
       expect(
         screen.getAllByText(matchText(formatCurrency(500000))).length,
       ).toBeGreaterThanOrEqual(1);
@@ -438,9 +438,9 @@ describe('AdminOrderDetailPage', () => {
       expect(
         screen.getByText(formatDateTime(mockSampleOrder.updatedAt)),
       ).toBeInTheDocument();
-      expect(
-        screen.getByText('Trạng thái: Chờ thanh toán'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Trạng thái:').closest('p')).toHaveTextContent(
+        'Trạng thái: Chờ thanh toán',
+      );
     });
 
     it('navigates back to /admin/orders when clicking back button in header', () => {
@@ -494,24 +494,24 @@ describe('AdminOrderDetailPage', () => {
       // Verify success callback return value
       const successMessage = options.success();
       expect(successMessage).toBe(
-        '✅ Đơn hàng ORD-123 đã được cập nhật thành "Đã thanh toán"',
+        'Đơn hàng ORD-123 đã được cập nhật thành "Đã thanh toán"',
       );
 
       // Verify error callback with an error object containing message
       const errorMessage = options.error(new Error('Mạng không ổn định'));
       expect(errorMessage).toBe(
-        '❌ Không thể cập nhật đơn hàng: Mạng không ổn định',
+        'Không thể cập nhật đơn hàng: Mạng không ổn định',
       );
 
       // Verify error callback fallback when error has no message
       expect(options.error(null)).toBe(
-        '❌ Không thể cập nhật đơn hàng: Lỗi không xác định',
+        'Không thể cập nhật đơn hàng: Lỗi không xác định',
       );
       expect(options.error(undefined)).toBe(
-        '❌ Không thể cập nhật đơn hàng: Lỗi không xác định',
+        'Không thể cập nhật đơn hàng: Lỗi không xác định',
       );
       expect(options.error({})).toBe(
-        '❌ Không thể cập nhật đơn hàng: Lỗi không xác định',
+        'Không thể cập nhật đơn hàng: Lỗi không xác định',
       );
     });
 
@@ -554,7 +554,7 @@ describe('AdminOrderDetailPage', () => {
 
       const [, options] = mockToast.promise.mock.calls[0];
       expect(options.success()).toBe(
-        '✅ Đơn hàng ORD-123 đã được cập nhật thành "Đã hủy"',
+        'Đơn hàng ORD-123 đã được cập nhật thành "Đã hủy"',
       );
     });
   });
@@ -865,7 +865,7 @@ describe('AdminOrderDetailPage', () => {
       expect(
         screen.getAllByText(matchText(formatCurrency(150000))).length,
       ).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('x1')).toBeInTheDocument();
+      expect(screen.getByText('1')).toBeInTheDocument();
     });
   });
 });

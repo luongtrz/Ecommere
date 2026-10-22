@@ -211,8 +211,8 @@ describe('ProductCard', () => {
       });
       const heartIcon = wishlistBtn.querySelector('svg')!;
 
-      expect(wishlistBtn).toHaveClass('text-rose-500');
-      expect(heartIcon).toHaveClass('fill-rose-500');
+      expect(wishlistBtn).toHaveClass('text-rose-600');
+      expect(heartIcon).toHaveClass('fill-rose-600');
 
       fireEvent.click(wishlistBtn);
 

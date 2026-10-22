@@ -1,5 +1,11 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ErrorPage } from './ErrorPage';
@@ -80,7 +86,9 @@ describe('ErrorPage', () => {
       screen.getByRole('heading', { level: 1, name: 'Oops! Đã có lỗi xảy ra' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật'),
+      screen.getByText(
+        'Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật và không thể tải trang. Đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.',
+      ),
     ).toBeInTheDocument();
   });
 
@@ -92,11 +100,11 @@ describe('ErrorPage', () => {
     );
 
     expect(
-      screen.getByRole('heading', { level: 2, name: 'Không thể tải trang' }),
+      screen.getByRole('heading', { level: 1, name: 'Oops! Đã có lỗi xảy ra' }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.',
+        'Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật và không thể tải trang. Đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.',
       ),
     ).toBeInTheDocument();
   });
@@ -108,7 +116,7 @@ describe('ErrorPage', () => {
       </MemoryRouter>,
     );
 
-    const homeLink = screen.getByRole('link', { name: /Về trang chủ/i });
+    const homeLink = screen.getAllByRole('link', { name: /Về trang chủ/i })[0];
     expect(homeLink).toBeInTheDocument();
     expect(homeLink).toHaveAttribute('href', '/');
 
@@ -136,34 +144,30 @@ describe('ErrorPage', () => {
   });
 
   it('renders additional help grid with three cards', () => {
-    render(
+    const { container } = render(
       <MemoryRouter>
         <ErrorPage />
       </MemoryRouter>,
     );
 
+    const grid = container.querySelector<HTMLElement>('.grid')!;
+
     // Card 1: Về trang chủ
+    expect(within(grid).getByText('Về trang chủ')).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { level: 3, name: 'Về trang chủ' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Quay lại trang chủ để tiếp tục mua sắm'),
+      within(grid).getByText('Quay lại trang chủ để tiếp tục mua sắm'),
     ).toBeInTheDocument();
 
     // Card 2: Tải lại trang
+    expect(within(grid).getByText('Tải lại trang')).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { level: 3, name: 'Tải lại trang' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Thử tải lại trang để khắc phục lỗi'),
+      within(grid).getByText('Thử tải lại trang để khắc phục lỗi'),
     ).toBeInTheDocument();
 
     // Card 3: Liên hệ hỗ trợ
+    expect(within(grid).getByText('Liên hệ hỗ trợ')).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { level: 3, name: 'Liên hệ hỗ trợ' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Nhận trợ giúp từ đội ngũ của chúng tôi'),
+      within(grid).getByText('Nhận trợ giúp từ đội ngũ của chúng tôi'),
     ).toBeInTheDocument();
   });
 
@@ -210,7 +214,7 @@ describe('ErrorPage', () => {
       </MemoryRouter>,
     );
 
-    const homeLink = screen.getByRole('link', { name: /Về trang chủ/i });
+    const homeLink = screen.getAllByRole('link', { name: /Về trang chủ/i })[0];
     await user.click(homeLink);
 
     await waitFor(() => {

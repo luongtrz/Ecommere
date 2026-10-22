@@ -377,8 +377,8 @@ describe('CheckoutPage', () => {
         .closest('div[role="button"]')!;
       await user.click(secondAddressCard);
 
-      // Verify that secondAddressCard has border-primary style class indicating selection
-      expect(secondAddressCard).toHaveClass('border-primary');
+      // Verify that secondAddressCard has border-teal-600 style class indicating selection
+      expect(secondAddressCard).toHaveClass('border-teal-600');
     });
 
     it('allows selecting address via keyboard Enter and Space, ignoring other keys', () => {
@@ -393,15 +393,15 @@ describe('CheckoutPage', () => {
 
       // Press Enter on second address
       fireEvent.keyDown(secondAddressCard, { key: 'Enter' });
-      expect(secondAddressCard).toHaveClass('border-primary');
+      expect(secondAddressCard).toHaveClass('border-teal-600');
 
       // Press Space on first address
       fireEvent.keyDown(firstAddressCard, { key: ' ' });
-      expect(firstAddressCard).toHaveClass('border-primary');
+      expect(firstAddressCard).toHaveClass('border-teal-600');
 
       // Press Escape or ArrowDown - should not switch selection
       fireEvent.keyDown(secondAddressCard, { key: 'Escape' });
-      expect(firstAddressCard).toHaveClass('border-primary');
+      expect(firstAddressCard).toHaveClass('border-teal-600');
     });
   });
 
@@ -429,7 +429,7 @@ describe('CheckoutPage', () => {
 
       await user.click(expressShippingCard);
 
-      expect(expressShippingCard).toHaveClass('border-green-500');
+      expect(expressShippingCard).toHaveClass('border-teal-600');
     });
 
     it('allows selecting shipping method via keyboard Enter and Space, ignoring other keys', () => {
@@ -444,15 +444,15 @@ describe('CheckoutPage', () => {
 
       // Select express with Enter
       fireEvent.keyDown(expressShippingCard, { key: 'Enter' });
-      expect(expressShippingCard).toHaveClass('border-green-500');
+      expect(expressShippingCard).toHaveClass('border-teal-600');
 
       // Select standard with Space
       fireEvent.keyDown(standardShippingCard, { key: ' ' });
-      expect(standardShippingCard).toHaveClass('border-green-500');
+      expect(standardShippingCard).toHaveClass('border-teal-600');
 
       // Press other key like ArrowDown - does not trigger change
       fireEvent.keyDown(expressShippingCard, { key: 'ArrowDown' });
-      expect(standardShippingCard).toHaveClass('border-green-500');
+      expect(standardShippingCard).toHaveClass('border-teal-600');
     });
   });
 
@@ -788,26 +788,26 @@ describe('CheckoutPage', () => {
 
       // Clicking non-COD method should not select it
       await user.click(bankTransferCard);
-      expect(bankTransferCard).not.toHaveClass('border-purple-600');
+      expect(bankTransferCard).not.toHaveClass('border-teal-600');
 
       // Keydown on non-COD method should not select it
       fireEvent.keyDown(bankTransferCard, { key: 'Enter' });
-      expect(bankTransferCard).not.toHaveClass('border-purple-600');
+      expect(bankTransferCard).not.toHaveClass('border-teal-600');
 
       // COD card should be active and selectable via click and keyboard
       const codCard = screen
         .getByText('Thanh toán khi nhận hàng (COD)')
         .closest('div[role="button"]')!;
-      expect(codCard).toHaveClass('border-purple-600');
+      expect(codCard).toHaveClass('border-teal-600');
 
       fireEvent.keyDown(codCard, { key: ' ' });
-      expect(codCard).toHaveClass('border-purple-600');
+      expect(codCard).toHaveClass('border-teal-600');
 
       fireEvent.keyDown(codCard, { key: 'Enter' });
-      expect(codCard).toHaveClass('border-purple-600');
+      expect(codCard).toHaveClass('border-teal-600');
 
       fireEvent.keyDown(codCard, { key: 'ArrowRight' });
-      expect(codCard).toHaveClass('border-purple-600');
+      expect(codCard).toHaveClass('border-teal-600');
 
       // Click "Quay lại" to go back to Step 1
       const backBtn = screen.getByRole('button', { name: 'Quay lại' });

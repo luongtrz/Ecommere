@@ -472,7 +472,7 @@ describe('SearchPage', () => {
       expect(screen.getByText('"rose"')).toBeInTheDocument();
       expect(screen.getByText('2 kết quả')).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: 'Xóa tìm kiếm' }),
+        screen.getAllByRole('button', { name: 'Xóa tìm kiếm' })[1],
       ).toBeInTheDocument();
     });
 
@@ -513,7 +513,9 @@ describe('SearchPage', () => {
 
     it('clears input and resets parameters on clicking header "Xóa tìm kiếm"', () => {
       renderPage(['/search?q=rose&sort=price_desc']);
-      fireEvent.click(screen.getByRole('button', { name: 'Xóa tìm kiếm' }));
+      fireEvent.click(
+        screen.getAllByRole('button', { name: 'Xóa tìm kiếm' })[1],
+      );
       expect(screen.getByPlaceholderText('Tìm kiếm sản phẩm...')).toHaveValue(
         '',
       );

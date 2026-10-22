@@ -137,13 +137,13 @@ describe('MobileNav', () => {
     const homeLink = screen.getByRole('link', { name: 'Trang chủ' });
     const catalogLink = screen.getByRole('link', { name: 'Khám phá' });
 
-    expect(homeLink).toHaveClass('text-foreground');
+    expect(homeLink).toHaveClass('text-teal-600');
     expect(homeLink.querySelector('svg')).toHaveClass('scale-110');
-    expect(homeLink.querySelector('span')).toHaveClass('font-semibold');
+    expect(homeLink.querySelector('span')).toHaveClass('font-bold');
 
-    expect(catalogLink).toHaveClass('text-muted-foreground');
+    expect(catalogLink).toHaveClass('text-slate-500');
     expect(catalogLink.querySelector('svg')).not.toHaveClass('scale-110');
-    expect(catalogLink.querySelector('span')).not.toHaveClass('font-semibold');
+    expect(catalogLink.querySelector('span')).not.toHaveClass('font-bold');
   });
 
   it('applies active styles to the catalog item when route is /catalog', () => {
@@ -152,13 +152,13 @@ describe('MobileNav', () => {
     const homeLink = screen.getByRole('link', { name: 'Trang chủ' });
     const catalogLink = screen.getByRole('link', { name: 'Khám phá' });
 
-    expect(catalogLink).toHaveClass('text-foreground');
+    expect(catalogLink).toHaveClass('text-teal-600');
     expect(catalogLink.querySelector('svg')).toHaveClass('scale-110');
-    expect(catalogLink.querySelector('span')).toHaveClass('font-semibold');
+    expect(catalogLink.querySelector('span')).toHaveClass('font-bold');
 
-    expect(homeLink).toHaveClass('text-muted-foreground');
+    expect(homeLink).toHaveClass('text-slate-500');
     expect(homeLink.querySelector('svg')).not.toHaveClass('scale-110');
-    expect(homeLink.querySelector('span')).not.toHaveClass('font-semibold');
+    expect(homeLink.querySelector('span')).not.toHaveClass('font-bold');
   });
 
   it('applies active styles to the account item when route matches /account for logged in user', () => {
@@ -191,18 +191,18 @@ describe('MobileNav', () => {
     renderMobileNav('/account');
 
     const accountLink = screen.getByRole('link', { name: 'Tài khoản' });
-    expect(accountLink).toHaveClass('text-foreground');
+    expect(accountLink).toHaveClass('text-teal-600');
     expect(accountLink.querySelector('svg')).toHaveClass('scale-110');
-    expect(accountLink.querySelector('span')).toHaveClass('font-semibold');
+    expect(accountLink.querySelector('span')).toHaveClass('font-bold');
   });
 
   it('applies active styles to the account item when route matches /login for guest user', () => {
     renderMobileNav('/login');
 
     const accountLink = screen.getByRole('link', { name: 'Tài khoản' });
-    expect(accountLink).toHaveClass('text-foreground');
+    expect(accountLink).toHaveClass('text-teal-600');
     expect(accountLink.querySelector('svg')).toHaveClass('scale-110');
-    expect(accountLink.querySelector('span')).toHaveClass('font-semibold');
+    expect(accountLink.querySelector('span')).toHaveClass('font-bold');
   });
 
   it('calls openCart when clicking the "Giỏ hàng" button', async () => {
@@ -307,7 +307,7 @@ describe('MobileNav', () => {
     renderMobileNav();
 
     expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('5')).toHaveClass('bg-primary');
+    expect(screen.getByText('5')).toHaveClass('bg-rose-600');
   });
 
   it('renders exact badge number when totalItems is 99', () => {

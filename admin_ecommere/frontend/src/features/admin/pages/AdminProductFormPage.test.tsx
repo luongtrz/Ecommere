@@ -446,7 +446,7 @@ describe('AdminProductFormPage', () => {
         expect(screen.getByRole('combobox')).toHaveTextContent('Chọn danh mục');
       });
       const comboboxButton = screen.getByRole('combobox');
-      expect(comboboxButton).toHaveClass('text-muted-foreground');
+      expect(comboboxButton).toHaveClass('text-slate-400');
 
       // Dropdown contains rendered tree items
       expect(screen.getByText('Nước hoa')).toBeInTheDocument();
@@ -464,13 +464,11 @@ describe('AdminProductFormPage', () => {
           'Nước hoa > Nước hoa Nam',
         );
       });
-      expect(screen.getByRole('combobox')).not.toHaveClass(
-        'text-muted-foreground',
-      );
+      expect(screen.getByRole('combobox')).not.toHaveClass('text-slate-400');
 
       // Selected item span gets font-bold text-primary class
       const spanNam = screen.getByText('Nước hoa Nam');
-      expect(spanNam).toHaveClass('font-bold', 'text-primary');
+      expect(spanNam).toHaveClass('font-bold', 'text-teal-600');
 
       const spanNu = screen.getByText('Nước hoa Nữ');
       expect(spanNu).not.toHaveClass('font-bold');
@@ -549,7 +547,7 @@ describe('AdminProductFormPage', () => {
     it('navigates back when clicking Cancel button', () => {
       renderPage();
 
-      const cancelBtn = screen.getByRole('button', { name: 'Hủy' });
+      const cancelBtn = screen.getAllByRole('button', { name: 'Hủy' })[0];
       fireEvent.click(cancelBtn);
 
       expect(mockNavigate).toHaveBeenCalledWith('/admin/products');
@@ -561,7 +559,9 @@ describe('AdminProductFormPage', () => {
       renderPage();
 
       // Click save with empty fields
-      const saveBtn = screen.getByRole('button', { name: /lưu sản phẩm/i });
+      const saveBtn = screen.getAllByRole('button', {
+        name: /lưu sản phẩm/i,
+      })[0];
       fireEvent.click(saveBtn);
 
       expect(
@@ -590,7 +590,9 @@ describe('AdminProductFormPage', () => {
         target: { value: '150.5' },
       });
 
-      const saveBtn = screen.getByRole('button', { name: /lưu sản phẩm/i });
+      const saveBtn = screen.getAllByRole('button', {
+        name: /lưu sản phẩm/i,
+      })[0];
       fireEvent.click(saveBtn);
 
       expect(
@@ -613,7 +615,9 @@ describe('AdminProductFormPage', () => {
         target: { value: '-5' },
       });
 
-      const saveBtn = screen.getByRole('button', { name: /lưu sản phẩm/i });
+      const saveBtn = screen.getAllByRole('button', {
+        name: /lưu sản phẩm/i,
+      })[0];
       fireEvent.click(saveBtn);
 
       expect(
@@ -698,7 +702,9 @@ describe('AdminProductFormPage', () => {
       });
 
       // Submit
-      const saveBtn = screen.getByRole('button', { name: /lưu sản phẩm/i });
+      const saveBtn = screen.getAllByRole('button', {
+        name: /lưu sản phẩm/i,
+      })[0];
       fireEvent.click(saveBtn);
 
       await waitFor(() => {
@@ -766,7 +772,9 @@ describe('AdminProductFormPage', () => {
       fireEvent.change(salePriceInput, { target: { value: '70000' } });
       fireEvent.change(salePriceInput, { target: { value: '' } });
 
-      const saveBtn = screen.getByRole('button', { name: /lưu sản phẩm/i });
+      const saveBtn = screen.getAllByRole('button', {
+        name: /lưu sản phẩm/i,
+      })[0];
       fireEvent.click(saveBtn);
 
       await waitFor(() => {
@@ -932,7 +940,9 @@ describe('AdminProductFormPage', () => {
 
       renderPage();
 
-      const saveBtn = screen.getByRole('button', { name: /lưu sản phẩm/i });
+      const saveBtn = screen.getAllByRole('button', {
+        name: /lưu sản phẩm/i,
+      })[0];
       fireEvent.click(saveBtn);
 
       expect(
@@ -963,7 +973,9 @@ describe('AdminProductFormPage', () => {
       });
 
       // Submit
-      const saveBtn = screen.getByRole('button', { name: /lưu sản phẩm/i });
+      const saveBtn = screen.getAllByRole('button', {
+        name: /lưu sản phẩm/i,
+      })[0];
       fireEvent.click(saveBtn);
 
       await waitFor(() => {
@@ -1030,17 +1042,19 @@ describe('AdminProductFormPage', () => {
         target: { value: '10' },
       });
 
-      const saveBtn = screen.getByRole('button', { name: /lưu sản phẩm/i });
+      const saveBtn = screen.getAllByRole('button', {
+        name: /lưu sản phẩm/i,
+      })[0];
       fireEvent.click(saveBtn);
 
       // During submission, button shows "Đang lưu..." and is disabled
       await waitFor(() => {
-        expect(screen.getByText('Đang lưu...')).toBeInTheDocument();
+        expect(screen.getAllByText('Đang lưu...')[0]).toBeInTheDocument();
       });
       expect(
-        screen.getByRole('button', { name: /đang lưu\.\.\./i }),
+        screen.getAllByRole('button', { name: /đang lưu\.\.\./i })[0],
       ).toBeDisabled();
-      expect(screen.getByRole('button', { name: 'Hủy' })).toBeDisabled();
+      expect(screen.getAllByRole('button', { name: 'Hủy' })[0]).toBeDisabled();
 
       // Resolve the submission
       await act(async () => {
@@ -1088,7 +1102,9 @@ describe('AdminProductFormPage', () => {
         target: { value: '10' },
       });
 
-      fireEvent.click(screen.getByRole('button', { name: /lưu sản phẩm/i }));
+      fireEvent.click(
+        screen.getAllByRole('button', { name: /lưu sản phẩm/i })[0],
+      );
 
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalledWith(
@@ -1133,7 +1149,9 @@ describe('AdminProductFormPage', () => {
         target: { value: '10' },
       });
 
-      fireEvent.click(screen.getByRole('button', { name: /lưu sản phẩm/i }));
+      fireEvent.click(
+        screen.getAllByRole('button', { name: /lưu sản phẩm/i })[0],
+      );
 
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalledWith(
@@ -1174,7 +1192,9 @@ describe('AdminProductFormPage', () => {
         target: { value: '10' },
       });
 
-      fireEvent.click(screen.getByRole('button', { name: /lưu sản phẩm/i }));
+      fireEvent.click(
+        screen.getAllByRole('button', { name: /lưu sản phẩm/i })[0],
+      );
 
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalledWith(
@@ -1213,7 +1233,9 @@ describe('AdminProductFormPage', () => {
         target: { value: '10' },
       });
 
-      fireEvent.click(screen.getByRole('button', { name: /lưu sản phẩm/i }));
+      fireEvent.click(
+        screen.getAllByRole('button', { name: /lưu sản phẩm/i })[0],
+      );
 
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalledWith(

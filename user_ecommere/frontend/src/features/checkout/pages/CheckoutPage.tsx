@@ -325,71 +325,74 @@ export function CheckoutPage() {
     <>
       <SEO title="Thanh toán" />
 
-      <div className="min-h-screen bg-[#F8F9FA] pb-20">
+      <div className="min-h-screen bg-slate-50 pb-24 lg:pb-16">
         {/* Modern Header */}
-        <div className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
-          <div className="container py-4 flex items-center justify-between">
+        <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+          <div className="container max-w-7xl mx-auto py-3.5 flex items-center justify-between px-4">
             <Link
               to="/cart"
-              className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-2 text-slate-600 hover:text-teal-600 transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 rounded-lg py-1 px-1.5 -ml-1.5"
             >
-              <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 transition-all duration-200 group-hover:-translate-x-0.5 group-hover:bg-teal-50 group-hover:border-teal-200 group-hover:text-teal-600">
                 <ArrowLeft className="h-4 w-4" />
               </div>
-              <span className="font-medium">Quay lại giỏ hàng</span>
+              <span className="font-semibold text-sm">Quay lại giỏ hàng</span>
             </Link>
-            <div className="font-playfair font-bold text-xl tracking-wide text-gray-900">
+            <div className="font-sans font-bold text-lg md:text-xl tracking-tight text-slate-900">
               Thanh toán
             </div>
             <div className="w-32 flex justify-end">
-              <div className="flex items-center gap-2 text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full border border-green-100">
-                <Shield className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 shadow-2xs">
+                <Shield className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 An toàn
               </div>
             </div>
           </div>
         </div>
 
-        <div className="container max-w-7xl pt-8 px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        <div className="container max-w-7xl mx-auto pt-6 sm:pt-8 px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12">
             {/* LEFT COLUMN: MAIN PROCESS */}
-            <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-8">
+            <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
               {/* Steps Indicator */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-xl p-4 sm:p-5 md:p-6 shadow-sm border border-slate-200">
                 <CheckoutSteps currentStep={step} />
               </div>
 
               {/* Step Content */}
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div>
                 {/* STEP 1: ADDRESS & SHIPPING */}
                 {step === 1 && (
                   <div className="space-y-6">
                     {/* Address Section */}
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                          <MapPin className="h-5 w-5 text-primary" />
+                      <div className="flex items-center justify-between gap-3">
+                        <h2 className="text-lg md:text-xl font-sans font-bold text-slate-900 flex items-center gap-2.5 tracking-tight">
+                          <MapPin className="h-5 w-5 text-teal-600 shrink-0" />
                           Địa chỉ giao hàng
                         </h2>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => setIsAddressDialogOpen(true)}
-                          className="text-primary hover:text-primary/80 hover:bg-secondary/40"
+                          className="rounded-lg border border-slate-200 bg-white hover:bg-teal-50/50 hover:border-teal-300 text-teal-600 hover:text-teal-700 font-semibold text-xs px-3 h-8 shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                         >
                           + Thêm mới
                         </Button>
                       </div>
 
                       {!addresses || addresses.length === 0 ? (
-                        <div className="text-center py-12 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-                          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <MapPin className="h-8 w-8 text-gray-300" />
+                        <div className="text-center py-10 sm:py-12 bg-white rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 shadow-sm">
+                          <div className="w-14 h-14 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-3.5 text-teal-600 border border-teal-100 shadow-2xs">
+                            <MapPin className="h-6 w-6" />
                           </div>
-                          <p className="text-gray-500 mb-4">
+                          <p className="text-sm font-medium text-slate-500 mb-4">
                             Bạn chưa có địa chỉ nào
                           </p>
-                          <Button onClick={() => setIsAddressDialogOpen(true)}>
+                          <Button
+                            onClick={() => setIsAddressDialogOpen(true)}
+                            className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 font-semibold text-sm shadow-sm h-10 px-5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                          >
                             Thêm địa chỉ ngay
                           </Button>
                         </div>
@@ -407,26 +410,26 @@ export function CheckoutPage() {
                                   setSelectedAddressId(addr.id);
                                 }
                               }}
-                              className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 group ${
+                              className={`relative p-4 sm:p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 ${
                                 selectedAddressId === addr.id
-                                  ? 'border-primary bg-white shadow-lg shadow-primary/5'
-                                  : 'border-transparent bg-white shadow-sm hover:border-primary/20 hover:shadow-md'
+                                  ? 'border-teal-600 bg-teal-50/40 shadow-sm ring-1 ring-teal-600/20'
+                                  : 'border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow-md'
                               }`}
                             >
-                              <div className="flex justify-between items-start mb-2">
-                                <div className="font-bold text-gray-900">
+                              <div className="flex justify-between items-start gap-2 mb-2">
+                                <div className="font-sans font-bold text-slate-900 text-sm sm:text-base tracking-tight">
                                   {addr.fullName}
                                 </div>
                                 {selectedAddressId === addr.id ? (
-                                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                                  <CheckCircle2 className="h-5 w-5 text-teal-600 shrink-0" />
                                 ) : (
-                                  <Circle className="h-5 w-5 text-gray-200 group-hover:text-primary/40" />
+                                  <Circle className="h-5 w-5 text-slate-300 group-hover:text-slate-400 shrink-0 transition-colors" />
                                 )}
                               </div>
-                              <div className="text-sm text-gray-500 mb-3">
+                              <div className="text-xs sm:text-sm font-medium text-slate-500 mb-2">
                                 {addr.phone}
                               </div>
-                              <div className="text-sm text-gray-600 leading-relaxed min-h-[40px]">
+                              <div className="text-xs sm:text-sm text-slate-700 leading-relaxed min-h-[40px]">
                                 {addr.line1}, {addr.ward}, {addr.district},{' '}
                                 {addr.province}
                               </div>
@@ -434,7 +437,7 @@ export function CheckoutPage() {
                                 <div className="mt-3">
                                   <Badge
                                     variant="secondary"
-                                    className="bg-gray-100 text-gray-600 font-normal"
+                                    className="bg-teal-50 text-teal-700 font-semibold rounded-md px-2 py-0.5 text-[10px] sm:text-[11px] border border-teal-200/80 shadow-2xs"
                                   >
                                     Mặc định
                                   </Badge>
@@ -446,12 +449,12 @@ export function CheckoutPage() {
                       )}
                     </div>
 
-                    <Separator className="bg-gray-100" />
+                    <Separator className="bg-slate-200/80 my-2" />
 
                     {/* Shipping Section */}
                     <div className="space-y-4">
-                      <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                        <Truck className="h-5 w-5 text-green-600" />
+                      <h2 className="text-lg md:text-xl font-sans font-bold text-slate-900 flex items-center gap-2.5 tracking-tight">
+                        <Truck className="h-5 w-5 text-teal-600 shrink-0" />
                         Phương thức vận chuyển
                       </h2>
                       <div className="grid grid-cols-1 gap-3">
@@ -467,37 +470,37 @@ export function CheckoutPage() {
                                 setShippingMethod(method.id);
                               }
                             }}
-                            className={`flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                            className={`flex items-center justify-between p-4 sm:p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 ${
                               shippingMethod === method.id
-                                ? 'border-green-500 bg-white shadow-lg shadow-green-50'
-                                : 'border-transparent bg-white shadow-sm hover:border-green-100'
+                                ? 'border-teal-600 bg-teal-50/40 shadow-sm ring-1 ring-teal-600/20'
+                                : 'border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow-md'
                             }`}
                           >
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3.5">
                               <div
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                                className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center transition-colors shrink-0 ${
                                   shippingMethod === method.id
-                                    ? 'bg-green-100 text-green-600'
-                                    : 'bg-gray-50 text-gray-400'
+                                    ? 'bg-teal-600 text-white shadow-sm'
+                                    : 'bg-slate-100 text-slate-500'
                                 }`}
                               >
                                 <Truck className="h-5 w-5" />
                               </div>
                               <div>
-                                <div className="font-bold text-gray-900">
+                                <div className="font-sans font-bold text-slate-900 text-sm sm:text-base tracking-tight">
                                   {method.name}
                                 </div>
-                                <div className="text-sm text-gray-500">
+                                <div className="text-xs sm:text-sm text-slate-500 font-medium">
                                   Nhận hàng trong {method.days}
                                 </div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-green-600">
+                              <div className="font-sans font-bold text-slate-900 tabular-nums text-sm sm:text-base tracking-tight">
                                 {formatCurrency(method.price)}
                               </div>
                               {shippingMethod === method.id && (
-                                <div className="text-[10px] text-green-600 font-medium uppercase tracking-wider mt-1">
+                                <div className="text-[10px] sm:text-[11px] text-teal-700 font-bold uppercase tracking-wider mt-0.5">
                                   Đã chọn
                                 </div>
                               )}
@@ -512,8 +515,8 @@ export function CheckoutPage() {
                 {/* STEP 2: PAYMENT */}
                 {step === 2 && (
                   <div className="space-y-6">
-                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                      <CreditCard className="h-5 w-5 text-purple-600" />
+                    <h2 className="text-lg md:text-xl font-sans font-bold text-slate-900 flex items-center gap-2.5 tracking-tight">
+                      <CreditCard className="h-5 w-5 text-teal-600 shrink-0" />
                       Chọn phương thức thanh toán
                     </h2>
 
@@ -536,39 +539,39 @@ export function CheckoutPage() {
                                 setPaymentMethod(method.id);
                               }
                             }}
-                            className={`relative p-6 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-4 ${
+                            className={`relative p-5 sm:p-6 rounded-xl border-2 transition-all duration-200 flex flex-col items-center text-center gap-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 ${
                               paymentMethod === method.id
-                                ? 'border-purple-600 bg-white shadow-xl shadow-purple-50 scale-[1.02] cursor-pointer'
+                                ? 'border-teal-600 bg-teal-50/40 shadow-sm ring-1 ring-teal-600/20 cursor-pointer'
                                 : isCOD
-                                  ? 'border-transparent bg-white shadow-sm hover:border-purple-100 hover:scale-[1.01] cursor-pointer'
-                                  : 'border-transparent bg-gray-50 opacity-50 cursor-not-allowed grayscale'
+                                  ? 'border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow-md cursor-pointer'
+                                  : 'border-slate-200 bg-slate-50/80 opacity-60 cursor-not-allowed'
                             }`}
                           >
                             <div
-                              className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
+                              className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-colors ${
                                 paymentMethod === method.id
-                                  ? 'bg-purple-100 text-purple-600'
-                                  : 'bg-gray-100 text-gray-400'
+                                  ? 'bg-teal-600 text-white shadow-sm'
+                                  : 'bg-slate-100 text-slate-500'
                               }`}
                             >
                               {method.id === 'COD' ? (
-                                <Truck className="h-7 w-7" />
+                                <Truck className="h-6 w-6" />
                               ) : (
-                                <CreditCard className="h-7 w-7" />
+                                <CreditCard className="h-6 w-6" />
                               )}
                             </div>
 
                             <div>
                               <div
-                                className={`font-bold text-lg mb-1 ${paymentMethod === method.id ? 'text-purple-700' : 'text-gray-900'}`}
+                                className={`font-sans font-bold text-base mb-1 tracking-tight ${paymentMethod === method.id ? 'text-teal-900' : 'text-slate-900'}`}
                               >
                                 {method.name}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-xs sm:text-sm text-slate-500">
                                 {method.id === 'COD' ? (
                                   'Thanh toán khi nhận hàng'
                                 ) : (
-                                  <span className="text-red-500 font-medium text-xs bg-red-50 px-2 py-1 rounded-full">
+                                  <span className="text-rose-700 font-semibold text-xs bg-rose-50 border border-rose-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
                                     Đang bảo trì
                                   </span>
                                 )}
@@ -577,7 +580,7 @@ export function CheckoutPage() {
 
                             {paymentMethod === method.id && (
                               <div className="absolute top-4 right-4">
-                                <CheckCircle2 className="h-6 w-6 text-purple-600" />
+                                <CheckCircle2 className="h-5 w-5 text-teal-600" />
                               </div>
                             )}
                           </div>
@@ -590,57 +593,57 @@ export function CheckoutPage() {
                 {/* STEP 3: CONFIRM */}
                 {step === 3 && (
                   <div className="space-y-6">
-                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center">
-                      <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <CheckCircle2 className="h-10 w-10 text-green-600" />
+                    <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center">
+                      <div className="w-14 h-14 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4 text-teal-600 border border-teal-100 shadow-2xs">
+                        <CheckCircle2 className="h-7 w-7" />
                       </div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900 mb-2 tracking-tight">
                         Sẵn sàng đặt hàng!
                       </h2>
-                      <p className="text-gray-500 max-w-md mx-auto">
+                      <p className="text-slate-600 max-w-md mx-auto text-sm leading-relaxed">
                         Vui lòng kiểm tra lại thông tin đơn hàng lần cuối trước
                         khi xác nhận.
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-200">
+                        <span className="text-xs font-bold text-teal-700 uppercase tracking-wider block mb-3">
                           Giao tới
-                        </h3>
-                        <div className="font-bold text-gray-900 text-lg mb-1">
+                        </span>
+                        <div className="font-sans font-bold text-slate-900 text-base mb-1 tracking-tight">
                           {selectedAddress?.fullName}
                         </div>
-                        <div className="text-gray-500 mb-2">
+                        <div className="text-slate-500 text-sm mb-2 font-medium">
                           {selectedAddress?.phone}
                         </div>
-                        <div className="text-gray-600">
+                        <div className="text-slate-700 text-sm leading-relaxed">
                           {selectedAddress?.line1}, {selectedAddress?.ward},{' '}
                           {selectedAddress?.district},{' '}
                           {selectedAddress?.province}
                         </div>
                       </div>
 
-                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
+                      <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-200">
+                        <span className="text-xs font-bold text-teal-700 uppercase tracking-wider block mb-3">
                           Thanh toán & Vận chuyển
-                        </h3>
-                        <div className="space-y-4">
+                        </span>
+                        <div className="space-y-3.5">
                           <div>
-                            <div className="text-xs text-gray-500 mb-1">
+                            <div className="text-xs text-slate-500 mb-1 font-medium">
                               Phương thức vận chuyển
                             </div>
-                            <div className="font-medium text-gray-900 flex items-center gap-2">
-                              <Truck className="h-4 w-4 text-green-600" />
+                            <div className="font-semibold text-slate-900 flex items-center gap-2 text-sm">
+                              <Truck className="h-4 w-4 text-teal-600 shrink-0" />
                               {selectedShipping?.name}
                             </div>
                           </div>
                           <div>
-                            <div className="text-xs text-gray-500 mb-1">
+                            <div className="text-xs text-slate-500 mb-1 font-medium">
                               Phương thức thanh toán
                             </div>
-                            <div className="font-medium text-gray-900 flex items-center gap-2">
-                              <CreditCard className="h-4 w-4 text-purple-600" />
+                            <div className="font-semibold text-slate-900 flex items-center gap-2 text-sm">
+                              <CreditCard className="h-4 w-4 text-teal-600 shrink-0" />
                               {
                                 PAYMENT_METHODS.find(
                                   (p) => p.id === paymentMethod,
@@ -656,13 +659,13 @@ export function CheckoutPage() {
               </div>
 
               {/* Fixed Action Bar for Mobile/Tablet or Inline for Desktop */}
-              <div className="bg-white border-t border-gray-100 p-4 -mx-4 lg:mx-0 lg:rounded-2xl lg:border lg:bg-white lg:p-6 lg:mt-4 sticky bottom-0 z-30 lg:relative lg:z-0">
-                <div className="flex gap-4">
+              <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 -mx-4 lg:mx-0 lg:rounded-xl lg:border lg:bg-white lg:p-5 lg:mt-2 sticky bottom-0 z-30 lg:relative lg:z-0 shadow-[0_-4px_16px_rgba(0,0,0,0.05)] lg:shadow-sm">
+                <div className="flex gap-3 sm:gap-4">
                   {step > 1 && (
                     <Button
                       variant="outline"
                       onClick={handleBackStep}
-                      className="h-12 w-32 rounded-xl border-gray-200 hover:bg-gray-50 font-medium"
+                      className="h-11 sm:h-12 w-28 sm:w-32 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 font-semibold text-slate-700 text-sm shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                     >
                       Quay lại
                     </Button>
@@ -676,11 +679,7 @@ export function CheckoutPage() {
                       isPreviewLoading ||
                       !isPreviewConfirmed
                     }
-                    className={`h-12 flex-1 rounded-xl text-base font-bold shadow-lg transition-all hover:scale-[1.01] ${
-                      step < 3
-                        ? 'bg-primary text-primary-foreground shadow-primary/10'
-                        : 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-500/25'
-                    }`}
+                    className="h-11 sm:h-12 flex-1 rounded-xl text-sm sm:text-base font-bold tracking-wide shadow-sm hover:shadow transition-all duration-200 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
                   >
                     {step < 3 ? (
                       <span className="flex items-center gap-2">
@@ -702,40 +701,43 @@ export function CheckoutPage() {
 
             {/* RIGHT COLUMN: SUMMARY (Sticky) */}
             <div className="lg:col-span-5 xl:col-span-4">
-              <div className="sticky top-28 space-y-6">
-                <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-                  <div className="p-6 bg-gray-50/50 border-b border-gray-100">
-                    <h3 className="font-bold text-lg text-gray-900 flex items-center justify-between">
+              <div className="sticky top-20 sm:top-24 space-y-6">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                  <div className="p-4 sm:p-5 bg-slate-50/80 border-b border-slate-200">
+                    <h3 className="font-sans font-bold text-base sm:text-lg text-slate-900 flex items-center justify-between tracking-tight">
                       <span>Đơn hàng của bạn</span>
                       <Badge
                         variant="secondary"
-                        className="bg-white text-gray-900 border-gray-200"
+                        className="bg-white text-slate-700 border-slate-200/80 rounded-md px-2.5 py-0.5 text-xs font-semibold tabular-nums shadow-2xs"
                       >
                         {items.length} sản phẩm
                       </Badge>
                     </h3>
                   </div>
 
-                  <div className="p-6 max-h-[400px] overflow-y-auto custom-scrollbar">
-                    <div className="space-y-6">
+                  <div className="p-4 sm:p-5 max-h-[380px] overflow-y-auto divide-y divide-slate-100">
+                    <div className="space-y-4">
                       {items.map((item) => (
-                        <div key={item.variantId} className="flex gap-4 group">
-                          <div className="w-16 h-16 bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm shrink-0">
+                        <div
+                          key={item.variantId}
+                          className="flex gap-3.5 group items-center"
+                        >
+                          <div className="w-14 h-14 bg-slate-50 rounded-xl overflow-hidden border border-slate-200/80 shadow-2xs shrink-0 p-1 flex items-center justify-center">
                             <img
                               src={item.image}
                               alt={item.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 line-clamp-2 text-sm mb-1">
+                            <div className="font-semibold text-slate-900 line-clamp-2 text-xs sm:text-sm mb-1 group-hover:text-teal-700 transition-colors">
                               {item.name}
                             </div>
                             <div className="flex justify-between items-end">
-                              <div className="text-gray-500 text-xs bg-gray-100 px-2 py-1 rounded-md">
+                              <div className="text-slate-600 text-xs bg-slate-100 px-2 py-0.5 rounded-md font-semibold">
                                 Sl: {item.quantity}
                               </div>
-                              <div className="font-bold text-gray-900">
+                              <div className="font-sans font-bold text-slate-900 text-sm tabular-nums tracking-tight">
                                 {formatCurrency(item.price * item.quantity)}
                               </div>
                             </div>
@@ -745,32 +747,34 @@ export function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-gray-50/80 space-y-3 border-t border-gray-100">
+                  <div className="p-4 sm:p-5 bg-white space-y-3.5 border-t border-slate-200">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Tạm tính</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="text-slate-600">Tạm tính</span>
+                      <span className="font-semibold text-slate-900 tabular-nums">
                         {formatCurrency(totalPrice)}
                       </span>
                     </div>
                     {serverDiscount > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Giảm giá</span>
-                        <span className="font-medium text-green-600">
+                        <span className="text-slate-600">Giảm giá</span>
+                        <span className="font-semibold text-rose-600 tabular-nums">
                           -{formatCurrency(serverDiscount)}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Phí vận chuyển</span>
-                      <span className="font-medium text-green-600">
+                      <span className="text-slate-600">Phí vận chuyển</span>
+                      <span className="font-semibold text-slate-900 tabular-nums">
                         {isPreviewLoading ? (
-                          <span className="inline-flex items-center gap-1.5 text-gray-400">
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <span className="inline-flex items-center gap-1.5 text-slate-400">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-600" />
                             Đang tính...
                           </span>
                         ) : shippingFee !== null ? (
                           shippingFee === 0 ? (
-                            'Miễn phí'
+                            <span className="text-emerald-600 font-bold">
+                              Miễn phí
+                            </span>
                           ) : (
                             formatCurrency(shippingFee)
                           )
@@ -779,15 +783,15 @@ export function CheckoutPage() {
                         )}
                       </span>
                     </div>
-                    <Separator className="my-2 bg-gray-200" />
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-base font-bold text-gray-900">
+                    <Separator className="my-2 bg-slate-200" />
+                    <div className="flex justify-between items-baseline gap-2">
+                      <span className="text-sm font-bold text-slate-900 tracking-tight">
                         Tổng thanh toán
                       </span>
-                      <span className="text-2xl font-playfair font-bold text-primary">
+                      <span className="text-xl sm:text-2xl font-sans font-extrabold text-teal-700 tabular-nums tracking-tight">
                         {isPreviewLoading ? (
-                          <span className="inline-flex items-center gap-1.5 text-base font-sans text-gray-400">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="inline-flex items-center gap-1.5 text-base font-sans font-medium text-slate-400">
+                            <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
                             Đang tính...
                           </span>
                         ) : finalTotal !== null ? (
@@ -809,22 +813,6 @@ export function CheckoutPage() {
           onOpenChange={setIsAddressDialogOpen}
         />
       </div>
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #e5e7eb;
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #d1d5db;
-        }
-      `}</style>
     </>
   );
 }

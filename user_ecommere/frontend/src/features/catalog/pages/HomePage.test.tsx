@@ -347,9 +347,7 @@ describe('HomePage', () => {
       expect(mainHeading).toHaveTextContent(
         'Chọn mùi hương khiến không gian của bạn trông có gu hơn.',
       );
-      expect(screen.getByText('trông có gu hơn')).toHaveClass(
-        'text-gradient-emerald',
-      );
+      expect(screen.getByText('trông có gu hơn')).toHaveClass('text-teal-600');
 
       expect(
         screen.getByText(
@@ -521,9 +519,7 @@ describe('HomePage', () => {
         screen.getByTestId('product-card-curated-prod-2'),
       ).toBeInTheDocument();
 
-      const animatedWrappers = container.querySelectorAll(
-        '.section-shell .animate-fade-in',
-      );
+      const animatedWrappers = container.querySelectorAll('.animate-fade-in');
       expect(animatedWrappers.length).toBeGreaterThanOrEqual(2);
       expect(animatedWrappers[0]).toHaveStyle({ animationDelay: '0ms' });
       expect(animatedWrappers[1]).toHaveStyle({ animationDelay: '80ms' });

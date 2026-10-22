@@ -257,8 +257,8 @@ describe('AddressesPage', () => {
     // Card classes for default
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-2xl')!;
-    expect(card1).toHaveClass('border-primary', 'bg-secondary/20');
+      .closest('.rounded-xl')!;
+    expect(card1).toHaveClass('border-teal-500');
 
     // Address 2 (Non-default)
     expect(screen.getByText('Trần Thị Thường')).toBeInTheDocument();
@@ -271,9 +271,9 @@ describe('AddressesPage', () => {
     expect(screen.getAllByText('Mặc định')).toHaveLength(1);
 
     // Card classes for non-default
-    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-2xl')!;
-    expect(card2).toHaveClass('border-gray-100');
-    expect(card2).not.toHaveClass('border-primary');
+    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-xl')!;
+    expect(card2).toHaveClass('border-slate-200');
+    expect(card2).not.toHaveClass('border-teal-500');
   });
 
   it('opens dialog in edit mode with selected address when clicking edit button', async () => {
@@ -285,7 +285,7 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-2xl')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-xl')!;
     const editButton =
       card2.querySelector('svg.lucide-edit')?.closest('button') ||
       card2.querySelectorAll('button')[0];
@@ -314,7 +314,7 @@ describe('AddressesPage', () => {
     // Open in edit mode
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-2xl')!;
+      .closest('.rounded-xl')!;
     const editButton =
       card1.querySelector('svg.lucide-edit')?.closest('button') ||
       card1.querySelectorAll('button')[0];
@@ -356,7 +356,7 @@ describe('AddressesPage', () => {
 
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-2xl')!;
+      .closest('.rounded-xl')!;
     const deleteButton =
       card1.querySelector('svg.lucide-trash-2')?.closest('button') ||
       card1.querySelectorAll('button')[1];
@@ -384,7 +384,7 @@ describe('AddressesPage', () => {
 
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-2xl')!;
+      .closest('.rounded-xl')!;
     const deleteButton =
       card1.querySelector('svg.lucide-trash-2')?.closest('button') ||
       card1.querySelectorAll('button')[1];
@@ -409,12 +409,12 @@ describe('AddressesPage', () => {
 
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-2xl')!;
+      .closest('.rounded-xl')!;
     const deleteButton1 =
       card1.querySelector('svg.lucide-trash-2')?.closest('button') ||
       card1.querySelectorAll('button')[1];
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-2xl')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-xl')!;
     const deleteButton2 =
       card2.querySelector('svg.lucide-trash-2')?.closest('button') ||
       card2.querySelectorAll('button')[1];
