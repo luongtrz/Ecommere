@@ -556,7 +556,7 @@ describe('AdminProductsPage', () => {
       ).toBeInTheDocument();
       expect(screen.getByText('20 sp')).toBeInTheDocument(); // totalStock 15 + 5
       expect(screen.getByText('20 sp')).toHaveClass(
-        'bg-green-50 text-green-700',
+        'bg-emerald-50 text-emerald-700',
       );
       expect(screen.getByText('2 biến thể')).toBeInTheDocument();
       expect(screen.getByText('4.8')).toBeInTheDocument();
@@ -586,7 +586,7 @@ describe('AdminProductsPage', () => {
       const zeroStockBadges = screen.getAllByText('0 sp');
       expect(zeroStockBadges).toHaveLength(3);
       zeroStockBadges.forEach((badge) => {
-        expect(badge).toHaveClass('bg-red-50 text-red-700');
+        expect(badge).toHaveClass('bg-rose-50 text-rose-700');
       });
       const zeroVariants = screen.getAllByText('0 biến thể');
       expect(zeroVariants).toHaveLength(2);
@@ -729,7 +729,7 @@ describe('AdminProductsPage', () => {
       // Filter button now displays "Đã lọc"
       expect(screen.getByText('Đã lọc')).toBeInTheDocument();
       expect(leafItem.querySelector('span')).toHaveClass(
-        'font-bold text-primary',
+        'font-bold text-teal-600',
       );
 
       // Clear filter button appears: "Xóa: Khử mùi xe hơi ✕"
