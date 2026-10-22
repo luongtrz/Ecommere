@@ -192,7 +192,10 @@ export function ProductQuickView({
 
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">
+                  <label
+                    htmlFor="quickview-variant"
+                    className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block"
+                  >
                     Phiên bản:
                   </label>
                   <Select
@@ -202,7 +205,10 @@ export function ProductQuickView({
                       setQuantity(1);
                     }}
                   >
-                    <SelectTrigger className="w-full rounded-lg border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-teal-500">
+                    <SelectTrigger
+                      id="quickview-variant"
+                      className="w-full rounded-lg border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-teal-500"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-lg border-slate-200 bg-white text-slate-900">
@@ -227,10 +233,17 @@ export function ProductQuickView({
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">
+                  <span
+                    id="quickview-quantity-label"
+                    className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block"
+                  >
                     Số lượng:
-                  </label>
-                  <div className="flex items-center h-10 w-32 bg-slate-50 rounded-lg border border-slate-200">
+                  </span>
+                  <div
+                    role="group"
+                    aria-labelledby="quickview-quantity-label"
+                    className="flex items-center h-10 w-32 bg-slate-50 rounded-lg border border-slate-200"
+                  >
                     <Button
                       type="button"
                       variant="ghost"
