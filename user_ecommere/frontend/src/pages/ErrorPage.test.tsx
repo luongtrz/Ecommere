@@ -80,7 +80,9 @@ describe('ErrorPage', () => {
       screen.getByRole('heading', { level: 1, name: 'Oops! Đã có lỗi xảy ra' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật'),
+      screen.getByText(
+        'Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.',
+      ),
     ).toBeInTheDocument();
   });
 
@@ -92,7 +94,7 @@ describe('ErrorPage', () => {
     );
 
     expect(
-      screen.getByRole('heading', { level: 2, name: 'Không thể tải trang' }),
+      screen.getByRole('heading', { level: 1, name: 'Oops! Đã có lỗi xảy ra' }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(

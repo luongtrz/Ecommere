@@ -54,7 +54,7 @@ describe('NotFoundPage', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại',
+        'Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có thể đường dẫn không chính xác hoặc trang đã bị xóa.',
       ),
     ).toBeInTheDocument();
   });
@@ -69,8 +69,8 @@ describe('NotFoundPage', () => {
     expect(screen.getByText('404')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', {
-        level: 2,
-        name: 'Oops! Trang không tồn tại',
+        level: 1,
+        name: 'Không tìm thấy trang',
       }),
     ).toBeInTheDocument();
     expect(
@@ -104,7 +104,7 @@ describe('NotFoundPage', () => {
 
     expect(
       screen.getByRole('heading', {
-        level: 3,
+        level: 2,
         name: 'Có thể bạn đang tìm kiếm:',
       }),
     ).toBeInTheDocument();
@@ -134,7 +134,7 @@ describe('NotFoundPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('💡 Mẹo:')).toBeInTheDocument();
+    expect(screen.getByText('Mẹo:')).toBeInTheDocument();
     expect(
       screen.getByText(
         'Kiểm tra lại đường dẫn URL hoặc sử dụng thanh tìm kiếm',
