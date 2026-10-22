@@ -55,8 +55,10 @@ describe('AuthLayout', () => {
     expect(wrapper).toHaveClass(
       'min-h-screen',
       'w-full',
-      'bg-[#020617]',
-      'text-slate-100',
+      'bg-slate-50',
+      'font-sans',
+      'text-slate-900',
+      'antialiased',
     );
   });
 
@@ -106,8 +108,10 @@ describe('AuthLayout', () => {
     expect(wrapper).toHaveClass(
       'min-h-screen',
       'w-full',
-      'bg-[#020617]',
-      'text-slate-100',
+      'bg-slate-50',
+      'font-sans',
+      'text-slate-900',
+      'antialiased',
     );
   });
 });

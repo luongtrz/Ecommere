@@ -54,7 +54,7 @@ describe('NotFoundPage', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại',
+        'Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại. Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có thể đường dẫn không chính xác hoặc trang đã bị xóa.',
       ),
     ).toBeInTheDocument();
   });
@@ -69,13 +69,13 @@ describe('NotFoundPage', () => {
     expect(screen.getByText('404')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', {
-        level: 2,
-        name: 'Oops! Trang không tồn tại',
+        level: 1,
+        name: 'Không tìm thấy trang',
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có thể đường dẫn không chính xác hoặc trang đã bị xóa.',
+        'Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại. Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có thể đường dẫn không chính xác hoặc trang đã bị xóa.',
       ),
     ).toBeInTheDocument();
   });
@@ -102,12 +102,7 @@ describe('NotFoundPage', () => {
       </MemoryRouter>,
     );
 
-    expect(
-      screen.getByRole('heading', {
-        level: 3,
-        name: 'Có thể bạn đang tìm kiếm:',
-      }),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Có thể bạn đang tìm kiếm:')).toBeInTheDocument();
 
     const catalogLink = screen.getByRole('link', { name: /Sản phẩm/i });
     expect(catalogLink).toBeInTheDocument();
@@ -134,7 +129,7 @@ describe('NotFoundPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('💡 Mẹo:')).toBeInTheDocument();
+    expect(screen.getByText('Mẹo:')).toBeInTheDocument();
     expect(
       screen.getByText(
         'Kiểm tra lại đường dẫn URL hoặc sử dụng thanh tìm kiếm',

@@ -156,7 +156,13 @@ describe('AdminLayout', () => {
 
       // Root container classes
       const rootDiv = container.firstElementChild;
-      expect(rootDiv).toHaveClass('min-h-screen', 'bg-transparent', 'lg:flex');
+      expect(rootDiv).toHaveClass(
+        'min-h-screen',
+        'bg-slate-50',
+        'font-sans',
+        'text-slate-900',
+        'lg:flex',
+      );
 
       // Sidebar brand link
       const brandLink = screen.getByRole('link', {
@@ -188,7 +194,7 @@ describe('AdminLayout', () => {
       expect(
         screen.getByText('Dữ liệu đồng bộ theo phiên gần nhất'),
       ).toBeInTheDocument();
-      expect(screen.getByText('Quyền quản trị viên')).toBeInTheDocument();
+      expect(screen.getAllByText('Quyền quản trị viên')[0]).toBeInTheDocument();
 
       // Dropdown menu texts
       expect(screen.getByText('Tài khoản')).toBeInTheDocument();
@@ -297,7 +303,7 @@ describe('AdminLayout', () => {
       expect(() => renderAdminLayout('/admin')).not.toThrow();
 
       expect(screen.getByText('Phiên quản trị')).toBeInTheDocument();
-      expect(screen.getByText('Quyền quản trị viên')).toBeInTheDocument();
+      expect(screen.getAllByText('Quyền quản trị viên')[0]).toBeInTheDocument();
     });
   });
 
@@ -400,12 +406,12 @@ describe('AdminLayout', () => {
       });
 
       // Dashboard should have active styles
-      expect(dashboardLink).toHaveClass('border-primary');
-      expect(dashboardLink).not.toHaveClass('border-transparent');
+      expect(dashboardLink).toHaveClass('bg-teal-50');
+      expect(dashboardLink).not.toHaveClass('text-slate-600');
 
       // Products should have inactive styles
-      expect(productsLink).toHaveClass('border-transparent');
-      expect(productsLink).not.toHaveClass('border-primary');
+      expect(productsLink).toHaveClass('text-slate-600');
+      expect(productsLink).not.toHaveClass('bg-teal-50');
     });
 
     it('marks Products as active and Dashboard as inactive when location is /admin/products', () => {
@@ -419,12 +425,12 @@ describe('AdminLayout', () => {
       });
 
       // Dashboard should NOT be active on /admin/products (checks exact match for /admin)
-      expect(dashboardLink).toHaveClass('border-transparent');
-      expect(dashboardLink).not.toHaveClass('border-primary');
+      expect(dashboardLink).toHaveClass('text-slate-600');
+      expect(dashboardLink).not.toHaveClass('bg-teal-50');
 
       // Products should be active
-      expect(productsLink).toHaveClass('border-primary');
-      expect(productsLink).not.toHaveClass('border-transparent');
+      expect(productsLink).toHaveClass('bg-teal-50');
+      expect(productsLink).not.toHaveClass('text-slate-600');
     });
 
     it('marks parent nav as active on nested subroutes via startsWith', () => {
@@ -437,8 +443,8 @@ describe('AdminLayout', () => {
         name: /Sản phẩm.*Danh mục và nội dung bán hàng/i,
       });
 
-      expect(dashboardLink).toHaveClass('border-transparent');
-      expect(productsLink).toHaveClass('border-primary');
+      expect(dashboardLink).toHaveClass('text-slate-600');
+      expect(productsLink).toHaveClass('bg-teal-50');
       expect(screen.getByText('Trang Thêm Sản Phẩm Mới')).toBeInTheDocument();
     });
 
@@ -457,12 +463,12 @@ describe('AdminLayout', () => {
         const nav = container.querySelector('nav')!;
 
         const activeLink = within(nav).getByRole('link', { name });
-        expect(activeLink).toHaveClass('border-primary');
+        expect(activeLink).toHaveClass('bg-teal-50');
 
         const dashboardLink = within(nav).getByRole('link', {
           name: /^Dashboard/i,
         });
-        expect(dashboardLink).toHaveClass('border-transparent');
+        expect(dashboardLink).toHaveClass('text-slate-600');
       }
     });
   });
@@ -551,7 +557,7 @@ describe('AdminLayout', () => {
         'animate-spin',
         'rounded-full',
         'border-2',
-        'border-primary',
+        'border-teal-600',
         'border-t-transparent',
       );
 
