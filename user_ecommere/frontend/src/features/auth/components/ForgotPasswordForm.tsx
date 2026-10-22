@@ -43,19 +43,19 @@ export function ForgotPasswordForm({
               <FormLabel className="text-xs font-semibold uppercase tracking-wider text-slate-700">
                 Email
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Mail className="h-4 w-4" />
-                  </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Mail className="h-4 w-4" />
+                </div>
+                <FormControl>
                   <Input
                     type="email"
                     placeholder="email@example.com"
                     className="pl-10 h-11 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 text-sm focus-visible:ring-2 focus-visible:ring-teal-500"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-xs text-rose-600" />
             </FormItem>
           )}
