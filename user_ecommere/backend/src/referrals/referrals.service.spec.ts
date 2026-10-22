@@ -396,18 +396,30 @@ describe('ReferralsService', () => {
           code: 'COUPON-C',
           type: CouponType.PERCENT,
           value: 10,
+          active: true,
+          validUntil: new Date('2099-01-01T00:00:00.000Z'),
+          maxUses: null,
+          usedCount: 0,
           createdAt: new Date('2026-03-03'),
         },
         {
           code: 'COUPON-B',
           type: CouponType.FIXED,
           value: 50000,
+          active: true,
+          validUntil: new Date('2099-01-01T00:00:00.000Z'),
+          maxUses: 10,
+          usedCount: 2,
           createdAt: new Date('2026-03-02'),
         },
         {
           code: 'COUPON-A',
           type: CouponType.PERCENT,
           value: 15,
+          active: true,
+          validUntil: new Date('2099-01-01T00:00:00.000Z'),
+          maxUses: null,
+          usedCount: 0,
           createdAt: new Date('2026-03-01'),
         },
       ];
@@ -419,6 +431,8 @@ describe('ReferralsService', () => {
       expect(mockPrismaService.coupon.findMany).toHaveBeenCalledWith({
         where: {
           code: { in: ['COUPON-A', 'COUPON-B', 'COUPON-C'] },
+          active: true,
+          validUntil: { gte: expect.any(Date) },
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -434,7 +448,10 @@ describe('ReferralsService', () => {
           code: 'COUPON-NO-EXPIRY',
           type: CouponType.PERCENT,
           value: 10,
+          active: true,
           validUntil: null,
+          maxUses: null,
+          usedCount: 0,
           createdAt: new Date('2026-03-01'),
         },
       ];
@@ -447,9 +464,116 @@ describe('ReferralsService', () => {
       expect(mockPrismaService.coupon.findMany).toHaveBeenCalledWith({
         where: {
           code: { in: ['COUPON-NO-EXPIRY'] },
+          active: true,
+          validUntil: { gte: expect.any(Date) },
         },
         orderBy: { createdAt: 'desc' },
       });
+    });
+
+    it('should filter out inactive coupons', async () => {
+      mockPrismaService.referral.findMany
+        .mockResolvedValueOnce([{ referrerCouponCode: 'COUPON-INACTIVE' }])
+        .mockResolvedValueOnce([]);
+
+      mockPrismaService.coupon.findMany.mockResolvedValue([
+        {
+          code: 'COUPON-INACTIVE',
+          type: CouponType.PERCENT,
+          value: 10,
+          active: false,
+          validUntil: new Date('2099-01-01T00:00:00.000Z'),
+          maxUses: null,
+          usedCount: 0,
+          createdAt: new Date('2026-03-01'),
+        },
+      ]);
+
+      const result = await service.getMyCouponsFromReferral('user-1');
+
+      expect(result).toEqual({ data: [] });
+    });
+
+    it('should filter out expired coupons', async () => {
+      mockPrismaService.referral.findMany
+        .mockResolvedValueOnce([{ referrerCouponCode: 'COUPON-EXPIRED' }])
+        .mockResolvedValueOnce([]);
+
+      mockPrismaService.coupon.findMany.mockResolvedValue([
+        {
+          code: 'COUPON-EXPIRED',
+          type: CouponType.PERCENT,
+          value: 10,
+          active: true,
+          validUntil: new Date('2020-01-01T00:00:00.000Z'),
+          maxUses: null,
+          usedCount: 0,
+          createdAt: new Date('2020-01-01'),
+        },
+      ]);
+
+      const result = await service.getMyCouponsFromReferral('user-1');
+
+      expect(result).toEqual({ data: [] });
+    });
+
+    it('should filter out fully spent coupons (usedCount >= maxUses)', async () => {
+      mockPrismaService.referral.findMany
+        .mockResolvedValueOnce([
+          { referrerCouponCode: 'COUPON-EXACT-MAX' },
+          { referrerCouponCode: 'COUPON-OVER-MAX' },
+        ])
+        .mockResolvedValueOnce([]);
+
+      mockPrismaService.coupon.findMany.mockResolvedValue([
+        {
+          code: 'COUPON-EXACT-MAX',
+          type: CouponType.PERCENT,
+          value: 10,
+          active: true,
+          validUntil: new Date('2099-01-01T00:00:00.000Z'),
+          maxUses: 1,
+          usedCount: 1,
+          createdAt: new Date('2026-03-01'),
+        },
+        {
+          code: 'COUPON-OVER-MAX',
+          type: CouponType.FIXED,
+          value: 20000,
+          active: true,
+          validUntil: new Date('2099-01-01T00:00:00.000Z'),
+          maxUses: 2,
+          usedCount: 3,
+          createdAt: new Date('2026-03-01'),
+        },
+      ]);
+
+      const result = await service.getMyCouponsFromReferral('user-1');
+
+      expect(result).toEqual({ data: [] });
+    });
+
+    it('should return coupons that still have remaining uses (usedCount < maxUses)', async () => {
+      const validCoupon = {
+        code: 'COUPON-HAS-USES',
+        type: CouponType.PERCENT,
+        value: 10,
+        active: true,
+        validUntil: new Date('2099-01-01T00:00:00.000Z'),
+        maxUses: 5,
+        usedCount: 2,
+        createdAt: new Date('2026-03-01'),
+      };
+
+      mockPrismaService.referral.findMany
+        .mockResolvedValueOnce([{ referrerCouponCode: 'COUPON-HAS-USES' }])
+        .mockResolvedValueOnce([]);
+
+      mockPrismaService.coupon.findMany.mockResolvedValue([validCoupon]);
+
+      const result = await service.getMyCouponsFromReferral('user-1');
+
+      expect(result).toEqual({ data: [validCoupon] });
     });
   });
 
