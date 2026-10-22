@@ -85,7 +85,7 @@ describe('CartBadge', () => {
       'rounded-full',
       'px-1',
       'text-[10px]',
-      'bg-destructive',
+      'bg-rose-50',
     );
   });
 
