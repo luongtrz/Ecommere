@@ -277,7 +277,7 @@ export function AdminInventoryPage() {
       setIsAdjustDialogOpen(false);
       const target = stockItems.find((item) => item.id === variables.variantId);
       if (target) {
-        let prev = target.stock;
+        const prev = target.stock;
         let next = prev;
         if (variables.type === 'IN') next = prev + variables.quantity;
         if (variables.type === 'OUT')
