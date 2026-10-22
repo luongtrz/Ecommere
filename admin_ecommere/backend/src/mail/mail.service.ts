@@ -20,8 +20,10 @@ export class MailService {
   }
 
   createTransporter(): any {
-    const host = this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
-    const port = Number(this.configService.get<number | string>('SMTP_PORT')) || 587;
+    const host =
+      this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
+    const port =
+      Number(this.configService.get<number | string>('SMTP_PORT')) || 587;
     const secureVal = this.configService.get<string | boolean>('SMTP_SECURE');
     const secure =
       secureVal !== undefined
@@ -35,11 +37,13 @@ export class MailService {
       this.configService.get<string>('SMTP_PASS') ||
       this.configService.get<string>('SMTP_PASSWORD');
 
-    const auth = (user || pass) ? { user: user || '', pass: pass || '' } : undefined;
+    const auth =
+      user || pass ? { user: user || '', pass: pass || '' } : undefined;
 
     const createTransport =
       (nodemailer as any).createTransport ||
-      ((nodemailer as any).default && (nodemailer as any).default.createTransport);
+      ((nodemailer as any).default &&
+        (nodemailer as any).default.createTransport);
 
     return createTransport({
       host,
@@ -68,7 +72,10 @@ export class MailService {
       this.logger.log(`Email sent to ${options.to}`);
       return info;
     } catch (error) {
-      this.logger.error(`Failed to send email to ${options.to}: ${error?.message || error}`, error?.stack);
+      this.logger.error(
+        `Failed to send email to ${options.to}: ${error?.message || error}`,
+        error?.stack,
+      );
       throw error;
     }
   }

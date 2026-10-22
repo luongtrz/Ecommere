@@ -25,42 +25,46 @@ export function parseAddressJson(value?: unknown): any {
   }
 }
 
-const orderSchema = z.object({
-  id: z.string(),
-  code: z.string().optional(),
-  orderNumber: z.string().optional(),
-  status: z.string(),
-  total: z.number(),
-  shippingFee: z.number(),
-  items: z.array(z.any()),
-  addressJson: z.string().optional(),
-  shippingAddress: z.any().optional(),
-  paymentMethod: z.string(),
-  createdAt: z.string(),
-}).transform(data => ({
-  ...data,
-  orderNumber: data.code || data.orderNumber,
-  shippingAddress: (() => {
-    const address = data.addressJson ? parseAddressJson(data.addressJson) : parseAddressJson(data.shippingAddress);
+const orderSchema = z
+  .object({
+    id: z.string(),
+    code: z.string().optional(),
+    orderNumber: z.string().optional(),
+    status: z.string(),
+    total: z.number(),
+    shippingFee: z.number(),
+    items: z.array(z.any()),
+    addressJson: z.string().optional(),
+    shippingAddress: z.any().optional(),
+    paymentMethod: z.string(),
+    createdAt: z.string(),
+  })
+  .transform((data) => ({
+    ...data,
+    orderNumber: data.code || data.orderNumber,
+    shippingAddress: (() => {
+      const address = data.addressJson
+        ? parseAddressJson(data.addressJson)
+        : parseAddressJson(data.shippingAddress);
 
-    if (!address) {
-      return null;
-    }
+      if (!address) {
+        return null;
+      }
 
-    return {
-      ...address,
-      address: address.address ?? address.line1,
-    };
-  })(),
-  items: data.items.map((item: any) => ({
-    ...item,
-    name: item.nameSnapshot,
-    price: item.unitPrice,
-    quantity: item.quantity,
-    image: item.variant?.product?.images?.[0] || null,
-    productName: item.variant?.product?.name || item.nameSnapshot,
-  })),
-}));
+      return {
+        ...address,
+        address: address.address ?? address.line1,
+      };
+    })(),
+    items: data.items.map((item: any) => ({
+      ...item,
+      name: item.nameSnapshot,
+      price: item.unitPrice,
+      quantity: item.quantity,
+      image: item.variant?.product?.images?.[0] || null,
+      productName: item.variant?.product?.name || item.nameSnapshot,
+    })),
+  }));
 
 const ordersResponseSchema = z.object({
   orders: z.array(orderSchema),
@@ -72,12 +76,15 @@ export type Order = z.infer<typeof orderSchema>;
 
 export const ordersApi = {
   async getAll(page = 1, limit = 10) {
-    const response = await apiClient.get('/orders/my', { params: { page, limit } });
+    const response = await apiClient.get('/orders/my', {
+      params: { page, limit },
+    });
     const actualData = response.data.data || response.data;
     const mapped = {
       orders: actualData.data || [],
       total: actualData.total || 0,
-      totalPages: actualData.totalPages ?? Math.ceil((actualData.total || 0) / limit),
+      totalPages:
+        actualData.totalPages ?? Math.ceil((actualData.total || 0) / limit),
     };
     return ordersResponseSchema.parse(mapped);
   },

@@ -9,8 +9,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, ArrowLeft, SlidersHorizontal, Package, TrendingUp, Grid3X3, List, ShoppingBag } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Search,
+  ArrowLeft,
+  SlidersHorizontal,
+  Package,
+  TrendingUp,
+  Grid3X3,
+  List,
+  ShoppingBag,
+} from 'lucide-react';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { formatCurrency } from '@/lib/formatters';
 
@@ -20,7 +35,9 @@ export function SearchPage() {
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
 
-  const { data, isLoading } = useProductSearch(query, { sortBy: sortBy as any });
+  const { data, isLoading } = useProductSearch(query, {
+    sortBy: sortBy as any,
+  });
   const { addItem } = useCart();
 
   const handleSearchChange = (newQuery: string) => {
@@ -39,7 +56,9 @@ export function SearchPage() {
 
   const handleFilterClick = () => {
     // TODO: Implement filter modal/sidebar
-    alert('Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.');
+    alert(
+      'Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.',
+    );
   };
 
   const handleAddToCart = (product: any, variant: any) => {
@@ -68,7 +87,10 @@ export function SearchPage() {
           <div className="container py-6">
             <div className="flex items-center gap-4 mb-6">
               <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
-                <Link to="/catalog" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/catalog"
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                >
                   <ArrowLeft className="h-4 w-4" />
                   Quay lại danh sách
                 </Link>
@@ -88,7 +110,9 @@ export function SearchPage() {
                       className="pl-12 h-12 text-base"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          handleSearchChange((e.target as HTMLInputElement).value);
+                          handleSearchChange(
+                            (e.target as HTMLInputElement).value,
+                          );
                         }
                       }}
                     />
@@ -96,7 +120,9 @@ export function SearchPage() {
 
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Sắp xếp:</span>
+                      <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                        Sắp xếp:
+                      </span>
                       <Select value={sortBy} onValueChange={handleSortChange}>
                         <SelectTrigger className="w-[180px] h-12">
                           <SelectValue />
@@ -111,13 +137,22 @@ export function SearchPage() {
                       </Select>
                     </div>
 
-                    <Button variant="outline" size="lg" className="h-12" onClick={handleFilterClick}>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="h-12"
+                      onClick={handleFilterClick}
+                    >
                       <SlidersHorizontal className="h-4 w-4 mr-2" />
                       Bộ lọc
                     </Button>
 
                     {query && (
-                      <Button variant="ghost" onClick={clearSearch} className="h-12 text-gray-500 hover:text-gray-700">
+                      <Button
+                        variant="ghost"
+                        onClick={clearSearch}
+                        className="h-12 text-gray-500 hover:text-gray-700"
+                      >
                         Xóa tìm kiếm
                       </Button>
                     )}
@@ -131,10 +166,14 @@ export function SearchPage() {
                       <div className="flex items-center gap-2">
                         <Search className="h-4 w-4 text-gray-400" />
                         <span className="text-sm text-gray-600">
-                          Tìm kiếm cho: <span className="font-medium">"{query}"</span>
+                          Tìm kiếm cho:{' '}
+                          <span className="font-medium">"{query}"</span>
                         </span>
                       </div>
-                      <Badge variant="secondary" className="flex items-center gap-1">
+                      <Badge
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         <Package className="h-3 w-3" />
                         {data?.total || 0} kết quả
                       </Badge>
@@ -143,7 +182,10 @@ export function SearchPage() {
                     {!isLoading && data?.total === 0 && (
                       <div className="text-sm text-gray-500">
                         Thử tìm với từ khóa khác hoặc{' '}
-                        <Link to="/catalog" className="text-blue-600 hover:underline">
+                        <Link
+                          to="/catalog"
+                          className="text-blue-600 hover:underline"
+                        >
                           xem tất cả sản phẩm
                         </Link>
                       </div>
@@ -175,7 +217,10 @@ export function SearchPage() {
                         Xem tất cả sản phẩm
                       </Link>
                     </Button>
-                    <Button variant="outline" onClick={() => setSearchParams({})}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchParams({})}
+                    >
                       Xóa tìm kiếm
                     </Button>
                   </div>
@@ -184,7 +229,9 @@ export function SearchPage() {
 
               {/* Search Suggestions */}
               <div className="mt-8 max-w-2xl mx-auto">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Gợi ý tìm kiếm:</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Gợi ý tìm kiếm:
+                </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     'Nước hoa chanh',
@@ -194,7 +241,7 @@ export function SearchPage() {
                     'Nước hoa vanilla',
                     'Nước hoa lavender',
                     'Nước hoa trà xanh',
-                    'Nước hoa bạc hà'
+                    'Nước hoa bạc hà',
                   ].map((suggestion) => (
                     <Button
                       key={suggestion}
@@ -243,12 +290,14 @@ export function SearchPage() {
               </div>
 
               {/* Products Display */}
-              <div className={`${
-                viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
-                  : 'space-y-4'
-              }`}>
-                {data?.products.map((product) => (
+              <div
+                className={`${
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
+                    : 'space-y-4'
+                }`}
+              >
+                {data?.products.map((product) =>
                   viewMode === 'grid' ? (
                     <ProductCard
                       key={product.id}
@@ -259,10 +308,16 @@ export function SearchPage() {
                       price={product.basePrice}
                       rating={product.rating}
                       reviewCount={product.reviewCount}
-                      onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                      onAddToCart={() =>
+                        product.variants[0] &&
+                        handleAddToCart(product, product.variants[0])
+                      }
                     />
                   ) : (
-                    <Card key={product.id} className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+                    <Card
+                      key={product.id}
+                      className="p-4 md:p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500"
+                    >
                       <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                         <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm mx-auto md:mx-0">
                           <img
@@ -273,10 +328,14 @@ export function SearchPage() {
                         </div>
                         <div className="flex-1 min-w-0 text-center md:text-left">
                           <div className="mb-3">
-                            <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-2 leading-tight">{product.name}</h3>
+                            <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-2 leading-tight">
+                              {product.name}
+                            </h3>
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-3">
                               <div className="flex items-center gap-1">
-                                <span className="text-yellow-400 text-base md:text-lg">★</span>
+                                <span className="text-yellow-400 text-base md:text-lg">
+                                  ★
+                                </span>
                                 <span className="text-sm font-medium text-gray-700">
                                   {product.rating?.toFixed(1) || '0.0'}
                                 </span>
@@ -294,16 +353,23 @@ export function SearchPage() {
                               </p>
                             )}
                             <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                              {product.variants?.slice(0, 3).map((variant: any, index: number) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {variant.scent} - {variant.volumeMl}ml
-                                </Badge>
-                              ))}
-                              {product.variants && product.variants.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{product.variants.length - 3} nữa
-                                </Badge>
-                              )}
+                              {product.variants
+                                ?.slice(0, 3)
+                                .map((variant: any, index: number) => (
+                                  <Badge
+                                    key={index}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {variant.scent} - {variant.volumeMl}ml
+                                  </Badge>
+                                ))}
+                              {product.variants &&
+                                product.variants.length > 3 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{product.variants.length - 3} nữa
+                                  </Badge>
+                                )}
                             </div>
                           </div>
                           <div className="text-center md:text-right">
@@ -313,7 +379,10 @@ export function SearchPage() {
                             <Button
                               size="lg"
                               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md w-full md:w-auto"
-                              onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                              onClick={() =>
+                                product.variants[0] &&
+                                handleAddToCart(product, product.variants[0])
+                              }
                             >
                               <ShoppingBag className="h-4 w-4 mr-2" />
                               Thêm vào giỏ
@@ -322,8 +391,8 @@ export function SearchPage() {
                         </div>
                       </div>
                     </Card>
-                  )
-                ))}
+                  ),
+                )}
               </div>
 
               {/* Load More or Pagination could go here */}
@@ -332,9 +401,7 @@ export function SearchPage() {
                   <p className="text-gray-600 mb-4">
                     Hiển thị {data.products.length} / {data.total} sản phẩm
                   </p>
-                  <Button variant="outline">
-                    Xem thêm sản phẩm
-                  </Button>
+                  <Button variant="outline">Xem thêm sản phẩm</Button>
                 </div>
               )}
             </>

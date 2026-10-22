@@ -8,7 +8,6 @@ import { ShippingService } from '../shipping/shipping.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     cart: {
@@ -58,7 +57,6 @@ describe('OrdersService', () => {
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
@@ -142,7 +140,9 @@ describe('OrdersService', () => {
       });
       mockPrismaService.order.create.mockResolvedValue(mockOrder);
       mockPrismaService.order.count.mockResolvedValue(0);
-      mockPrismaService.productVariant.findUnique.mockResolvedValue({ stock: 8 });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        stock: 8,
+      });
 
       const result = await service.checkout('user1', { addressId: 'addr1' });
 
@@ -216,7 +216,9 @@ describe('OrdersService', () => {
         coupon: null,
       };
 
-      mockPrismaService.cart.findUnique.mockResolvedValue(mockCartWithMultipleItems);
+      mockPrismaService.cart.findUnique.mockResolvedValue(
+        mockCartWithMultipleItems,
+      );
       mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
       mockPrismaService.productVariant.findUnique.mockResolvedValue({
         id: 'var1',
@@ -319,16 +321,24 @@ describe('OrdersService', () => {
 
       mockPrismaService.cart.findUnique.mockResolvedValue(emptyCart);
 
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow(BadRequestException);
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow('Cart is empty');
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow('Cart is empty');
     });
 
     it('should throw NotFoundException when address not found', async () => {
       mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
       mockPrismaService.address.findUnique.mockResolvedValue(null);
 
-      await expect(service.checkout('user1', { addressId: 'invalid' })).rejects.toThrow(NotFoundException);
-      await expect(service.checkout('user1', { addressId: 'invalid' })).rejects.toThrow('Address not found');
+      await expect(
+        service.checkout('user1', { addressId: 'invalid' }),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.checkout('user1', { addressId: 'invalid' }),
+      ).rejects.toThrow('Address not found');
     });
 
     it('should throw BadRequestException when address belongs to different user', async () => {
@@ -337,7 +347,9 @@ describe('OrdersService', () => {
       mockPrismaService.cart.findUnique.mockResolvedValue(mockCart);
       mockPrismaService.address.findUnique.mockResolvedValue(otherUserAddress);
 
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException when product is inactive', async () => {
@@ -361,8 +373,12 @@ describe('OrdersService', () => {
       mockPrismaService.cart.findUnique.mockResolvedValue(inactiveProductCart);
       mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
 
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow(BadRequestException);
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow('Product is no longer available');
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow('Product is no longer available');
     });
 
     it('should throw BadRequestException when insufficient stock', async () => {
@@ -383,8 +399,12 @@ describe('OrdersService', () => {
       mockPrismaService.cart.findUnique.mockResolvedValue(lowStockCart);
       mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
 
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow(BadRequestException);
-      await expect(service.checkout('user1', { addressId: 'addr1' })).rejects.toThrow('Insufficient stock');
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.checkout('user1', { addressId: 'addr1' }),
+      ).rejects.toThrow('Insufficient stock');
     });
 
     it('should apply coupon discount when explicit items checkout provides a valid couponCode', async () => {
@@ -689,7 +709,9 @@ describe('OrdersService', () => {
           items: [{ variantId: 'var1', quantity: 1 }],
           couponCode: 'PERUSER',
         }),
-      ).rejects.toThrow('You have already used this coupon the maximum number of times');
+      ).rejects.toThrow(
+        'You have already used this coupon the maximum number of times',
+      );
 
       expect(mockPrismaService.order.create).not.toHaveBeenCalled();
     });
@@ -878,7 +900,11 @@ describe('OrdersService', () => {
       mockPrismaService.order.findMany.mockResolvedValue([]);
       mockPrismaService.order.count.mockResolvedValue(0);
 
-      await service.getMyOrders('user1', { page: 1, limit: 10, status: OrderStatus.DELIVERED });
+      await service.getMyOrders('user1', {
+        page: 1,
+        limit: 10,
+        status: OrderStatus.DELIVERED,
+      });
 
       expect(mockPrismaService.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -913,7 +939,9 @@ describe('OrdersService', () => {
         return callback(mockPrismaService);
       });
 
-      const result = await service.updateOrderStatus('order1', { status: OrderStatus.PAID });
+      const result = await service.updateOrderStatus('order1', {
+        status: OrderStatus.PAID,
+      });
 
       expect(result.status).toBe(OrderStatus.PAID);
       expect(result.paymentStatus).toBe(PaymentStatus.COMPLETED);
@@ -922,9 +950,9 @@ describe('OrdersService', () => {
     it('should throw NotFoundException when order not found', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateOrderStatus('invalid', { status: OrderStatus.PAID })).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.updateOrderStatus('invalid', { status: OrderStatus.PAID }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException for invalid status transition', async () => {
@@ -937,12 +965,16 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(service.updateOrderStatus('order1', { status: OrderStatus.PENDING_PAYMENT })).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.updateOrderStatus('order1', { status: OrderStatus.PENDING_PAYMENT })).rejects.toThrow(
-        'Invalid status transition',
-      );
+      await expect(
+        service.updateOrderStatus('order1', {
+          status: OrderStatus.PENDING_PAYMENT,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.updateOrderStatus('order1', {
+          status: OrderStatus.PENDING_PAYMENT,
+        }),
+      ).rejects.toThrow('Invalid status transition');
     });
 
     it('should transition to CANCELED from PAID and set paymentStatus to REFUNDED, restore stock, and release coupon', async () => {
@@ -974,11 +1006,19 @@ describe('OrdersService', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         return callback(mockPrismaService);
       });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
-      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        stock: 10,
+      });
+      mockPrismaService.productVariant.update.mockResolvedValue({
+        id: 'var1',
+        stock: 12,
+      });
       mockPrismaService.coupon.updateMany.mockResolvedValue({ count: 1 });
 
-      const result = await service.updateOrderStatus('order1', { status: OrderStatus.CANCELED });
+      const result = await service.updateOrderStatus('order1', {
+        status: OrderStatus.CANCELED,
+      });
 
       expect(mockPrismaService.order.updateMany).toHaveBeenCalledWith({
         where: {
@@ -1029,7 +1069,9 @@ describe('OrdersService', () => {
 
       const releaseCouponSpy = jest.spyOn(service as any, 'releaseCouponUsage');
 
-      const result = await service.updateOrderStatus('order1', { status: OrderStatus.CANCELED });
+      const result = await service.updateOrderStatus('order1', {
+        status: OrderStatus.CANCELED,
+      });
 
       expect(mockPrismaService.order.updateMany).toHaveBeenCalledWith({
         where: {
@@ -1072,8 +1114,14 @@ describe('OrdersService', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         return callback(mockPrismaService);
       });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
-      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        stock: 10,
+      });
+      mockPrismaService.productVariant.update.mockResolvedValue({
+        id: 'var1',
+        stock: 12,
+      });
       mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.order.findUnique
         .mockResolvedValueOnce(mockOrder)
@@ -1110,8 +1158,14 @@ describe('OrdersService', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         return callback(mockPrismaService);
       });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
-      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        stock: 10,
+      });
+      mockPrismaService.productVariant.update.mockResolvedValue({
+        id: 'var1',
+        stock: 12,
+      });
       mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.coupon.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.order.findUnique
@@ -1170,8 +1224,14 @@ describe('OrdersService', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         return callback(mockPrismaService);
       });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 5 });
-      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 6 });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        stock: 5,
+      });
+      mockPrismaService.productVariant.update.mockResolvedValue({
+        id: 'var1',
+        stock: 6,
+      });
       mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.coupon.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.order.findUnique
@@ -1230,8 +1290,14 @@ describe('OrdersService', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         return callback(mockPrismaService);
       });
-      mockPrismaService.productVariant.findUnique.mockResolvedValue({ id: 'var1', stock: 10 });
-      mockPrismaService.productVariant.update.mockResolvedValue({ id: 'var1', stock: 12 });
+      mockPrismaService.productVariant.findUnique.mockResolvedValue({
+        id: 'var1',
+        stock: 10,
+      });
+      mockPrismaService.productVariant.update.mockResolvedValue({
+        id: 'var1',
+        stock: 12,
+      });
       mockPrismaService.order.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.order.findUnique
         .mockResolvedValueOnce(mockOrder)
@@ -1250,7 +1316,9 @@ describe('OrdersService', () => {
     it('should throw NotFoundException when order not found', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(null);
 
-      await expect(service.cancelOrder('user1', 'invalid')).rejects.toThrow(NotFoundException);
+      await expect(service.cancelOrder('user1', 'invalid')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException when order belongs to different user', async () => {
@@ -1263,8 +1331,12 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(NotFoundException);
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Order not found');
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(
+        'Order not found',
+      );
     });
 
     it('should throw BadRequestException when order cannot be cancelled', async () => {
@@ -1277,17 +1349,27 @@ describe('OrdersService', () => {
 
       mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(BadRequestException);
-      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow('Order cannot be cancelled at this stage');
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.cancelOrder('user1', 'order1')).rejects.toThrow(
+        'Order cannot be cancelled at this stage',
+      );
     });
   });
 
   describe('quoteShippingFee', () => {
     it('should throw BadRequestException when province is empty', () => {
       expect(() => service.quoteShippingFee('')).toThrow(BadRequestException);
-      expect(() => service.quoteShippingFee('')).toThrow('Vui lòng nhập tỉnh/thành phố');
-      expect(() => service.quoteShippingFee('   ')).toThrow(BadRequestException);
-      expect(() => service.quoteShippingFee('   ')).toThrow('Vui lòng nhập tỉnh/thành phố');
+      expect(() => service.quoteShippingFee('')).toThrow(
+        'Vui lòng nhập tỉnh/thành phố',
+      );
+      expect(() => service.quoteShippingFee('   ')).toThrow(
+        BadRequestException,
+      );
+      expect(() => service.quoteShippingFee('   ')).toThrow(
+        'Vui lòng nhập tỉnh/thành phố',
+      );
     });
 
     it('should return 0 for a Bangkok quote', () => {
@@ -1299,7 +1381,10 @@ describe('OrdersService', () => {
         fee: 0,
       });
 
-      const expressResult = service.quoteShippingFee('Bangkok', ShippingMethod.EXPRESS);
+      const expressResult = service.quoteShippingFee(
+        'Bangkok',
+        ShippingMethod.EXPRESS,
+      );
       expect(expressResult).toEqual({
         province: 'Bangkok',
         shippingMethod: ShippingMethod.EXPRESS,
@@ -1315,7 +1400,10 @@ describe('OrdersService', () => {
         address,
         ShippingMethod.STANDARD,
       );
-      const standardResult = service.quoteShippingFee(province, ShippingMethod.STANDARD);
+      const standardResult = service.quoteShippingFee(
+        province,
+        ShippingMethod.STANDARD,
+      );
 
       expect(standardResult).toEqual({
         province,
@@ -1327,7 +1415,10 @@ describe('OrdersService', () => {
         address,
         ShippingMethod.EXPRESS,
       );
-      const expressResult = service.quoteShippingFee(province, ShippingMethod.EXPRESS);
+      const expressResult = service.quoteShippingFee(
+        province,
+        ShippingMethod.EXPRESS,
+      );
 
       expect(expressResult).toEqual({
         province,
@@ -1540,7 +1631,9 @@ describe('OrdersService', () => {
       });
 
       expect(result.address).toEqual(mockAddress);
-      expect(result.deliveryAddress).toBe('123 Test St., Lat Yao, Chatuchak, Bangkok');
+      expect(result.deliveryAddress).toBe(
+        '123 Test St., Lat Yao, Chatuchak, Bangkok',
+      );
       expect(result.itemCount).toBe(1);
       expect(result.subtotal).toBe(180000);
       expect(result.shippingFee).toBe(0);

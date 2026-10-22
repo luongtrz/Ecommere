@@ -1,19 +1,35 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck } from 'lucide-react';
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingBag,
+  ArrowRight,
+  Truck,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 
 const FREESHIP_THRESHOLD = 250000;
 
 export function CartDrawer() {
-  const { items, updateQuantity, removeItem, totalPrice, isOpen, closeCart } = useCart();
+  const { items, updateQuantity, removeItem, totalPrice, isOpen, closeCart } =
+    useCart();
 
   const freeshipRemaining = Math.max(0, FREESHIP_THRESHOLD - totalPrice);
-  const freeshipProgress = Math.min(100, Math.round((totalPrice / FREESHIP_THRESHOLD) * 100));
+  const freeshipProgress = Math.min(
+    100,
+    Math.round((totalPrice / FREESHIP_THRESHOLD) * 100),
+  );
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
@@ -38,14 +54,22 @@ export function CartDrawer() {
             <div className="flex items-center gap-1.5 font-bold text-teal-900">
               <Truck className="h-3.5 w-3.5 text-teal-600" />
               {freeshipRemaining === 0 ? (
-                <span className="text-emerald-700">🎉 Bạn đã đủ điều kiện FREESHIP!</span>
+                <span className="text-emerald-700">
+                  🎉 Bạn đã đủ điều kiện FREESHIP!
+                </span>
               ) : (
                 <span>
-                  Mua thêm <strong className="text-teal-700">{formatCurrency(freeshipRemaining)}</strong> để được Freeship
+                  Mua thêm{' '}
+                  <strong className="text-teal-700">
+                    {formatCurrency(freeshipRemaining)}
+                  </strong>{' '}
+                  để được Freeship
                 </span>
               )}
             </div>
-            <span className="font-extrabold text-teal-700">{freeshipProgress}%</span>
+            <span className="font-extrabold text-teal-700">
+              {freeshipProgress}%
+            </span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-teal-200/60 overflow-hidden">
             <div
@@ -62,9 +86,12 @@ export function CartDrawer() {
                 <ShoppingBag className="h-8 w-8" />
               </div>
               <div>
-                <h3 className="font-black text-slate-900 text-base">Giỏ hàng của bạn đang trống</h3>
+                <h3 className="font-black text-slate-900 text-base">
+                  Giỏ hàng của bạn đang trống
+                </h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Hãy khám phá các dòng chai xịt Thái Lan đuổi chuột, diệt côn trùng và tẩy rửa tiện ích.
+                  Hãy khám phá các dòng chai xịt Thái Lan đuổi chuột, diệt côn
+                  trùng và tẩy rửa tiện ích.
                 </p>
               </div>
               <Button
@@ -80,7 +107,10 @@ export function CartDrawer() {
           <>
             <div className="flex-1 px-6 overflow-y-auto divide-y divide-slate-100">
               {items.map((item) => (
-                <div key={item.variantId} className="py-4 flex gap-3.5 items-center">
+                <div
+                  key={item.variantId}
+                  className="py-4 flex gap-3.5 items-center"
+                >
                   <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50 p-1">
                     <img
                       src={getImageUrl(item.image)}
@@ -96,7 +126,10 @@ export function CartDrawer() {
                       </h4>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {item.scent && (
-                          <Badge variant="secondary" className="px-2 py-0 text-[10px] font-semibold bg-slate-100 text-slate-700 rounded-md">
+                          <Badge
+                            variant="secondary"
+                            className="px-2 py-0 text-[10px] font-semibold bg-slate-100 text-slate-700 rounded-md"
+                          >
                             {item.scent}
                           </Badge>
                         )}
@@ -119,7 +152,9 @@ export function CartDrawer() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 rounded-md hover:bg-slate-100 text-slate-700"
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity - 1)
+                            }
                             disabled={item.quantity <= 1}
                           >
                             <Minus className="h-3 w-3" />
@@ -131,8 +166,13 @@ export function CartDrawer() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 rounded-md hover:bg-slate-100 text-slate-700"
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity + 1)
+                            }
+                            disabled={
+                              typeof item.stock === 'number' &&
+                              item.quantity >= item.stock
+                            }
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -157,17 +197,31 @@ export function CartDrawer() {
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-slate-500">
                   <span>Tạm tính ({items.length} sản phẩm):</span>
-                  <span className="font-medium text-slate-700">{formatCurrency(totalPrice)}</span>
+                  <span className="font-medium text-slate-700">
+                    {formatCurrency(totalPrice)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-500">
                   <span>Vận chuyển:</span>
-                  <span className={freeshipRemaining === 0 ? 'text-emerald-600 font-bold' : 'text-slate-700'}>
-                    {freeshipRemaining === 0 ? 'Miễn phí' : 'Tính khi thanh toán'}
+                  <span
+                    className={
+                      freeshipRemaining === 0
+                        ? 'text-emerald-600 font-bold'
+                        : 'text-slate-700'
+                    }
+                  >
+                    {freeshipRemaining === 0
+                      ? 'Miễn phí'
+                      : 'Tính khi thanh toán'}
                   </span>
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                  <span className="text-sm font-bold text-slate-900">Tổng cộng:</span>
-                  <span className="text-xl font-black text-teal-700">{formatCurrency(totalPrice)}</span>
+                  <span className="text-sm font-bold text-slate-900">
+                    Tổng cộng:
+                  </span>
+                  <span className="text-xl font-black text-teal-700">
+                    {formatCurrency(totalPrice)}
+                  </span>
                 </div>
               </div>
 
@@ -177,7 +231,10 @@ export function CartDrawer() {
                   onClick={closeCart}
                   asChild
                 >
-                  <Link to="/checkout" className="flex items-center justify-center gap-2">
+                  <Link
+                    to="/checkout"
+                    className="flex items-center justify-center gap-2"
+                  >
                     Tiến Hành Thanh Toán
                     <ArrowRight className="h-4 w-4" />
                   </Link>

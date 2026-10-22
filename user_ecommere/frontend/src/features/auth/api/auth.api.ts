@@ -21,7 +21,11 @@ function clearCartIfAccountChanged(nextUserId: string) {
 const userSchema = z.object({
   id: z.string(),
   email: z.string().nullable().optional(),
-  name: z.string().nullable().optional().transform((value) => value ?? ''),
+  name: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => value ?? ''),
   role: z.enum(['CUSTOMER', 'ADMIN']),
   phone: z.string(),
   createdAt: z.string().optional(),
@@ -66,7 +70,13 @@ export const authApi = {
     }
   },
 
-  async register(name: string, phone: string, password: string, email?: string, referralCode?: string): Promise<LoginResponse> {
+  async register(
+    name: string,
+    phone: string,
+    password: string,
+    email?: string,
+    referralCode?: string,
+  ): Promise<LoginResponse> {
     try {
       const response = await apiClient.post('/auth/register', {
         name,
@@ -99,7 +109,9 @@ export const authApi = {
     }
   },
 
-  async forgotPassword(input: string | { email: string }): Promise<{ message: string }> {
+  async forgotPassword(
+    input: string | { email: string },
+  ): Promise<{ message: string }> {
     const email = typeof input === 'string' ? input : input.email;
     try {
       const response = await apiClient.post('/auth/forgot-password', { email });
@@ -113,12 +125,21 @@ export const authApi = {
 
   async resetPassword(
     tokenOrPayload: string | { token: string; newPassword: string },
-    maybeNewPassword?: string
+    maybeNewPassword?: string,
   ): Promise<{ message: string }> {
-    const token = typeof tokenOrPayload === 'string' ? tokenOrPayload : tokenOrPayload.token;
-    const newPassword = typeof tokenOrPayload === 'string' ? maybeNewPassword! : tokenOrPayload.newPassword;
+    const token =
+      typeof tokenOrPayload === 'string'
+        ? tokenOrPayload
+        : tokenOrPayload.token;
+    const newPassword =
+      typeof tokenOrPayload === 'string'
+        ? maybeNewPassword!
+        : tokenOrPayload.newPassword;
     try {
-      const response = await apiClient.post('/auth/reset-password', { token, newPassword });
+      const response = await apiClient.post('/auth/reset-password', {
+        token,
+        newPassword,
+      });
       const actualData = response.data.data || response.data;
       return actualData;
     } catch (error) {

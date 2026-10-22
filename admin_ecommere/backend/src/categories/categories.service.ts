@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SlugifyUtil } from '@/common/utils/slugify.util';
@@ -7,7 +12,7 @@ import { UpdateCategoryDto } from './dtos/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll() {
     const categories = await this.prisma.category.findMany({
@@ -19,7 +24,7 @@ export class CategoriesService {
       orderBy: { name: 'asc' },
     });
 
-    return categories.map(cat => ({
+    return categories.map((cat) => ({
       ...cat,
       productCount: cat._count.products,
     }));
@@ -91,7 +96,10 @@ export class CategoriesService {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('Category with this name already exists');
       }
 
@@ -132,7 +140,10 @@ export class CategoriesService {
         data,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('Category with this name already exists');
       }
 
@@ -162,8 +173,9 @@ export class CategoriesService {
       });
     } catch (error) {
       if (
-        (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') ||
-        ((error as any)?.code === 'P2003')
+        (error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2003') ||
+        (error as any)?.code === 'P2003'
       ) {
         throw new ConflictException('Danh mục đang được sử dụng');
       }
@@ -203,7 +215,9 @@ export class CategoriesService {
     const rootCategories: any[] = [];
     for (const category of allCategories) {
       const node = nodes.get(category.id);
-      const parent = category.parentId ? nodes.get(category.parentId) : undefined;
+      const parent = category.parentId
+        ? nodes.get(category.parentId)
+        : undefined;
 
       if (parent) {
         parent.children.push(node);
@@ -214,7 +228,7 @@ export class CategoriesService {
 
     // Build tree recursively
     const buildTree = (categories: any[]): any[] => {
-      return categories.map(cat => ({
+      return categories.map((cat) => ({
         id: cat.id,
         name: cat.name,
         slug: cat.slug,
@@ -250,7 +264,10 @@ export class CategoriesService {
    * Validate if category can be deleted
    * Rules: No children AND no products
    */
-  async canDelete(id: string, tx?: Prisma.TransactionClient): Promise<{ canDelete: boolean; reason?: string }> {
+  async canDelete(
+    id: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<{ canDelete: boolean; reason?: string }> {
     const prisma = tx ?? this.prisma;
     const category = await prisma.category.findUnique({
       where: { id },
@@ -354,7 +371,10 @@ export class CategoriesService {
     return result;
   }
 
-  private async validateParentCategory(parentId?: string | null, categoryId?: string) {
+  private async validateParentCategory(
+    parentId?: string | null,
+    categoryId?: string,
+  ) {
     if (!parentId) {
       return;
     }
@@ -378,7 +398,9 @@ export class CategoriesService {
       }
 
       if (parent.id === categoryId) {
-        throw new BadRequestException('Category cannot be nested under itself or its descendant');
+        throw new BadRequestException(
+          'Category cannot be nested under itself or its descendant',
+        );
       }
 
       currentId = parent.parentId;

@@ -4,7 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Phone, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 interface LoginFormProps {
@@ -31,7 +38,9 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-slate-300">Tài khoản / Số điện thoại</FormLabel>
+              <FormLabel className="text-xs font-bold text-slate-300">
+                Tài khoản / Số điện thoại
+              </FormLabel>
               <FormControl>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -55,7 +64,9 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-slate-300">Mật khẩu bảo mật</FormLabel>
+              <FormLabel className="text-xs font-bold text-slate-300">
+                Mật khẩu bảo mật
+              </FormLabel>
               <FormControl>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -72,7 +83,11 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </FormControl>

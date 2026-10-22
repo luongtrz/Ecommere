@@ -1,5 +1,10 @@
 import { Controller, Get, Delete, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ReviewsService } from './reviews.service';
 import { ReviewFilterDto } from './dtos/review-filter.dto';
 import { AdminReviewFilterDto } from './dtos/admin-review-filter.dto';
@@ -18,7 +23,10 @@ export class ReviewsController {
   @Get('product/:productId')
   @ApiOperation({ summary: 'Get product reviews' })
   @ApiResponse({ status: 200, type: [ReviewEntity] })
-  async getProductReviews(@Param('productId') productId: string, @Query() filterDto: ReviewFilterDto) {
+  async getProductReviews(
+    @Param('productId') productId: string,
+    @Query() filterDto: ReviewFilterDto,
+  ) {
     return this.reviewsService.getProductReviews(productId, filterDto);
   }
 

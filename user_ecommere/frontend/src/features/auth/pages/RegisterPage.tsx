@@ -47,8 +47,12 @@ export function RegisterPage() {
               <Gift className="h-5 w-5" />
             </div>
             <div className="text-xs">
-              <p className="font-extrabold text-amber-950">Tặng Voucher 20.000đ</p>
-              <p className="text-amber-800/80 font-medium">Áp dụng cho đơn hàng đầu tiên của bạn</p>
+              <p className="font-extrabold text-amber-950">
+                Tặng Voucher 20.000đ
+              </p>
+              <p className="text-amber-800/80 font-medium">
+                Áp dụng cho đơn hàng đầu tiên của bạn
+              </p>
             </div>
           </div>
 
@@ -59,7 +63,10 @@ export function RegisterPage() {
                 🎉 Bạn được giới thiệu bởi bạn bè
               </p>
               <p className="text-[11px] text-teal-700 font-medium mt-0.5">
-                Mã giới thiệu: <span className="font-mono font-bold text-teal-900">{referralCode}</span>
+                Mã giới thiệu:{' '}
+                <span className="font-mono font-bold text-teal-900">
+                  {referralCode}
+                </span>
               </p>
             </div>
           )}

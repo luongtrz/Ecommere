@@ -66,7 +66,17 @@ export class RecentOrderDto {
   @ApiProperty()
   totalAmount: number;
 
-  @ApiProperty({ enum: ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED', 'DELIVERED', 'CANCELED', 'REFUNDED'] })
+  @ApiProperty({
+    enum: [
+      'PENDING_PAYMENT',
+      'PAID',
+      'PACKING',
+      'SHIPPED',
+      'DELIVERED',
+      'CANCELED',
+      'REFUNDED',
+    ],
+  })
   status: string;
 
   @ApiProperty()
@@ -114,9 +124,15 @@ export class DashboardStatsDto {
   @ApiProperty({ type: [RecentOrderDto], description: '10 đơn hàng gần nhất' })
   recentOrders: RecentOrderDto[];
 
-  @ApiProperty({ type: [TopProductDto], description: '5 sản phẩm bán chạy nhất' })
+  @ApiProperty({
+    type: [TopProductDto],
+    description: '5 sản phẩm bán chạy nhất',
+  })
   topProducts: TopProductDto[];
 
-  @ApiProperty({ type: [RevenueHistoryDto], description: 'Doanh thu 6 tháng gần nhất' })
+  @ApiProperty({
+    type: [RevenueHistoryDto],
+    description: 'Doanh thu 6 tháng gần nhất',
+  })
   revenueHistory: RevenueHistoryDto[];
 }

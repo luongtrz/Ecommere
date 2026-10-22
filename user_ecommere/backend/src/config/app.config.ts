@@ -20,8 +20,11 @@ export default registerAs('app', () => ({
     maxPageSize: parseInt(process.env.MAX_PAGE_SIZE, 10) || 100,
   },
   chatbot: {
-    ragProductLimit: parseInt(process.env.CHATBOT_RAG_PRODUCT_LIMIT || '4', 10) || 4,
-    ragVariantLimit: parseInt(process.env.CHATBOT_RAG_VARIANT_LIMIT || '3', 10) || 3,
-    ragCandidateLimit: parseInt(process.env.CHATBOT_RAG_CANDIDATE_LIMIT || '12', 10) || 12,
+    ragProductLimit:
+      parseInt(process.env.CHATBOT_RAG_PRODUCT_LIMIT || '4', 10) || 4,
+    ragVariantLimit:
+      parseInt(process.env.CHATBOT_RAG_VARIANT_LIMIT || '3', 10) || 3,
+    ragCandidateLimit:
+      parseInt(process.env.CHATBOT_RAG_CANDIDATE_LIMIT || '12', 10) || 12,
   },
 }));

@@ -32,9 +32,8 @@ function applyOrphanRule(messages: BaseMessage[]): BaseMessage[] {
         j++;
       }
 
-      const toolCalls = (
-        msg as { tool_calls?: Array<{ id?: string }> }
-      ).tool_calls;
+      const toolCalls = (msg as { tool_calls?: Array<{ id?: string }> })
+        .tool_calls;
       const followingToolCallIds = new Set(
         followingTools
           .map((t) => (t as { tool_call_id?: string }).tool_call_id)

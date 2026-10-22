@@ -8,19 +8,67 @@ import { RequireAuth } from './guards/RequireAuth';
 import { RequireAdmin } from './guards/RequireAdmin';
 
 // Lazy load all pages
-const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const AccountPage = lazy(() => import('@/features/auth/pages/AccountPage').then(m => ({ default: m.AccountPage })));
-const DashboardPage = lazy(() => import('@/features/admin/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
-const AdminProductsPage = lazy(() => import('@/features/admin/pages/AdminProductsPage').then(m => ({ default: m.AdminProductsPage })));
-const AdminProductFormPage = lazy(() => import('@/features/admin/pages/AdminProductFormPage').then(m => ({ default: m.AdminProductFormPage })));
-const AdminOrdersPage = lazy(() => import('@/features/admin/pages/AdminOrdersPage').then(m => ({ default: m.AdminOrdersPage })));
-const AdminOrderDetailPage = lazy(() => import('@/features/admin/pages/AdminOrderDetailPage').then(m => ({ default: m.AdminOrderDetailPage })));
-const AdminCouponsPage = lazy(() => import('@/features/admin/pages/AdminCouponsPage').then(m => ({ default: m.AdminCouponsPage })));
-const AdminInventoryPage = lazy(() => import('@/features/admin/pages/AdminInventoryPage').then(m => ({ default: m.AdminInventoryPage })));
-const AdminCategoriesPage = lazy(() => import('@/features/admin/pages/AdminCategoriesPage').then(m => ({ default: m.AdminCategoriesPage })));
-const AdminChatbotPage = lazy(() => import('@/features/chatbot/pages/AdminChatbotPage').then(m => ({ default: m.AdminChatbotPage })));
-const ErrorPage = lazy(() => import('@/pages/ErrorPage').then(m => ({ default: m.ErrorPage })));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+const LoginPage = lazy(() =>
+  import('@/features/auth/pages/LoginPage').then((m) => ({
+    default: m.LoginPage,
+  })),
+);
+const AccountPage = lazy(() =>
+  import('@/features/auth/pages/AccountPage').then((m) => ({
+    default: m.AccountPage,
+  })),
+);
+const DashboardPage = lazy(() =>
+  import('@/features/admin/pages/DashboardPage').then((m) => ({
+    default: m.DashboardPage,
+  })),
+);
+const AdminProductsPage = lazy(() =>
+  import('@/features/admin/pages/AdminProductsPage').then((m) => ({
+    default: m.AdminProductsPage,
+  })),
+);
+const AdminProductFormPage = lazy(() =>
+  import('@/features/admin/pages/AdminProductFormPage').then((m) => ({
+    default: m.AdminProductFormPage,
+  })),
+);
+const AdminOrdersPage = lazy(() =>
+  import('@/features/admin/pages/AdminOrdersPage').then((m) => ({
+    default: m.AdminOrdersPage,
+  })),
+);
+const AdminOrderDetailPage = lazy(() =>
+  import('@/features/admin/pages/AdminOrderDetailPage').then((m) => ({
+    default: m.AdminOrderDetailPage,
+  })),
+);
+const AdminCouponsPage = lazy(() =>
+  import('@/features/admin/pages/AdminCouponsPage').then((m) => ({
+    default: m.AdminCouponsPage,
+  })),
+);
+const AdminInventoryPage = lazy(() =>
+  import('@/features/admin/pages/AdminInventoryPage').then((m) => ({
+    default: m.AdminInventoryPage,
+  })),
+);
+const AdminCategoriesPage = lazy(() =>
+  import('@/features/admin/pages/AdminCategoriesPage').then((m) => ({
+    default: m.AdminCategoriesPage,
+  })),
+);
+const AdminChatbotPage = lazy(() =>
+  import('@/features/chatbot/pages/AdminChatbotPage').then((m) => ({
+    default: m.AdminChatbotPage,
+  })),
+);
+const ErrorPage = lazy(() =>
+  import('@/pages/ErrorPage').then((m) => ({ default: m.ErrorPage })),
+);
+const NotFoundPage = lazy(() =>
+  import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
+);
 
 export const router = createBrowserRouter([
   {

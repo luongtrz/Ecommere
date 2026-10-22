@@ -46,10 +46,14 @@ export interface UiActionDeps {
  */
 export function applyUiAction(
   action: { type: string; payload: Record<string, unknown> },
-  deps: UiActionDeps
+  deps: UiActionDeps,
 ): void {
   try {
-    if (!action || typeof action !== 'object' || typeof action.type !== 'string') {
+    if (
+      !action ||
+      typeof action !== 'object' ||
+      typeof action.type !== 'string'
+    ) {
       return;
     }
     if (!deps || typeof deps !== 'object') {
@@ -57,7 +61,9 @@ export function applyUiAction(
     }
 
     const payload =
-      action.payload && typeof action.payload === 'object' ? action.payload : {};
+      action.payload && typeof action.payload === 'object'
+        ? action.payload
+        : {};
 
     switch (action.type) {
       case 'cart.add': {
@@ -111,7 +117,9 @@ export function applyUiAction(
 
         if (
           volumeMl !== undefined &&
-          (typeof volumeMl !== 'number' || !Number.isFinite(volumeMl) || volumeMl <= 0)
+          (typeof volumeMl !== 'number' ||
+            !Number.isFinite(volumeMl) ||
+            volumeMl <= 0)
         ) {
           return;
         }
@@ -207,12 +215,12 @@ export function applyUiAction(
           typeof payload.to === 'string'
             ? payload.to
             : typeof payload.path === 'string'
-            ? payload.path
-            : typeof payload.route === 'string'
-            ? payload.route
-            : typeof payload.url === 'string'
-            ? payload.url
-            : null;
+              ? payload.path
+              : typeof payload.route === 'string'
+                ? payload.route
+                : typeof payload.url === 'string'
+                  ? payload.url
+                  : null;
 
         if (!target) {
           return;
@@ -220,7 +228,11 @@ export function applyUiAction(
 
         // Only a path that starts with a single '/' and not '//' is passed to deps.navigate.
         // Absolute URLs and other schemes are rejected.
-        if (target.startsWith('/') && !target.startsWith('//') && !target.startsWith('/\\')) {
+        if (
+          target.startsWith('/') &&
+          !target.startsWith('//') &&
+          !target.startsWith('/\\')
+        ) {
           deps.navigate?.(target);
         }
         break;
@@ -233,8 +245,7 @@ export function applyUiAction(
           Array.isArray(keys) &&
           keys.every(
             (inner) =>
-              Array.isArray(inner) &&
-              inner.every((k) => typeof k === 'string')
+              Array.isArray(inner) && inner.every((k) => typeof k === 'string'),
           )
         ) {
           deps.invalidate?.(keys as QueryKey[]);

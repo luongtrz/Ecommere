@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsInt, IsEnum, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsInt, IsEnum, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 
@@ -30,7 +30,11 @@ export class ProductFilterDto extends PaginationDto {
   @IsString()
   categorySlug?: string;
 
-  @ApiProperty({ required: false, enum: ProductSortBy, default: ProductSortBy.NEWEST })
+  @ApiProperty({
+    required: false,
+    enum: ProductSortBy,
+    default: ProductSortBy.NEWEST,
+  })
   @IsOptional()
   @IsEnum(ProductSortBy)
   sortBy?: ProductSortBy = ProductSortBy.NEWEST;
@@ -49,17 +53,26 @@ export class ProductFilterDto extends PaginationDto {
   @Min(0)
   maxPrice?: number;
 
-  @ApiProperty({ required: false, description: 'Filter by brand (comma-separated for multiple)' })
+  @ApiProperty({
+    required: false,
+    description: 'Filter by brand (comma-separated for multiple)',
+  })
   @IsOptional()
   @IsString()
   brand?: string;
 
-  @ApiProperty({ required: false, description: 'Filter by scent (comma-separated for multiple)' })
+  @ApiProperty({
+    required: false,
+    description: 'Filter by scent (comma-separated for multiple)',
+  })
   @IsOptional()
   @IsString()
   scent?: string;
 
-  @ApiProperty({ required: false, description: 'Filter by volume in ml (comma-separated for multiple)' })
+  @ApiProperty({
+    required: false,
+    description: 'Filter by volume in ml (comma-separated for multiple)',
+  })
   @IsOptional()
   @IsString()
   volumeMl?: string;

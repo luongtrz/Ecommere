@@ -42,7 +42,10 @@ export const ProductCard = memo(function ProductCard({
   const { toggleItem, isInWishlist } = useWishlist();
   const prefetchProduct = usePrefetchProduct();
   const isWishlisted = isInWishlist(id);
-  const discountPercent = hasDiscount && salePrice != null ? Math.max(1, Math.round(((price - salePrice) / price) * 100)) : 0;
+  const discountPercent =
+    hasDiscount && salePrice != null
+      ? Math.max(1, Math.round(((price - salePrice) / price) * 100))
+      : 0;
   const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = useCallback(() => {
@@ -78,7 +81,7 @@ export const ProductCard = memo(function ProductCard({
               />
             </div>
           </Link>
- 
+
           <div className="absolute left-3 top-3 flex items-center gap-2">
             {hasDiscount ? (
               <span className="rounded-full bg-primary/95 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
@@ -90,11 +93,17 @@ export const ProductCard = memo(function ProductCard({
               </span>
             )}
           </div>
- 
+
           <button
             onClick={(event) => {
               event.preventDefault();
-              toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
+              toggleItem({
+                productId: id,
+                name,
+                slug,
+                image: images[0],
+                price: finalPrice,
+              });
             }}
             className={cn(
               'absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 active:scale-90 shadow-sm border border-white/50',
@@ -103,9 +112,14 @@ export const ProductCard = memo(function ProductCard({
                 : 'bg-white/80 text-primary/70 hover:bg-white hover:text-red-500 hover:scale-105 hover:shadow-md hover:shadow-black/5',
             )}
           >
-            <Heart className={cn('h-4 w-4 transition-transform duration-300', isWishlisted && 'fill-red-500 scale-110')} />
+            <Heart
+              className={cn(
+                'h-4 w-4 transition-transform duration-300',
+                isWishlisted && 'fill-red-500 scale-110',
+              )}
+            />
           </button>
- 
+
           <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
             <button
               type="button"
@@ -116,19 +130,19 @@ export const ProductCard = memo(function ProductCard({
             </button>
           </div>
         </div>
- 
+
         <CardContent className="flex flex-1 flex-col p-4">
           <div className="mb-2.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-accent-foreground/70">
             <Sparkles className="h-3 w-3 text-accent-foreground/60 fill-accent/10" />
             Mùi hương nổi bật
           </div>
- 
+
           <Link to={`/p/${slug}`}>
             <h3 className="min-h-[3.3rem] text-base font-bold leading-snug text-foreground transition duration-300 group-hover:text-accent-foreground/90 font-serif">
               {name}
             </h3>
           </Link>
- 
+
           {reviewCount > 0 ? (
             <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
               <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -137,23 +151,32 @@ export const ProductCard = memo(function ProductCard({
               <span>{reviewCount} đánh giá</span>
             </div>
           ) : (
-            <p className="mt-3 text-sm text-muted-foreground">Phù hợp cho nhịp sống hằng ngày và không gian gọn gàng.</p>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Phù hợp cho nhịp sống hằng ngày và không gian gọn gàng.
+            </p>
           )}
- 
+
           <div className="mt-auto pt-5">
             <div className="flex items-end gap-2">
-              <span className="text-lg font-bold text-foreground">{formatCurrency(finalPrice)}</span>
+              <span className="text-lg font-bold text-foreground">
+                {formatCurrency(finalPrice)}
+              </span>
               {hasDiscount ? (
-                <span className="pb-0.5 text-sm text-muted-foreground line-through">{formatCurrency(price)}</span>
+                <span className="pb-0.5 text-sm text-muted-foreground line-through">
+                  {formatCurrency(price)}
+                </span>
               ) : null}
             </div>
           </div>
         </CardContent>
- 
+
         <CardFooter className="p-4 pt-0">
           <Button
             onClick={onAddToCart}
-            disabled={variants !== undefined && (!selectedVariant || selectedVariant.stock === 0)}
+            disabled={
+              variants !== undefined &&
+              (!selectedVariant || selectedVariant.stock === 0)
+            }
             className="h-11 w-full rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/15 active:scale-[0.98] font-bold uppercase tracking-wider text-xs"
             size="sm"
           >
@@ -164,7 +187,11 @@ export const ProductCard = memo(function ProductCard({
       </Card>
 
       {isQuickViewOpen ? (
-        <ProductQuickView slug={slug} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+        <ProductQuickView
+          slug={slug}
+          open={isQuickViewOpen}
+          onOpenChange={setIsQuickViewOpen}
+        />
       ) : null}
     </>
   );

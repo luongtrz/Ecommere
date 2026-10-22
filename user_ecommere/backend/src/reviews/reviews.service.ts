@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { OrderStatus, Prisma } from '@prisma/client';
 import { CreateReviewDto } from './dtos/create-review.dto';
@@ -26,7 +31,9 @@ export class ReviewsService {
     const hasPurchased = await this.hasUserPurchasedProduct(userId, productId);
 
     if (!hasPurchased) {
-      throw new BadRequestException('You can only review products you have purchased');
+      throw new BadRequestException(
+        'You can only review products you have purchased',
+      );
     }
 
     // Check if user has already reviewed this product
@@ -60,7 +67,10 @@ export class ReviewsService {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException('You have already reviewed this product');
       }
 
@@ -140,7 +150,11 @@ export class ReviewsService {
     };
   }
 
-  async updateReview(userId: string, reviewId: string, updateReviewDto: UpdateReviewDto) {
+  async updateReview(
+    userId: string,
+    reviewId: string,
+    updateReviewDto: UpdateReviewDto,
+  ) {
     const review = await this.prisma.review.findUnique({
       where: { id: reviewId },
     });
@@ -225,7 +239,13 @@ export class ReviewsService {
       }),
     ]);
 
-    const ratingDistribution: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    const ratingDistribution: Record<number, number> = {
+      5: 0,
+      4: 0,
+      3: 0,
+      2: 0,
+      1: 0,
+    };
     for (const row of distribution) {
       ratingDistribution[row.rating] = row._count.rating;
     }
@@ -237,7 +257,10 @@ export class ReviewsService {
     };
   }
 
-  private async hasUserPurchasedProduct(userId: string, productId: string): Promise<boolean> {
+  private async hasUserPurchasedProduct(
+    userId: string,
+    productId: string,
+  ): Promise<boolean> {
     const order = await this.prisma.order.findFirst({
       where: {
         userId,

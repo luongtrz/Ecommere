@@ -74,21 +74,37 @@ describe('LangGraph Agent Graph', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    readCatalogHandler = jest.fn().mockImplementation(async (args: { query: string }) => {
-      return { items: [`Result for ${args.query}`] };
-    });
+    readCatalogHandler = jest
+      .fn()
+      .mockImplementation(async (args: { query: string }) => {
+        return { items: [`Result for ${args.query}`] };
+      });
 
-    addToCartHandler = jest.fn().mockImplementation(async (args: { itemId: string; quantity: number }) => {
-      return { success: true, added: args.itemId };
-    });
+    addToCartHandler = jest
+      .fn()
+      .mockImplementation(
+        async (args: { itemId: string; quantity: number }) => {
+          return { success: true, added: args.itemId };
+        },
+      );
 
-    cancelOrderHandler = jest.fn().mockImplementation(async (args: { orderId: string }) => {
-      return { cancelled: true, orderId: args.orderId };
-    });
+    cancelOrderHandler = jest
+      .fn()
+      .mockImplementation(async (args: { orderId: string }) => {
+        return { cancelled: true, orderId: args.orderId };
+      });
 
-    updateStockHandler = jest.fn().mockImplementation(async (args: { productId: string; stock: number }) => {
-      return { updated: true, productId: args.productId, stock: args.stock };
-    });
+    updateStockHandler = jest
+      .fn()
+      .mockImplementation(
+        async (args: { productId: string; stock: number }) => {
+          return {
+            updated: true,
+            productId: args.productId,
+            stock: args.stock,
+          };
+        },
+      );
 
     customErrorToolHandler = jest.fn().mockResolvedValue({ ok: true });
 
@@ -107,11 +123,14 @@ describe('LangGraph Agent Graph', () => {
       name: 'add_to_cart',
       domain: 'cart',
       description: 'Thêm sản phẩm vào giỏ hàng',
-      schema: z.object({ itemId: z.string(), quantity: z.number().int() }).strict(),
+      schema: z
+        .object({ itemId: z.string(), quantity: z.number().int() })
+        .strict(),
       auth: 'customer',
       risk: 'WRITE',
       handler: addToCartHandler,
-      summarize: (args) => `Thêm sản phẩm ${args.itemId} số lượng ${args.quantity} vào giỏ`,
+      summarize: (args) =>
+        `Thêm sản phẩm ${args.itemId} số lượng ${args.quantity} vào giỏ`,
     };
 
     const cancelOrderTool: AgentToolDef<{ orderId: string }> = {
@@ -125,24 +144,32 @@ describe('LangGraph Agent Graph', () => {
       summarize: (args) => `Hủy đơn hàng ${args.orderId}`,
     };
 
-    const updateStockTool: AgentToolDef<{ productId: string; stock: number }> = {
-      name: 'update_stock',
-      domain: 'inventory',
-      description: 'Cập nhật tồn kho sản phẩm',
-      schema: z.object({ productId: z.string(), stock: z.number().int() }).strict(),
-      auth: 'admin',
-      risk: 'WRITE',
-      handler: updateStockHandler,
-      summarize: (args) => `Cập nhật tồn kho ${args.productId} thành ${args.stock}`,
-    };
+    const updateStockTool: AgentToolDef<{ productId: string; stock: number }> =
+      {
+        name: 'update_stock',
+        domain: 'inventory',
+        description: 'Cập nhật tồn kho sản phẩm',
+        schema: z
+          .object({ productId: z.string(), stock: z.number().int() })
+          .strict(),
+        auth: 'admin',
+        risk: 'WRITE',
+        handler: updateStockHandler,
+        summarize: (args) =>
+          `Cập nhật tồn kho ${args.productId} thành ${args.stock}`,
+      };
 
     const customErrorTool: AgentToolDef<{ code: string }> = {
       name: 'custom_check',
       domain: 'check',
       description: 'Kiểm tra mã với thông báo tiếng Việt',
-      schema: z.object({
-        code: z.string({ message: 'Mã bắt buộc phải là chuỗi ký tự' }).min(2, { message: 'Mã phải có ít nhất 2 ký tự' }),
-      }).strict(),
+      schema: z
+        .object({
+          code: z
+            .string({ message: 'Mã bắt buộc phải là chuỗi ký tự' })
+            .min(2, { message: 'Mã phải có ít nhất 2 ký tự' }),
+        })
+        .strict(),
       auth: 'public',
       risk: 'READ',
       handler: customErrorToolHandler,
@@ -166,7 +193,13 @@ describe('LangGraph Agent Graph', () => {
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_read_1', name: 'read_catalog', args: { query: 'laptop' } }],
+        tool_calls: [
+          {
+            id: 'call_read_1',
+            name: 'read_catalog',
+            args: { query: 'laptop' },
+          },
+        ],
       }),
       new AIMessage({ content: 'Tìm thấy sản phẩm laptop.' }),
     ]);
@@ -178,14 +211,19 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'thread-a', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'thread-a', ctx: customerCtx },
+    };
     const result = await graph.invoke(
       { messages: [new HumanMessage('Tìm laptop')] },
       config,
     );
 
     expect(readCatalogHandler).toHaveBeenCalledTimes(1);
-    expect(readCatalogHandler).toHaveBeenCalledWith({ query: 'laptop' }, customerCtx);
+    expect(readCatalogHandler).toHaveBeenCalledWith(
+      { query: 'laptop' },
+      customerCtx,
+    );
     expect((result as any).__interrupt__).toBeUndefined();
 
     const finalMsg = result.messages[result.messages.length - 1];
@@ -203,7 +241,13 @@ describe('LangGraph Agent Graph', () => {
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_write_1', name: 'add_to_cart', args: { itemId: 'p1', quantity: 2 } }],
+        tool_calls: [
+          {
+            id: 'call_write_1',
+            name: 'add_to_cart',
+            args: { itemId: 'p1', quantity: 2 },
+          },
+        ],
       }),
       new AIMessage({ content: 'Đã thêm vào giỏ hàng.' }),
     ]);
@@ -215,7 +259,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'thread-b', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'thread-b', ctx: customerCtx },
+    };
     const result = await graph.invoke(
       { messages: [new HumanMessage('Thêm p1')] },
       config,
@@ -223,8 +269,13 @@ describe('LangGraph Agent Graph', () => {
 
     expect((result as any).__interrupt__).toBeUndefined();
     expect(addToCartHandler).toHaveBeenCalledTimes(1);
-    expect(addToCartHandler).toHaveBeenCalledWith({ itemId: 'p1', quantity: 2 }, customerCtx);
-    expect(result.messages[result.messages.length - 1].content).toBe('Đã thêm vào giỏ hàng.');
+    expect(addToCartHandler).toHaveBeenCalledWith(
+      { itemId: 'p1', quantity: 2 },
+      customerCtx,
+    );
+    expect(result.messages[result.messages.length - 1].content).toBe(
+      'Đã thêm vào giỏ hàng.',
+    );
   });
 
   it('case c: USER customer, DESTRUCTIVE tool: approve scenario runs handler, decline scenario does not', async () => {
@@ -232,7 +283,13 @@ describe('LangGraph Agent Graph', () => {
     const model1 = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_destr_1', name: 'cancel_order', args: { orderId: 'ord-100' } }],
+        tool_calls: [
+          {
+            id: 'call_destr_1',
+            name: 'cancel_order',
+            args: { orderId: 'ord-100' },
+          },
+        ],
       }),
       new AIMessage({ content: 'Đã hủy đơn ord-100 thành công.' }),
     ]);
@@ -244,7 +301,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config1 = { configurable: { thread_id: 'thread-c1', ctx: customerCtx } };
+    const config1 = {
+      configurable: { thread_id: 'thread-c1', ctx: customerCtx },
+    };
     const res1 = await graph1.invoke(
       { messages: [new HumanMessage('Hủy đơn ord-100')] },
       config1,
@@ -253,23 +312,38 @@ describe('LangGraph Agent Graph', () => {
     expect((res1 as any).__interrupt__).toBeDefined();
     expect((res1 as any).__interrupt__.length).toBeGreaterThan(0);
     expect((res1 as any).__interrupt__[0].value.kind).toBe('confirm');
-    expect((res1 as any).__interrupt__[0].value.calls[0].summary).toBe('Hủy đơn hàng ord-100');
+    expect((res1 as any).__interrupt__[0].value.calls[0].summary).toBe(
+      'Hủy đơn hàng ord-100',
+    );
     expect(cancelOrderHandler).not.toHaveBeenCalled();
 
     const res2 = await graph1.invoke(
-      new Command({ resume: { decisions: [{ callId: 'call_destr_1', approve: true }] } }),
+      new Command({
+        resume: { decisions: [{ callId: 'call_destr_1', approve: true }] },
+      }),
       config1,
     );
 
     expect(cancelOrderHandler).toHaveBeenCalledTimes(1);
-    expect(cancelOrderHandler).toHaveBeenCalledWith({ orderId: 'ord-100' }, customerCtx);
-    expect(res2.messages[res2.messages.length - 1].content).toBe('Đã hủy đơn ord-100 thành công.');
+    expect(cancelOrderHandler).toHaveBeenCalledWith(
+      { orderId: 'ord-100' },
+      customerCtx,
+    );
+    expect(res2.messages[res2.messages.length - 1].content).toBe(
+      'Đã hủy đơn ord-100 thành công.',
+    );
 
     // Scenario 2: Decline
     const model2 = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_destr_2', name: 'cancel_order', args: { orderId: 'ord-200' } }],
+        tool_calls: [
+          {
+            id: 'call_destr_2',
+            name: 'cancel_order',
+            args: { orderId: 'ord-200' },
+          },
+        ],
       }),
       new AIMessage({ content: 'Dạ, em đã giữ nguyên đơn hàng cho bạn.' }),
     ]);
@@ -281,7 +355,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config2 = { configurable: { thread_id: 'thread-c2', ctx: customerCtx } };
+    const config2 = {
+      configurable: { thread_id: 'thread-c2', ctx: customerCtx },
+    };
     const declineRes1 = await graph2.invoke(
       { messages: [new HumanMessage('Hủy đơn ord-200')] },
       config2,
@@ -291,7 +367,9 @@ describe('LangGraph Agent Graph', () => {
     expect(cancelOrderHandler).toHaveBeenCalledTimes(1); // from scenario 1 only
 
     const declineRes2 = await graph2.invoke(
-      new Command({ resume: { decisions: [{ callId: 'call_destr_2', approve: false }] } }),
+      new Command({
+        resume: { decisions: [{ callId: 'call_destr_2', approve: false }] },
+      }),
       config2,
     );
 
@@ -312,7 +390,13 @@ describe('LangGraph Agent Graph', () => {
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_adm_1', name: 'update_stock', args: { productId: 'p1', stock: 10 } }],
+        tool_calls: [
+          {
+            id: 'call_adm_1',
+            name: 'update_stock',
+            args: { productId: 'p1', stock: 10 },
+          },
+        ],
       }),
     ]);
     const graph = buildAgentGraph({
@@ -351,7 +435,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'thread-e', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'thread-e', ctx: customerCtx },
+    };
     const res1 = await graph.invoke(
       { messages: [new HumanMessage('Gọi tool không tồn tại')] },
       config,
@@ -360,7 +446,9 @@ describe('LangGraph Agent Graph', () => {
     expect((res1 as any).__interrupt__).toBeDefined();
 
     const res2 = await graph.invoke(
-      new Command({ resume: { decisions: [{ callId: 'call_unk_1', approve: true }] } }),
+      new Command({
+        resume: { decisions: [{ callId: 'call_unk_1', approve: true }] },
+      }),
       config,
     );
 
@@ -371,14 +459,22 @@ describe('LangGraph Agent Graph', () => {
     const parsed = JSON.parse(toolMsg!.content as string);
     expect(parsed.ok).toBe(false);
     expect(parsed.error).toBe('Công cụ không khả dụng');
-    expect(res2.messages[res2.messages.length - 1].content).toBe('Công cụ không khả dụng.');
+    expect(res2.messages[res2.messages.length - 1].content).toBe(
+      'Công cụ không khả dụng.',
+    );
   });
 
   it('case f: invalid args fails schema validation: handler not called, error ToolMessage produced', async () => {
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_inv_1', name: 'read_catalog', args: { query: 'shoes', extraField: 'unrecognized' } }],
+        tool_calls: [
+          {
+            id: 'call_inv_1',
+            name: 'read_catalog',
+            args: { query: 'shoes', extraField: 'unrecognized' },
+          },
+        ],
       }),
       new AIMessage({ content: 'Báo lỗi tham số.' }),
     ]);
@@ -390,7 +486,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'thread-f', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'thread-f', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Tìm giày với tham số sai')] },
       config,
@@ -404,14 +502,18 @@ describe('LangGraph Agent Graph', () => {
     const parsed = JSON.parse(toolMsg!.content as string);
     expect(parsed.ok).toBe(false);
     expect(parsed.error).toBe('Tham số không hợp lệ');
-    expect(res.messages[res.messages.length - 1].content).toBe('Báo lỗi tham số.');
+    expect(res.messages[res.messages.length - 1].content).toBe(
+      'Báo lỗi tham số.',
+    );
   });
 
   it('case f (custom message): Vietnamese zod issue message is preserved', async () => {
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_custom_1', name: 'custom_check', args: { code: 'a' } }],
+        tool_calls: [
+          { id: 'call_custom_1', name: 'custom_check', args: { code: 'a' } },
+        ],
       }),
       new AIMessage({ content: 'Báo lỗi độ dài mã.' }),
     ]);
@@ -423,7 +525,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'thread-f2', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'thread-f2', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Kiểm tra mã a')] },
       config,
@@ -459,7 +563,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 2, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'thread-g', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'thread-g', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Tìm 3 món')] },
       config,
@@ -495,20 +601,29 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'thread-h', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'thread-h', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Tìm hai món')] },
       config,
     );
 
     const aiMessages = res.messages.filter(
-      (m: any) => m.getType() === 'ai' && Array.isArray(m.tool_calls) && m.tool_calls.length > 0,
+      (m: any) =>
+        m.getType() === 'ai' &&
+        Array.isArray(m.tool_calls) &&
+        m.tool_calls.length > 0,
     );
-    const toolMessages = res.messages.filter((m: any) => m.getType() === 'tool');
+    const toolMessages = res.messages.filter(
+      (m: any) => m.getType() === 'tool',
+    );
 
     for (const aiMsg of aiMessages) {
       for (const tc of (aiMsg as AIMessage).tool_calls!) {
-        const matching = toolMessages.filter((tm: any) => (tm as ToolMessage).tool_call_id === tc.id);
+        const matching = toolMessages.filter(
+          (tm: any) => (tm as ToolMessage).tool_call_id === tc.id,
+        );
         expect(matching).toHaveLength(1);
       }
     }
@@ -519,7 +634,9 @@ describe('LangGraph Agent Graph', () => {
     const model1 = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_aud_1', name: 'read_catalog', args: { query: 'paint' } }],
+        tool_calls: [
+          { id: 'call_aud_1', name: 'read_catalog', args: { query: 'paint' } },
+        ],
       }),
       new AIMessage({ content: 'Xong.' }),
     ]);
@@ -554,7 +671,13 @@ describe('LangGraph Agent Graph', () => {
     const model2 = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_aud_2', name: 'cancel_order', args: { orderId: 'ord-999' } }],
+        tool_calls: [
+          {
+            id: 'call_aud_2',
+            name: 'cancel_order',
+            args: { orderId: 'ord-999' },
+          },
+        ],
       }),
       new AIMessage({ content: 'Đã hủy theo yêu cầu.' }),
     ]);
@@ -566,11 +689,15 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config2 = { configurable: { thread_id: 'thread-i2', ctx: customerCtx } };
+    const config2 = {
+      configurable: { thread_id: 'thread-i2', ctx: customerCtx },
+    };
     await graph2.invoke({ messages: [new HumanMessage('Hủy đơn')] }, config2);
 
     await graph2.invoke(
-      new Command({ resume: { decisions: [{ callId: 'call_aud_2', approve: false }] } }),
+      new Command({
+        resume: { decisions: [{ callId: 'call_aud_2', approve: false }] },
+      }),
       config2,
     );
 
@@ -591,7 +718,9 @@ describe('LangGraph Agent Graph', () => {
     const model3 = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_aud_3', name: 'read_catalog', args: { query: 'primer' } }],
+        tool_calls: [
+          { id: 'call_aud_3', name: 'read_catalog', args: { query: 'primer' } },
+        ],
       }),
       new AIMessage({ content: 'Sản phẩm primer.' }),
     ]);
@@ -624,7 +753,13 @@ describe('LangGraph Agent Graph', () => {
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_malformed_1', name: 'cancel_order', args: { orderId: 'ord-mal' } }],
+        tool_calls: [
+          {
+            id: 'call_malformed_1',
+            name: 'cancel_order',
+            args: { orderId: 'ord-mal' },
+          },
+        ],
       }),
       new AIMessage({ content: 'Đã hủy thao tác.' }),
     ]);
@@ -636,7 +771,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'thread-malformed', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'thread-malformed', ctx: customerCtx },
+    };
     await graph.invoke({ messages: [new HumanMessage('Hủy đơn')] }, config);
 
     // Resume with null / malformed resume
@@ -647,7 +784,8 @@ describe('LangGraph Agent Graph', () => {
 
     expect(cancelOrderHandler).not.toHaveBeenCalled();
     const toolMsg = res.messages.find(
-      (m: any) => m.getType() === 'tool' && m.tool_call_id === 'call_malformed_1',
+      (m: any) =>
+        m.getType() === 'tool' && m.tool_call_id === 'call_malformed_1',
     );
     expect(toolMsg).toBeDefined();
     const parsed = JSON.parse(toolMsg!.content as string);
@@ -657,7 +795,11 @@ describe('LangGraph Agent Graph', () => {
 
   it('case preview 1: tool with a preview uses the preview text as interrupt call summary', async () => {
     const previewHandler = jest.fn().mockResolvedValue({ ok: true });
-    const previewFn = jest.fn().mockResolvedValue('Đơn hàng ord-100: giao tới 123 Lê Lợi, tổng 500.000đ');
+    const previewFn = jest
+      .fn()
+      .mockResolvedValue(
+        'Đơn hàng ord-100: giao tới 123 Lê Lợi, tổng 500.000đ',
+      );
 
     const previewTool: AgentToolDef<{ orderId: string }> = {
       name: 'confirm_order_preview',
@@ -675,7 +817,13 @@ describe('LangGraph Agent Graph', () => {
       model: new ScriptedFakeModel([
         new AIMessage({
           content: '',
-          tool_calls: [{ id: 'call_prev_1', name: 'confirm_order_preview', args: { orderId: 'ord-100' } }],
+          tool_calls: [
+            {
+              id: 'call_prev_1',
+              name: 'confirm_order_preview',
+              args: { orderId: 'ord-100' },
+            },
+          ],
         }),
       ]),
       registry: new ToolRegistry([previewTool]),
@@ -684,7 +832,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-prev-1', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-prev-1', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Xác nhận')] },
       config,
@@ -702,7 +852,9 @@ describe('LangGraph Agent Graph', () => {
 
   it('case preview 2: tool whose preview throws uses summarize(args) and run still reaches interrupt', async () => {
     const previewHandler = jest.fn().mockResolvedValue({ ok: true });
-    const previewFn = jest.fn().mockRejectedValue(new Error('Lỗi cơ sở dữ liệu'));
+    const previewFn = jest
+      .fn()
+      .mockRejectedValue(new Error('Lỗi cơ sở dữ liệu'));
 
     const previewTool: AgentToolDef<{ orderId: string }> = {
       name: 'throwing_preview_tool',
@@ -720,7 +872,13 @@ describe('LangGraph Agent Graph', () => {
       model: new ScriptedFakeModel([
         new AIMessage({
           content: '',
-          tool_calls: [{ id: 'call_prev_2', name: 'throwing_preview_tool', args: { orderId: 'ord-200' } }],
+          tool_calls: [
+            {
+              id: 'call_prev_2',
+              name: 'throwing_preview_tool',
+              args: { orderId: 'ord-200' },
+            },
+          ],
         }),
       ]),
       registry: new ToolRegistry([previewTool]),
@@ -729,7 +887,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-prev-2', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-prev-2', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Xác nhận')] },
       config,
@@ -740,7 +900,9 @@ describe('LangGraph Agent Graph', () => {
     expect((res as any).__interrupt__).toBeDefined();
     expect((res as any).__interrupt__.length).toBeGreaterThan(0);
     expect((res as any).__interrupt__[0].value.kind).toBe('confirm');
-    expect((res as any).__interrupt__[0].value.calls[0].summary).toBe('Xác nhận đơn hàng ord-200');
+    expect((res as any).__interrupt__[0].value.calls[0].summary).toBe(
+      'Xác nhận đơn hàng ord-200',
+    );
   });
 
   it('case preview 3: tool whose preview returns undefined uses summarize(args)', async () => {
@@ -763,7 +925,13 @@ describe('LangGraph Agent Graph', () => {
       model: new ScriptedFakeModel([
         new AIMessage({
           content: '',
-          tool_calls: [{ id: 'call_prev_3', name: 'undefined_preview_tool', args: { orderId: 'ord-300' } }],
+          tool_calls: [
+            {
+              id: 'call_prev_3',
+              name: 'undefined_preview_tool',
+              args: { orderId: 'ord-300' },
+            },
+          ],
         }),
       ]),
       registry: new ToolRegistry([previewTool]),
@@ -772,7 +940,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-prev-3', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-prev-3', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Xác nhận')] },
       config,
@@ -783,14 +953,18 @@ describe('LangGraph Agent Graph', () => {
     expect((res as any).__interrupt__).toBeDefined();
     expect((res as any).__interrupt__.length).toBeGreaterThan(0);
     expect((res as any).__interrupt__[0].value.kind).toBe('confirm');
-    expect((res as any).__interrupt__[0].value.calls[0].summary).toBe('Xác nhận đơn hàng ord-300');
+    expect((res as any).__interrupt__[0].value.calls[0].summary).toBe(
+      'Xác nhận đơn hàng ord-300',
+    );
   });
 
   it('case empty id 1: a tool call with an empty or missing id requiring confirmation is treated as declined by confirm node and never reaches handler', async () => {
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: '', name: 'cancel_order', args: { orderId: 'ord-empty-1' } }],
+        tool_calls: [
+          { id: '', name: 'cancel_order', args: { orderId: 'ord-empty-1' } },
+        ],
       }),
       new AIMessage({ content: 'Đã giữ nguyên đơn hàng.' }),
     ]);
@@ -802,7 +976,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-empty-1', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-empty-1', ctx: customerCtx },
+    };
     const res1 = await graph.invoke(
       { messages: [new HumanMessage('Hủy đơn với id rỗng')] },
       config,
@@ -818,7 +994,8 @@ describe('LangGraph Agent Graph', () => {
 
     expect(cancelOrderHandler).not.toHaveBeenCalled();
     const toolMsg = res2.messages.find(
-      (m: any) => m.getType() === 'tool' && (!m.tool_call_id || m.tool_call_id === ''),
+      (m: any) =>
+        m.getType() === 'tool' && (!m.tool_call_id || m.tool_call_id === ''),
     );
     expect(toolMsg).toBeDefined();
     const parsed = JSON.parse(toolMsg!.content as string);
@@ -830,7 +1007,9 @@ describe('LangGraph Agent Graph', () => {
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: '', name: 'read_catalog', args: { query: 'laptop' } }],
+        tool_calls: [
+          { id: '', name: 'read_catalog', args: { query: 'laptop' } },
+        ],
       }),
       new AIMessage({ content: 'Lỗi công cụ.' }),
     ]);
@@ -842,7 +1021,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-empty-2', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-empty-2', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Tìm laptop')] },
       config,
@@ -850,7 +1031,8 @@ describe('LangGraph Agent Graph', () => {
 
     expect(readCatalogHandler).not.toHaveBeenCalled();
     const toolMsg = res.messages.find(
-      (m: any) => m.getType() === 'tool' && (!m.tool_call_id || m.tool_call_id === ''),
+      (m: any) =>
+        m.getType() === 'tool' && (!m.tool_call_id || m.tool_call_id === ''),
     );
     expect(toolMsg).toBeDefined();
     const parsed = JSON.parse(toolMsg!.content as string);
@@ -885,11 +1067,10 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-seq-1', ctx: customerCtx } };
-    await graph.invoke(
-      { messages: [new HumanMessage('Tìm 2 món')] },
-      config,
-    );
+    const config = {
+      configurable: { thread_id: 'th-seq-1', ctx: customerCtx },
+    };
+    await graph.invoke({ messages: [new HumanMessage('Tìm 2 món')] }, config);
 
     expect(readCatalogHandler).toHaveBeenCalledTimes(2);
     expect(events).toEqual([
@@ -905,8 +1086,16 @@ describe('LangGraph Agent Graph', () => {
       new AIMessage({
         content: '',
         tool_calls: [
-          { id: 'call_w_1', name: 'add_to_cart', args: { itemId: 'item-1', quantity: 1 } },
-          { id: 'call_w_2', name: 'add_to_cart', args: { itemId: 'item-2', quantity: 2 } },
+          {
+            id: 'call_w_1',
+            name: 'add_to_cart',
+            args: { itemId: 'item-1', quantity: 1 },
+          },
+          {
+            id: 'call_w_2',
+            name: 'add_to_cart',
+            args: { itemId: 'item-2', quantity: 2 },
+          },
         ],
       }),
       new AIMessage({ content: 'Đã thêm sản phẩm.' }),
@@ -919,14 +1108,19 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-batch-w2', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-batch-w2', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Thêm 2 món')] },
       config,
     );
 
     expect(addToCartHandler).toHaveBeenCalledTimes(1);
-    expect(addToCartHandler).toHaveBeenCalledWith({ itemId: 'item-1', quantity: 1 }, customerCtx);
+    expect(addToCartHandler).toHaveBeenCalledWith(
+      { itemId: 'item-1', quantity: 1 },
+      customerCtx,
+    );
 
     const toolMsg2 = res.messages.find(
       (m: any) => m.getType() === 'tool' && m.tool_call_id === 'call_w_2',
@@ -943,7 +1137,11 @@ describe('LangGraph Agent Graph', () => {
         content: '',
         tool_calls: [
           { id: 'call_r_1', name: 'read_catalog', args: { query: 'laptop' } },
-          { id: 'call_w_1', name: 'add_to_cart', args: { itemId: 'p1', quantity: 1 } },
+          {
+            id: 'call_w_1',
+            name: 'add_to_cart',
+            args: { itemId: 'p1', quantity: 1 },
+          },
           { id: 'call_r_2', name: 'read_catalog', args: { query: 'mouse' } },
         ],
       }),
@@ -957,7 +1155,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-batch-w1-r2', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-batch-w1-r2', ctx: customerCtx },
+    };
     const res = await graph.invoke(
       { messages: [new HumanMessage('Tìm và thêm hàng')] },
       config,
@@ -965,7 +1165,10 @@ describe('LangGraph Agent Graph', () => {
 
     expect(readCatalogHandler).toHaveBeenCalledTimes(2);
     expect(addToCartHandler).toHaveBeenCalledTimes(1);
-    expect(addToCartHandler).toHaveBeenCalledWith({ itemId: 'p1', quantity: 1 }, customerCtx);
+    expect(addToCartHandler).toHaveBeenCalledWith(
+      { itemId: 'p1', quantity: 1 },
+      customerCtx,
+    );
 
     const toolMsgW = res.messages.find(
       (m: any) => m.getType() === 'tool' && m.tool_call_id === 'call_w_1',
@@ -994,11 +1197,10 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-batch-r2', ctx: customerCtx } };
-    await graph.invoke(
-      { messages: [new HumanMessage('Tìm cả hai')] },
-      config,
-    );
+    const config = {
+      configurable: { thread_id: 'th-batch-r2', ctx: customerCtx },
+    };
+    await graph.invoke({ messages: [new HumanMessage('Tìm cả hai')] }, config);
 
     expect(readCatalogHandler).toHaveBeenCalledTimes(2);
   });
@@ -1008,8 +1210,16 @@ describe('LangGraph Agent Graph', () => {
       new AIMessage({
         content: '',
         tool_calls: [
-          { id: 'call_destr_1', name: 'cancel_order', args: { orderId: 'ord-1' } },
-          { id: 'call_destr_2', name: 'cancel_order', args: { orderId: 'ord-2' } },
+          {
+            id: 'call_destr_1',
+            name: 'cancel_order',
+            args: { orderId: 'ord-1' },
+          },
+          {
+            id: 'call_destr_2',
+            name: 'cancel_order',
+            args: { orderId: 'ord-2' },
+          },
         ],
       }),
       new AIMessage({ content: 'Hoàn tất.' }),
@@ -1022,7 +1232,9 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-batch-destr', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-batch-destr', ctx: customerCtx },
+    };
     const res1 = await graph.invoke(
       { messages: [new HumanMessage('Hủy 2 đơn hàng')] },
       config,
@@ -1044,7 +1256,10 @@ describe('LangGraph Agent Graph', () => {
     );
 
     expect(cancelOrderHandler).toHaveBeenCalledTimes(1);
-    expect(cancelOrderHandler).toHaveBeenCalledWith({ orderId: 'ord-1' }, customerCtx);
+    expect(cancelOrderHandler).toHaveBeenCalledWith(
+      { orderId: 'ord-1' },
+      customerCtx,
+    );
 
     const toolMsg2 = res2.messages.find(
       (m: any) => m.getType() === 'tool' && m.tool_call_id === 'call_destr_2',
@@ -1060,18 +1275,29 @@ describe('LangGraph Agent Graph', () => {
     const customAudit: AgentAuditSink = {
       record: jest.fn().mockImplementation(async (entry: ToolAuditEntry) => {
         if (entry.status === 'OK' && entry.toolCallId) {
-          memoryStore.set(`${entry.threadId}:${entry.toolCallId}`, entry.resultSummary ?? 'Đã thực hiện');
+          memoryStore.set(
+            `${entry.threadId}:${entry.toolCallId}`,
+            entry.resultSummary ?? 'Đã thực hiện',
+          );
         }
       }),
-      findCompleted: jest.fn().mockImplementation(async (threadId: string, toolCallId: string) => {
-        return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
-      }),
+      findCompleted: jest
+        .fn()
+        .mockImplementation(async (threadId: string, toolCallId: string) => {
+          return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
+        }),
     };
 
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_write_idem_1', name: 'update_stock', args: { productId: 'p1', stock: 10 } }],
+        tool_calls: [
+          {
+            id: 'call_write_idem_1',
+            name: 'update_stock',
+            args: { productId: 'p1', stock: 10 },
+          },
+        ],
       }),
       new AIMessage({ content: 'Tồn kho đã được cập nhật lần 1.' }),
     ]);
@@ -1087,19 +1313,28 @@ describe('LangGraph Agent Graph', () => {
     const config = { configurable: { thread_id: 'th-idem-1', ctx: adminCtx } };
 
     // Turn 1: request requiring confirmation
-    await graph.invoke({ messages: [new HumanMessage('Cập nhật kho p1')] }, config);
+    await graph.invoke(
+      { messages: [new HumanMessage('Cập nhật kho p1')] },
+      config,
+    );
     expect(updateStockHandler).not.toHaveBeenCalled();
 
     // First confirmation: handler runs once
     const res1 = await graph.invoke(
-      new Command({ resume: { decisions: [{ callId: 'call_write_idem_1', approve: true }] } }),
+      new Command({
+        resume: { decisions: [{ callId: 'call_write_idem_1', approve: true }] },
+      }),
       config,
     );
     expect(updateStockHandler).toHaveBeenCalledTimes(1);
-    expect(updateStockHandler).toHaveBeenCalledWith({ productId: 'p1', stock: 10 }, adminCtx);
+    expect(updateStockHandler).toHaveBeenCalledWith(
+      { productId: 'p1', stock: 10 },
+      adminCtx,
+    );
 
     const toolMsg1 = res1.messages.find(
-      (m: any) => m.getType() === 'tool' && m.tool_call_id === 'call_write_idem_1',
+      (m: any) =>
+        m.getType() === 'tool' && m.tool_call_id === 'call_write_idem_1',
     );
     expect(toolMsg1).toBeDefined();
 
@@ -1110,22 +1345,35 @@ describe('LangGraph Agent Graph', () => {
       checkpointer: new MemorySaver(),
       audit: customAudit,
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
-    })({
-      messages: [
-        new AIMessage({
-          content: '',
-          tool_calls: [{ id: 'call_write_idem_1', name: 'update_stock', args: { productId: 'p1', stock: 10 } }],
-        }),
-      ],
-    } as any, config);
+    })(
+      {
+        messages: [
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: 'call_write_idem_1',
+                name: 'update_stock',
+                args: { productId: 'p1', stock: 10 },
+              },
+            ],
+          }),
+        ],
+      } as any,
+      config,
+    );
 
     // Handler must NOT run a second time
     expect(updateStockHandler).toHaveBeenCalledTimes(1);
 
     // Stored summary must be returned as the tool result content
     expect(res2.messages).toHaveLength(1);
-    expect((res2.messages[0] as ToolMessage).tool_call_id).toBe('call_write_idem_1');
-    expect((res2.messages[0] as ToolMessage).content).toBe((toolMsg1 as ToolMessage).content.slice(0, 300));
+    expect((res2.messages[0] as ToolMessage).tool_call_id).toBe(
+      'call_write_idem_1',
+    );
+    expect((res2.messages[0] as ToolMessage).content).toBe(
+      (toolMsg1 as ToolMessage).content.slice(0, 300),
+    );
   });
 
   it('write tool idempotency: a write call with a new tool call id still runs normally', async () => {
@@ -1133,23 +1381,40 @@ describe('LangGraph Agent Graph', () => {
     const customAudit: AgentAuditSink = {
       record: jest.fn().mockImplementation(async (entry: ToolAuditEntry) => {
         if (entry.status === 'OK' && entry.toolCallId) {
-          memoryStore.set(`${entry.threadId}:${entry.toolCallId}`, entry.resultSummary ?? 'Đã thực hiện');
+          memoryStore.set(
+            `${entry.threadId}:${entry.toolCallId}`,
+            entry.resultSummary ?? 'Đã thực hiện',
+          );
         }
       }),
-      findCompleted: jest.fn().mockImplementation(async (threadId: string, toolCallId: string) => {
-        return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
-      }),
+      findCompleted: jest
+        .fn()
+        .mockImplementation(async (threadId: string, toolCallId: string) => {
+          return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
+        }),
     };
 
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_write_new_1', name: 'add_to_cart', args: { itemId: 'p1', quantity: 2 } }],
+        tool_calls: [
+          {
+            id: 'call_write_new_1',
+            name: 'add_to_cart',
+            args: { itemId: 'p1', quantity: 2 },
+          },
+        ],
       }),
       new AIMessage({ content: 'Đã thêm p1.' }),
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_write_new_2', name: 'add_to_cart', args: { itemId: 'p2', quantity: 3 } }],
+        tool_calls: [
+          {
+            id: 'call_write_new_2',
+            name: 'add_to_cart',
+            args: { itemId: 'p2', quantity: 3 },
+          },
+        ],
       }),
       new AIMessage({ content: 'Đã thêm p2.' }),
     ]);
@@ -1162,15 +1427,23 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-new-id', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-new-id', ctx: customerCtx },
+    };
 
     await graph.invoke({ messages: [new HumanMessage('Thêm p1')] }, config);
     expect(addToCartHandler).toHaveBeenCalledTimes(1);
-    expect(addToCartHandler).toHaveBeenLastCalledWith({ itemId: 'p1', quantity: 2 }, customerCtx);
+    expect(addToCartHandler).toHaveBeenLastCalledWith(
+      { itemId: 'p1', quantity: 2 },
+      customerCtx,
+    );
 
     await graph.invoke({ messages: [new HumanMessage('Thêm p2')] }, config);
     expect(addToCartHandler).toHaveBeenCalledTimes(2);
-    expect(addToCartHandler).toHaveBeenLastCalledWith({ itemId: 'p2', quantity: 3 }, customerCtx);
+    expect(addToCartHandler).toHaveBeenLastCalledWith(
+      { itemId: 'p2', quantity: 3 },
+      customerCtx,
+    );
   });
 
   it('write tool idempotency: read tools behave as before and are not deduplicated across calls', async () => {
@@ -1178,18 +1451,29 @@ describe('LangGraph Agent Graph', () => {
     const customAudit: AgentAuditSink = {
       record: jest.fn().mockImplementation(async (entry: ToolAuditEntry) => {
         if (entry.status === 'OK' && entry.toolCallId) {
-          memoryStore.set(`${entry.threadId}:${entry.toolCallId}`, entry.resultSummary ?? 'Đã thực hiện');
+          memoryStore.set(
+            `${entry.threadId}:${entry.toolCallId}`,
+            entry.resultSummary ?? 'Đã thực hiện',
+          );
         }
       }),
-      findCompleted: jest.fn().mockImplementation(async (threadId: string, toolCallId: string) => {
-        return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
-      }),
+      findCompleted: jest
+        .fn()
+        .mockImplementation(async (threadId: string, toolCallId: string) => {
+          return memoryStore.get(`${threadId}:${toolCallId}`) ?? null;
+        }),
     };
 
     const model = new ScriptedFakeModel([
       new AIMessage({
         content: '',
-        tool_calls: [{ id: 'call_read_repeat', name: 'read_catalog', args: { query: 'laptop' } }],
+        tool_calls: [
+          {
+            id: 'call_read_repeat',
+            name: 'read_catalog',
+            args: { query: 'laptop' },
+          },
+        ],
       }),
       new AIMessage({ content: 'Kết quả 1.' }),
     ]);
@@ -1202,12 +1486,20 @@ describe('LangGraph Agent Graph', () => {
       limits: { maxToolCallsPerTurn: 5, historyMaxMessages: 10 },
     });
 
-    const config = { configurable: { thread_id: 'th-read-repeat', ctx: customerCtx } };
+    const config = {
+      configurable: { thread_id: 'th-read-repeat', ctx: customerCtx },
+    };
     const state = {
       messages: [
         new AIMessage({
           content: '',
-          tool_calls: [{ id: 'call_read_repeat', name: 'read_catalog', args: { query: 'laptop' } }],
+          tool_calls: [
+            {
+              id: 'call_read_repeat',
+              name: 'read_catalog',
+              args: { query: 'laptop' },
+            },
+          ],
         }),
       ],
     } as any;
@@ -1221,4 +1513,3 @@ describe('LangGraph Agent Graph', () => {
     expect(customAudit.findCompleted).not.toHaveBeenCalled();
   });
 });
-

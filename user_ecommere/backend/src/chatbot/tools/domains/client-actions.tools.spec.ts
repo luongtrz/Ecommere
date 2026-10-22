@@ -1,4 +1,7 @@
-import { createClientActionTools, ClientActionToolDeps } from './client-actions.tools';
+import {
+  createClientActionTools,
+  ClientActionToolDeps,
+} from './client-actions.tools';
 import { AgentToolDef, ToolContext } from '../tool.types';
 
 describe('client-actions tools', () => {
@@ -115,8 +118,12 @@ describe('client-actions tools', () => {
 
     it('rejects non-positive quantity and empty variantId in schema', () => {
       const tool = getTool('cart_add_item');
-      expect(() => tool.schema.parse({ variantId: 'var-1', quantity: 0 })).toThrow();
-      expect(() => tool.schema.parse({ variantId: 'var-1', quantity: -5 })).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'var-1', quantity: 0 }),
+      ).toThrow();
+      expect(() =>
+        tool.schema.parse({ variantId: 'var-1', quantity: -5 }),
+      ).toThrow();
       expect(() => tool.schema.parse({ variantId: '', quantity: 1 })).toThrow();
       expect(() =>
         tool.schema.parse({ variantId: 'a'.repeat(65), quantity: 1 }),
@@ -195,7 +202,10 @@ describe('client-actions tools', () => {
         },
       });
 
-      const parsedArgs = tool.schema.parse({ variantId: 'var-123', quantity: 2 });
+      const parsedArgs = tool.schema.parse({
+        variantId: 'var-123',
+        quantity: 2,
+      });
       const result: any = await tool.handler(parsedArgs, mockContext);
 
       expect(result).toEqual({
@@ -484,9 +494,15 @@ describe('client-actions tools', () => {
       expect(() => tool.schema.parse({ path: '/c/' })).toThrow();
       expect(() => tool.schema.parse({ path: '/orders/' })).toThrow();
 
-      await expect(tool.handler({ path: '/p/' }, mockContext)).rejects.toThrow();
-      await expect(tool.handler({ path: '/c/' }, mockContext)).rejects.toThrow();
-      await expect(tool.handler({ path: '/orders/' }, mockContext)).rejects.toThrow();
+      await expect(
+        tool.handler({ path: '/p/' }, mockContext),
+      ).rejects.toThrow();
+      await expect(
+        tool.handler({ path: '/c/' }, mockContext),
+      ).rejects.toThrow();
+      await expect(
+        tool.handler({ path: '/orders/' }, mockContext),
+      ).rejects.toThrow();
     });
   });
 });

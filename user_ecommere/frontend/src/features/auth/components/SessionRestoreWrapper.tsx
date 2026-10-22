@@ -9,7 +9,9 @@ interface SessionRestoreWrapperProps {
 
 let sessionRestorePromise: Promise<void> | null = null;
 
-export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) {
+export function SessionRestoreWrapper({
+  children,
+}: SessionRestoreWrapperProps) {
   useEffect(() => {
     // Chỉ restore token nếu có user trong localStorage
     const restoreSession = async () => {
@@ -23,7 +25,10 @@ export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) 
         authToken.remove();
         useCartStore.getState().clearCart();
         localStorage.removeItem('user');
-        if (window.location.pathname !== '/login' && isProtectedRoute(window.location.pathname)) {
+        if (
+          window.location.pathname !== '/login' &&
+          isProtectedRoute(window.location.pathname)
+        ) {
           window.location.replace('/login');
         }
       }

@@ -21,6 +21,6 @@ export function useToast() {
       loading: sonnerToast.loading,
       dismiss: sonnerToast.dismiss,
     }),
-    []
+    [],
   );
 }

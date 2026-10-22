@@ -4,7 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
 import { STORE_URL } from '@/lib/constants';
@@ -57,7 +64,6 @@ export function LoginPage() {
                 </span>
               </div>
             </div>
-
           </div>
 
           {/* Center Showcase Content */}
@@ -76,15 +82,19 @@ export function LoginPage() {
               </h1>
 
               <p className="text-sm xl:text-base text-slate-600 leading-relaxed font-normal">
-                Tối ưu hóa quy trình xuất nhập kho các dòng chai xịt đuổi chuột ARS, diệt côn trùng, tẩy rửa sinh học, đồng bộ hóa đơn hàng đa kênh và quản trị cơ sở dữ liệu PostgreSQL.
+                Tối ưu hóa quy trình xuất nhập kho các dòng chai xịt đuổi chuột
+                ARS, diệt côn trùng, tẩy rửa sinh học, đồng bộ hóa đơn hàng đa
+                kênh và quản trị cơ sở dữ liệu PostgreSQL.
               </p>
             </div>
-
           </div>
 
           {/* Bottom Security Footer */}
           <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-200/80">
-            <span>&copy; {new Date().getFullYear()} Thai Spray Việt Nam • Control Platform</span>
+            <span>
+              &copy; {new Date().getFullYear()} Thai Spray Việt Nam • Control
+              Platform
+            </span>
             <span className="flex items-center gap-1 text-slate-600 font-medium">
               <ShieldCheck className="h-4 w-4 text-teal-600" />
               Bảo mật SSL / TLS
@@ -101,8 +111,12 @@ export function LoginPage() {
                 TS
               </div>
               <div>
-                <h2 className="text-xl font-black text-slate-900">Thai Spray Admin</h2>
-                <p className="text-xs text-teal-700 font-medium uppercase tracking-wider">Cổng Quản Trị Hệ Thống</p>
+                <h2 className="text-xl font-black text-slate-900">
+                  Thai Spray Admin
+                </h2>
+                <p className="text-xs text-teal-700 font-medium uppercase tracking-wider">
+                  Cổng Quản Trị Hệ Thống
+                </p>
               </div>
             </div>
 
@@ -116,14 +130,18 @@ export function LoginPage() {
                 Đăng Nhập Quản Trị
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                Vui lòng nhập số điện thoại quản trị viên và mật khẩu bảo mật để truy cập bảng điều khiển.
+                Vui lòng nhập số điện thoại quản trị viên và mật khẩu bảo mật để
+                truy cập bảng điều khiển.
               </p>
             </div>
 
             {/* Auth Form Card */}
             <div className="rounded-3xl border border-slate-200/80 bg-white p-7 sm:p-9 shadow-lg">
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-5"
+                >
                   <FormField
                     control={form.control}
                     name="phone"
@@ -179,7 +197,11 @@ export function LoginPage() {
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                             >
-                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
                             </button>
                           </div>
                         </FormControl>

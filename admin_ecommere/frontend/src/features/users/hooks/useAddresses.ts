@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { usersApi, type CreateAddressDto, type UpdateAddressDto } from '../api/users.api';
+import {
+  usersApi,
+  type CreateAddressDto,
+  type UpdateAddressDto,
+} from '../api/users.api';
 import { toast } from 'sonner';
 
 export function useAddresses() {

@@ -69,7 +69,9 @@ export class AdminChatbotController {
     },
   })
   @Post('stream')
-  @ApiOperation({ summary: 'Stream assistant responses using Server-Sent Events' })
+  @ApiOperation({
+    summary: 'Stream assistant responses using Server-Sent Events',
+  })
   @ApiResponse({ status: 200, description: 'Server-Sent Events stream' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
   @ApiResponse({ status: 409, description: 'Thread is busy' })
@@ -102,7 +104,9 @@ export class AdminChatbotController {
       role: 'ADMIN',
       app: 'ADMIN',
       threadId,
-      ...(body.clientContext ? { clientContext: body.clientContext as any } : {}),
+      ...(body.clientContext
+        ? { clientContext: body.clientContext as any }
+        : {}),
     };
 
     await this.runSseTurn(req, res, {
@@ -119,7 +123,9 @@ export class AdminChatbotController {
     },
   })
   @Post('threads/:threadId/resume')
-  @ApiOperation({ summary: 'Resume assistant execution with tool call decisions' })
+  @ApiOperation({
+    summary: 'Resume assistant execution with tool call decisions',
+  })
   @ApiResponse({ status: 200, description: 'Server-Sent Events stream' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
   @ApiResponse({ status: 409, description: 'Thread is busy' })
@@ -176,10 +182,7 @@ export class AdminChatbotController {
   @Get('threads')
   @ApiOperation({ summary: 'List admin chat threads' })
   @ApiResponse({ status: 200, description: 'List of caller threads' })
-  async listThreads(
-    @Req() req: Request,
-    @Query() query: AgentThreadQueryDto,
-  ) {
+  async listThreads(@Req() req: Request, @Query() query: AgentThreadQueryDto) {
     const actor = this.getActor(req);
     if (!actor.userId) {
       return [];
@@ -192,10 +195,7 @@ export class AdminChatbotController {
   @ApiOperation({ summary: 'Get thread details by ID' })
   @ApiResponse({ status: 200, description: 'Thread details' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
-  async getThread(
-    @Req() req: Request,
-    @Param('threadId') threadId: string,
-  ) {
+  async getThread(@Req() req: Request, @Param('threadId') threadId: string) {
     const actor = this.getActor(req);
     const thread = await this.threads.assertOwned(threadId, actor);
     return {
@@ -226,10 +226,7 @@ export class AdminChatbotController {
   @ApiResponse({ status: 200, description: 'Thread deleted' })
   @ApiResponse({ status: 404, description: 'Thread not found or unowned' })
   @ApiResponse({ status: 409, description: 'Thread is busy' })
-  async deleteThread(
-    @Req() req: Request,
-    @Param('threadId') threadId: string,
-  ) {
+  async deleteThread(@Req() req: Request, @Param('threadId') threadId: string) {
     const actor = this.getActor(req);
     await this.threads.assertOwned(threadId, actor);
     if (this.runner.isThreadRunning(threadId)) {
@@ -315,7 +312,11 @@ export class AdminChatbotController {
         message: options.message,
         resume: options.resume,
         sink: (event: AgentStreamEvent) => {
-          if (isTerminated || abortController.signal.aborted || res.writableFinished) {
+          if (
+            isTerminated ||
+            abortController.signal.aborted ||
+            res.writableFinished
+          ) {
             return;
           }
           const w = getWriter();
@@ -329,9 +330,10 @@ export class AdminChatbotController {
         (err instanceof AgentBusyError || err?.name === 'AgentBusyError') &&
         !writer
       ) {
-        res
-          .status(409)
-          .json({ statusCode: 409, message: 'Cuộc trò chuyện đang được xử lý' });
+        res.status(409).json({
+          statusCode: 409,
+          message: 'Cuộc trò chuyện đang được xử lý',
+        });
         return;
       }
       throw err;
@@ -340,7 +342,11 @@ export class AdminChatbotController {
     try {
       await runPromise;
     } catch {
-      if (!isTerminated && !abortController.signal.aborted && !res.writableFinished) {
+      if (
+        !isTerminated &&
+        !abortController.signal.aborted &&
+        !res.writableFinished
+      ) {
         const w = getWriter();
         w.send({
           event: 'error',

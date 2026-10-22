@@ -31,7 +31,9 @@ describe('SSE frames', () => {
       const lines = frame.split('\n');
       const dataLines = lines.filter((line) => line.startsWith('data:'));
       expect(dataLines).toHaveLength(1);
-      expect(dataLines[0]).toBe('data: {"text":"line 1\\nline 2\\r\\nline 3\\n"}');
+      expect(dataLines[0]).toBe(
+        'data: {"text":"line 1\\nline 2\\r\\nline 3\\n"}',
+      );
     });
 
     it('formats all AgentStreamEvent variants with single-line data', () => {
@@ -39,17 +41,31 @@ describe('SSE frames', () => {
         { event: 'thread', data: { threadId: 'thread_1' } },
         {
           event: 'tool_start',
-          data: { id: 'call_1', name: 'search_product', summary: 'Searching products' },
+          data: {
+            id: 'call_1',
+            name: 'search_product',
+            summary: 'Searching products',
+          },
         },
         {
           event: 'tool_result',
-          data: { id: 'call_1', name: 'search_product', ok: true, summary: 'Found 3 items' },
+          data: {
+            id: 'call_1',
+            name: 'search_product',
+            ok: true,
+            summary: 'Found 3 items',
+          },
         },
         {
           event: 'confirm_required',
           data: {
             calls: [
-              { id: 'call_2', name: 'checkout', summary: 'Place order', risk: 'high' },
+              {
+                id: 'call_2',
+                name: 'checkout',
+                summary: 'Place order',
+                risk: 'high',
+              },
             ],
           },
         },
@@ -61,14 +77,22 @@ describe('SSE frames', () => {
           event: 'sources',
           data: [{ title: 'Doc 1', uri: 'https://example.com/1' }],
         },
-        { event: 'done', data: { usage: { promptTokens: 10, completionTokens: 5 } } },
+        {
+          event: 'done',
+          data: { usage: { promptTokens: 10, completionTokens: 5 } },
+        },
         { event: 'done', data: { usage: null } },
-        { event: 'error', data: { message: 'Something went wrong', code: 'INTERNAL_ERROR' } },
+        {
+          event: 'error',
+          data: { message: 'Something went wrong', code: 'INTERNAL_ERROR' },
+        },
       ];
 
       for (const ev of events) {
         const frame = formatSseFrame(ev);
-        expect(frame).toBe(`event: ${ev.event}\ndata: ${JSON.stringify(ev.data)}\n\n`);
+        expect(frame).toBe(
+          `event: ${ev.event}\ndata: ${JSON.stringify(ev.data)}\n\n`,
+        );
       }
     });
   });
@@ -103,7 +127,9 @@ describe('SSE frames', () => {
       for (const [header, value] of Object.entries(SSE_HEADERS)) {
         expect(mockRes.setHeader).toHaveBeenCalledWith(header, value);
       }
-      expect(mockRes.setHeader).toHaveBeenCalledTimes(Object.keys(SSE_HEADERS).length);
+      expect(mockRes.setHeader).toHaveBeenCalledTimes(
+        Object.keys(SSE_HEADERS).length,
+      );
       expect(mockRes.flushHeaders).toHaveBeenCalledTimes(1);
     });
 

@@ -40,8 +40,16 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-image:
-      radial-gradient(circle at top right, rgba(124, 58, 237, 0.08), transparent 30%),
-      radial-gradient(circle at top left, rgba(99, 102, 241, 0.08), transparent 28%),
+      radial-gradient(
+        circle at top right,
+        rgba(124, 58, 237, 0.08),
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at top left,
+        rgba(99, 102, 241, 0.08),
+        transparent 28%
+      ),
       linear-gradient(180deg, hsl(224, 71%, 4%), hsl(222, 47%, 2%));
     background-attachment: fixed;
   }
@@ -64,7 +72,11 @@
   }
 
   .sidebar-glass {
-    background: linear-gradient(135deg, rgba(10, 12, 18, 0.96) 0%, rgba(5, 6, 8, 0.92) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(10, 12, 18, 0.96) 0%,
+      rgba(5, 6, 8, 0.92) 100%
+    );
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
   }
@@ -83,9 +95,11 @@
   .admin-glow {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .admin-glow:hover {
-    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.3), 0 0 24px -2px rgba(99, 102, 241, 0.15);
+    box-shadow:
+      0 24px 48px -12px rgba(0, 0, 0, 0.3),
+      0 0 24px -2px rgba(99, 102, 241, 0.15);
     border-color: rgba(99, 102, 241, 0.25);
   }
 }

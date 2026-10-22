@@ -1,12 +1,26 @@
-import { BadRequestException, Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dtos/create-coupon.dto';
 import { UpdateCouponDto } from './dtos/update-coupon.dto';
 import { ValidateCouponDto } from './dtos/validate-coupon.dto';
 import { CouponEntity, CouponValidationEntity } from './entities/coupon.entity';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
-import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
@@ -48,7 +62,10 @@ export class CouponsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update coupon (Admin only)' })
   @ApiResponse({ status: 200, type: CouponEntity })
-  async update(@Param('code') code: string, @Body() updateCouponDto: UpdateCouponDto) {
+  async update(
+    @Param('code') code: string,
+    @Body() updateCouponDto: UpdateCouponDto,
+  ) {
     return this.couponsService.update(code, updateCouponDto);
   }
 
@@ -71,15 +88,22 @@ export class CouponsController {
     @Query('orderTotal') orderTotal?: string,
   ) {
     const normalizedOrderTotal = orderTotal?.trim();
-    const total = normalizedOrderTotal === undefined ? 0 : Number(normalizedOrderTotal);
+    const total =
+      normalizedOrderTotal === undefined ? 0 : Number(normalizedOrderTotal);
 
     if (
       normalizedOrderTotal !== undefined &&
       (normalizedOrderTotal === '' || !Number.isSafeInteger(total) || total < 0)
     ) {
-      throw new BadRequestException('orderTotal must be a non-negative integer');
+      throw new BadRequestException(
+        'orderTotal must be a non-negative integer',
+      );
     }
 
-    return this.couponsService.validateCoupon(validateCouponDto.code, userId, total);
+    return this.couponsService.validateCoupon(
+      validateCouponDto.code,
+      userId,
+      total,
+    );
   }
 }

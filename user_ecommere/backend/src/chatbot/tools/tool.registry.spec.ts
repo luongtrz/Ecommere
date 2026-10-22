@@ -159,7 +159,10 @@ describe('ToolRegistry', () => {
       };
 
       // Valid arguments without userId
-      const validPayload = { orderId: 'ord-999', reason: 'Đổi ý không mua nữa' };
+      const validPayload = {
+        orderId: 'ord-999',
+        reason: 'Đổi ý không mua nữa',
+      };
       const validParsed = fixtureTool.schema.safeParse(validPayload);
       expect(validParsed.success).toBe(true);
 

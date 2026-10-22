@@ -8,7 +8,9 @@ interface SessionRestoreWrapperProps {
 
 let sessionRestorePromise: Promise<void> | null = null;
 
-export function SessionRestoreWrapper({ children }: SessionRestoreWrapperProps) {
+export function SessionRestoreWrapper({
+  children,
+}: SessionRestoreWrapperProps) {
   useEffect(() => {
     // Chỉ restore token nếu có user trong localStorage
     const restoreSession = async () => {

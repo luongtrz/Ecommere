@@ -26,52 +26,59 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      
+
       addItem: (item) => {
-        const existingItem = get().items.find((i) => i.variantId === item.variantId);
+        const existingItem = get().items.find(
+          (i) => i.variantId === item.variantId,
+        );
         if (existingItem) {
           set({
             items: get().items.map((i) =>
               i.variantId === item.variantId
                 ? { ...i, quantity: i.quantity + (item.quantity || 1) }
-                : i
+                : i,
             ),
           });
         } else {
-          set({ items: [...get().items, { ...item, quantity: item.quantity || 1 }] });
+          set({
+            items: [...get().items, { ...item, quantity: item.quantity || 1 }],
+          });
         }
       },
-      
+
       removeItem: (variantId) => {
         set({ items: get().items.filter((i) => i.variantId !== variantId) });
       },
-      
+
       updateQuantity: (variantId, quantity) => {
         if (quantity <= 0) {
           get().removeItem(variantId);
         } else {
           set({
             items: get().items.map((i) =>
-              i.variantId === variantId ? { ...i, quantity } : i
+              i.variantId === variantId ? { ...i, quantity } : i,
             ),
           });
         }
       },
-      
+
       clearCart: () => {
         set({ items: [] });
       },
-      
+
       getTotalPrice: () => {
-        return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
+        return get().items.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0,
+        );
       },
-      
+
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);
       },
     }),
     {
       name: 'cart-storage',
-    }
-  )
+    },
+  ),
 );

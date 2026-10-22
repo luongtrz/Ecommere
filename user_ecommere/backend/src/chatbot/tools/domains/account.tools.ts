@@ -34,7 +34,10 @@ function projectAddress(addr: any): Record<string, unknown> | unknown {
   return projected;
 }
 
-function projectList<T>(result: T, itemProjector?: (item: any) => any): unknown {
+function projectList<T>(
+  result: T,
+  itemProjector?: (item: any) => any,
+): unknown {
   if (!result || typeof result !== 'object') {
     return result;
   }
@@ -74,7 +77,10 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
   const updateMyProfileBaseSchema = z
     .object({
       name: z.string().min(1).max(100).optional(),
-      phone: z.string().regex(PHONE_REGEX, 'Số điện thoại không hợp lệ').optional(),
+      phone: z
+        .string()
+        .regex(PHONE_REGEX, 'Số điện thoại không hợp lệ')
+        .optional(),
     })
     .strict();
 
@@ -96,7 +102,9 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
         throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       if (args.name === undefined && args.phone === undefined) {
-        throw new ToolError('Ít nhất một trong hai trường name hoặc phone phải có');
+        throw new ToolError(
+          'Ít nhất một trong hai trường name hoặc phone phải có',
+        );
       }
       const fields: { name?: string; phone?: string } = {};
       if (args.name !== undefined) {
@@ -213,7 +221,9 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
         parts.push(`tỉnh/thành: ${args.province}`);
       }
       if (args?.isDefault !== undefined) {
-        parts.push(args.isDefault ? 'đặt làm mặc định' : 'không đặt làm mặc định');
+        parts.push(
+          args.isDefault ? 'đặt làm mặc định' : 'không đặt làm mặc định',
+        );
       } else {
         parts.push('không đặt làm mặc định');
       }
@@ -230,7 +240,10 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
     .object({
       addressId: z.string().min(1).max(64),
       fullName: z.string().min(1).max(100).optional(),
-      phone: z.string().regex(PHONE_REGEX, 'Số điện thoại không hợp lệ').optional(),
+      phone: z
+        .string()
+        .regex(PHONE_REGEX, 'Số điện thoại không hợp lệ')
+        .optional(),
       province: z.string().min(1).max(100).optional(),
       district: z.string().min(1).max(100).optional(),
       ward: z.string().min(1).max(100).optional(),
@@ -318,7 +331,9 @@ export function createAccountTools(deps: AccountToolDeps): AgentToolDef[] {
         parts.push(`tỉnh/thành: ${args.province}`);
       }
       if (args?.isDefault !== undefined) {
-        parts.push(args.isDefault ? 'đặt làm mặc định' : 'không đặt làm mặc định');
+        parts.push(
+          args.isDefault ? 'đặt làm mặc định' : 'không đặt làm mặc định',
+        );
       }
       const addrId = args?.addressId ? ` ${args.addressId}` : '';
       if (parts.length === 0) {

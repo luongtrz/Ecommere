@@ -66,7 +66,11 @@ export function setRefreshTokenCookie(
   isProduction: boolean,
   maxAge = DEFAULT_COOKIE_MAX_AGE_MS,
 ) {
-  response.cookie('refreshToken', token, getCookieOptions(isProduction, maxAge));
+  response.cookie(
+    'refreshToken',
+    token,
+    getCookieOptions(isProduction, maxAge),
+  );
 }
 
 /**
@@ -78,7 +82,11 @@ export function setCsrfTokenCookie(
   isProduction: boolean,
   maxAge = DEFAULT_COOKIE_MAX_AGE_MS,
 ) {
-  response.cookie('csrf_token', token, getCsrfCookieOptions(isProduction, maxAge));
+  response.cookie(
+    'csrf_token',
+    token,
+    getCsrfCookieOptions(isProduction, maxAge),
+  );
 }
 
 /**

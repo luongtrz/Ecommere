@@ -22,7 +22,9 @@ export function ToolCallCard({ step }: { step: ChatToolStep }) {
         <span className="flex-1 truncate">{step.summary}</span>
       </CollapsibleTrigger>
       <CollapsibleContent className="border-t border-border px-3 py-2 text-muted-foreground whitespace-pre-wrap break-words">
-        {step.status === 'running' ? 'Đang thực hiện…' : (step.resultSummary ?? null)}
+        {step.status === 'running'
+          ? 'Đang thực hiện…'
+          : (step.resultSummary ?? null)}
       </CollapsibleContent>
     </Collapsible>
   );

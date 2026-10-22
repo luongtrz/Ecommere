@@ -10,9 +10,23 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { SEO } from '@/lib/seo';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,17 +43,45 @@ function formatCompactCurrency(value: number) {
 
 function getStatusBadge(status: string) {
   const statusMap: Record<string, { label: string; className: string }> = {
-    PENDING_PAYMENT: { label: 'Chờ thanh toán', className: 'bg-amber-50 text-amber-700 border-amber-200' },
-    PAID: { label: 'Đã thanh toán', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    PACKING: { label: 'Đang đóng gói', className: 'bg-sky-50 text-sky-700 border-sky-200' },
-    SHIPPED: { label: 'Đang giao', className: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-    DELIVERED: { label: 'Đã giao', className: 'bg-blue-50 text-blue-700 border-blue-200' },
-    CANCELED: { label: 'Đã hủy', className: 'bg-rose-50 text-rose-700 border-rose-200' },
-    REFUNDED: { label: 'Hoàn tiền', className: 'bg-slate-100 text-slate-700 border-slate-200' },
+    PENDING_PAYMENT: {
+      label: 'Chờ thanh toán',
+      className: 'bg-amber-50 text-amber-700 border-amber-200',
+    },
+    PAID: {
+      label: 'Đã thanh toán',
+      className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    },
+    PACKING: {
+      label: 'Đang đóng gói',
+      className: 'bg-sky-50 text-sky-700 border-sky-200',
+    },
+    SHIPPED: {
+      label: 'Đang giao',
+      className: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    },
+    DELIVERED: {
+      label: 'Đã giao',
+      className: 'bg-blue-50 text-blue-700 border-blue-200',
+    },
+    CANCELED: {
+      label: 'Đã hủy',
+      className: 'bg-rose-50 text-rose-700 border-rose-200',
+    },
+    REFUNDED: {
+      label: 'Hoàn tiền',
+      className: 'bg-slate-100 text-slate-700 border-slate-200',
+    },
   };
 
-  const config = statusMap[status] || { label: status, className: 'bg-slate-100 text-slate-700 border-slate-200' };
-  return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
+  const config = statusMap[status] || {
+    label: status,
+    className: 'bg-slate-100 text-slate-700 border-slate-200',
+  };
+  return (
+    <Badge variant="outline" className={config.className}>
+      {config.label}
+    </Badge>
+  );
 }
 
 export function DashboardPage() {
@@ -75,9 +117,16 @@ export function DashboardPage() {
         <AlertCircle className="h-14 w-14 text-muted-foreground" />
         <div>
           <h2 className="text-2xl font-semibold">Không thể tải dashboard</h2>
-          <p className="mt-2 text-muted-foreground">API thống kê hiện không phản hồi hoặc dữ liệu chưa sẵn sàng.</p>
+          <p className="mt-2 text-muted-foreground">
+            API thống kê hiện không phản hồi hoặc dữ liệu chưa sẵn sàng.
+          </p>
         </div>
-        <Button onClick={() => window.location.reload()} className="rounded-full px-6">Tải lại</Button>
+        <Button
+          onClick={() => window.location.reload()}
+          className="rounded-full px-6"
+        >
+          Tải lại
+        </Button>
       </div>
     );
   }
@@ -89,8 +138,10 @@ export function DashboardPage() {
       icon: DollarSign,
       change: stats.revenue.monthlyChange,
       description: 'so với tháng trước',
-      borderClass: 'border-l-4 border-l-emerald-500/80 border-t border-r border-b border-slate-800/50',
-      iconClass: 'bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 shadow-inner',
+      borderClass:
+        'border-l-4 border-l-emerald-500/80 border-t border-r border-b border-slate-800/50',
+      iconClass:
+        'bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 shadow-inner',
     },
     {
       title: 'Đơn hàng mới',
@@ -98,8 +149,10 @@ export function DashboardPage() {
       icon: ShoppingCart,
       change: stats.orders.monthlyChange,
       description: `${stats.orders.pendingOrders} đơn đang chờ xử lý`,
-      borderClass: 'border-l-4 border-l-indigo-500/80 border-t border-r border-b border-slate-800/50',
-      iconClass: 'bg-indigo-950/40 text-indigo-400 border border-indigo-800/30 shadow-inner',
+      borderClass:
+        'border-l-4 border-l-indigo-500/80 border-t border-r border-b border-slate-800/50',
+      iconClass:
+        'bg-indigo-950/40 text-indigo-400 border border-indigo-800/30 shadow-inner',
     },
     {
       title: 'Sản phẩm hoạt động',
@@ -107,8 +160,10 @@ export function DashboardPage() {
       icon: Package,
       change: undefined,
       description: `${stats.products.lowStockProducts} sản phẩm sắp hết hàng`,
-      borderClass: 'border-l-4 border-l-amber-500/80 border-t border-r border-b border-slate-800/50',
-      iconClass: 'bg-amber-950/40 text-amber-400 border border-amber-800/30 shadow-inner',
+      borderClass:
+        'border-l-4 border-l-amber-500/80 border-t border-r border-b border-slate-800/50',
+      iconClass:
+        'bg-amber-950/40 text-amber-400 border border-amber-800/30 shadow-inner',
     },
     {
       title: 'Khách hàng mới',
@@ -116,8 +171,10 @@ export function DashboardPage() {
       icon: Users,
       change: stats.customers.monthlyChange,
       description: `${stats.customers.totalCustomers} tài khoản toàn hệ thống`,
-      borderClass: 'border-l-4 border-l-purple-500/80 border-t border-r border-b border-slate-800/50',
-      iconClass: 'bg-purple-950/40 text-purple-400 border border-purple-800/30 shadow-inner',
+      borderClass:
+        'border-l-4 border-l-purple-500/80 border-t border-r border-b border-slate-800/50',
+      iconClass:
+        'bg-purple-950/40 text-purple-400 border border-purple-800/30 shadow-inner',
     },
   ];
 
@@ -129,21 +186,32 @@ export function DashboardPage() {
         <section className="admin-surface overflow-hidden p-6 md:p-8">
           <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr] xl:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Tổng quan vận hành</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                Tổng quan vận hành
+              </p>
               <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-foreground md:text-5xl">
-                Doanh thu, đơn hàng và hàng bán chạy đang nằm trên cùng một màn hình gọn hơn.
+                Doanh thu, đơn hàng và hàng bán chạy đang nằm trên cùng một màn
+                hình gọn hơn.
               </h2>
               <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-                Theo dõi thay đổi theo tháng, đơn hàng cần chú ý và nhóm sản phẩm kéo doanh thu tốt nhất để quyết định nhanh hơn.
+                Theo dõi thay đổi theo tháng, đơn hàng cần chú ý và nhóm sản
+                phẩm kéo doanh thu tốt nhất để quyết định nhanh hơn.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Button asChild className="rounded-full px-6 transition-transform duration-300 hover:scale-[1.02] shadow-lg shadow-primary/10">
+                <Button
+                  asChild
+                  className="rounded-full px-6 transition-transform duration-300 hover:scale-[1.02] shadow-lg shadow-primary/10"
+                >
                   <Link to="/admin/orders">
                     Xử lý đơn hàng
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="rounded-full px-6 bg-slate-900/30 border-slate-800 transition-transform duration-300 hover:scale-[1.02] shadow-sm">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-full px-6 bg-slate-900/30 border-slate-800 transition-transform duration-300 hover:scale-[1.02] shadow-sm"
+                >
                   <Link to="/admin/products">Cập nhật sản phẩm</Link>
                 </Button>
               </div>
@@ -152,15 +220,27 @@ export function DashboardPage() {
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
               <div className="relative overflow-hidden rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(99,102,241,0.08),rgba(10,15,30,0.6))] border border-slate-800/80 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:scale-[1.01] hover:shadow-[0_12px_30px_rgba(99,102,241,0.15)] group">
                 <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
-                <p className="text-sm font-semibold text-muted-foreground tracking-wide">Doanh thu toàn hệ thống</p>
-                <p className="mt-2 text-3xl font-extrabold text-foreground tracking-tight">{formatCurrency(stats.revenue.totalRevenue)}</p>
-                <p className="mt-2 text-xs text-muted-foreground/80 leading-relaxed">Tổng doanh thu đã ghi nhận từ trước đến nay trên hệ thống.</p>
+                <p className="text-sm font-semibold text-muted-foreground tracking-wide">
+                  Doanh thu toàn hệ thống
+                </p>
+                <p className="mt-2 text-3xl font-extrabold text-foreground tracking-tight">
+                  {formatCurrency(stats.revenue.totalRevenue)}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground/80 leading-relaxed">
+                  Tổng doanh thu đã ghi nhận từ trước đến nay trên hệ thống.
+                </p>
               </div>
               <div className="relative overflow-hidden rounded-[1.6rem] bg-[linear-gradient(145deg,rgba(16,185,129,0.08),rgba(10,15,30,0.6))] border border-slate-800/80 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:scale-[1.01] hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)] group">
                 <div className="absolute top-0 right-0 h-24 w-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
-                <p className="text-sm font-semibold text-muted-foreground tracking-wide">Tốc độ giao dịch gần nhất</p>
-                <p className="mt-2 text-3xl font-extrabold text-foreground tracking-tight">{stats.orders.shippingOrders} đơn</p>
-                <p className="mt-2 text-xs text-muted-foreground/80 leading-relaxed">Tổng số đơn hàng đang trong trạng thái giao vận thực tế.</p>
+                <p className="text-sm font-semibold text-muted-foreground tracking-wide">
+                  Tốc độ giao dịch gần nhất
+                </p>
+                <p className="mt-2 text-3xl font-extrabold text-foreground tracking-tight">
+                  {stats.orders.shippingOrders} đơn
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground/80 leading-relaxed">
+                  Tổng số đơn hàng đang trong trạng thái giao vận thực tế.
+                </p>
               </div>
             </div>
           </div>
@@ -168,25 +248,53 @@ export function DashboardPage() {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {statCards.map((card) => (
-            <Card key={card.title} className={cn("overflow-hidden rounded-[1.75rem] bg-slate-900/40 border border-slate-800/80 shadow-[0_12px_45px_-16px_rgba(0,0,0,0.4)] admin-glow hover:-translate-y-1 transition-all duration-300", card.borderClass)}>
+            <Card
+              key={card.title}
+              className={cn(
+                'overflow-hidden rounded-[1.75rem] bg-slate-900/40 border border-slate-800/80 shadow-[0_12px_45px_-16px_rgba(0,0,0,0.4)] admin-glow hover:-translate-y-1 transition-all duration-300',
+                card.borderClass,
+              )}
+            >
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div>
-                  <CardTitle className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{card.title}</CardTitle>
-                  <div className="mt-3 text-2xl font-bold text-foreground font-serif tracking-tight">{card.value}</div>
+                  <CardTitle className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    {card.title}
+                  </CardTitle>
+                  <div className="mt-3 text-2xl font-bold text-foreground font-serif tracking-tight">
+                    {card.value}
+                  </div>
                 </div>
-                <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800/50", card.iconClass)}>
+                <div
+                  className={cn(
+                    'flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800/50',
+                    card.iconClass,
+                  )}
+                >
                   <card.icon className="h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                   {card.change !== undefined ? (
-                    <span className={cn('inline-flex items-center gap-1 font-bold text-xs rounded-full px-2 py-0.5', card.change >= 0 ? 'bg-emerald-950/50 text-emerald-400' : 'bg-rose-950/50 text-rose-400')}>
-                      {card.change >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1 font-bold text-xs rounded-full px-2 py-0.5',
+                        card.change >= 0
+                          ? 'bg-emerald-950/50 text-emerald-400'
+                          : 'bg-rose-950/50 text-rose-400',
+                      )}
+                    >
+                      {card.change >= 0 ? (
+                        <TrendingUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <TrendingDown className="h-3.5 w-3.5" />
+                      )}
                       {Math.abs(card.change).toFixed(1)}%
                     </span>
                   ) : null}
-                  <span className="text-xs text-muted-foreground/90 font-medium">{card.description}</span>
+                  <span className="text-xs text-muted-foreground/90 font-medium">
+                    {card.description}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -196,27 +304,61 @@ export function DashboardPage() {
         <section className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
           <Card className="admin-surface border-0 shadow-[0_12px_45px_-16px_rgba(0,0,0,0.5)]">
             <CardHeader>
-              <CardTitle className="text-lg font-bold tracking-wide text-foreground">Tín hiệu doanh thu</CardTitle>
-              <CardDescription className="text-xs text-muted-foreground/80 font-medium">Xu hướng doanh thu 7 kỳ gần nhất dựa trên dữ liệu hệ thống.</CardDescription>
+              <CardTitle className="text-lg font-bold tracking-wide text-foreground">
+                Tín hiệu doanh thu
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground/80 font-medium">
+                Xu hướng doanh thu 7 kỳ gần nhất dựa trên dữ liệu hệ thống.
+              </CardDescription>
             </CardHeader>
             <CardContent className="pl-0 pr-2 md:pl-2">
               <div className="h-[360px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={stats.revenueHistory} margin={{ left: 6, right: 6, top: 10, bottom: 0 }}>
+                  <AreaChart
+                    data={stats.revenueHistory}
+                    margin={{ left: 6, right: 6, top: 10, bottom: 0 }}
+                  >
                     <defs>
-                      <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="#7C3AED" stopOpacity={0.01} />
+                      <linearGradient
+                        id="dashboardRevenue"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#7C3AED"
+                          stopOpacity={0.28}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#7C3AED"
+                          stopOpacity={0.01}
+                        />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} stroke="#64748b" dy={8} />
+                    <CartesianGrid
+                      vertical={false}
+                      strokeDasharray="3 3"
+                      stroke="#1e293b"
+                    />
+                    <XAxis
+                      dataKey="name"
+                      tickLine={false}
+                      axisLine={false}
+                      fontSize={11}
+                      stroke="#64748b"
+                      dy={8}
+                    />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
                       fontSize={11}
                       stroke="#64748b"
-                      tickFormatter={(value) => formatCompactCurrency(Number(value))}
+                      tickFormatter={(value) =>
+                        formatCompactCurrency(Number(value))
+                      }
                       dx={-8}
                     />
                     <Tooltip
@@ -245,10 +387,19 @@ export function DashboardPage() {
           <Card className="admin-surface border-0 shadow-[0_12px_45px_-16px_rgba(15,23,42,0.08)]">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-bold tracking-wide text-foreground">Đơn gần đây</CardTitle>
-                <CardDescription className="text-xs text-muted-foreground/80 font-medium">{stats.recentOrders.length} đơn mới nhất cần theo dõi.</CardDescription>
+                <CardTitle className="text-lg font-bold tracking-wide text-foreground">
+                  Đơn gần đây
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground/80 font-medium">
+                  {stats.recentOrders.length} đơn mới nhất cần theo dõi.
+                </CardDescription>
               </div>
-              <Button variant="ghost" size="icon" asChild className="rounded-full hover:bg-secondary">
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="rounded-full hover:bg-secondary"
+              >
                 <Link to="/admin/orders">
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -270,17 +421,34 @@ export function DashboardPage() {
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3.5 min-w-0">
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary/20 to-primary/10 border border-primary/20 font-bold text-sm text-primary shadow-sm">
-                            {order.customerName ? order.customerName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'KH'}
+                            {order.customerName
+                              ? order.customerName
+                                  .split(' ')
+                                  .map((n: string) => n[0])
+                                  .join('')
+                                  .slice(0, 2)
+                                  .toUpperCase()
+                              : 'KH'}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-sm text-foreground tracking-wide">{order.orderNumber}</p>
-                            <p className="mt-0.5 text-xs text-muted-foreground font-semibold truncate max-w-[150px]">{order.customerName}</p>
-                            <p className="mt-1 text-[10px] text-muted-foreground/80 font-medium">{formatDateTime(order.createdAt)}</p>
+                            <p className="font-bold text-sm text-foreground tracking-wide">
+                              {order.orderNumber}
+                            </p>
+                            <p className="mt-0.5 text-xs text-muted-foreground font-semibold truncate max-w-[150px]">
+                              {order.customerName}
+                            </p>
+                            <p className="mt-1 text-[10px] text-muted-foreground/80 font-medium">
+                              {formatDateTime(order.createdAt)}
+                            </p>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="font-extrabold text-sm text-foreground tracking-tight">{formatCurrency(order.totalAmount)}</p>
-                          <div className="mt-2 flex justify-end">{getStatusBadge(order.status)}</div>
+                          <p className="font-extrabold text-sm text-foreground tracking-tight">
+                            {formatCurrency(order.totalAmount)}
+                          </p>
+                          <div className="mt-2 flex justify-end">
+                            {getStatusBadge(order.status)}
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -295,12 +463,17 @@ export function DashboardPage() {
           <Card className="admin-surface border-0">
             <CardHeader>
               <CardTitle>Sản phẩm kéo doanh thu</CardTitle>
-              <CardDescription>Nhóm có doanh thu cao nhất trong kỳ hiện tại.</CardDescription>
+              <CardDescription>
+                Nhóm có doanh thu cao nhất trong kỳ hiện tại.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {stats.topProducts.map((product, index) => (
-                  <div key={product.id} className="flex items-center justify-between gap-4 rounded-[1.4rem] border border-slate-800 bg-slate-900/20 px-4 py-4">
+                  <div
+                    key={product.id}
+                    className="flex items-center justify-between gap-4 rounded-[1.4rem] border border-slate-800 bg-slate-900/20 px-4 py-4"
+                  >
                     <div className="flex min-w-0 items-center gap-4">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary text-sm font-semibold text-foreground">
                         #{index + 1}
@@ -315,12 +488,18 @@ export function DashboardPage() {
                         />
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate font-semibold text-foreground">{product.name}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">Đã bán {product.soldQuantity} sản phẩm</p>
+                        <p className="truncate font-semibold text-foreground">
+                          {product.name}
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Đã bán {product.soldQuantity} sản phẩm
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-foreground">{formatCurrency(product.revenue)}</p>
+                      <p className="font-bold text-foreground">
+                        {formatCurrency(product.revenue)}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -331,23 +510,43 @@ export function DashboardPage() {
           <Card className="admin-surface border-0">
             <CardHeader>
               <CardTitle>Nhịp vận hành hôm nay</CardTitle>
-              <CardDescription>Các tín hiệu cần quan tâm khi theo dõi shop.</CardDescription>
+              <CardDescription>
+                Các tín hiệu cần quan tâm khi theo dõi shop.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-[1.4rem] border border-slate-800/80 bg-slate-900/30 p-4">
-                <p className="text-sm font-semibold text-foreground">Đơn đang chờ xử lý</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">{stats.orders.pendingOrders}</p>
-                <p className="mt-1 text-sm text-muted-foreground">Nên ưu tiên xác nhận và đẩy sang đóng gói sớm.</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Đơn đang chờ xử lý
+                </p>
+                <p className="mt-2 text-3xl font-bold text-foreground">
+                  {stats.orders.pendingOrders}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Nên ưu tiên xác nhận và đẩy sang đóng gói sớm.
+                </p>
               </div>
               <div className="rounded-[1.4rem] border border-slate-800/80 bg-slate-900/30 p-4">
-                <p className="text-sm font-semibold text-foreground">Sản phẩm sắp hết hàng</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">{stats.products.lowStockProducts}</p>
-                <p className="mt-1 text-sm text-muted-foreground">Theo dõi để tránh out-of-stock ở nhóm bán tốt.</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Sản phẩm sắp hết hàng
+                </p>
+                <p className="mt-2 text-3xl font-bold text-foreground">
+                  {stats.products.lowStockProducts}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Theo dõi để tránh out-of-stock ở nhóm bán tốt.
+                </p>
               </div>
               <div className="rounded-[1.4rem] border border-slate-800/80 bg-slate-900/30 p-4">
-                <p className="text-sm font-semibold text-foreground">Khách hàng mới trong tháng</p>
-                <p className="mt-2 text-3xl font-bold text-foreground">{stats.customers.newCustomersThisMonth}</p>
-                <p className="mt-1 text-sm text-muted-foreground">Có thể tận dụng để chạy cross-sell hoặc referral.</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Khách hàng mới trong tháng
+                </p>
+                <p className="mt-2 text-3xl font-bold text-foreground">
+                  {stats.customers.newCustomersThisMonth}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Có thể tận dụng để chạy cross-sell hoặc referral.
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -5,7 +5,13 @@ import { SearchBox } from './SearchBox';
 import { CartBadge } from './CartBadge';
 import { CategoryNav } from './CategoryNav';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 export function Header() {
   const { user, logout } = useAuth();

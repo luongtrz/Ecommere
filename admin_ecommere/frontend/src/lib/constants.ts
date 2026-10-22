@@ -13,7 +13,9 @@ export const PRODUCT_SCENTS = [
 export const PRODUCT_VOLUMES = [50, 100, 150, 200, 300, 500] as const;
 
 // Customer storefront URL, set per deployment through VITE_STORE_URL.
-export const STORE_URL = (import.meta.env.VITE_STORE_URL || 'http://localhost:5173').replace(/\/$/, '');
+export const STORE_URL = (
+  import.meta.env.VITE_STORE_URL || 'http://localhost:5173'
+).replace(/\/$/, '');
 
 export const PAYMENT_METHODS = [
   { id: 'COD', name: 'Thanh toán khi nhận hàng (COD)' },
@@ -23,7 +25,12 @@ export const PAYMENT_METHODS = [
 ] as const;
 
 export const SHIPPING_METHODS = [
-  { id: 'STANDARD', name: 'Giao hàng tiêu chuẩn', price: 30000, days: '3-5 ngày' },
+  {
+    id: 'STANDARD',
+    name: 'Giao hàng tiêu chuẩn',
+    price: 30000,
+    days: '3-5 ngày',
+  },
   { id: 'EXPRESS', name: 'Giao hàng nhanh', price: 50000, days: '1-2 ngày' },
 ] as const;
 

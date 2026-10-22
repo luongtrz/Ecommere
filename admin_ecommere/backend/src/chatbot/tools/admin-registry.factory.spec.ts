@@ -1,4 +1,7 @@
-import { buildAdminToolRegistry, AdminRegistryDeps } from './admin-registry.factory';
+import {
+  buildAdminToolRegistry,
+  AdminRegistryDeps,
+} from './admin-registry.factory';
 import { ToolContext } from './tool.types';
 import { ToolRegistry } from './tool.registry';
 

@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
 import {
   Bot,
   Loader2,
@@ -78,7 +84,10 @@ export function ChatbotWidget() {
   }, [user, ownerKey, newThread, claimOwner]);
 
   const isOwnerMatch = user !== undefined && ownerId === ownerKey;
-  const visibleMessages = isOwnerMatch ? messages : [];
+  const visibleMessages = useMemo(
+    () => (isOwnerMatch ? messages : []),
+    [isOwnerMatch, messages],
+  );
 
   // Escape closes the panel
   useEffect(() => {
@@ -103,7 +112,10 @@ export function ChatbotWidget() {
   // Scroll to bottom when messages update or streaming starts
   useEffect(() => {
     if (!open) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+    });
   }, [open, visibleMessages, isStreaming]);
 
   const handleSubmit = () => {
@@ -121,7 +133,11 @@ export function ChatbotWidget() {
 
   const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     // Enter that confirms an IME composition (Vietnamese input methods) must not send.
-    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+    if (
+      event.key === 'Enter' &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing
+    ) {
       event.preventDefault();
       handleSubmit();
     }
@@ -138,8 +154,12 @@ export function ChatbotWidget() {
                 <Sparkles className="h-5 w-5 text-amber-300 animate-pulse" />
               </div>
               <div>
-                <p className="text-sm font-bold tracking-wide">Chuyên gia Mùi hương</p>
-                <p className="text-[11px] text-white/80 mt-0.5 font-medium">Tư vấn mùi thơm cho nhà ở & xe hơi</p>
+                <p className="text-sm font-bold tracking-wide">
+                  Chuyên gia Mùi hương
+                </p>
+                <p className="text-[11px] text-white/80 mt-0.5 font-medium">
+                  Tư vấn mùi thơm cho nhà ở & xe hơi
+                </p>
               </div>
             </div>
 
@@ -183,7 +203,9 @@ export function ChatbotWidget() {
                 <Bot className="h-4 w-4" />
               </div>
               <div className="max-w-[80%] rounded-[1.5rem] rounded-tl-[0.25rem] border border-slate-100/90 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm">
-                <div className="whitespace-pre-line text-sm">{WELCOME_MESSAGE}</div>
+                <div className="whitespace-pre-line text-sm">
+                  {WELCOME_MESSAGE}
+                </div>
               </div>
             </div>
 
@@ -242,7 +264,9 @@ export function ChatbotWidget() {
                           <ConfirmActionCard
                             calls={message.confirm.calls}
                             decided={message.confirm.decided}
-                            onSubmit={(decisions) => decide(message.id, decisions)}
+                            onSubmit={(decisions) =>
+                              decide(message.id, decisions)
+                            }
                           />
                         )}
 
@@ -250,11 +274,15 @@ export function ChatbotWidget() {
                         {message.sources && message.sources.length > 0 && (
                           <div className="border-t border-dashed border-slate-150 pt-2.5">
                             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                              <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10" /> Sản phẩm được đề xuất:
+                              <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10" />{' '}
+                              Sản phẩm được đề xuất:
                             </p>
                             <div className="flex flex-col gap-2">
                               {message.sources.map((source) => (
-                                <ChatbotSourceItem key={source.id} source={source} />
+                                <ChatbotSourceItem
+                                  key={source.id}
+                                  source={source}
+                                />
                               ))}
                             </div>
                           </div>
@@ -279,7 +307,9 @@ export function ChatbotWidget() {
             {/* Quick suggestions when no conversation yet */}
             {visibleMessages.length === 0 ? (
               <div className="space-y-2.5 px-1 pt-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Gợi ý nhanh</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                  Gợi ý nhanh
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {SUGGESTIONS.map((suggestion) => (
                     <button

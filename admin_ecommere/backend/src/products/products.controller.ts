@@ -1,5 +1,19 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
@@ -37,7 +51,9 @@ export class ProductsController {
   @Get('admin')
   @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get all products including inactive products (Admin only)' })
+  @ApiOperation({
+    summary: 'Get all products including inactive products (Admin only)',
+  })
   @ApiResponse({ status: 200, type: [ProductEntity] })
   async findAllForAdmin(@Query() filterDto: ProductFilterDto) {
     return this.productsService.findAll(filterDto, true);
@@ -73,7 +89,10 @@ export class ProductsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update product (Admin only)' })
   @ApiResponse({ status: 200, type: ProductEntity })
-  async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
     return this.productsService.update(id, updateProductDto);
   }
 
@@ -92,7 +111,10 @@ export class ProductsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create product variant (Admin only)' })
   @ApiResponse({ status: 201 })
-  async createVariant(@Param('productId') productId: string, @Body() createVariantDto: CreateVariantDto) {
+  async createVariant(
+    @Param('productId') productId: string,
+    @Body() createVariantDto: CreateVariantDto,
+  ) {
     return this.productsService.createVariant(productId, createVariantDto);
   }
 
@@ -101,7 +123,10 @@ export class ProductsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update product variant (Admin only)' })
   @ApiResponse({ status: 200 })
-  async updateVariant(@Param('variantId') variantId: string, @Body() updateVariantDto: UpdateVariantDto) {
+  async updateVariant(
+    @Param('variantId') variantId: string,
+    @Body() updateVariantDto: UpdateVariantDto,
+  ) {
     return this.productsService.updateVariant(variantId, updateVariantDto);
   }
 

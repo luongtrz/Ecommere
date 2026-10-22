@@ -18,7 +18,8 @@ export function NotFoundPage() {
               </div>
               <h1 className="text-3xl font-bold mb-4">Không tìm thấy trang</h1>
               <p className="text-xl text-gray-200 max-w-2xl mx-auto">
-                Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại
+                Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn
+                tại
               </p>
             </div>
           </div>
@@ -30,10 +31,12 @@ export function NotFoundPage() {
               <span className="text-6xl font-bold text-white">404</span>
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Oops! Trang không tồn tại</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Oops! Trang không tồn tại
+            </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-              Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm.
-              Có thể đường dẫn không chính xác hoặc trang đã bị xóa.
+              Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có
+              thể đường dẫn không chính xác hoặc trang đã bị xóa.
             </p>
 
             {/* Action Buttons */}
@@ -62,7 +65,9 @@ export function NotFoundPage() {
 
             {/* Popular Links */}
             <div className="border-t pt-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Có thể bạn đang tìm kiếm:</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                Có thể bạn đang tìm kiếm:
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Link
                   to="/catalog"
@@ -73,7 +78,9 @@ export function NotFoundPage() {
                   </div>
                   <div className="text-left">
                     <div className="font-medium text-gray-900">Sản phẩm</div>
-                    <div className="text-sm text-gray-600">Xem danh mục sản phẩm</div>
+                    <div className="text-sm text-gray-600">
+                      Xem danh mục sản phẩm
+                    </div>
                   </div>
                 </Link>
 
@@ -86,7 +93,9 @@ export function NotFoundPage() {
                   </div>
                   <div className="text-left">
                     <div className="font-medium text-gray-900">Danh mục</div>
-                    <div className="text-sm text-gray-600">Tìm theo danh mục</div>
+                    <div className="text-sm text-gray-600">
+                      Tìm theo danh mục
+                    </div>
                   </div>
                 </Link>
 

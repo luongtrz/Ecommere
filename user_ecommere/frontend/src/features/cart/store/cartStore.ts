@@ -35,7 +35,9 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
 
       addItem: (item) => {
-        const existingItem = get().items.find((i) => i.variantId === item.variantId);
+        const existingItem = get().items.find(
+          (i) => i.variantId === item.variantId,
+        );
         if (existingItem) {
           const effectiveStock =
             typeof item.stock === 'number' ? item.stock : existingItem.stock;
@@ -52,10 +54,12 @@ export const useCartStore = create<CartState>()(
               i.variantId === item.variantId
                 ? {
                     ...i,
-                    ...(typeof item.stock === 'number' ? { stock: item.stock } : {}),
+                    ...(typeof item.stock === 'number'
+                      ? { stock: item.stock }
+                      : {}),
                     quantity: newQuantity,
                   }
-                : i
+                : i,
             ),
             isOpen: true, // Auto open drawer
           });
@@ -93,7 +97,7 @@ export const useCartStore = create<CartState>()(
 
         set({
           items: get().items.map((i) =>
-            i.variantId === variantId ? { ...i, quantity: newQuantity } : i
+            i.variantId === variantId ? { ...i, quantity: newQuantity } : i,
           ),
         });
       },
@@ -107,18 +111,28 @@ export const useCartStore = create<CartState>()(
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
 
       getTotalPrice: () => {
-        return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
+        return get().items.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0,
+        );
       },
 
       getTotalItems: () => {
-        const total = get().items.reduce((total, item) => total + item.quantity, 0);
+        const total = get().items.reduce(
+          (total, item) => total + item.quantity,
+          0,
+        );
         return total;
       },
 
       replaceItems: (items) => {
         set({
           items: items.map((item) => {
-            if (typeof item.stock === 'number' && item.stock > 0 && item.quantity > item.stock) {
+            if (
+              typeof item.stock === 'number' &&
+              item.stock > 0 &&
+              item.quantity > item.stock
+            ) {
               return { ...item, quantity: Math.max(1, item.stock) };
             }
             return item;
@@ -129,6 +143,6 @@ export const useCartStore = create<CartState>()(
     {
       name: 'cart-storage',
       partialize: (state) => ({ items: state.items }), // Only persist items
-    }
-  )
+    },
+  ),
 );

@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAdminOrders, getAdminOrderById, updateOrderStatus, type AdminOrdersFilter, type OrderStatus } from '../api/admin-orders.api';
+import {
+  getAdminOrders,
+  getAdminOrderById,
+  updateOrderStatus,
+  type AdminOrdersFilter,
+  type OrderStatus,
+} from '../api/admin-orders.api';
 
 /**
  * Hook để lấy danh sách đơn hàng (Admin)
@@ -31,8 +37,13 @@ export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ orderId, status }: { orderId: string; status: OrderStatus }) =>
-      updateOrderStatus(orderId, status),
+    mutationFn: ({
+      orderId,
+      status,
+    }: {
+      orderId: string;
+      status: OrderStatus;
+    }) => updateOrderStatus(orderId, status),
     onSuccess: () => {
       // Invalidate orders list to refetch
       queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
