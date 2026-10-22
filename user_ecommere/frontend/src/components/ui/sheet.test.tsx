@@ -197,7 +197,7 @@ describe('Sheet components', () => {
 
       const overlay = screen.getByTestId('sheet-overlay');
       expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-background/80');
+      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-slate-900/50');
       expect(overlay).toHaveClass('custom-overlay');
       expect(ref.current).toBe(overlay);
     });
@@ -213,7 +213,7 @@ describe('Sheet components', () => {
 
       const overlay = screen.getByTestId('sheet-overlay-default');
       expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-background/80');
+      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-slate-900/50');
     });
   });
 
@@ -228,7 +228,7 @@ describe('Sheet components', () => {
       const header = screen.getByTestId('sheet-header');
       expect(header).toBeInTheDocument();
       expect(header).toHaveClass(
-        'flex flex-col space-y-2 text-center sm:text-left',
+        'flex flex-col space-y-1.5 text-center sm:text-left',
       );
       expect(header).toHaveClass('header-extra');
       expect(screen.getByText('Tiêu đề phần đầu')).toBeInTheDocument();
@@ -243,7 +243,7 @@ describe('Sheet components', () => {
 
       const header = screen.getByTestId('sheet-header-default');
       expect(header).toHaveClass(
-        'flex flex-col space-y-2 text-center sm:text-left',
+        'flex flex-col space-y-1.5 text-center sm:text-left',
       );
     });
 
@@ -297,7 +297,7 @@ describe('Sheet components', () => {
       const title = screen.getByTestId('sheet-title');
       expect(title).toBeInTheDocument();
       expect(title).toHaveClass(
-        'text-lg font-semibold text-foreground title-extra',
+        'text-lg font-semibold text-slate-900 title-extra',
       );
       expect(ref.current).toBe(title);
     });
@@ -314,7 +314,7 @@ describe('Sheet components', () => {
       );
 
       const title = screen.getByTestId('sheet-title-default');
-      expect(title).toHaveClass('text-lg font-semibold text-foreground');
+      expect(title).toHaveClass('text-lg font-semibold text-slate-900');
     });
 
     it('renders SheetDescription with ref, default and custom classes', () => {
@@ -336,7 +336,7 @@ describe('Sheet components', () => {
 
       const desc = screen.getByTestId('sheet-desc');
       expect(desc).toBeInTheDocument();
-      expect(desc).toHaveClass('text-sm text-muted-foreground desc-extra');
+      expect(desc).toHaveClass('text-sm text-slate-500 desc-extra');
       expect(ref.current).toBe(desc);
     });
 
@@ -353,7 +353,7 @@ describe('Sheet components', () => {
       );
 
       const desc = screen.getByTestId('sheet-desc-default');
-      expect(desc).toHaveClass('text-sm text-muted-foreground');
+      expect(desc).toHaveClass('text-sm text-slate-500');
     });
   });
 });
