@@ -4,6 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { CsrfGuard } from './csrf.guard';
 import { IS_CSRF_EXEMPT_KEY } from '../decorators/csrf-exempt.decorator';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 describe('CsrfGuard', () => {
   let guard: CsrfGuard;
@@ -129,6 +130,55 @@ describe('CsrfGuard', () => {
       expect(result).toBe(true);
       expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(
         IS_CSRF_EXEMPT_KEY,
+        [context.getHandler(), context.getClass()],
+      );
+    });
+  });
+
+  describe('Public route decorator (IS_PUBLIC_KEY)', () => {
+    it.each([
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+      'post',
+      'put',
+      'patch',
+      'delete',
+    ])('allows public mutation method %s without checking tokens', (method) => {
+      mockReflector.getAllAndOverride!.mockImplementation((key: string) => {
+        return key === IS_PUBLIC_KEY;
+      });
+
+      const context = createMockExecutionContext({
+        method,
+        headers: {},
+        cookies: {},
+      });
+
+      const result = guard.canActivate(context);
+
+      expect(result).toBe(true);
+      expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(
+        IS_PUBLIC_KEY,
+        [context.getHandler(), context.getClass()],
+      );
+    });
+
+    it('proceeds with CSRF checks when isPublic is false or undefined', () => {
+      mockReflector.getAllAndOverride!.mockReturnValue(false);
+
+      const context = createMockExecutionContext({
+        method: 'POST',
+        headers: { 'x-csrf-token': 'valid-token' },
+        cookies: { csrf_token: 'valid-token' },
+      });
+
+      const result = guard.canActivate(context);
+
+      expect(result).toBe(true);
+      expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(
+        IS_PUBLIC_KEY,
         [context.getHandler(), context.getClass()],
       );
     });
