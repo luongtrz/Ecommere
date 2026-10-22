@@ -154,8 +154,7 @@ export function createReviewsShippingTools(
   const updateReviewTool: AgentToolDef = {
     name: 'update_review',
     domain: 'reviews',
-    description:
-      'Cập nhật nội dung hoặc số sao đánh giá của chính khách hàng.',
+    description: 'Cập nhật nội dung hoặc số sao đánh giá của chính khách hàng.',
     schema: updateReviewBaseSchema,
     auth: 'customer',
     risk: 'SENSITIVE',
@@ -164,7 +163,9 @@ export function createReviewsShippingTools(
         throw new ToolError('Cần đăng nhập để dùng chức năng này');
       }
       if (args.rating === undefined && args.content === undefined) {
-        throw new ToolError('Ít nhất một trong hai trường rating hoặc content phải có');
+        throw new ToolError(
+          'Ít nhất một trong hai trường rating hoặc content phải có',
+        );
       }
       const fields: { rating?: number; content?: string } = {};
       if (args.rating !== undefined) {

@@ -27,7 +27,9 @@ export function useCancelOrder() {
     onSuccess: (_data, orderId) => {
       // Invalidate both the order list and the specific order detail
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAIL, orderId] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAIL, orderId],
+      });
     },
   });
 }

@@ -10,9 +10,23 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { SEO } from '@/lib/seo';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -208,7 +222,10 @@ export function DashboardPage() {
             <CardContent className="p-5 pt-2 pl-0 pr-2 md:pl-2">
               <div className="h-[360px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={stats.revenueHistory} margin={{ left: 6, right: 6, top: 10, bottom: 0 }}>
+                  <AreaChart
+                    data={stats.revenueHistory}
+                    margin={{ left: 6, right: 6, top: 10, bottom: 0 }}
+                  >
                     <defs>
                       <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="rgb(13, 148, 136)" stopOpacity={0.2} />

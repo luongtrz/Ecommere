@@ -10,37 +10,37 @@ import { PaginationDto } from '@/common/dtos/pagination.dto';
 @Roles(Role.ADMIN)
 @Controller('referrals')
 export class ReferralsController {
-    constructor(private referralsService: ReferralsService) { }
+  constructor(private referralsService: ReferralsService) {}
 
-    @Get('config')
-    @Roles(Role.ADMIN)
-    @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Lấy cấu hình referral' })
-    async getConfig() {
-        return this.referralsService.getConfig();
-    }
+  @Get('config')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Lấy cấu hình referral' })
+  async getConfig() {
+    return this.referralsService.getConfig();
+  }
 
-    @Put('config')
-    @Roles(Role.ADMIN)
-    @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Cập nhật cấu hình referral' })
-    async updateConfig(@Body() dto: UpdateReferralConfigDto) {
-        return this.referralsService.updateConfig(dto);
-    }
+  @Put('config')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Cập nhật cấu hình referral' })
+  async updateConfig(@Body() dto: UpdateReferralConfigDto) {
+    return this.referralsService.updateConfig(dto);
+  }
 
-    @Get('stats')
-    @Roles(Role.ADMIN)
-    @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Thống kê referral' })
-    async getStats() {
-        return this.referralsService.getStats();
-    }
+  @Get('stats')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Thống kê referral' })
+  async getStats() {
+    return this.referralsService.getStats();
+  }
 
-    @Get('list')
-    @Roles(Role.ADMIN)
-    @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Danh sách tất cả referrals' })
-    async getAllReferrals(@Query() paginationDto: PaginationDto) {
-        return this.referralsService.getAllReferrals(paginationDto);
-    }
+  @Get('list')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Danh sách tất cả referrals' })
+  async getAllReferrals(@Query() paginationDto: PaginationDto) {
+    return this.referralsService.getAllReferrals(paginationDto);
+  }
 }

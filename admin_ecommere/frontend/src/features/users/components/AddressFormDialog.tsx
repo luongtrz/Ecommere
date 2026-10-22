@@ -19,7 +19,11 @@ interface AddressFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDialogProps) {
+export function AddressFormDialog({
+  address,
+  open,
+  onOpenChange,
+}: AddressFormDialogProps) {
   const isEdit = !!address;
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();

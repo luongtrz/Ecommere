@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "buildCommand": "npx prisma generate && npm run build",
+  "outputDirectory": "public",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "{dist/**,prisma/**,node_modules/.prisma/client/**,node_modules/openai/**,node_modules/@langchain/**}",
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ]
+}

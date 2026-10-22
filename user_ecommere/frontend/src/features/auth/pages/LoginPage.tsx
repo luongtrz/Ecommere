@@ -4,7 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
 import { Link } from 'react-router-dom';
@@ -88,7 +95,9 @@ export function LoginPage() {
               </h2>
 
               <p className="text-sm xl:text-base text-slate-600 leading-relaxed font-normal">
-                Đăng nhập để nhận ngay ưu đãi thành viên, tích lũy điểm thưởng khi mua chai xịt đuổi chuột ARS, diệt gián kiến, tẩy rửa Magiclean và nước giặt xả Hygiene.
+                Đăng nhập để nhận ngay ưu đãi thành viên, tích lũy điểm thưởng
+                khi mua chai xịt đuổi chuột ARS, diệt gián kiến, tẩy rửa
+                Magiclean và nước giặt xả Hygiene.
               </p>
             </div>
 

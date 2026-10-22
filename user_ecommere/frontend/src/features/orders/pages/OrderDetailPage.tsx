@@ -23,7 +23,7 @@ import {
   Phone,
   User,
   XCircle,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react';
 
 export function OrderDetailPage() {
@@ -110,22 +110,35 @@ export function OrderDetailPage() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'PENDING_PAYMENT': return 'Chờ thanh toán';
-      case 'PAID': return 'Đã thanh toán';
-      case 'PACKING': return 'Đang đóng gói';
-      case 'SHIPPED': return 'Đang giao hàng';
-      case 'DELIVERED': return 'Giao thành công';
-      case 'CANCELED': return 'Đã hủy';
-      case 'REFUNDED': return 'Đã hoàn tiền';
-      default: return status;
+      case 'PENDING_PAYMENT':
+        return 'Chờ thanh toán';
+      case 'PAID':
+        return 'Đã thanh toán';
+      case 'PACKING':
+        return 'Đang đóng gói';
+      case 'SHIPPED':
+        return 'Đang giao hàng';
+      case 'DELIVERED':
+        return 'Giao thành công';
+      case 'CANCELED':
+        return 'Đã hủy';
+      case 'REFUNDED':
+        return 'Đã hoàn tiền';
+      default:
+        return status;
     }
   };
 
   // Status steps for timeline
   const steps = ['PENDING_PAYMENT', 'PACKING', 'SHIPPED', 'DELIVERED'];
-  const currentStepIndex = steps.indexOf(order.status) === -1
-    ? (order.status === 'PAID' ? 0 : (['CANCELED', 'REFUNDED'].includes(order.status) ? -1 : 0))
-    : steps.indexOf(order.status);
+  const currentStepIndex =
+    steps.indexOf(order.status) === -1
+      ? order.status === 'PAID'
+        ? 0
+        : ['CANCELED', 'REFUNDED'].includes(order.status)
+          ? -1
+          : 0
+      : steps.indexOf(order.status);
 
   const isCancelled = ['CANCELED', 'REFUNDED'].includes(order.status);
 
@@ -168,10 +181,18 @@ export function OrderDetailPage() {
                   <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-200 -translate-y-1/2 rounded-full hidden md:block" />
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
                     {[
-                      { status: 'PENDING_PAYMENT', label: 'Đặt hàng', icon: Clock },
+                      {
+                        status: 'PENDING_PAYMENT',
+                        label: 'Đặt hàng',
+                        icon: Clock,
+                      },
                       { status: 'PACKING', label: 'Đóng gói', icon: Package },
                       { status: 'SHIPPED', label: 'Vận chuyển', icon: Truck },
-                      { status: 'DELIVERED', label: 'Giao hàng', icon: CheckCircle }
+                      {
+                        status: 'DELIVERED',
+                        label: 'Giao hàng',
+                        icon: CheckCircle,
+                      },
                     ].map((step, index) => {
                       const isCompleted = index <= currentStepIndex;
                       const isCurrent = index === currentStepIndex;
@@ -387,7 +408,9 @@ export function OrderDetailPage() {
                           onClick={handleCancelOrder}
                           disabled={cancelOrder.isPending}
                         >
-                          {cancelOrder.isPending ? 'Đang hủy...' : 'Xác nhận hủy'}
+                          {cancelOrder.isPending
+                            ? 'Đang hủy...'
+                            : 'Xác nhận hủy'}
                         </Button>
                       </div>
                     </div>

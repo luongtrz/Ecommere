@@ -1,11 +1,4 @@
-import {
-  createReportsTools,
-  ReportsToolDeps,
-  DATE_REGEX,
-  GROUP_BY_OPTIONS,
-  projectCustomer,
-  projectList,
-} from './reports.tools';
+import { createReportsTools, ReportsToolDeps } from './reports.tools';
 import { ToolContext, AgentToolDef } from '../tool.types';
 import type { AdminService } from '../../../admin/admin.service';
 import type { ReportsService } from '../../../admin/reports.service';
@@ -62,7 +55,9 @@ describe('Reports Tools', () => {
     };
 
     tools = createReportsTools(deps);
-    getDashboardStatsTool = tools.find((t) => t.name === 'get_dashboard_stats')!;
+    getDashboardStatsTool = tools.find(
+      (t) => t.name === 'get_dashboard_stats',
+    )!;
     getSalesReportTool = tools.find((t) => t.name === 'get_sales_report')!;
     getTopProductsTool = tools.find((t) => t.name === 'get_top_products')!;
     listCustomersTool = tools.find((t) => t.name === 'list_customers')!;
@@ -145,10 +140,29 @@ describe('Reports Tools', () => {
       expect(getDashboardStatsTool.auth).toBe('admin');
 
       const mockStats = {
-        revenue: { totalRevenue: 100000000, monthlyRevenue: 25000000, monthlyChange: 15.5 },
-        orders: { totalOrders: 500, monthlyOrders: 120, monthlyChange: 8.2, pendingOrders: 10, shippingOrders: 20 },
-        products: { totalProducts: 80, activeProducts: 75, newProductsThisMonth: 5, lowStockProducts: 3 },
-        customers: { totalCustomers: 300, newCustomersThisMonth: 30, monthlyChange: 10.0 },
+        revenue: {
+          totalRevenue: 100000000,
+          monthlyRevenue: 25000000,
+          monthlyChange: 15.5,
+        },
+        orders: {
+          totalOrders: 500,
+          monthlyOrders: 120,
+          monthlyChange: 8.2,
+          pendingOrders: 10,
+          shippingOrders: 20,
+        },
+        products: {
+          totalProducts: 80,
+          activeProducts: 75,
+          newProductsThisMonth: 5,
+          lowStockProducts: 3,
+        },
+        customers: {
+          totalCustomers: 300,
+          newCustomersThisMonth: 30,
+          monthlyChange: 10.0,
+        },
         recentOrders: [],
         topProducts: [],
         revenueHistory: [],
@@ -177,12 +191,20 @@ describe('Reports Tools', () => {
     it('project() trims recentOrders, topProducts, and revenueHistory to at most 20 items', () => {
       const mockStats = {
         revenue: { totalRevenue: 1000 },
-        recentOrders: Array.from({ length: 25 }, (_, i) => ({ id: `ord-${i + 1}` })),
-        topProducts: Array.from({ length: 25 }, (_, i) => ({ id: `prod-${i + 1}` })),
-        revenueHistory: Array.from({ length: 25 }, (_, i) => ({ month: `M-${i + 1}` })),
+        recentOrders: Array.from({ length: 25 }, (_, i) => ({
+          id: `ord-${i + 1}`,
+        })),
+        topProducts: Array.from({ length: 25 }, (_, i) => ({
+          id: `prod-${i + 1}`,
+        })),
+        revenueHistory: Array.from({ length: 25 }, (_, i) => ({
+          month: `M-${i + 1}`,
+        })),
       };
 
-      const projected = getDashboardStatsTool.project!(mockStats) as typeof mockStats;
+      const projected = getDashboardStatsTool.project!(
+        mockStats,
+      ) as typeof mockStats;
       expect(projected.recentOrders).toHaveLength(20);
       expect(projected.topProducts).toHaveLength(20);
       expect(projected.revenueHistory).toHaveLength(20);
@@ -221,7 +243,9 @@ describe('Reports Tools', () => {
     });
 
     it('calls reports.getSalesReport with groupBy undefined when omitted', async () => {
-      mockReportsService.getSalesReport.mockResolvedValue({ totals: { orders: 0, revenue: 0 } });
+      mockReportsService.getSalesReport.mockResolvedValue({
+        totals: { orders: 0, revenue: 0 },
+      });
 
       await getSalesReportTool.handler(
         { from: '2026-02-01', to: '2026-02-28' },
@@ -395,8 +419,18 @@ describe('Reports Tools', () => {
       expect(getTopProductsTool.auth).toBe('admin');
 
       const mockProducts = [
-        { productId: 'prod-1', name: 'Nước hoa 1', soldQuantity: 50, revenue: 15000000 },
-        { productId: 'prod-2', name: 'Nước hoa 2', soldQuantity: 30, revenue: 9000000 },
+        {
+          productId: 'prod-1',
+          name: 'Nước hoa 1',
+          soldQuantity: 50,
+          revenue: 15000000,
+        },
+        {
+          productId: 'prod-2',
+          name: 'Nước hoa 2',
+          soldQuantity: 30,
+          revenue: 9000000,
+        },
       ];
       mockReportsService.getTopProducts.mockResolvedValue(mockProducts);
 
@@ -561,7 +595,10 @@ describe('Reports Tools', () => {
     });
 
     it('calls customers.getCustomers with undefined optional arguments when omitted', async () => {
-      mockCustomersService.getCustomers.mockResolvedValue({ data: [], total: 0 });
+      mockCustomersService.getCustomers.mockResolvedValue({
+        data: [],
+        total: 0,
+      });
 
       await listCustomersTool.handler({}, adminCtx);
 
@@ -583,18 +620,18 @@ describe('Reports Tools', () => {
       expect(
         listCustomersTool.schema.safeParse({ search: 'a'.repeat(101) }).success,
       ).toBe(false);
-      expect(
-        listCustomersTool.schema.safeParse({ page: 0 }).success,
-      ).toBe(false);
-      expect(
-        listCustomersTool.schema.safeParse({ page: 51 }).success,
-      ).toBe(false);
-      expect(
-        listCustomersTool.schema.safeParse({ limit: 0 }).success,
-      ).toBe(false);
-      expect(
-        listCustomersTool.schema.safeParse({ limit: 51 }).success,
-      ).toBe(false);
+      expect(listCustomersTool.schema.safeParse({ page: 0 }).success).toBe(
+        false,
+      );
+      expect(listCustomersTool.schema.safeParse({ page: 51 }).success).toBe(
+        false,
+      );
+      expect(listCustomersTool.schema.safeParse({ limit: 0 }).success).toBe(
+        false,
+      );
+      expect(listCustomersTool.schema.safeParse({ limit: 51 }).success).toBe(
+        false,
+      );
 
       expect(
         listCustomersTool.schema.safeParse({
@@ -678,9 +715,9 @@ describe('Reports Tools', () => {
     });
 
     it('summarize returns a Vietnamese string with search or page', () => {
-      expect(
-        listCustomersTool.summarize({ search: 'Nguyen' }),
-      ).toContain('Nguyen');
+      expect(listCustomersTool.summarize({ search: 'Nguyen' })).toContain(
+        'Nguyen',
+      );
       expect(listCustomersTool.summarize({ page: 2 })).toContain('trang 2');
       expect(listCustomersTool.summarize({})).toBe('Xem danh sách khách hàng');
     });
@@ -714,18 +751,23 @@ describe('Reports Tools', () => {
       };
       mockCustomersService.getCustomerById.mockResolvedValue(mockCustomer);
 
-      const result = await getCustomerTool.handler({ id: 'cust-123' }, adminCtx);
+      const result = await getCustomerTool.handler(
+        { id: 'cust-123' },
+        adminCtx,
+      );
 
       expect(mockCustomersService.getCustomerById).toHaveBeenCalledTimes(1);
-      expect(mockCustomersService.getCustomerById).toHaveBeenCalledWith('cust-123');
+      expect(mockCustomersService.getCustomerById).toHaveBeenCalledWith(
+        'cust-123',
+      );
       expect(result).toEqual(mockCustomer);
     });
 
     it('validates id length constraints (1..64)', () => {
       expect(getCustomerTool.schema.safeParse({ id: '' }).success).toBe(false);
-      expect(getCustomerTool.schema.safeParse({ id: 'a'.repeat(65) }).success).toBe(
-        false,
-      );
+      expect(
+        getCustomerTool.schema.safeParse({ id: 'a'.repeat(65) }).success,
+      ).toBe(false);
       expect(getCustomerTool.schema.safeParse({ id: 'cust-ok' }).success).toBe(
         true,
       );
@@ -743,7 +785,9 @@ describe('Reports Tools', () => {
         })),
       };
 
-      const projected = getCustomerTool.project!(mockRawCustomer) as typeof mockRawCustomer;
+      const projected = getCustomerTool.project!(
+        mockRawCustomer,
+      ) as typeof mockRawCustomer;
 
       expect(projected).not.toHaveProperty('password');
       expect(projected).not.toHaveProperty('token');
@@ -753,7 +797,9 @@ describe('Reports Tools', () => {
     });
 
     it('summarize returns a Vietnamese string with id', () => {
-      expect(getCustomerTool.summarize({ id: 'cust-123' })).toContain('cust-123');
+      expect(getCustomerTool.summarize({ id: 'cust-123' })).toContain(
+        'cust-123',
+      );
     });
   });
 });

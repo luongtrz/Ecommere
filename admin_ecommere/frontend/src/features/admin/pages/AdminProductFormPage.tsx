@@ -19,32 +19,59 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ArrowLeft, Loader2, Save, ChevronDown, Plus, Trash2 } from 'lucide-react';
-import { useAdminProduct, useCreateProduct, useUpdateProduct } from '../hooks/useAdminProducts';
+import {
+  ArrowLeft,
+  Loader2,
+  Save,
+  ChevronDown,
+  Plus,
+  Trash2,
+} from 'lucide-react';
+import {
+  useAdminProduct,
+  useCreateProduct,
+  useUpdateProduct,
+} from '../hooks/useAdminProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ImageUpload } from '@/components/common/ImageUpload';
 import { useToast } from '@/hooks/useToast';
 
 // Form validation schema
-const variantFormSchema = z.object({
-  scent: z.string().min(1, 'Mùi hương là bắt buộc'),
-  volumeMl: z.number().int().min(1, 'Dung tích phải lớn hơn 0'),
-  price: z.number().int().min(0, 'Giá phải lớn hơn hoặc bằng 0'),
-  salePrice: z.number().int().min(0, 'Giá sale không được âm').nullable().optional(),
-  stock: z.number().int().min(0, 'Tồn kho không được âm'),
-  barcode: z.string().optional(),
-}).refine((variant) => variant.salePrice == null || variant.salePrice <= variant.price, {
-  path: ['salePrice'],
-  message: 'Giá sale không được lớn hơn giá niêm yết',
-});
+const variantFormSchema = z
+  .object({
+    scent: z.string().min(1, 'Mùi hương là bắt buộc'),
+    volumeMl: z.number().int().min(1, 'Dung tích phải lớn hơn 0'),
+    price: z.number().int().min(0, 'Giá phải lớn hơn hoặc bằng 0'),
+    salePrice: z
+      .number()
+      .int()
+      .min(0, 'Giá sale không được âm')
+      .nullable()
+      .optional(),
+    stock: z.number().int().min(0, 'Tồn kho không được âm'),
+    barcode: z.string().optional(),
+  })
+  .refine(
+    (variant) =>
+      variant.salePrice == null || variant.salePrice <= variant.price,
+    {
+      path: ['salePrice'],
+      message: 'Giá sale không được lớn hơn giá niêm yết',
+    },
+  );
 
 const productFormSchema = z.object({
   name: z.string().min(1, 'Tên sản phẩm là bắt buộc'),
   description: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
   categoryId: z.string().min(1, 'Vui lòng chọn danh mục'),
-  basePrice: z.number().int('Giá phải là số nguyên').positive('Giá phải lớn hơn 0'),
+  basePrice: z
+    .number()
+    .int('Giá phải là số nguyên')
+    .positive('Giá phải lớn hơn 0'),
   active: z.boolean(),
-  variants: z.array(variantFormSchema).min(1, 'Sản phẩm phải có ít nhất một biến thể'),
+  variants: z
+    .array(variantFormSchema)
+    .min(1, 'Sản phẩm phải có ít nhất một biến thể'),
   images: z.array(z.string()).min(1, 'Vui lòng thêm ít nhất 1 ảnh'),
 });
 
@@ -60,7 +87,9 @@ export function AdminProductFormPage() {
   const [images, setImages] = useState<string[]>([]);
 
   // Fetch product data if editing
-  const { data: product, isLoading: isLoadingProduct } = useAdminProduct(id || null);
+  const { data: product, isLoading: isLoadingProduct } = useAdminProduct(
+    id || null,
+  );
 
   // Mutations
   const createProduct = useCreateProduct();
@@ -108,12 +137,14 @@ export function AdminProductFormPage() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const tree = await import('../api/categories.api').then(m => m.categoriesApi.getTree());
+        const tree = await import('../api/categories.api').then((m) =>
+          m.categoriesApi.getTree(),
+        );
 
         // Flatten tree but only keep leaves
         const allCategories: any[] = [];
         const traverse = (nodes: any[], prefix = '') => {
-          nodes.forEach(node => {
+          nodes.forEach((node) => {
             const currentName = prefix + node.name;
             const isLeaf = !node.children || node.children.length === 0;
 
@@ -170,7 +201,8 @@ export function AdminProductFormPage() {
   const onSubmit = async (data: ProductFormData) => {
     try {
       if (isEditMode && id) {
-        const { variants: _variants, ...productData } = data;
+        const productData = { ...data };
+        delete (productData as Partial<ProductFormData>).variants;
 
         // Update existing product
         await updateProduct.mutateAsync({
@@ -513,14 +545,17 @@ export function AdminProductFormPage() {
                         {(() => {
                           const renderMenu = (nodes: any[]) => {
                             return nodes.map((node) => {
-                              const isLeaf = !node.children || node.children.length === 0;
+                              const isLeaf =
+                                !node.children || node.children.length === 0;
 
                               if (isLeaf) {
                                 return (
                                   <DropdownMenuItem
                                     key={node.id}
                                     onClick={() => {
-                                      setValue('categoryId', node.id, { shouldValidate: true });
+                                      setValue('categoryId', node.id, {
+                                        shouldValidate: true,
+                                      });
                                     }}
                                     className="cursor-pointer text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700"
                                   >

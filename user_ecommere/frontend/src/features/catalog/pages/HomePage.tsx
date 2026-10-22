@@ -26,7 +26,11 @@ const HIGHLIGHTS = [
 const BENEFITS = [
   { icon: Truck, title: 'Giao nhanh', desc: 'Nội thành linh hoạt trong ngày' },
   { icon: Shield, title: 'Chính hãng', desc: 'Danh mục được chọn lọc kỹ' },
-  { icon: RefreshCw, title: 'Đổi trả rõ ràng', desc: 'Hỗ trợ trong 7 ngày đầu' },
+  {
+    icon: RefreshCw,
+    title: 'Đổi trả rõ ràng',
+    desc: 'Hỗ trợ trong 7 ngày đầu',
+  },
 ];
 
 const FEATURED_CATEGORY_LIMIT = 4;
@@ -54,7 +58,11 @@ interface CategoryProductSectionProps {
   onAddToCart: (product: any, variant: any) => void;
 }
 
-function CategoryProductSection({ category, index, onAddToCart }: CategoryProductSectionProps) {
+function CategoryProductSection({
+  category,
+  index,
+  onAddToCart,
+}: CategoryProductSectionProps) {
   const [isVisible, setIsVisible] = useState(index < 2);
   const sectionRef = useRef<HTMLElement | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -130,7 +138,11 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
         <>
           <div className="hidden gap-4 md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-4">
             {productsData.products.slice(0, 4).map((product, idx) => (
-              <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${idx * 80}ms` }}>
+              <div
+                key={product.id}
+                className="animate-fade-in"
+                style={{ animationDelay: `${idx * 80}ms` }}
+              >
                 <ProductCard
                   id={product.id}
                   name={product.name}
@@ -140,7 +152,10 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                   rating={product.rating}
                   reviewCount={product.reviewCount}
                   variants={product.variants}
-                  onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                  onAddToCart={() =>
+                    product.variants[0] &&
+                    onAddToCart(product, product.variants[0])
+                  }
                 />
               </div>
             ))}
@@ -159,7 +174,10 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     variants={product.variants}
-                    onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                    onAddToCart={() =>
+                      product.variants[0] &&
+                      onAddToCart(product, product.variants[0])
+                    }
                   />
                 </div>
               ))}
@@ -190,12 +208,15 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
 export function HomePage() {
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { addItem } = useCart();
-  const { data: curatedProducts, isLoading: isLoadingCuratedProducts } = useProducts({
-    sortBy: 'best_selling',
-    limit: 4,
-  });
+  const { data: curatedProducts, isLoading: isLoadingCuratedProducts } =
+    useProducts({
+      sortBy: 'best_selling',
+      limit: 4,
+    });
 
-  const rootCategories = (categories?.filter((category) => !category.parentId) || []).slice(0, FEATURED_CATEGORY_LIMIT);
+  const rootCategories = (
+    categories?.filter((category) => !category.parentId) || []
+  ).slice(0, FEATURED_CATEGORY_LIMIT);
 
   const handleAddToCart = (product: any, variant: any) => {
     addItem({
@@ -323,7 +344,11 @@ export function HomePage() {
           ) : (
             <div className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
               {curatedProducts?.products.map((product, index) => (
-                <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 80}ms` }}>
+                <div
+                  key={product.id}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -333,7 +358,10 @@ export function HomePage() {
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     variants={product.variants}
-                    onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                    onAddToCart={() =>
+                      product.variants[0] &&
+                      handleAddToCart(product, product.variants[0])
+                    }
                   />
                 </div>
               ))}

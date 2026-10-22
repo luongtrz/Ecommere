@@ -41,7 +41,10 @@ export function SearchBox() {
     setRecentSearches(readRecentSearches());
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsFocused(false);
       }
     };
@@ -51,7 +54,10 @@ export function SearchBox() {
   }, []);
 
   const saveRecentSearch = (searchTerm: string) => {
-    const nextRecent = [searchTerm, ...recentSearches.filter((item) => item !== searchTerm)].slice(0, 5);
+    const nextRecent = [
+      searchTerm,
+      ...recentSearches.filter((item) => item !== searchTerm),
+    ].slice(0, 5);
     setRecentSearches(nextRecent);
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(nextRecent));
   };
@@ -147,6 +153,8 @@ export function SearchBox() {
                         {recentSearches.map((term) => (
                           <div
                             key={term}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => handleSearch(term)}
                             className="group flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 font-sans"
                           >

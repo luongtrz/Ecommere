@@ -9,7 +9,13 @@ interface RatingProps {
   className?: string;
 }
 
-export function Rating({ value, max = 5, size = 'sm', showValue = false, className }: RatingProps) {
+export function Rating({
+  value,
+  max = 5,
+  size = 'sm',
+  showValue = false,
+  className,
+}: RatingProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-5 w-5',

@@ -1,15 +1,26 @@
 import { randomBytes } from 'crypto';
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MoneyUtil } from '@/common/utils/money.util';
-import { Prisma, CouponType, OrderStatus, PaymentStatus, StockMovementType } from '@prisma/client';
+import {
+  Prisma,
+  CouponType,
+  OrderStatus,
+  PaymentStatus,
+  StockMovementType,
+} from '@prisma/client';
 import { CheckoutDto, ShippingMethod } from './dtos/checkout.dto';
 import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { OrderFilterDto } from './dtos/order-filter.dto';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async checkout(userId: string, checkoutDto: CheckoutDto) {
     if (checkoutDto.checkoutKey) {
@@ -34,7 +45,6 @@ export class OrdersService {
       items,
       paymentMethod,
       shippingMethod,
-      total,
     } = checkoutDto;
 
     // Get user's cart
@@ -72,11 +82,15 @@ export class OrdersService {
         });
 
         if (!variant) {
-          throw new NotFoundException(`Product variant not found: ${item.variantId}`);
+          throw new NotFoundException(
+            `Product variant not found: ${item.variantId}`,
+          );
         }
 
         if (!variant.product.active) {
-          throw new BadRequestException(`Product is no longer available: ${variant.product.name}`);
+          throw new BadRequestException(
+            `Product is no longer available: ${variant.product.name}`,
+          );
         }
 
         if (variant.stock < item.quantity) {
@@ -156,7 +170,9 @@ export class OrdersService {
         },
       });
     } else {
-      throw new BadRequestException('Either addressId or complete address information must be provided');
+      throw new BadRequestException(
+        'Either addressId or complete address information must be provided',
+      );
     }
 
     // Calculate order totals
@@ -216,23 +232,28 @@ export class OrdersService {
         });
 
         if (userUsageCount >= coupon.maxUsesPerUser) {
-          throw new BadRequestException('You have already used this coupon the maximum number of times');
+          throw new BadRequestException(
+            'You have already used this coupon the maximum number of times',
+          );
         }
       }
 
       // Check minimum order
       if (coupon.minOrder && subtotal < coupon.minOrder) {
-        throw new BadRequestException(`Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`);
+        throw new BadRequestException(
+          `Minimum order amount is ${MoneyUtil.format(coupon.minOrder)}`,
+        );
       }
 
-      discount = coupon.type === CouponType.FREESHIP
-        ? 0
-        : MoneyUtil.calculateDiscount(
-            subtotal,
-            coupon.type,
-            coupon.value,
-            coupon.maxDiscount,
-          );
+      discount =
+        coupon.type === CouponType.FREESHIP
+          ? 0
+          : MoneyUtil.calculateDiscount(
+              subtotal,
+              coupon.type,
+              coupon.value,
+              coupon.maxDiscount,
+            );
     }
 
     // Shipping is calculated on the server. Client-provided totals and fees
@@ -241,7 +262,8 @@ export class OrdersService {
       address,
       shippingMethod ?? ShippingMethod.STANDARD,
     );
-    const shippingFee = coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
+    const shippingFee =
+      coupon?.type === CouponType.FREESHIP ? 0 : calculatedShippingFee;
 
     const orderTotal = subtotal - discount + shippingFee;
 
@@ -262,7 +284,9 @@ export class OrdersService {
           });
 
           if (userUsageCount >= coupon.maxUsesPerUser) {
-            throw new BadRequestException('You have already used this coupon the maximum number of times');
+            throw new BadRequestException(
+              'You have already used this coupon the maximum number of times',
+            );
           }
         }
 
@@ -329,7 +353,9 @@ export class OrdersService {
           });
 
           if (!updatedVariant) {
-            throw new NotFoundException(`Product variant not found: ${item.variantId}`);
+            throw new NotFoundException(
+              `Product variant not found: ${item.variantId}`,
+            );
           }
 
           const newStock = updatedVariant.stock;
@@ -581,7 +607,10 @@ export class OrdersService {
     return order;
   }
 
-  async updateOrderStatus(orderId: string, updateOrderStatusDto: UpdateOrderStatusDto) {
+  async updateOrderStatus(
+    orderId: string,
+    updateOrderStatusDto: UpdateOrderStatusDto,
+  ) {
     const { status } = updateOrderStatusDto;
 
     const order = await this.prisma.order.findUnique({
@@ -600,7 +629,11 @@ export class OrdersService {
 
     // Update payment status based on order status
     let paymentStatus = order.paymentStatus;
-    if (status === OrderStatus.PAID || status === OrderStatus.PACKING || status === OrderStatus.SHIPPED) {
+    if (
+      status === OrderStatus.PAID ||
+      status === OrderStatus.PACKING ||
+      status === OrderStatus.SHIPPED
+    ) {
       paymentStatus = PaymentStatus.COMPLETED;
     } else if (status === OrderStatus.REFUNDED) {
       paymentStatus = PaymentStatus.REFUNDED;
@@ -703,7 +736,9 @@ export class OrdersService {
       });
 
       if (statusUpdate.count !== 1) {
-        throw new BadRequestException('Order cannot be cancelled at this stage');
+        throw new BadRequestException(
+          'Order cannot be cancelled at this stage',
+        );
       }
 
       await this.restoreStockForOrder(order, tx);
@@ -752,7 +787,9 @@ export class OrdersService {
     if (checkoutDto.items && checkoutDto.items.length > 0) {
       const orderItems = order.items ?? [];
       if (checkoutDto.items.length !== orderItems.length) {
-        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        throw new ConflictException(
+          'Mã đặt hàng đã được dùng cho một đơn khác',
+        );
       }
 
       const sortedDtoItems = [...checkoutDto.items].sort(
@@ -771,7 +808,9 @@ export class OrdersService {
           sortedDtoItems[i].variantId !== sortedOrderItems[i].variantId ||
           sortedDtoItems[i].quantity !== sortedOrderItems[i].quantity
         ) {
-          throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+          throw new ConflictException(
+            'Mã đặt hàng đã được dùng cho một đơn khác',
+          );
         }
       }
     }
@@ -807,7 +846,9 @@ export class OrdersService {
         },
       });
       if (!requestAddress) {
-        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        throw new ConflictException(
+          'Mã đặt hàng đã được dùng cho một đơn khác',
+        );
       }
     } else {
       requestAddress = {
@@ -831,7 +872,9 @@ export class OrdersService {
 
     for (const field of addressFields) {
       if (requestAddress[field] !== orderAddress[field]) {
-        throw new ConflictException('Mã đặt hàng đã được dùng cho một đơn khác');
+        throw new ConflictException(
+          'Mã đặt hàng đã được dùng cho một đơn khác',
+        );
       }
     }
 
@@ -856,7 +899,9 @@ export class OrdersService {
     const target = (error as any).meta?.target;
     if (Array.isArray(target)) {
       return target.some(
-        (t: unknown) => typeof t === 'string' && (t === 'checkoutKey' || t.includes('checkoutKey')),
+        (t: unknown) =>
+          typeof t === 'string' &&
+          (t === 'checkoutKey' || t.includes('checkoutKey')),
       );
     }
     if (typeof target === 'string') {
@@ -894,7 +939,10 @@ export class OrdersService {
     return `ORD${year}${month}${day}${sequence}${random}`;
   }
 
-  private calculateShippingFee(address: any, shippingMethod: ShippingMethod): number {
+  private calculateShippingFee(
+    address: any,
+    shippingMethod: ShippingMethod,
+  ): number {
     // Mock shipping calculation - flat rate based on province
     // In real implementation, this would integrate with shipping provider API
     const provinceLowerCase = address.province.toLowerCase();
@@ -913,7 +961,10 @@ export class OrdersService {
     return shippingMethod === ShippingMethod.EXPRESS ? 50000 : 30000;
   }
 
-  private validateStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus) {
+  private validateStatusTransition(
+    currentStatus: OrderStatus,
+    newStatus: OrderStatus,
+  ) {
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
       [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PAID, OrderStatus.CANCELED],
       [OrderStatus.PAID]: [OrderStatus.PACKING, OrderStatus.CANCELED],
@@ -1003,6 +1054,8 @@ export class OrdersService {
       }
     }
 
-    throw new BadRequestException('Checkout could not be completed; please retry');
+    throw new BadRequestException(
+      'Checkout could not be completed; please retry',
+    );
   }
 }

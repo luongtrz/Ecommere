@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +18,10 @@ interface ProfileFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps) {
+export function ProfileFormDialog({
+  open,
+  onOpenChange,
+}: ProfileFormDialogProps) {
   const { user, refreshUser } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -32,7 +40,8 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
   }, [open, user]);
 
   const updateProfile = useMutation({
-    mutationFn: (data: { name?: string; phone?: string }) => usersApi.updateProfile(data),
+    mutationFn: (data: { name?: string; phone?: string }) =>
+      usersApi.updateProfile(data),
     onSuccess: async () => {
       await refreshUser();
       toast.success('Cập nhật thông tin thành công');
@@ -65,7 +74,9 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
               required
               className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               placeholder="Nguyễn Văn A"
             />
           </div>
@@ -77,7 +88,9 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
               type="tel"
               className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
               placeholder="0912345678"
             />
           </div>

@@ -1,11 +1,26 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, ShieldCheck, Truck, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
+import {
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  Truck,
+  RefreshCw,
+  Sparkles,
+  CheckCircle2,
+} from 'lucide-react';
 
 const shoppingLinks = [
   { to: '/catalog', label: 'Tất cả sản phẩm' },
   { to: '/catalog?sort=best_selling', label: 'Sản phẩm bán chạy' },
-  { to: '/catalog?category=diet-con-trung', label: 'Xịt diệt côn trùng Thái Lan' },
-  { to: '/catalog?category=tay-rua-nha-bep', label: 'Tẩy rửa & Vệ sinh nhà cửa' },
+  {
+    to: '/catalog?category=diet-con-trung',
+    label: 'Xịt diệt côn trùng Thái Lan',
+  },
+  {
+    to: '/catalog?category=tay-rua-nha-bep',
+    label: 'Tẩy rửa & Vệ sinh nhà cửa',
+  },
   { to: '/catalog?category=thom-phong', label: 'Xịt thơm & Khử mùi phòng' },
 ];
 

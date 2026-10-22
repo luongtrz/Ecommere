@@ -15,11 +15,14 @@ export function useProductDetail(slug: string) {
 /** Prefetch product detail on hover for instant navigation */
 export function usePrefetchProduct() {
   const queryClient = useQueryClient();
-  return useCallback((slug: string) => {
-    queryClient.prefetchQuery({
-      queryKey: [QUERY_KEYS.PRODUCT_DETAIL, slug],
-      queryFn: () => productsApi.getBySlug(slug),
-      staleTime: 5 * 60 * 1000,
-    });
-  }, [queryClient]);
+  return useCallback(
+    (slug: string) => {
+      queryClient.prefetchQuery({
+        queryKey: [QUERY_KEYS.PRODUCT_DETAIL, slug],
+        queryFn: () => productsApi.getBySlug(slug),
+        staleTime: 5 * 60 * 1000,
+      });
+    },
+    [queryClient],
+  );
 }

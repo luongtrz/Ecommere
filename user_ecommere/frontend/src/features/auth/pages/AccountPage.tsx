@@ -4,7 +4,19 @@ import { useAuth } from '../hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Calendar, Shield, ShoppingBag, Heart, Settings, LogOut, MapPin, Phone, ChevronRight } from 'lucide-react';
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  ShoppingBag,
+  Heart,
+  Settings,
+  LogOut,
+  MapPin,
+  Phone,
+  ChevronRight,
+} from 'lucide-react';
 import { SEO } from '@/lib/seo';
 import { formatDate } from '@/lib/utils';
 import { ProfileFormDialog } from '@/features/users/components/ProfileFormDialog';
@@ -19,7 +31,7 @@ export function AccountPage() {
   const getInitials = (name: string) => {
     return name
       .split(' ')
-      .map(word => word.charAt(0))
+      .map((word) => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);

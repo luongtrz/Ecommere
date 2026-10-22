@@ -12,13 +12,25 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PAGINATION, PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { Search, ShoppingBag, Grid3X3, List, Filter, X, Star } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
 import { FilterSidebar } from '../components/FilterSidebar';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export function CategoryPage() {
@@ -51,13 +63,19 @@ export function CategoryPage() {
   const debouncedSearch = useDebounce(searchInput, 400);
 
   // Filter params
-  const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
-  const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
+  const minPrice = searchParams.get('minPrice')
+    ? parseInt(searchParams.get('minPrice')!)
+    : undefined;
+  const maxPrice = searchParams.get('maxPrice')
+    ? parseInt(searchParams.get('maxPrice')!)
+    : undefined;
   const scent = searchParams.get('scent') || undefined;
   const volumeMl = searchParams.get('volumeMl') || undefined;
   const brand = searchParams.get('brand') || undefined;
 
-  const { data: category, isLoading: isCategoryLoading } = useCategoryBySlug(categorySlug!);
+  const { data: category, isLoading: isCategoryLoading } = useCategoryBySlug(
+    categorySlug!,
+  );
   const { data: products, isLoading: isProductsLoading } = useProducts({
     page: currentPage,
     limit: PAGINATION.DEFAULT_LIMIT,
@@ -72,20 +90,23 @@ export function CategoryPage() {
   });
   const { addItem } = useCart();
 
-  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (!('page' in updates)) {
-      newParams.set('page', '1');
-    }
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === undefined || value === '') {
-        newParams.delete(key);
-      } else {
-        newParams.set(key, value);
+  const updateParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      const newParams = new URLSearchParams(searchParams);
+      if (!('page' in updates)) {
+        newParams.set('page', '1');
       }
-    });
-    setSearchParams(newParams);
-  }, [searchParams, setSearchParams]);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === undefined || value === '') {
+          newParams.delete(key);
+        } else {
+          newParams.set(key, value);
+        }
+      });
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams],
+  );
 
   // Apply debounced search to URL params
   useEffect(() => {
@@ -115,9 +136,12 @@ export function CategoryPage() {
     updateParams({ view: mode });
   };
 
-  const handleFilterChange = useCallback((filters: Record<string, string | undefined>) => {
-    updateParams({ ...filters, page: '1' });
-  }, [updateParams]);
+  const handleFilterChange = useCallback(
+    (filters: Record<string, string | undefined>) => {
+      updateParams({ ...filters, page: '1' });
+    },
+    [updateParams],
+  );
 
   const handleAddToCart = (product: any, variant: any) => {
     addItem({
@@ -343,7 +367,10 @@ export function CategoryPage() {
                           rating={product.rating}
                           reviewCount={product.reviewCount}
                           variants={product.variants}
-                          onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                          onAddToCart={() =>
+                            product.variants[0] &&
+                            handleAddToCart(product, product.variants[0])
+                          }
                         />
                       ) : (
                         <div
@@ -400,8 +427,8 @@ export function CategoryPage() {
                             </div>
                           </div>
                         </div>
-                      )
-                    ))}
+                      ),
+                    )}
                   </div>
 
                   {products && products.totalPages > 1 && (

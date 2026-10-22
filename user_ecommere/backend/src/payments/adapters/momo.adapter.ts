@@ -14,7 +14,11 @@ export class MoMoAdapter implements PaymentProvider {
     return 'MoMo';
   }
 
-  async createPayment(orderId: string, amount: number, currency: string): Promise<PaymentResult> {
+  async createPayment(
+    orderId: string,
+    amount: number,
+    currency: string,
+  ): Promise<PaymentResult> {
     this.logger.log(`[MOCK] Creating MoMo payment for order ${orderId}`);
     this.logger.log(`[MOCK] Amount: ${amount} ${currency}`);
 
@@ -32,7 +36,8 @@ export class MoMoAdapter implements PaymentProvider {
       paymentId: mockPaymentId,
       paymentUrl: `https://payment.momo.vn/mock/${mockPaymentId}`,
       qrCode: `https://api.qrserver.com/v1/create-qr-code/?data=MOMO_${mockPaymentId}&size=300x300`,
-      message: 'Mock MoMo payment created. In production, this would return a real MoMo payment request.',
+      message:
+        'Mock MoMo payment created. In production, this would return a real MoMo payment request.',
       metadata: {
         provider: 'momo',
         orderId,
@@ -56,8 +61,13 @@ export class MoMoAdapter implements PaymentProvider {
     };
   }
 
-  async refundPayment(paymentId: string, amount: number): Promise<RefundResult> {
-    this.logger.log(`[MOCK] Refunding MoMo payment ${paymentId}, amount: ${amount}`);
+  async refundPayment(
+    paymentId: string,
+    amount: number,
+  ): Promise<RefundResult> {
+    this.logger.log(
+      `[MOCK] Refunding MoMo payment ${paymentId}, amount: ${amount}`,
+    );
 
     // Mock implementation - In production:
     // Call MoMo refund API with proper signature

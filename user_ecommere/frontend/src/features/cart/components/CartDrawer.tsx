@@ -1,19 +1,35 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck } from 'lucide-react';
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingBag,
+  ArrowRight,
+  Truck,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 
 const FREESHIP_THRESHOLD = 250000;
 
 export function CartDrawer() {
-  const { items, updateQuantity, removeItem, totalPrice, isOpen, closeCart } = useCart();
+  const { items, updateQuantity, removeItem, totalPrice, isOpen, closeCart } =
+    useCart();
 
   const freeshipRemaining = Math.max(0, FREESHIP_THRESHOLD - totalPrice);
-  const freeshipProgress = Math.min(100, Math.round((totalPrice / FREESHIP_THRESHOLD) * 100));
+  const freeshipProgress = Math.min(
+    100,
+    Math.round((totalPrice / FREESHIP_THRESHOLD) * 100),
+  );
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
@@ -177,7 +193,10 @@ export function CartDrawer() {
                   onClick={closeCart}
                   asChild
                 >
-                  <Link to="/checkout" className="flex items-center justify-center gap-2">
+                  <Link
+                    to="/checkout"
+                    className="flex items-center justify-center gap-2"
+                  >
                     Tiến Hành Thanh Toán
                     <ArrowRight className="h-4 w-4" />
                   </Link>

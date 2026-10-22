@@ -1,5 +1,10 @@
 import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import { StockAdjustmentDto } from './dtos/stock-adjustment.dto';
 import { LowStockQueryDto } from './dtos/low-stock-query.dto';
@@ -30,7 +35,9 @@ export class InventoryController {
   @Get('history/:variantId')
   @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get stock movement history for a variant (Admin only)' })
+  @ApiOperation({
+    summary: 'Get stock movement history for a variant (Admin only)',
+  })
   @ApiResponse({ status: 200, type: [StockMovementEntity] })
   async getStockHistory(
     @Param('variantId') variantId: string,
@@ -44,7 +51,9 @@ export class InventoryController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get variants with low stock (Admin only)' })
   @ApiResponse({ status: 200 })
-  async getLowStockVariants(@Query() query: LowStockQueryDto = new LowStockQueryDto()) {
+  async getLowStockVariants(
+    @Query() query: LowStockQueryDto = new LowStockQueryDto(),
+  ) {
     const threshold = query?.threshold ?? 10;
     const limit = query?.limit ?? 100;
 

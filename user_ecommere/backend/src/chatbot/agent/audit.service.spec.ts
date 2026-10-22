@@ -5,7 +5,6 @@ import { Prisma } from '@prisma/client';
 
 describe('AuditService', () => {
   let service: AuditService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     agentToolLog: {
@@ -25,7 +24,6 @@ describe('AuditService', () => {
     }).compile();
 
     service = module.get<AuditService>(AuditService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
@@ -90,9 +88,7 @@ describe('AuditService', () => {
           secret: 'nestedSecret',
           phone: '0987654321',
         },
-        items: [
-          { token: 'arrayToken' },
-        ],
+        items: [{ token: 'arrayToken' }],
       };
 
       Object.freeze(input);

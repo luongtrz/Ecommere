@@ -1,4 +1,9 @@
-import { refreshAccessToken, authToken, getCookie, API_BASE_URL } from '@/lib/api';
+import {
+  refreshAccessToken,
+  authToken,
+  getCookie,
+  API_BASE_URL,
+} from '@/lib/api';
 
 export interface SseMessage {
   event: string;
@@ -109,7 +114,7 @@ export class ApiStreamError extends Error {
   constructor(
     statusOrMessage: number | string,
     messageOrStatus?: string | number,
-    code?: string
+    code?: string,
   ) {
     let status: number;
     let message: string;
@@ -136,7 +141,7 @@ export class ApiStreamError extends Error {
 const DEFAULT_ERROR_MESSAGE = 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
 
 async function parseErrorResponse(
-  response: Response
+  response: Response,
 ): Promise<{ message: string; code?: string }> {
   try {
     const errorBody = await response.json();
@@ -145,8 +150,8 @@ async function parseErrorResponse(
         typeof errorBody.code === 'string'
           ? errorBody.code
           : typeof errorBody.data?.code === 'string'
-          ? errorBody.data.code
-          : undefined;
+            ? errorBody.data.code
+            : undefined;
 
       const rawMsg = errorBody.message ?? errorBody.data?.message;
       if (Array.isArray(rawMsg) && rawMsg.length > 0) {
@@ -156,7 +161,10 @@ async function parseErrorResponse(
         }
       } else if (typeof rawMsg === 'string' && rawMsg.trim().length > 0) {
         return { message: rawMsg.trim(), code };
-      } else if (typeof errorBody.error === 'string' && errorBody.error.trim().length > 0) {
+      } else if (
+        typeof errorBody.error === 'string' &&
+        errorBody.error.trim().length > 0
+      ) {
         return { message: errorBody.error.trim(), code };
       }
       return { message: DEFAULT_ERROR_MESSAGE, code };
@@ -171,7 +179,7 @@ export async function streamAgentRequest(
   path: string,
   body: unknown,
   onMessage: (m: SseMessage) => void,
-  options: { signal?: AbortSignal } = {}
+  options: { signal?: AbortSignal } = {},
 ): Promise<void> {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${API_BASE_URL}/api${normalizedPath}`;
@@ -233,7 +241,10 @@ export async function streamAgentRequest(
   }
 
   if (!response.body) {
-    throw new ApiStreamError(response.status, 'Không thể đọc luồng dữ liệu từ máy chủ.');
+    throw new ApiStreamError(
+      response.status,
+      'Không thể đọc luồng dữ liệu từ máy chủ.',
+    );
   }
 
   const reader = response.body.getReader();
@@ -244,9 +255,11 @@ export async function streamAgentRequest(
   let streamError: unknown = null;
 
   try {
-    while (true) {
+    let isDone = false;
+    while (!isDone) {
       const { done, value } = await reader.read();
       if (done) {
+        isDone = true;
         break;
       }
       if (value) {

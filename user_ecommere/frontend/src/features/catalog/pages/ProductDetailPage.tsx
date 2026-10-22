@@ -48,7 +48,8 @@ export function ProductDetailPage() {
   }, [productSlug]);
 
   const selectedVariant =
-    product?.variants.find((v) => v.id === selectedVariantId) || product?.variants[0];
+    product?.variants.find((v) => v.id === selectedVariantId) ||
+    product?.variants[0];
   const isWishlisted = product ? isInWishlist(product.id) : false;
 
   const handleAddToCart = () => {
@@ -162,7 +163,8 @@ export function ProductDetailPage() {
   const finalPrice = selectedVariant?.salePrice ?? selectedVariant?.price ?? 0;
   const originalPrice = selectedVariant?.price ?? 0;
   const hasDiscount =
-    selectedVariant?.salePrice != null && selectedVariant.salePrice < originalPrice;
+    selectedVariant?.salePrice != null &&
+    selectedVariant.salePrice < originalPrice;
   const discountSavings = originalPrice - finalPrice;
 
   return (
@@ -192,7 +194,10 @@ export function ProductDetailPage() {
               items={[
                 { label: 'Trang chủ', href: '/' },
                 { label: 'Sản phẩm', href: '/catalog' },
-                { label: product.category?.name || 'Danh mục', href: `/c/${product.category?.slug}` },
+                {
+                  label: product.category?.name || 'Danh mục',
+                  href: `/c/${product.category?.slug}`,
+                },
                 { label: product.name },
               ]}
               className="text-xs sm:text-sm text-slate-600"
@@ -354,7 +359,10 @@ export function ProductDetailPage() {
                     <label className="block text-xs font-semibold text-slate-700 mb-2.5">
                       Chọn phân loại / Dung tích:
                     </label>
-                    <div className="flex flex-wrap gap-2.5">
+                    <div
+                      id="product-variants"
+                      className="flex flex-wrap gap-2.5"
+                    >
                       {product.variants.map((v) => {
                         const isSelected = selectedVariant?.id === v.id;
                         const isOutOfStock = v.stock === 0;
@@ -373,7 +381,9 @@ export function ProductDetailPage() {
                                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                             }`}
                           >
-                            {isSelected && <CheckCircle2 className="h-4 w-4 text-teal-600" />}
+                            {isSelected && (
+                              <CheckCircle2 className="h-4 w-4 text-teal-600" />
+                            )}
                             <span>{v.scent}</span>
                             {v.volumeMl ? (
                               <span
@@ -457,7 +467,9 @@ export function ProductDetailPage() {
                     disabled={!selectedVariant || selectedVariant.stock === 0}
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    {selectedVariant?.stock === 0 ? 'Tạm Hết Hàng' : 'Thêm Vào Giỏ Hàng'}
+                    {selectedVariant?.stock === 0
+                      ? 'Tạm Hết Hàng'
+                      : 'Thêm Vào Giỏ Hàng'}
                   </Button>
 
                   <Button
@@ -583,8 +595,12 @@ export function ProductDetailPage() {
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
                           <PackageCheck className="h-5 w-5 text-teal-600 shrink-0 mt-0.5" />
                           <div>
-                            <strong className="text-slate-900 block mb-0.5">Bảo quản:</strong>
-                            Nơi khô ráo thoáng mát, tránh ánh nắng trực tiếp và nguồn nhiệt cao trên 50°C. Đậy nắp kín sau mỗi lần sử dụng.
+                            <strong className="text-slate-900 block mb-0.5">
+                              Bảo quản:
+                            </strong>
+                            Nơi khô ráo thoáng mát, tránh ánh nắng trực tiếp và
+                            nguồn nhiệt cao trên 50°C. Đậy nắp kín sau mỗi lần
+                            sử dụng.
                           </div>
                         </div>
                       </div>

@@ -153,7 +153,12 @@ describe('shipping.rules and ShippingService', () => {
         ward: 'Unknown',
         line1: 'Customer address',
       };
-      const quote = await service.calculateFee(mockOrigin, destination, weight, method);
+      const quote = await service.calculateFee(
+        mockOrigin,
+        destination,
+        weight,
+        method,
+      );
       expect(quote.fee).toBe(expectedFee);
       expect(quote.estimatedDays).toBe(expectedDays);
       expect(quote.currency).toBe('VND');

@@ -1,8 +1,4 @@
-import {
-  StateGraph,
-  MessagesAnnotation,
-  START,
-} from '@langchain/langgraph';
+import { StateGraph, MessagesAnnotation, START } from '@langchain/langgraph';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type { BaseMessage, AIMessage } from '@langchain/core/messages';
 import type { ToolRegistry } from '../tools/tool.registry';

@@ -8,12 +8,24 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { formatCurrency } from '@/lib/formatters';
 import { PAGINATION, PRODUCT_SORT_OPTIONS } from '@/lib/constants';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search, Grid3X3, List, SlidersHorizontal, ShoppingBag } from 'lucide-react';
+import {
+  Search,
+  Grid3X3,
+  List,
+  SlidersHorizontal,
+  ShoppingBag,
+} from 'lucide-react';
 
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,12 +72,19 @@ export function CatalogPage() {
   };
 
   const handleViewToggle = (mode: string) => {
-    setSearchParams({ page: page.toString(), sort: sortBy, q: searchQuery, view: mode });
+    setSearchParams({
+      page: page.toString(),
+      sort: sortBy,
+      q: searchQuery,
+      view: mode,
+    });
   };
 
   const handleFilterClick = () => {
     // TODO: Implement filter modal/sidebar
-    alert('Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.');
+    alert(
+      'Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.',
+    );
   };
 
   return (
@@ -77,8 +96,12 @@ export function CatalogPage() {
         <div className="bg-white border-b">
           <div className="container py-6">
             <div className="mb-4">
-              <h1 className="text-3xl font-bold text-gray-900 mb-1">Bộ sưu tập sản phẩm</h1>
-              <p className="text-sm text-gray-600">Khám phá các loại nước hoa xịt thơm chất lượng cao</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">
+                Bộ sưu tập sản phẩm
+              </h1>
+              <p className="text-sm text-gray-600">
+                Khám phá các loại nước hoa xịt thơm chất lượng cao
+              </p>
             </div>
 
             {/* Search and Filters */}
@@ -98,7 +121,9 @@ export function CatalogPage() {
 
                   {/* Sort Dropdown */}
                   <div className="flex items-center gap-2 min-w-[180px]">
-                    <span className="text-xs font-medium text-gray-700 whitespace-nowrap">Sắp xếp:</span>
+                    <span className="text-xs font-medium text-gray-700 whitespace-nowrap">
+                      Sắp xếp:
+                    </span>
                     <Select value={sortBy} onValueChange={handleSortChange}>
                       <SelectTrigger className="h-10 text-sm">
                         <SelectValue />
@@ -115,12 +140,21 @@ export function CatalogPage() {
 
                   {/* View Toggle & Filters */}
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="h-10" onClick={handleFilterClick}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-10"
+                      onClick={handleFilterClick}
+                    >
                       <SlidersHorizontal className="h-4 w-4 mr-2" />
                       Bộ lọc
                     </Button>
                     {(sortBy !== 'newest' || searchQuery) && (
-                      <Button variant="ghost" onClick={clearFilters} className="h-10 text-xs text-gray-500 hover:text-gray-700">
+                      <Button
+                        variant="ghost"
+                        onClick={clearFilters}
+                        className="h-10 text-xs text-gray-500 hover:text-gray-700"
+                      >
                         Xóa bộ lọc
                       </Button>
                     )}
@@ -130,10 +164,15 @@ export function CatalogPage() {
                 {/* Active Filters */}
                 {(sortBy !== 'newest' || searchQuery) && (
                   <div className="flex items-center gap-2 mt-4 pt-4 border-t">
-                    <span className="text-sm font-medium text-gray-700">Bộ lọc đang áp dụng:</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      Bộ lọc đang áp dụng:
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {searchQuery && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
                           Tìm kiếm: "{searchQuery}"
                           <button
                             onClick={() => handleSearchChange('')}
@@ -144,8 +183,16 @@ export function CatalogPage() {
                         </Badge>
                       )}
                       {sortBy !== 'newest' && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          Sắp xếp: {PRODUCT_SORT_OPTIONS.find(opt => opt.value === sortBy)?.label}
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          Sắp xếp:{' '}
+                          {
+                            PRODUCT_SORT_OPTIONS.find(
+                              (opt) => opt.value === sortBy,
+                            )?.label
+                          }
                           <button
                             onClick={() => handleSortChange('newest')}
                             className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
@@ -204,16 +251,22 @@ export function CatalogPage() {
           ) : data?.products.length === 0 ? (
             <EmptyState
               title="Không tìm thấy sản phẩm"
-              description={searchQuery ? "Không có sản phẩm nào khớp với tìm kiếm của bạn" : "Chưa có sản phẩm nào trong danh mục này"}
+              description={
+                searchQuery
+                  ? 'Không có sản phẩm nào khớp với tìm kiếm của bạn'
+                  : 'Chưa có sản phẩm nào trong danh mục này'
+              }
             />
           ) : (
             <>
-              <div className={`${
-                viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'
-                  : 'space-y-3'
-              }`}>
-                {data?.products.map((product) => (
+              <div
+                className={`${
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'
+                    : 'space-y-3'
+                }`}
+              >
+                {data?.products.map((product) =>
                   viewMode === 'grid' ? (
                     <ProductCard
                       key={product.id}
@@ -224,10 +277,16 @@ export function CatalogPage() {
                       price={product.basePrice}
                       rating={product.rating}
                       reviewCount={product.reviewCount}
-                      onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                      onAddToCart={() =>
+                        product.variants[0] &&
+                        handleAddToCart(product, product.variants[0])
+                      }
                     />
                   ) : (
-                    <Card key={product.id} className="p-3 md:p-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+                    <Card
+                      key={product.id}
+                      className="p-3 md:p-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500"
+                    >
                       <div className="flex flex-col md:flex-row gap-3 md:gap-4">
                         <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm mx-auto md:mx-0">
                           <img
@@ -238,10 +297,14 @@ export function CatalogPage() {
                         </div>
                         <div className="flex-1 min-w-0 text-center md:text-left">
                           <div className="mb-2">
-                            <h3 className="font-bold text-base md:text-lg text-gray-900 mb-1 leading-tight">{product.name}</h3>
+                            <h3 className="font-bold text-base md:text-lg text-gray-900 mb-1 leading-tight">
+                              {product.name}
+                            </h3>
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 mb-2">
                               <div className="flex items-center gap-1">
-                                <span className="text-yellow-400 text-base md:text-lg">★</span>
+                                <span className="text-yellow-400 text-base md:text-lg">
+                                  ★
+                                </span>
                                 <span className="text-sm font-medium text-gray-700">
                                   {product.rating?.toFixed(1) || '0.0'}
                                 </span>
@@ -259,16 +322,23 @@ export function CatalogPage() {
                               </p>
                             )}
                             <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                              {product.variants?.slice(0, 3).map((variant: any, index: number) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {variant.scent} - {variant.volumeMl}ml
-                                </Badge>
-                              ))}
-                              {product.variants && product.variants.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{product.variants.length - 3} nữa
-                                </Badge>
-                              )}
+                              {product.variants
+                                ?.slice(0, 3)
+                                .map((variant: any, index: number) => (
+                                  <Badge
+                                    key={index}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {variant.scent} - {variant.volumeMl}ml
+                                  </Badge>
+                                ))}
+                              {product.variants &&
+                                product.variants.length > 3 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{product.variants.length - 3} nữa
+                                  </Badge>
+                                )}
                             </div>
                           </div>
                           <div className="text-center md:text-right">
@@ -278,7 +348,10 @@ export function CatalogPage() {
                             <Button
                               size="default"
                               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md w-full md:w-auto"
-                              onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                              onClick={() =>
+                                product.variants[0] &&
+                                handleAddToCart(product, product.variants[0])
+                              }
                             >
                               <ShoppingBag className="h-4 w-4 mr-2" />
                               Thêm vào giỏ
@@ -287,8 +360,8 @@ export function CatalogPage() {
                         </div>
                       </div>
                     </Card>
-                  )
-                ))}
+                  ),
+                )}
               </div>
 
               {data && data.totalPages > 1 && (

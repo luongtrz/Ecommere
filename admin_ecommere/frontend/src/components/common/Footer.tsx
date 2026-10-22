@@ -9,25 +9,50 @@ export function Footer() {
           <div>
             <h3 className="font-bold text-lg mb-4">Thai Spray Shop</h3>
             <p className="text-sm text-muted-foreground">
-              Cung cấp chai xịt Thái Lan chính hãng với đa dạng mùi hương và dung tích.
+              Cung cấp chai xịt Thái Lan chính hãng với đa dạng mùi hương và
+              dung tích.
             </p>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Liên kết</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/catalog" className="hover:text-primary">Sản phẩm</Link></li>
-              <li><Link to="/about" className="hover:text-primary">Giới thiệu</Link></li>
-              <li><Link to="/contact" className="hover:text-primary">Liên hệ</Link></li>
+              <li>
+                <Link to="/catalog" className="hover:text-primary">
+                  Sản phẩm
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="hover:text-primary">
+                  Giới thiệu
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-primary">
+                  Liên hệ
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Chính sách</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/policy/shipping" className="hover:text-primary">Vận chuyển</Link></li>
-              <li><Link to="/policy/return" className="hover:text-primary">Đổi trả</Link></li>
-              <li><Link to="/policy/privacy" className="hover:text-primary">Bảo mật</Link></li>
+              <li>
+                <Link to="/policy/shipping" className="hover:text-primary">
+                  Vận chuyển
+                </Link>
+              </li>
+              <li>
+                <Link to="/policy/return" className="hover:text-primary">
+                  Đổi trả
+                </Link>
+              </li>
+              <li>
+                <Link to="/policy/privacy" className="hover:text-primary">
+                  Bảo mật
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -44,8 +69,20 @@ export function Footer() {
               </li>
             </ul>
             <div className="flex gap-4 mt-4">
-              <a href="#" className="hover:text-primary"><Facebook className="h-5 w-5" /></a>
-              <a href="#" className="hover:text-primary"><Instagram className="h-5 w-5" /></a>
+              <button
+                type="button"
+                className="hover:text-primary"
+                aria-label="Facebook"
+              >
+                <Facebook className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                className="hover:text-primary"
+                aria-label="Instagram"
+              >
+                <Instagram className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>

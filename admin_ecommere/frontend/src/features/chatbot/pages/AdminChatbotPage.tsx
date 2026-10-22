@@ -1,5 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from '@tanstack/react-query';
 import {
   Bot,
   Send,
@@ -188,7 +192,8 @@ export function AdminChatbotPage() {
   const [input, setInput] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
-  const [threadToDelete, setThreadToDelete] = useState<AgentThreadSummary | null>(null);
+  const [threadToDelete, setThreadToDelete] =
+    useState<AgentThreadSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [threadError, setThreadError] = useState<string | null>(null);
   const [threadLimit, setThreadLimit] = useState(DEFAULT_THREAD_LIMIT);
@@ -220,7 +225,10 @@ export function AdminChatbotPage() {
 
   const currentAdminId = user ? user.id : null;
   const isOwnerMatch = user !== undefined && ownerId === currentAdminId;
-  const visibleMessages = isOwnerMatch ? messages : [];
+  const visibleMessages = useMemo(
+    () => (isOwnerMatch ? messages : []),
+    [isOwnerMatch, messages],
+  );
 
   const {
     data: threads = [],
@@ -232,9 +240,12 @@ export function AdminChatbotPage() {
     placeholderData: keepPreviousData,
   });
 
-  const hasMoreThreads = threads.length >= threadLimit && threadLimit < MAX_THREAD_LIMIT;
+  const hasMoreThreads =
+    threads.length >= threadLimit && threadLimit < MAX_THREAD_LIMIT;
   const handleLoadMoreThreads = () => {
-    setThreadLimit((limit) => Math.min(limit + THREAD_LIMIT_STEP, MAX_THREAD_LIMIT));
+    setThreadLimit((limit) =>
+      Math.min(limit + THREAD_LIMIT_STEP, MAX_THREAD_LIMIT),
+    );
   };
 
   useEffect(() => {
@@ -281,7 +292,9 @@ export function AdminChatbotPage() {
           };
         }
 
-        const hasContent = Boolean(msg.content && msg.content.trim().length > 0);
+        const hasContent = Boolean(
+          msg.content && msg.content.trim().length > 0,
+        );
 
         // An assistant message with no text and no card must not show as an empty chat bubble.
         if (msg.role === 'assistant' && !hasContent && !confirm) {
@@ -302,8 +315,8 @@ export function AdminChatbotPage() {
         return;
       }
       const status =
-        (err as { response?: { status?: number }; status?: number })?.response?.status ??
-        (err as { status?: number })?.status;
+        (err as { response?: { status?: number }; status?: number })?.response
+          ?.status ?? (err as { status?: number })?.status;
 
       if (status === 404) {
         toast.error('Cuộc trò chuyện không còn khả dụng.');
@@ -327,7 +340,9 @@ export function AdminChatbotPage() {
       if (threadToDelete.id === threadId) {
         startNewConversation();
       }
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'chatbot', 'threads'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['admin', 'chatbot', 'threads'],
+      });
       toast.success('Đã xóa cuộc trò chuyện thành công');
     } catch {
       toast.error('Xóa cuộc trò chuyện thất bại. Vui lòng thử lại.');
@@ -349,7 +364,9 @@ export function AdminChatbotPage() {
     try {
       await send(trimmed);
     } finally {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'chatbot', 'threads'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'chatbot', 'threads'],
+      });
     }
   };
 
@@ -501,12 +518,14 @@ export function AdminChatbotPage() {
                     );
                   }
 
-                  const hasTools = Boolean(message.tools && message.tools.length > 0);
+                  const hasTools = Boolean(
+                    message.tools && message.tools.length > 0,
+                  );
                   const hasContent = Boolean(
-                    message.content && message.content.trim().length > 0
+                    message.content && message.content.trim().length > 0,
                   );
                   const hasConfirm = Boolean(
-                    message.confirm?.calls && message.confirm.calls.length > 0
+                    message.confirm?.calls && message.confirm.calls.length > 0,
                   );
                   const hasError = Boolean(message.error);
 
@@ -540,7 +559,9 @@ export function AdminChatbotPage() {
                             <ConfirmActionCard
                               calls={message.confirm!.calls}
                               decided={message.confirm!.decided}
-                              onSubmit={(decisions) => decide(message.id, decisions)}
+                              onSubmit={(decisions) =>
+                                decide(message.id, decisions)
+                              }
                             />
                           </div>
                         )}

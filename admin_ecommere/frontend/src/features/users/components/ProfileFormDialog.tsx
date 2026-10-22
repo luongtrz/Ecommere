@@ -19,7 +19,10 @@ interface ProfileFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps) {
+export function ProfileFormDialog({
+  open,
+  onOpenChange,
+}: ProfileFormDialogProps) {
   const { user, refreshUser } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -38,7 +41,8 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
   }, [open, user]);
 
   const updateProfile = useMutation({
-    mutationFn: (data: { name?: string; phone?: string }) => usersApi.updateProfile(data),
+    mutationFn: (data: { name?: string; phone?: string }) =>
+      usersApi.updateProfile(data),
     onSuccess: async () => {
       await refreshUser();
       toast.success('Cập nhật thông tin thành công');
@@ -51,7 +55,11 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile.mutateAsync(formData);
+    try {
+      await updateProfile.mutateAsync(formData);
+    } catch {
+      // The failure is already shown by the mutation's onError toast; just stop the rejection escaping the handler.
+    }
   };
 
   return (

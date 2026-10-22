@@ -37,7 +37,10 @@ export class ChatbotRetrievalService {
     }
     const normalizedQuery = this.normalize(trimmedQuery);
     const tokens = this.extractTokens(trimmedQuery);
-    const categoryIds = await this.findRelevantCategoryIds(trimmedQuery, tokens);
+    const categoryIds = await this.findRelevantCategoryIds(
+      trimmedQuery,
+      tokens,
+    );
 
     const products = await this.prisma.product.findMany({
       where: {
@@ -57,7 +60,12 @@ export class ChatbotRetrievalService {
     const rankedProducts = products
       .map((product) => ({
         product,
-        score: this.scoreProduct(product, normalizedQuery, tokens, new Set(categoryIds)),
+        score: this.scoreProduct(
+          product,
+          normalizedQuery,
+          tokens,
+          new Set(categoryIds),
+        ),
       }))
       .filter((entry) => entry.score > 0)
       .sort((left, right) => right.score - left.score)
@@ -73,7 +81,14 @@ export class ChatbotRetrievalService {
 
     const context = rankedProducts
       .map(({ product, score }, index) =>
-        this.formatProductContext(index + 1, product, score, normalizedQuery, tokens, options.variantLimit),
+        this.formatProductContext(
+          index + 1,
+          product,
+          score,
+          normalizedQuery,
+          tokens,
+          options.variantLimit,
+        ),
       )
       .join('\n\n');
 
@@ -89,16 +104,30 @@ export class ChatbotRetrievalService {
     };
   }
 
-  private buildProductWhereClauses(query: string, tokens: string[], categoryIds: string[]) {
-    const terms = Array.from(new Set([query, ...tokens])).filter(Boolean).slice(0, 8);
+  private buildProductWhereClauses(
+    query: string,
+    tokens: string[],
+    categoryIds: string[],
+  ) {
+    const terms = Array.from(new Set([query, ...tokens]))
+      .filter(Boolean)
+      .slice(0, 8);
     const clauses: any[] = terms.flatMap((term) => [
       { name: { contains: term, mode: 'insensitive' as const } },
       { description: { contains: term, mode: 'insensitive' as const } },
       { brand: { contains: term, mode: 'insensitive' as const } },
       { slug: { contains: this.slugify(term), mode: 'insensitive' as const } },
       { category: { name: { contains: term, mode: 'insensitive' as const } } },
-      { variants: { some: { scent: { contains: term, mode: 'insensitive' as const } } } },
-      { variants: { some: { sku: { contains: term, mode: 'insensitive' as const } } } },
+      {
+        variants: {
+          some: { scent: { contains: term, mode: 'insensitive' as const } },
+        },
+      },
+      {
+        variants: {
+          some: { sku: { contains: term, mode: 'insensitive' as const } },
+        },
+      },
     ]);
 
     if (categoryIds.length > 0) {
@@ -111,7 +140,9 @@ export class ChatbotRetrievalService {
   }
 
   private async findRelevantCategoryIds(query: string, tokens: string[]) {
-    const terms = Array.from(new Set([query, ...tokens])).filter(Boolean).slice(0, 6);
+    const terms = Array.from(new Set([query, ...tokens]))
+      .filter(Boolean)
+      .slice(0, 6);
 
     if (terms.length === 0) {
       return [];
@@ -121,7 +152,12 @@ export class ChatbotRetrievalService {
       where: {
         OR: terms.flatMap((term) => [
           { name: { contains: term, mode: 'insensitive' as const } },
-          { slug: { contains: this.slugify(term), mode: 'insensitive' as const } },
+          {
+            slug: {
+              contains: this.slugify(term),
+              mode: 'insensitive' as const,
+            },
+          },
         ]),
       },
       select: { id: true },
@@ -156,14 +192,22 @@ export class ChatbotRetrievalService {
     const brand = this.normalize(product.brand || '');
     const categoryName = this.normalize(product.category.name);
     const categorySlug = this.normalize(product.category.slug);
-    const variantScentText = this.normalize(product.variants.map((variant) => variant.scent).join(' '));
-    const variantSkuText = this.normalize(product.variants.map((variant) => variant.sku).join(' '));
+    const variantScentText = this.normalize(
+      product.variants.map((variant) => variant.scent).join(' '),
+    );
+    const variantSkuText = this.normalize(
+      product.variants.map((variant) => variant.sku).join(' '),
+    );
 
     let score = 0;
 
     if (name.includes(normalizedQuery)) score += 120;
     if (variantScentText.includes(normalizedQuery)) score += 90;
-    if (categoryName.includes(normalizedQuery) || categorySlug.includes(normalizedQuery)) score += 70;
+    if (
+      categoryName.includes(normalizedQuery) ||
+      categorySlug.includes(normalizedQuery)
+    )
+      score += 70;
     if (brand.includes(normalizedQuery)) score += 50;
     if (description.includes(normalizedQuery)) score += 30;
     if (variantSkuText.includes(normalizedQuery)) score += 20;
@@ -172,7 +216,8 @@ export class ChatbotRetrievalService {
     for (const token of tokens) {
       if (name.includes(token)) score += 18;
       if (variantScentText.includes(token)) score += 16;
-      if (categoryName.includes(token) || categorySlug.includes(token)) score += 12;
+      if (categoryName.includes(token) || categorySlug.includes(token))
+        score += 12;
       if (brand.includes(token)) score += 10;
       if (description.includes(token)) score += 6;
       if (variantSkuText.includes(token)) score += 8;
@@ -213,22 +258,32 @@ export class ChatbotRetrievalService {
         ...variant,
         score: this.scoreVariant(variant, normalizedQuery, tokens),
       }))
-      .sort((left, right) => right.score - left.score || right.stock - left.stock)
+      .sort(
+        (left, right) => right.score - left.score || right.stock - left.stock,
+      )
       .slice(0, variantLimit);
 
-    const prices = product.variants.map((variant) => variant.salePrice ?? variant.price);
-    const minPrice = prices.length > 0 ? Math.min(...prices) : product.basePrice;
-    const maxPrice = prices.length > 0 ? Math.max(...prices) : product.basePrice;
-    const shortDescription = product.description.length > 180
-      ? `${product.description.slice(0, 177)}...`
-      : product.description;
+    const prices = product.variants.map(
+      (variant) => variant.salePrice ?? variant.price,
+    );
+    const minPrice =
+      prices.length > 0 ? Math.min(...prices) : product.basePrice;
+    const maxPrice =
+      prices.length > 0 ? Math.max(...prices) : product.basePrice;
+    const shortDescription =
+      product.description.length > 180
+        ? `${product.description.slice(0, 177)}...`
+        : product.description;
 
-    const variantLines = rankedVariants.length > 0
-      ? rankedVariants.map((variant) => {
-          const actualPrice = variant.salePrice ?? variant.price;
-          return `  * ${variant.scent} | ${variant.volumeMl}ml | ${this.formatMoney(actualPrice)} | ${variant.stock > 0 ? `còn ${variant.stock}` : 'hết hàng'} | SKU ${variant.sku}`;
-        }).join('\n')
-      : '  * Chưa có biến thể phù hợp được truy xuất';
+    const variantLines =
+      rankedVariants.length > 0
+        ? rankedVariants
+            .map((variant) => {
+              const actualPrice = variant.salePrice ?? variant.price;
+              return `  * ${variant.scent} | ${variant.volumeMl}ml | ${this.formatMoney(actualPrice)} | ${variant.stock > 0 ? `còn ${variant.stock}` : 'hết hàng'} | SKU ${variant.sku}`;
+            })
+            .join('\n')
+        : '  * Chưa có biến thể phù hợp được truy xuất';
 
     return [
       `${index}. ${product.name} (score ${score})`,
@@ -239,7 +294,9 @@ export class ChatbotRetrievalService {
       `- Giá tham khảo: ${this.formatPriceRange(minPrice, maxPrice)}`,
       `- Biến thể nổi bật:`,
       variantLines,
-    ].filter(Boolean).join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
   }
 
   private scoreVariant(
@@ -294,7 +351,9 @@ export class ChatbotRetrievalService {
   }
 
   private slugify(value: string) {
-    return this.normalize(value).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return this.normalize(value)
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
   private formatMoney(value: number) {

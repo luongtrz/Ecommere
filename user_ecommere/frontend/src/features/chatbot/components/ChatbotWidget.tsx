@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
 import {
   Bot,
   Loader2,
@@ -78,7 +84,10 @@ export function ChatbotWidget() {
   }, [user, ownerKey, newThread, claimOwner]);
 
   const isOwnerMatch = user !== undefined && ownerId === ownerKey;
-  const visibleMessages = isOwnerMatch ? messages : [];
+  const visibleMessages = useMemo(
+    () => (isOwnerMatch ? messages : []),
+    [isOwnerMatch, messages],
+  );
 
   // Escape closes the panel
   useEffect(() => {
@@ -103,7 +112,10 @@ export function ChatbotWidget() {
   // Scroll to bottom when messages update or streaming starts
   useEffect(() => {
     if (!open) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+    });
   }, [open, visibleMessages, isStreaming]);
 
   const handleSubmit = () => {
@@ -121,7 +133,11 @@ export function ChatbotWidget() {
 
   const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     // Enter that confirms an IME composition (Vietnamese input methods) must not send.
-    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+    if (
+      event.key === 'Enter' &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing
+    ) {
       event.preventDefault();
       handleSubmit();
     }
@@ -242,7 +258,9 @@ export function ChatbotWidget() {
                           <ConfirmActionCard
                             calls={message.confirm.calls}
                             decided={message.confirm.decided}
-                            onSubmit={(decisions) => decide(message.id, decisions)}
+                            onSubmit={(decisions) =>
+                              decide(message.id, decisions)
+                            }
                           />
                         )}
 
@@ -254,7 +272,10 @@ export function ChatbotWidget() {
                             </p>
                             <div className="flex flex-col gap-2">
                               {message.sources.map((source) => (
-                                <ChatbotSourceItem key={source.id} source={source} />
+                                <ChatbotSourceItem
+                                  key={source.id}
+                                  source={source}
+                                />
                               ))}
                             </div>
                           </div>

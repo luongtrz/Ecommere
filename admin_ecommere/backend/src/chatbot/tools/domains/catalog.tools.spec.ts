@@ -1,7 +1,4 @@
-import {
-  createAdminCatalogTools,
-  AdminCatalogToolDeps,
-} from './catalog.tools';
+import { createAdminCatalogTools, AdminCatalogToolDeps } from './catalog.tools';
 import { AgentToolDef, ToolContext } from '../tool.types';
 import { ToolError } from '../tool-result.util';
 import type { ProductsService } from '../../../products/products.service';
@@ -234,13 +231,31 @@ describe('Admin Catalog Tools', () => {
     });
 
     it('validates schema bounds (page 1..50, limit 1..50, search 1..100)', () => {
-      expect(listProductsTool.schema.safeParse({ page: 0 }).success).toBe(false);
-      expect(listProductsTool.schema.safeParse({ page: 51 }).success).toBe(false);
-      expect(listProductsTool.schema.safeParse({ limit: 0 }).success).toBe(false);
-      expect(listProductsTool.schema.safeParse({ limit: 51 }).success).toBe(false);
-      expect(listProductsTool.schema.safeParse({ search: '' }).success).toBe(false);
-      expect(listProductsTool.schema.safeParse({ search: 'a'.repeat(101) }).success).toBe(false);
-      expect(listProductsTool.schema.safeParse({ search: 'a'.repeat(100), page: 50, limit: 50 }).success).toBe(true);
+      expect(listProductsTool.schema.safeParse({ page: 0 }).success).toBe(
+        false,
+      );
+      expect(listProductsTool.schema.safeParse({ page: 51 }).success).toBe(
+        false,
+      );
+      expect(listProductsTool.schema.safeParse({ limit: 0 }).success).toBe(
+        false,
+      );
+      expect(listProductsTool.schema.safeParse({ limit: 51 }).success).toBe(
+        false,
+      );
+      expect(listProductsTool.schema.safeParse({ search: '' }).success).toBe(
+        false,
+      );
+      expect(
+        listProductsTool.schema.safeParse({ search: 'a'.repeat(101) }).success,
+      ).toBe(false);
+      expect(
+        listProductsTool.schema.safeParse({
+          search: 'a'.repeat(100),
+          page: 50,
+          limit: 50,
+        }).success,
+      ).toBe(true);
     });
 
     it('project() keeps at most 20 items and at most 3 variants per product', () => {
@@ -286,7 +301,9 @@ describe('Admin Catalog Tools', () => {
       expect(projected.data[0]).not.toHaveProperty('description');
       expect(projected.data[0]).not.toHaveProperty('extraField');
 
-      const variants = projected.data[0].variants as Array<Record<string, unknown>>;
+      const variants = projected.data[0].variants as Array<
+        Record<string, unknown>
+      >;
       expect(variants).toHaveLength(3);
       expect(variants[0]).toEqual({
         id: 'var-1-1',
@@ -337,7 +354,10 @@ describe('Admin Catalog Tools', () => {
         variants: [],
       };
 
-      const projected = getProductTool.project!(rawProduct) as Record<string, unknown>;
+      const projected = getProductTool.project!(rawProduct) as Record<
+        string,
+        unknown
+      >;
 
       expect(projected.description).toHaveLength(300);
       expect(projected.description).toBe('D'.repeat(300));
@@ -567,7 +587,10 @@ describe('Admin Catalog Tools', () => {
         ...validVariantArgs,
       });
 
-      const result = await createVariantTool.handler(validVariantArgs, adminCtx);
+      const result = await createVariantTool.handler(
+        validVariantArgs,
+        adminCtx,
+      );
 
       expect(mockProductsService.createVariant).toHaveBeenCalledTimes(1);
       expect(mockProductsService.createVariant).toHaveBeenCalledWith('prod-1', {
@@ -650,7 +673,9 @@ describe('Admin Catalog Tools', () => {
       ).rejects.toThrow(ToolError);
       await expect(
         updateVariantTool.handler({ variantId: 'var-1' }, adminCtx),
-      ).rejects.toThrow('Cần ít nhất một trường để cập nhật biến thể ngoài variantId');
+      ).rejects.toThrow(
+        'Cần ít nhất một trường để cập nhật biến thể ngoài variantId',
+      );
     });
 
     it('accepts salePrice null to remove sale price and calls products.updateVariant', async () => {
@@ -727,7 +752,10 @@ describe('Admin Catalog Tools', () => {
         message: 'Product deleted successfully',
       });
 
-      const result = await deleteProductTool.handler({ id: 'prod-1' }, adminCtx);
+      const result = await deleteProductTool.handler(
+        { id: 'prod-1' },
+        adminCtx,
+      );
 
       expect(mockProductsService.remove).toHaveBeenCalledTimes(1);
       expect(mockProductsService.remove).toHaveBeenCalledWith('prod-1');
@@ -874,16 +902,25 @@ describe('Admin Catalog Tools', () => {
     });
 
     it('validates name length and optional parentId', () => {
-      expect(createCategoryTool.schema.safeParse({ name: '' }).success).toBe(false);
-      expect(createCategoryTool.schema.safeParse({ name: 'a'.repeat(101) }).success).toBe(false);
-      expect(createCategoryTool.schema.safeParse({ name: 'Hợp lệ' }).success).toBe(true);
-      expect(createCategoryTool.schema.safeParse({ name: 'Hợp lệ', parentId: 'p-1' }).success).toBe(true);
+      expect(createCategoryTool.schema.safeParse({ name: '' }).success).toBe(
+        false,
+      );
+      expect(
+        createCategoryTool.schema.safeParse({ name: 'a'.repeat(101) }).success,
+      ).toBe(false);
+      expect(
+        createCategoryTool.schema.safeParse({ name: 'Hợp lệ' }).success,
+      ).toBe(true);
+      expect(
+        createCategoryTool.schema.safeParse({ name: 'Hợp lệ', parentId: 'p-1' })
+          .success,
+      ).toBe(true);
     });
 
     it('summarize returns a Vietnamese line', () => {
-      expect(createCategoryTool.summarize({ name: 'Nước hoa ô tô' } as any)).toBe(
-        'Tạo danh mục "Nước hoa ô tô"',
-      );
+      expect(
+        createCategoryTool.summarize({ name: 'Nước hoa ô tô' } as any),
+      ).toBe('Tạo danh mục "Nước hoa ô tô"');
     });
   });
 
@@ -953,7 +990,10 @@ describe('Admin Catalog Tools', () => {
         message: 'Category deleted successfully',
       });
 
-      const result = await deleteCategoryTool.handler({ id: 'cat-1' }, adminCtx);
+      const result = await deleteCategoryTool.handler(
+        { id: 'cat-1' },
+        adminCtx,
+      );
 
       expect(mockCategoriesService.remove).toHaveBeenCalledTimes(1);
       expect(mockCategoriesService.remove).toHaveBeenCalledWith('cat-1');

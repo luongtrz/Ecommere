@@ -3,7 +3,10 @@ import { AgentToolDef, ToolContext } from '../tool.types';
 import { ToolError } from '../tool-result.util';
 import type { ProductsService } from '../../../products/products.service';
 import type { CategoriesService } from '../../../categories/categories.service';
-import type { CreateProductDto, CreateVariantDto } from '../../../products/dtos/create-product.dto';
+import type {
+  CreateProductDto,
+  CreateVariantDto,
+} from '../../../products/dtos/create-product.dto';
 import type { CreateCategoryDto } from '../../../categories/dtos/create-category.dto';
 
 export type AdminCatalogToolDeps = {
@@ -208,10 +211,7 @@ export function createAdminCatalogTools(
     schema: createProductSchema,
     auth: 'admin',
     risk: 'WRITE',
-    handler: async (
-      args: CreateProductDto,
-      _ctx: ToolContext,
-    ) => {
+    handler: async (args: CreateProductDto, _ctx: ToolContext) => {
       return deps.products.create(args);
     },
     summarize: (args) => `Tạo sản phẩm mới "${args.name}"`,
@@ -270,8 +270,7 @@ export function createAdminCatalogTools(
   const createVariantTool: AgentToolDef = {
     name: 'create_variant',
     domain: 'catalog',
-    description:
-      'Tạo biến thể mới cho một sản phẩm đã có. Giá tính bằng VND.',
+    description: 'Tạo biến thể mới cho một sản phẩm đã có. Giá tính bằng VND.',
     schema: createVariantSchema,
     auth: 'admin',
     risk: 'WRITE',
@@ -378,10 +377,7 @@ export function createAdminCatalogTools(
     schema: listCategoriesSchema,
     auth: 'admin',
     risk: 'READ',
-    handler: async (
-      _args: Record<string, never>,
-      _ctx: ToolContext,
-    ) => {
+    handler: async (_args: Record<string, never>, _ctx: ToolContext) => {
       return deps.categories.getTreeStructure();
     },
     summarize: () => 'Xem danh mục sản phẩm',
@@ -404,10 +400,7 @@ export function createAdminCatalogTools(
     schema: createCategorySchema,
     auth: 'admin',
     risk: 'WRITE',
-    handler: async (
-      args: CreateCategoryDto,
-      _ctx: ToolContext,
-    ) => {
+    handler: async (args: CreateCategoryDto, _ctx: ToolContext) => {
       return deps.categories.create(args);
     },
     summarize: (args) => `Tạo danh mục "${args.name}"`,

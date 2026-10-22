@@ -127,7 +127,11 @@ export function AdminOrdersPage() {
 
   const updateStatusMutation = useUpdateOrderStatus();
 
-  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus, orderCode: string) => {
+  const handleUpdateStatus = async (
+    orderId: string,
+    newStatus: OrderStatus,
+    orderCode: string,
+  ) => {
     updateStatusMutation.mutate(
       { orderId, status: newStatus },
       {
@@ -140,12 +144,13 @@ export function AdminOrdersPage() {
           );
         },
         onError: (error: any) => {
-          const message = typeof error?.response?.data?.message === 'string'
-            ? error.response.data.message
-            : 'Cập nhật thất bại. Vui lòng thử lại.';
+          const message =
+            typeof error?.response?.data?.message === 'string'
+              ? error.response.data.message
+              : 'Cập nhật thất bại. Vui lòng thử lại.';
           toast.error(message);
         },
-      }
+      },
     );
   };
 
@@ -317,7 +322,9 @@ export function AdminOrdersPage() {
             <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
               <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
               {Object.entries(ORDER_STATUS_MAP).map(([key, config]) => (
-                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                <SelectItem key={key} value={key}>
+                  {config.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -427,7 +434,13 @@ export function AdminOrdersPage() {
                         <div className="flex items-center justify-end gap-2">
                           <Select
                             value={order.status}
-                            onValueChange={(val) => handleUpdateStatus(order.id, val as OrderStatus, order.code)}
+                            onValueChange={(val) =>
+                              handleUpdateStatus(
+                                order.id,
+                                val as OrderStatus,
+                                order.code,
+                              )
+                            }
                           >
                             <SelectTrigger className="w-[125px] h-8 text-xs bg-white border-slate-200 text-slate-700 shadow-none rounded-lg">
                               <SelectValue />

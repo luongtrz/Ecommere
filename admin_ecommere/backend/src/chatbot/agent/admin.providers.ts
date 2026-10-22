@@ -139,12 +139,7 @@ export const adminAgentProviders: Provider[] = [
           timeoutMs: config.timeoutMs,
         },
       }),
-    inject: [
-      AGENT_GRAPH,
-      ADMIN_TOOL_REGISTRY,
-      ThreadService,
-      AGENT_CONFIG,
-    ],
+    inject: [AGENT_GRAPH, ADMIN_TOOL_REGISTRY, ThreadService, AGENT_CONFIG],
   },
 ];
 

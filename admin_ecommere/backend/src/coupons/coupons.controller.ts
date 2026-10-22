@@ -1,5 +1,19 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dtos/create-coupon.dto';
 import { UpdateCouponDto } from './dtos/update-coupon.dto';
@@ -46,7 +60,10 @@ export class CouponsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update coupon (Admin only)' })
   @ApiResponse({ status: 200, type: CouponEntity })
-  async update(@Param('code') code: string, @Body() updateCouponDto: UpdateCouponDto) {
+  async update(
+    @Param('code') code: string,
+    @Body() updateCouponDto: UpdateCouponDto,
+  ) {
     return this.couponsService.update(code, updateCouponDto);
   }
 

@@ -52,3 +52,5 @@ lerna-debug.log*
 # Prisma
 /prisma/migrations
 !.env.example
+.vercel
+.env*.local

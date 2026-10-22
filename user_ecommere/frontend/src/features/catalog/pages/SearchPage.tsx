@@ -23,7 +23,10 @@ export function SearchPage() {
   const query = searchParams.get('q') || '';
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
-  const category = searchParams.get('category') || searchParams.get('categorySlug') || undefined;
+  const category =
+    searchParams.get('category') ||
+    searchParams.get('categorySlug') ||
+    undefined;
 
   const [searchInput, setSearchInput] = useState(query);
   const debouncedSearch = useDebounce(searchInput, 400);
@@ -39,7 +42,7 @@ export function SearchPage() {
   const { data, isLoading, isFetching, isPlaceholderData } = useProductSearch(
     query,
     searchFilters,
-    page
+    page,
   );
   const { addItem } = useCart();
 
@@ -50,7 +53,11 @@ export function SearchPage() {
   useEffect(() => {
     if (debouncedSearch !== query) {
       if (debouncedSearch.trim()) {
-        setSearchParams({ q: debouncedSearch.trim(), sort: sortBy, view: viewMode });
+        setSearchParams({
+          q: debouncedSearch.trim(),
+          sort: sortBy,
+          view: viewMode,
+        });
       } else {
         const nextParams = new URLSearchParams(searchParams);
         nextParams.delete('q');
@@ -72,7 +79,9 @@ export function SearchPage() {
     } else if (data.page === page) {
       setAllProducts((prev) => {
         const existingIds = new Set(prev.map((p) => p.id));
-        const nextProducts = data.products.filter((p) => !existingIds.has(p.id));
+        const nextProducts = data.products.filter(
+          (p) => !existingIds.has(p.id),
+        );
         return [...prev, ...nextProducts];
       });
     }
@@ -82,13 +91,13 @@ export function SearchPage() {
     allProducts.length > 0
       ? allProducts
       : page === 1 && data && !isPlaceholderData
-      ? data.products
-      : [];
+        ? data.products
+        : [];
 
   const hasNextPage = Boolean(
     data &&
-    (data.hasNextPage ?? (data.page < data.totalPages)) &&
-    productsToShow.length < data.total
+    (data.hasNextPage ?? data.page < data.totalPages) &&
+    productsToShow.length < data.total,
   );
 
   const handleLoadMore = () => {
@@ -110,7 +119,9 @@ export function SearchPage() {
   };
 
   const handleFilterClick = () => {
-    alert('Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.');
+    alert(
+      'Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.',
+    );
   };
 
   const handleAddToCart = (product: any, variant: any) => {
@@ -366,7 +377,10 @@ export function SearchPage() {
                       rating={product.rating}
                       reviewCount={product.reviewCount}
                       variants={product.variants}
-                      onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                      onAddToCart={() =>
+                        product.variants[0] &&
+                        handleAddToCart(product, product.variants[0])
+                      }
                     />
                   ) : (
                     <div

@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 // import cookieParser from 'cookie-parser';
 import * as cookieParser from 'cookie-parser';
+import * as express from 'express';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { setupSwagger } from './swagger';
@@ -31,7 +32,6 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Serve static files (uploads)
-  const express = require('express');
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
   // CORS
@@ -58,9 +58,11 @@ async function bootstrap() {
       'X-Requested-With',
       'Accept',
       'Origin',
-      'X-CSRF-Token', // Add CSRF header
+      'X-CSRF-Token',
+      'X-Chat-Session',
+      'x-chat-session',
     ],
-    exposedHeaders: ['Content-Disposition', 'X-CSRF-Token'],
+    exposedHeaders: ['Content-Disposition', 'X-CSRF-Token', 'X-Chat-Session'],
   });
 
   // Global pipes
@@ -95,7 +97,9 @@ async function bootstrap() {
 
   console.log(`🚀 Server running on http://localhost:${port}`);
   if (swaggerEnabled) {
-    console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
+    console.log(
+      `📚 Swagger docs available at http://localhost:${port}/api/docs`,
+    );
   }
 }
 

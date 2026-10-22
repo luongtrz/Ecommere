@@ -152,7 +152,7 @@
   .admin-glow {
     @apply transition-all duration-200;
   }
-  
+
   .admin-glow:hover {
     @apply shadow-md border-slate-300;
   }

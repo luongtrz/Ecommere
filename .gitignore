@@ -8,6 +8,8 @@ build/
 .env.*
 !.env.example
 !**/.env.example
+!.env.production
+!**/.env.production
 
 # IDEs
 .vscode/
@@ -45,9 +47,17 @@ yarn.lock
 .gemini/
 
 # Misc
-.github/
 cookies.txt
 
 # Local agent tooling (git worktrees and session files)
 .worktrees/
 .agy-sessions/
+
+# Vercel
+.vercel/
+
+.neon
+
+# Playwright
+test-results/
+playwright-report/

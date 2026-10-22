@@ -17,7 +17,10 @@ export interface ChatState {
   reset: () => void;
 }
 
-export type ChatPersistedState = Pick<ChatState, 'ownerId' | 'threadId' | 'messages'>;
+export type ChatPersistedState = Pick<
+  ChatState,
+  'ownerId' | 'threadId' | 'messages'
+>;
 
 function getLocalStorage(): Storage | null {
   try {
@@ -170,7 +173,7 @@ export const useChatStore = create<ChatState>()(
       patchMessage: (id: string, patch: Partial<ChatMessage>) => {
         set((state) => ({
           messages: state.messages.map((m) =>
-            m.id === id ? { ...m, ...patch } : m
+            m.id === id ? { ...m, ...patch } : m,
           ),
         }));
       },
@@ -185,7 +188,11 @@ export const useChatStore = create<ChatState>()(
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         const currentGuestKey = `guest:${getChatSessionId()}`;
-        if (!state.ownerId || (state.ownerId.startsWith('guest:') && state.ownerId !== currentGuestKey)) {
+        if (
+          !state.ownerId ||
+          (state.ownerId.startsWith('guest:') &&
+            state.ownerId !== currentGuestKey)
+        ) {
           state.ownerId = currentGuestKey;
           state.threadId = null;
           state.messages = [];
@@ -196,8 +203,8 @@ export const useChatStore = create<ChatState>()(
         threadId: state.threadId,
         messages: state.messages.slice(-30),
       }),
-    }
-  )
+    },
+  ),
 );
 
 export const chatStore = useChatStore;

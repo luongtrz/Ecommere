@@ -10,7 +10,17 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatters';
 import { PAYMENT_METHODS, SHIPPING_METHODS, QUERY_KEYS } from '@/lib/constants';
 import apiClient from '@/lib/api';
-import { ArrowLeft, Truck, CreditCard, MapPin, Shield, ChevronRight, CheckCircle2, Circle, Loader2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Truck,
+  CreditCard,
+  MapPin,
+  Shield,
+  ChevronRight,
+  CheckCircle2,
+  Circle,
+  Loader2,
+} from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
 import { CheckoutSteps } from '../components/CheckoutSteps';
 import confetti from 'canvas-confetti';
@@ -28,7 +38,9 @@ export function CheckoutPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const checkoutKeyRef = useRef<{ key: string; fingerprint: string } | null>(null);
+  const checkoutKeyRef = useRef<{ key: string; fingerprint: string } | null>(
+    null,
+  );
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,11 +49,17 @@ export function CheckoutPage() {
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
 
   // Default selections
-  const [shippingMethod, setShippingMethod] = useState<string>(SHIPPING_METHODS[0].id);
-  const [paymentMethod, setPaymentMethod] = useState<string>(PAYMENT_METHODS[0].id);
+  const [shippingMethod, setShippingMethod] = useState<string>(
+    SHIPPING_METHODS[0].id,
+  );
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    PAYMENT_METHODS[0].id,
+  );
 
   // Server-confirmed preview state
-  const [serverShippingFee, setServerShippingFee] = useState<number | null>(null);
+  const [serverShippingFee, setServerShippingFee] = useState<number | null>(
+    null,
+  );
   const [serverTotal, setServerTotal] = useState<number | null>(null);
   const [serverDiscount, setServerDiscount] = useState<number>(0);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
@@ -51,17 +69,24 @@ export function CheckoutPage() {
   // Auto-select default address
   useEffect(() => {
     if (addresses && addresses.length > 0 && !selectedAddressId) {
-      const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
+      const defaultAddress =
+        addresses.find((addr) => addr.isDefault) || addresses[0];
       setSelectedAddressId(defaultAddress.id);
     }
   }, [addresses, selectedAddressId]);
 
-  const selectedAddress = addresses?.find(addr => addr.id === selectedAddressId);
-  const selectedShipping = SHIPPING_METHODS.find(m => m.id === shippingMethod);
+  const selectedAddress = addresses?.find(
+    (addr) => addr.id === selectedAddressId,
+  );
+  const selectedShipping = SHIPPING_METHODS.find(
+    (m) => m.id === shippingMethod,
+  );
   const shippingFee = serverShippingFee;
   const finalTotal = serverTotal;
 
-  const itemsFingerprint = items.map((i) => `${i.variantId}:${i.quantity}:${i.price}`).join(',');
+  const itemsFingerprint = items
+    .map((i) => `${i.variantId}:${i.quantity}:${i.price}`)
+    .join(',');
 
   useEffect(() => {
     if (!selectedAddress) {
@@ -98,13 +123,16 @@ export function CheckoutPage() {
         if (isCancelled) return;
 
         const resData = response.data?.data ?? response.data;
-        const fee = typeof resData?.shippingFee === 'number' ? resData.shippingFee : 0;
-        const discount = typeof resData?.discount === 'number' ? resData.discount : 0;
-        const total = typeof resData?.total === 'number'
-          ? resData.total
-          : (typeof resData?.subtotal === 'number'
-            ? resData.subtotal - discount + fee
-            : totalPrice + fee);
+        const fee =
+          typeof resData?.shippingFee === 'number' ? resData.shippingFee : 0;
+        const discount =
+          typeof resData?.discount === 'number' ? resData.discount : 0;
+        const total =
+          typeof resData?.total === 'number'
+            ? resData.total
+            : typeof resData?.subtotal === 'number'
+              ? resData.subtotal - discount + fee
+              : totalPrice + fee;
 
         setServerShippingFee(fee);
         setServerDiscount(discount);
@@ -157,7 +185,17 @@ export function CheckoutPage() {
       isCancelled = true;
       controller.abort();
     };
-  }, [selectedAddress?.id, selectedAddress?.province, shippingMethod, itemsFingerprint, totalPrice, previewRetryTrigger]);
+    // itemsFingerprint stands in for items: the effect re-runs only when cart content changes,
+    // not when the items array identity changes between renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    selectedAddress?.id,
+    selectedAddress?.province,
+    shippingMethod,
+    itemsFingerprint,
+    totalPrice,
+    previewRetryTrigger,
+  ]);
 
   const handleNextStep = () => {
     if (step === 1 && !selectedAddress) {
@@ -168,11 +206,11 @@ export function CheckoutPage() {
       toast.error('Phí vận chuyển chưa được xác nhận. Vui lòng thử lại.');
       return;
     }
-    setStep(prev => prev + 1);
+    setStep((prev) => prev + 1);
   };
 
   const handleBackStep = () => {
-    setStep(prev => prev - 1);
+    setStep((prev) => prev - 1);
   };
 
   const handleSubmit = async () => {
@@ -203,7 +241,10 @@ export function CheckoutPage() {
     });
 
     let key: string;
-    if (!checkoutKeyRef.current || checkoutKeyRef.current.fingerprint !== fingerprint) {
+    if (
+      !checkoutKeyRef.current ||
+      checkoutKeyRef.current.fingerprint !== fingerprint
+    ) {
       key = generateCheckoutKey();
       checkoutKeyRef.current = { key, fingerprint };
     } else {
@@ -236,8 +277,15 @@ export function CheckoutPage() {
       console.error('Order creation failed:', error);
       const serverMessage = (error as any)?.response?.data?.message;
       const message =
-        (Array.isArray(serverMessage) ? serverMessage.map((m: any) => (typeof m === 'string' ? m : String(m))).filter(Boolean).join(', ') : null) ||
-        (typeof serverMessage === 'string' && serverMessage.trim() ? serverMessage : null) ||
+        (Array.isArray(serverMessage)
+          ? serverMessage
+              .map((m: any) => (typeof m === 'string' ? m : String(m)))
+              .filter(Boolean)
+              .join(', ')
+          : null) ||
+        (typeof serverMessage === 'string' && serverMessage.trim()
+          ? serverMessage
+          : null) ||
         'Đặt hàng thất bại. Vui lòng thử lại.';
       toast.error(message);
     } finally {
@@ -249,7 +297,7 @@ export function CheckoutPage() {
         confetti({
           particleCount: 150,
           spread: 70,
-          origin: { y: 0.6 }
+          origin: { y: 0.6 },
         });
       } catch (_) {
         // Ignore confetti errors
@@ -299,7 +347,6 @@ export function CheckoutPage() {
 
         <div className="container max-w-7xl pt-8 px-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-
             {/* LEFT COLUMN: MAIN PROCESS */}
             <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6 md:gap-8">
 
@@ -349,6 +396,8 @@ export function CheckoutPage() {
                           {addresses.map((addr) => (
                             <div
                               key={addr.id}
+                              role="button"
+                              tabIndex={0}
                               onClick={() => setSelectedAddressId(addr.id)}
                               className={`relative p-4 sm:p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 group ${
                                 selectedAddressId === addr.id
@@ -393,6 +442,8 @@ export function CheckoutPage() {
                         {SHIPPING_METHODS.map((method) => (
                           <div
                             key={method.id}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => setShippingMethod(method.id)}
                             className={`flex items-center justify-between p-4 sm:p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                               shippingMethod === method.id
@@ -438,6 +489,9 @@ export function CheckoutPage() {
                         return (
                           <div
                             key={method.id}
+                            role="button"
+                            tabIndex={isCOD ? 0 : -1}
+                            aria-disabled={!isCOD}
                             onClick={() => isCOD && setPaymentMethod(method.id)}
                             className={`relative p-5 sm:p-6 rounded-xl border-2 transition-all duration-200 flex flex-col items-center text-center gap-3.5 ${
                               paymentMethod === method.id
@@ -518,7 +572,6 @@ export function CheckoutPage() {
                     </div>
                   </div>
                 )}
-
               </div>
 
               {/* Fixed Action Bar for Mobile/Tablet or Inline for Desktop */}
@@ -545,7 +598,9 @@ export function CheckoutPage() {
                     className="h-11 flex-1 rounded-lg text-sm sm:text-base font-medium shadow-sm transition-colors duration-200 bg-teal-600 hover:bg-teal-700 text-white focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-50 disabled:pointer-events-none"
                   >
                     {step < 3 ? (
-                      <span className="flex items-center gap-2">Tiếp tục <ChevronRight className="h-5 w-5" /></span>
+                      <span className="flex items-center gap-2">
+                        Tiếp tục <ChevronRight className="h-5 w-5" />
+                      </span>
                     ) : (
                       <span className="flex items-center gap-2">
                         {isSubmitting
@@ -558,7 +613,6 @@ export function CheckoutPage() {
                   </Button>
                 </div>
               </div>
-
             </div>
 
             {/* RIGHT COLUMN: SUMMARY (Sticky) */}
@@ -639,7 +693,6 @@ export function CheckoutPage() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 

@@ -14,6 +14,8 @@ export function createChatModel(config: AgentConfig): ChatOpenAI {
     timeout: config.timeoutMs,
     maxRetries: 1,
     streaming: true,
-    ...(config.baseURL !== null ? { configuration: { baseURL: config.baseURL } } : {}),
+    ...(config.baseURL !== null
+      ? { configuration: { baseURL: config.baseURL } }
+      : {}),
   });
 }

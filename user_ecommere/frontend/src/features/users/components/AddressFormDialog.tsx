@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +19,11 @@ interface AddressFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDialogProps) {
+export function AddressFormDialog({
+  address,
+  open,
+  onOpenChange,
+}: AddressFormDialogProps) {
   const isEdit = !!address;
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
@@ -60,13 +69,18 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isEdit) {
-      await updateAddress.mutateAsync({
-        id: address.id,
-        data: formData,
-      });
-    } else {
-      await createAddress.mutateAsync(formData);
+    try {
+      if (isEdit) {
+        await updateAddress.mutateAsync({
+          id: address.id,
+          data: formData,
+        });
+      } else {
+        await createAddress.mutateAsync(formData);
+      }
+    } catch {
+      // Keep the dialog open on failure. This form has no error toast yet, so the rejection is only stopped here.
+      return;
     }
 
     onOpenChange(false);
@@ -95,7 +109,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
                 value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
                 placeholder="Nguyễn Văn A"
               />
             </div>
@@ -108,7 +124,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 type="tel"
                 className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 placeholder="0912345678"
               />
             </div>
@@ -121,7 +139,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
               required
               className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
               value={formData.line1}
-              onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, line1: e.target.value })
+              }
               placeholder="Số nhà, tên đường..."
             />
           </div>
@@ -134,7 +154,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
                 value={formData.province}
-                onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, province: e.target.value })
+                }
                 placeholder="Hồ Chí Minh"
               />
             </div>
@@ -146,7 +168,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
                 value={formData.district}
-                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, district: e.target.value })
+                }
                 placeholder="Quận 1"
               />
             </div>
@@ -158,7 +182,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
                 value={formData.ward}
-                onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, ward: e.target.value })
+                }
                 placeholder="Bến Nghé"
               />
             </div>

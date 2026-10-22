@@ -11,7 +11,12 @@ export function requiresConfirmation(input: {
     return false;
   }
 
-  const knownRisks: ReadonlyArray<ToolRisk> = ['READ', 'WRITE', 'SENSITIVE', 'DESTRUCTIVE'];
+  const knownRisks: ReadonlyArray<ToolRisk> = [
+    'READ',
+    'WRITE',
+    'SENSITIVE',
+    'DESTRUCTIVE',
+  ];
   if (!knownRisks.includes(input.risk)) {
     return true;
   }
@@ -30,7 +35,11 @@ export function requiresConfirmation(input: {
   }
 
   if (input.app === 'ADMIN') {
-    if (input.risk === 'WRITE' || input.risk === 'SENSITIVE' || input.risk === 'DESTRUCTIVE') {
+    if (
+      input.risk === 'WRITE' ||
+      input.risk === 'SENSITIVE' ||
+      input.risk === 'DESTRUCTIVE'
+    ) {
       return true;
     }
   }

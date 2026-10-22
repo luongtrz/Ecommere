@@ -15,9 +15,9 @@ export function CategoryNav() {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  const rootCategories = categories?.filter(c => !c.parentId) || [];
+  const rootCategories = categories?.filter((c) => !c.parentId) || [];
   const subCategories = activeCategory
-    ? categories?.filter(c => c.parentId === activeCategory.id) || []
+    ? categories?.filter((c) => c.parentId === activeCategory.id) || []
     : [];
 
   const isActive = (path: string) => {
@@ -27,7 +27,8 @@ export function CategoryNav() {
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
       setShowLeftArrow(scrollLeft > 0);
       setShowRightArrow(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
     }
@@ -146,8 +147,8 @@ export function CategoryNav() {
         className={cn(
           "absolute top-full border border-slate-200 bg-white rounded-xl shadow-md transition-all duration-150 min-w-[200px] z-20 p-1.5 mt-1",
           activeCategory
-            ? "opacity-100 visible translate-y-0"
-            : "opacity-0 invisible -translate-y-1 pointer-events-none"
+            ? 'opacity-100 visible translate-y-0'
+            : 'opacity-0 invisible -translate-y-1 pointer-events-none',
         )}
       >
         {activeCategory && (

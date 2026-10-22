@@ -20,7 +20,11 @@ function clearCartIfAccountChanged(nextUserId: string) {
 const userSchema = z.object({
   id: z.string(),
   email: z.string().nullable().optional(),
-  name: z.string().nullable().optional().transform((value) => value ?? ''),
+  name: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => value ?? ''),
   role: z.enum(['CUSTOMER', 'ADMIN']),
   phone: z.string(),
   createdAt: z.string().optional(),

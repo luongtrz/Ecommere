@@ -9,7 +9,8 @@ import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const { resetPassword, isResetPasswordLoading, resetPasswordError } = useAuth();
+  const { resetPassword, isResetPasswordLoading, resetPasswordError } =
+    useAuth();
 
   const isTokenMissing = !token || !token.trim();
 
@@ -152,7 +153,8 @@ export function ResetPasswordPage() {
                 <div className="space-y-4">
                   <Alert className="border-rose-200 bg-rose-50 text-rose-800">
                     <AlertDescription>
-                      Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.
+                      Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác
+                      thực.
                     </AlertDescription>
                   </Alert>
 
@@ -186,14 +188,22 @@ export function ResetPasswordPage() {
                   {resetPasswordError && (
                     <Alert className="border-rose-200 bg-rose-50 text-rose-800">
                       <AlertDescription>
-                        {Array.isArray(resetPasswordError.response?.data?.message)
-                          ? resetPasswordError.response?.data?.message.join(', ')
-                          : (resetPasswordError.response?.data?.message || 'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.')}
+                        {Array.isArray(
+                          resetPasswordError.response?.data?.message,
+                        )
+                          ? resetPasswordError.response?.data?.message.join(
+                              ', ',
+                            )
+                          : resetPasswordError.response?.data?.message ||
+                            'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.'}
                       </AlertDescription>
                     </Alert>
                   )}
 
-                  <ResetPasswordForm onSubmit={handleSubmit} isLoading={isResetPasswordLoading} />
+                  <ResetPasswordForm
+                    onSubmit={handleSubmit}
+                    isLoading={isResetPasswordLoading}
+                  />
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">

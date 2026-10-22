@@ -7,7 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Settings, Users, BarChart3, Save, Ticket, Percent, Truck } from 'lucide-react';
 import { adminReferralsApi, type ReferralConfig } from '../api/adminReferrals.api';
@@ -99,7 +105,8 @@ export function AdminCouponsPage() {
   });
 
   const updateConfigMutation = useMutation({
-    mutationFn: (data: Partial<ReferralConfig>) => adminReferralsApi.updateConfig(data),
+    mutationFn: (data: Partial<ReferralConfig>) =>
+      adminReferralsApi.updateConfig(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-referral-config'] });
       queryClient.invalidateQueries({ queryKey: ['admin-referral-stats'] });
@@ -113,21 +120,31 @@ export function AdminCouponsPage() {
   const handleSaveConfig = () => {
     const data = {
       active: configForm.active ?? config?.active,
-      referrerCouponType: configForm.referrerCouponType ?? config?.referrerCouponType,
-      referrerCouponValue: configForm.referrerCouponValue ?? config?.referrerCouponValue,
-      referrerMaxDiscount: configForm.referrerMaxDiscount ?? config?.referrerMaxDiscount,
-      refereeCouponType: configForm.refereeCouponType ?? config?.refereeCouponType,
-      refereeCouponValue: configForm.refereeCouponValue ?? config?.refereeCouponValue,
-      refereeMaxDiscount: configForm.refereeMaxDiscount ?? config?.refereeMaxDiscount,
-      minOrderForCoupon: configForm.minOrderForCoupon ?? config?.minOrderForCoupon,
+      referrerCouponType:
+        configForm.referrerCouponType ?? config?.referrerCouponType,
+      referrerCouponValue:
+        configForm.referrerCouponValue ?? config?.referrerCouponValue,
+      referrerMaxDiscount:
+        configForm.referrerMaxDiscount ?? config?.referrerMaxDiscount,
+      refereeCouponType:
+        configForm.refereeCouponType ?? config?.refereeCouponType,
+      refereeCouponValue:
+        configForm.refereeCouponValue ?? config?.refereeCouponValue,
+      refereeMaxDiscount:
+        configForm.refereeMaxDiscount ?? config?.refereeMaxDiscount,
+      minOrderForCoupon:
+        configForm.minOrderForCoupon ?? config?.minOrderForCoupon,
       couponValidDays: configForm.couponValidDays ?? config?.couponValidDays,
-      maxReferralsPerUser: configForm.maxReferralsPerUser ?? config?.maxReferralsPerUser,
+      maxReferralsPerUser:
+        configForm.maxReferralsPerUser ?? config?.maxReferralsPerUser,
     };
     updateConfigMutation.mutate(data);
   };
 
   const getFieldValue = (field: keyof ReferralConfig) => {
-    return configForm[field] !== undefined ? configForm[field] : config?.[field];
+    return configForm[field] !== undefined
+      ? configForm[field]
+      : config?.[field];
   };
 
   const renderTypeBadge = (type: 'PERCENT' | 'FIXED' | 'FREESHIP', value?: number) => {
@@ -439,8 +456,16 @@ export function AdminCouponsPage() {
                         <div className="space-y-2">
                           <Label className="text-slate-700 text-xs font-medium">Loại coupon</Label>
                           <Select
-                            value={(getFieldValue('referrerCouponType') as string) || 'PERCENT'}
-                            onValueChange={(v) => setConfigForm((prev) => ({ ...prev, referrerCouponType: v as any }))}
+                            value={
+                              (getFieldValue('referrerCouponType') as string) ||
+                              'PERCENT'
+                            }
+                            onValueChange={(v) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                referrerCouponType: v as any,
+                              }))
+                            }
                           >
                             <SelectTrigger className="bg-white border-slate-200 text-slate-900 rounded-lg shadow-none text-sm"><SelectValue /></SelectTrigger>
                             <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
@@ -484,8 +509,16 @@ export function AdminCouponsPage() {
                         <div className="space-y-2">
                           <Label className="text-slate-700 text-xs font-medium">Loại coupon</Label>
                           <Select
-                            value={(getFieldValue('refereeCouponType') as string) || 'PERCENT'}
-                            onValueChange={(v) => setConfigForm((prev) => ({ ...prev, refereeCouponType: v as any }))}
+                            value={
+                              (getFieldValue('refereeCouponType') as string) ||
+                              'PERCENT'
+                            }
+                            onValueChange={(v) =>
+                              setConfigForm((prev) => ({
+                                ...prev,
+                                refereeCouponType: v as any,
+                              }))
+                            }
                           >
                             <SelectTrigger className="bg-white border-slate-200 text-slate-900 rounded-lg shadow-none text-sm"><SelectValue /></SelectTrigger>
                             <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
@@ -572,7 +605,9 @@ export function AdminCouponsPage() {
                         className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 font-medium shadow-sm"
                       >
                         <Save className="mr-2 h-4 w-4" />
-                        {updateConfigMutation.isPending ? 'Đang lưu...' : 'Lưu cấu hình'}
+                        {updateConfigMutation.isPending
+                          ? 'Đang lưu...'
+                          : 'Lưu cấu hình'}
                       </Button>
                     </div>
                   </CardContent>

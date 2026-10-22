@@ -12,7 +12,12 @@ export function MobileNav() {
   const navItems = [
     { label: 'Trang chủ', icon: Home, href: '/' },
     { label: 'Khám phá', icon: Grid3X3, href: '/catalog' },
-    { label: 'Giỏ hàng', icon: ShoppingBag, action: openCart, badge: totalItems },
+    {
+      label: 'Giỏ hàng',
+      icon: ShoppingBag,
+      action: openCart,
+      badge: totalItems,
+    },
     { label: 'Tài khoản', icon: User, href: user ? '/account' : '/login' },
   ];
 

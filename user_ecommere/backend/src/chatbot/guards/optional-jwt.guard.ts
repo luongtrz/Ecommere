@@ -1,13 +1,21 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
   canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
-    const authHeader = request?.headers?.authorization ?? request?.headers?.Authorization;
+    const authHeader =
+      request?.headers?.authorization ?? request?.headers?.Authorization;
 
-    if (!authHeader || (typeof authHeader === 'string' && authHeader.trim() === '')) {
+    if (
+      !authHeader ||
+      (typeof authHeader === 'string' && authHeader.trim() === '')
+    ) {
       if (request) {
         request.user = undefined;
       }
@@ -23,7 +31,7 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
    * an authenticated session; silently degrading to guest mode would mask authentication
    * failures and could lead to unexpected behavior or security issues.
    */
-  handleRequest(err: any, user: any, info?: any) {
+  handleRequest(err: any, user: any, _info?: any) {
     if (err) {
       throw err;
     }

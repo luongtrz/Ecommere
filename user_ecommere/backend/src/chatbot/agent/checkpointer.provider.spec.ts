@@ -7,13 +7,15 @@ import {
 
 describe('toCheckpointConnectionString', () => {
   it('removes schema=... query parameter from the connection URL', () => {
-    const input = 'postgresql://user:pass@localhost:5432/thaispray_shop?schema=public';
+    const input =
+      'postgresql://user:pass@localhost:5432/thaispray_shop?schema=public';
     const result = toCheckpointConnectionString(input);
     expect(result).toBe('postgresql://user:pass@localhost:5432/thaispray_shop');
   });
 
   it('removes schema parameter with custom schema name', () => {
-    const input = 'postgresql://user:pass@localhost:5432/thaispray_shop?schema=custom_schema';
+    const input =
+      'postgresql://user:pass@localhost:5432/thaispray_shop?schema=custom_schema';
     const result = toCheckpointConnectionString(input);
     expect(result).toBe('postgresql://user:pass@localhost:5432/thaispray_shop');
   });
@@ -41,9 +43,12 @@ describe('toCheckpointConnectionString', () => {
   });
 
   it('works with postgres:// protocol URLs', () => {
-    const input = 'postgres://user:pass@localhost:5432/db?schema=public&sslmode=prefer';
+    const input =
+      'postgres://user:pass@localhost:5432/db?schema=public&sslmode=prefer';
     const result = toCheckpointConnectionString(input);
-    expect(result).toBe('postgres://user:pass@localhost:5432/db?sslmode=prefer');
+    expect(result).toBe(
+      'postgres://user:pass@localhost:5432/db?sslmode=prefer',
+    );
   });
 });
 
@@ -146,7 +151,9 @@ describe('deleteExpiredCheckpoints', () => {
     expect(query).toHaveBeenCalledTimes(1);
     const [sql, params] = query.mock.calls[0];
     expect(sql).toContain('WITH expired_threads AS');
-    expect(sql).toContain('SELECT id FROM "agent_threads" WHERE "updatedAt" < $1');
+    expect(sql).toContain(
+      'SELECT id FROM "agent_threads" WHERE "updatedAt" < $1',
+    );
     expect(sql).toContain('DELETE FROM "agent".checkpoint_writes');
     expect(sql).toContain('DELETE FROM "agent".checkpoint_blobs');
     expect(sql).toContain('DELETE FROM "agent".checkpoints');
@@ -158,7 +165,11 @@ describe('deleteExpiredCheckpoints', () => {
     const pool = { query };
     const cutoff = new Date('2026-09-01T00:00:00Z');
 
-    const result = await deleteExpiredCheckpoints(pool, cutoff, 'custom_schema');
+    const result = await deleteExpiredCheckpoints(
+      pool,
+      cutoff,
+      'custom_schema',
+    );
 
     expect(result).toBe(0);
     expect(query).toHaveBeenCalledTimes(1);
@@ -183,5 +194,3 @@ describe('deleteExpiredCheckpoints', () => {
     expect(sql).toContain('DELETE FROM "agent".checkpoints');
   });
 });
-
-

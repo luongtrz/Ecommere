@@ -1,15 +1,13 @@
 import { Logger } from '@nestjs/common';
 import { Command } from '@langchain/langgraph';
-import {
-  HumanMessage,
-  AIMessageChunk,
-  type AIMessage,
-  type ToolMessage,
-} from '@langchain/core/messages';
+import { HumanMessage } from '@langchain/core/messages';
 import type { ToolRegistry } from '../tools/tool.registry';
 import type { ToolContext } from '../tools/tool.types';
 import type { AgentStreamEvent } from './sse.frames';
-import { getCheckpointerPool, deleteThreadCheckpoints } from './checkpointer.provider';
+import {
+  getCheckpointerPool,
+  deleteThreadCheckpoints,
+} from './checkpointer.provider';
 
 export class AgentBusyError extends Error {
   constructor(message = 'Cuộc trò chuyện đang được xử lý') {
@@ -39,9 +37,7 @@ export interface AgentRunnerDeps {
       input: unknown,
       config: unknown,
     ): PromiseLike<AsyncIterable<unknown>> | AsyncIterable<unknown>;
-    getState?(
-      config: unknown,
-    ): PromiseLike<unknown> | unknown;
+    getState?(config: unknown): PromiseLike<unknown> | unknown;
     // The compiled LangGraph graph types this as a boolean or a saver, so accept any
     // value here and check the shape where it is used.
     checkpointer?: unknown;
@@ -223,7 +219,10 @@ export class AgentRunner {
     }
 
     const pendingSet = new Set(pendingCallIds);
-    if (callIdSet.size !== pendingSet.size || callIds.length !== pendingCallIds.length) {
+    if (
+      callIdSet.size !== pendingSet.size ||
+      callIds.length !== pendingCallIds.length
+    ) {
       throw new AgentNotPendingError();
     }
 
@@ -311,15 +310,17 @@ export class AgentRunner {
     sink: (event: AgentStreamEvent) => void,
   ): void {
     for (const msg of messages) {
-      const toolCallId =
-        (msg as any)?.tool_call_id ?? (msg as any)?.id ?? '';
+      const toolCallId = (msg as any)?.tool_call_id ?? (msg as any)?.id ?? '';
       const toolName = (msg as any)?.name ?? '';
 
       let parsedContent: any = null;
       try {
         if (typeof (msg as any)?.content === 'string') {
           parsedContent = JSON.parse((msg as any).content);
-        } else if ((msg as any)?.content && typeof (msg as any).content === 'object') {
+        } else if (
+          (msg as any)?.content &&
+          typeof (msg as any).content === 'object'
+        ) {
           parsedContent = (msg as any).content;
         }
       } catch {
@@ -417,7 +418,9 @@ export class AgentRunner {
     if (controller.signal.aborted) {
       onInternalAbort();
     } else {
-      controller.signal.addEventListener('abort', onInternalAbort, { once: true });
+      controller.signal.addEventListener('abort', onInternalAbort, {
+        once: true,
+      });
     }
 
     params.sink({
@@ -468,7 +471,10 @@ export class AgentRunner {
           }
 
           const nextPromise = iterator.next();
-          const { done, value } = await Promise.race([nextPromise, abortPromise]);
+          const { done, value } = await Promise.race([
+            nextPromise,
+            abortPromise,
+          ]);
           if (done) {
             break;
           }
@@ -509,7 +515,10 @@ export class AgentRunner {
                     hasUsage = true;
                   }
 
-                  if (Array.isArray(msg?.tool_calls) && msg.tool_calls.length > 0) {
+                  if (
+                    Array.isArray(msg?.tool_calls) &&
+                    msg.tool_calls.length > 0
+                  ) {
                     for (const call of msg.tool_calls) {
                       const id = call.id ?? '';
                       const name = call.name ?? '';

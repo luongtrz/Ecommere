@@ -29,7 +29,9 @@ export function useAuth() {
       navigate('/');
     },
     onError: (error: AxiosError<any>) => {
-      const message = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại số điện thoại và mật khẩu.';
+      const message =
+        error.response?.data?.message ||
+        'Đăng nhập thất bại. Vui lòng kiểm tra lại số điện thoại và mật khẩu.';
       toast.error(message);
     },
   });

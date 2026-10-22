@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
@@ -21,7 +20,7 @@ import {
   AlertCircle,
   RotateCcw,
   ArrowRight,
-  ShoppingBag
+  ShoppingBag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +48,11 @@ const getStatusConfig = (status: string) => {
 
 const TABS = [
   { id: 'ALL', label: 'Tất cả' },
-  { id: 'PROCESSING', label: 'Đang xử lý', statuses: ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'] },
+  {
+    id: 'PROCESSING',
+    label: 'Đang xử lý',
+    statuses: ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'],
+  },
   { id: 'COMPLETED', label: 'Hoàn thành', statuses: ['DELIVERED'] },
   { id: 'CANCELLED', label: 'Đã hủy', statuses: ['CANCELED', 'REFUNDED'] },
 ];
@@ -69,8 +72,15 @@ export function OrdersPage() {
       console.error('Cancel order failed:', error);
       const serverMessage = (error as any)?.response?.data?.message;
       const message =
-        (Array.isArray(serverMessage) ? serverMessage.map((m: any) => (typeof m === 'string' ? m : String(m))).filter(Boolean).join(', ') : null) ||
-        (typeof serverMessage === 'string' && serverMessage.trim() ? serverMessage : null) ||
+        (Array.isArray(serverMessage)
+          ? serverMessage
+              .map((m: any) => (typeof m === 'string' ? m : String(m)))
+              .filter(Boolean)
+              .join(', ')
+          : null) ||
+        (typeof serverMessage === 'string' && serverMessage.trim()
+          ? serverMessage
+          : null) ||
         'Hủy đơn hàng thất bại. Vui lòng thử lại.';
       toast.error(message);
     }
@@ -90,12 +100,13 @@ export function OrdersPage() {
   const totalPages = data?.totalPages ?? Math.ceil(totalOrders / limit);
 
   // Filter orders based on active tab
-  const filteredOrders = activeTab === 'ALL'
-    ? allOrders
-    : allOrders.filter(order => {
-      const tab = TABS.find(t => t.id === activeTab);
-      return tab?.statuses?.includes(order.status);
-    });
+  const filteredOrders =
+    activeTab === 'ALL'
+      ? allOrders
+      : allOrders.filter((order) => {
+          const tab = TABS.find((t) => t.id === activeTab);
+          return tab?.statuses?.includes(order.status);
+        });
 
   return (
     <>

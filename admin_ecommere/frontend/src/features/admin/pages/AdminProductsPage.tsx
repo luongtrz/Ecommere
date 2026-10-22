@@ -46,7 +46,9 @@ import {
 import { useDeleteProduct } from '../hooks/useAdminProducts';
 import { useToast } from '@/hooks/useToast';
 
-const STORE_URL = (import.meta.env.VITE_STORE_URL || 'http://localhost:5173').replace(/\/$/, '');
+const STORE_URL = (
+  import.meta.env.VITE_STORE_URL || 'http://localhost:5173'
+).replace(/\/$/, '');
 
 export function AdminProductsPage() {
   const [search, setSearch] = useState('');
@@ -62,19 +64,21 @@ export function AdminProductsPage() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const tree = await import('../api/categories.api').then(m => m.categoriesApi.getTree());
+        const tree = await import('../api/categories.api').then((m) =>
+          m.categoriesApi.getTree(),
+        );
         setCategoryTree(tree);
 
         // Flatten for name lookup
         const allCategories: any[] = [];
         const traverse = (nodes: any[], prefix = '') => {
-          nodes.forEach(node => {
+          nodes.forEach((node) => {
             const currentName = prefix + node.name;
             const isLeaf = !node.children || node.children.length === 0;
             allCategories.push({
               ...node,
               displayName: currentName,
-              isLeaf
+              isLeaf,
             });
 
             if (node.children?.length > 0) {
@@ -97,7 +101,7 @@ export function AdminProductsPage() {
     isError,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
   } = useInfiniteAdminProducts({
     limit: 20,
     search: debouncedSearch,
@@ -117,31 +121,39 @@ export function AdminProductsPage() {
   }, [search]);
 
   useEffect(() => {
+    const target = observerTarget.current;
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting && hasNextPage) {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (target) {
+      observer.observe(target);
     }
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (target) {
+        observer.unobserve(target);
       }
     };
   }, [hasNextPage, fetchNextPage]);
 
   const handleDelete = async (id: string, name: string) => {
-    if (deletingIdRef.current === id || (deleteProduct.isPending && deleteProduct.variables === id)) {
+    if (
+      deletingIdRef.current === id ||
+      (deleteProduct.isPending && deleteProduct.variables === id)
+    ) {
       return;
     }
-    if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`)) {
+    if (
+      window.confirm(
+        `Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`,
+      )
+    ) {
       deletingIdRef.current = id;
       deleteProduct.mutate(id, {
         onSuccess: () => {
@@ -158,7 +170,12 @@ export function AdminProductsPage() {
   };
 
   const calculateTotalStock = (product: any) => {
-    return product.variants?.reduce((acc: number, v: any) => acc + (v.stock || 0), 0) || 0;
+    return (
+      product.variants?.reduce(
+        (acc: number, v: any) => acc + (v.stock || 0),
+        0,
+      ) || 0
+    );
   };
 
   const products = data?.pages.flatMap((page) => page.products) || [];
@@ -175,7 +192,9 @@ export function AdminProductsPage() {
   }
 
   /* Helper to get selected category name */
-  const selectedCategoryName = categories.find(c => c.id === categoryId)?.displayName;
+  const selectedCategoryName = categories.find(
+    (c) => c.id === categoryId,
+  )?.displayName;
 
   /* Recursive render function for category menu */
   const renderCategoryMenu = (nodes: any[]) => {
@@ -361,13 +380,19 @@ export function AdminProductsPage() {
                   <TableBody>
                     {products.map((product) => {
                       const totalStock = calculateTotalStock(product);
-                      const isDeleting = (deleteProduct.isPending && deleteProduct.variables === product.id) || deletingIdRef.current === product.id;
+                      const isDeleting =
+                        (deleteProduct.isPending &&
+                          deleteProduct.variables === product.id) ||
+                        deletingIdRef.current === product.id;
                       return (
                         <TableRow key={product.id} className="group hover:bg-slate-50 transition-colors border-b border-slate-100">
                           <TableCell className="px-4 py-3">
                             <div className="relative h-12 w-12 rounded-lg border border-slate-200 overflow-hidden bg-slate-100 shadow-sm shrink-0">
                               <img
-                                src={product.images[0] || 'https://placehold.co/100x100?text=No+Image'}
+                                src={
+                                  product.images[0] ||
+                                  'https://placehold.co/100x100?text=No+Image'
+                                }
                                 alt={product.name}
                                 loading="lazy"
                                 className="w-full h-full object-cover"
@@ -446,7 +471,8 @@ export function AdminProductsPage() {
                                   className="text-rose-600 focus:text-rose-700 focus:bg-rose-50 cursor-pointer"
                                   onClick={() => handleDelete(product.id, product.name)}
                                 >
-                                  <Trash2 className="mr-2 h-4 w-4" /> Xóa sản phẩm
+                                  <Trash2 className="mr-2 h-4 w-4" /> Xóa sản
+                                  phẩm
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>

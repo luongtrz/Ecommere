@@ -119,12 +119,8 @@ export function createReportsTools(deps: ReportsToolDeps): AgentToolDef[] {
   // 2. get_sales_report
   const getSalesReportSchema = z
     .object({
-      from: z
-        .string()
-        .regex(DATE_REGEX, 'Định dạng ngày phải là YYYY-MM-DD'),
-      to: z
-        .string()
-        .regex(DATE_REGEX, 'Định dạng ngày phải là YYYY-MM-DD'),
+      from: z.string().regex(DATE_REGEX, 'Định dạng ngày phải là YYYY-MM-DD'),
+      to: z.string().regex(DATE_REGEX, 'Định dạng ngày phải là YYYY-MM-DD'),
       groupBy: z.enum(GROUP_BY_OPTIONS).optional(),
     })
     .strict();
@@ -161,12 +157,8 @@ export function createReportsTools(deps: ReportsToolDeps): AgentToolDef[] {
   // 3. get_top_products
   const getTopProductsSchema = z
     .object({
-      from: z
-        .string()
-        .regex(DATE_REGEX, 'Định dạng ngày phải là YYYY-MM-DD'),
-      to: z
-        .string()
-        .regex(DATE_REGEX, 'Định dạng ngày phải là YYYY-MM-DD'),
+      from: z.string().regex(DATE_REGEX, 'Định dạng ngày phải là YYYY-MM-DD'),
+      to: z.string().regex(DATE_REGEX, 'Định dạng ngày phải là YYYY-MM-DD'),
       limit: z.number().int().min(1).max(50).optional(),
     })
     .strict();

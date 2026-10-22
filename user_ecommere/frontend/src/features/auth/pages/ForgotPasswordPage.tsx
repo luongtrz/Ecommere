@@ -8,14 +8,17 @@ import type { ForgotPasswordInput } from '@/lib/validators';
 import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 
 export function ForgotPasswordPage() {
-  const { forgotPassword, isForgotPasswordLoading, forgotPasswordError } = useAuth();
+  const { forgotPassword, isForgotPasswordLoading, forgotPasswordError } =
+    useAuth();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = (data: ForgotPasswordInput) => {
     setSuccessMessage(null);
     forgotPassword(data.email, {
       onSuccess: () => {
-        setSuccessMessage('Nếu email tồn tại, liên kết đặt lại mật khẩu sẽ được gửi');
+        setSuccessMessage(
+          'Nếu email tồn tại, liên kết đặt lại mật khẩu sẽ được gửi',
+        );
       },
     });
   };
@@ -159,12 +162,16 @@ export function ForgotPasswordPage() {
                   <AlertDescription>
                     {Array.isArray(forgotPasswordError.response?.data?.message)
                       ? forgotPasswordError.response?.data?.message.join(', ')
-                      : (forgotPasswordError.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.')}
+                      : forgotPasswordError.response?.data?.message ||
+                        'Đã có lỗi xảy ra. Vui lòng thử lại sau.'}
                   </AlertDescription>
                 </Alert>
               )}
 
-              <ForgotPasswordForm onSubmit={handleSubmit} isLoading={isForgotPasswordLoading} />
+              <ForgotPasswordForm
+                onSubmit={handleSubmit}
+                isLoading={isForgotPasswordLoading}
+              />
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">

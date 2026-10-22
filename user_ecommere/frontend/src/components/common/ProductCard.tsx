@@ -42,7 +42,10 @@ export const ProductCard = memo(function ProductCard({
   const { toggleItem, isInWishlist } = useWishlist();
   const prefetchProduct = usePrefetchProduct();
   const isWishlisted = isInWishlist(id);
-  const discountPercent = hasDiscount && salePrice != null ? Math.max(1, Math.round(((price - salePrice) / price) * 100)) : 0;
+  const discountPercent =
+    hasDiscount && salePrice != null
+      ? Math.max(1, Math.round(((price - salePrice) / price) * 100))
+      : 0;
   const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = useCallback(() => {
@@ -93,7 +96,13 @@ export const ProductCard = memo(function ProductCard({
             type="button"
             onClick={(event) => {
               event.preventDefault();
-              toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
+              toggleItem({
+                productId: id,
+                name,
+                slug,
+                image: images[0],
+                price: finalPrice,
+              });
             }}
             aria-label="Thêm vào yêu thích"
             className={cn(
@@ -166,7 +175,11 @@ export const ProductCard = memo(function ProductCard({
       </Card>
 
       {isQuickViewOpen ? (
-        <ProductQuickView slug={slug} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+        <ProductQuickView
+          slug={slug}
+          open={isQuickViewOpen}
+          onOpenChange={setIsQuickViewOpen}
+        />
       ) : null}
     </>
   );

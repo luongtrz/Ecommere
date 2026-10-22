@@ -1,6 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validators';
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordInput,
+} from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -11,7 +14,10 @@ interface ForgotPasswordFormProps {
   isLoading?: boolean;
 }
 
-export function ForgotPasswordForm({ onSubmit, isLoading }: ForgotPasswordFormProps) {
+export function ForgotPasswordForm({
+  onSubmit,
+  isLoading,
+}: ForgotPasswordFormProps) {
   const form = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {

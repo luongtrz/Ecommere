@@ -5,7 +5,7 @@ import {
   ShoppingCart,
   Ticket,
   Warehouse,
-  Home
+  Home,
 } from 'lucide-react';
 
 const navigation = [

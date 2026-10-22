@@ -13,7 +13,12 @@ import {
   type AgentTurnBody,
   type AgentClientContext,
 } from '../api/agent.api';
-import type { ChatMessage, ChatToolStep, ChatConfirmCall, ChatSource } from '../types';
+import type {
+  ChatMessage,
+  ChatToolStep,
+  ChatConfirmCall,
+  ChatSource,
+} from '../types';
 
 const FALLBACK_ERROR_MESSAGE = 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
 
@@ -22,10 +27,10 @@ function mapStreamError(err: unknown): string {
     err instanceof ApiStreamError
       ? err.status
       : typeof (err as any)?.status === 'number'
-      ? (err as any).status
-      : typeof (err as any)?.response?.status === 'number'
-      ? (err as any).response.status
-      : undefined;
+        ? (err as any).status
+        : typeof (err as any)?.response?.status === 'number'
+          ? (err as any).response.status
+          : undefined;
 
   switch (status) {
     case 401:
@@ -58,7 +63,10 @@ function isAbortError(err: unknown): boolean {
 }
 
 function generateUuid(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
     return crypto.randomUUID();
   }
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -121,7 +129,7 @@ export function useChatAgent(): {
         }
       },
     }),
-    [navigate, queryClient]
+    [navigate, queryClient],
   );
 
   const handleSseMessage = useCallback(
@@ -196,7 +204,7 @@ export function useChatAgent(): {
                         status: (resData.ok ? 'ok' : 'error') as 'ok' | 'error',
                         resultSummary: resData.summary,
                       }
-                    : step
+                    : step,
                 )
               : [
                   ...currentTools,
@@ -258,7 +266,7 @@ export function useChatAgent(): {
           if (data && typeof data === 'object') {
             applyUiAction(
               data as { type: string; payload: Record<string, unknown> },
-              deps
+              deps,
             );
           }
           break;
@@ -289,7 +297,7 @@ export function useChatAgent(): {
           break;
       }
     },
-    [deps, queryClient]
+    [deps, queryClient],
   );
 
   const cancel = useCallback(() => {
@@ -364,7 +372,8 @@ export function useChatAgent(): {
       });
 
       const currentPath =
-        typeof window !== 'undefined' && typeof window.location?.pathname === 'string'
+        typeof window !== 'undefined' &&
+        typeof window.location?.pathname === 'string'
           ? window.location.pathname.slice(0, 200)
           : undefined;
 
@@ -390,7 +399,7 @@ export function useChatAgent(): {
         await streamTurn(
           body,
           (msg) => handleSseMessage(msg, assistantMessageId),
-          { signal: controller.signal }
+          { signal: controller.signal },
         );
       } catch (err: unknown) {
         if (controller.signal.aborted || isAbortError(err)) {
@@ -401,10 +410,10 @@ export function useChatAgent(): {
           err instanceof ApiStreamError
             ? err.status
             : typeof (err as any)?.status === 'number'
-            ? (err as any).status
-            : typeof (err as any)?.response?.status === 'number'
-            ? (err as any).response.status
-            : undefined;
+              ? (err as any).status
+              : typeof (err as any)?.response?.status === 'number'
+                ? (err as any).response.status
+                : undefined;
 
         if (status === 404) {
           useChatStore.getState().setThreadId(null);
@@ -422,7 +431,7 @@ export function useChatAgent(): {
         setIsStreaming(false);
       }
     },
-    [handleSseMessage]
+    [handleSseMessage],
   );
 
   const decide = useCallback(
@@ -484,7 +493,7 @@ export function useChatAgent(): {
           threadId,
           decisions,
           (msg) => handleSseMessage(msg, messageId),
-          { signal: controller.signal }
+          { signal: controller.signal },
         );
       } catch (err: unknown) {
         if (controller.signal.aborted || isAbortError(err)) {
@@ -495,10 +504,10 @@ export function useChatAgent(): {
           err instanceof ApiStreamError
             ? err.status
             : typeof (err as any)?.status === 'number'
-            ? (err as any).status
-            : typeof (err as any)?.response?.status === 'number'
-            ? (err as any).response.status
-            : undefined;
+              ? (err as any).status
+              : typeof (err as any)?.response?.status === 'number'
+                ? (err as any).response.status
+                : undefined;
 
         if (status === 404) {
           useChatStore.getState().setThreadId(null);
@@ -524,7 +533,7 @@ export function useChatAgent(): {
         setIsStreaming(false);
       }
     },
-    [handleSseMessage]
+    [handleSseMessage],
   );
 
   useEffect(() => {

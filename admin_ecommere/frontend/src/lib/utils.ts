@@ -42,8 +42,12 @@ export function truncate(text: string, length: number): string {
   return text.slice(0, length) + '...';
 }
 
-export function getImageUrl(path: string | undefined | null, options?: { width?: number; quality?: number }): string {
-  if (!path) return 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop';
+export function getImageUrl(
+  path: string | undefined | null,
+  options?: { width?: number; quality?: number },
+): string {
+  if (!path)
+    return 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop';
   if (path.includes('res.cloudinary.com') && options?.width) {
     const transforms = `w_${options.width},q_${options.quality || 'auto'},f_auto`;
     return path.replace('/upload/', `/upload/${transforms}/`);
@@ -79,7 +83,11 @@ export function parseShippingAddress<T = any>(addressJson: unknown): T | null {
   }
   try {
     const parsed = JSON.parse(trimmed);
-    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      !Array.isArray(parsed)
+    ) {
       return parsed as T;
     }
     return null;

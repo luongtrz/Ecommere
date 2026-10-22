@@ -39,9 +39,15 @@ export function getCheckpointerPool(checkpointer: unknown): any {
   }
   return (
     (checkpointer as any).pool ??
-    (typeof (checkpointer as any).getPool === 'function' ? (checkpointer as any).getPool() : undefined) ??
-    ((checkpointer as any).client?.query ? (checkpointer as any).client : undefined) ??
-    (typeof (checkpointer as any).query === 'function' ? checkpointer : undefined)
+    (typeof (checkpointer as any).getPool === 'function'
+      ? (checkpointer as any).getPool()
+      : undefined) ??
+    ((checkpointer as any).client?.query
+      ? (checkpointer as any).client
+      : undefined) ??
+    (typeof (checkpointer as any).query === 'function'
+      ? checkpointer
+      : undefined)
   );
 }
 
@@ -99,4 +105,3 @@ export async function deleteExpiredCheckpoints(
   }
   return 0;
 }
-

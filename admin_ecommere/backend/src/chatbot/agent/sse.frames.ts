@@ -2,14 +2,25 @@ export type AgentStreamEvent =
   | { event: 'thread'; data: { threadId: string } }
   | { event: 'token'; data: { text: string } }
   | { event: 'tool_start'; data: { id: string; name: string; summary: string } }
-  | { event: 'tool_result'; data: { id: string; name: string; ok: boolean; summary: string } }
+  | {
+      event: 'tool_result';
+      data: { id: string; name: string; ok: boolean; summary: string };
+    }
   | {
       event: 'confirm_required';
       data: {
-        calls: Array<{ id: string; name: string; summary: string; risk: string }>;
+        calls: Array<{
+          id: string;
+          name: string;
+          summary: string;
+          risk: string;
+        }>;
       };
     }
-  | { event: 'ui_action'; data: { type: string; payload: Record<string, unknown> } }
+  | {
+      event: 'ui_action';
+      data: { type: string; payload: Record<string, unknown> };
+    }
   | { event: 'sources'; data: Array<Record<string, unknown>> }
   | { event: 'done'; data: { usage: Record<string, number> | null } }
   | { event: 'error'; data: { message: string; code: string } };

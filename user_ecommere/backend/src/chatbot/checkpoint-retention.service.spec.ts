@@ -30,7 +30,9 @@ describe('parseRetentionDays', () => {
     logger.warn.mockClear();
     expect(parseRetentionDays('invalid', logger)).toBe(DEFAULT_RETENTION_DAYS);
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid CHECKPOINT_RETENTION_DAYS value "invalid"'),
+      expect.stringContaining(
+        'Invalid CHECKPOINT_RETENTION_DAYS value "invalid"',
+      ),
     );
 
     logger.warn.mockClear();
@@ -65,7 +67,10 @@ describe('CheckpointRetentionService', () => {
     const query = jest.fn().mockResolvedValue({ rowCount: 4 });
     const mockPool = { query };
 
-    const service = new CheckpointRetentionService({ pool: mockPool, schema: 'agent' });
+    const service = new CheckpointRetentionService({
+      pool: mockPool,
+      schema: 'agent',
+    });
     const beforeTime = Date.now();
     const deleted = await service.cleanupExpiredCheckpoints();
     const afterTime = Date.now();
@@ -77,8 +82,12 @@ describe('CheckpointRetentionService', () => {
     const expectedCutoffApprox = beforeTime - 30 * 24 * 60 * 60 * 1000;
     const actualCutoff = query.mock.calls[0][1][0] as Date;
     expect(actualCutoff).toBeInstanceOf(Date);
-    expect(actualCutoff.getTime()).toBeGreaterThanOrEqual(expectedCutoffApprox - 1000);
-    expect(actualCutoff.getTime()).toBeLessThanOrEqual(afterTime - 30 * 24 * 60 * 60 * 1000 + 1000);
+    expect(actualCutoff.getTime()).toBeGreaterThanOrEqual(
+      expectedCutoffApprox - 1000,
+    );
+    expect(actualCutoff.getTime()).toBeLessThanOrEqual(
+      afterTime - 30 * 24 * 60 * 60 * 1000 + 1000,
+    );
   });
 
   it('CHECKPOINT_RETENTION_DAYS=0 disables the job and performs no deletes', async () => {
@@ -119,7 +128,9 @@ describe('CheckpointRetentionService', () => {
     // Default 30 days cutoff used
     const actualCutoff = query.mock.calls[0][1][0] as Date;
     const expectedCutoffApprox = beforeTime - 30 * 24 * 60 * 60 * 1000;
-    expect(actualCutoff.getTime()).toBeGreaterThanOrEqual(expectedCutoffApprox - 1000);
+    expect(actualCutoff.getTime()).toBeGreaterThanOrEqual(
+      expectedCutoffApprox - 1000,
+    );
   });
 
   it('respects custom valid retention days from environment', async () => {
@@ -134,11 +145,14 @@ describe('CheckpointRetentionService', () => {
     expect(deleted).toBe(2);
     const actualCutoff = query.mock.calls[0][1][0] as Date;
     const expectedCutoffApprox = beforeTime - 10 * 24 * 60 * 60 * 1000;
-    expect(actualCutoff.getTime()).toBeGreaterThanOrEqual(expectedCutoffApprox - 1000);
+    expect(actualCutoff.getTime()).toBeGreaterThanOrEqual(
+      expectedCutoffApprox - 1000,
+    );
   });
 
   it('is idempotent: running twice removes nothing extra on the second run', async () => {
-    const query = jest.fn()
+    const query = jest
+      .fn()
       .mockResolvedValueOnce({ rowCount: 3 })
       .mockResolvedValueOnce({ rowCount: 0 });
     const mockPool = { query };
@@ -155,7 +169,9 @@ describe('CheckpointRetentionService', () => {
   });
 
   it('catches database errors so one failed run does not stop the schedule or throw', async () => {
-    const query = jest.fn().mockRejectedValue(new Error('PostgreSQL connection dropped'));
+    const query = jest
+      .fn()
+      .mockRejectedValue(new Error('PostgreSQL connection dropped'));
     const mockPool = { query };
 
     const service = new CheckpointRetentionService({ pool: mockPool });
@@ -173,10 +189,9 @@ describe('CheckpointRetentionService', () => {
     const query = jest.fn().mockResolvedValue({ rowCount: 1 });
     const mockPool = { query };
 
-    const service = new CheckpointRetentionService(
-      { pool: mockPool },
-      { checkpointSchema: 'custom_agent' } as any,
-    );
+    const service = new CheckpointRetentionService({ pool: mockPool }, {
+      checkpointSchema: 'custom_agent',
+    } as any);
 
     await service.cleanupExpiredCheckpoints();
 

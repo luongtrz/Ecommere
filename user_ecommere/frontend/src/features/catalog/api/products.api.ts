@@ -11,27 +11,31 @@ const variantSchema = z.object({
   sku: z.string(),
 });
 
-const productSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  slug: z.string(),
-  description: z.string(),
-  images: z.array(z.string()),
-  categoryId: z.string(),
-  category: z.object({
+const productSchema = z
+  .object({
     id: z.string(),
     name: z.string(),
     slug: z.string(),
-  }).optional(),
-  variants: z.array(variantSchema),
-  basePrice: z.number(),
-  averageRating: z.number().optional(), // Backend returns averageRating
-  reviewCount: z.number().optional(),
-  createdAt: z.string(),
-}).transform(data => ({
-  ...data,
-  rating: data.averageRating, // Map to rating for frontend compatibility
-}));
+    description: z.string(),
+    images: z.array(z.string()),
+    categoryId: z.string(),
+    category: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+      })
+      .optional(),
+    variants: z.array(variantSchema),
+    basePrice: z.number(),
+    averageRating: z.number().optional(), // Backend returns averageRating
+    reviewCount: z.number().optional(),
+    createdAt: z.string(),
+  })
+  .transform((data) => ({
+    ...data,
+    rating: data.averageRating, // Map to rating for frontend compatibility
+  }));
 
 const productsResponseSchema = z.object({
   products: z.array(productSchema),
@@ -83,7 +87,8 @@ export const productsApi = {
       page: actualData.page || 1,
       limit: actualData.limit || 12,
       totalPages: actualData.totalPages || 1,
-      hasNextPage: actualData.hasNextPage ?? (actualData.page < actualData.totalPages),
+      hasNextPage:
+        actualData.hasNextPage ?? actualData.page < actualData.totalPages,
     };
 
     return productsResponseSchema.parse(mapped);
@@ -95,7 +100,10 @@ export const productsApi = {
     return productSchema.parse(actualData.data || actualData);
   },
 
-  async search(query: string, filters: ProductFilters = {}): Promise<ProductsResponse> {
+  async search(
+    query: string,
+    filters: ProductFilters = {},
+  ): Promise<ProductsResponse> {
     const response = await apiClient.get('/products', {
       params: { search: query, ...filters },
     });
@@ -108,7 +116,8 @@ export const productsApi = {
       page: actualData.page || 1,
       limit: actualData.limit || 12,
       totalPages: actualData.totalPages || 1,
-      hasNextPage: actualData.hasNextPage ?? (actualData.page < actualData.totalPages),
+      hasNextPage:
+        actualData.hasNextPage ?? actualData.page < actualData.totalPages,
     };
 
     return productsResponseSchema.parse(mapped);

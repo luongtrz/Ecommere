@@ -13,7 +13,7 @@ import {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Lấy tất cả thống kê cho dashboard admin
@@ -27,8 +27,12 @@ export class AdminService {
     const vnMonth = vnNow.getUTCMonth();
 
     // Shift by -7 hours to obtain UTC range for DB query.
-    const firstDayOfMonth = new Date(Date.UTC(vnYear, vnMonth, 1, 0, 0, 0, 0) - 7 * 60 * 60 * 1000);
-    const firstDayOfLastMonth = new Date(Date.UTC(vnYear, vnMonth - 1, 1, 0, 0, 0, 0) - 7 * 60 * 60 * 1000);
+    const firstDayOfMonth = new Date(
+      Date.UTC(vnYear, vnMonth, 1, 0, 0, 0, 0) - 7 * 60 * 60 * 1000,
+    );
+    const firstDayOfLastMonth = new Date(
+      Date.UTC(vnYear, vnMonth - 1, 1, 0, 0, 0, 0) - 7 * 60 * 60 * 1000,
+    );
     const lastDayOfLastMonth = firstDayOfMonth;
 
     // Chạy tất cả queries song song
@@ -41,10 +45,22 @@ export class AdminService {
       topProducts,
       revenueHistory,
     ] = await Promise.all([
-      this.getRevenueStats(firstDayOfMonth, firstDayOfLastMonth, lastDayOfLastMonth),
-      this.getOrderStats(firstDayOfMonth, firstDayOfLastMonth, lastDayOfLastMonth),
+      this.getRevenueStats(
+        firstDayOfMonth,
+        firstDayOfLastMonth,
+        lastDayOfLastMonth,
+      ),
+      this.getOrderStats(
+        firstDayOfMonth,
+        firstDayOfLastMonth,
+        lastDayOfLastMonth,
+      ),
       this.getProductStats(firstDayOfMonth),
-      this.getCustomerStats(firstDayOfMonth, firstDayOfLastMonth, lastDayOfLastMonth),
+      this.getCustomerStats(
+        firstDayOfMonth,
+        firstDayOfLastMonth,
+        lastDayOfLastMonth,
+      ),
       this.getRecentOrders(),
       this.getTopProducts(firstDayOfMonth),
       this.getRevenueHistory(),
@@ -73,7 +89,12 @@ export class AdminService {
     const totalRevenueData = await this.prisma.order.aggregate({
       where: {
         status: {
-          in: [OrderStatus.PAID, OrderStatus.PACKING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+          in: [
+            OrderStatus.PAID,
+            OrderStatus.PACKING,
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+          ],
         },
       },
       _sum: {
@@ -85,7 +106,12 @@ export class AdminService {
     const monthlyRevenueData = await this.prisma.order.aggregate({
       where: {
         status: {
-          in: [OrderStatus.PAID, OrderStatus.PACKING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+          in: [
+            OrderStatus.PAID,
+            OrderStatus.PACKING,
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+          ],
         },
         createdAt: {
           gte: firstDayOfMonth,
@@ -100,7 +126,12 @@ export class AdminService {
     const lastMonthRevenueData = await this.prisma.order.aggregate({
       where: {
         status: {
-          in: [OrderStatus.PAID, OrderStatus.PACKING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+          in: [
+            OrderStatus.PAID,
+            OrderStatus.PACKING,
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+          ],
         },
         createdAt: {
           gte: firstDayOfLastMonth,
@@ -117,9 +148,12 @@ export class AdminService {
     const lastMonthRevenue = lastMonthRevenueData._sum.total || 0;
 
     // Tính % thay đổi
-    const monthlyChange = lastMonthRevenue > 0
-      ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
-      : monthlyRevenue > 0 ? 100 : 0;
+    const monthlyChange =
+      lastMonthRevenue > 0
+        ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+        : monthlyRevenue > 0
+          ? 100
+          : 0;
 
     return {
       totalRevenue,
@@ -176,9 +210,12 @@ export class AdminService {
       },
     });
 
-    const monthlyChange = lastMonthOrders > 0
-      ? ((monthlyOrders - lastMonthOrders) / lastMonthOrders) * 100
-      : monthlyOrders > 0 ? 100 : 0;
+    const monthlyChange =
+      lastMonthOrders > 0
+        ? ((monthlyOrders - lastMonthOrders) / lastMonthOrders) * 100
+        : monthlyOrders > 0
+          ? 100
+          : 0;
 
     return {
       totalOrders,
@@ -192,7 +229,9 @@ export class AdminService {
   /**
    * Thống kê sản phẩm
    */
-  private async getProductStats(firstDayOfMonth: Date): Promise<ProductStatsDto> {
+  private async getProductStats(
+    firstDayOfMonth: Date,
+  ): Promise<ProductStatsDto> {
     // Tổng sản phẩm
     const totalProducts = await this.prisma.product.count();
 
@@ -272,9 +311,13 @@ export class AdminService {
       },
     });
 
-    const monthlyChange = lastMonthCustomers > 0
-      ? ((newCustomersThisMonth - lastMonthCustomers) / lastMonthCustomers) * 100
-      : newCustomersThisMonth > 0 ? 100 : 0;
+    const monthlyChange =
+      lastMonthCustomers > 0
+        ? ((newCustomersThisMonth - lastMonthCustomers) / lastMonthCustomers) *
+          100
+        : newCustomersThisMonth > 0
+          ? 100
+          : 0;
 
     return {
       totalCustomers,
@@ -315,7 +358,9 @@ export class AdminService {
   /**
    * 5 sản phẩm bán chạy nhất
    */
-  private async getTopProducts(firstDayOfMonth: Date): Promise<TopProductDto[]> {
+  private async getTopProducts(
+    firstDayOfMonth: Date,
+  ): Promise<TopProductDto[]> {
     // Tính tổng quantity đã bán theo product (từ OrderItem với status DELIVERED)
     const topProductsData = await this.prisma.orderItem.groupBy({
       by: ['productId'],
@@ -375,10 +420,7 @@ export class AdminService {
     // Map dữ liệu
     const productMap = new Map(products.map((p) => [p.id, p]));
     const revenueMap = new Map(
-      revenueData.map((r) => [
-        r.productId,
-        r._sum.lineTotal || 0,
-      ])
+      revenueData.map((r) => [r.productId, r._sum.lineTotal || 0]),
     );
 
     return topProductsData.map((item) => {
@@ -404,7 +446,15 @@ export class AdminService {
     // Loop for last 6 months including current
     for (let i = months - 1; i >= 0; i--) {
       const firstDay = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const lastDay = new Date(firstDay.getFullYear(), firstDay.getMonth() + 1, 0, 23, 59, 59, 999);
+      const lastDay = new Date(
+        firstDay.getFullYear(),
+        firstDay.getMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+        999,
+      );
 
       const monthLabel = `T${firstDay.getMonth() + 1}`;
 
@@ -422,7 +472,12 @@ export class AdminService {
         const result = await this.prisma.order.aggregate({
           where: {
             status: {
-              in: [OrderStatus.PAID, OrderStatus.PACKING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+              in: [
+                OrderStatus.PAID,
+                OrderStatus.PACKING,
+                OrderStatus.SHIPPED,
+                OrderStatus.DELIVERED,
+              ],
             },
             createdAt: {
               gte: month.firstDay,
@@ -438,7 +493,7 @@ export class AdminService {
           name: month.name,
           total: result._sum.total || 0,
         };
-      })
+      }),
     );
 
     return data;

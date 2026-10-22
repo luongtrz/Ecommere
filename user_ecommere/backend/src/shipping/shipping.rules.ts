@@ -29,9 +29,7 @@ function isOptionsObject(
   return value !== null && typeof value === 'object';
 }
 
-export function calculateShippingFee(
-  options: ShippingFeeOptions,
-): number;
+export function calculateShippingFee(options: ShippingFeeOptions): number;
 export function calculateShippingFee(
   province?: string | null,
   method?: string | null,

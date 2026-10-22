@@ -1,5 +1,18 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CartService } from './cart.service';
 import { AddToCartDto } from './dtos/add-to-cart.dto';
 import { UpdateCartItemDto } from './dtos/update-cart-item.dto';
@@ -23,7 +36,10 @@ export class CartController {
   @Post('items')
   @ApiOperation({ summary: 'Add item to cart' })
   @ApiResponse({ status: 201, type: CartEntity })
-  async addToCart(@CurrentUser('id') userId: string, @Body() addToCartDto: AddToCartDto) {
+  async addToCart(
+    @CurrentUser('id') userId: string,
+    @Body() addToCartDto: AddToCartDto,
+  ) {
     return this.cartService.addToCart(userId, addToCartDto);
   }
 
@@ -41,7 +57,10 @@ export class CartController {
   @Delete('items/:itemId')
   @ApiOperation({ summary: 'Remove item from cart' })
   @ApiResponse({ status: 200, type: CartEntity })
-  async removeCartItem(@CurrentUser('id') userId: string, @Param('itemId') itemId: string) {
+  async removeCartItem(
+    @CurrentUser('id') userId: string,
+    @Param('itemId') itemId: string,
+  ) {
     return this.cartService.removeCartItem(userId, itemId);
   }
 
@@ -55,7 +74,10 @@ export class CartController {
   @Post('coupon')
   @ApiOperation({ summary: 'Apply or remove coupon' })
   @ApiResponse({ status: 200, type: CartEntity })
-  async applyCoupon(@CurrentUser('id') userId: string, @Body() applyCouponDto: ApplyCouponDto) {
+  async applyCoupon(
+    @CurrentUser('id') userId: string,
+    @Body() applyCouponDto: ApplyCouponDto,
+  ) {
     return this.cartService.applyCoupon(userId, applyCouponDto.couponCode);
   }
 }

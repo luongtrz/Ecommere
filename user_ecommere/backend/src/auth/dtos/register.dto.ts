@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsString, MinLength, Matches, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  Matches,
+  IsOptional,
+} from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({ example: '0912345678' })
@@ -29,7 +35,11 @@ export class RegisterDto {
   @IsEmail()
   email?: string;
 
-  @ApiProperty({ example: 'REF-ABC123', required: false, description: 'Mã giới thiệu từ bạn bè' })
+  @ApiProperty({
+    example: 'REF-ABC123',
+    required: false,
+    description: 'Mã giới thiệu từ bạn bè',
+  })
   @IsOptional()
   @IsString()
   referralCode?: string;

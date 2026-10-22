@@ -40,7 +40,7 @@ export interface AgentThreadSummary {
 export function streamTurn(
   body: AgentTurnBody,
   onMessage: (message: SseMessage) => void,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<void> {
   return streamAgentRequest('/chatbot/stream', body, onMessage, options);
 }
@@ -52,13 +52,13 @@ export function resumeTurn(
   threadId: string,
   decisions: AgentDecision[],
   onMessage: (message: SseMessage) => void,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<void> {
   return streamAgentRequest(
     `/chatbot/threads/${encodeURIComponent(threadId)}/resume`,
     { decisions },
     onMessage,
-    options
+    options,
   );
 }
 
@@ -82,7 +82,7 @@ export const agentApi = {
         headers: {
           'X-Chat-Session': getChatSessionId(),
         },
-      }
+      },
     );
     return (response.data?.data ?? response.data) as AgentThreadSummary;
   },
@@ -94,7 +94,7 @@ export const agentApi = {
         headers: {
           'X-Chat-Session': getChatSessionId(),
         },
-      }
+      },
     );
     return (response.data?.data ?? response.data) as { deleted: boolean };
   },
@@ -106,7 +106,7 @@ export const agentApi = {
         headers: {
           'X-Chat-Session': getChatSessionId(),
         },
-      }
+      },
     );
     return response.data?.data ?? response.data;
   },
@@ -118,7 +118,7 @@ export const agentApi = {
         headers: {
           'X-Chat-Session': getChatSessionId(),
         },
-      }
+      },
     );
     return response.data?.data ?? response.data;
   },

@@ -69,7 +69,9 @@ describe('Coupons and Referrals Tools', () => {
     createCouponTool = tools.find((t) => t.name === 'create_coupon')!;
     updateCouponTool = tools.find((t) => t.name === 'update_coupon')!;
     deleteCouponTool = tools.find((t) => t.name === 'delete_coupon')!;
-    getReferralConfigTool = tools.find((t) => t.name === 'get_referral_config')!;
+    getReferralConfigTool = tools.find(
+      (t) => t.name === 'get_referral_config',
+    )!;
     updateReferralConfigTool = tools.find(
       (t) => t.name === 'update_referral_config',
     )!;
@@ -209,9 +211,15 @@ describe('Coupons and Referrals Tools', () => {
 
     it('validates page (1..50) and limit (1..50) range', () => {
       expect(listCouponsTool.schema.safeParse({ page: 0 }).success).toBe(false);
-      expect(listCouponsTool.schema.safeParse({ page: 51 }).success).toBe(false);
-      expect(listCouponsTool.schema.safeParse({ limit: 0 }).success).toBe(false);
-      expect(listCouponsTool.schema.safeParse({ limit: 51 }).success).toBe(false);
+      expect(listCouponsTool.schema.safeParse({ page: 51 }).success).toBe(
+        false,
+      );
+      expect(listCouponsTool.schema.safeParse({ limit: 0 }).success).toBe(
+        false,
+      );
+      expect(listCouponsTool.schema.safeParse({ limit: 51 }).success).toBe(
+        false,
+      );
       expect(
         listCouponsTool.schema.safeParse({ page: 1, limit: 50 }).success,
       ).toBe(true);
@@ -256,9 +264,9 @@ describe('Coupons and Referrals Tools', () => {
       expect(
         getCouponTool.schema.safeParse({ code: 'a'.repeat(41) }).success,
       ).toBe(false);
-      expect(
-        getCouponTool.schema.safeParse({ code: 'SUMMER' }).success,
-      ).toBe(true);
+      expect(getCouponTool.schema.safeParse({ code: 'SUMMER' }).success).toBe(
+        true,
+      );
     });
 
     it('summarize returns a Vietnamese string with code', () => {
@@ -479,7 +487,8 @@ describe('Coupons and Referrals Tools', () => {
       );
 
       expect(mockCouponsService.update).toHaveBeenCalledTimes(1);
-      const [calledCode, calledFields] = mockCouponsService.update.mock.calls[0];
+      const [calledCode, calledFields] =
+        mockCouponsService.update.mock.calls[0];
       expect(calledCode).toBe('SUMMER2026');
       expect(calledFields.value).toBe(25);
       expect(calledFields.validFrom).toBeInstanceOf(Date);
@@ -678,7 +687,9 @@ describe('Coupons and Referrals Tools', () => {
       ).rejects.toThrow(ToolError);
       await expect(
         updateReferralConfigTool.handler({}, adminCtx),
-      ).rejects.toThrow('Cần ít nhất một trường để cập nhật cấu hình giới thiệu');
+      ).rejects.toThrow(
+        'Cần ít nhất một trường để cập nhật cấu hình giới thiệu',
+      );
       expect(mockReferralsService.updateConfig).not.toHaveBeenCalled();
     });
 

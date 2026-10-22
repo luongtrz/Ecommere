@@ -39,7 +39,11 @@ function isAllowedPath(path: string): boolean {
   for (const prefix of ALLOWED_PREFIXES) {
     if (path.startsWith(prefix)) {
       const segment = path.slice(prefix.length);
-      if (segment.length > 0 && !segment.startsWith('/') && !segment.includes('//')) {
+      if (
+        segment.length > 0 &&
+        !segment.startsWith('/') &&
+        !segment.includes('//')
+      ) {
         return true;
       }
     }
@@ -47,11 +51,14 @@ function isAllowedPath(path: string): boolean {
   return false;
 }
 
-export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDef[] {
+export function createClientActionTools(
+  deps: ClientActionToolDeps,
+): AgentToolDef[] {
   const cartGetTool: AgentToolDef = {
     name: 'cart_get',
     domain: 'cart',
-    description: 'Xem các sản phẩm hiện có trong giỏ hàng từ trình duyệt của khách hàng.',
+    description:
+      'Xem các sản phẩm hiện có trong giỏ hàng từ trình duyệt của khách hàng.',
     schema: z.object({}).strict(),
     auth: 'public',
     risk: 'READ',
@@ -86,11 +93,15 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
       }
 
       if (!variant.product || !variant.product.active) {
-        throw new ToolError('Sản phẩm hiện không còn kinh doanh hoặc đã ngừng hoạt động.');
+        throw new ToolError(
+          'Sản phẩm hiện không còn kinh doanh hoặc đã ngừng hoạt động.',
+        );
       }
 
       if (variant.stock < args.quantity) {
-        throw new ToolError(`Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`);
+        throw new ToolError(
+          `Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`,
+        );
       }
 
       const productId = variant.product.id ?? variant.productId;
@@ -163,11 +174,15 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
       }
 
       if (!variant.product || !variant.product.active) {
-        throw new ToolError('Sản phẩm hiện không còn kinh doanh hoặc đã ngừng hoạt động.');
+        throw new ToolError(
+          'Sản phẩm hiện không còn kinh doanh hoặc đã ngừng hoạt động.',
+        );
       }
 
       if (variant.stock < args.quantity) {
-        throw new ToolError(`Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`);
+        throw new ToolError(
+          `Số lượng tồn kho không đủ (chỉ còn ${variant.stock} sản phẩm).`,
+        );
       }
 
       return {
@@ -242,7 +257,8 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
   const navigateToTool: AgentToolDef = {
     name: 'navigate_to',
     domain: 'navigation',
-    description: 'Chuyển hướng người dùng đến trang được chỉ định trong trình duyệt.',
+    description:
+      'Chuyển hướng người dùng đến trang được chỉ định trong trình duyệt.',
     schema: z
       .object({
         path: z
@@ -255,7 +271,9 @@ export function createClientActionTools(deps: ClientActionToolDeps): AgentToolDe
     risk: 'WRITE',
     handler: async (args: { path: string }) => {
       if (!isAllowedPath(args.path)) {
-        throw new ToolError('Đường dẫn không hợp lệ hoặc không được phép truy cập.');
+        throw new ToolError(
+          'Đường dẫn không hợp lệ hoặc không được phép truy cập.',
+        );
       }
       return {
         path: args.path,
