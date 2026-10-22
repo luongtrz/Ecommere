@@ -334,7 +334,7 @@ describe('ReferralPage', () => {
       renderComponent();
 
       const codeLabel = screen.getByText('Mã giới thiệu của bạn');
-      const cardContainer = codeLabel.closest('.p-5') as HTMLElement;
+      const cardContainer = codeLabel.parentElement as HTMLElement;
       const copyButton = within(cardContainer).getByRole('button', {
         name: /Sao chép/i,
       });
@@ -368,7 +368,7 @@ describe('ReferralPage', () => {
       renderComponent();
 
       const codeLabel = screen.getByText('Mã giới thiệu của bạn');
-      const cardContainer = codeLabel.closest('.p-5') as HTMLElement;
+      const cardContainer = codeLabel.parentElement as HTMLElement;
       const copyButton = within(cardContainer).getByRole('button', {
         name: /Sao chép/i,
       });
@@ -429,7 +429,7 @@ describe('ReferralPage', () => {
       renderComponent();
 
       const codeLabel = screen.getByText('Mã giới thiệu của bạn');
-      const cardContainer = codeLabel.closest('.p-5') as HTMLElement;
+      const cardContainer = codeLabel.parentElement as HTMLElement;
       const copyButton = within(cardContainer).getByRole('button', {
         name: /Sao chép/i,
       });
@@ -651,7 +651,7 @@ describe('ReferralPage', () => {
       // Copy coupon code
       const couponRow = screen
         .getByText('GIAM20')
-        .closest('.flex.items-center.justify-between') as HTMLElement;
+        .closest('.justify-between') as HTMLElement;
       const copyBtn = within(couponRow).getByRole('button', {
         name: 'Sao chép',
       });
@@ -697,8 +697,8 @@ describe('ReferralPage', () => {
 
       const couponRow = screen
         .getByText('EXPIRED10')
-        .closest('.flex.items-center.justify-between') as HTMLElement;
-      expect(couponRow.className).toContain('opacity-60 grayscale');
+        .closest('.justify-between') as HTMLElement;
+      expect(couponRow.className).toContain('opacity-50 grayscale');
       expect(
         within(couponRow).queryByRole('button', { name: 'Sao chép' }),
       ).not.toBeInTheDocument();
@@ -738,8 +738,8 @@ describe('ReferralPage', () => {
 
       const couponRow = screen
         .getByText('USEDFULL')
-        .closest('.flex.items-center.justify-between') as HTMLElement;
-      expect(couponRow.className).toContain('opacity-60 grayscale');
+        .closest('.justify-between') as HTMLElement;
+      expect(couponRow.className).toContain('opacity-50 grayscale');
       expect(
         within(couponRow).queryByRole('button', { name: 'Sao chép' }),
       ).not.toBeInTheDocument();
