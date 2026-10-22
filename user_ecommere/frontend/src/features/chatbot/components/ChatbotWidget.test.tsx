@@ -476,8 +476,8 @@ describe('ChatbotWidget', () => {
       renderWithProviders(<ChatbotWidget />);
       const userMsg = screen.getByText('Xin chào bot');
       expect(userMsg).toBeInTheDocument();
-      // User message container has primary-to-emerald gradient
-      expect(userMsg.parentElement).toHaveClass('from-primary');
+      // User message container has teal background
+      expect(userMsg.parentElement).toHaveClass('bg-teal-600');
     });
 
     it('returns null and does not render empty assistant message without tools, confirm, sources, or error', () => {
