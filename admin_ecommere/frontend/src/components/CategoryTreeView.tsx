@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   ChevronRight,
   ChevronDown,
@@ -157,7 +157,7 @@ export function CategoryTreeView() {
     null,
   );
 
-  const fetchTree = async () => {
+  const fetchTree = useCallback(async () => {
     try {
       setLoading(true);
       const data = await categoriesApi.getTree();
@@ -168,11 +168,11 @@ export function CategoryTreeView() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchTree();
-  }, []);
+  }, [fetchTree]);
 
   const openAddDialog = (parentId: string | null) => {
     setDialogMode('add');
@@ -326,7 +326,6 @@ export function CategoryTreeView() {
                 placeholder="Nhập tên danh mục..."
                 className="h-10 rounded-lg bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-teal-500"
                 required
-                autoFocus
               />
             </div>
             <DialogFooter className="pt-4 border-t border-slate-100 mt-4 flex flex-col sm:flex-row gap-2">

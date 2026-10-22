@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { SEO } from '@/lib/seo';
 import {
   Card,
@@ -63,6 +63,8 @@ function CategoryTreeNode({
   return (
     <div className="space-y-1">
       <div
+        role="button"
+        tabIndex={0}
         className={cn(
           'flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer group border text-xs md:text-sm',
           isSelected
@@ -71,6 +73,12 @@ function CategoryTreeNode({
         )}
         style={{ paddingLeft: `${Math.max(8, level * 16 + 8)}px` }}
         onClick={() => onSelect(category)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect(category);
+          }
+        }}
       >
         {hasChildren ? (
           <button
@@ -184,15 +192,24 @@ export function AdminCategoriesPage() {
   const {
     data: treeData = [],
     isLoading,
+    isError: isTreeError,
+    error: treeError,
     refetch,
   } = useQuery({
     queryKey: [QUERY_KEYS.CATEGORIES],
     queryFn: () => categoriesApi.getTree(),
   });
 
+  useEffect(() => {
+    if (isTreeError && treeError) {
+      console.error('Failed to fetch categories tree:', treeError);
+      toast.error('Không thể tải sơ đồ danh mục.');
+    }
+  }, [isTreeError, treeError, toast]);
+
   const { data: flatCategories = [] } = useQuery({
     queryKey: [QUERY_KEYS.CATEGORIES, 'flat'],
-    queryFn: () => categoriesApi.getAll(),
+    queryFn: async () => (await categoriesApi.getAll()) || [],
   });
 
   const createMutation = useMutation({
