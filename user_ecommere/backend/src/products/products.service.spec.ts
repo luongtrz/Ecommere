@@ -22,6 +22,7 @@ describe('ProductsService', () => {
       findUnique: jest.fn(),
     },
     productVariant: {
+      findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -186,6 +187,43 @@ describe('ProductsService', () => {
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: { in: ['1'] } },
+        }),
+      );
+    });
+
+    it('should filter products by effective price range', async () => {
+      mockPrismaService.product.findMany.mockResolvedValue([]);
+      mockPrismaService.product.count.mockResolvedValue(0);
+
+      await service.findAll({
+        page: 1,
+        limit: 12,
+        minPrice: 50000,
+        maxPrice: 150000,
+      });
+
+      expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            variants: {
+              some: {
+                AND: [
+                  {
+                    OR: [
+                      { salePrice: { gte: 50000 } },
+                      { salePrice: null, price: { gte: 50000 } },
+                    ],
+                  },
+                  {
+                    OR: [
+                      { salePrice: { lte: 150000 } },
+                      { salePrice: null, price: { lte: 150000 } },
+                    ],
+                  },
+                ],
+              },
+            },
+          }),
         }),
       );
     });
@@ -460,6 +498,52 @@ describe('ProductsService', () => {
       await expect(service.remove('1')).rejects.toThrow(
         'Cannot delete product with existing carts, orders, or stock history',
       );
+    });
+  });
+
+  describe('getFilterOptions', () => {
+    it('should return filter options with price range calculated from effective sale price', async () => {
+      mockPrismaService.product.findMany.mockResolvedValue([
+        { brand: 'Thai Aroma' },
+      ]);
+      mockPrismaService.productVariant.findMany
+        .mockResolvedValueOnce([{ scent: 'Lavender' }])
+        .mockResolvedValueOnce([{ volumeMl: 250 }])
+        .mockResolvedValueOnce([
+          { price: 100000, salePrice: 75000 },
+          { price: 200000, salePrice: null },
+        ]);
+
+      const result = await service.getFilterOptions();
+
+      expect(result).toEqual({
+        brands: ['Thai Aroma'],
+        scents: ['Lavender'],
+        volumes: [250],
+        priceRange: { min: 75000, max: 200000 },
+      });
+      expect(mockPrismaService.productVariant.findMany).toHaveBeenNthCalledWith(
+        3,
+        {
+          where: { product: { active: true } },
+          select: { price: true, salePrice: true },
+        },
+      );
+    });
+
+    it('should fallback to regular price when salePrice is not less than regular price', async () => {
+      mockPrismaService.product.findMany.mockResolvedValue([]);
+      mockPrismaService.productVariant.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { price: 80000, salePrice: 90000 },
+          { price: 150000, salePrice: null },
+        ]);
+
+      const result = await service.getFilterOptions();
+
+      expect(result.priceRange).toEqual({ min: 80000, max: 150000 });
     });
   });
 });

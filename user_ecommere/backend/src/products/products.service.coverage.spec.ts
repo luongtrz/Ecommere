@@ -350,6 +350,31 @@ describe('ProductsService - Coverage Companion', () => {
       expect(result.hasNextPage).toBe(false);
     });
 
+    it('should rank products by RATING using database query and scoreExpression', async () => {
+      mockPrismaService.$queryRaw.mockResolvedValue([{ id: 'p1' }]);
+      mockPrismaService.product.count.mockResolvedValue(1);
+
+      const mockProduct = {
+        id: 'p1',
+        name: 'Lavender Spray',
+        category: { id: 'cat1' },
+        variants: [],
+        _count: { reviews: 1 },
+      };
+      mockPrismaService.product.findMany.mockResolvedValue([mockProduct]);
+      mockPrismaService.review.groupBy.mockResolvedValue([
+        { productId: 'p1', _avg: { rating: 4.8 } },
+      ]);
+
+      const result = await service.findAll({
+        sortBy: ProductSortBy.RATING,
+      });
+
+      expect(mockPrismaService.$queryRaw).toHaveBeenCalled();
+      expect(result.data[0].averageRating).toBe(4.8);
+      expect(result.data[0].reviewCount).toBe(1);
+    });
+
     it('should map averageRating to 0 if product review average is null in groupBy', async () => {
       const mockProduct = {
         id: 'p1',
@@ -923,11 +948,11 @@ describe('ProductsService - Coverage Companion', () => {
       ]);
       mockPrismaService.productVariant.findMany
         .mockResolvedValueOnce([{ scent: 'Lavender' }, { scent: 'Rose' }])
-        .mockResolvedValueOnce([{ volumeMl: 100 }, { volumeMl: 250 }]);
-      mockPrismaService.productVariant.aggregate.mockResolvedValue({
-        _min: { price: 50000 },
-        _max: { price: 250000 },
-      });
+        .mockResolvedValueOnce([{ volumeMl: 100 }, { volumeMl: 250 }])
+        .mockResolvedValueOnce([
+          { price: 60000, salePrice: 50000 },
+          { price: 250000, salePrice: null },
+        ]);
 
       const result = await service.getFilterOptions();
 
@@ -961,11 +986,13 @@ describe('ProductsService - Coverage Companion', () => {
           orderBy: { volumeMl: 'asc' },
         },
       );
-      expect(mockPrismaService.productVariant.aggregate).toHaveBeenCalledWith({
-        where: { product: { active: true } },
-        _min: { price: true },
-        _max: { price: true },
-      });
+      expect(mockPrismaService.productVariant.findMany).toHaveBeenNthCalledWith(
+        3,
+        {
+          where: { product: { active: true } },
+          select: { price: true, salePrice: true },
+        },
+      );
     });
 
     it('should default priceRange to 0 when min or max price is null, and filter falsy brands', async () => {
@@ -976,17 +1003,71 @@ describe('ProductsService - Coverage Companion', () => {
       ]);
       mockPrismaService.productVariant.findMany
         .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
         .mockResolvedValueOnce([]);
-      mockPrismaService.productVariant.aggregate.mockResolvedValue({
-        _min: { price: null },
-        _max: { price: null },
-      });
 
       const result = await service.getFilterOptions();
 
       expect(result.brands).toEqual(['Thai Aroma']);
       expect(result.scents).toEqual([]);
       expect(result.volumes).toEqual([]);
+      expect(result.priceRange).toEqual({ min: 0, max: 0 });
+    });
+
+    it('should calculate effective price using salePrice when salePrice is lower than price', async () => {
+      mockPrismaService.product.findMany.mockResolvedValue([]);
+      mockPrismaService.productVariant.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { price: 100000, salePrice: 80000 },
+          { price: 150000, salePrice: 120000 },
+        ]);
+
+      const result = await service.getFilterOptions();
+
+      expect(result.priceRange).toEqual({ min: 80000, max: 120000 });
+    });
+
+    it('should fallback to price when salePrice is null, undefined, or not less than price', async () => {
+      mockPrismaService.product.findMany.mockResolvedValue([]);
+      mockPrismaService.productVariant.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { price: 50000, salePrice: null },
+          { price: 70000, salePrice: undefined },
+          { price: 80000, salePrice: 90000 },
+          { price: 90000, salePrice: 90000 },
+          { price: 200000, salePrice: null },
+        ]);
+
+      const result = await service.getFilterOptions();
+
+      expect(result.priceRange).toEqual({ min: 50000, max: 200000 });
+    });
+
+    it('should handle single variant setting both min and max price', async () => {
+      mockPrismaService.product.findMany.mockResolvedValue([]);
+      mockPrismaService.productVariant.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ price: 100000, salePrice: 75000 }]);
+
+      const result = await service.getFilterOptions();
+
+      expect(result.priceRange).toEqual({ min: 75000, max: 75000 });
+    });
+
+    it('should fallback minPrice and maxPrice to 0 when variants result in non-finite bounds', async () => {
+      mockPrismaService.product.findMany.mockResolvedValue([]);
+      mockPrismaService.productVariant.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ price: NaN, salePrice: null }]);
+
+      const result = await service.getFilterOptions();
+
       expect(result.priceRange).toEqual({ min: 0, max: 0 });
     });
   });
