@@ -160,10 +160,18 @@ export function SearchBox() {
                             role="button"
                             tabIndex={0}
                             onClick={() => handleSearch(term)}
+                            onKeyDown={(event) => {
+                              if (event.target !== event.currentTarget) return;
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                handleSearch(term);
+                              }
+                            }}
                             className="group flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 font-sans"
                           >
                             <span>{term}</span>
                             <button
+                              type="button"
                               onClick={(event) => removeRecent(event, term)}
                               className="rounded p-1 text-slate-400 opacity-0 transition group-hover:opacity-100 hover:bg-slate-200 hover:text-slate-700"
                             >
