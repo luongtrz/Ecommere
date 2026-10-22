@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -120,7 +121,7 @@ export class CartService {
     }
 
     if (cartItem.cart.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new ForbiddenException('Unauthorized');
     }
 
     if (cartItem.variant.stock < quantity) {
@@ -148,7 +149,7 @@ export class CartService {
     }
 
     if (cartItem.cart.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new ForbiddenException('Unauthorized');
     }
 
     await this.prisma.cartItem.delete({
