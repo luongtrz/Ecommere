@@ -73,10 +73,10 @@ describe('SearchBox', () => {
         'Tìm chai xịt chuột, kiến gián, tẩy rửa, nước giặt...',
       );
       const wrapper = input.parentElement;
-      expect(wrapper).toHaveClass('border-slate-200/90');
+      expect(wrapper).toHaveClass('border-slate-200');
 
       fireEvent.focus(input);
-      expect(wrapper).toHaveClass('border-teal-600');
+      expect(wrapper).toHaveClass('border-teal-500');
       expect(screen.getByText('Gợi ý phổ biến')).toBeInTheDocument();
       expect(screen.getByText('Sản phẩm tìm kiếm nhiều')).toBeInTheDocument();
     });

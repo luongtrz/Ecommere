@@ -152,8 +152,8 @@ describe('ProductCard', () => {
       ) as HTMLButtonElement;
       const heartIcon = container.querySelector('svg.lucide-heart');
 
-      expect(wishlistButton).toHaveClass('text-primary/70');
-      expect(heartIcon).not.toHaveClass('fill-red-500');
+      expect(wishlistButton).toHaveClass('text-slate-400');
+      expect(heartIcon).not.toHaveClass('fill-rose-600');
 
       const clickEvent = new MouseEvent('click', {
         bubbles: true,
@@ -184,8 +184,8 @@ describe('ProductCard', () => {
       ) as HTMLButtonElement;
       const heartIcon = container.querySelector('svg.lucide-heart');
 
-      expect(wishlistButton).toHaveClass('text-red-500');
-      expect(heartIcon).toHaveClass('fill-red-500');
+      expect(wishlistButton).toHaveClass('text-rose-600');
+      expect(heartIcon).toHaveClass('fill-rose-600');
 
       fireEvent.click(wishlistButton);
 

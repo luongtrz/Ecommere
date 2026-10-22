@@ -75,10 +75,10 @@ describe('CartBadge', () => {
     expect(badge?.textContent).toBe('1');
     expect(badge).toHaveClass(
       'absolute',
-      '-right-1',
-      '-top-1',
+      '-right-1.5',
+      '-top-1.5',
       'rounded-full',
-      'bg-destructive',
+      'bg-rose-600',
     );
   });
 

@@ -116,7 +116,7 @@ describe('CategoryNav', () => {
     const { container } = renderCategoryNav();
 
     const skeletons = container.querySelectorAll('.animate-pulse');
-    expect(skeletons.length).toBe(5);
+    expect(skeletons.length).toBe(6);
     expect(screen.queryByText('Tất cả')).not.toBeInTheDocument();
   });
 
@@ -170,7 +170,7 @@ describe('CategoryNav', () => {
     renderCategoryNav('/catalog');
 
     const allLink = screen.getByRole('link', { name: 'Tất cả' });
-    expect(allLink.className).toContain('text-teal-700 after:scale-x-100');
+    expect(allLink.className).toContain('text-teal-700 bg-teal-50 font-semibold');
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
     expect(cat1Link.className).toContain('text-slate-600 hover:text-teal-700');
@@ -185,7 +185,7 @@ describe('CategoryNav', () => {
     renderCategoryNav('/c/xit-thom-phong');
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
-    expect(cat1Link.className).toContain('text-teal-700 after:scale-x-100');
+    expect(cat1Link.className).toContain('text-teal-700 bg-teal-50 font-semibold');
 
     const allLink = screen.getByRole('link', { name: 'Tất cả' });
     expect(allLink.className).toContain('text-slate-600 hover:text-teal-700');
@@ -200,7 +200,7 @@ describe('CategoryNav', () => {
     renderCategoryNav('/c/xit-thom-phong/detail');
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
-    expect(cat1Link.className).toContain('text-teal-700 after:scale-x-100');
+    expect(cat1Link.className).toContain('text-teal-700 bg-teal-50 font-semibold');
   });
 
   it('shows subcategories dropdown on mouse hover and allows viewing all', () => {
@@ -278,7 +278,7 @@ describe('CategoryNav', () => {
       screen.getByRole('link', { name: 'Xem tất cả' }),
     ).toBeInTheDocument();
 
-    const navContainer = container.querySelector('.backdrop-blur-md')!;
+    const navContainer = container.firstElementChild!;
     fireEvent.mouseLeave(navContainer);
 
     expect(

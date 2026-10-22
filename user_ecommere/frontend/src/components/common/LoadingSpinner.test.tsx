@@ -14,36 +14,68 @@ describe('LoadingSpinner', () => {
     expect(wrapper).toBeInTheDocument();
     expect(wrapper).toHaveClass('flex', 'items-center', 'justify-center');
 
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('animate-spin', 'text-primary', 'h-8', 'w-8');
+    const spinner = container.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
+    expect(spinner).toHaveClass(
+      'rounded-full',
+      'border-teal-100',
+      'border-t-teal-600',
+      'animate-spin',
+      'h-8',
+      'w-8',
+      'border-[2.5px]',
+    );
   });
 
   it('renders with small size (sm)', () => {
     const { container } = render(<LoadingSpinner size="sm" />);
 
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('animate-spin', 'text-primary', 'h-4', 'w-4');
-    expect(svg).not.toHaveClass('h-8', 'w-8', 'h-12', 'w-12');
+    const spinner = container.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
+    expect(spinner).toHaveClass(
+      'rounded-full',
+      'border-teal-100',
+      'border-t-teal-600',
+      'animate-spin',
+      'h-5',
+      'w-5',
+      'border-2',
+    );
+    expect(spinner).not.toHaveClass('h-8', 'w-8', 'h-12', 'w-12');
   });
 
   it('renders with medium size explicitly (md)', () => {
     const { container } = render(<LoadingSpinner size="md" />);
 
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('animate-spin', 'text-primary', 'h-8', 'w-8');
-    expect(svg).not.toHaveClass('h-4', 'w-4', 'h-12', 'w-12');
+    const spinner = container.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
+    expect(spinner).toHaveClass(
+      'rounded-full',
+      'border-teal-100',
+      'border-t-teal-600',
+      'animate-spin',
+      'h-8',
+      'w-8',
+      'border-[2.5px]',
+    );
+    expect(spinner).not.toHaveClass('h-5', 'w-5', 'h-12', 'w-12');
   });
 
   it('renders with large size (lg)', () => {
     const { container } = render(<LoadingSpinner size="lg" />);
 
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('animate-spin', 'text-primary', 'h-12', 'w-12');
-    expect(svg).not.toHaveClass('h-4', 'w-4', 'h-8', 'w-8');
+    const spinner = container.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
+    expect(spinner).toHaveClass(
+      'rounded-full',
+      'border-teal-100',
+      'border-t-teal-600',
+      'animate-spin',
+      'h-12',
+      'w-12',
+      'border-[3px]',
+    );
+    expect(spinner).not.toHaveClass('h-5', 'w-5', 'h-8', 'w-8');
   });
 
   it('merges custom className with default classes', () => {
@@ -51,14 +83,18 @@ describe('LoadingSpinner', () => {
       <LoadingSpinner className="custom-loader-class text-secondary" />,
     );
 
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass(
+    const spinner = container.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
+    expect(spinner).toHaveClass(
+      'rounded-full',
+      'border-teal-100',
+      'border-t-teal-600',
       'animate-spin',
       'custom-loader-class',
       'text-secondary',
       'h-8',
       'w-8',
+      'border-[2.5px]',
     );
   });
 
@@ -67,13 +103,16 @@ describe('LoadingSpinner', () => {
       <LoadingSpinner size="sm" className="opacity-75" />,
     );
 
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass(
+    const spinner = container.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
+    expect(spinner).toHaveClass(
+      'rounded-full',
+      'border-teal-100',
+      'border-t-teal-600',
       'animate-spin',
-      'text-primary',
-      'h-4',
-      'w-4',
+      'h-5',
+      'w-5',
+      'border-2',
       'opacity-75',
     );
   });
