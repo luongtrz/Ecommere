@@ -10,12 +10,19 @@ import {
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import { AdminCategoriesPage } from './AdminCategoriesPage';
 import {
   categoriesApi,
   type Category,
 } from '@/features/admin/api/categories.api';
 import { QUERY_KEYS } from '@/lib/constants';
+
+vi.mock('@/lib/seo', () => ({
+  SEO: ({ title }: { title?: string }) => (
+    <div data-testid="seo-title" data-title={title} />
+  ),
+}));
 
 const mockToast = {
   toast: vi.fn(),
@@ -117,9 +124,11 @@ function renderWithProviders(ui: React.ReactElement) {
   const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
   const renderResult = render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>{ui}</MemoryRouter>
-    </QueryClientProvider>,
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>{ui}</MemoryRouter>
+      </QueryClientProvider>
+    </HelmetProvider>,
   );
 
   return {
@@ -142,6 +151,7 @@ describe('AdminCategoriesPage', () => {
   beforeEach(() => {
     cleanup();
     vi.clearAllMocks();
+    vi.mocked(categoriesApi.getAll).mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -152,7 +162,7 @@ describe('AdminCategoriesPage', () => {
     vi.mocked(categoriesApi.getTree).mockResolvedValueOnce([]);
     const { container } = renderWithProviders(<AdminCategoriesPage />);
 
-    const rootWrapper = container.querySelector('div.container.mx-auto.p-6');
+    const rootWrapper = container.querySelector('div.min-h-screen.bg-slate-50');
     expect(rootWrapper).toBeInTheDocument();
   });
 
@@ -167,18 +177,18 @@ describe('AdminCategoriesPage', () => {
     vi.mocked(categoriesApi.getTree).mockResolvedValueOnce([]);
     renderWithProviders(<AdminCategoriesPage />);
 
-    expect(await screen.findByText('Cấu trúc danh mục')).toBeInTheDocument();
+    expect(await screen.findByText('Quản lý danh mục')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Kéo sản phẩm theo nhánh cha/con để tối ưu hóa điều hướng',
+        'Cấu trúc danh mục sản phẩm theo mô hình phân cấp cha và con',
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /Thêm danh mục gốc/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Chưa có danh mục nào. Hãy tạo danh mục đầu tiên để bắt đầu phân loại sản phẩm.',
+      await screen.findByText(
+        'Chưa có danh mục nào phù hợp. Hãy tạo danh mục đầu tiên để bắt đầu phân loại sản phẩm.',
       ),
     ).toBeInTheDocument();
   });
@@ -190,18 +200,18 @@ describe('AdminCategoriesPage', () => {
     expect(
       await screen.findByText('Xịt thơm phòng Thái Lan'),
     ).toBeInTheDocument();
-    expect(screen.getByText('12 sản phẩm')).toBeInTheDocument();
+    expect(screen.getByText('12 SP')).toBeInTheDocument();
     expect(screen.getByText('Mục cha')).toBeInTheDocument();
 
     expect(screen.getByText('Hương Hoa Nhài')).toBeInTheDocument();
-    expect(screen.getByText('5 sản phẩm')).toBeInTheDocument();
+    expect(screen.getByText('5 SP')).toBeInTheDocument();
 
     expect(screen.getByText('Hương Bạc Hà')).toBeInTheDocument();
 
     expect(screen.getByText('Xịt côn trùng ARS')).toBeInTheDocument();
 
     expect(screen.getByText('Danh mục chưa phân loại')).toBeInTheDocument();
-    expect(screen.getAllByText('0 sản phẩm').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('0 SP').length).toBeGreaterThanOrEqual(2);
   });
 
   it('expands and collapses child categories when chevron toggle is clicked', async () => {
@@ -248,9 +258,11 @@ describe('AdminCategoriesPage', () => {
     });
     fireEvent.click(addRootButton);
 
-    expect(await screen.findByText('Thêm danh mục mới')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Thêm danh mục gốc mới'),
+    ).toBeInTheDocument();
 
-    const input = screen.getByLabelText('Tên danh mục');
+    const input = screen.getByLabelText(/Tên danh mục/i);
     fireEvent.change(input, {
       target: { value: 'Chai xịt tinh dầu Thái' },
     });
@@ -296,9 +308,13 @@ describe('AdminCategoriesPage', () => {
     const addChildButton = within(parentRow).getByTitle('Thêm danh mục con');
     fireEvent.click(addChildButton);
 
-    expect(await screen.findByText('Thêm danh mục mới')).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        'Thêm danh mục con cho "Xịt thơm phòng Thái Lan"',
+      ),
+    ).toBeInTheDocument();
 
-    const input = screen.getByLabelText('Tên danh mục');
+    const input = screen.getByLabelText(/Tên danh mục/i);
     fireEvent.change(input, {
       target: { value: 'Hương Sả Chanh' },
     });
@@ -335,9 +351,11 @@ describe('AdminCategoriesPage', () => {
     });
     fireEvent.click(addRootButton);
 
-    expect(await screen.findByText('Thêm danh mục mới')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Thêm danh mục gốc mới'),
+    ).toBeInTheDocument();
 
-    const input = screen.getByLabelText('Tên danh mục');
+    const input = screen.getByLabelText(/Tên danh mục/i);
     const submitButton = screen.getByRole('button', { name: 'Tạo mới' });
 
     expect(submitButton).toBeDisabled();
@@ -362,13 +380,17 @@ describe('AdminCategoriesPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Thêm danh mục gốc/i }));
 
-    expect(await screen.findByText('Thêm danh mục mới')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Thêm danh mục gốc mới'),
+    ).toBeInTheDocument();
 
-    const cancelButton = screen.getByRole('button', { name: 'Hủy' });
+    const cancelButton = screen.getByRole('button', { name: 'Hủy / Bỏ chọn' });
     fireEvent.click(cancelButton);
 
     await waitFor(() => {
-      expect(screen.queryByText('Thêm danh mục mới')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Thêm danh mục gốc mới'),
+      ).not.toBeInTheDocument();
     });
 
     expect(categoriesApi.create).not.toHaveBeenCalled();
@@ -389,27 +411,27 @@ describe('AdminCategoriesPage', () => {
     expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
-    const editButton = within(row).getByTitle('Chỉnh sửa');
-    fireEvent.click(editButton);
+    fireEvent.click(row);
 
     expect(
-      await screen.findByText('Chỉnh sửa tên danh mục'),
+      await screen.findByText('Chỉnh sửa danh mục: Xịt côn trùng ARS'),
     ).toBeInTheDocument();
 
-    const input = screen.getByLabelText('Tên danh mục') as HTMLInputElement;
+    const input = screen.getByLabelText(/Tên danh mục/i) as HTMLInputElement;
     expect(input.value).toBe('Xịt côn trùng ARS');
 
     fireEvent.change(input, {
       target: { value: 'Xịt côn trùng ARS 600ml' },
     });
 
-    const submitButton = screen.getByRole('button', { name: 'Cập nhật' });
+    const submitButton = screen.getByRole('button', { name: 'Lưu thay đổi' });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(categoriesApi.update).toHaveBeenCalledTimes(1);
       expect(categoriesApi.update).toHaveBeenCalledWith('cat-leaf-2', {
         name: 'Xịt côn trùng ARS 600ml',
+        parentId: undefined,
       });
     });
 
@@ -417,7 +439,7 @@ describe('AdminCategoriesPage', () => {
       queryKey: [QUERY_KEYS.CATEGORIES],
     });
     expect(mockToast.success).toHaveBeenCalledWith(
-      'Cập nhật tên danh mục thành công',
+      'Cập nhật danh mục thành công',
     );
   });
 
@@ -431,27 +453,27 @@ describe('AdminCategoriesPage', () => {
 
     // cat-parent-1: has children -> disabled
     const parentRow = getCategoryRow('Xịt thơm phòng Thái Lan');
-    const parentDeleteBtn = within(parentRow).getByTitle('Xóa');
+    const parentDeleteBtn = within(parentRow).getByTitle('Xóa danh mục');
     expect(parentDeleteBtn).toBeDisabled();
 
     // cat-child-1: productCount = 5 -> disabled
     const child1Row = getCategoryRow('Hương Hoa Nhài');
-    const child1DeleteBtn = within(child1Row).getByTitle('Xóa');
+    const child1DeleteBtn = within(child1Row).getByTitle('Xóa danh mục');
     expect(child1DeleteBtn).toBeDisabled();
 
     // cat-child-2: productCount = 0, no children -> enabled
     const child2Row = getCategoryRow('Hương Bạc Hà');
-    const child2DeleteBtn = within(child2Row).getByTitle('Xóa');
+    const child2DeleteBtn = within(child2Row).getByTitle('Xóa danh mục');
     expect(child2DeleteBtn).not.toBeDisabled();
 
     // cat-leaf-2: productCount = 0, no children -> enabled
     const leaf2Row = getCategoryRow('Xịt côn trùng ARS');
-    const leaf2DeleteBtn = within(leaf2Row).getByTitle('Xóa');
+    const leaf2DeleteBtn = within(leaf2Row).getByTitle('Xóa danh mục');
     expect(leaf2DeleteBtn).not.toBeDisabled();
 
     // cat-leaf-3: productCount = undefined, no children -> enabled
     const leaf3Row = getCategoryRow('Danh mục chưa phân loại');
-    const leaf3DeleteBtn = within(leaf3Row).getByTitle('Xóa');
+    const leaf3DeleteBtn = within(leaf3Row).getByTitle('Xóa danh mục');
     expect(leaf3DeleteBtn).not.toBeDisabled();
   });
 
@@ -462,10 +484,12 @@ describe('AdminCategoriesPage', () => {
     expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
-    const deleteButton = within(row).getByTitle('Xóa');
+    const deleteButton = within(row).getByTitle('Xóa danh mục');
     fireEvent.click(deleteButton);
 
-    expect(await screen.findByText('Xóa danh mục này?')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Xác nhận xóa danh mục'),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/Bạn có chắc chắn muốn xóa danh mục/),
     ).toBeInTheDocument();
@@ -475,7 +499,9 @@ describe('AdminCategoriesPage', () => {
     fireEvent.click(cancelButton);
 
     await waitFor(() => {
-      expect(screen.queryByText('Xóa danh mục này?')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Xác nhận xóa danh mục'),
+      ).not.toBeInTheDocument();
     });
 
     expect(categoriesApi.delete).not.toHaveBeenCalled();
@@ -492,10 +518,12 @@ describe('AdminCategoriesPage', () => {
     expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
-    const deleteButton = within(row).getByTitle('Xóa');
+    const deleteButton = within(row).getByTitle('Xóa danh mục');
     fireEvent.click(deleteButton);
 
-    expect(await screen.findByText('Xóa danh mục này?')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Xác nhận xóa danh mục'),
+    ).toBeInTheDocument();
 
     const confirmButton = screen.getByRole('button', {
       name: 'Xác nhận xóa',
@@ -510,9 +538,7 @@ describe('AdminCategoriesPage', () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QUERY_KEYS.CATEGORIES],
     });
-    expect(mockToast.success).toHaveBeenCalledWith(
-      'Xóa danh mục "Xịt côn trùng ARS" thành công',
-    );
+    expect(mockToast.success).toHaveBeenCalledWith('Xóa danh mục thành công');
   });
 
   it('shows error toast when fetching categories tree fails', async () => {
@@ -555,7 +581,7 @@ describe('AdminCategoriesPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Thêm danh mục gốc/i }));
 
-    const input = screen.getByLabelText('Tên danh mục');
+    const input = screen.getByLabelText(/Tên danh mục/i);
     fireEvent.change(input, { target: { value: 'Tên trùng' } });
 
     const submitButton = screen.getByRole('button', { name: 'Tạo mới' });
@@ -563,7 +589,7 @@ describe('AdminCategoriesPage', () => {
 
     await waitFor(() => {
       expect(mockToast.error).toHaveBeenCalledWith(
-        'Thao tác thất bại: Tên danh mục đã tồn tại',
+        'Không thể tạo danh mục: Tên danh mục đã tồn tại',
       );
     });
   });
@@ -579,18 +605,18 @@ describe('AdminCategoriesPage', () => {
     expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
-    fireEvent.click(within(row).getByTitle('Chỉnh sửa'));
+    fireEvent.click(row);
 
     expect(
-      await screen.findByText('Chỉnh sửa tên danh mục'),
+      await screen.findByText('Chỉnh sửa danh mục: Xịt côn trùng ARS'),
     ).toBeInTheDocument();
 
-    const submitButton = screen.getByRole('button', { name: 'Cập nhật' });
+    const submitButton = screen.getByRole('button', { name: 'Lưu thay đổi' });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(mockToast.error).toHaveBeenCalledWith(
-        'Thao tác thất bại: Mất kết nối máy chủ',
+        'Không thể cập nhật danh mục: Mất kết nối máy chủ',
       );
     });
   });
@@ -610,9 +636,11 @@ describe('AdminCategoriesPage', () => {
     expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
-    fireEvent.click(within(row).getByTitle('Xóa'));
+    fireEvent.click(within(row).getByTitle('Xóa danh mục'));
 
-    expect(await screen.findByText('Xóa danh mục này?')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Xác nhận xóa danh mục'),
+    ).toBeInTheDocument();
 
     const confirmButton = screen.getByRole('button', {
       name: 'Xác nhận xóa',
@@ -637,9 +665,11 @@ describe('AdminCategoriesPage', () => {
     expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
-    fireEvent.click(within(row).getByTitle('Xóa'));
+    fireEvent.click(within(row).getByTitle('Xóa danh mục'));
 
-    expect(await screen.findByText('Xóa danh mục này?')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Xác nhận xóa danh mục'),
+    ).toBeInTheDocument();
 
     const confirmButton = screen.getByRole('button', {
       name: 'Xác nhận xóa',
