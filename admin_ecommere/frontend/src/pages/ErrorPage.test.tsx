@@ -150,7 +150,7 @@ describe('ErrorPage', () => {
       </MemoryRouter>,
     );
 
-    const grid = container.querySelector('.grid')!;
+    const grid = container.querySelector<HTMLElement>('.grid')!;
 
     // Card 1: Về trang chủ
     expect(within(grid).getByText('Về trang chủ')).toBeInTheDocument();
