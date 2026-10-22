@@ -647,7 +647,7 @@ describe('SearchPage', () => {
       const { gridBtn, listBtn } = getViewToggleButtons();
       expect(gridBtn).toBeInTheDocument();
       expect(listBtn).toBeInTheDocument();
-      expect(gridBtn).toHaveClass('bg-primary');
+      expect(gridBtn).toHaveClass('bg-teal-600');
       expect(listBtn).toHaveClass('border');
       expect(gridBtn!.querySelector('svg')).toBeInTheDocument();
       expect(listBtn!.querySelector('svg')).toBeInTheDocument();
@@ -755,7 +755,7 @@ describe('SearchPage', () => {
       expect(gridBtn).toBeInTheDocument();
       expect(listBtn).toBeInTheDocument();
       expect(gridBtn).toHaveClass('border');
-      expect(listBtn).toHaveClass('bg-primary');
+      expect(listBtn).toHaveClass('bg-teal-600');
       expect(gridBtn!.querySelector('svg')).toBeInTheDocument();
       expect(listBtn!.querySelector('svg')).toBeInTheDocument();
 

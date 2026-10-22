@@ -26,7 +26,8 @@ describe('ChatMarkdown', () => {
       'text-sm',
       'break-words',
       'leading-relaxed',
-      'space-y-2',
+      'space-y-2.5',
+      'text-slate-700',
     );
   });
 
@@ -35,7 +36,7 @@ describe('ChatMarkdown', () => {
     const strong = screen.getByText('chính hãng 100%');
 
     expect(strong.tagName).toBe('STRONG');
-    expect(strong).toHaveClass('font-semibold', 'text-foreground');
+    expect(strong).toHaveClass('font-semibold', 'text-slate-900');
   });
 
   it('renders unordered list with custom styles', () => {
@@ -92,9 +93,10 @@ describe('ChatMarkdown', () => {
     expect(h1).toHaveClass(
       'text-base',
       'font-bold',
-      'text-foreground',
+      'text-slate-900',
       'mt-3',
-      'mb-1',
+      'mb-1.5',
+      'tracking-tight',
     );
 
     const h2 = screen.getByRole('heading', {
@@ -104,9 +106,10 @@ describe('ChatMarkdown', () => {
     expect(h2).toHaveClass(
       'text-sm',
       'font-bold',
-      'text-foreground',
-      'mt-2',
+      'text-slate-900',
+      'mt-2.5',
       'mb-1',
+      'tracking-tight',
     );
 
     const h3 = screen.getByRole('heading', {
@@ -114,9 +117,11 @@ describe('ChatMarkdown', () => {
       name: 'Tiêu đề cấp 3: Đơn hàng thành công',
     });
     expect(h3).toHaveClass(
-      'text-sm',
+      'text-xs',
       'font-semibold',
-      'text-foreground',
+      'uppercase',
+      'tracking-wider',
+      'text-slate-500',
       'mt-2',
       'mb-1',
     );
@@ -135,28 +140,45 @@ describe('ChatMarkdown', () => {
     expect(table).toHaveClass(
       'w-full',
       'border-collapse',
-      'border',
-      'border-border',
       'text-left',
       'text-xs',
+      'tabular-nums',
     );
 
     const tableWrapper = table.parentElement;
-    expect(tableWrapper).toHaveClass('my-2', 'overflow-x-auto');
+    expect(tableWrapper).toHaveClass(
+      'my-3',
+      'overflow-x-auto',
+      'rounded-xl',
+      'border',
+      'border-slate-200',
+      'bg-white',
+      'shadow-sm',
+    );
 
     const th = screen.getByRole('columnheader', { name: 'Tên sản phẩm' });
     expect(th).toHaveClass(
-      'border',
-      'border-border',
-      'bg-muted',
-      'px-2.5',
-      'py-1.5',
+      'sticky',
+      'top-0',
+      'border-b',
+      'border-slate-200',
+      'bg-slate-50',
+      'px-4',
+      'py-3',
       'font-semibold',
-      'text-foreground',
+      'text-slate-900',
+      'text-xs',
+      'whitespace-nowrap',
     );
 
     const td = screen.getByRole('cell', { name: 'Xịt phòng bạc hà' });
-    expect(td).toHaveClass('border', 'border-border', 'px-2.5', 'py-1.5');
+    expect(td).toHaveClass(
+      'border-b',
+      'border-slate-100',
+      'px-4',
+      'py-3',
+      'text-slate-700',
+    );
   });
 
   it('renders inline code with monospace styling', () => {
@@ -165,12 +187,16 @@ describe('ChatMarkdown', () => {
 
     expect(code.tagName).toBe('CODE');
     expect(code).toHaveClass(
-      'rounded',
-      'bg-muted',
+      'rounded-md',
+      'border',
+      'border-slate-200',
+      'bg-slate-100',
       'px-1.5',
       'py-0.5',
       'font-mono',
       'text-xs',
+      'text-teal-700',
+      'font-medium',
     );
   });
 
@@ -183,16 +209,22 @@ describe('ChatMarkdown', () => {
 
     expect(pre).not.toBeNull();
     expect(pre).toHaveClass(
-      'my-2',
+      'my-3',
       'overflow-x-auto',
-      'rounded-md',
-      'bg-muted',
-      'p-3',
+      'rounded-xl',
+      'border',
+      'border-slate-200',
+      'bg-slate-50',
+      'p-3.5',
       'font-mono',
       'text-xs',
+      'text-slate-800',
+      'shadow-sm',
       '[&>code]:bg-transparent',
       '[&>code]:p-0',
       '[&>code]:rounded-none',
+      '[&>code]:border-0',
+      '[&>code]:text-inherit',
     );
   });
 
@@ -205,7 +237,7 @@ describe('ChatMarkdown', () => {
 
     const altSpan = screen.getByText('Ảnh minh họa đơn hàng số 1024');
     expect(altSpan.tagName).toBe('SPAN');
-    expect(altSpan).toHaveClass('text-muted-foreground');
+    expect(altSpan).toHaveClass('text-slate-400');
   });
 
   describe('links (a component)', () => {
@@ -220,10 +252,18 @@ describe('ChatMarkdown', () => {
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/admin/orders?status=PENDING');
       expect(link).toHaveClass(
-        'text-primary',
+        'font-medium',
+        'text-teal-600',
         'underline',
-        'underline-offset-2',
-        'hover:opacity-80',
+        'underline-offset-4',
+        'decoration-teal-600/40',
+        'hover:text-teal-700',
+        'hover:decoration-teal-700',
+        'transition-colors',
+        'focus-visible:outline-none',
+        'focus-visible:ring-2',
+        'focus-visible:ring-teal-500',
+        'rounded-sm',
       );
       expect(link).not.toHaveAttribute('target');
       expect(link).not.toHaveAttribute('rel');
@@ -241,10 +281,18 @@ describe('ChatMarkdown', () => {
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer nofollow');
       expect(link).toHaveClass(
-        'text-primary',
+        'font-medium',
+        'text-teal-600',
         'underline',
-        'underline-offset-2',
-        'hover:opacity-80',
+        'underline-offset-4',
+        'decoration-teal-600/40',
+        'hover:text-teal-700',
+        'hover:decoration-teal-700',
+        'transition-colors',
+        'focus-visible:outline-none',
+        'focus-visible:ring-2',
+        'focus-visible:ring-teal-500',
+        'rounded-sm',
       );
     });
 

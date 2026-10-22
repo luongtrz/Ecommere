@@ -141,7 +141,7 @@ describe('AccountPage', () => {
     // ADMIN role badge
     const badge = screen.getByText('Quản trị viên');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass('bg-red-100', 'text-red-800');
+    expect(badge).toHaveClass('bg-emerald-50', 'text-emerald-700');
 
     // Edit profile button
     expect(
@@ -165,7 +165,9 @@ describe('AccountPage', () => {
     expect(screen.getByText('Xem lịch sử mua hàng')).toBeInTheDocument();
     expect(screen.getByText('Danh sách yêu thích')).toBeInTheDocument();
     expect(screen.getByText('Sản phẩm đã lưu')).toBeInTheDocument();
-    expect(screen.getByText('Bảo mật tài khoản')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Bảo mật tài khoản' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Đổi mật khẩu')).toBeInTheDocument();
 
     // Account actions card
@@ -199,7 +201,7 @@ describe('AccountPage', () => {
     // CUSTOMER role badge
     const badge = screen.getByText('Khách hàng');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass('bg-blue-100', 'text-blue-800');
+    expect(badge).toHaveClass('bg-slate-50', 'text-slate-700');
   });
 
   it('renders fallback values when phone is empty and createdAt is undefined', () => {

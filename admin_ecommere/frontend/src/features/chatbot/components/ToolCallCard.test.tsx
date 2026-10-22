@@ -36,12 +36,12 @@ describe('ToolCallCard', () => {
       expect(svg).toBeInTheDocument();
       expect(svg).toHaveClass(
         'animate-spin',
-        'text-muted-foreground',
+        'text-amber-500',
         'h-3.5',
         'w-3.5',
       );
-      expect(svg).not.toHaveClass('text-primary');
-      expect(svg).not.toHaveClass('text-destructive');
+      expect(svg).not.toHaveClass('text-emerald-600');
+      expect(svg).not.toHaveClass('text-rose-600');
 
       // Content initially collapsed: Radix unmounts children while closed
       const content = container.querySelector<HTMLDivElement>('div.border-t');
@@ -112,9 +112,9 @@ describe('ToolCallCard', () => {
       // CheckCircle2 icon
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
-      expect(svg).toHaveClass('text-primary', 'h-3.5', 'w-3.5');
+      expect(svg).toHaveClass('text-emerald-600', 'h-3.5', 'w-3.5');
       expect(svg).not.toHaveClass('animate-spin');
-      expect(svg).not.toHaveClass('text-destructive');
+      expect(svg).not.toHaveClass('text-rose-600');
 
       // Click to expand
       await user.click(trigger);
@@ -139,7 +139,7 @@ describe('ToolCallCard', () => {
 
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
-      expect(svg).toHaveClass('text-primary');
+      expect(svg).toHaveClass('text-emerald-600');
 
       const trigger = screen.getByRole('button', {
         name: /Kiểm tra kết nối dịch vụ/i,
@@ -197,9 +197,9 @@ describe('ToolCallCard', () => {
       // XCircle icon
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
-      expect(svg).toHaveClass('text-destructive', 'h-3.5', 'w-3.5');
+      expect(svg).toHaveClass('text-rose-600', 'h-3.5', 'w-3.5');
       expect(svg).not.toHaveClass('animate-spin');
-      expect(svg).not.toHaveClass('text-primary');
+      expect(svg).not.toHaveClass('text-emerald-600');
 
       // Click to expand
       await user.click(trigger);
@@ -224,7 +224,7 @@ describe('ToolCallCard', () => {
 
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
-      expect(svg).toHaveClass('text-destructive');
+      expect(svg).toHaveClass('text-rose-600');
 
       const trigger = screen.getByRole('button', {
         name: /Đồng bộ kho thất bại/i,
@@ -275,8 +275,12 @@ describe('ToolCallCard', () => {
 
       const { container } = render(<ToolCallCard step={step} />);
 
-      // No icon rendered
-      expect(container.querySelector('svg')).toBeNull();
+      // No status icon rendered
+      expect(
+        container.querySelector(
+          '.lucide-loader2, .lucide-check-circle2, .lucide-xcircle',
+        ),
+      ).toBeNull();
 
       // Summary text is rendered
       const trigger = screen.getByRole('button', {
@@ -300,7 +304,12 @@ describe('ToolCallCard', () => {
 
       const { container } = render(<ToolCallCard step={step} />);
 
-      expect(container.querySelector('svg')).toBeNull();
+      // No status icon rendered
+      expect(
+        container.querySelector(
+          '.lucide-loader2, .lucide-check-circle2, .lucide-xcircle',
+        ),
+      ).toBeNull();
 
       const trigger = screen.getByRole('button', {
         name: /Trạng thái rỗng/i,
@@ -328,15 +337,17 @@ describe('ToolCallCard', () => {
       // Root Collapsible container
       const root = container.firstElementChild;
       expect(root).toHaveClass(
+        'group',
         'w-full',
         'rounded-xl',
         'border',
-        'border-border',
-        'bg-card',
-        'text-card-foreground',
+        'border-slate-200',
+        'bg-slate-50/70',
         'text-xs',
         'overflow-hidden',
         'shadow-sm',
+        'transition-all',
+        'hover:border-slate-300',
       );
 
       // Trigger button
@@ -347,28 +358,40 @@ describe('ToolCallCard', () => {
         'flex',
         'w-full',
         'items-center',
-        'gap-2',
-        'px-3',
+        'gap-2.5',
+        'px-3.5',
         'py-2',
         'text-left',
         'font-medium',
-        'hover:bg-muted/50',
+        'hover:bg-slate-100/80',
         'transition-colors',
+        'outline-none',
+        'focus-visible:ring-2',
+        'focus-visible:ring-teal-500',
       );
 
       // Summary span
       const summarySpan = screen.getByText('Kiểm tra kiểu hiển thị');
-      expect(summarySpan).toHaveClass('flex-1', 'truncate');
+      expect(summarySpan).toHaveClass(
+        'flex-1',
+        'truncate',
+        'font-medium',
+        'text-slate-800',
+      );
 
       // Collapsible content element
       const content = container.querySelector<HTMLDivElement>('div.border-t');
       expect(content).toBeInTheDocument();
       expect(content).toHaveClass(
         'border-t',
-        'border-border',
-        'px-3',
-        'py-2',
-        'text-muted-foreground',
+        'border-slate-200',
+        'bg-white',
+        'px-3.5',
+        'py-2.5',
+        'text-xs',
+        'text-slate-600',
+        'font-mono',
+        'leading-relaxed',
         'whitespace-pre-wrap',
         'break-words',
       );
