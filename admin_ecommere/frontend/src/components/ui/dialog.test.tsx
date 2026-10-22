@@ -138,7 +138,9 @@ describe('Dialog components', () => {
 
       const overlay = screen.getByTestId('dialog-overlay');
       expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-background/80');
+      expect(overlay).toHaveClass(
+        'fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm',
+      );
       expect(overlay).toHaveClass('custom-dialog-overlay');
       expect(ref.current).toBe(overlay);
     });
@@ -154,7 +156,9 @@ describe('Dialog components', () => {
 
       const overlay = screen.getByTestId('dialog-overlay-default');
       expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-background/80');
+      expect(overlay).toHaveClass(
+        'fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm',
+      );
     });
   });
 
@@ -279,7 +283,7 @@ describe('Dialog components', () => {
 
       const desc = screen.getByTestId('dialog-desc');
       expect(desc).toBeInTheDocument();
-      expect(desc).toHaveClass('text-sm text-muted-foreground desc-extra');
+      expect(desc).toHaveClass('text-sm text-slate-600 desc-extra');
       expect(ref.current).toBe(desc);
     });
 
@@ -296,7 +300,7 @@ describe('Dialog components', () => {
       );
 
       const desc = screen.getByTestId('dialog-desc-default');
-      expect(desc).toHaveClass('text-sm text-muted-foreground');
+      expect(desc).toHaveClass('text-sm text-slate-600');
     });
   });
 });

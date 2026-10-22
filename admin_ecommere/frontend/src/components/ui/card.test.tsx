@@ -35,10 +35,10 @@ describe('Card UI components', () => {
       expect(card).toBeInTheDocument();
       expect(card.tagName).toBe('DIV');
       expect(card).toHaveClass(
-        'rounded-lg',
+        'rounded-xl',
         'border',
-        'bg-card',
-        'text-card-foreground',
+        'bg-white',
+        'text-slate-900',
         'shadow-sm',
       );
       expect(card).toHaveTextContent('Nội dung thẻ');
@@ -56,7 +56,7 @@ describe('Card UI components', () => {
       expect(card).toHaveClass(
         'custom-card-class',
         'max-w-sm',
-        'rounded-lg',
+        'rounded-xl',
         'border',
       );
     });
@@ -153,7 +153,7 @@ describe('Card UI components', () => {
       expect(title).toBeInTheDocument();
       expect(title.tagName).toBe('H3');
       expect(title).toHaveClass(
-        'text-2xl',
+        'text-xl',
         'font-semibold',
         'leading-none',
         'tracking-tight',
@@ -201,7 +201,7 @@ describe('Card UI components', () => {
 
       expect(desc).toBeInTheDocument();
       expect(desc.tagName).toBe('P');
-      expect(desc).toHaveClass('text-sm', 'text-muted-foreground');
+      expect(desc).toHaveClass('text-sm', 'text-slate-500');
       expect(desc).toHaveTextContent('Mô tả chi tiết báo cáo doanh thu');
     });
 
@@ -219,7 +219,7 @@ describe('Card UI components', () => {
       expect(desc).toHaveClass(
         'custom-desc',
         'text-xs',
-        'text-muted-foreground',
+        'text-slate-500',
       );
     });
 

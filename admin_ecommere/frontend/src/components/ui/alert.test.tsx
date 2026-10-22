@@ -28,11 +28,11 @@ describe('Alert UI components', () => {
       expect(alert).toHaveClass(
         'relative',
         'w-full',
-        'rounded-lg',
+        'rounded-xl',
         'border',
         'p-4',
-        'bg-background',
-        'text-foreground',
+        'bg-white',
+        'text-slate-900',
       );
       expect(alert).toHaveTextContent('Thông báo hệ thống');
     });
@@ -45,7 +45,7 @@ describe('Alert UI components', () => {
       );
       const alert = screen.getByTestId('alert-variant-default');
 
-      expect(alert).toHaveClass('bg-background', 'text-foreground');
+      expect(alert).toHaveClass('bg-white', 'text-slate-900');
     });
 
     it('renders with destructive variant', () => {
@@ -57,10 +57,10 @@ describe('Alert UI components', () => {
       const alert = screen.getByTestId('alert-variant-destructive');
 
       expect(alert).toHaveClass(
-        'border-destructive/50',
-        'text-destructive',
-        'dark:border-destructive',
-        '[&>svg]:text-destructive',
+        'border-rose-200',
+        'bg-rose-50',
+        'text-rose-700',
+        '[&>svg]:text-rose-600',
       );
       expect(alert).toHaveTextContent('Lỗi nghiêm trọng khi tải dữ liệu');
     });
@@ -80,7 +80,7 @@ describe('Alert UI components', () => {
         'custom-alert-class',
         'shadow-md',
         'relative',
-        'rounded-lg',
+        'rounded-xl',
       );
     });
 
@@ -126,7 +126,7 @@ describe('Alert UI components', () => {
       expect(title.tagName).toBe('H5');
       expect(title).toHaveClass(
         'mb-1',
-        'font-medium',
+        'font-semibold',
         'leading-none',
         'tracking-tight',
       );
@@ -145,7 +145,7 @@ describe('Alert UI components', () => {
       );
       const title = screen.getByTestId('alert-title-custom');
 
-      expect(title).toHaveClass('custom-title-class', 'text-lg', 'font-medium');
+      expect(title).toHaveClass('custom-title-class', 'text-lg', 'font-semibold');
       expect(title).toHaveAttribute('id', 'custom-alert-title-id');
     });
 
@@ -250,7 +250,7 @@ describe('Alert UI components', () => {
       );
 
       const alert = screen.getByTestId('composite-alert-destructive');
-      expect(alert).toHaveClass('text-destructive');
+      expect(alert).toHaveClass('text-rose-700');
       expect(
         screen.getByRole('heading', {
           level: 5,
