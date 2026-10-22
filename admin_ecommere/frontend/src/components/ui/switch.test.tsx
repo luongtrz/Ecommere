@@ -49,7 +49,7 @@ describe('Switch', () => {
       'h-5',
       'w-5',
       'rounded-full',
-      'bg-background',
+      'bg-white',
     );
   });
 

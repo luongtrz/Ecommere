@@ -100,7 +100,7 @@ describe('Tabs components', () => {
     expect(list).toHaveClass('custom-list-class');
     expect(list).toHaveClass('inline-flex');
     expect(list).toHaveClass('h-10');
-    expect(list).toHaveClass('bg-muted');
+    expect(list).toHaveClass('bg-slate-100');
 
     const trigger = screen.getByRole('tab', { name: 'Tổng quan' });
     expect(trigger).toHaveClass('custom-trigger-class');
@@ -110,7 +110,7 @@ describe('Tabs components', () => {
     const content = screen.getByRole('tabpanel');
     expect(content).toHaveClass('custom-content-class');
     expect(content).toHaveClass('mt-2');
-    expect(content).toHaveClass('ring-offset-background');
+    expect(content).toHaveClass('focus-visible:ring-offset-2');
   });
 
   it('does not switch tabs or call onValueChange when trigger is disabled', async () => {

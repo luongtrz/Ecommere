@@ -74,7 +74,7 @@ describe('Form components and useFormField', () => {
 
     expect(labelRef.current).toBeInstanceOf(HTMLLabelElement);
     expect(labelRef.current).toHaveClass('custom-label');
-    expect(labelRef.current).not.toHaveClass('text-destructive');
+    expect(labelRef.current).not.toHaveClass('text-rose-600');
 
     const input = screen.getByPlaceholderText('Nhập tên');
     expect(controlRef.current).toBe(input);
@@ -124,7 +124,7 @@ describe('Form components and useFormField', () => {
 
     expect(messageRef.current).toBeInstanceOf(HTMLParagraphElement);
     expect(messageRef.current).toHaveClass('custom-msg-fallback');
-    expect(messageRef.current).toHaveClass('text-destructive');
+    expect(messageRef.current).toHaveClass('text-rose-600');
     expect(messageRef.current).toHaveTextContent('Vui lòng nhập email hợp lệ');
   });
 
@@ -177,7 +177,7 @@ describe('Form components and useFormField', () => {
     const desc = screen.getByTestId('desc');
 
     // Initially without error: fallback text is shown because children were passed
-    expect(label).not.toHaveClass('text-destructive');
+    expect(label).not.toHaveClass('text-rose-600');
     expect(input).toHaveAttribute('aria-invalid', 'false');
     expect(input).toHaveAttribute('aria-describedby', desc.id);
     expect(screen.getByTestId('message')).toHaveTextContent(
@@ -193,7 +193,7 @@ describe('Form components and useFormField', () => {
     });
 
     const errorMsg = screen.getByTestId('message');
-    expect(label).toHaveClass('text-destructive');
+    expect(label).toHaveClass('text-rose-600');
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAttribute(
       'aria-describedby',
@@ -208,7 +208,7 @@ describe('Form components and useFormField', () => {
       clearErrorsFn('username');
     });
 
-    expect(label).not.toHaveClass('text-destructive');
+    expect(label).not.toHaveClass('text-rose-600');
     expect(input).toHaveAttribute('aria-invalid', 'false');
     expect(input).toHaveAttribute('aria-describedby', desc.id);
     expect(screen.getByTestId('message')).toHaveTextContent(

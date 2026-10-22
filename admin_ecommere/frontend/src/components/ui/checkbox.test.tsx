@@ -31,9 +31,9 @@ describe('Checkbox', () => {
       'h-4',
       'w-4',
       'shrink-0',
-      'rounded-sm',
+      'rounded',
       'border',
-      'border-primary',
+      'border-slate-300',
     );
   });
 
