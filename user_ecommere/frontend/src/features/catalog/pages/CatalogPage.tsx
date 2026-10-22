@@ -11,13 +11,7 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
 import { PAGINATION, PRODUCT_SORT_OPTIONS } from '@/lib/constants';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -29,19 +23,19 @@ function parseNumericParam(
   value: string | null,
   defaultValue: number,
   min?: number,
-  max?: number,
+  max?: number
 ): number;
 function parseNumericParam(
   value: string | null,
   defaultValue: undefined,
   min?: number,
-  max?: number,
+  max?: number
 ): number | undefined;
 function parseNumericParam(
   value: string | null,
   defaultValue: number | undefined,
   min?: number,
-  max?: number,
+  max?: number
 ): number | undefined {
   if (value === null || value === undefined || value.trim() === '') {
     return defaultValue;
@@ -77,16 +71,8 @@ export function CatalogPage() {
 
   // Filter params
   const categorySlug = searchParams.get('category') || undefined;
-  const minPrice = parseNumericParam(
-    searchParams.get('minPrice'),
-    undefined,
-    0,
-  );
-  const maxPrice = parseNumericParam(
-    searchParams.get('maxPrice'),
-    undefined,
-    0,
-  );
+  const minPrice = parseNumericParam(searchParams.get('minPrice'), undefined, 0);
+  const maxPrice = parseNumericParam(searchParams.get('maxPrice'), undefined, 0);
   const scent = searchParams.get('scent') || undefined;
   const volumeMl = searchParams.get('volumeMl') || undefined;
   const brand = searchParams.get('brand') || undefined;
@@ -106,24 +92,21 @@ export function CatalogPage() {
 
   const { addItem } = useCart();
 
-  const updateParams = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      const newParams = new URLSearchParams(searchParams);
-      // Reset page khi thay doi filter
-      if (!('page' in updates)) {
-        newParams.set('page', '1');
+  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
+    const newParams = new URLSearchParams(searchParams);
+    // Reset page khi thay doi filter
+    if (!('page' in updates)) {
+      newParams.set('page', '1');
+    }
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === undefined || value === '') {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
       }
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value === undefined || value === '') {
-          newParams.delete(key);
-        } else {
-          newParams.set(key, value);
-        }
-      });
-      setSearchParams(newParams);
-    },
-    [searchParams, setSearchParams],
-  );
+    });
+    setSearchParams(newParams);
+  }, [searchParams, setSearchParams]);
 
   // Apply debounced search to URL params
   useEffect(() => {
@@ -158,21 +141,18 @@ export function CatalogPage() {
     });
   };
 
-  const handleFilterChange = useCallback(
-    (filters: Record<string, string | undefined>) => {
-      // Map categorySlug -> category param for URL
-      const mapped: Record<string, string | undefined> = {};
-      Object.entries(filters).forEach(([key, value]) => {
-        if (key === 'categorySlug') {
-          mapped['category'] = value;
-        } else {
-          mapped[key] = value;
-        }
-      });
-      updateParams({ ...mapped, page: '1' });
-    },
-    [updateParams],
-  );
+  const handleFilterChange = useCallback((filters: Record<string, string | undefined>) => {
+    // Map categorySlug -> category param for URL
+    const mapped: Record<string, string | undefined> = {};
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key === 'categorySlug') {
+        mapped['category'] = value;
+      } else {
+        mapped[key] = value;
+      }
+    });
+    updateParams({ ...mapped, page: '1' });
+  }, [updateParams]);
 
   const clearFilters = () => {
     setSearchParams({ view: viewMode });
@@ -381,10 +361,7 @@ export function CatalogPage() {
                           rating={product.rating}
                           reviewCount={product.reviewCount}
                           variants={product.variants}
-                          onAddToCart={() =>
-                            product.variants[0] &&
-                            handleAddToCart(product, product.variants[0])
-                          }
+                          onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                         />
                       ) : (
                         <div
@@ -441,8 +418,8 @@ export function CatalogPage() {
                             </div>
                           </div>
                         </div>
-                      ),
-                    )}
+                      )
+                    ))}
                   </div>
 
                   {data && data.totalPages > 1 && (
