@@ -45,7 +45,7 @@ export function CheckoutSteps({ currentStep }: CheckoutStepsProps) {
                 )}
               </div>
               <span
-                className={`text-[11px] sm:text-xs transition-colors ${
+                className={`text-[11px] sm:text-xs transition-colors duration-200 ${
                   isCurrent
                     ? 'text-teal-700 font-semibold'
                     : isCompleted
