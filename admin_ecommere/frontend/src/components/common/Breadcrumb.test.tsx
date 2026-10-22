@@ -32,10 +32,7 @@ describe('Breadcrumb', () => {
 
     const homeLink = within(container).getByRole('link');
     expect(homeLink).toHaveAttribute('href', '/');
-    expect(homeLink).toHaveClass(
-      'text-slate-500',
-      'hover:text-teal-600',
-    );
+    expect(homeLink).toHaveClass('text-slate-500', 'hover:text-teal-600');
 
     const homeSvg = homeLink.querySelector('svg');
     expect(homeSvg).toBeInTheDocument();
@@ -54,10 +51,7 @@ describe('Breadcrumb', () => {
     });
     expect(categoryLink).toBeInTheDocument();
     expect(categoryLink).toHaveAttribute('href', '/categories');
-    expect(categoryLink).toHaveClass(
-      'text-slate-500',
-      'hover:text-teal-600',
-    );
+    expect(categoryLink).toHaveClass('text-slate-500', 'hover:text-teal-600');
 
     // 2 SVGs: Home icon and 1 ChevronRight icon
     const svgs = container.querySelectorAll('svg');

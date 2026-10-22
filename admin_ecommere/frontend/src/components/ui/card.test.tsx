@@ -216,11 +216,7 @@ describe('Card UI components', () => {
       );
       const desc = screen.getByTestId('desc-custom');
 
-      expect(desc).toHaveClass(
-        'custom-desc',
-        'text-xs',
-        'text-slate-500',
-      );
+      expect(desc).toHaveClass('custom-desc', 'text-xs', 'text-slate-500');
     });
 
     it('forwards ref to HTMLParagraphElement', () => {

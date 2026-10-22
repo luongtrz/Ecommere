@@ -145,7 +145,11 @@ describe('Alert UI components', () => {
       );
       const title = screen.getByTestId('alert-title-custom');
 
-      expect(title).toHaveClass('custom-title-class', 'text-lg', 'font-semibold');
+      expect(title).toHaveClass(
+        'custom-title-class',
+        'text-lg',
+        'font-semibold',
+      );
       expect(title).toHaveAttribute('id', 'custom-alert-title-id');
     });
 

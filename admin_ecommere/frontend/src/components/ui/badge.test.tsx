@@ -54,11 +54,7 @@ describe('Badge Component', () => {
     render(<Badge variant="destructive">Đã hủy</Badge>);
 
     const badge = screen.getByText('Đã hủy');
-    expect(badge).toHaveClass(
-      'border-rose-200',
-      'bg-rose-50',
-      'text-rose-700',
-    );
+    expect(badge).toHaveClass('border-rose-200', 'bg-rose-50', 'text-rose-700');
   });
 
   it('renders with variant="outline"', () => {
