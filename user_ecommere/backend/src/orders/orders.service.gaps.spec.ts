@@ -3,6 +3,7 @@ import { OrdersService } from './orders.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import {
   NotFoundException,
+  ForbiddenException,
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
@@ -1244,14 +1245,14 @@ describe('OrdersService - Gap Coverage', () => {
       );
     });
 
-    it('throws NotFoundException when order belongs to a different user', async () => {
+    it('throws ForbiddenException when order belongs to a different user', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue({
         id: 'ord-1',
         userId: 'other-user',
       });
 
       await expect(service.getMyOrderById('user1', 'ord-1')).rejects.toThrow(
-        NotFoundException,
+        ForbiddenException,
       );
     });
 

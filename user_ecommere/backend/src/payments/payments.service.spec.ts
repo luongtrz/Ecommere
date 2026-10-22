@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
+  ForbiddenException,
   NotFoundException,
   ServiceUnavailableException,
   UnauthorizedException,
@@ -205,7 +206,7 @@ describe('PaymentsService', () => {
       expect(mockMoMoAdapter.createPayment).not.toHaveBeenCalled();
     });
 
-    it('should throw BadRequestException when order does not belong to the user', async () => {
+    it('should throw ForbiddenException when order does not belong to the user', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue({
         ...mockOrder,
         userId: 'other-user-999',
@@ -213,7 +214,7 @@ describe('PaymentsService', () => {
 
       await expect(
         service.createPayment(userId, orderId, PaymentMethod.STRIPE),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ForbiddenException);
       await expect(
         service.createPayment(userId, orderId, PaymentMethod.STRIPE),
       ).rejects.toThrow('Unauthorized');
@@ -377,7 +378,17 @@ describe('PaymentsService', () => {
   });
 
   describe('verifyPayment', () => {
+    const userId = 'user-123';
+    const orderId = 'order-456';
     const paymentId = 'pay-mock-123';
+    const mockOrder = {
+      id: orderId,
+      code: 'ORD-2026-001',
+      userId: userId,
+      status: OrderStatus.PENDING_PAYMENT,
+      paymentStatus: PaymentStatus.PENDING,
+      total: 350000,
+    };
 
     const mockStripeVerification: PaymentVerification = {
       success: true,
@@ -397,35 +408,88 @@ describe('PaymentsService', () => {
       mockConfigService.get.mockReturnValue('production');
 
       await expect(
-        service.verifyPayment(paymentId, PaymentMethod.STRIPE),
+        service.verifyPayment(userId, paymentId, PaymentMethod.STRIPE, orderId),
       ).rejects.toThrow(ServiceUnavailableException);
       await expect(
-        service.verifyPayment(paymentId, PaymentMethod.STRIPE),
+        service.verifyPayment(userId, paymentId, PaymentMethod.STRIPE, orderId),
       ).rejects.toThrow('Payment provider is not configured');
 
       expect(mockConfigService.get).toHaveBeenCalledWith('NODE_ENV');
+      expect(mockPrismaService.order.findUnique).not.toHaveBeenCalled();
+      expect(mockStripeAdapter.verifyPayment).not.toHaveBeenCalled();
+      expect(mockMoMoAdapter.verifyPayment).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when order is not found', async () => {
+      mockPrismaService.order.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.verifyPayment(userId, paymentId, PaymentMethod.STRIPE, orderId),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.verifyPayment(userId, paymentId, PaymentMethod.STRIPE, orderId),
+      ).rejects.toThrow('Order not found');
+
+      expect(mockPrismaService.order.findUnique).toHaveBeenCalledWith({
+        where: { id: orderId },
+      });
+      expect(mockStripeAdapter.verifyPayment).not.toHaveBeenCalled();
+      expect(mockMoMoAdapter.verifyPayment).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when order does not belong to the user', async () => {
+      mockPrismaService.order.findUnique.mockResolvedValue({
+        ...mockOrder,
+        userId: 'other-user-999',
+      });
+
+      await expect(
+        service.verifyPayment(userId, paymentId, PaymentMethod.STRIPE, orderId),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.verifyPayment(userId, paymentId, PaymentMethod.STRIPE, orderId),
+      ).rejects.toThrow('Unauthorized');
+
+      expect(mockPrismaService.order.findUnique).toHaveBeenCalledWith({
+        where: { id: orderId },
+      });
       expect(mockStripeAdapter.verifyPayment).not.toHaveBeenCalled();
       expect(mockMoMoAdapter.verifyPayment).not.toHaveBeenCalled();
     });
 
     it('should successfully verify payment using Stripe adapter when method is STRIPE', async () => {
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
       mockStripeAdapter.verifyPayment.mockResolvedValue(mockStripeVerification);
 
       const result = await service.verifyPayment(
+        userId,
         paymentId,
         PaymentMethod.STRIPE,
+        orderId,
       );
 
+      expect(mockPrismaService.order.findUnique).toHaveBeenCalledWith({
+        where: { id: orderId },
+      });
       expect(mockStripeAdapter.verifyPayment).toHaveBeenCalledWith(paymentId);
       expect(mockMoMoAdapter.verifyPayment).not.toHaveBeenCalled();
       expect(result).toEqual(mockStripeVerification);
     });
 
     it('should successfully verify payment using MoMo adapter when method is MOMO', async () => {
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
       mockMoMoAdapter.verifyPayment.mockResolvedValue(mockMoMoVerification);
 
-      const result = await service.verifyPayment(paymentId, PaymentMethod.MOMO);
+      const result = await service.verifyPayment(
+        userId,
+        paymentId,
+        PaymentMethod.MOMO,
+        orderId,
+      );
 
+      expect(mockPrismaService.order.findUnique).toHaveBeenCalledWith({
+        where: { id: orderId },
+      });
       expect(mockMoMoAdapter.verifyPayment).toHaveBeenCalledWith(paymentId);
       expect(mockStripeAdapter.verifyPayment).not.toHaveBeenCalled();
       expect(result).toEqual(mockMoMoVerification);
@@ -433,24 +497,44 @@ describe('PaymentsService', () => {
 
     it('should propagate error when Stripe adapter verifyPayment fails', async () => {
       const adapterError = new Error('Stripe verify error: network error');
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
       mockStripeAdapter.verifyPayment.mockRejectedValue(adapterError);
 
       await expect(
-        service.verifyPayment(paymentId, PaymentMethod.STRIPE),
+        service.verifyPayment(userId, paymentId, PaymentMethod.STRIPE, orderId),
       ).rejects.toThrow(adapterError);
 
+      expect(mockPrismaService.order.findUnique).toHaveBeenCalledWith({
+        where: { id: orderId },
+      });
       expect(mockStripeAdapter.verifyPayment).toHaveBeenCalledWith(paymentId);
     });
 
     it('should propagate error when MoMo adapter verifyPayment fails', async () => {
       const adapterError = new Error('MoMo verify error: signature mismatch');
+      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
       mockMoMoAdapter.verifyPayment.mockRejectedValue(adapterError);
 
       await expect(
-        service.verifyPayment(paymentId, PaymentMethod.MOMO),
+        service.verifyPayment(userId, paymentId, PaymentMethod.MOMO, orderId),
       ).rejects.toThrow(adapterError);
 
+      expect(mockPrismaService.order.findUnique).toHaveBeenCalledWith({
+        where: { id: orderId },
+      });
       expect(mockMoMoAdapter.verifyPayment).toHaveBeenCalledWith(paymentId);
+    });
+
+    it('should propagate error when prisma order.findUnique fails', async () => {
+      const dbError = new Error('Database connection failed');
+      mockPrismaService.order.findUnique.mockRejectedValue(dbError);
+
+      await expect(
+        service.verifyPayment(userId, paymentId, PaymentMethod.STRIPE, orderId),
+      ).rejects.toThrow(dbError);
+
+      expect(mockStripeAdapter.verifyPayment).not.toHaveBeenCalled();
+      expect(mockMoMoAdapter.verifyPayment).not.toHaveBeenCalled();
     });
   });
 

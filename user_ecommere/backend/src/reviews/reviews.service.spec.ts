@@ -77,7 +77,6 @@ describe('ReviewsService', () => {
       user: {
         id: 'user-1',
         name: 'Nguyen Van A',
-        email: 'user1@example.com',
       },
     };
 
@@ -214,7 +213,6 @@ describe('ReviewsService', () => {
             select: {
               id: true,
               name: true,
-              email: true,
             },
           },
         },
@@ -251,7 +249,6 @@ describe('ReviewsService', () => {
             select: {
               id: true,
               name: true,
-              email: true,
             },
           },
         },
@@ -693,7 +690,6 @@ describe('ReviewsService', () => {
       user: {
         id: 'user-1',
         name: 'Nguyen Van A',
-        email: 'user1@example.com',
       },
       product: {
         id: 'prod-1',
@@ -759,7 +755,6 @@ describe('ReviewsService', () => {
             select: {
               id: true,
               name: true,
-              email: true,
             },
           },
           product: {

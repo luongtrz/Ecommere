@@ -423,6 +423,34 @@ describe('ReferralsService', () => {
         orderBy: { createdAt: 'desc' },
       });
     });
+
+    it('should accept and return coupons with null validUntil', async () => {
+      mockPrismaService.referral.findMany
+        .mockResolvedValueOnce([{ referrerCouponCode: 'COUPON-NO-EXPIRY' }])
+        .mockResolvedValueOnce([]);
+
+      const mockCoupons = [
+        {
+          code: 'COUPON-NO-EXPIRY',
+          type: CouponType.PERCENT,
+          value: 10,
+          validUntil: null,
+          createdAt: new Date('2026-03-01'),
+        },
+      ];
+      mockPrismaService.coupon.findMany.mockResolvedValue(mockCoupons);
+
+      const result = await service.getMyCouponsFromReferral('user-1');
+
+      expect(result).toEqual({ data: mockCoupons });
+      expect(result.data[0].validUntil).toBeNull();
+      expect(mockPrismaService.coupon.findMany).toHaveBeenCalledWith({
+        where: {
+          code: { in: ['COUPON-NO-EXPIRY'] },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
   });
 
   describe('processReferral', () => {

@@ -61,7 +61,6 @@ export class ReviewsService {
             select: {
               id: true,
               name: true,
-              email: true,
             },
           },
         },
@@ -175,7 +174,6 @@ export class ReviewsService {
           select: {
             id: true,
             name: true,
-            email: true,
           },
         },
         product: {

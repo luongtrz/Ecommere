@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CouponType, OrderStatus, Prisma } from '@prisma/client';
 import { CartService } from './cart.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -761,7 +765,7 @@ describe('CartService', () => {
       });
     });
 
-    it('should throw BadRequestException when cart item belongs to another user', async () => {
+    it('should throw ForbiddenException when cart item belongs to another user', async () => {
       mockPrismaService.cartItem.findUnique.mockResolvedValue({
         id: 'item-1',
         cart: { userId: 'other-user' },
@@ -770,7 +774,7 @@ describe('CartService', () => {
 
       await expect(
         service.updateCartItem('user-1', 'item-1', updateCartItemDto),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ForbiddenException);
       await expect(
         service.updateCartItem('user-1', 'item-1', updateCartItemDto),
       ).rejects.toThrow('Unauthorized');
@@ -837,14 +841,14 @@ describe('CartService', () => {
       });
     });
 
-    it('should throw BadRequestException when cart item belongs to another user', async () => {
+    it('should throw ForbiddenException when cart item belongs to another user', async () => {
       mockPrismaService.cartItem.findUnique.mockResolvedValue({
         id: 'item-1',
         cart: { userId: 'other-user' },
       });
 
       await expect(service.removeCartItem('user-1', 'item-1')).rejects.toThrow(
-        BadRequestException,
+        ForbiddenException,
       );
       await expect(service.removeCartItem('user-1', 'item-1')).rejects.toThrow(
         'Unauthorized',

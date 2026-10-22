@@ -10,7 +10,6 @@ import { CouponsController } from './coupons.controller';
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dtos/create-coupon.dto';
 import { UpdateCouponDto } from './dtos/update-coupon.dto';
-import { ValidateCouponDto } from './dtos/validate-coupon.dto';
 import { PaginationDto } from '@/common/dtos/pagination.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
@@ -299,10 +298,8 @@ describe('CouponsController', () => {
     });
   });
 
-  describe('POST /coupons/validate (validateCoupon)', () => {
-    const validateCouponDto: ValidateCouponDto = {
-      code: 'SUMMER2025',
-    };
+  describe('GET /coupons/validate (validateCoupon)', () => {
+    const couponCode = 'SUMMER2025';
 
     const mockValidationSuccess = {
       valid: true,
@@ -316,13 +313,65 @@ describe('CouponsController', () => {
       },
     };
 
+    it('should throw BadRequestException when code is undefined', async () => {
+      await expect(
+        controller.validateCoupon(undefined as any, 'user-1', '100000'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.validateCoupon(undefined as any, 'user-1', '100000'),
+      ).rejects.toThrow('code is required');
+
+      expect(mockCouponsService.validateCoupon).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when code is empty string', async () => {
+      await expect(
+        controller.validateCoupon('', 'user-1', '100000'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.validateCoupon('', 'user-1', '100000'),
+      ).rejects.toThrow('code is required');
+
+      expect(mockCouponsService.validateCoupon).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when code is whitespace only', async () => {
+      await expect(
+        controller.validateCoupon('   ', 'user-1', '100000'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.validateCoupon('   ', 'user-1', '100000'),
+      ).rejects.toThrow('code is required');
+
+      expect(mockCouponsService.validateCoupon).not.toHaveBeenCalled();
+    });
+
+    it('should trim code whitespace before delegating to service', async () => {
+      mockCouponsService.validateCoupon.mockResolvedValue(
+        mockValidationSuccess,
+      );
+
+      const result = await controller.validateCoupon(
+        '  SUMMER2025  ',
+        'user-1',
+        '100000',
+      );
+
+      expect(result).toEqual(mockValidationSuccess);
+      expect(mockCouponsService.validateCoupon).toHaveBeenCalledWith(
+        'SUMMER2025',
+        'user-1',
+        100000,
+      );
+    });
+
     it('should delegate to couponsService.validateCoupon with parsed integer when orderTotal is provided', async () => {
       mockCouponsService.validateCoupon.mockResolvedValue(
         mockValidationSuccess,
       );
 
       const result = await controller.validateCoupon(
-        validateCouponDto,
+        couponCode,
         'user-1',
         '100000',
       );
@@ -341,7 +390,7 @@ describe('CouponsController', () => {
       );
 
       const result = await controller.validateCoupon(
-        validateCouponDto,
+        couponCode,
         'user-1',
         '  250000  ',
       );
@@ -359,11 +408,7 @@ describe('CouponsController', () => {
         mockValidationSuccess,
       );
 
-      const result = await controller.validateCoupon(
-        validateCouponDto,
-        'user-1',
-        '0',
-      );
+      const result = await controller.validateCoupon(couponCode, 'user-1', '0');
 
       expect(result).toEqual(mockValidationSuccess);
       expect(mockCouponsService.validateCoupon).toHaveBeenCalledWith(
@@ -379,7 +424,7 @@ describe('CouponsController', () => {
       );
 
       const result = await controller.validateCoupon(
-        validateCouponDto,
+        couponCode,
         'user-1',
         undefined,
       );
@@ -394,10 +439,10 @@ describe('CouponsController', () => {
 
     it('should throw BadRequestException when orderTotal is empty string', async () => {
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', ''),
+        controller.validateCoupon(couponCode, 'user-1', ''),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', ''),
+        controller.validateCoupon(couponCode, 'user-1', ''),
       ).rejects.toThrow('orderTotal must be a non-negative integer');
 
       expect(mockCouponsService.validateCoupon).not.toHaveBeenCalled();
@@ -405,10 +450,10 @@ describe('CouponsController', () => {
 
     it('should throw BadRequestException when orderTotal is whitespace only', async () => {
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', '   '),
+        controller.validateCoupon(couponCode, 'user-1', '   '),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', '   '),
+        controller.validateCoupon(couponCode, 'user-1', '   '),
       ).rejects.toThrow('orderTotal must be a non-negative integer');
 
       expect(mockCouponsService.validateCoupon).not.toHaveBeenCalled();
@@ -416,10 +461,10 @@ describe('CouponsController', () => {
 
     it('should throw BadRequestException when orderTotal is negative', async () => {
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', '-100'),
+        controller.validateCoupon(couponCode, 'user-1', '-100'),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', '-100'),
+        controller.validateCoupon(couponCode, 'user-1', '-100'),
       ).rejects.toThrow('orderTotal must be a non-negative integer');
 
       expect(mockCouponsService.validateCoupon).not.toHaveBeenCalled();
@@ -427,10 +472,10 @@ describe('CouponsController', () => {
 
     it('should throw BadRequestException when orderTotal is non-numeric string', async () => {
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', 'abc'),
+        controller.validateCoupon(couponCode, 'user-1', 'abc'),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', 'abc'),
+        controller.validateCoupon(couponCode, 'user-1', 'abc'),
       ).rejects.toThrow('orderTotal must be a non-negative integer');
 
       expect(mockCouponsService.validateCoupon).not.toHaveBeenCalled();
@@ -438,10 +483,10 @@ describe('CouponsController', () => {
 
     it('should throw BadRequestException when orderTotal is a decimal number', async () => {
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', '100.5'),
+        controller.validateCoupon(couponCode, 'user-1', '100.5'),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', '100.5'),
+        controller.validateCoupon(couponCode, 'user-1', '100.5'),
       ).rejects.toThrow('orderTotal must be a non-negative integer');
 
       expect(mockCouponsService.validateCoupon).not.toHaveBeenCalled();
@@ -452,7 +497,7 @@ describe('CouponsController', () => {
       mockCouponsService.validateCoupon.mockRejectedValue(error);
 
       await expect(
-        controller.validateCoupon(validateCouponDto, 'user-1', '50000'),
+        controller.validateCoupon(couponCode, 'user-1', '50000'),
       ).rejects.toThrow(error);
 
       expect(mockCouponsService.validateCoupon).toHaveBeenCalledWith(

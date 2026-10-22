@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
+  ForbiddenException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -126,10 +127,13 @@ describe('PaymentsController', () => {
   });
 
   describe('verifyPayment', () => {
-    it('should delegate to paymentsService.verifyPayment with paymentId and method (STRIPE)', async () => {
+    const userId = 'user-123';
+
+    it('should delegate to paymentsService.verifyPayment with userId, paymentId, method (STRIPE), and orderId', async () => {
       const dto: VerifyPaymentDto = {
         paymentId: 'pi_test_123',
         method: PaymentMethod.STRIPE,
+        orderId: 'order-1',
       };
       const mockVerification = {
         success: true,
@@ -138,20 +142,23 @@ describe('PaymentsController', () => {
       };
       mockPaymentsService.verifyPayment.mockResolvedValue(mockVerification);
 
-      const result = await controller.verifyPayment(dto);
+      const result = await controller.verifyPayment(userId, dto);
 
       expect(paymentsService.verifyPayment).toHaveBeenCalledWith(
+        userId,
         'pi_test_123',
         PaymentMethod.STRIPE,
+        'order-1',
       );
       expect(paymentsService.verifyPayment).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockVerification);
     });
 
-    it('should delegate to paymentsService.verifyPayment with paymentId and method (MOMO)', async () => {
+    it('should delegate to paymentsService.verifyPayment with userId, paymentId, method (MOMO), and orderId', async () => {
       const dto: VerifyPaymentDto = {
         paymentId: 'momo_test_456',
         method: PaymentMethod.MOMO,
+        orderId: 'order-2',
       };
       const mockVerification = {
         success: true,
@@ -160,11 +167,13 @@ describe('PaymentsController', () => {
       };
       mockPaymentsService.verifyPayment.mockResolvedValue(mockVerification);
 
-      const result = await controller.verifyPayment(dto);
+      const result = await controller.verifyPayment(userId, dto);
 
       expect(paymentsService.verifyPayment).toHaveBeenCalledWith(
+        userId,
         'momo_test_456',
         PaymentMethod.MOMO,
+        'order-2',
       );
       expect(paymentsService.verifyPayment).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockVerification);
@@ -174,14 +183,59 @@ describe('PaymentsController', () => {
       const dto: VerifyPaymentDto = {
         paymentId: 'bad_payment_id',
         method: PaymentMethod.STRIPE,
+        orderId: 'order-1',
       };
       const error = new BadRequestException('Verification failed');
       mockPaymentsService.verifyPayment.mockRejectedValue(error);
 
-      await expect(controller.verifyPayment(dto)).rejects.toThrow(error);
+      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(
+        error,
+      );
       expect(paymentsService.verifyPayment).toHaveBeenCalledWith(
+        userId,
         'bad_payment_id',
         PaymentMethod.STRIPE,
+        'order-1',
+      );
+    });
+
+    it('should propagate ForbiddenException from paymentsService.verifyPayment when user does not own order', async () => {
+      const dto: VerifyPaymentDto = {
+        paymentId: 'pi_test_123',
+        method: PaymentMethod.STRIPE,
+        orderId: 'order-foreign',
+      };
+      const error = new ForbiddenException('Unauthorized');
+      mockPaymentsService.verifyPayment.mockRejectedValue(error);
+
+      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(
+        error,
+      );
+      expect(paymentsService.verifyPayment).toHaveBeenCalledWith(
+        userId,
+        'pi_test_123',
+        PaymentMethod.STRIPE,
+        'order-foreign',
+      );
+    });
+
+    it('should propagate NotFoundException from paymentsService.verifyPayment when order not found', async () => {
+      const dto: VerifyPaymentDto = {
+        paymentId: 'pi_test_123',
+        method: PaymentMethod.STRIPE,
+        orderId: 'order-not-found',
+      };
+      const error = new NotFoundException('Order not found');
+      mockPaymentsService.verifyPayment.mockRejectedValue(error);
+
+      await expect(controller.verifyPayment(userId, dto)).rejects.toThrow(
+        error,
+      );
+      expect(paymentsService.verifyPayment).toHaveBeenCalledWith(
+        userId,
+        'pi_test_123',
+        PaymentMethod.STRIPE,
+        'order-not-found',
       );
     });
   });

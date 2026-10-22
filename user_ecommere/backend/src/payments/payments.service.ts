@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -41,7 +42,7 @@ export class PaymentsService {
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Unauthorized');
+      throw new ForbiddenException('Unauthorized');
     }
 
     if (order.status !== OrderStatus.PENDING_PAYMENT) {
@@ -67,8 +68,25 @@ export class PaymentsService {
     };
   }
 
-  async verifyPayment(paymentId: string, method: PaymentMethod) {
+  async verifyPayment(
+    userId: string,
+    paymentId: string,
+    method: PaymentMethod,
+    orderId: string,
+  ) {
     this.ensurePaymentProviderConfigured();
+
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.userId !== userId) {
+      throw new ForbiddenException('Unauthorized');
+    }
 
     const provider =
       method === PaymentMethod.STRIPE ? this.stripeAdapter : this.momoAdapter;
