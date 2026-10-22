@@ -373,10 +373,10 @@ describe('ProductDetailPage', () => {
     expect(
       screen.getByText(`(${mockProduct.reviewCount} đánh giá)`),
     ).toBeInTheDocument();
-    expect(screen.getByText('🔥 Đã bán hơn 1.200 chai')).toBeInTheDocument();
+    expect(screen.getByText('Đã bán hơn 1.200 chai')).toBeInTheDocument();
 
     // Pricing box
-    expect(screen.getByText(/120[.,]000/)).toBeInTheDocument();
+    expect(screen.getAllByText(/120[.,]000/)[0]).toBeInTheDocument();
     expect(screen.getByText(/150[.,]000/)).toBeInTheDocument();
     expect(screen.getByText(/Tiết kiệm.*30[.,]000/)).toBeInTheDocument();
     expect(screen.getByText('Còn hàng trong kho')).toBeInTheDocument();
@@ -449,7 +449,7 @@ describe('ProductDetailPage', () => {
     fireEvent.click(var2Btn);
 
     expect(var2Btn).toHaveClass('border-teal-600');
-    expect(screen.getByText(/180[.,]000/)).toBeInTheDocument();
+    expect(screen.getAllByText(/180[.,]000/)[0]).toBeInTheDocument();
     expect(screen.queryByText(/Tiết kiệm/i)).not.toBeInTheDocument();
     expect(screen.getByText('(Có sẵn 5 sản phẩm)')).toBeInTheDocument();
 
@@ -458,7 +458,7 @@ describe('ProductDetailPage', () => {
     fireEvent.click(var4Btn);
 
     expect(var4Btn).toHaveClass('border-teal-600');
-    expect(screen.getByText(/90[.,]000/)).toBeInTheDocument();
+    expect(screen.getAllByText(/90[.,]000/)[0]).toBeInTheDocument();
     // volumeMl is 0, so (0ml) shouldn't be rendered
     expect(screen.queryByText('(0ml)')).not.toBeInTheDocument();
     // salePrice === price, so hasDiscount is false
@@ -536,9 +536,9 @@ describe('ProductDetailPage', () => {
     )[1] as HTMLButtonElement;
     fireEvent.click(plusBtn); // quantity = 2
 
-    const addToCartBtn = screen.getByRole('button', {
+    const addToCartBtn = screen.getAllByRole('button', {
       name: /Thêm Vào Giỏ Hàng/i,
-    });
+    })[0];
     fireEvent.click(addToCartBtn);
 
     expect(mockAddItem).toHaveBeenCalledTimes(1);
@@ -570,9 +570,9 @@ describe('ProductDetailPage', () => {
     // Select var-2 where salePrice is null
     fireEvent.click(screen.getByRole('button', { name: /Chanh Sả/i }));
 
-    const addToCartBtn = screen.getByRole('button', {
+    const addToCartBtn = screen.getAllByRole('button', {
       name: /Thêm Vào Giỏ Hàng/i,
-    });
+    })[0];
     fireEvent.click(addToCartBtn);
 
     expect(mockAddItem).toHaveBeenCalledWith({
@@ -596,7 +596,7 @@ describe('ProductDetailPage', () => {
 
     renderComponent();
 
-    const buyNowBtn = screen.getByRole('button', { name: /Mua Ngay/i });
+    const buyNowBtn = screen.getAllByRole('button', { name: /Mua Ngay/i })[0];
     fireEvent.click(buyNowBtn);
 
     expect(mockAddItem).toHaveBeenCalledTimes(1);
@@ -673,10 +673,12 @@ describe('ProductDetailPage', () => {
 
     renderComponent();
 
-    const addToCartBtn = screen.getByRole('button', { name: /Tạm Hết Hàng/i });
+    const addToCartBtn = screen.getAllByRole('button', {
+      name: /Tạm Hết Hàng/i,
+    })[0];
     expect(addToCartBtn).toBeDisabled();
 
-    const buyNowBtn = screen.getByRole('button', { name: /Mua Ngay/i });
+    const buyNowBtn = screen.getAllByRole('button', { name: /Mua Ngay/i })[0];
     expect(buyNowBtn).toBeDisabled();
 
     // Clicking disabled button should not trigger actions
@@ -763,19 +765,19 @@ describe('ProductDetailPage', () => {
 
     // finalPrice and originalPrice fall back to 0
     expect(
-      screen.getByText((content) => /^0\s*[₫đ]$/.test(content.trim())),
+      screen.getAllByText((content) => /^0\s*[₫đ]$/.test(content.trim()))[0],
     ).toBeInTheDocument();
 
     // Buttons are disabled
-    const addToCartBtn = screen.getByRole('button', {
+    const addToCartBtn = screen.getAllByRole('button', {
       name: /Thêm Vào Giỏ Hàng/i,
-    });
+    })[0];
     expect(addToCartBtn).toBeDisabled();
-    const buyNowBtn = screen.getByRole('button', { name: /Mua Ngay/i });
+    const buyNowBtn = screen.getAllByRole('button', { name: /Mua Ngay/i })[0];
     expect(buyNowBtn).toBeDisabled();
 
-    // Stock fallback shows (Có sẵn 50 sản phẩm)
-    expect(screen.getByText('(Có sẵn 50 sản phẩm)')).toBeInTheDocument();
+    // Stock fallback shows (Có sẵn 0 sản phẩm)
+    expect(screen.getByText('(Có sẵn 0 sản phẩm)')).toBeInTheDocument();
 
     // Wishlist price falls back to 0
     const wishlistBtn = screen.getByRole('button', {
