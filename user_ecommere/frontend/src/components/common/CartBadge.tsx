@@ -10,10 +10,7 @@ export function CartBadge() {
     <div className="relative flex h-9 w-9 items-center justify-center">
       <ShoppingCart className="h-5 w-5" />
       {itemCount > 0 ? (
-        <Badge
-          variant="destructive"
-          className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px]"
-        >
+        <Badge className="tabular absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full p-0 px-1 text-xs">
           {itemCount > 99 ? '99+' : itemCount}
         </Badge>
       ) : null}

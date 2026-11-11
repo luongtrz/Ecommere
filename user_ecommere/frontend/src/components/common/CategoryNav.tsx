@@ -15,9 +15,9 @@ export function CategoryNav() {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  const rootCategories = categories?.filter(c => !c.parentId) || [];
+  const rootCategories = categories?.filter((c) => !c.parentId) || [];
   const subCategories = activeCategory
-    ? categories?.filter(c => c.parentId === activeCategory.id) || []
+    ? categories?.filter((c) => c.parentId === activeCategory.id) || []
     : [];
 
   const isActive = (path: string) => {
@@ -65,11 +65,11 @@ export function CategoryNav() {
 
   if (isLoading) {
     return (
-      <div className="bg-white border-b border-slate-100 hidden md:block">
+      <div className="border-b border-border bg-card">
         <div className="container">
-          <div className="flex gap-6 py-3">
+          <div className="flex gap-6 py-2.5">
             {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-5 w-20 bg-slate-100" />
+              <Skeleton key={i} className="h-5 w-20 rounded-md" />
             ))}
           </div>
         </div>
@@ -80,14 +80,16 @@ export function CategoryNav() {
   return (
     <div
       ref={navRef}
-      className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 relative z-10 hidden md:block md:mx-auto md:max-w-7xl md:mt-2 md:rounded-2xl md:border md:border-slate-200/80 md:shadow-sm"
+      className="relative z-10 border-b border-border bg-card"
       onMouseLeave={() => setActiveCategory(null)}
     >
       <div className="container relative">
         {showLeftArrow && (
           <button
+            type="button"
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-slate-900 shadow-sm transition-colors"
+            className="absolute left-0 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+            aria-label="Cuộn sang trái"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -95,8 +97,10 @@ export function CategoryNav() {
 
         {showRightArrow && (
           <button
+            type="button"
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-slate-900 shadow-sm transition-colors"
+            className="absolute right-0 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+            aria-label="Cuộn sang phải"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -104,16 +108,17 @@ export function CategoryNav() {
 
         <ul
           ref={scrollContainerRef}
-          className="flex items-center gap-7 overflow-x-auto scrollbar-hide py-3 scroll-smooth"
+          className="scrollbar-hide flex items-center gap-6 overflow-x-auto py-2.5 scroll-smooth"
         >
           <li className="shrink-0">
             <Link
               to="/catalog"
               className={cn(
-                "relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-teal-600 after:transition-transform after:duration-300",
-                isActive('/catalog') 
-                  ? "text-teal-700 after:scale-x-100" 
-                  : "text-slate-600 hover:text-teal-700 after:scale-x-0 hover:after:scale-x-100"
+                'relative block whitespace-nowrap py-1 text-sm font-medium transition-colors',
+                'after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-accent after:transition-transform after:duration-150',
+                isActive('/catalog')
+                  ? 'text-foreground font-semibold after:scale-x-100'
+                  : 'text-muted-foreground hover:text-foreground after:scale-x-0 hover:after:scale-x-100',
               )}
               onMouseEnter={() => setActiveCategory(null)}
             >
@@ -121,22 +126,26 @@ export function CategoryNav() {
             </Link>
           </li>
 
-          {rootCategories.map((category) => (
-            <li key={category.id} className="shrink-0">
-              <Link
-                to={`/c/${category.slug}`}
-                className={cn(
-                  "relative text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-teal-600 after:transition-transform after:duration-300",
-                  isActive(`/c/${category.slug}`) || activeCategory?.id === category.id
-                    ? "text-teal-700 after:scale-x-100"
-                    : "text-slate-600 hover:text-teal-700 after:scale-x-0 hover:after:scale-x-100"
-                )}
-                onMouseEnter={(e) => handleMouseEnter(category, e)}
-              >
-                {category.name}
-              </Link>
-            </li>
-          ))}
+          {rootCategories.map((category) => {
+            const active = isActive(`/c/${category.slug}`) || activeCategory?.id === category.id;
+            return (
+              <li key={category.id} className="shrink-0">
+                <Link
+                  to={`/c/${category.slug}`}
+                  className={cn(
+                    'relative block whitespace-nowrap py-1 text-sm font-medium transition-colors',
+                    'after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-accent after:transition-transform after:duration-150',
+                    active
+                      ? 'text-foreground font-semibold after:scale-x-100'
+                      : 'text-muted-foreground hover:text-foreground after:scale-x-0 hover:after:scale-x-100',
+                  )}
+                  onMouseEnter={(e) => handleMouseEnter(category, e)}
+                >
+                  {category.name}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
@@ -144,10 +153,10 @@ export function CategoryNav() {
       <div
         style={{ left: menuPosition }}
         className={cn(
-          "absolute top-full border border-slate-200 bg-white rounded-2xl shadow-xl transition-all duration-150 min-w-[210px] z-10 p-1.5 mt-1",
+          'absolute top-full z-20 mt-1 min-w-[210px] rounded-md border border-border bg-popover p-1 shadow-md transition-opacity duration-150',
           activeCategory
-            ? "opacity-100 visible translate-y-0"
-            : "opacity-0 invisible -translate-y-1 pointer-events-none"
+            ? 'visible opacity-100'
+            : 'pointer-events-none invisible opacity-0',
         )}
       >
         {activeCategory && (
@@ -158,22 +167,22 @@ export function CategoryNav() {
                   <Link
                     key={sub.id}
                     to={`/c/${sub.slug}`}
-                    className="block text-sm text-slate-700 hover:text-slate-900 hover:bg-slate-50 rounded-xl px-3.5 py-2 transition-colors font-medium"
+                    className="block rounded-sm px-3 py-2 text-sm font-medium text-popover-foreground transition-colors hover:bg-muted"
                   >
                     {sub.name}
                   </Link>
                 ))}
-                <div className="border-t border-dashed border-slate-100 mt-1 pt-1.5">
+                <div className="mt-1 border-t border-border pt-1">
                   <Link
                     to={`/c/${activeCategory.slug}`}
-                    className="block text-sm font-semibold text-teal-700 hover:bg-teal-50 rounded-xl px-3.5 py-2 transition-colors"
+                    className="block rounded-sm px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-muted"
                   >
                     Xem tất cả
                   </Link>
                 </div>
               </>
             ) : (
-              <div className="px-3.5 py-2.5 text-xs text-slate-400">
+              <div className="px-3 py-2 text-xs text-muted-foreground">
                 Chưa có danh mục con
               </div>
             )}
