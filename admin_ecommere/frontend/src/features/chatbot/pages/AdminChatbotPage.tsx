@@ -226,10 +226,7 @@ export function AdminChatbotPage() {
   const claimOwner = useChatStore((s) => s.claimOwner);
   const reset = useChatStore((s) => s.reset);
   const setThreadId = useChatStore((s) => s.setThreadId);
-  const appendMessage = useChatStore((s) => s.appendMessage);
-  const setMessages = useChatStore(
-    (s) => (s as unknown as { setMessages?: (messages: ChatMessage[]) => void }).setMessages
-  );
+  const setMessages = useChatStore((s) => s.setMessages);
 
   const { user } = useAuth();
 
@@ -375,13 +372,7 @@ export function AdminChatbotPage() {
         });
       }
 
-      if (typeof setMessages === 'function') {
-        setMessages(loadedMessages);
-      } else {
-        for (const msg of loadedMessages) {
-          appendMessage(msg);
-        }
-      }
+      setMessages(loadedMessages);
     } catch (err: unknown) {
       if (requestId !== transcriptRequestIdRef.current) {
         return;
