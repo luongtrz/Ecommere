@@ -1,10 +1,10 @@
 import { useSearchParams } from 'react-router-dom';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { SEO } from '@/lib/seo';
 import { useProducts } from '../hooks/useProducts';
 import { useDebounce } from '@/hooks/useDebounce';
 import { ProductCard } from '@/components/common/ProductCard';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { Breadcrumb } from '@/components/common/Breadcrumb';
 import { Pagination } from '@/components/common/Pagination';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -115,6 +115,16 @@ export function CatalogPage() {
     }
   }, [debouncedSearch, searchQuery, updateParams]);
 
+  // Keep input in sync with EXTERNAL URL changes (e.g. clearing a filter chip). Skip the echo of our
+  // own debounced update, otherwise characters typed while that update was in flight get overwritten.
+  // debouncedSearch is intentionally not a dependency: this must only run when the URL query changes.
+  useEffect(() => {
+    if (searchQuery !== debouncedSearch) {
+      setSearchInput(searchQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
+
   const handlePageChange = (newPage: number) => {
     updateParams({ page: newPage.toString() });
   };
@@ -154,13 +164,99 @@ export function CatalogPage() {
     updateParams({ ...mapped, page: '1' });
   }, [updateParams]);
 
-  const clearFilters = () => {
-    setSearchParams({ view: viewMode });
-  };
+  const clearFilters = useCallback(() => {
+    setSearchInput('');
+    const newParams: Record<string, string> = {};
+    if (viewMode && viewMode !== 'grid') {
+      newParams.view = viewMode;
+    }
+    setSearchParams(newParams);
+  }, [viewMode, setSearchParams]);
 
   const handleViewToggle = (mode: string) => {
     updateParams({ view: mode });
   };
+
+  // Active filter chips
+  const activeChips = useMemo(() => {
+    const chips: Array<{ id: string; label: string; onRemove: () => void }> = [];
+
+    if (searchQuery) {
+      chips.push({
+        id: 'q',
+        label: `Tìm kiếm: "${searchQuery}"`,
+        onRemove: () => {
+          setSearchInput('');
+          updateParams({ q: undefined, page: '1' });
+        },
+      });
+    }
+
+    if (categorySlug) {
+      chips.push({
+        id: 'category',
+        label: `Danh mục: ${categorySlug}`,
+        onRemove: () => handleFilterChange({ categorySlug: undefined }),
+      });
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      let priceLabel = '';
+      if (minPrice !== undefined && maxPrice !== undefined) {
+        priceLabel = `${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}`;
+      } else if (minPrice !== undefined) {
+        priceLabel = `Từ ${formatCurrency(minPrice)}`;
+      } else if (maxPrice !== undefined) {
+        priceLabel = `Đến ${formatCurrency(maxPrice)}`;
+      }
+      chips.push({
+        id: 'price',
+        label: priceLabel,
+        onRemove: () => handleFilterChange({ minPrice: undefined, maxPrice: undefined }),
+      });
+    }
+
+    if (scent) {
+      scent.split(',').map((s) => s.trim()).filter(Boolean).forEach((s) => {
+        chips.push({
+          id: `scent-${s}`,
+          label: s,
+          onRemove: () => {
+            const next = scent.split(',').map((x) => x.trim()).filter((x) => x && x !== s);
+            updateParams({ scent: next.length > 0 ? next.join(',') : undefined, page: '1' });
+          },
+        });
+      });
+    }
+
+    if (volumeMl) {
+      volumeMl.split(',').map((v) => v.trim()).filter(Boolean).forEach((v) => {
+        chips.push({
+          id: `volume-${v}`,
+          label: `${v}ml`,
+          onRemove: () => {
+            const next = volumeMl.split(',').map((x) => x.trim()).filter((x) => x && x !== v);
+            updateParams({ volumeMl: next.length > 0 ? next.join(',') : undefined, page: '1' });
+          },
+        });
+      });
+    }
+
+    if (brand) {
+      brand.split(',').map((b) => b.trim()).filter(Boolean).forEach((b) => {
+        chips.push({
+          id: `brand-${b}`,
+          label: b,
+          onRemove: () => {
+            const next = brand.split(',').map((x) => x.trim()).filter((x) => x && x !== b);
+            updateParams({ brand: next.length > 0 ? next.join(',') : undefined, page: '1' });
+          },
+        });
+      });
+    }
+
+    return chips;
+  }, [searchQuery, categorySlug, minPrice, maxPrice, scent, volumeMl, brand, handleFilterChange, updateParams]);
 
   // Filter sidebar content (dung chung cho desktop va mobile)
   const filterContent = (
@@ -181,131 +277,226 @@ export function CatalogPage() {
     <>
       <SEO title="Sản phẩm" />
 
-      <div className="min-h-screen">
-        {/* Compact Header */}
-        <div className="border-b border-white/30 bg-white/30 backdrop-blur-md">
-          <div className="container py-4">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div>
-                  <h1 className="text-xl font-bold text-foreground">Sản phẩm</h1>
-                  <p className="text-xs text-muted-foreground hidden md:block">{data?.total || 0} kết quả tìm thấy</p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`hidden lg:flex items-center gap-2 h-9 rounded-full ${showFilters ? 'bg-secondary border-white/80 hover:bg-secondary/80' : 'border-dashed border-white/80 bg-white/30'}`}
-                >
-                  <Filter className="h-4 w-4 text-foreground/80" />
-                  <span className="text-xs font-semibold text-foreground">{showFilters ? 'Ẩn bộ lọc' : 'Bộ lọc'}</span>
-                </Button>
+      <div className="min-h-screen bg-background">
+        <div className="container section-y">
+          {/* Page Header */}
+          <header className="border-b border-border pb-6 mb-8 md:mb-10">
+            <Breadcrumb
+              items={[
+                { label: 'Sản phẩm' },
+              ]}
+              className="mb-4"
+            />
+
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h1 className="font-serif text-3xl md:text-4xl text-foreground font-normal tracking-tight">
+                  Sản phẩm
+                </h1>
+                <p className="text-sm text-muted-foreground mt-2 max-w-[65ch]">
+                  <span className="tabular">{data?.total || 0}</span> kết quả tìm thấy
+                </p>
               </div>
 
-              {/* Compact Toolbar */}
-              <div className="flex items-center gap-2 w-full md:w-auto">
+              {/* Controls */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-stretch sm:items-center">
                 {/* Search */}
-                <div className="relative flex-1 md:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <div className="relative w-full sm:w-60 md:w-56 lg:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={searchInput}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder="Tìm kiếm..."
-                    className="h-9 pl-9 text-sm bg-white/60 border-white/80 rounded-xl focus:bg-white transition-all"
+                    className="h-10 pl-9 pr-8 text-sm rounded-md bg-background"
                   />
                   {searchInput && (
-                    <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-secondary rounded-full p-0.5">
-                      <X className="h-3 w-3 text-muted-foreground" />
+                    <button
+                      type="button"
+                      onClick={() => handleSearchChange('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      aria-label="Xóa tìm kiếm"
+                    >
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 border-l pl-2 ml-2 border-white/40">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  {/* Desktop Show/Hide Filter Toggle */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="hidden lg:inline-flex items-center gap-2 h-9 rounded-md text-sm"
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span>{showFilters ? 'Ẩn bộ lọc' : 'Bộ lọc'}</span>
+                  </Button>
+
+                  {/* Mobile Filter Trigger */}
+                  <div className="lg:hidden flex-1 sm:flex-initial">
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="outline" size="default" className="h-10 w-full sm:w-auto gap-2 rounded-md">
+                          <Filter className="h-4 w-4" />
+                          <span>Lọc</span>
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="left" className="w-80 overflow-y-auto bg-card border-r border-border p-6">
+                        <SheetHeader className="mb-4">
+                          <SheetTitle className="text-foreground font-serif text-xl">Bộ lọc</SheetTitle>
+                        </SheetHeader>
+                        <div>
+                          {filterContent}
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+
                   {/* Sort */}
-                  <Select value={sortBy} onValueChange={handleSortChange}>
-                    <SelectTrigger className="h-9 w-[130px] text-xs border-0 bg-transparent hover:bg-secondary/40 font-semibold text-foreground rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-white/70 bg-white/95">
-                      {PRODUCT_SORT_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value} className="text-xs rounded-lg">
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex-1 sm:flex-initial">
+                    <Select value={sortBy} onValueChange={handleSortChange}>
+                      <SelectTrigger className="h-10 w-full sm:w-[150px] md:w-[160px] text-sm rounded-md bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover rounded-md shadow-md border-border">
+                        {PRODUCT_SORT_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value} className="text-sm">
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
                   {/* View Toggle */}
-                  <div className="flex bg-secondary/55 rounded-xl p-0.5 border border-white/40">
+                  <div className="hidden sm:flex items-center border border-border rounded-md p-0.5 bg-muted">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleViewToggle('grid')}
-                      className={`h-7 w-7 p-0 rounded-lg ${viewMode === 'grid' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground'}`}
+                      className={`h-8 w-8 p-0 rounded-sm ${viewMode === 'grid' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                      aria-label="Xem dạng lưới"
                     >
-                      <Grid3X3 className="h-3.5 w-3.5" />
+                      <Grid3X3 className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleViewToggle('list')}
-                      className={`h-7 w-7 p-0 rounded-lg ${viewMode === 'list' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground'}`}
+                      className={`h-8 w-8 p-0 rounded-sm ${viewMode === 'list' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                      aria-label="Xem dạng danh sách"
                     >
-                      <List className="h-3.5 w-3.5" />
+                      <List className="h-4 w-4" />
                     </Button>
                   </div>
-
-                  {/* Mobile Filter Trigger */}
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-xl lg:hidden border-white/80 bg-white/30">
-                        <Filter className="h-4 w-4" />
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-80 overflow-y-auto border-white/70 bg-white/95">
-                      <SheetHeader>
-                        <SheetTitle className="text-foreground">Bộ lọc</SheetTitle>
-                      </SheetHeader>
-                      <div className="py-4">
-                        {filterContent}
-                      </div>
-                    </SheetContent>
-                  </Sheet>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </header>
 
-        {/* Main Content with Sidebar */}
-        <div className="container py-6 min-h-[60vh]">
-          <div className="flex gap-6">
+          {/* Main Layout: two columns desktop when showFilters is true, single column when false */}
+          <div className={`items-start ${showFilters ? 'lg:grid lg:grid-cols-[260px_1fr] lg:gap-10' : ''}`}>
             {/* Sidebar - Desktop only */}
             {showFilters && (
-              <aside className="hidden lg:block w-64 shrink-0 animate-in slide-in-from-left-2 duration-300 fade-in">
-                <div className="sticky top-24 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/60 p-4 shadow-sm overflow-y-auto max-h-[calc(100vh-8rem)]">
-                  {filterContent}
+              <aside className="hidden lg:block">
+                <div className="lg:sticky lg:top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                  <div className="surface p-5">
+                    {filterContent}
+                  </div>
                 </div>
               </aside>
             )}
 
-            {/* Products */}
-            <div className="flex-1 min-w-0">
+            {/* Products Column */}
+            <div className="min-w-0">
+              {/* Active filter chips */}
+              {activeChips.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 mb-6" aria-label="Bộ lọc đang áp dụng">
+                  <span className="text-xs text-muted-foreground">Bộ lọc:</span>
+                  {activeChips.map((chip) => (
+                    <span
+                      key={chip.id}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card text-sm text-foreground"
+                    >
+                      <span>{chip.label}</span>
+                      <button
+                        type="button"
+                        onClick={chip.onRemove}
+                        className="hover:text-destructive focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-full p-0.5"
+                        aria-label={`Xóa bộ lọc ${chip.label}`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="h-8 text-xs text-muted-foreground hover:text-foreground px-2"
+                  >
+                    Xóa tất cả
+                  </Button>
+                </div>
+              )}
+
+              {/* Product list / states */}
               {isLoading ? (
-                <div className="py-20 flex justify-center"><LoadingSpinner /></div>
+                viewMode === 'grid' ? (
+                  <div
+                    className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${
+                      !showFilters ? 'xl:grid-cols-5' : ''
+                    } gap-x-4 gap-y-8 md:gap-x-6`}
+                    role="status"
+                    aria-label="Đang tải sản phẩm"
+                  >
+                    {Array.from({ length: !showFilters ? 10 : 8 }).map((_, index) => (
+                      <div key={index} className="space-y-3">
+                        <div className="aspect-[4/5] w-full bg-muted rounded-lg animate-pulse" />
+                        <div className="space-y-2">
+                          <div className="h-4 w-3/4 bg-muted rounded-sm animate-pulse" />
+                          <div className="h-3.5 w-1/3 bg-muted rounded-sm animate-pulse" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4" role="status" aria-label="Đang tải sản phẩm">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={index} className="flex gap-4 p-4 border border-border bg-card rounded-lg">
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 bg-muted rounded-lg shrink-0 animate-pulse" />
+                        <div className="flex-1 space-y-3 py-1">
+                          <div className="h-4 w-1/2 bg-muted rounded-sm animate-pulse" />
+                          <div className="h-3 w-1/4 bg-muted rounded-sm animate-pulse" />
+                          <div className="h-4 w-1/3 bg-muted rounded-sm animate-pulse" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
               ) : data?.products.length === 0 ? (
                 <EmptyState
                   title="Không tìm thấy sản phẩm"
                   description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
-                  action={<Button variant="outline" className="rounded-full" onClick={clearFilters}>Xóa bộ lọc</Button>}
+                  action={
+                    <Button variant="outline" className="rounded-md" onClick={clearFilters}>
+                      Xóa bộ lọc
+                    </Button>
+                  }
                 />
               ) : (
-                <div className="space-y-8 animate-fade-in">
-                  <div className={`${viewMode === 'grid'
-                    ? `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${!showFilters ? 'xl:grid-cols-5' : ''} gap-4 md:gap-6`
-                    : 'space-y-4'
-                    }`}>
-                    {data?.products.map((product) => (
+                <div>
+                  <div
+                    className={
+                      viewMode === 'grid'
+                        ? `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${
+                            !showFilters ? 'xl:grid-cols-5' : ''
+                          } gap-x-4 gap-y-8 md:gap-x-6`
+                        : 'space-y-4'
+                    }
+                  >
+                    {data?.products.map((product) =>
                       viewMode === 'grid' ? (
                         <ProductCard
                           key={product.id}
@@ -320,42 +511,61 @@ export function CatalogPage() {
                           onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                         />
                       ) : (
-                        <div key={product.id} className="flex gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-[1.65rem] border border-white/60 hover:shadow-lg transition-all duration-300">
-                          <div className="w-24 h-24 bg-white/50 border border-white/40 rounded-xl overflow-hidden shrink-0">
-                            <img src={getImageUrl(product.images[0], { width: 200 })} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
+                        <div
+                          key={product.id}
+                          className="flex gap-4 p-4 border border-border bg-card rounded-lg transition-colors hover:border-foreground/30"
+                        >
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 bg-muted rounded-lg overflow-hidden shrink-0 border border-border">
+                            <img
+                              src={getImageUrl(product.images[0], { width: 200 })}
+                              alt={product.name}
+                              loading="lazy"
+                              className="w-full h-full object-cover"
+                            />
                           </div>
                           <div className="flex-1 min-w-0 py-1 flex flex-col justify-between">
                             <div>
-                              <h3 className="font-bold text-foreground truncate text-base">{product.name}</h3>
+                              <h3 className="font-medium text-foreground truncate text-base">
+                                {product.name}
+                              </h3>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                                <div className="flex items-center text-amber-500 font-semibold">
-                                  <span className="mr-0.5">&#9733;</span> {product.rating?.toFixed(1)}
+                                <div className="flex items-center text-accent font-semibold">
+                                  <span className="mr-0.5" aria-hidden="true">&#9733;</span>
+                                  <span className="tabular">{product.rating?.toFixed(1)}</span>
                                 </div>
                                 <span>|</span>
-                                <span>{product.reviewCount} đánh giá</span>
+                                <span>
+                                  <span className="tabular">{product.reviewCount}</span> đánh giá
+                                </span>
                               </div>
                               <div className="flex flex-wrap gap-1 mb-3">
                                 {product.variants.slice(0, 3).map((v, i) => (
-                                  <Badge key={i} variant="secondary" className="text-[10px] h-5 px-2 font-normal rounded-full">
+                                  <Badge key={i} variant="secondary" className="text-xs h-5 px-2 font-normal rounded-sm">
                                     {v.scent}
                                   </Badge>
                                 ))}
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-primary text-base">{formatCurrency(product.basePrice)}</span>
-                              <Button size="sm" className="h-9 rounded-full text-xs transition-all duration-300 active:scale-95" onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}>
-                                <ShoppingBag className="h-3.5 w-3.5 mr-1.5" /> Thêm vào giỏ
+                              <span className="font-semibold text-foreground text-base tabular">
+                                {formatCurrency(product.basePrice)}
+                              </span>
+                              <Button
+                                size="sm"
+                                className="h-9 rounded-md text-xs transition-colors"
+                                onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                              >
+                                <ShoppingBag className="h-4 w-4 mr-1.5" /> Thêm vào giỏ
                               </Button>
                             </div>
                           </div>
                         </div>
                       )
-                    ))}
+                    )}
                   </div>
 
                   {data && data.totalPages > 1 && (
-                    <div className="flex justify-center pt-8 border-t border-white/40">
+                    <div className="mt-12 flex justify-center pt-8 border-t border-border">
                       <Pagination
                         currentPage={page}
                         totalPages={data.totalPages}
