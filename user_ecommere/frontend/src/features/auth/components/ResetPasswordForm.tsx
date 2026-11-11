@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
-interface ResetPasswordFormProps {
+export interface ResetPasswordFormProps {
   onSubmit: (data: ResetPasswordInput) => void;
   isLoading?: boolean;
 }
@@ -21,17 +21,24 @@ export function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProp
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
           name="newPassword"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Mật khẩu mới</FormLabel>
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Mật khẩu mới
+              </FormLabel>
               <FormControl>
-                <Input type="password" placeholder="--------" {...field} />
+                <Input
+                  type="password"
+                  placeholder="--------"
+                  className="h-11 rounded-md border-input bg-background text-sm"
+                  {...field}
+                />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm text-destructive" />
             </FormItem>
           )}
         />
@@ -39,16 +46,27 @@ export function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProp
           control={form.control}
           name="confirmPassword"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Xác nhận mật khẩu mới</FormLabel>
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Xác nhận mật khẩu mới
+              </FormLabel>
               <FormControl>
-                <Input type="password" placeholder="--------" {...field} />
+                <Input
+                  type="password"
+                  placeholder="--------"
+                  className="h-11 rounded-md border-input bg-background text-sm"
+                  {...field}
+                />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm text-destructive" />
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button
+          type="submit"
+          className="w-full h-11 rounded-md text-sm font-medium"
+          disabled={isLoading}
+        >
           {isLoading ? 'Đang đặt lại mật khẩu...' : 'Đặt lại mật khẩu'}
         </Button>
       </form>

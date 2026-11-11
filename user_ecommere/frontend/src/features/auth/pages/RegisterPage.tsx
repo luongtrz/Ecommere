@@ -2,7 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { RegisterForm } from '../components/RegisterForm';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
-import { Gift, ShieldCheck, Sparkles, UserCheck } from 'lucide-react';
+import { Gift, ShieldCheck } from 'lucide-react';
 
 export function RegisterPage() {
   const { register, isRegisterLoading } = useAuth();
@@ -12,102 +12,129 @@ export function RegisterPage() {
   return (
     <>
       <SEO title="Đăng ký tài khoản - Thai Spray" />
-      <div className="min-h-[85vh] flex items-center justify-center p-4 relative overflow-hidden py-10">
-        {/* Background ambient lighting */}
-        <div className="pointer-events-none absolute -top-40 -left-40 h-80 w-80 rounded-full bg-teal-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
 
-        <div className="w-full max-w-md relative z-10 space-y-6">
-          {/* Brand Header */}
-          <div className="text-center space-y-2">
-            <Link to="/" className="inline-flex items-center gap-3 group">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-500 text-white font-black text-lg shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform">
-                TS
-              </div>
-              <div className="text-left">
-                <span className="text-xl font-black tracking-tight text-slate-900 block leading-tight">
-                  Thai <span className="text-teal-600">Spray</span>
-                </span>
-                <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
-                  Chính Hãng Thái Lan
-                </span>
-              </div>
+      <div className="min-h-screen w-full grid lg:grid-cols-2 bg-background text-foreground">
+        {/* ================= LEFT COLUMN: Brand Panel ================= */}
+        <div className="hidden lg:flex flex-col justify-between p-12 xl:p-16 bg-primary text-primary-foreground">
+          <div>
+            <Link
+              to="/"
+              className="font-serif text-2xl tracking-tight text-primary-foreground hover:opacity-90 transition-opacity"
+            >
+              Thai Spray
             </Link>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight pt-2">
-              Tạo Tài Khoản Khách Hàng
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-xs mx-auto">
-              Đăng ký thành viên để nhận voucher và ưu đãi độc quyền
+            <p className="mt-1 text-xs text-primary-foreground/70 uppercase tracking-wider">
+              Chính Hãng Thái Lan
             </p>
           </div>
 
-          {/* Special Gift Voucher Banner */}
-          <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 p-3.5 flex items-center gap-3 shadow-sm">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white font-bold">
-              <Gift className="h-5 w-5" />
-            </div>
-            <div className="text-xs">
-              <p className="font-extrabold text-amber-950">Tặng Voucher 20.000đ</p>
-              <p className="text-amber-800/80 font-medium">Áp dụng cho đơn hàng đầu tiên của bạn</p>
+          <div className="max-w-md space-y-4">
+            <h2 className="font-serif text-3xl xl:text-4xl leading-tight text-primary-foreground">
+              Tạo Tài Khoản Khách Hàng
+            </h2>
+
+            <p className="text-sm text-primary-foreground/80 leading-relaxed">
+              Đăng ký thành viên để nhận voucher và ưu đãi độc quyền
+            </p>
+
+            <div className="pt-4 border-t border-primary-foreground/15 text-xs text-primary-foreground/80 space-y-1">
+              <p className="font-semibold text-primary-foreground">Tặng Voucher 20.000đ</p>
+              <p className="text-primary-foreground/70">Áp dụng cho đơn hàng đầu tiên của bạn</p>
             </div>
           </div>
 
-          {/* Referral Notice */}
-          {referralCode && (
-            <div className="bg-teal-50 border border-teal-200/80 rounded-2xl p-3 text-center">
-              <p className="text-xs font-bold text-teal-900">
-                🎉 Bạn được giới thiệu bởi bạn bè
-              </p>
-              <p className="text-[11px] text-teal-700 font-medium mt-0.5">
-                Mã giới thiệu: <span className="font-mono font-bold text-teal-900">{referralCode}</span>
+          <div className="pt-6 border-t border-primary-foreground/15 flex items-center justify-between text-xs text-primary-foreground/70">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              <span>Bảo mật 100%</span>
+            </div>
+            <span>Tích điểm không giới hạn</span>
+          </div>
+        </div>
+
+        {/* ================= RIGHT COLUMN: Form Column ================= */}
+        <div className="flex min-h-screen flex-col justify-center items-center p-6 sm:p-10 lg:p-12 bg-background">
+          <div className="w-full max-w-sm space-y-6">
+            {/* Mobile Brand */}
+            <div className="lg:hidden flex items-center justify-between">
+              <Link to="/" className="font-serif text-xl tracking-tight text-foreground">
+                Thai Spray
+              </Link>
+              <Link
+                to="/"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Trang chủ →
+              </Link>
+            </div>
+
+            {/* Header */}
+            <div className="space-y-1.5">
+              <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground">
+                Tạo Tài Khoản Khách Hàng
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Đăng ký thành viên để nhận voucher và ưu đãi độc quyền
               </p>
             </div>
-          )}
 
-          {/* Register Card */}
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-7 sm:p-8 shadow-xl shadow-slate-200/50 space-y-6">
+            {/* Special Gift Voucher Banner */}
+            <div className="rounded-md border border-border bg-secondary/50 p-3.5 flex items-center gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-primary text-primary-foreground">
+                <Gift className="h-4 w-4" />
+              </div>
+              <div className="text-xs">
+                <p className="font-semibold text-foreground">Tặng Voucher 20.000đ</p>
+                <p className="text-muted-foreground">Áp dụng cho đơn hàng đầu tiên của bạn</p>
+              </div>
+            </div>
+
+            {/* Referral Notice */}
+            {referralCode && (
+              <div className="bg-secondary/60 border border-border rounded-md p-3 text-center">
+                <p className="text-xs font-semibold text-foreground">
+                  🎉 Bạn được giới thiệu bởi bạn bè
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Mã giới thiệu: <span className="font-mono font-semibold text-foreground">{referralCode}</span>
+                </p>
+              </div>
+            )}
+
+            {/* Register Form */}
             <RegisterForm
               onSubmit={(data) => register(data)}
               isLoading={isRegisterLoading}
               defaultReferralCode={referralCode}
             />
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-100" />
+            {/* Divider & Login Link */}
+            <div className="pt-2">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-background px-3 text-muted-foreground">
+                    Đã có tài khoản?
+                  </span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-slate-400 font-medium">
-                  Đã có tài khoản?
-                </span>
+
+              <div className="text-center mt-4">
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Đăng nhập tài khoản ngay
+                </Link>
               </div>
             </div>
-
-            <div className="text-center">
-              <Link
-                to="/login"
-                className="inline-flex items-center justify-center gap-1.5 w-full h-11 rounded-xl border border-slate-200 hover:border-teal-400 bg-slate-50/80 hover:bg-teal-50/50 text-xs font-bold text-slate-700 hover:text-teal-800 transition-all"
-              >
-                <UserCheck className="h-4 w-4 text-teal-600" />
-                Đăng nhập tài khoản ngay
-              </Link>
-            </div>
-          </div>
-
-          {/* Trust Guarantees */}
-          <div className="flex items-center justify-center gap-6 text-xs text-slate-500 font-medium pt-1">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-teal-600" />
-              Bảo mật 100%
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              Tích điểm không giới hạn
-            </span>
           </div>
         </div>
       </div>
     </>
   );
 }
+
+export default RegisterPage;
