@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Sparkles,
   Square,
+  ChevronDown,
 } from 'lucide-react';
 
 import { useChatAgent } from '../hooks/useChatAgent';
@@ -67,6 +68,17 @@ function formatVietnameseDate(dateStr?: string | null): string {
   }
 }
 
+function formatMessageTime(dateStr?: string | null): string {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
 interface ThreadListContentProps {
   threads: AgentThreadSummary[];
   currentThreadId: string | null;
@@ -106,7 +118,7 @@ function ThreadListContent({
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-8 gap-2">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none text-muted-foreground" />
             <span className="text-xs text-muted-foreground">Đang tải danh sách…</span>
           </div>
         ) : threads.length === 0 ? (
@@ -141,7 +153,7 @@ function ThreadListContent({
                     {dateText && (
                       <p
                         className={cn(
-                          'mt-1 text-[11px] truncate',
+                          'mt-1 text-xs truncate',
                           isSelected ? 'text-primary/70' : 'text-muted-foreground'
                         )}
                       >
@@ -153,11 +165,11 @@ function ThreadListContent({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                    className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                     onClick={() => onDeleteClick(thread)}
                     aria-label="Xóa cuộc trò chuyện"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               );
@@ -172,7 +184,9 @@ function ThreadListContent({
                   onClick={onLoadMore}
                   disabled={isLoadingMore}
                 >
-                  {isLoadingMore && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                  {isLoadingMore && (
+                    <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none text-primary" />
+                  )}
                   <span>Tải thêm</span>
                 </Button>
               </div>
@@ -192,9 +206,16 @@ export function AdminChatbotPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [threadError, setThreadError] = useState<string | null>(null);
   const [threadLimit, setThreadLimit] = useState(DEFAULT_THREAD_LIMIT);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [srAnnouncement, setSrAnnouncement] = useState('');
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const transcriptRequestIdRef = useRef(0);
+  const prevStreamingRef = useRef(false);
+
   const queryClient = useQueryClient();
   const toast = useToast();
 
@@ -206,6 +227,9 @@ export function AdminChatbotPage() {
   const reset = useChatStore((s) => s.reset);
   const setThreadId = useChatStore((s) => s.setThreadId);
   const appendMessage = useChatStore((s) => s.appendMessage);
+  const setMessages = useChatStore(
+    (s) => (s as unknown as { setMessages?: (messages: ChatMessage[]) => void }).setMessages
+  );
 
   const { user } = useAuth();
 
@@ -237,14 +261,64 @@ export function AdminChatbotPage() {
     setThreadLimit((limit) => Math.min(limit + THREAD_LIMIT_STEP, MAX_THREAD_LIMIT));
   };
 
+  // Announce streaming status transitions to screen readers without reading every token
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!prevStreamingRef.current && isStreaming) {
+      setSrAnnouncement('Trợ lý đang phản hồi…');
+    } else if (prevStreamingRef.current && !isStreaming) {
+      setSrAnnouncement('Trợ lý đã trả lời xong');
+    }
+    prevStreamingRef.current = isStreaming;
+  }, [isStreaming]);
+
+  // Auto-grow textarea up to max-h-32 (128px)
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [input]);
+
+  const scrollToBottom = (behavior: ScrollBehavior = 'auto') => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior,
+      });
+    }
+  };
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const threshold = 80;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
+    setIsAtBottom(atBottom);
+    isAtBottomRef.current = atBottom;
+  };
+
+  // Stick to bottom: only auto-scroll if within ~80px of bottom
+  useEffect(() => {
+    if (isAtBottomRef.current) {
+      scrollToBottom('auto');
+    }
   }, [visibleMessages, isStreaming]);
+
+  const handleScrollToBottomClick = () => {
+    setIsAtBottom(true);
+    isAtBottomRef.current = true;
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scrollToBottom(prefersReducedMotion ? 'auto' : 'smooth');
+  };
 
   const startNewConversation = () => {
     transcriptRequestIdRef.current += 1;
     setIsLoadingTranscript(false);
     setThreadError(null);
+    setIsAtBottom(true);
+    isAtBottomRef.current = true;
     newThread();
   };
 
@@ -257,11 +331,14 @@ export function AdminChatbotPage() {
     setThreadId(id);
     setIsLoadingTranscript(true);
     setThreadError(null);
+    setIsAtBottom(true);
+    isAtBottomRef.current = true;
     try {
       const transcript = await agentApi.getTranscript(id);
       if (requestId !== transcriptRequestIdRef.current) {
         return;
       }
+      const loadedMessages: ChatMessage[] = [];
       const now = new Date().toISOString();
       for (const msg of transcript) {
         const hasToolCalls =
@@ -288,7 +365,7 @@ export function AdminChatbotPage() {
           continue;
         }
 
-        appendMessage({
+        loadedMessages.push({
           id: msg.id,
           role: msg.role,
           content: msg.content,
@@ -296,6 +373,14 @@ export function AdminChatbotPage() {
           confirm,
           createdAt: now,
         });
+      }
+
+      if (typeof setMessages === 'function') {
+        setMessages(loadedMessages);
+      } else {
+        for (const msg of loadedMessages) {
+          appendMessage(msg);
+        }
       }
     } catch (err: unknown) {
       if (requestId !== transcriptRequestIdRef.current) {
@@ -346,6 +431,9 @@ export function AdminChatbotPage() {
     }
     setInput('');
     setThreadError(null);
+    setIsAtBottom(true);
+    isAtBottomRef.current = true;
+    scrollToBottom('auto');
     try {
       await send(trimmed);
     } finally {
@@ -353,13 +441,25 @@ export function AdminChatbotPage() {
     }
   };
 
+  const shouldShowStreamingIndicator = (() => {
+    if (!isOwnerMatch || !isStreaming) return false;
+    const lastMsg = visibleMessages[visibleMessages.length - 1];
+    if (!lastMsg || lastMsg.role !== 'assistant') {
+      return true;
+    }
+    const hasContent = Boolean(lastMsg.content && lastMsg.content.trim().length > 0);
+    const hasTools = Boolean(lastMsg.tools && lastMsg.tools.length > 0);
+    const hasConfirm = Boolean(lastMsg.confirm?.calls && lastMsg.confirm.calls.length > 0);
+    return !hasContent && !hasTools && !hasConfirm;
+  })();
+
   return (
     <>
       <SEO title="Trợ lý quản trị - Thai Spray Admin" />
 
-      <div className="admin-surface flex h-[calc(100vh-7.5rem)] min-h-[500px] flex-col overflow-hidden">
+      <div className="admin-surface flex h-[calc(100dvh-7.5rem)] flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between border-b border-border/60 px-5 py-3 shrink-0 bg-white/50">
+        <header className="flex items-center justify-between border-b border-border/60 px-5 py-3 shrink-0 bg-card/60 backdrop-blur">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary shrink-0" />
@@ -373,7 +473,7 @@ export function AdminChatbotPage() {
           <div className="flex items-center gap-2 shrink-0">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden gap-1.5 h-8 text-xs">
+                <Button variant="outline" size="sm" className="md:hidden gap-1.5 h-9 text-xs">
                   <History className="h-3.5 w-3.5" />
                   <span>Lịch sử</span>
                 </Button>
@@ -427,9 +527,14 @@ export function AdminChatbotPage() {
 
           {/* Right column: Conversation */}
           <section className="flex flex-1 flex-col min-w-0 min-h-0 bg-background/50">
+            {/* Screen reader live region for status announcements */}
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+              {srAnnouncement}
+            </div>
+
             {isLoadingTranscript ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <Loader2 className="h-6 w-6 animate-spin motion-reduce:animate-none text-primary" />
                 <p className="text-xs text-muted-foreground">Đang tải cuộc trò chuyện…</p>
               </div>
             ) : visibleMessages.length === 0 ? (
@@ -464,154 +569,198 @@ export function AdminChatbotPage() {
               </div>
             ) : (
               /* Message list */
-              <div
-                role="log"
-                aria-live="polite"
-                className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4"
-              >
-                {threadError && (
-                  <Alert variant="destructive" role="alert" className="mb-4">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="flex items-center justify-between">
-                      <span>{threadError}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => setThreadError(null)}
-                      >
-                        Đóng
-                      </Button>
-                    </AlertDescription>
-                  </Alert>
-                )}
+              <div className="relative flex-1 min-h-0 flex flex-col">
+                <div
+                  ref={scrollRef}
+                  onScroll={handleScroll}
+                  role="log"
+                  aria-label="Nội dung cuộc trò chuyện"
+                  className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4"
+                >
+                  <div className="max-w-4xl mx-auto w-full space-y-4">
+                    {threadError && (
+                      <Alert variant="destructive" role="alert" className="mb-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="flex items-center justify-between">
+                          <span>{threadError}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={() => setThreadError(null)}
+                          >
+                            Đóng
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
 
-                {visibleMessages.map((message) => {
-                  if (message.role === 'user') {
-                    return (
-                      <div key={message.id} className="flex justify-end">
-                        <div className="max-w-[85%] rounded-2xl bg-primary px-4 py-2.5 text-primary-foreground text-sm shadow-sm whitespace-pre-wrap break-words">
-                          {message.content}
+                    {visibleMessages.map((message) => {
+                      if (message.role === 'user') {
+                        const timeText = formatMessageTime(message.createdAt);
+                        return (
+                          <div key={message.id} className="flex flex-col items-end">
+                            <div className="max-w-[85%] rounded-2xl bg-primary px-4 py-2.5 text-primary-foreground text-sm shadow-sm whitespace-pre-wrap break-words">
+                              {message.content}
+                            </div>
+                            {timeText ? (
+                              <span className="mt-1 text-xs text-muted-foreground px-1">
+                                {timeText}
+                              </span>
+                            ) : null}
+                          </div>
+                        );
+                      }
+
+                      const hasTools = Boolean(message.tools && message.tools.length > 0);
+                      const hasContent = Boolean(
+                        message.content && message.content.trim().length > 0
+                      );
+                      const hasConfirm = Boolean(
+                        message.confirm?.calls && message.confirm.calls.length > 0
+                      );
+                      const hasError = Boolean(message.error);
+
+                      if (!hasTools && !hasContent && !hasConfirm && !hasError) {
+                        return null;
+                      }
+
+                      const timeText = formatMessageTime(message.createdAt);
+
+                      return (
+                        <div key={message.id} className="flex items-start gap-2.5 justify-start">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 shadow-sm mt-0.5">
+                            <Bot className="h-4 w-4" />
+                          </div>
+                          <div className="flex flex-col items-start max-w-[95%] sm:max-w-[85%]">
+                            <div className="w-full rounded-2xl border border-border/60 bg-card p-4 text-card-foreground shadow-sm space-y-3">
+                              {/* Tools rows above its text */}
+                              {hasTools && (
+                                <div className="space-y-1.5">
+                                  {message.tools.map((step) => (
+                                    <ToolCallCard key={step.id} step={step} />
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Text with ChatMarkdown */}
+                              {hasContent ? (
+                                <ChatMarkdown content={message.content} />
+                              ) : null}
+
+                              {/* Confirm block */}
+                              {hasConfirm && (
+                                <div className={hasContent ? 'mt-2' : undefined}>
+                                  <ConfirmActionCard
+                                    calls={message.confirm!.calls}
+                                    decided={message.confirm!.decided}
+                                    onSubmit={(decisions) => decide(message.id, decisions)}
+                                  />
+                                </div>
+                              )}
+
+                              {/* Error in a visible alert with role="alert" */}
+                              {hasError && (
+                                <Alert variant="destructive" role="alert" className="mt-2">
+                                  <AlertCircle className="h-4 w-4" />
+                                  <AlertDescription>{message.error}</AlertDescription>
+                                </Alert>
+                              )}
+                            </div>
+                            {timeText ? (
+                              <span className="mt-1 text-xs text-muted-foreground px-1">
+                                {timeText}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Streaming indicator: only shown before first token/tool/confirm appears */}
+                    {shouldShowStreamingIndicator && (
+                      <div className="flex items-start gap-2.5 justify-start">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 shadow-sm mt-0.5">
+                          <Bot className="h-4 w-4" />
+                        </div>
+                        <div className="flex items-center gap-2 rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none text-primary" />
+                          <span>Trợ lý đang phản hồi…</span>
                         </div>
                       </div>
-                    );
-                  }
+                    )}
 
-                  const hasTools = Boolean(message.tools && message.tools.length > 0);
-                  const hasContent = Boolean(
-                    message.content && message.content.trim().length > 0
-                  );
-                  const hasConfirm = Boolean(
-                    message.confirm?.calls && message.confirm.calls.length > 0
-                  );
-                  const hasError = Boolean(message.error);
+                    <div ref={messagesEndRef} aria-hidden="true" />
+                  </div>
+                </div>
 
-                  if (!hasTools && !hasContent && !hasConfirm && !hasError) {
-                    return null;
-                  }
-
-                  return (
-                    <div key={message.id} className="flex justify-start">
-                      <div className="max-w-[95%] sm:max-w-[85%] rounded-2xl border border-border/60 bg-card p-4 text-card-foreground shadow-sm space-y-3">
-                        {/* Tools rows above its text */}
-                        {hasTools && (
-                          <div className="space-y-1.5">
-                            {message.tools.map((step) => (
-                              <ToolCallCard key={step.id} step={step} />
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Text with ChatMarkdown */}
-                        {hasContent ? (
-                          <ChatMarkdown content={message.content} />
-                        ) : null}
-
-                        {/* Confirm block */}
-                        {hasConfirm && (
-                          <div className={hasContent ? 'mt-2' : undefined}>
-                            <ConfirmActionCard
-                              calls={message.confirm!.calls}
-                              decided={message.confirm!.decided}
-                              onSubmit={(decisions) => decide(message.id, decisions)}
-                            />
-                          </div>
-                        )}
-
-                        {/* Error in a visible alert with role="alert" */}
-                        {hasError && (
-                          <Alert variant="destructive" role="alert" className="mt-2">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>{message.error}</AlertDescription>
-                          </Alert>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Streaming indicator */}
-                {isOwnerMatch && isStreaming && (
-                  <div className="flex items-center justify-between gap-2 rounded-xl bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground w-fit">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                      <span>Trợ lý đang phản hồi…</span>
-                    </div>
+                {/* Floating "Scroll down" button when scrolled up */}
+                {!isAtBottom && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="secondary"
                       size="sm"
-                      className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                      onClick={cancel}
+                      onClick={handleScrollToBottomClick}
+                      className="shadow-lg rounded-full px-3 py-1.5 h-8 text-xs font-medium gap-1.5 border border-border/80 bg-card/95 backdrop-blur text-foreground hover:bg-accent"
+                      aria-label="Cuộn xuống tin nhắn mới nhất"
                     >
-                      <Square className="h-3 w-3 mr-1 fill-current" />
-                      Dừng
+                      <ChevronDown className="h-3.5 w-3.5" />
+                      <span>Cuộn xuống</span>
                     </Button>
                   </div>
                 )}
-
-                <div ref={messagesEndRef} />
               </div>
             )}
 
             {/* Input area */}
             <div className="border-t border-border/60 p-3 sm:p-4 bg-card/60 shrink-0">
-              <div className="relative flex items-end gap-2">
-                <Textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    // Ignore Enter during IME composition (Vietnamese input methods use Enter to confirm composed text)
-                    if (e.nativeEvent.isComposing) {
-                      return;
-                    }
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      if (!isStreaming && input.trim()) {
-                        handleSend(input);
+              <div className="max-w-4xl mx-auto w-full">
+                <div className="relative flex items-end gap-2">
+                  <Textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      // Ignore Enter during IME composition (Vietnamese input methods use Enter to confirm composed text)
+                      if (e.nativeEvent.isComposing) {
+                        return;
                       }
-                    }
-                  }}
-                  placeholder="Nhập yêu cầu cho trợ lý… (Shift + Enter để xuống dòng)"
-                  aria-label="Nhập yêu cầu"
-                  className="min-h-[52px] max-h-32 resize-none rounded-xl bg-background border-border/80 focus-visible:ring-primary text-sm p-3 pr-12 shadow-sm"
-                  disabled={isStreaming}
-                  rows={1}
-                />
-                <Button
-                  type="button"
-                  size="icon"
-                  disabled={isStreaming || !input.trim()}
-                  onClick={() => handleSend(input)}
-                  className="absolute right-2 bottom-2 h-8 w-8 rounded-lg shrink-0 shadow-sm"
-                  aria-label="Gửi yêu cầu"
-                >
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!isStreaming && input.trim()) {
+                          handleSend(input);
+                        }
+                      }
+                    }}
+                    placeholder="Nhập yêu cầu cho trợ lý… (Shift + Enter để xuống dòng)"
+                    aria-label="Nhập yêu cầu"
+                    className="min-h-[52px] max-h-32 overflow-y-auto resize-none rounded-xl bg-background border-border/80 focus-visible:ring-primary text-sm p-3 pr-12 shadow-sm"
+                    rows={1}
+                  />
                   {isStreaming ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Button
+                      type="button"
+                      size="icon"
+                      onClick={cancel}
+                      className="absolute right-2 bottom-2 h-9 w-9 rounded-lg shrink-0 shadow-sm"
+                      aria-label="Dừng"
+                    >
+                      <Square className="h-3.5 w-3.5 fill-current" />
+                    </Button>
                   ) : (
-                    <Send className="h-4 w-4" />
+                    <Button
+                      type="button"
+                      size="icon"
+                      disabled={!input.trim()}
+                      onClick={() => handleSend(input)}
+                      className="absolute right-2 bottom-2 h-9 w-9 rounded-lg shrink-0 shadow-sm"
+                      aria-label="Gửi yêu cầu"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
                   )}
-                </Button>
+                </div>
               </div>
             </div>
           </section>
@@ -642,7 +791,7 @@ export function AdminChatbotPage() {
             >
               {isDeleting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />
                   Đang xóa…
                 </>
               ) : (
