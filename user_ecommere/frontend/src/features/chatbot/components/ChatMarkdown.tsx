@@ -3,10 +3,40 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { getAllowedChatImageUrl } from '../lib/chatImagePolicy';
 
 export interface ChatMarkdownProps {
   content: string;
   size?: 'sm' | 'base';
+}
+
+interface ChatMarkdownImageProps {
+  src?: string;
+  alt?: string;
+}
+
+function ChatMarkdownImage({ src, alt }: ChatMarkdownImageProps) {
+  const [failed, setFailed] = React.useState(false);
+  const safeSrc = getAllowedChatImageUrl(src);
+
+  if (!safeSrc || failed) {
+    if (!alt) {
+      return null;
+    }
+    return <span className="text-muted-foreground">{alt}</span>;
+  }
+
+  return (
+    <img
+      src={safeSrc}
+      alt={alt ?? ''}
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      className="my-2 block max-h-72 w-auto max-w-full rounded-xl border border-border object-cover"
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 export const ChatMarkdown = React.memo(
@@ -69,9 +99,11 @@ export const ChatMarkdown = React.memo(
                 {children}
               </pre>
             ),
-            img: ({ alt }) => (
-              <span className="text-muted-foreground">{alt}</span>
-            ),
+            // Images are allowed only through chatImagePolicy allowlist (Shop's Cloudinary cloud
+            // or origin). Commit c16c9dac previously rendered alt text only to mitigate data
+            // exfiltration via prompt injection in model-produced URLs. Blocked or failed images
+            // continue rendering as plain alt text.
+            img: ({ src, alt }) => <ChatMarkdownImage src={src} alt={alt} />,
             a: ({ href, children }) => {
               if (href && href.startsWith('/') && !href.startsWith('//')) {
                 return (
