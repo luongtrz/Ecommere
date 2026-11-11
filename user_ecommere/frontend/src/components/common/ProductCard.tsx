@@ -1,14 +1,12 @@
 import { memo, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Sparkles, Star } from 'lucide-react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Heart, ShoppingCart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
-import { getImageUrl } from '@/lib/utils';
+import { getImageUrl, cn } from '@/lib/utils';
 import { ProductQuickView } from '@/features/catalog/components/ProductQuickView';
 import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { usePrefetchProduct } from '@/features/catalog/hooks/useProductDetail';
-import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   id: string;
@@ -38,6 +36,7 @@ export const ProductCard = memo(function ProductCard({
   const selectedVariant = variants?.[0];
   const finalPrice = salePrice ?? price;
   const hasDiscount = salePrice != null && salePrice < price;
+  const isOutOfStock = variants !== undefined && (!selectedVariant || selectedVariant.stock === 0);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { toggleItem, isInWishlist } = useWishlist();
   const prefetchProduct = usePrefetchProduct();
@@ -61,107 +60,112 @@ export const ProductCard = memo(function ProductCard({
 
   return (
     <>
-      <Card
-        className="group flex flex-col h-full overflow-hidden rounded-[1.8rem] border border-black/[0.03] bg-white/90 shadow-luxury hover:shadow-luxury-glow hover:-translate-y-2 duration-500 ease-out transition-all"
+      <div
+        className="group flex h-full flex-col"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="relative overflow-hidden">
-          <Link to={`/p/${slug}`}>
-            <div className="aspect-square overflow-hidden bg-[linear-gradient(145deg,#FAF9F5,rgba(240,236,227,0.85))]">
-              <img
-                src={getImageUrl(images[0], { width: 500 })}
-                alt={name}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-              />
-            </div>
+        {/* Image Area */}
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-muted">
+          <Link to={`/p/${slug}`} className="block h-full w-full">
+            <img
+              src={getImageUrl(images[0], { width: 500 })}
+              alt={name}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transform-none group-hover:scale-[1.03]"
+            />
           </Link>
- 
-          <div className="absolute left-3 top-3 flex items-center gap-2">
-            {hasDiscount ? (
-              <span className="rounded-full bg-primary/95 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+
+          {/* Badges */}
+          <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col gap-1">
+            {hasDiscount && (
+              <span className="rounded-sm bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">
                 Giảm {discountPercent}%
               </span>
-            ) : (
-              <span className="rounded-full border border-accent/30 bg-white/80 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary backdrop-blur-md shadow-sm">
-                Được chọn lọc
+            )}
+            {isOutOfStock && (
+              <span className="rounded-sm bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                Hết hàng
               </span>
             )}
           </div>
- 
+
+          {/* Wishlist Button */}
           <button
+            type="button"
             onClick={(event) => {
               event.preventDefault();
               toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
             }}
             className={cn(
-              'absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 active:scale-90 shadow-sm border border-white/50',
-              isWishlisted
-                ? 'bg-red-50/95 text-red-500 shadow-md shadow-red-500/10 hover:scale-105 hover:bg-red-50'
-                : 'bg-white/80 text-primary/70 hover:bg-white hover:text-red-500 hover:scale-105 hover:shadow-md hover:shadow-black/5',
+              'absolute right-2.5 top-2.5 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              isWishlisted && 'text-destructive hover:text-destructive'
             )}
+            aria-label="Thêm vào yêu thích"
           >
-            <Heart className={cn('h-4 w-4 transition-transform duration-300', isWishlisted && 'fill-red-500 scale-110')} />
+            <Heart className={cn('h-4 w-4 transition-colors', isWishlisted && 'fill-destructive text-destructive')} />
           </button>
- 
-          <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+
+          {/* Quick-view Trigger */}
+          <div className="absolute inset-x-2.5 bottom-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-within:opacity-100">
             <button
               type="button"
               onClick={() => setIsQuickViewOpen(true)}
-              className="pointer-events-auto w-full rounded-full bg-primary/95 hover:bg-primary text-primary-foreground backdrop-blur-md px-4 py-2.5 text-xs font-bold uppercase tracking-wider shadow-xl transition duration-300 active:scale-95 border border-white/10"
+              className="w-full rounded-md border border-border bg-card py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Xem nhanh
             </button>
           </div>
         </div>
- 
-        <CardContent className="flex flex-1 flex-col p-4">
-          <div className="mb-2.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-accent-foreground/70">
-            <Sparkles className="h-3 w-3 text-accent-foreground/60 fill-accent/10" />
-            Mùi hương nổi bật
-          </div>
- 
-          <Link to={`/p/${slug}`}>
-            <h3 className="min-h-[3.3rem] text-base font-bold leading-snug text-foreground transition duration-300 group-hover:text-accent-foreground/90 font-serif">
+
+        {/* Text Block */}
+        <div className="flex flex-1 flex-col pt-3">
+          <Link
+            to={`/p/${slug}`}
+            className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <h3 className="font-sans text-sm md:text-base font-medium leading-snug line-clamp-2 text-foreground transition-colors group-hover:underline">
               {name}
             </h3>
           </Link>
- 
+
           {reviewCount > 0 ? (
-            <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              <span>{rating.toFixed(1)}</span>
+            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Star className="h-4 w-4 fill-accent text-accent" />
+              <span className="font-medium text-foreground tabular">{rating.toFixed(1)}</span>
               <span>·</span>
-              <span>{reviewCount} đánh giá</span>
+              <span className="tabular">{reviewCount} đánh giá</span>
             </div>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground">Phù hợp cho nhịp sống hằng ngày và không gian gọn gàng.</p>
-          )}
- 
-          <div className="mt-auto pt-5">
-            <div className="flex items-end gap-2">
-              <span className="text-lg font-bold text-foreground">{formatCurrency(finalPrice)}</span>
-              {hasDiscount ? (
-                <span className="pb-0.5 text-sm text-muted-foreground line-through">{formatCurrency(price)}</span>
-              ) : null}
-            </div>
+          ) : null}
+
+          {/* Price Row */}
+          <div className="mt-auto pt-2 flex items-baseline gap-2">
+            <span className="text-base font-semibold tabular text-foreground">
+              {formatCurrency(finalPrice)}
+            </span>
+            {hasDiscount && (
+              <span className="text-sm text-muted-foreground line-through tabular">
+                {formatCurrency(price)}
+              </span>
+            )}
           </div>
-        </CardContent>
- 
-        <CardFooter className="p-4 pt-0">
-          <Button
-            onClick={onAddToCart}
-            disabled={variants !== undefined && (!selectedVariant || selectedVariant.stock === 0)}
-            className="h-11 w-full rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/15 active:scale-[0.98] font-bold uppercase tracking-wider text-xs"
-            size="sm"
-          >
-            <ShoppingCart className="mr-2 h-3.5 w-3.5" />
-            Thêm vào giỏ
-          </Button>
-        </CardFooter>
-      </Card>
+
+          {/* Add to Cart */}
+          <div className="mt-3 transition-opacity duration-200 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onAddToCart}
+              disabled={isOutOfStock}
+              className="w-full text-xs font-medium"
+            >
+              <ShoppingCart className="mr-1.5 h-4 w-4" />
+              Thêm vào giỏ
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {isQuickViewOpen ? (
         <ProductQuickView slug={slug} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
