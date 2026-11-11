@@ -1,4 +1,4 @@
-import { Bot, RotateCcw, Sparkles } from 'lucide-react';
+import { Bot, RotateCcw, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ToolCallCard } from './ToolCallCard';
@@ -30,7 +30,7 @@ export function ChatMessageItem({
       <div className="flex w-full justify-end">
         <div
           className={cn(
-            'rounded-2xl rounded-tr-sm bg-primary px-4 py-3 text-sm text-primary-foreground shadow-sm whitespace-pre-wrap break-words',
+            'rounded-lg rounded-tr-sm bg-primary px-4 py-3 text-sm text-primary-foreground whitespace-pre-wrap break-words',
             variant === 'page' ? 'max-w-[75%]' : 'max-w-[85%]'
           )}
         >
@@ -59,7 +59,7 @@ export function ChatMessageItem({
     <div className="flex w-full items-start gap-2.5 sm:gap-3 justify-start">
       {/* Left avatar */}
       <div
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-border/50 shadow-sm mt-0.5"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-border mt-0.5"
         aria-hidden="true"
       >
         <Bot className="h-4 w-4" />
@@ -84,7 +84,7 @@ export function ChatMessageItem({
         {/* 2. Markdown answer */}
         {hasContent && (
           variant === 'widget' ? (
-            <div className="w-full rounded-2xl rounded-tl-sm border border-border/70 bg-card px-4 py-3 text-sm text-card-foreground shadow-sm">
+            <div className="w-full rounded-lg rounded-tl-sm border border-border bg-card px-4 py-3 text-sm text-card-foreground">
               <ChatMarkdown content={message.content} size="sm" />
             </div>
           ) : (
@@ -109,7 +109,7 @@ export function ChatMessageItem({
         {hasSources && message.sources && (
           <div className="w-full space-y-2 pt-1">
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
+              <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
               <span>Sản phẩm gợi ý</span>
             </p>
             <div
@@ -130,7 +130,7 @@ export function ChatMessageItem({
         {hasError && message.error && (
           <div
             role="alert"
-            className="flex w-full items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive shadow-sm"
+            className="flex w-full items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive"
           >
             <span className="flex-1 break-words">{message.error}</span>
             {onRetry && (
@@ -139,7 +139,7 @@ export function ChatMessageItem({
                 variant="outline"
                 size="sm"
                 onClick={onRetry}
-                className="shrink-0 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive text-xs"
+                className="shrink-0 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive text-xs rounded-md"
               >
                 <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Thử lại</span>

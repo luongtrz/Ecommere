@@ -32,8 +32,8 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'group flex items-center rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-200 motion-reduce:transition-none',
-        'hover:border-primary/30 hover:bg-secondary/40 hover:shadow-md',
+        'group flex items-center rounded-lg border border-border bg-card text-card-foreground transition-colors duration-200 motion-reduce:transition-none',
+        'hover:border-foreground/30 hover:bg-secondary/40',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         'w-full min-h-[44px]',
         variant === 'page' ? 'gap-3.5 p-3 sm:p-4' : 'gap-2.5 p-2.5'
@@ -42,7 +42,7 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
       {/* Thumbnail */}
       <div
         className={cn(
-          'relative shrink-0 overflow-hidden rounded-xl border border-border/60 bg-secondary flex items-center justify-center',
+          'relative shrink-0 overflow-hidden rounded-md border border-border bg-secondary flex items-center justify-center',
           variant === 'page' ? 'h-20 w-20' : 'h-14 w-14'
         )}
       >
@@ -52,7 +52,7 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
             alt={source.name}
             loading="lazy"
             onError={() => setImageError(true)}
-            className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
+            className="h-full w-full object-cover transition-opacity duration-200 motion-reduce:transition-none group-hover:opacity-95"
           />
         ) : (
           <div
@@ -70,14 +70,14 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
           {source.name}
         </p>
         {hasPrice && (
-          <p className="text-xs font-semibold text-foreground">
+          <p className="text-xs font-semibold text-foreground tabular">
             Từ {formatCurrency(item.minPrice as number)}
           </p>
         )}
         <div className="flex items-center gap-0.5 text-xs font-medium text-primary">
           <span>Xem chi tiết</span>
           <ArrowUpRight
-            className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 motion-reduce:transition-none group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 motion-reduce:transition-none group-hover:translate-x-0.5"
             aria-hidden="true"
           />
         </div>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Minimize2, Plus, Sparkles, ChevronDown } from 'lucide-react';
+import { Minimize2, Plus, Bot, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/lib/seo';
 import { useToast } from '@/hooks/useToast';
@@ -71,8 +71,8 @@ export function ChatbotPage() {
     <div className="flex flex-col h-[100dvh] bg-background text-foreground overflow-hidden">
       <SEO title="Chuyên gia Mùi hương" />
 
-      {/* 1. Top bar (~56px, border-b, backdrop blur, safe-area top padding) */}
-      <header className="shrink-0 border-b border-border bg-background/90 backdrop-blur z-10 pt-[env(safe-area-inset-top)]">
+      {/* 1. Top bar (~56px, border-b, solid background, safe-area top padding) */}
+      <header className="shrink-0 border-b border-border bg-background z-10 pt-[env(safe-area-inset-top)]">
         <div className="flex h-14 items-center justify-between px-3 sm:px-4 max-w-5xl mx-auto w-full">
           {/* Left: Thu nhỏ */}
           <Button
@@ -81,7 +81,7 @@ export function ChatbotPage() {
             size="sm"
             onClick={handleMinimize}
             aria-label="Thu nhỏ về khung chat"
-            className="h-9 min-h-[36px] w-9 sm:w-auto px-0 sm:px-3 text-sm font-medium gap-1.5 text-foreground hover:bg-secondary hover:text-foreground active:scale-95 transition-all motion-reduce:transition-none"
+            className="h-9 min-h-[36px] w-9 sm:w-auto px-0 sm:px-3 text-sm font-medium gap-1.5 text-foreground hover:bg-secondary hover:text-foreground active:scale-95 transition-colors duration-200 motion-reduce:transition-none"
           >
             <Minimize2 className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">Thu nhỏ</span>
@@ -90,10 +90,10 @@ export function ChatbotPage() {
           {/* Center: Title block */}
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-accent shrink-0 shadow-sm"
+              className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground shrink-0"
               aria-hidden="true"
             >
-              <Sparkles className="h-4 w-4" />
+              <Bot className="h-4 w-4" />
             </div>
             <div className="min-w-0 text-left">
               <h1 className="text-sm font-semibold leading-tight text-foreground truncate">
@@ -112,7 +112,7 @@ export function ChatbotPage() {
             size="sm"
             onClick={newThread}
             aria-label="Cuộc trò chuyện mới"
-            className="h-9 min-h-[36px] w-9 sm:w-auto px-0 sm:px-3 text-sm font-medium gap-1.5 text-foreground hover:bg-secondary hover:text-foreground active:scale-95 transition-all motion-reduce:transition-none"
+            className="h-9 min-h-[36px] w-9 sm:w-auto px-0 sm:px-3 text-sm font-medium gap-1.5 text-foreground hover:bg-secondary hover:text-foreground active:scale-95 transition-colors duration-200 motion-reduce:transition-none"
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">Cuộc trò chuyện mới</span>
@@ -137,10 +137,10 @@ export function ChatbotPage() {
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 sm:py-12 space-y-6 text-center animate-fade-in motion-reduce:animate-none">
               <div
-                className="flex h-16 w-16 items-center justify-center rounded-3xl bg-secondary text-primary border border-border/60 shadow-sm"
+                className="flex h-16 w-16 items-center justify-center rounded-lg bg-secondary text-primary border border-border"
                 aria-hidden="true"
               >
-                <Sparkles className="h-8 w-8 text-accent" />
+                <Bot className="h-8 w-8" />
               </div>
               <div className="space-y-2 max-w-lg">
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground font-serif">
@@ -157,7 +157,7 @@ export function ChatbotPage() {
                     type="button"
                     disabled={isStreaming}
                     onClick={() => void send(suggestion)}
-                    className="rounded-2xl border border-border bg-card p-4 text-sm text-card-foreground text-left leading-snug transition-all duration-200 motion-reduce:transition-none hover:border-primary/40 hover:shadow-md active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[44px]"
+                    className="rounded-lg border border-border bg-card p-4 text-sm text-card-foreground text-left leading-snug transition-colors duration-200 motion-reduce:transition-none hover:border-foreground/30 hover:bg-secondary/40 active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[44px]"
                   >
                     <span className="font-medium text-foreground">{suggestion}</span>
                   </button>
@@ -192,7 +192,7 @@ export function ChatbotPage() {
       </div>
 
       {/* 5. Composer dock at the bottom */}
-      <div className="relative shrink-0 border-t border-border bg-background/90 backdrop-blur z-10">
+      <div className="relative shrink-0 border-t border-border bg-background z-10">
         {/* Floating "Cuộn xuống" pill */}
         {!isAtBottom && (
           <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-20 pointer-events-auto animate-fade-in motion-reduce:animate-none">
@@ -201,7 +201,7 @@ export function ChatbotPage() {
               size="sm"
               variant="secondary"
               onClick={() => scrollToBottom('smooth')}
-              className="rounded-full shadow-md border border-border bg-background/95 backdrop-blur px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary flex items-center gap-1.5 transition-all duration-200 motion-reduce:transition-none active:scale-95 min-h-[36px]"
+              className="rounded-full shadow-md border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary flex items-center gap-1.5 transition-colors duration-200 motion-reduce:transition-none active:scale-95 min-h-[36px]"
               aria-label="Cuộn xuống tin nhắn mới nhất"
             >
               <ChevronDown className="h-4 w-4" aria-hidden="true" />

@@ -82,7 +82,7 @@ export function ChatComposer({
 
   return (
     <div className="w-full pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <div className="rounded-3xl border border-border bg-card p-1.5 shadow-sm transition-all duration-200 motion-reduce:transition-none focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/30 flex items-end gap-2">
+      <div className="rounded-lg border border-border bg-card p-1.5 transition-colors duration-200 motion-reduce:transition-none focus-within:border-foreground/30 focus-within:ring-1 focus-within:ring-ring flex items-end gap-2">
         <Textarea
           ref={textareaRef}
           value={value}
@@ -105,7 +105,7 @@ export function ChatComposer({
           aria-label={isStreaming ? 'Dừng' : 'Gửi tin nhắn'}
           title={isStreaming ? 'Dừng' : 'Gửi tin nhắn'}
           className={cn(
-            'rounded-full shrink-0 shadow-sm transition-all duration-200 motion-reduce:transition-none bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center disabled:opacity-50 active:scale-95 motion-reduce:active:scale-100',
+            'rounded-full shrink-0 transition-colors duration-200 motion-reduce:transition-none bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center disabled:opacity-50 active:scale-95 motion-reduce:active:scale-100',
             isPage ? 'h-10 w-10' : 'h-9 w-9'
           )}
         >

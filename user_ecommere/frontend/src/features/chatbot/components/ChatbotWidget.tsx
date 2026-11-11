@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bot,
-  Sparkles,
   Plus,
   X,
   Maximize2,
@@ -152,18 +151,18 @@ export function ChatbotWidget() {
           aria-label="Trò chuyện với chuyên gia mùi hương"
           className={cn(
             'fixed inset-0 z-[60] flex flex-col h-[100dvh] pt-[env(safe-area-inset-top,0px)] md:pt-0 bg-card overflow-hidden',
-            'md:inset-auto md:bottom-6 md:right-6 md:w-[420px] md:h-[min(680px,calc(100dvh-3rem))] md:rounded-3xl md:border md:border-border md:shadow-2xl',
+            'md:inset-auto md:bottom-6 md:right-6 md:w-[420px] md:h-[min(680px,calc(100dvh-3rem))] md:rounded-lg md:border md:border-border md:shadow-md',
             'animate-in fade-in-0 zoom-in-95 duration-200 motion-reduce:animate-none'
           )}
         >
           {/* Header */}
-          <div className="flex items-center justify-between gap-3 bg-primary px-4 py-3 sm:px-5 sm:py-3.5 text-primary-foreground shadow-sm shrink-0">
+          <div className="flex items-center justify-between gap-3 bg-primary px-4 py-3 sm:px-5 sm:py-3.5 text-primary-foreground shrink-0">
             <div className="flex items-center gap-3 min-w-0">
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/10"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary-foreground/10"
                 aria-hidden="true"
               >
-                <Sparkles className="h-5 w-5 text-accent" />
+                <Bot className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold leading-tight truncate">
@@ -180,7 +179,7 @@ export function ChatbotWidget() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-lg hidden md:inline-flex disabled:opacity-50"
+                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-md hidden md:inline-flex disabled:opacity-50"
                 disabled={isStreaming}
                 onClick={handleExpand}
                 title={isStreaming ? 'Không thể mở rộng khi đang trả lời' : 'Mở rộng'}
@@ -193,7 +192,7 @@ export function ChatbotWidget() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-lg"
+                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-md"
                 onClick={() => newThread()}
                 title="Cuộc trò chuyện mới"
                 aria-label="Cuộc trò chuyện mới"
@@ -205,7 +204,7 @@ export function ChatbotWidget() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-lg"
+                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-md"
                 onClick={() => setOpen(false)}
                 title="Đóng"
                 aria-label="Đóng"
@@ -262,7 +261,7 @@ export function ChatbotWidget() {
                             void send(suggestion);
                           }
                         }}
-                        className="min-h-[36px] rounded-full border border-border bg-card px-4 py-1.5 text-left text-sm font-medium text-foreground transition-colors duration-200 motion-reduce:transition-none hover:bg-primary hover:text-primary-foreground hover:border-primary active:scale-95 motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none shadow-sm flex items-center"
+                        className="min-h-[36px] rounded-full border border-border bg-card px-4 py-1.5 text-left text-sm font-medium text-foreground transition-colors duration-200 motion-reduce:transition-none hover:bg-secondary hover:text-foreground hover:border-foreground/30 active:scale-95 motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none flex items-center"
                       >
                         {suggestion}
                       </button>
@@ -281,7 +280,7 @@ export function ChatbotWidget() {
                 type="button"
                 onClick={() => scrollToBottom('smooth')}
                 aria-label="Cuộn xuống"
-                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex min-h-[36px] items-center gap-1.5 rounded-full border border-border bg-card/95 px-3.5 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur transition-all duration-200 motion-reduce:transition-none hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95 motion-reduce:active:scale-100"
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex min-h-[36px] items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground shadow-md transition-colors duration-200 motion-reduce:transition-none hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95 motion-reduce:active:scale-100"
               >
                 <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Cuộn xuống</span>
@@ -313,8 +312,8 @@ export function ChatbotWidget() {
           className={cn(
             'fixed bottom-24 right-4 z-[60] md:bottom-6 md:right-6',
             'h-14 w-14 md:w-auto md:px-5 rounded-full',
-            'bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 hover:shadow-xl',
-            'transition-all duration-200 motion-reduce:transition-none',
+            'bg-primary text-primary-foreground shadow-md hover:bg-primary/90',
+            'transition-colors duration-200 motion-reduce:transition-none',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             'flex items-center justify-center gap-2.5 active:scale-95 motion-reduce:active:scale-100'
           )}

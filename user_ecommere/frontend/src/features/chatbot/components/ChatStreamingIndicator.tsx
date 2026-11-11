@@ -24,7 +24,7 @@ export function ChatStreamingIndicator({
       {/* Bot Avatar */}
       <div
         className={cn(
-          'flex shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5',
+          'flex shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-border mt-0.5',
           isPage ? 'h-8 w-8' : 'h-7 w-7'
         )}
         aria-hidden="true"
@@ -35,7 +35,7 @@ export function ChatStreamingIndicator({
       {/* Typing Bubble with staggered bouncing dots */}
       <div
         className={cn(
-          'flex items-center gap-1.5 rounded-[1.5rem] rounded-tl-[0.25rem] border border-border/80 bg-card shadow-sm',
+          'flex items-center gap-1.5 rounded-lg rounded-tl-sm border border-border bg-card',
           isPage ? 'px-4 py-3' : 'px-3.5 py-2.5'
         )}
       >
