@@ -93,41 +93,6 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
-
-  /* DEPRECATED: remove once unused */
-  .section-shell {
-    @apply rounded-lg border border-border bg-card;
-  }
-
-  /* DEPRECATED: remove once unused */
-  .glass-panel {
-    @apply border border-border bg-card;
-  }
-
-  /* DEPRECATED: remove once unused */
-  .glass-premium {
-    @apply border border-border bg-card;
-  }
-
-  /* DEPRECATED: remove once unused */
-  .hover-glow {
-    transition: border-color 0.2s ease;
-  }
-
-  /* DEPRECATED: remove once unused */
-  .hover-glow:hover {
-    border-color: hsl(var(--foreground) / 0.3);
-  }
-
-  /* DEPRECATED: remove once unused */
-  .text-gradient-emerald {
-    @apply text-primary;
-  }
-
-  /* DEPRECATED: remove once unused */
-  .animate-float-orb {
-    animation: none;
-  }
 }
 
 @layer utilities {

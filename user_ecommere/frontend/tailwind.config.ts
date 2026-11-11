@@ -65,8 +65,6 @@ const config: Config = {
       },
       boxShadow: {
         soft: '0 1px 2px 0 rgb(24 20 16 / 0.05)',
-        luxury: '0 1px 2px 0 rgb(24 20 16 / 0.05)',
-        'luxury-glow': '0 4px 12px -2px rgb(24 20 16 / 0.08)',
       },
       keyframes: {
         'accordion-down': {
