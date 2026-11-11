@@ -1,4 +1,4 @@
-import { CheckCircle } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface CheckoutStepsProps {
   currentStep: number;
@@ -12,62 +12,58 @@ const STEPS = [
 
 export function CheckoutSteps({ currentStep }: CheckoutStepsProps) {
   return (
-    <div className="flex items-center justify-center w-full max-w-xl mx-auto py-2">
-      {STEPS.map((step, index) => {
-        const isCompleted = currentStep > step.id;
-        const isCurrent = currentStep === step.id;
+    <nav aria-label="Tiến trình thanh toán" className="w-full max-w-xl mx-auto">
+      <ol className="flex items-center justify-between">
+        {STEPS.map((step, index) => {
+          const isCompleted = currentStep > step.id;
+          const isCurrent = currentStep === step.id;
 
-        return (
-          <div
-            key={step.id}
-            className="flex items-center flex-1 last:flex-none"
-          >
-            {/* Step Circle */}
-            <div className="flex flex-col items-center gap-1.5 relative">
-              <div
-                className={`
-                  w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200
-                  ${
-                    isCurrent
-                      ? 'bg-teal-600 text-white ring-4 ring-teal-50 shadow-sm'
-                      : isCompleted
-                        ? 'bg-teal-600 text-white shadow-sm'
-                        : 'bg-slate-100 text-slate-400 border border-slate-200'
-                  }
-                `}
-              >
-                {isCompleted ? (
-                  <CheckCircle className="h-5 w-5 text-white" />
-                ) : (
-                  <span className="font-sans font-semibold text-xs">
-                    {step.id}
-                  </span>
-                )}
-              </div>
-              <span
-                className={`text-[11px] sm:text-xs transition-colors duration-200 ${
-                  isCurrent
-                    ? 'text-teal-700 font-semibold'
-                    : isCompleted
-                      ? 'text-slate-800 font-medium'
-                      : 'text-slate-400 font-normal'
-                }`}
-              >
-                {step.label}
-              </span>
-            </div>
-
-            {/* Connector Line */}
-            {index < STEPS.length - 1 && (
-              <div className="flex-1 h-0.5 mx-2 sm:mx-4 rounded-full overflow-hidden bg-slate-200 relative mb-5">
+          return (
+            <li
+              key={step.id}
+              className={`flex items-center ${index < STEPS.length - 1 ? 'flex-1' : ''}`}
+            >
+              <div className="flex items-center gap-2.5 shrink-0">
+                {/* 28px circle */}
                 <div
-                  className={`absolute inset-0 bg-teal-600 transition-transform duration-300 ease-in-out origin-left ${currentStep > step.id ? 'scale-x-100' : 'scale-x-0'}`}
-                />
+                  className={`
+                    w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium tabular shrink-0 transition-colors
+                    ${isCurrent ? 'bg-primary text-primary-foreground' : ''}
+                    ${isCompleted ? 'bg-success text-success-foreground' : ''}
+                    ${!isCurrent && !isCompleted ? 'border border-border text-muted-foreground bg-card' : ''}
+                  `}
+                  aria-current={isCurrent ? 'step' : undefined}
+                >
+                  {isCompleted ? (
+                    <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                  ) : (
+                    <span>{step.id}</span>
+                  )}
+                </div>
+
+                {/* Label text-sm; collapses to numbers + current label on mobile */}
+                <span
+                  className={`text-sm ${
+                    isCurrent
+                      ? 'font-medium text-foreground inline'
+                      : 'text-muted-foreground hidden sm:inline'
+                  }`}
+                >
+                  {step.label}
+                </span>
               </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+
+              {/* 1px hairline connector */}
+              {index < STEPS.length - 1 && (
+                <div
+                  className="h-px bg-border flex-1 mx-3 sm:mx-4"
+                  aria-hidden="true"
+                />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }

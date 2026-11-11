@@ -8,12 +8,9 @@ export function CartBadge() {
 
   return (
     <div className="relative flex h-9 w-9 items-center justify-center">
-      <ShoppingCart className="h-5 w-5 text-slate-700" />
+      <ShoppingCart className="h-5 w-5" />
       {itemCount > 0 ? (
-        <Badge
-          variant="destructive"
-          className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-semibold tabular-nums text-white shadow-sm border-2 border-white"
-        >
+        <Badge className="tabular absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full p-0 px-1 text-xs">
           {itemCount > 99 ? '99+' : itemCount}
         </Badge>
       ) : null}

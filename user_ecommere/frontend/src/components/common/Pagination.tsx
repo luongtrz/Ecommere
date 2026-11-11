@@ -9,18 +9,13 @@ interface PaginationProps {
   className?: string;
 }
 
-export function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-  className,
-}: PaginationProps) {
+export function Pagination({ currentPage, totalPages, onPageChange, className }: PaginationProps) {
   const pages = [];
   const showPages = 5;
-
+  
   let startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
-  const endPage = Math.min(totalPages, startPage + showPages - 1);
-
+  let endPage = Math.min(totalPages, startPage + showPages - 1);
+  
   if (endPage - startPage < showPages - 1) {
     startPage = Math.max(1, endPage - showPages + 1);
   }
@@ -32,19 +27,13 @@ export function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <nav
-      aria-label="Pagination"
-      className={cn(
-        'flex items-center justify-center gap-1.5 md:gap-2 py-6 font-sans',
-        className,
-      )}
-    >
+    <nav className={cn('flex items-center justify-center gap-1.5', className)} aria-label="Phân trang">
       <Button
         variant="outline"
         size="icon"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-slate-600 shadow-sm"
+        aria-label="Trang trước"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -53,16 +42,13 @@ export function Pagination({
         <>
           <Button
             variant="outline"
+            size="icon"
             onClick={() => onPageChange(1)}
-            className="h-9 w-9 rounded-lg p-0 border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 tabular-nums"
+            className="tabular"
           >
             1
           </Button>
-          {startPage > 2 && (
-            <span className="flex h-9 w-6 items-center justify-center text-xs font-sans text-slate-400 select-none">
-              ...
-            </span>
-          )}
+          {startPage > 2 && <span className="px-1 text-xs text-muted-foreground select-none" aria-hidden="true">&hellip;</span>}
         </>
       )}
 
@@ -70,13 +56,10 @@ export function Pagination({
         <Button
           key={page}
           variant={currentPage === page ? 'default' : 'outline'}
+          size="icon"
           onClick={() => onPageChange(page)}
-          className={cn(
-            'h-9 w-9 rounded-lg p-0 text-sm font-semibold tabular-nums transition-colors',
-            currentPage === page
-              ? 'bg-teal-600 text-white shadow-sm hover:bg-teal-700'
-              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900',
-          )}
+          className="tabular"
+          aria-current={currentPage === page ? 'page' : undefined}
         >
           {page}
         </Button>
@@ -84,15 +67,12 @@ export function Pagination({
 
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && (
-            <span className="flex h-9 w-6 items-center justify-center text-xs font-sans text-slate-400 select-none">
-              ...
-            </span>
-          )}
+          {endPage < totalPages - 1 && <span className="px-1 text-xs text-muted-foreground select-none" aria-hidden="true">&hellip;</span>}
           <Button
             variant="outline"
+            size="icon"
             onClick={() => onPageChange(totalPages)}
-            className="h-9 w-9 rounded-lg p-0 border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 tabular-nums"
+            className="tabular"
           >
             {totalPages}
           </Button>
@@ -104,7 +84,7 @@ export function Pagination({
         size="icon"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-slate-600 shadow-sm"
+        aria-label="Trang sau"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

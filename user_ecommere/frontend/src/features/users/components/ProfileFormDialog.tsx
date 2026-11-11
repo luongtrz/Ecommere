@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,10 +13,7 @@ interface ProfileFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ProfileFormDialog({
-  open,
-  onOpenChange,
-}: ProfileFormDialogProps) {
+export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps) {
   const { user, refreshUser } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -40,8 +32,7 @@ export function ProfileFormDialog({
   }, [open, user]);
 
   const updateProfile = useMutation({
-    mutationFn: (data: { name?: string; phone?: string }) =>
-      usersApi.updateProfile(data),
+    mutationFn: (data: { name?: string; phone?: string }) => usersApi.updateProfile(data),
     onSuccess: async () => {
       await refreshUser();
       toast.success('Cập nhật thông tin thành công');
@@ -59,66 +50,43 @@ export function ProfileFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-lg max-w-md">
-        <DialogHeader className="pb-4 border-b border-slate-200">
-          <DialogTitle className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl font-semibold text-foreground">
             Chỉnh sửa thông tin cá nhân
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 pt-4">
-          <div className="space-y-2">
-            <Label
-              htmlFor="name"
-              className="text-slate-900 text-sm font-medium"
-            >
-              Họ và tên *
-            </Label>
-            <Input
-              id="name"
-              required
-              className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="Nguyễn Văn A"
-            />
+        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="name">Họ và tên *</Label>
+              <Input
+                id="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Nguyễn Văn A"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Số điện thoại</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="0912345678"
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="phone"
-              className="text-slate-900 text-sm font-medium"
-            >
-              Số điện thoại
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              className="h-11 rounded-lg bg-white border-slate-200 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 transition-all text-slate-900 placeholder:text-slate-400"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              placeholder="0912345678"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="h-11 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-6 text-sm font-medium transition-colors"
-            >
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Hủy
             </Button>
-            <Button
-              type="submit"
-              className="h-11 px-7 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm text-sm font-medium transition-colors"
-              disabled={updateProfile.isPending}
-            >
+            <Button type="submit" disabled={updateProfile.isPending}>
               Cập nhật
             </Button>
           </div>

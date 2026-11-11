@@ -6,9 +6,9 @@ import { ChatbotWidget } from '@/features/chatbot/components/ChatbotWidget';
 
 export function MainLayout() {
   return (
-    <div className="relative flex min-h-screen flex-col bg-slate-50 text-slate-900 font-sans antialiased selection:bg-teal-100 selection:text-teal-900">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="flex-1 pb-24 md:pb-12 lg:pb-16">
+      <main className="flex-1 pb-20 md:pb-0">
         <Outlet />
       </main>
       <Footer />
@@ -17,5 +17,3 @@ export function MainLayout() {
     </div>
   );
 }
-
-export default MainLayout;

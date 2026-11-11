@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Menu, Sparkles, User } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchBox } from './SearchBox';
 import { CartBadge } from './CartBadge';
@@ -28,24 +28,23 @@ export function Header() {
   const { openCart } = useCart();
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white">
-      {/* Top promotional strip */}
-      <div className="border-b border-teal-700/20 bg-teal-600 text-white">
-        <div className="container flex min-h-9 items-center justify-between gap-3 text-xs md:text-sm">
-          <div className="flex items-center gap-2 text-teal-50">
-            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-            <span>Hương thơm cho nhà ở, xe hơi và quà tặng mỗi ngày.</span>
-          </div>
-          <div className="hidden items-center gap-5 text-teal-100 md:flex">
+    <header className="sticky top-0 z-50 w-full bg-background">
+      {/* Promo bar */}
+      <div className="h-9 border-b border-primary/20 bg-primary text-primary-foreground">
+        <div className="container flex h-full items-center justify-between text-xs md:text-sm">
+          <p className="truncate">
+            Hương thơm cho nhà ở, xe hơi và quà tặng mỗi ngày.
+          </p>
+          <div className="hidden items-center gap-4 text-xs text-primary-foreground/80 md:flex">
             <span>Giao nhanh nội thành</span>
             <span>Đổi trả 7 ngày</span>
           </div>
         </div>
       </div>
 
-      {/* Main header row */}
-      <div className="border-b border-slate-200 bg-white">
-        <div className="container py-2.5 md:py-3">
+      {/* Main header */}
+      <div className="border-b border-border bg-background">
+        <div className="container py-3 md:py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Sheet>
@@ -53,40 +52,33 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 md:hidden"
+                    className="h-10 w-10 rounded-full md:hidden"
+                    aria-label="Mở menu điều hướng"
                   >
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent
-                  side="left"
-                  className="w-[88vw] max-w-sm border-r border-slate-200 bg-white p-6"
-                >
+                <SheetContent side="left" className="w-[86vw] max-w-sm border-r border-border bg-card p-6">
                   <div className="mt-6 flex flex-col gap-6">
-                    <Link to="/" className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 font-sans text-sm font-bold text-white shadow-sm">
-                        TS
-                      </div>
-                      <div>
-                        <p className="font-sans text-base font-bold text-slate-900 tracking-tight">
-                          Thai Spray
-                        </p>
-                        <p className="text-xs text-slate-500 font-sans">
-                          Không gian có gu, hương thơm có dấu ấn.
-                        </p>
-                      </div>
+                    <Link to="/" className="flex flex-col">
+                      <span className="font-serif text-xl font-bold tracking-tight text-foreground">
+                        Thai Spray
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Không gian có gu, hương thơm có dấu ấn.
+                      </span>
                     </Link>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">
+                    <div>
+                      <p className="eyebrow mb-2 text-muted-foreground">
                         Điều hướng nhanh
                       </p>
-                      <div className="flex flex-col gap-1.5">
+                      <div className="divide-y divide-border border-y border-border">
                         {mobileLinks.map((link) => (
                           <Link
                             key={link.to}
                             to={link.to}
-                            className="rounded-lg px-3.5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-teal-50 hover:text-teal-700"
+                            className="block py-3 text-sm font-medium text-foreground transition-colors hover:text-primary"
                           >
                             {link.label}
                           </Link>
@@ -94,34 +86,35 @@ export function Header() {
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-sans">
+                    <div>
+                      <p className="eyebrow mb-2 text-muted-foreground">
                         Tài khoản
                       </p>
-                      <div className="flex flex-col gap-1.5">
+                      <div className="divide-y divide-border border-y border-border text-sm">
                         {user ? (
                           <>
                             <Link
                               to="/account"
-                              className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium"
+                              className="block py-3 font-medium text-foreground transition-colors hover:text-primary"
                             >
                               Thông tin cá nhân
                             </Link>
                             <Link
                               to="/orders"
-                              className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium"
+                              className="block py-3 font-medium text-foreground transition-colors hover:text-primary"
                             >
                               Theo dõi đơn hàng
                             </Link>
                             <Link
                               to="/referral"
-                              className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium"
+                              className="block py-3 font-medium text-foreground transition-colors hover:text-primary"
                             >
                               Mời bạn bè
                             </Link>
                             <button
+                              type="button"
                               onClick={logout}
-                              className="rounded-lg px-3.5 py-2.5 text-left text-rose-600 font-medium transition hover:bg-rose-50"
+                              className="block w-full py-3 text-left font-medium text-destructive transition-colors hover:underline"
                             >
                               Đăng xuất
                             </button>
@@ -129,7 +122,7 @@ export function Header() {
                         ) : (
                           <Link
                             to="/login"
-                            className="rounded-lg px-3.5 py-2.5 transition hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-medium"
+                            className="block py-3 font-medium text-foreground transition-colors hover:text-primary"
                           >
                             Đăng nhập / Đăng ký
                           </Link>
@@ -140,22 +133,17 @@ export function Header() {
                 </SheetContent>
               </Sheet>
 
-              <Link to="/" className="flex items-center gap-3 group">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 font-sans text-sm font-bold text-white shadow-sm transition duration-200 group-hover:bg-teal-700">
-                  TS
-                </div>
-                <div className="hidden min-w-0 sm:block">
-                  <p className="font-sans text-base font-bold leading-none text-slate-900 transition duration-200 group-hover:text-teal-600 tracking-tight">
-                    Thai Spray
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500 font-sans">
-                    Mùi hương tinh gọn, hiện đại, dễ sống cùng.
-                  </p>
-                </div>
+              <Link to="/" className="flex flex-col">
+                <span className="font-serif text-xl font-bold tracking-tight text-foreground transition-colors hover:text-primary md:text-2xl">
+                  Thai Spray
+                </span>
+                <span className="hidden text-xs text-muted-foreground sm:inline-block">
+                  Mùi hương tinh gọn, hiện đại, dễ sống cùng.
+                </span>
               </Link>
             </div>
 
-            <div className="hidden flex-1 max-w-lg mx-6 md:block">
+            <div className="hidden flex-1 max-w-md mx-auto md:block">
               <SearchBox />
             </div>
 
@@ -163,7 +151,7 @@ export function Header() {
               <Button
                 asChild
                 variant="ghost"
-                className="hidden rounded-lg px-3.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:inline-flex"
+                className="hidden text-sm font-medium text-muted-foreground hover:text-foreground lg:inline-flex"
               >
                 <Link to="/catalog?sort=best_selling">Bán chạy</Link>
               </Button>
@@ -171,8 +159,10 @@ export function Header() {
               <Button
                 type="button"
                 variant="ghost"
-                className="relative h-10 w-10 rounded-lg p-0 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                size="icon"
+                className="relative rounded-full text-muted-foreground hover:text-foreground"
                 onClick={openCart}
+                aria-label="Mở giỏ hàng"
               >
                 <CartBadge />
               </Button>
@@ -182,66 +172,46 @@ export function Header() {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-10 rounded-lg px-2 hover:bg-slate-100"
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-50 text-teal-700 border border-teal-200/60 shadow-sm">
+                    <Button variant="ghost" className="flex items-center gap-2 rounded-md px-2 hover:bg-muted">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-foreground">
                         <User className="h-4 w-4" />
                       </div>
                       <div className="hidden text-left md:block">
-                        <p className="max-w-[140px] truncate text-sm font-semibold text-slate-900">
+                        <p className="max-w-[140px] truncate text-sm font-medium text-foreground">
                           {user.name || 'Tài khoản'}
                         </p>
-                        <p className="max-w-[140px] truncate text-xs text-slate-500">
-                          {user.email}
-                        </p>
+                        <p className="max-w-[140px] truncate text-xs text-muted-foreground">{user.email}</p>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-md"
-                  >
-                    <DropdownMenuItem
-                      asChild
-                      className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700"
-                    >
+                  <DropdownMenuContent align="end" className="w-56 rounded-md border border-border bg-popover p-1 shadow-md">
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium">
                       <Link to="/account">Tài khoản</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      asChild
-                      className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700"
-                    >
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium">
                       <Link to="/orders">Đơn hàng</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      asChild
-                      className="cursor-pointer rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-teal-700"
-                    >
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium">
                       <Link to="/referral">Mời bạn bè</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                    <DropdownMenuSeparator className="bg-border" />
                     <DropdownMenuItem
                       onClick={logout}
-                      className="cursor-pointer rounded-lg px-3 py-2 text-rose-600 hover:bg-rose-50 hover:text-rose-700 focus:bg-rose-50 focus:text-rose-700"
+                      className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium text-destructive focus:text-destructive"
                     >
                       Đăng xuất
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button
-                  asChild
-                  className="h-9 rounded-lg bg-teal-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500"
-                >
+                <Button asChild size="sm">
                   <Link to="/login">Đăng nhập</Link>
                 </Button>
               )}
             </nav>
           </div>
 
-          <div className="mt-2.5 md:hidden">
+          <div className="mt-3 md:hidden">
             <SearchBox />
           </div>
         </div>

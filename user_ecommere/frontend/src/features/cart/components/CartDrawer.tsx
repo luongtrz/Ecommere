@@ -1,79 +1,52 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
-import {
-  Minus,
-  Plus,
-  Trash2,
-  ShoppingBag,
-  ArrowRight,
-  Truck,
-} from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
 
 const FREESHIP_THRESHOLD = 250000;
 
 export function CartDrawer() {
-  const { items, updateQuantity, removeItem, totalPrice, isOpen, closeCart } =
-    useCart();
+  const { items, updateQuantity, removeItem, totalPrice, isOpen, closeCart } = useCart();
 
   const freeshipRemaining = Math.max(0, FREESHIP_THRESHOLD - totalPrice);
-  const freeshipProgress = Math.min(
-    100,
-    Math.round((totalPrice / FREESHIP_THRESHOLD) * 100),
-  );
+  const freeshipProgress = Math.min(100, Math.round((totalPrice / FREESHIP_THRESHOLD) * 100));
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
-      <SheetContent className="w-full sm:max-w-md flex flex-col p-0 gap-0 border-l border-slate-200 bg-white shadow-xl">
-        <SheetHeader className="px-5 sm:px-6 py-4 border-b border-slate-200 bg-white flex-shrink-0">
-          <SheetTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-slate-900 font-sans font-bold text-lg tracking-tight">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 border border-teal-100 shadow-sm flex-shrink-0">
-                <ShoppingBag className="h-4 w-4" />
-              </div>
+      <SheetContent className="w-full sm:max-w-md flex flex-col p-0 gap-0 border-l border-border bg-background shadow-md">
+        <SheetHeader className="px-6 py-4 border-b border-border bg-card">
+          <SheetTitle className="font-sans flex items-center justify-between text-base font-semibold text-foreground">
+            <span className="flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4" />
               <span>Giỏ Hàng Của Bạn</span>
-            </div>
-            <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full tabular-nums">
+            </span>
+            <span className="text-xs font-normal text-muted-foreground tabular">
               {items.length} sản phẩm
             </span>
           </SheetTitle>
         </SheetHeader>
 
         {/* Freeship Progress Meter */}
-        <div className="bg-slate-50/80 border-b border-slate-200 px-5 sm:px-6 py-3.5 flex-shrink-0">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <div className="flex items-center gap-2 font-medium text-slate-600">
-              <Truck className="h-4 w-4 text-teal-600 flex-shrink-0" />
+        <div className="bg-muted/50 border-b border-border px-6 py-3">
+          <div className="flex items-center justify-between text-xs mb-1.5">
+            <div className="flex items-center gap-1.5 text-foreground">
+              <Truck className="h-4 w-4 text-muted-foreground" />
               {freeshipRemaining === 0 ? (
-                <span className="font-semibold text-emerald-600">
-                  Bạn đã đủ điều kiện FREESHIP!
-                </span>
+                <span className="text-success font-medium">🎉 Bạn đã đủ điều kiện FREESHIP!</span>
               ) : (
                 <span>
-                  Mua thêm{' '}
-                  <strong className="text-slate-900 font-semibold">
-                    {formatCurrency(freeshipRemaining)}
-                  </strong>{' '}
-                  để được Freeship
+                  Mua thêm <strong className="font-semibold text-foreground tabular">{formatCurrency(freeshipRemaining)}</strong> để được Freeship
                 </span>
               )}
             </div>
-            <span className="font-sans font-semibold text-slate-900 tabular-nums">
-              {freeshipProgress}%
-            </span>
+            <span className="font-medium text-foreground tabular">{freeshipProgress}%</span>
           </div>
-          <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
             <div
-              className="h-full bg-teal-600 rounded-full transition-all duration-500"
+              className={`h-full rounded-full transition-all duration-300 ${freeshipRemaining === 0 ? 'bg-success' : 'bg-primary'}`}
               style={{ width: `${freeshipProgress}%` }}
             />
           </div>
@@ -82,22 +55,19 @@ export function CartDrawer() {
         {items.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center space-y-4 max-w-xs">
-              <div className="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto text-teal-600 border border-teal-100 shadow-sm">
-                <ShoppingBag className="h-8 w-8 text-teal-600" />
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+                <ShoppingBag className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-sans font-bold text-slate-900 text-base tracking-tight">
-                  Giỏ hàng của bạn đang trống
-                </h3>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Hãy khám phá các dòng chai xịt Thái Lan đuổi chuột, diệt côn
-                  trùng và tẩy rửa tiện ích.
+                <h3 className="font-sans font-semibold text-foreground text-base">Giỏ hàng của bạn đang trống</h3>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Hãy khám phá các dòng chai xịt Thái Lan đuổi chuột, diệt côn trùng và tẩy rửa tiện ích.
                 </p>
               </div>
               <Button
                 onClick={closeCart}
                 asChild
-                className="w-full rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm h-11 transition-colors duration-200 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                className="w-full"
               >
                 <Link to="/catalog">Khám Phá Sản Phẩm Ngay</Link>
               </Button>
@@ -105,149 +75,116 @@ export function CartDrawer() {
           </div>
         ) : (
           <>
-            <div className="flex-1 px-5 sm:px-6 overflow-y-auto divide-y divide-slate-100">
+            <div className="flex-1 px-6 overflow-y-auto divide-y divide-border">
               {items.map((item) => (
-                <div
-                  key={item.variantId}
-                  className="py-4 flex gap-3.5 items-center group"
-                >
-                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50/50 p-1.5 shadow-sm transition-all duration-200 group-hover:scale-[1.02] group-hover:border-slate-300">
-                    <img
-                      src={getImageUrl(item.image)}
-                      alt={item.name}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
+                <div key={item.variantId} className="py-4 flex gap-3.5 items-start">
+                  <img
+                    src={getImageUrl(item.image)}
+                    alt={item.name}
+                    className="h-16 w-16 rounded-md bg-muted object-cover flex-shrink-0"
+                  />
 
-                  <div className="flex flex-1 flex-col justify-between min-w-0">
-                    <div>
-                      <h4 className="font-sans font-bold text-sm text-slate-900 line-clamp-1 leading-snug mb-1 tracking-tight">
-                        {item.name}
-                      </h4>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {item.scent && (
-                          <Badge
-                            variant="secondary"
-                            className="px-2 py-0 text-[10px] font-medium bg-slate-100 text-slate-700 border-slate-200 rounded-md"
-                          >
-                            {item.scent}
-                          </Badge>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm text-foreground line-clamp-1">
+                          {item.name}
+                        </p>
+                        {(item.scent || item.volumeMl) && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {[item.scent, item.volumeMl ? `${item.volumeMl}ml` : null].filter(Boolean).join(' · ')}
+                          </p>
                         )}
-                        {item.volumeMl ? (
-                          <span className="text-[11px] text-slate-500 font-medium">
-                            {item.volumeMl}ml
-                          </span>
-                        ) : null}
                       </div>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeItem(item.variantId)}
+                        className="text-muted-foreground hover:text-destructive h-7 w-7 flex-shrink-0"
+                        aria-label="Xóa sản phẩm"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
 
-                    <div className="flex items-center justify-between mt-2.5">
-                      <span className="font-sans font-bold text-sm text-slate-900 tabular-nums">
+                    <div className="flex items-center justify-between">
+                      {/* Quantity stepper */}
+                      <div className="flex items-center rounded-md border border-border bg-card">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                          onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                          aria-label="Giảm số lượng"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-7 text-center text-xs font-medium tabular text-foreground">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                          onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                          disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                          aria-label="Tăng số lượng"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+
+                      <span className="font-semibold text-sm tabular text-foreground">
                         {formatCurrency(item.price * item.quantity)}
                       </span>
-
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 shadow-sm">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 rounded-md hover:bg-white text-slate-700 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-40"
-                            onClick={() =>
-                              updateQuantity(item.variantId, item.quantity - 1)
-                            }
-                            disabled={item.quantity <= 1}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="w-7 text-center text-xs font-bold text-slate-900 tabular-nums">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 rounded-md hover:bg-white text-slate-700 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-40"
-                            onClick={() =>
-                              updateQuantity(item.variantId, item.quantity + 1)
-                            }
-                            disabled={
-                              typeof item.stock === 'number' &&
-                              item.quantity >= item.stock
-                            }
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => removeItem(item.variantId)}
-                          className="text-slate-400 hover:text-rose-600 transition-colors duration-200 p-1.5 rounded-lg hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
-                          aria-label="Xóa sản phẩm"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-slate-200 px-5 sm:px-6 py-4 bg-white space-y-4 flex-shrink-0">
+            <div className="border-t border-border bg-card p-5 space-y-4">
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-slate-600">
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Tạm tính ({items.length} sản phẩm):</span>
-                  <span className="font-semibold text-slate-900 tabular-nums">
-                    {formatCurrency(totalPrice)}
-                  </span>
+                  <span className="font-medium tabular text-foreground">{formatCurrency(totalPrice)}</span>
                 </div>
-                <div className="flex justify-between text-xs text-slate-600">
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Vận chuyển:</span>
-                  <span
-                    className={
-                      freeshipRemaining === 0
-                        ? 'text-emerald-600 font-semibold'
-                        : 'text-slate-900 font-medium'
-                    }
-                  >
-                    {freeshipRemaining === 0
-                      ? 'Miễn phí'
-                      : 'Tính khi thanh toán'}
+                  <span className={freeshipRemaining === 0 ? 'text-success font-medium' : 'text-foreground'}>
+                    {freeshipRemaining === 0 ? 'Miễn phí' : 'Tính khi thanh toán'}
                   </span>
                 </div>
-                <div className="pt-2.5 border-t border-slate-200 flex justify-between items-baseline">
-                  <span className="text-sm font-semibold text-slate-900">
-                    Tổng cộng:
-                  </span>
-                  <span className="text-xl font-sans font-bold text-slate-900 tabular-nums">
-                    {formatCurrency(totalPrice)}
-                  </span>
+                <div className="pt-2 border-t border-border flex justify-between items-baseline">
+                  <span className="text-sm font-semibold text-foreground">Tổng cộng:</span>
+                  <span className="text-lg font-semibold tabular text-primary">{formatCurrency(totalPrice)}</span>
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Button
-                  className="w-full h-11 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                  size="lg"
+                  className="w-full"
                   onClick={closeCart}
                   asChild
                 >
-                  <Link
-                    to="/checkout"
-                    className="flex items-center justify-center gap-2"
-                  >
+                  <Link to="/checkout" className="flex items-center justify-center gap-2">
                     Tiến Hành Thanh Toán
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
 
-                <Button
-                  variant="outline"
-                  className="w-full h-10 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
-                  onClick={closeCart}
-                  asChild
-                >
-                  <Link to="/cart">Xem Trang Giỏ Hàng Chi Tiết</Link>
-                </Button>
+                <div className="text-center">
+                  <Link
+                    to="/cart"
+                    onClick={closeCart}
+                    className="inline-block text-xs text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                  >
+                    Xem Trang Giỏ Hàng Chi Tiết
+                  </Link>
+                </div>
               </div>
             </div>
           </>

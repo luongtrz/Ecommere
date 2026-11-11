@@ -6,33 +6,18 @@ import type { Product, ProductFilters } from '../api/products.api';
 import { ProductCard } from '@/components/common/ProductCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
+import { Pagination } from '@/components/common/Pagination';
+import { FilterSidebar } from '../components/FilterSidebar';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
-('@/components/ui/card');
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Search,
-  ArrowLeft,
-  SlidersHorizontal,
-  Package,
-  TrendingUp,
-  Grid3X3,
-  List,
-  ShoppingBag,
-  Star,
-  X,
-} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, ArrowLeft, SlidersHorizontal, Package, Grid3X3, List, ShoppingBag } from 'lucide-react';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { formatCurrency } from '@/lib/formatters';
-import { getImageUrl } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export function SearchPage() {
@@ -40,26 +25,36 @@ export function SearchPage() {
   const query = searchParams.get('q') || '';
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
-  const category =
-    searchParams.get('category') ||
-    searchParams.get('categorySlug') ||
-    undefined;
+  const category = searchParams.get('category') || searchParams.get('categorySlug') || undefined;
+  const pageParam = parseInt(searchParams.get('page') || '1', 10);
+  const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
+  const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
+  const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
+  const scent = searchParams.get('scent') || undefined;
+  const volumeMl = searchParams.get('volumeMl') || undefined;
+  const brand = searchParams.get('brand') || undefined;
+
+  const [showFilters, setShowFilters] = useState(true);
   const [searchInput, setSearchInput] = useState(query);
   const debouncedSearch = useDebounce(searchInput, 400);
 
-  const [page, setPage] = useState(1);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   const searchFilters: ProductFilters = {
     sortBy: sortBy as any,
     ...(category ? { categorySlug: category } : {}),
+    ...(minPrice !== undefined ? { minPrice } : {}),
+    ...(maxPrice !== undefined ? { maxPrice } : {}),
+    ...(scent ? { scent } : {}),
+    ...(volumeMl ? { volumeMl } : {}),
+    ...(brand ? { brand } : {}),
   };
 
-  const { data, isLoading, isFetching, isPlaceholderData } = useProductSearch(
+  const { data, isLoading, isPlaceholderData } = useProductSearch(
     query,
     searchFilters,
-    page,
+    page
   );
   const { addItem } = useCart();
 
@@ -69,63 +64,40 @@ export function SearchPage() {
 
   useEffect(() => {
     if (debouncedSearch !== query) {
+      const nextParams = new URLSearchParams(searchParams);
       if (debouncedSearch.trim()) {
-        setSearchParams({
-          q: debouncedSearch.trim(),
-          sort: sortBy,
-          view: viewMode,
-        });
+        nextParams.set('q', debouncedSearch.trim());
       } else {
-        const nextParams = new URLSearchParams(searchParams);
         nextParams.delete('q');
-        setSearchParams(nextParams);
       }
+      nextParams.set('page', '1');
+      setSearchParams(nextParams);
     }
-  }, [debouncedSearch, query, sortBy, viewMode, setSearchParams, searchParams]);
-
-  useEffect(() => {
-    setPage(1);
-    setAllProducts([]);
-  }, [query, sortBy, category]);
+  }, [debouncedSearch, query, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!data || isPlaceholderData) return;
-
-    if (page === 1) {
-      setAllProducts(data.products);
-    } else if (data.page === page) {
-      setAllProducts((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id));
-        const nextProducts = data.products.filter(
-          (p) => !existingIds.has(p.id),
-        );
-        return [...prev, ...nextProducts];
-      });
-    }
-  }, [data, page, isPlaceholderData]);
+    setAllProducts(data.products);
+  }, [data, isPlaceholderData]);
 
   const productsToShow =
     allProducts.length > 0
       ? allProducts
       : page === 1 && data && !isPlaceholderData
-        ? data.products
-        : [];
+      ? data.products
+      : (data?.products || []);
 
-  const hasNextPage = Boolean(
-    data &&
-    (data.hasNextPage ?? data.page < data.totalPages) &&
-    productsToShow.length < data.total,
-  );
-
-  const handleLoadMore = () => {
-    if (!isFetching && hasNextPage) {
-      setPage((prev) => prev + 1);
-    }
+  const handlePageChange = (newPage: number) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('page', newPage.toString());
+    setSearchParams(nextParams);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSortChange = (value: string) => {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('sort', value);
+    nextParams.set('page', '1');
     setSearchParams(nextParams);
   };
 
@@ -135,10 +107,22 @@ export function SearchPage() {
     setSearchParams(nextParams);
   };
 
+  const handleFilterChange = (filters: Record<string, string | undefined>) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('page', '1');
+    Object.entries(filters).forEach(([key, value]) => {
+      const paramKey = key === 'categorySlug' ? 'category' : key;
+      if (value === undefined || value === '') {
+        nextParams.delete(paramKey);
+      } else {
+        nextParams.set(paramKey, value);
+      }
+    });
+    setSearchParams(nextParams);
+  };
+
   const handleFilterClick = () => {
-    alert(
-      'Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.',
-    );
+    setShowFilters((prev) => !prev);
   };
 
   const handleAddToCart = (product: any, variant: any) => {
@@ -155,27 +139,39 @@ export function SearchPage() {
 
   const clearSearch = () => {
     setSearchInput('');
-    setSearchParams({});
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('q');
+    nextParams.set('page', '1');
+    setSearchParams(nextParams);
   };
 
   const isInitialLoading =
     (isLoading || isPlaceholderData) && productsToShow.length === 0 && !!query;
 
+  const filterContent = (
+    <FilterSidebar
+      currentFilters={{
+        categorySlug: category,
+        minPrice,
+        maxPrice,
+        scent,
+        volumeMl,
+        brand,
+      }}
+      onFilterChange={handleFilterChange}
+    />
+  );
+
   return (
     <>
       <SEO title={`Tìm kiếm: ${query}`} />
 
-      <div className="min-h-screen bg-slate-50">
-        {/* Search Header */}
-        <div className="border-b border-slate-200 bg-white/95 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-          <div className="container py-4 md:py-6">
-            <div className="flex items-center gap-4 mb-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                asChild
-                className="rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900"
-              >
+      <div className="min-h-screen bg-background">
+        {/* Page Header */}
+        <div className="border-b border-border bg-card">
+          <div className="container py-8 md:py-10">
+            <div className="flex items-center gap-4 mb-4">
+              <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground hover:text-foreground">
                 <Link to="/catalog" className="flex items-center gap-2">
                   <ArrowLeft className="h-4 w-4" />
                   Quay lại danh sách
@@ -183,154 +179,146 @@ export function SearchPage() {
               </Button>
             </div>
 
-            {/* Search Input Box */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm">
-              <div className="flex flex-col lg:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 pointer-events-none" />
-                  <Input
-                    placeholder="Tìm kiếm sản phẩm..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-11 pr-10 h-11 text-xs md:text-sm bg-slate-50 border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-teal-500 focus-visible:ring-1 focus-visible:ring-teal-500 transition-all"
-                  />
-                  {searchInput && (
-                    <button
-                      onClick={() => setSearchInput('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 hover:bg-slate-100 rounded-full p-1 text-slate-400 hover:text-slate-600 transition-colors"
-                      aria-label="Xóa tìm kiếm"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
+            <div>
+              <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+                {query ? `Kết quả tìm kiếm cho "${query}"` : 'Tìm kiếm'}
+              </h1>
+              {query && (
+                <p className="text-sm text-muted-foreground mt-2 tabular">
+                  {data?.total || 0} kết quả tìm thấy
+                </p>
+              )}
+            </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap uppercase tracking-wider">
-                      Sắp xếp:
-                    </span>
-                    <Select value={sortBy} onValueChange={handleSortChange}>
-                      <SelectTrigger className="w-[150px] h-11 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-700 px-4 focus:ring-1 focus:ring-teal-500 hover:bg-slate-50">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border border-slate-200 bg-white text-slate-900 shadow-md">
-                        {PRODUCT_SORT_OPTIONS.map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className="text-xs rounded-lg focus:bg-teal-50 focus:text-teal-700 cursor-pointer"
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
+            {/* Search Toolbar */}
+            <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between mt-6 pt-6 border-t border-border">
+              <div className="relative flex-1 max-w-xl">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Tìm kiếm sản phẩm..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-10 h-10 text-sm bg-background border-border rounded-md"
+                />
+                {searchInput && (
                   <Button
-                    variant="outline"
-                    size="lg"
-                    className="h-11 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 px-4"
-                    onClick={handleFilterClick}
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearSearch}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
                   >
-                    <SlidersHorizontal className="h-3.5 w-3.5 mr-2" />
-                    Bộ lọc
+                    Xóa tìm kiếm
                   </Button>
-
-                  {searchInput && (
-                    <Button
-                      variant="ghost"
-                      onClick={clearSearch}
-                      className="h-11 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-lg px-4"
-                    >
-                      Xóa tìm kiếm
-                    </Button>
-                  )}
-                </div>
+                )}
               </div>
 
-              {/* Search Info */}
-              {query && (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-4 pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <Search className="h-3.5 w-3.5 text-slate-400" />
-                      <span>
-                        Tìm kiếm cho:{' '}
-                        <span className="font-semibold text-slate-900">
-                          "{query}"
-                        </span>
-                      </span>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className="flex items-center gap-1 rounded-md text-[10px] h-5 px-2 bg-teal-50 text-teal-700 border border-teal-200 font-medium"
-                    >
-                      <Package className="h-3 w-3" />
-                      {data?.total || 0} kết quả
-                    </Badge>
-                  </div>
-
-                  {!isLoading && !isPlaceholderData && data?.total === 0 && (
-                    <div className="text-xs text-slate-500">
-                      Thử tìm với từ khóa khác hoặc{' '}
-                      <Link
-                        to="/catalog"
-                        className="text-teal-600 hover:text-teal-700 hover:underline font-medium"
-                      >
-                        xem tất cả sản phẩm
-                      </Link>
-                    </div>
-                  )}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">Sắp xếp:</span>
+                  <Select value={sortBy} onValueChange={handleSortChange}>
+                    <SelectTrigger className="w-[160px] h-10 rounded-md border-border bg-background text-sm font-normal text-foreground">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-md border-border bg-popover">
+                      {PRODUCT_SORT_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value} className="text-sm">
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+
+                {/* Filter Trigger Button Desktop */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden lg:flex items-center gap-2 h-10 rounded-md border-border bg-background hover:bg-secondary text-foreground"
+                  onClick={handleFilterClick}
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  <span>Bộ lọc</span>
+                </Button>
+
+                {/* Filter Sheet Mobile */}
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="lg:hidden flex items-center gap-2 h-10 rounded-md border-border bg-background hover:bg-secondary text-foreground"
+                    >
+                      <SlidersHorizontal className="h-4 w-4" />
+                      <span>Bộ lọc</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-80 overflow-y-auto border-border bg-card">
+                    <SheetHeader>
+                      <SheetTitle className="text-foreground">Bộ lọc</SheetTitle>
+                    </SheetHeader>
+                    <div className="py-4">
+                      {filterContent}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                {/* View Mode Toggle */}
+                <div className="flex items-center border border-border rounded-md p-0.5 bg-background">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewToggle('grid')}
+                    className={`h-8 w-8 p-0 rounded-sm ${viewMode === 'grid' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                    aria-label="Chế độ lưới"
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewToggle('list')}
+                    className={`h-8 w-8 p-0 rounded-sm ${viewMode === 'list' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                    aria-label="Chế độ danh sách"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Results Section */}
-        <div className="container py-8 md:py-12">
+        <div className="container py-8 md:py-12 min-h-[60vh]">
           {isInitialLoading ? (
-            <div className="py-24 flex justify-center">
+            <div className="py-20 flex justify-center">
               <LoadingSpinner />
             </div>
           ) : data && data.total === 0 ? (
-            <div className="py-8">
-              <div className="bg-white rounded-2xl border border-slate-200 p-8 md:p-16 text-center max-w-xl mx-auto shadow-sm">
-                <EmptyState
-                  icon={<Search className="h-12 w-12 text-slate-300" />}
-                  title="Không tìm thấy sản phẩm"
-                  description={`Không có sản phẩm nào khớp với từ khóa "${query}". Hãy thử tìm kiếm với từ khóa khác.`}
-                  action={
-                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                      <Button
-                        asChild
-                        className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white focus-visible:ring-2 focus-visible:ring-teal-500 px-6"
-                      >
-                        <Link to="/catalog" className="flex items-center gap-2">
-                          <Package className="h-4 w-4" />
-                          Xem tất cả sản phẩm
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-6"
-                        onClick={() => setSearchParams({})}
-                      >
-                        Xóa tìm kiếm
-                      </Button>
-                    </div>
-                  }
-                />
-              </div>
+            <div className="py-12">
+              <EmptyState
+                icon={<Search className="h-12 w-12 text-muted-foreground stroke-1" />}
+                title="Không tìm thấy sản phẩm"
+                description={`Không có sản phẩm nào khớp với từ khóa "${query}". Hãy thử tìm kiếm với từ khóa khác.`}
+                action={
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button asChild className="rounded-md">
+                      <Link to="/catalog" className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        Xem tất cả sản phẩm
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="rounded-md" onClick={clearSearch}>
+                      Xóa tìm kiếm
+                    </Button>
+                  </div>
+                }
+              />
 
               {/* Search Suggestions */}
-              <div className="mt-12 max-w-2xl mx-auto">
-                <h3 className="text-lg font-sans font-bold text-slate-900 mb-4">
-                  Gợi ý tìm kiếm:
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="mt-12 max-w-2xl mx-auto text-center">
+                <h3 className="text-sm font-semibold text-foreground mb-4">Gợi ý tìm kiếm:</h3>
+                <div className="flex flex-wrap items-center justify-center gap-2">
                   {[
                     'Nước hoa chanh',
                     'Nước hoa bạc hà',
@@ -339,200 +327,143 @@ export function SearchPage() {
                     'Nước hoa vanilla',
                     'Nước hoa lavender',
                     'Nước hoa trà xanh',
-                    'Nước hoa bạc hà',
                   ].map((suggestion, idx) => (
-                    <Button
-                      key={idx}
-                      variant="outline"
-                      className="justify-start h-auto py-2.5 px-3.5 text-left rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-500 text-xs text-slate-700 transition-all"
+                    <button
+                      key={`${suggestion}-${idx}`}
+                      type="button"
                       onClick={() => setSearchInput(suggestion)}
+                      className="rounded-full border border-border bg-card px-4 py-1.5 text-sm text-foreground hover:border-foreground/30 hover:bg-secondary transition-colors"
                     >
-                      <Search className="h-3.5 w-3.5 mr-2 shrink-0 text-slate-400" />
-                      <span className="truncate">{suggestion}</span>
-                    </Button>
+                      {suggestion}
+                    </button>
                   ))}
                 </div>
               </div>
             </div>
           ) : (
-            <>
-              {/* Results Header */}
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
-                <div className="flex items-baseline gap-3">
-                  <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-900 tracking-tight">
-                    Kết quả tìm kiếm
-                  </h2>
-                  <Badge
-                    variant="outline"
-                    className="flex items-center gap-1 rounded-md border-slate-200 bg-slate-50 text-slate-600 text-xs font-normal"
-                  >
-                    <TrendingUp className="h-3 w-3 text-teal-600" />
-                    {data?.total || 0} sản phẩm
-                  </Badge>
+            <div className="flex gap-8">
+              {/* Sidebar - Desktop only */}
+              {showFilters && (
+                <aside className="hidden lg:block w-64 shrink-0">
+                  <div className="sticky top-24 bg-card rounded-lg border border-border p-5 overflow-y-auto max-h-[calc(100vh-8rem)]">
+                    {filterContent}
+                  </div>
+                </aside>
+              )}
+
+              {/* Products Column */}
+              <div className="flex-1 min-w-0">
+                {/* Results Header */}
+                <div className="flex items-center justify-between mb-6 pb-3 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Kết quả tìm kiếm
+                    </h2>
+                    <span className="text-sm text-muted-foreground tabular">
+                      ({data?.total || 0} sản phẩm)
+                    </span>
+                  </div>
                 </div>
 
-                {/* View Options */}
-                <div className="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleViewToggle('grid')}
-                    aria-label="Xem lưới"
-                    className={`h-7 w-7 p-0 rounded-md transition-all ${
-                      viewMode === 'grid'
-                        ? 'bg-white shadow-sm text-teal-600 font-semibold'
-                        : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                  >
-                    <Grid3X3 className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleViewToggle('list')}
-                    aria-label="Xem danh sách"
-                    className={`h-7 w-7 p-0 rounded-md transition-all ${
-                      viewMode === 'list'
-                        ? 'bg-white shadow-sm text-teal-600 font-semibold'
-                        : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                  >
-                    <List className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Products Display */}
-              <div
-                className={`${
+                {/* Product Grid / List */}
+                <div className={
                   viewMode === 'grid'
-                    ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'
+                    ? 'grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8'
                     : 'space-y-4'
-                }`}
-              >
-                {productsToShow.map((product) =>
-                  viewMode === 'grid' ? (
-                    <ProductCard
-                      key={product.id}
-                      id={product.id}
-                      name={product.name}
-                      slug={product.slug}
-                      images={product.images}
-                      price={product.basePrice}
-                      rating={product.rating}
-                      reviewCount={product.reviewCount}
-                      variants={product.variants}
-                      onAddToCart={() =>
-                        product.variants[0] &&
-                        handleAddToCart(product, product.variants[0])
-                      }
-                    />
-                  ) : (
-                    <div
-                      key={product.id}
-                      className="flex flex-col sm:flex-row gap-4 md:gap-6 bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
-                    >
-                      <div className="w-full sm:w-32 md:w-36 aspect-square sm:aspect-auto sm:h-36 bg-slate-50 border border-slate-100 rounded-lg overflow-hidden shrink-0">
-                        <img
-                          src={getImageUrl(product.images[0], { width: 300 })}
-                          alt={product.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0 py-1 flex flex-col justify-between">
-                        <div>
-                          <p className="uppercase tracking-wider text-[10px] font-semibold text-teal-600 mb-1">
-                            Thai Spray
-                          </p>
-                          <h3 className="font-sans font-semibold text-slate-900 truncate text-base md:text-lg mb-1">
-                            {product.name}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-2 md:gap-4 mb-2">
-                            <div className="flex items-center gap-1 text-xs">
-                              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                              <span className="font-semibold text-slate-700 tabular-nums">
-                                {product.rating?.toFixed(1) || '0.0'}
-                              </span>
-                              <span className="text-slate-500 tabular-nums">
-                                ({product.reviewCount || 0} đánh giá)
-                              </span>
-                            </div>
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] h-5 rounded-md border-slate-200 bg-slate-50 text-slate-600 font-normal"
-                            >
-                              {product.variants?.length || 0} biến thể
-                            </Badge>
+                }>
+                  {productsToShow.map((product) => (
+                    viewMode === 'grid' ? (
+                      <ProductCard
+                        key={product.id}
+                        id={product.id}
+                        name={product.name}
+                        slug={product.slug}
+                        images={product.images}
+                        price={product.basePrice}
+                        rating={product.rating}
+                        reviewCount={product.reviewCount}
+                        variants={product.variants}
+                        onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                      />
+                    ) : (
+                      <Card key={product.id} className="p-4 md:p-5 border border-border bg-card rounded-lg hover:border-foreground/30 transition-colors shadow-none">
+                        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-secondary rounded-lg overflow-hidden shrink-0 mx-auto sm:mx-0">
+                            <img
+                              src={product.images[0]}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
-                          {product.description && (
-                            <p className="text-slate-600 text-xs leading-relaxed mb-3 line-clamp-2">
-                              {product.description}
-                            </p>
-                          )}
-                          <div className="flex flex-wrap gap-1.5 mb-3">
-                            {product.variants
-                              ?.slice(0, 3)
-                              .map((variant: any, index: number) => (
-                                <Badge
-                                  key={index}
-                                  variant="secondary"
-                                  className="text-[10px] h-5 px-2 font-normal rounded-md border border-slate-200 bg-slate-100 text-slate-700"
-                                >
-                                  {variant.scent} - {variant.volumeMl}ml
+                          <div className="flex-1 min-w-0 flex flex-col justify-between">
+                            <div>
+                              <h3 className="font-semibold text-base sm:text-lg text-foreground mb-1 leading-snug">
+                                {product.name}
+                              </h3>
+                              <div className="flex flex-wrap items-center gap-2 mb-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1 text-foreground">
+                                  <span className="text-accent text-sm">★</span>
+                                  <span className="font-medium tabular">
+                                    {product.rating?.toFixed(1) || '0.0'}
+                                  </span>
+                                </div>
+                                <span>·</span>
+                                <span className="tabular">({product.reviewCount || 0} đánh giá)</span>
+                                <span>·</span>
+                                <Badge variant="outline" className="text-xs rounded-sm font-normal">
+                                  {product.variants?.length || 0} biến thể
                                 </Badge>
-                              ))}
-                            {product.variants &&
-                              product.variants.length > 3 && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-[10px] h-5 px-2 rounded-md border-slate-200 bg-slate-50 text-slate-500"
-                                >
-                                  +{product.variants.length - 3} nữa
-                                </Badge>
+                              </div>
+                              {product.description && (
+                                <p className="text-muted-foreground text-sm leading-relaxed mb-3 line-clamp-2 max-w-[65ch]">
+                                  {product.description}
+                                </p>
                               )}
+                              <div className="flex flex-wrap gap-1.5 mb-3">
+                                {product.variants?.slice(0, 3).map((variant: any, index: number) => (
+                                  <Badge key={index} variant="secondary" className="text-xs rounded-sm font-normal">
+                                    {variant.scent} - {variant.volumeMl}ml
+                                  </Badge>
+                                ))}
+                                {product.variants && product.variants.length > 3 && (
+                                  <Badge variant="outline" className="text-xs rounded-sm font-normal">
+                                    +{product.variants.length - 3} nữa
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border">
+                              <div className="text-lg sm:text-xl font-semibold text-foreground tabular">
+                                {formatCurrency(product.basePrice)}
+                              </div>
+                              <Button
+                                size="sm"
+                                className="rounded-md"
+                                onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                              >
+                                <ShoppingBag className="h-4 w-4 mr-2" />
+                                Thêm vào giỏ
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                          <span className="font-sans font-bold text-rose-600 text-base md:text-lg tabular-nums">
-                            {formatCurrency(product.basePrice)}
-                          </span>
-                          <Button
-                            size="sm"
-                            className="h-9 rounded-lg px-4 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 transition-all duration-200 active:scale-95"
-                            onClick={() =>
-                              product.variants[0] &&
-                              handleAddToCart(product, product.variants[0])
-                            }
-                          >
-                            <ShoppingBag className="h-3.5 w-3.5 mr-1.5" /> Thêm
-                            vào giỏ
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ),
+                      </Card>
+                    )
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {data && data.totalPages > 1 && (
+                  <div className="flex justify-center pt-10 mt-8 border-t border-border">
+                    <Pagination
+                      currentPage={page}
+                      totalPages={data.totalPages}
+                      onPageChange={handlePageChange}
+                    />
+                  </div>
                 )}
               </div>
-
-              {/* Load More */}
-              {hasNextPage && (
-                <div className="text-center mt-10">
-                  <p className="text-xs text-slate-500 mb-4">
-                    Hiển thị {productsToShow.length} / {data?.total || 0} sản
-                    phẩm
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs px-6"
-                    onClick={handleLoadMore}
-                    disabled={isFetching}
-                  >
-                    Xem thêm sản phẩm
-                  </Button>
-                </div>
-              )}
-            </>
+            </div>
           )}
         </div>
       </div>
