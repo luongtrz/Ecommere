@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-import { MapPin, Plus, Edit, Trash2, Home, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Plus, Edit, Trash2 } from 'lucide-react';
 import { useAddresses, useDeleteAddress } from '../hooks/useAddresses';
 import { AddressFormDialog } from '../components/AddressFormDialog';
 import type { Address } from '../api/users.api';
@@ -37,10 +37,11 @@ export function AddressesPage() {
 
   if (isLoading) {
     return (
-      <div className="container max-w-4xl py-20 text-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded-xl w-full max-w-2xl"></div>
+      <div className="container py-8 md:py-12 max-w-5xl">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-48 mb-6" />
+          <div className="h-28 bg-muted rounded-lg w-full" />
+          <div className="h-28 bg-muted rounded-lg w-full" />
         </div>
       </div>
     );
@@ -49,97 +50,108 @@ export function AddressesPage() {
   return (
     <>
       <SEO title="Quản lý địa chỉ" />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-secondary/20">
-        <div className="container max-w-5xl py-8 md:py-12">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Sổ địa chỉ</h1>
-              <p className="text-gray-600">Quản lý địa chỉ giao hàng của bạn</p>
+      <div className="container py-8 md:py-12 max-w-5xl">
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted-foreground">
+          <Link to="/account" className="hover:text-foreground transition-colors">
+            Tài khoản
+          </Link>
+          <span className="mx-2 text-muted-foreground/60">/</span>
+          <span className="text-foreground">Sổ địa chỉ</span>
+        </nav>
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border mb-8">
+          <div>
+            <h1 className="font-serif text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+              Sổ địa chỉ
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Quản lý địa chỉ giao hàng của bạn
+            </p>
+          </div>
+          <Button onClick={handleAdd}>
+            <Plus className="h-4 w-4 mr-2" />
+            Thêm địa chỉ mới
+          </Button>
+        </div>
+
+        {!addresses || addresses.length === 0 ? (
+          <div className="rounded-lg border border-border bg-card p-8 md:p-12 text-center max-w-md mx-auto">
+            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 text-foreground">
+              <MapPin className="h-6 w-6 text-muted-foreground" />
             </div>
-            <Button onClick={handleAdd} className="rounded-xl shadow-lg shadow-primary/10 bg-primary text-primary-foreground hover:bg-primary/95 h-11 px-6">
-              <Plus className="h-5 w-5 mr-2" />
-              Thêm địa chỉ mới
+            <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
+              Chưa có địa chỉ nào
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto leading-relaxed">
+              Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại Thai Spray Shop
+            </p>
+            <Button onClick={handleAdd}>
+              <Plus className="h-4 w-4 mr-2" />
+              Thêm địa chỉ đầu tiên
             </Button>
           </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {addresses.map((address) => (
+              <div
+                key={address.id}
+                className="rounded-lg border border-border bg-card p-5 transition-colors hover:border-foreground/30 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-medium text-foreground text-base">
+                          {address.fullName}
+                        </h3>
+                        {address.isDefault && (
+                          <Badge variant="secondary" className="rounded-sm text-xs font-normal">
+                            Mặc định
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-foreground tabular">{address.phone}</p>
+                    </div>
+                  </div>
 
-          {!addresses || addresses.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12 text-center animate-fade-in">
-              <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <MapPin className="h-10 w-10 text-primary" />
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {address.line1}, {address.ward}, {address.district}, {address.province}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-4 mt-4 border-t border-border">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => handleEdit(address)}
+                  >
+                    <Edit className="h-3.5 w-3.5 mr-1.5" />
+                    Chỉnh sửa
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2.5 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => handleDelete(address.id)}
+                    disabled={deleteAddress.isPending}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                    Xóa
+                  </Button>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Chưa có địa chỉ nào</h3>
-              <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-                Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại Thai Spray Shop
-              </p>
-              <Button onClick={handleAdd} size="lg" className="rounded-xl">
-                <Plus className="h-5 w-5 mr-2" />
-                Thêm địa chỉ đầu tiên
-              </Button>
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2">
-              {addresses.map((address) => (
-                <Card
-                  key={address.id}
-                  className={`border transition-all duration-300 rounded-2xl overflow-hidden group hover:shadow-lg ${address.isDefault ? 'border-primary bg-secondary/20 shadow-md ring-1 ring-secondary' : 'border-gray-100 shadow-sm hover:border-gray-200'}`}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${address.isDefault ? 'bg-secondary text-primary' : 'bg-gray-100 text-gray-500'}`}>
-                          {address.isDefault ? <Home className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900 text-lg">{address.fullName}</h3>
-                          {address.isDefault && (
-                            <div className="flex items-center gap-1 text-xs font-semibold text-primary bg-secondary px-2 py-0.5 rounded-full w-fit mt-0.5">
-                              <CheckCircle className="h-3 w-3" />
-                              Mặc định
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-full text-gray-400 hover:text-primary hover:bg-secondary"
-                          onClick={() => handleEdit(address)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(address.id)}
-                          disabled={deleteAddress.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+            ))}
+          </div>
+        )}
 
-                    <div className="space-y-3 pl-[52px]">
-                      <div className="text-gray-900 font-medium">
-                        {address.phone}
-                      </div>
-                      <div className="text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-3 rounded-lg border border-gray-100">
-                        {address.line1}, {address.ward}, {address.district}, {address.province}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          <AddressFormDialog
-            address={selectedAddress}
-            open={isDialogOpen}
-            onOpenChange={handleDialogClose}
-          />
-        </div>
+        <AddressFormDialog
+          address={selectedAddress}
+          open={isDialogOpen}
+          onOpenChange={handleDialogClose}
+        />
       </div>
     </>
   );
