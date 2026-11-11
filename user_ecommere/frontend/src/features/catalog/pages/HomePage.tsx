@@ -6,7 +6,6 @@ import {
   ChevronRight,
   RefreshCw,
   Shield,
-  Sparkles,
   Truck,
 } from 'lucide-react';
 import { SEO } from '@/lib/seo';
@@ -33,9 +32,13 @@ const FEATURED_CATEGORY_LIMIT = 4;
 
 function HomeSectionSkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 md:gap-x-6 xl:grid-cols-4">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="h-[360px] animate-pulse rounded-[1.65rem] bg-white/70" />
+        <div key={index} className="space-y-3">
+          <div className="aspect-[4/5] w-full animate-pulse rounded-lg bg-muted" />
+          <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+        </div>
       ))}
     </div>
   );
@@ -89,22 +92,22 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
 
   const scroll = (direction: 'left' | 'right') => {
     scrollRef.current?.scrollBy({
-      left: direction === 'left' ? -320 : 320,
+      left: direction === 'left' ? -280 : 280,
       behavior: 'smooth',
     });
   };
 
   return (
-    <section ref={sectionRef} className="section-shell overflow-hidden p-5 md:p-8">
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <section ref={sectionRef} className="section-y border-t border-border">
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Danh mục nổi bật</p>
-          <h2 className="section-title text-2xl md:text-3xl">{category.name}</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+          <p className="eyebrow text-muted-foreground mb-2">Danh mục nổi bật</p>
+          <h2 className="section-title">{category.name}</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Những lựa chọn được khách chọn nhiều khi cần mùi thơm gọn, dễ dùng và phù hợp sinh hoạt mỗi ngày.
           </p>
         </div>
-        <Button asChild variant="outline" className="rounded-full px-5">
+        <Button asChild variant="outline" className="shrink-0">
           <Link to={`/c/${category.slug}`}>
             Xem toàn bộ danh mục
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -116,28 +119,27 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
 
       {!isLoading && productsData?.products?.length ? (
         <>
-          <div className="hidden gap-5 md:grid md:grid-cols-2 xl:grid-cols-4">
-            {productsData.products.slice(0, 4).map((product, idx) => (
-              <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${idx * 80}ms` }}>
-                <ProductCard
-                  id={product.id}
-                  name={product.name}
-                  slug={product.slug}
-                  images={product.images}
-                  price={product.basePrice}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  variants={product.variants}
-                  onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
-                />
-              </div>
+          <div className="hidden md:grid md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-6">
+            {productsData.products.slice(0, 4).map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                slug={product.slug}
+                images={product.images}
+                price={product.basePrice}
+                rating={product.rating}
+                reviewCount={product.reviewCount}
+                variants={product.variants}
+                onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+              />
             ))}
           </div>
 
           <div className="relative md:hidden">
-            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
               {productsData.products.map((product) => (
-                <div key={product.id} className="w-[265px] shrink-0">
+                <div key={product.id} className="w-64 shrink-0 snap-start">
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -154,15 +156,17 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
             </div>
             <button
               onClick={() => scroll('left')}
-              className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg"
+              aria-label="Cuộn sang trái"
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               onClick={() => scroll('right')}
-              className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg"
+              aria-label="Cuộn sang phải"
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         </>
@@ -197,129 +201,95 @@ export function HomePage() {
     <>
       <SEO />
 
-      <div className="container space-y-8 py-6 md:space-y-10 md:py-8">
-        <section className="section-shell relative overflow-hidden px-6 py-12 md:px-12 md:py-20 bg-white/80 backdrop-blur-xl border border-black/[0.02] shadow-luxury">
-          {/* Animated Ambient Blobs */}
-          <div className="absolute top-[-20%] left-[-10%] h-[350px] w-[350px] rounded-full bg-amber-300/12 blur-[80px] animate-float-orb pointer-events-none" />
-          <div className="absolute bottom-[-15%] right-[-5%] h-[400px] w-[400px] rounded-full bg-neutral-400/10 blur-[90px] animate-float-orb [animation-delay:-5s] pointer-events-none" />
-          
-          <div className="relative grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-            <div>
-              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-white/80 px-4.5 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary shadow-sm hover:scale-[1.01] transition-transform duration-300 backdrop-blur-md">
-                <Sparkles className="h-3.5 w-3.5 text-accent-foreground/75 fill-accent/10 animate-pulse" />
+      <div className="container">
+        <section className="section-y">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col justify-center">
+              <p className="eyebrow text-muted-foreground mb-3">
                 Hương thơm cho không gian sống hiện đại
               </p>
-              <h1 className="max-w-3xl text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-7xl font-serif">
-                Chọn mùi hương khiến không gian của bạn <span className="text-gradient-emerald">trông có gu hơn</span>.
+              <h1 className="font-serif text-4xl md:text-6xl tracking-tight text-foreground max-w-xl">
+                Chọn mùi hương khiến không gian của bạn trông có gu hơn.
               </h1>
-              <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg font-medium">
+              <p className="mt-4 max-w-prose text-base leading-relaxed text-muted-foreground">
                 Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết, gọn và không gắt. Bạn có thể bắt đầu từ
                 mùi bán chạy, hỏi chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay trên catalog.
               </p>
-              <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
-                <Button asChild size="lg" className="h-[3.25rem] rounded-full px-8 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 shadow-xl shadow-primary/15 hover:shadow-primary/25 bg-primary font-bold uppercase tracking-wider text-xs">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Button asChild size="lg">
                   <Link to="/catalog">
                     Khám phá bộ sưu tập
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-[3.25rem] rounded-full px-8 border-black/[0.05] bg-white/60 hover:bg-white/95 hover:-translate-y-0.5 hover:scale-[1.03] transition-all duration-300 shadow-sm font-bold uppercase tracking-wider text-xs">
+                <Button asChild variant="outline" size="lg">
                   <Link to="/catalog?sort=best_selling">Xem nhóm bán chạy nhất</Link>
                 </Button>
               </div>
             </div>
- 
-            <div className="relative aspect-square w-full max-w-[400px] mx-auto lg:max-w-none rounded-[2.2rem] border border-black/[0.02] shadow-luxury group animate-scale-in">
-              <div className="h-full w-full overflow-hidden rounded-[2.2rem] bg-gradient-to-tr from-secondary/50 to-white/30 border border-white/40">
-                <img
-                  src="/hero-fragrance.png"
-                  alt="Thai Spray Luxury Fragrance"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.2s] ease-out"
-                />
-              </div>
-              <div className="absolute inset-0 rounded-[2.2rem] bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/80">Premium Scent Collection</p>
-                <h3 className="text-lg font-bold mt-1 font-serif leading-tight">Mùi hương tinh tế cho nhịp sống hiện đại</h3>
-              </div>
-              <div className="absolute top-4 right-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-md px-4 py-2.5 text-white shadow-lg animate-bounce [animation-duration:4s]">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-white/80">Khuyên dùng</p>
-                <p className="text-xs font-extrabold mt-0.5 tracking-wide">Woody & Fresh</p>
-              </div>
-              
-              {/* Scent notes overlay */}
-              <div className="absolute -bottom-4 -left-4 glass-premium p-4.5 rounded-[1.6rem] max-w-[210px] border border-black/[0.02] shadow-luxury hidden sm:block hover:scale-105 duration-300">
-                <p className="text-[9px] font-extrabold uppercase tracking-widest text-primary">Olfactory Notes</p>
-                <div className="flex flex-col gap-2 mt-2.5">
-                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
-                    <span className="h-2 w-2 rounded-full bg-emerald-600 shadow-sm" />
-                    <span>Gỗ thông rừng</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
-                    <span className="h-2 w-2 rounded-full bg-amber-400 shadow-sm" />
-                    <span>Xô thơm quýt</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-foreground/90">
-                    <span className="h-2 w-2 rounded-full bg-blue-400 shadow-sm" />
-                    <span>Bạc hà lạnh</span>
-                  </div>
-                </div>
-              </div>
+
+            <div className="aspect-[4/5] w-full overflow-hidden rounded-lg border border-border bg-muted">
+              <img
+                src="/hero-fragrance.png"
+                alt="Thai Spray Luxury Fragrance"
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
         </section>
- 
-        <section className="grid gap-6 md:grid-cols-2">
-          <div className="section-shell p-6 bg-white/60 backdrop-blur-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Điểm mạnh của shop</p>
-            <div className="grid gap-3 grid-cols-3">
-              {HIGHLIGHTS.map((item) => (
-                <div key={item.label} className="rounded-2xl bg-white/90 border border-black/[0.02] p-4 shadow-luxury text-center hover-glow hover:-translate-y-0.5 transition-all duration-300">
-                  <p className="text-2xl font-bold text-primary">{item.value}</p>
-                  <p className="mt-1 text-xs text-muted-foreground font-semibold leading-tight">{item.label}</p>
+
+        <section className="border-t border-border py-6 md:py-8">
+          <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-3 md:divide-y-0 md:divide-x md:divide-border">
+            {BENEFITS.map((item) => (
+              <div key={item.title} className="flex items-start gap-3.5 py-4 first:pt-0 last:pb-0 md:py-0 md:px-6 md:first:pl-0 md:last:pr-0">
+                <item.icon className="h-5 w-5 shrink-0 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{item.desc}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-          <div className="section-shell p-6 bg-white/60 backdrop-blur-sm flex flex-col justify-between">
+        </section>
+
+        <section className="border-t border-border py-8 md:py-12">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">Gợi ý bắt đầu nhanh</p>
-              <div className="flex flex-wrap gap-2 pt-1">
+              <p className="eyebrow text-muted-foreground mb-4">Điểm mạnh của shop</p>
+              <div className="grid grid-cols-3 divide-x divide-border">
+                {HIGHLIGHTS.map((item) => (
+                  <div key={item.label} className="px-4 first:pl-0 last:pr-0">
+                    <p className="text-2xl md:text-3xl font-bold text-primary tabular">{item.value}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="border-t border-border pt-6 lg:border-t-0 lg:border-l lg:border-border lg:pl-8 lg:pt-0">
+              <p className="eyebrow text-muted-foreground mb-4">Gợi ý bắt đầu nhanh</p>
+              <div className="flex flex-wrap gap-2">
                 {['Xịt phòng khách', 'Body mist nhẹ', 'Quà tặng', 'Mùi sạch cho xe'].map((item) => (
                   <Link
                     key={item}
                     to={`/search?q=${encodeURIComponent(item)}`}
-                    className="rounded-full border border-white/60 bg-white/80 px-4 py-2 text-xs font-bold text-foreground transition-all duration-300 hover:scale-[1.02] hover:border-primary/25 hover:bg-secondary shadow-sm"
+                    className="rounded-full border border-border bg-secondary px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-foreground/30 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {item}
                   </Link>
                 ))}
               </div>
+              <p className="text-xs text-muted-foreground mt-3">Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.</p>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-4">Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.</p>
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          {BENEFITS.map((item) => (
-            <div key={item.title} className="section-shell flex items-start gap-4 p-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-foreground">
-                <item.icon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-lg font-semibold text-foreground">{item.title}</p>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.desc}</p>
-              </div>
-            </div>
-          ))}
-        </section>
-
-        <section className="section-shell p-5 md:p-8">
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <section className="section-y border-t border-border">
+          <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Biên tập bởi Thai Spray</p>
-              <h2 className="section-title text-2xl md:text-3xl">Những lựa chọn đang được hỏi nhiều</h2>
+              <p className="eyebrow text-muted-foreground mb-2">Biên tập bởi Thai Spray</p>
+              <h2 className="section-title">Những lựa chọn đang được hỏi nhiều</h2>
             </div>
-            <Button asChild variant="ghost" className="justify-start rounded-full px-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
+            <Button asChild variant="ghost" className="justify-start px-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
               <Link to="/catalog?sort=best_selling">
                 Xem thêm trong catalog
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -330,29 +300,28 @@ export function HomePage() {
           {isLoadingCuratedProducts && !curatedProducts ? (
             <HomeSectionSkeleton />
           ) : (
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {curatedProducts?.products.map((product, index) => (
-                <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 80}ms` }}>
-                  <ProductCard
-                    id={product.id}
-                    name={product.name}
-                    slug={product.slug}
-                    images={product.images}
-                    price={product.basePrice}
-                    rating={product.rating}
-                    reviewCount={product.reviewCount}
-                    variants={product.variants}
-                    onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
-                  />
-                </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 md:gap-x-6 xl:grid-cols-4">
+              {curatedProducts?.products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  slug={product.slug}
+                  images={product.images}
+                  price={product.basePrice}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  variants={product.variants}
+                  onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                />
               ))}
             </div>
           )}
         </section>
 
-        <div className="space-y-6">
+        <div>
           {isLoadingCategories ? (
-            <div className="flex justify-center py-10">
+            <div className="flex justify-center py-12">
               <LoadingSpinner />
             </div>
           ) : (
