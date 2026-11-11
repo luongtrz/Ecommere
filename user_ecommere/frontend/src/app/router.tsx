@@ -25,6 +25,7 @@ const OrderDetailPage = lazy(() => import('@/features/orders/pages/OrderDetailPa
 const ReferralPage = lazy(() => import('@/features/referrals/pages/ReferralPage').then(m => ({ default: m.ReferralPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 const ErrorPage = lazy(() => import('@/pages/ErrorPage').then(m => ({ default: m.ErrorPage })));
+const ChatbotPage = lazy(() => import('@/features/chatbot/pages/ChatbotPage').then(m => ({ default: m.ChatbotPage })));
 
 export const protectedRoutes: RouteObject[] = [
   { path: 'account', element: <AccountPage /> },
@@ -67,6 +68,9 @@ export function AppRouter() {
           <Route path="forgot-password" element={<ForgotPasswordPage />} />
           <Route path="reset-password" element={<ResetPasswordPage />} />
         </Route>
+
+        {/* Standalone Chat Route */}
+        <Route path="chat" element={<ChatbotPage />} />
 
         {/* Protected User Routes */}
         <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
