@@ -51,7 +51,7 @@ export function SearchPage() {
     ...(brand ? { brand } : {}),
   };
 
-  const { data, isLoading, isFetching, isPlaceholderData } = useProductSearch(
+  const { data, isLoading, isPlaceholderData } = useProductSearch(
     query,
     searchFilters,
     page
@@ -86,18 +86,6 @@ export function SearchPage() {
       : page === 1 && data && !isPlaceholderData
       ? data.products
       : (data?.products || []);
-
-  const hasNextPage = Boolean(
-    data &&
-    (data.hasNextPage ?? (data.page < data.totalPages)) &&
-    productsToShow.length < data.total
-  );
-
-  const handleLoadMore = () => {
-    if (!isFetching && hasNextPage && data && page < data.totalPages) {
-      handlePageChange(page + 1);
-    }
-  };
 
   const handlePageChange = (newPage: number) => {
     const nextParams = new URLSearchParams(searchParams);
