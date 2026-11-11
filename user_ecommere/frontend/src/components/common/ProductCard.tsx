@@ -152,7 +152,7 @@ export const ProductCard = memo(function ProductCard({
           </div>
 
           {/* Add to Cart */}
-          <div className="mt-3 transition-opacity duration-200 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100">
+          <div className="mt-3">
             <Button
               variant="outline"
               size="sm"

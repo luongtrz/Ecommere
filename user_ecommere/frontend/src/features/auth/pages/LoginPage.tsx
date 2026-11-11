@@ -54,13 +54,6 @@ export function LoginPage() {
                 Hàng Thái Lan Chính Hãng
               </p>
             </div>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 text-xs text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Về Trang Chủ</span>
-            </Link>
           </div>
 
           <div className="max-w-md space-y-4">
