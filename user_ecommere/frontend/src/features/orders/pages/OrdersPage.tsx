@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
@@ -6,7 +5,6 @@ import { useOrders, useCancelOrder } from '../hooks/useOrders';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Pagination } from '@/components/common/Pagination';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
@@ -14,36 +12,30 @@ import { formatDateTime } from '@/lib/utils';
 import {
   Package,
   Calendar,
-  Clock,
-  Truck,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  RotateCcw,
   ArrowRight,
-  ShoppingBag
+  ShoppingBag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Order Status Helpers
 const getStatusConfig = (status: string) => {
   switch (status) {
-    case 'PENDING_PAYMENT':
-      return { label: 'Chờ thanh toán', color: 'text-amber-600 bg-amber-50 border-amber-200', icon: Clock };
-    case 'PAID':
-      return { label: 'Đã thanh toán', color: 'text-teal-700 bg-teal-50 border-teal-200', icon: CheckCircle2 };
-    case 'PACKING':
-      return { label: 'Đang đóng gói', color: 'text-purple-600 bg-purple-50 border-purple-200', icon: Package };
-    case 'SHIPPED':
-      return { label: 'Đang giao hàng', color: 'text-indigo-600 bg-indigo-50 border-indigo-200', icon: Truck };
     case 'DELIVERED':
-      return { label: 'Giao thành công', color: 'text-emerald-600 bg-emerald-50 border-emerald-200', icon: CheckCircle2 };
+      return { label: 'Giao thành công', variant: 'success' as const };
+    case 'PENDING_PAYMENT':
+      return { label: 'Chờ thanh toán', variant: 'secondary' as const };
+    case 'PAID':
+      return { label: 'Đã thanh toán', variant: 'secondary' as const };
+    case 'PACKING':
+      return { label: 'Đang đóng gói', variant: 'secondary' as const };
+    case 'SHIPPED':
+      return { label: 'Đang giao hàng', variant: 'secondary' as const };
     case 'CANCELED':
-      return { label: 'Đã hủy', color: 'text-rose-600 bg-rose-50 border-rose-200', icon: XCircle };
+      return { label: 'Đã hủy', variant: 'destructive' as const };
     case 'REFUNDED':
-      return { label: 'Đã hoàn tiền', color: 'text-gray-600 bg-gray-50 border-gray-200', icon: RotateCcw };
+      return { label: 'Đã hoàn tiền', variant: 'outline' as const };
     default:
-      return { label: status, color: 'text-gray-600 bg-gray-50 border-gray-200', icon: AlertCircle };
+      return { label: status, variant: 'outline' as const };
   }
 };
 
@@ -101,85 +93,83 @@ export function OrdersPage() {
     <>
       <SEO title="Đơn hàng của tôi" />
 
-      <div className="bg-gray-50/30 pb-10 min-h-[calc(100vh-4rem)]">
-        {/* Header Section Compact */}
-        <div className="bg-white border-b border-gray-100 shadow-sm">
-          <div className="container max-w-5xl py-6 px-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Đơn hàng của tôi</h1>
-                <p className="text-gray-500 text-sm">Quản lý và theo dõi đơn hàng</p>
-              </div>
-
-              {/* Tabs moved to Header for compactness */}
-              {totalOrders > 0 && (
-                <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-lg self-start md:self-center overflow-x-auto max-w-full">
-                  {TABS.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
-                        activeTab === tab.id
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "text-gray-500 hover:text-gray-900 hover:bg-gray-200/50"
-                      )}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Stats Overview Compact */}
-            {totalOrders > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
-                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">Tổng đơn</div>
-                  <div className="text-xl font-bold text-gray-900">{totalOrders}</div>
-                </div>
-                <div className="bg-amber-50/50 rounded-xl p-3 border border-amber-100/50 flex items-center justify-between">
-                  <div className="text-amber-600 text-xs font-medium uppercase tracking-wider">Đang xử lý</div>
-                  <div className="text-xl font-bold text-amber-700">
-                    {allOrders.filter(o => ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'].includes(o.status)).length}
-                  </div>
-                </div>
-                <div className="bg-emerald-50/50 rounded-xl p-3 border border-emerald-100/50 flex items-center justify-between">
-                  <div className="text-emerald-600 text-xs font-medium uppercase tracking-wider">Hoàn thành</div>
-                  <div className="text-xl font-bold text-emerald-700">
-                    {allOrders.filter(o => o.status === 'DELIVERED').length}
-                  </div>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
-                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">Chi tiêu</div>
-                  <div className="text-lg font-bold text-gray-900 truncate">
-                    {formatCurrency(allOrders.filter(o => o.status !== 'CANCELED').reduce((acc, curr) => acc + curr.total, 0))}
-                  </div>
-                </div>
-              </div>
-            )}
+      <div className="min-h-[calc(100vh-4rem)] bg-background">
+        <div className="container max-w-5xl py-8 md:py-12">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+              Đơn hàng của tôi
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              Quản lý và theo dõi đơn hàng
+            </p>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <div className="container max-w-5xl px-4 mt-6">
-          {/* Orders List */}
-          {filteredOrders.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm animate-in fade-in zoom-in-95 duration-500">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShoppingBag className="h-8 w-8 text-gray-300" />
+          {/* Stats Overview */}
+          {totalOrders > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="surface p-4">
+                <div className="text-xs text-muted-foreground font-medium uppercase">Tổng đơn</div>
+                <div className="text-2xl font-semibold text-foreground tabular mt-1">{totalOrders}</div>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">
+              <div className="surface p-4">
+                <div className="text-xs text-muted-foreground font-medium uppercase">Đang xử lý</div>
+                <div className="text-2xl font-semibold text-foreground tabular mt-1">
+                  {allOrders.filter(o => ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'].includes(o.status)).length}
+                </div>
+              </div>
+              <div className="surface p-4">
+                <div className="text-xs text-muted-foreground font-medium uppercase">Hoàn thành</div>
+                <div className="text-2xl font-semibold text-foreground tabular mt-1">
+                  {allOrders.filter(o => o.status === 'DELIVERED').length}
+                </div>
+              </div>
+              <div className="surface p-4">
+                <div className="text-xs text-muted-foreground font-medium uppercase">Chi tiêu</div>
+                <div className="text-2xl font-semibold text-foreground tabular mt-1 truncate">
+                  {formatCurrency(allOrders.filter(o => o.status !== 'CANCELED').reduce((acc, curr) => acc + curr.total, 0))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Filter Tabs */}
+          {totalOrders > 0 && (
+            <div className="flex items-center gap-6 border-b border-border mb-8 overflow-x-auto scrollbar-hide">
+              {TABS.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "pb-3 text-sm font-medium transition-colors whitespace-nowrap border-b-2 -mb-px min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      isActive
+                        ? "border-primary text-foreground font-semibold"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Orders List / Empty State */}
+          {filteredOrders.length === 0 ? (
+            <div className="surface p-12 text-center">
+              <ShoppingBag className="h-10 w-10 text-muted-foreground/60 mx-auto mb-4" strokeWidth={1.5} />
+              <h2 className="font-serif text-xl font-semibold text-foreground mb-1">
                 {activeTab === 'ALL' ? 'Chưa có đơn hàng' : 'Không có đơn hàng'}
-              </h3>
-              <p className="text-gray-500 mb-6 text-sm">
+              </h2>
+              <p className="text-muted-foreground text-sm max-w-[45ch] mx-auto mb-6">
                 {activeTab === 'ALL'
                   ? 'Hãy đặt hàng ngay hôm nay!'
                   : 'Không tìm thấy đơn hàng trong mục này.'}
               </p>
               {activeTab === 'ALL' && (
-                <Button size="sm" className="rounded-full bg-gray-900 hover:bg-black px-6" asChild>
+                <Button asChild>
                   <Link to="/catalog">Khám phá ngay</Link>
                 </Button>
               )}
@@ -187,87 +177,89 @@ export function OrdersPage() {
           ) : (
             <>
               <div className="space-y-4">
-              {filteredOrders.map((order, index) => {
-                const status = getStatusConfig(order.status);
-                const StatusIcon = status.icon;
-                const canCancel = ['PENDING_PAYMENT', 'PAID'].includes(order.status);
+                {filteredOrders.map((order) => {
+                  const status = getStatusConfig(order.status);
+                  const canCancel = ['PENDING_PAYMENT', 'PAID'].includes(order.status);
 
-                return (
-                  <div
-                    key={order.id}
-                    className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <Card className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 bg-white rounded-xl group">
-                      {/* Compact Header */}
-                      <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-gray-900 text-base">#{order.orderNumber}</span>
-                          <span className="text-gray-300">|</span>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Calendar className="w-3 h-3" />
-                            <span>{formatDateTime(order.createdAt)}</span>
+                  return (
+                    <div
+                      key={order.id}
+                      className="surface border border-border p-5 transition-colors duration-150 hover:border-foreground/30"
+                    >
+                      {/* Top bar: Order code, date, status */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="font-medium text-foreground tabular text-sm md:text-base">
+                            #{order.orderNumber}
+                          </span>
+                          <span className="text-border" aria-hidden="true">•</span>
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            <span className="tabular">{formatDateTime(order.createdAt)}</span>
                           </div>
                         </div>
-                        <Badge variant="outline" className={cn("px-2 py-1 rounded-md border shadow-sm flex items-center gap-1 text-xs font-normal pointer-events-none", status.color)}>
-                          <StatusIcon className="w-3 h-3" />
+                        <Badge
+                          variant={status.variant as any}
+                          className={cn(
+                            status.variant === 'success' && 'bg-success text-success-foreground border-transparent'
+                          )}
+                        >
                           {status.label}
                         </Badge>
                       </div>
 
-                      {/* Compact Body */}
-                      <div className="p-4">
-                        {/* Horizontal List */}
-                        <div className="mb-4">
-                          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                            {order.items.map((item: any, idx: number) => (
-                              <div key={idx} className="flex-shrink-0 w-[220px] flex gap-3 p-2 rounded-lg bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
-                                <div className="w-12 h-12 rounded-md bg-white overflow-hidden flex-shrink-0 border border-gray-200">
-                                  {item.image ? (
-                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                      <Package className="w-5 h-5" />
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-                                  <h4 className="font-medium text-gray-900 text-xs truncate w-full" title={item.productName || item.name}>
-                                    {item.productName || item.name}
-                                  </h4>
-                                  <div className="text-xs text-gray-500">
-                                    x{item.quantity}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                      {/* Middle/Bottom: Thumbnails, Total, Actions */}
+                      <div className="pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        {/* Thumbnails row */}
+                        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-1">
+                          {order.items.map((item: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className="w-10 h-10 rounded-md bg-secondary overflow-hidden flex-shrink-0 border border-border flex items-center justify-center"
+                              title={`${item.productName || item.name} (x${item.quantity})`}
+                            >
+                              {item.image ? (
+                                <img
+                                  src={item.image}
+                                  alt={item.productName || item.name || 'Sản phẩm'}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Package className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                          ))}
+                          <span className="text-xs text-muted-foreground pl-1 truncate max-w-[240px] md:max-w-[320px]">
+                            {order.items.length === 1
+                              ? (order.items[0]?.productName || order.items[0]?.name)
+                              : `${order.items[0]?.productName || order.items[0]?.name} (+${order.items.length - 1})`}
+                          </span>
                         </div>
 
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-500">Tổng tiền:</span>
-                            <span className="text-base font-bold text-gray-900">
+                        {/* Total & Action buttons */}
+                        <div className="flex items-center justify-between md:justify-end gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-border">
+                          <div className="text-left md:text-right">
+                            <span className="text-xs text-muted-foreground block">Tổng tiền</span>
+                            <span className="text-base font-semibold text-foreground tabular">
                               {formatCurrency(order.total)}
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
                             {canCancel && (
                               cancellingId === order.id ? (
                                 <div className="flex items-center gap-2">
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-8 px-3 text-xs text-gray-600"
                                     onClick={() => setCancellingId(null)}
                                     disabled={cancelOrder.isPending}
                                   >
                                     Hủy
                                   </Button>
                                   <Button
+                                    variant="destructive"
                                     size="sm"
-                                    className="h-8 px-3 bg-red-600 hover:bg-red-700 text-white text-xs"
                                     onClick={() => handleCancel(order.id)}
                                     disabled={cancelOrder.isPending}
                                   >
@@ -278,7 +270,7 @@ export function OrdersPage() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-8 px-3 text-xs text-gray-500 hover:text-red-600 hover:bg-red-50"
+                                  className="text-muted-foreground hover:text-destructive"
                                   onClick={() => setCancellingId(order.id)}
                                 >
                                   Hủy đơn
@@ -286,32 +278,32 @@ export function OrdersPage() {
                               )
                             )}
 
-                            <Button size="sm" className="h-8 px-4 rounded-full bg-gray-900 hover:bg-black text-white text-xs shadow-sm" asChild>
-                              <Link to={`/orders/${order.id}`} className="flex items-center gap-1">
-                                Chi tiết
-                                <ArrowRight className="w-3 h-3" />
-                              </Link>
-                            </Button>
+                            <Link
+                              to={`/orders/${order.id}`}
+                              className="text-sm font-medium text-foreground hover:underline inline-flex items-center gap-1 min-h-[44px] md:min-h-0 py-2"
+                            >
+                              <span>Xem chi tiết</span>
+                              <ArrowRight className="h-4 w-4" />
+                            </Link>
                           </div>
                         </div>
                       </div>
-                    </Card>
-                  </div>
-                );
-              })}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex justify-center pt-6">
-                <Pagination
-                  currentPage={page}
-                  totalPages={totalPages}
-                  onPageChange={setPage}
-                />
+                    </div>
+                  );
+                })}
               </div>
-            )}
-          </>
-        )}
+
+              {totalPages > 1 && (
+                <div className="flex justify-center pt-8">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                  />
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </>
