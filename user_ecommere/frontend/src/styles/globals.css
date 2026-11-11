@@ -6,26 +6,28 @@
 
 @layer base {
   :root {
-    --background: 30 15% 98%; /* Luxurious warm silk white */
-    --foreground: 20 20% 12%; /* Deep elegant charcoal */
+    --background: 40 30% 97%;
+    --foreground: 24 24% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 20 20% 12%;
+    --card-foreground: 24 24% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 20% 12%;
-    --primary: 24 25% 12%; /* Luxury obsidian bronze */
-    --primary-foreground: 36 45% 97%;
-    --secondary: 30 12% 94%;
-    --secondary-foreground: 20 20% 12%;
-    --muted: 30 8% 93%;
-    --muted-foreground: 20 10% 45%;
-    --accent: 36 32% 75%; /* Champagne gold */
-    --accent-foreground: 20 20% 12%;
-    --destructive: 0 84% 60%;
+    --popover-foreground: 24 24% 10%;
+    --primary: 24 30% 14%;
+    --primary-foreground: 40 30% 97%;
+    --secondary: 38 22% 93%;
+    --secondary-foreground: 24 24% 10%;
+    --muted: 38 16% 92%;
+    --muted-foreground: 24 8% 38%;
+    --accent: 38 48% 56%;
+    --accent-foreground: 24 30% 12%;
+    --destructive: 6 62% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 10% 90%; /* Soft border */
-    --input: 30 10% 90%;
-    --ring: 24 25% 12%;
-    --radius: 1.25rem;
+    --success: 150 36% 30%;
+    --success-foreground: 0 0% 100%;
+    --border: 36 14% 85%;
+    --input: 30 8% 54%; /* form control borders: >= 3:1 against card and background (WCAG 1.4.11) */
+    --ring: 24 30% 14%;
+    --radius: 0.5rem;
   }
 
   * {
@@ -36,41 +38,95 @@
     @apply scroll-smooth;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-feature-settings: 'ss01', 'cv11';
-    background-image:
-      radial-gradient(circle at top left, rgba(197, 160, 107, 0.12), transparent 35%),
-      radial-gradient(circle at top right, rgba(120, 140, 130, 0.08), transparent 30%),
-      linear-gradient(180deg, rgba(252, 251, 249, 0.98), rgba(246, 244, 238, 0.98));
-    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
-  h2,
+  h2 {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.01em;
+  }
+
   h3,
   h4,
   h5,
   h6 {
-    font-family: 'Playfair Display', serif;
-    letter-spacing: -0.02em;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }
 
 @layer components {
-  .glass-panel {
-    @apply border border-white/90 bg-white/85 shadow-[0_20px_48px_-16px_rgba(20,20,20,0.04)] backdrop-blur-2xl transition-all duration-300;
-  }
-
-  .section-shell {
-    @apply rounded-[2.2rem] border border-white/90 bg-white/80 shadow-[0_24px_64px_-24px_rgba(20,20,20,0.06)] backdrop-blur transition-all duration-300;
+  /* New editorial retail helper classes */
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground;
   }
 
   .section-title {
-    @apply text-3xl font-semibold leading-tight text-foreground md:text-4xl;
+    @apply font-serif text-3xl font-semibold leading-tight tracking-tight text-foreground md:text-4xl;
+  }
+
+  .section-y {
+    @apply py-12 md:py-20;
+  }
+
+  .surface {
+    @apply rounded-lg border border-border bg-card;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* DEPRECATED: remove once unused */
+  .section-shell {
+    @apply rounded-lg border border-border bg-card;
+  }
+
+  /* DEPRECATED: remove once unused */
+  .glass-panel {
+    @apply border border-border bg-card;
+  }
+
+  /* DEPRECATED: remove once unused */
+  .glass-premium {
+    @apply border border-border bg-card;
+  }
+
+  /* DEPRECATED: remove once unused */
+  .hover-glow {
+    transition: border-color 0.2s ease;
+  }
+
+  /* DEPRECATED: remove once unused */
+  .hover-glow:hover {
+    border-color: hsl(var(--foreground) / 0.3);
+  }
+
+  /* DEPRECATED: remove once unused */
+  .text-gradient-emerald {
+    @apply text-primary;
+  }
+
+  /* DEPRECATED: remove once unused */
+  .animate-float-orb {
+    animation: none;
   }
 }
 
@@ -87,32 +143,4 @@
   .text-balance {
     text-wrap: balance;
   }
-
-  .hover-glow {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .hover-glow:hover {
-    box-shadow: 0 20px 40px -15px rgba(20, 20, 20, 0.06), 0 0 20px -2px rgba(197, 160, 107, 0.04);
-    border-color: rgba(197, 160, 107, 0.15);
-  }
-
-  .glass-premium {
-    @apply border border-white/95 bg-white/75 backdrop-blur-2xl shadow-[0_20px_60px_-20px_rgba(20,20,20,0.05)] transition-all duration-300;
-  }
-
-  .text-gradient-emerald {
-    @apply bg-gradient-to-r from-primary via-amber-700 to-amber-950 bg-clip-text text-transparent;
-  }
-}
-
-@keyframes float-orb {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(40px, -60px) scale(1.15); }
-  66% { transform: translate(-30px, 30px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
-}
-
-.animate-float-orb {
-  animation: float-orb 20s infinite ease-in-out;
 }

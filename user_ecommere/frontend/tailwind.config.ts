@@ -37,6 +37,10 @@ const config: Config = {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',
@@ -60,8 +64,9 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       boxShadow: {
-        'luxury': '0 24px 48px -12px rgba(20, 20, 20, 0.03), 0 0 0 1px rgba(20, 20, 20, 0.01)',
-        'luxury-glow': '0 30px 60px -15px rgba(20, 20, 20, 0.05), 0 0 30px -5px rgba(197, 160, 107, 0.06)',
+        soft: '0 1px 2px 0 rgb(24 20 16 / 0.05)',
+        luxury: '0 1px 2px 0 rgb(24 20 16 / 0.05)',
+        'luxury-glow': '0 4px 12px -2px rgb(24 20 16 / 0.08)',
       },
       keyframes: {
         'accordion-down': {
