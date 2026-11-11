@@ -27,22 +27,28 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
   if (totalPages <= 1) return null;
 
   return (
-    <div className={cn('flex items-center justify-center gap-2', className)}>
+    <nav className={cn('flex items-center justify-center gap-1.5', className)} aria-label="Phân trang">
       <Button
         variant="outline"
         size="icon"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        aria-label="Trang trước"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
       {startPage > 1 && (
         <>
-          <Button variant="outline" onClick={() => onPageChange(1)}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => onPageChange(1)}
+            className="tabular"
+          >
             1
           </Button>
-          {startPage > 2 && <span className="px-2">...</span>}
+          {startPage > 2 && <span className="px-1 text-xs text-muted-foreground select-none" aria-hidden="true">&hellip;</span>}
         </>
       )}
 
@@ -50,7 +56,10 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
         <Button
           key={page}
           variant={currentPage === page ? 'default' : 'outline'}
+          size="icon"
           onClick={() => onPageChange(page)}
+          className="tabular"
+          aria-current={currentPage === page ? 'page' : undefined}
         >
           {page}
         </Button>
@@ -58,8 +67,13 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
 
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="px-2">...</span>}
-          <Button variant="outline" onClick={() => onPageChange(totalPages)}>
+          {endPage < totalPages - 1 && <span className="px-1 text-xs text-muted-foreground select-none" aria-hidden="true">&hellip;</span>}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => onPageChange(totalPages)}
+            className="tabular"
+          >
             {totalPages}
           </Button>
         </>
@@ -70,9 +84,10 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
         size="icon"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
+        aria-label="Trang sau"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
-    </div>
+    </nav>
   );
 }

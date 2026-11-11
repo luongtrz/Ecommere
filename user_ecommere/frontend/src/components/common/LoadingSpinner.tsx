@@ -9,13 +9,14 @@ interface LoadingSpinnerProps {
 export function LoadingSpinner({ className, size = 'md' }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
-    md: 'h-8 w-8',
-    lg: 'h-12 w-12',
+    md: 'h-6 w-6',
+    lg: 'h-8 w-8',
   };
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center" role="status" aria-label="Đang tải">
       <Loader2 className={cn('animate-spin text-primary', sizeClasses[size], className)} />
+      <span className="sr-only">Đang tải...</span>
     </div>
   );
 }
