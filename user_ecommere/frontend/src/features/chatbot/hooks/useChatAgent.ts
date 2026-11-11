@@ -74,6 +74,7 @@ export function useChatAgent(): {
   decide: (messageId: string, decisions: AgentDecision[]) => Promise<void>;
   cancel: () => void;
   newThread: () => void;
+  retry: () => Promise<void>;
 } {
   const [isStreaming, setIsStreaming] = useState(false);
   const isStreamingRef = useRef(false);
@@ -306,40 +307,8 @@ export function useChatAgent(): {
     useChatStore.getState().reset();
   }, [cancel]);
 
-  const send = useCallback(
-    async (prompt: string): Promise<void> => {
-      const trimmedPrompt = prompt.trim();
-      if (!trimmedPrompt || trimmedPrompt.length > 4000) {
-        return;
-      }
-
-      if (isStreamingRef.current) {
-        return;
-      }
-
-      const userMessageId = generateUuid();
-      const assistantMessageId = generateUuid();
-
-      const now = new Date().toISOString();
-      const userMessage: ChatMessage = {
-        id: userMessageId,
-        role: 'user',
-        content: trimmedPrompt,
-        tools: [],
-        createdAt: now,
-      };
-
-      const assistantMessage: ChatMessage = {
-        id: assistantMessageId,
-        role: 'assistant',
-        content: '',
-        tools: [],
-        createdAt: now,
-      };
-
-      useChatStore.getState().appendMessage(userMessage);
-      useChatStore.getState().appendMessage(assistantMessage);
-
+  const runTurn = useCallback(
+    async (trimmedPrompt: string, assistantMessageId: string): Promise<void> => {
       const rawCartItems = useCartStore.getState().items;
       const cart = rawCartItems.slice(0, 100).map((item) => {
         const rawQty =
@@ -424,6 +393,92 @@ export function useChatAgent(): {
     },
     [handleSseMessage]
   );
+
+  const send = useCallback(
+    async (prompt: string): Promise<void> => {
+      const trimmedPrompt = prompt.trim();
+      if (!trimmedPrompt || trimmedPrompt.length > 4000) {
+        return;
+      }
+
+      if (isStreamingRef.current) {
+        return;
+      }
+
+      const userMessageId = generateUuid();
+      const assistantMessageId = generateUuid();
+
+      const now = new Date().toISOString();
+      const userMessage: ChatMessage = {
+        id: userMessageId,
+        role: 'user',
+        content: trimmedPrompt,
+        tools: [],
+        createdAt: now,
+      };
+
+      const assistantMessage: ChatMessage = {
+        id: assistantMessageId,
+        role: 'assistant',
+        content: '',
+        tools: [],
+        createdAt: now,
+      };
+
+      useChatStore.getState().appendMessage(userMessage);
+      useChatStore.getState().appendMessage(assistantMessage);
+
+      await runTurn(trimmedPrompt, assistantMessageId);
+    },
+    [runTurn]
+  );
+
+  const retry = useCallback(async (): Promise<void> => {
+    if (isStreamingRef.current) {
+      return;
+    }
+
+    const messages = useChatStore.getState().messages;
+    if (messages.length === 0) {
+      return;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    if (
+      lastMessage.role !== 'assistant' ||
+      typeof lastMessage.error !== 'string' ||
+      lastMessage.error.trim().length === 0
+    ) {
+      return;
+    }
+
+    let userMessage: ChatMessage | undefined;
+    for (let i = messages.length - 2; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        userMessage = messages[i];
+        break;
+      }
+    }
+
+    if (!userMessage) {
+      return;
+    }
+
+    const trimmedPrompt = userMessage.content.trim();
+    if (!trimmedPrompt || trimmedPrompt.length > 4000) {
+      return;
+    }
+
+    useChatStore.getState().patchMessage(lastMessage.id, {
+      error: undefined,
+      content: '',
+      tools: [],
+      sources: undefined,
+      confirm: undefined,
+    });
+
+    await runTurn(trimmedPrompt, lastMessage.id);
+  }, [runTurn]);
 
   const decide = useCallback(
     async (messageId: string, decisions: AgentDecision[]): Promise<void> => {
@@ -536,5 +591,5 @@ export function useChatAgent(): {
     };
   }, []);
 
-  return { isStreaming, send, decide, cancel, newThread };
+  return { isStreaming, send, decide, cancel, newThread, retry };
 }

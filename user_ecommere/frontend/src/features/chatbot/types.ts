@@ -20,6 +20,8 @@ export interface ChatSource {
   name: string;
   slug: string;
   score?: number;
+  imageUrl?: string | null;
+  minPrice?: number | null;
 }
 
 export interface ChatMessage {
