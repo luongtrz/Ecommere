@@ -1,93 +1,113 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Bot,
-  Loader2,
-  SendHorizonal,
   Sparkles,
   Plus,
   X,
-  ArrowUpRight,
+  Maximize2,
+  ChevronDown,
 } from 'lucide-react';
-import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { useChatAgent } from '../hooks/useChatAgent';
 import { useChatStore } from '../store/chatStore';
-import { formatChatOwnerKey } from '../lib/session';
-import { ToolCallCard } from './ToolCallCard';
-import { ConfirmActionCard } from './ConfirmActionCard';
-import { ChatMarkdown } from './ChatMarkdown';
-import type { ChatSource } from '../types';
+import { useChatOwnerSync } from '../hooks/useChatOwnerSync';
+import { useStickToBottom } from '../hooks/useStickToBottom';
+import { ChatMessageItem } from './ChatMessageItem';
+import { ChatComposer } from './ChatComposer';
+import { ChatStreamingIndicator } from './ChatStreamingIndicator';
+import {
+  CHAT_MAX_MESSAGE_LENGTH,
+  CHAT_SUGGESTIONS,
+  CHAT_WELCOME_MESSAGE,
+  shouldShowTypingIndicator,
+} from '../lib/chatContent';
+import type { ChatMessage } from '../types';
 
-const MAX_MESSAGE_LENGTH = 4000;
-
-const SUGGESTIONS = [
-  'Tư vấn mùi xịt phòng cho phòng khách',
-  'Nên chọn dung tích nào cho gia đình?',
-  'Hướng dẫn sử dụng để mùi bền hơn',
-];
-
-const WELCOME_MESSAGE =
-  'Xin chào! Tôi là chuyên gia tư vấn mùi hương của Thai Spray. Tôi có thể gợi ý mùi hương cho phòng khách, phòng ngủ, xe hơi hoặc quà tặng phù hợp nhất cho bạn.';
-
-function ChatbotSourceItem({ source }: { source: ChatSource }) {
-  return (
-    <a
-      href={`/p/${source.slug}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-2.5 p-2 rounded-2xl border border-slate-100 bg-white hover:bg-secondary/40 hover:border-primary/20 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 group w-full shadow-sm active:scale-[0.99]"
-    >
-      <div className="h-10 w-10 rounded-xl overflow-hidden bg-secondary/30 border border-slate-100 shrink-0 flex items-center justify-center font-bold text-[10px] text-muted-foreground">
-        TS
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-bold text-foreground leading-snug truncate group-hover:text-primary transition-colors">
-          {source.name}
-        </p>
-        <p className="text-[10px] font-bold text-primary mt-0.5">
-          Xem chi tiết
-        </p>
-      </div>
-      <ArrowUpRight className="h-3 w-3 text-muted-foreground opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all shrink-0 mr-0.5" />
-    </a>
-  );
-}
+const WELCOME_CHAT_MESSAGE: ChatMessage = {
+  id: 'welcome',
+  role: 'assistant',
+  content: CHAT_WELCOME_MESSAGE,
+  tools: [],
+  createdAt: '',
+};
 
 export function ChatbotWidget() {
-  const { open, setOpen, messages, ownerId, claimOwner } = useChatStore();
-  const { isStreaming, send, decide, newThread } = useChatAgent();
-  const { user } = useAuth();
+  const { open, setOpen } = useChatStore();
+  const { isStreaming, send, decide, cancel, newThread, retry } = useChatAgent();
+  const { messages } = useChatOwnerSync(newThread);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [draft, setDraft] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [srAnnouncement, setSrAnnouncement] = useState('');
+  const prevStreamingRef = useRef(isStreaming);
+
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
   const wasOpenRef = useRef(open);
 
-  const ownerKey = formatChatOwnerKey(user ? user.id : null);
+  const { scrollRef, isAtBottom, scrollToBottom } = useStickToBottom<HTMLDivElement>([
+    messages,
+    isStreaming,
+  ]);
 
-  // Sync conversation ownership with signed-in user or guest session
+  const showTyping = shouldShowTypingIndicator(messages, isStreaming);
+
+  // Screen reader polite announcements for streaming state
   useEffect(() => {
-    if (user === undefined) return;
-    if (useChatStore.getState().ownerId !== ownerKey) {
-      newThread();
-      claimOwner(ownerKey);
+    if (!prevStreamingRef.current && isStreaming) {
+      setSrAnnouncement('Trợ lý đang phản hồi…');
+    } else if (prevStreamingRef.current && !isStreaming) {
+      setSrAnnouncement('Trợ lý đã trả lời xong');
     }
-  }, [user, ownerKey, newThread, claimOwner]);
+    prevStreamingRef.current = isStreaming;
+  }, [isStreaming]);
 
-  const isOwnerMatch = user !== undefined && ownerId === ownerKey;
-  const visibleMessages = isOwnerMatch ? messages : [];
-
-  // Escape closes the panel
+  // Lock body scroll on mobile (below md / 768px) while chat panel is open
   useEffect(() => {
     if (!open) return;
-    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+
+    const originalOverflow = document.body.style.overflow;
+    const isMobileQuery = window.matchMedia('(max-width: 767.98px)');
+
+    const updateScrollLock = () => {
+      if (isMobileQuery.matches) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = originalOverflow;
+      }
+    };
+
+    updateScrollLock();
+
+    if (typeof isMobileQuery.addEventListener === 'function') {
+      isMobileQuery.addEventListener('change', updateScrollLock);
+    } else {
+      isMobileQuery.addListener(updateScrollLock);
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      if (typeof isMobileQuery.removeEventListener === 'function') {
+        isMobileQuery.removeEventListener('change', updateScrollLock);
+      } else {
+        isMobileQuery.removeListener(updateScrollLock);
+      }
+    };
+  }, [open]);
+
+  // Escape key closes the panel
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setOpen(false);
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, setOpen]);
@@ -100,70 +120,95 @@ export function ChatbotWidget() {
     wasOpenRef.current = open;
   }, [open]);
 
-  // Scroll to bottom when messages update or streaming starts
-  useEffect(() => {
-    if (!open) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [open, visibleMessages, isStreaming]);
-
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     const prompt = draft.trim();
     if (!prompt || isStreaming) {
       return;
     }
-    if (prompt.length > MAX_MESSAGE_LENGTH) {
-      toast.error(`Tin nhắn không được vượt quá ${MAX_MESSAGE_LENGTH} ký tự.`);
+    if (prompt.length > CHAT_MAX_MESSAGE_LENGTH) {
+      toast.error(`Tin nhắn không được vượt quá ${CHAT_MAX_MESSAGE_LENGTH} ký tự.`);
       return;
     }
     setDraft('');
     void send(prompt);
-  };
+  }, [draft, isStreaming, send, toast]);
 
-  const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Enter that confirms an IME composition (Vietnamese input methods) must not send.
-    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-      event.preventDefault();
-      handleSubmit();
-    }
-  };
+  const handleExpand = useCallback(() => {
+    if (isStreaming) return;
+    setOpen(false);
+    navigate('/chat');
+  }, [isStreaming, setOpen, navigate]);
 
   return (
     <>
+      {/* Screen-reader announcement region */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {srAnnouncement}
+      </div>
+
       {open ? (
-        <div className="fixed bottom-28 right-3 z-[60] flex h-[min(80vh,700px)] w-[calc(100vw-2rem)] max-w-[460px] flex-col overflow-hidden rounded-[28px] border border-white/60 bg-white/90 backdrop-blur-2xl shadow-[0_24px_80px_rgba(24,46,37,0.25)] animate-in slide-in-from-bottom-4 duration-300 md:bottom-6 md:right-6">
+        <div
+          role="dialog"
+          aria-label="Trò chuyện với chuyên gia mùi hương"
+          className={cn(
+            'fixed inset-0 z-[60] flex flex-col h-[100dvh] pt-[env(safe-area-inset-top,0px)] md:pt-0 bg-card overflow-hidden',
+            'md:inset-auto md:bottom-6 md:right-6 md:w-[420px] md:h-[min(680px,calc(100dvh-3rem))] md:rounded-3xl md:border md:border-border md:shadow-2xl',
+            'animate-in fade-in-0 zoom-in-95 duration-200 motion-reduce:animate-none'
+          )}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-950 via-primary to-emerald-900 px-5 py-4 text-white shadow-md">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 backdrop-blur border border-white/10 shadow-inner">
-                <Sparkles className="h-5 w-5 text-amber-300 animate-pulse" />
+          <div className="flex items-center justify-between gap-3 bg-primary px-4 py-3 sm:px-5 sm:py-3.5 text-primary-foreground shadow-sm shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/10"
+                aria-hidden="true"
+              >
+                <Sparkles className="h-5 w-5 text-accent" />
               </div>
-              <div>
-                <p className="text-sm font-bold tracking-wide">Chuyên gia Mùi hương</p>
-                <p className="text-[11px] text-white/80 mt-0.5 font-medium">Tư vấn mùi thơm cho nhà ở & xe hơi</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold leading-tight truncate">
+                  Chuyên gia Mùi hương
+                </p>
+                <p className="text-xs text-primary-foreground/80 mt-0.5 truncate">
+                  Tư vấn mùi thơm cho nhà ở & xe hơi
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 shrink-0">
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10 rounded-xl"
+                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-lg hidden md:inline-flex disabled:opacity-50"
+                disabled={isStreaming}
+                onClick={handleExpand}
+                title={isStreaming ? 'Không thể mở rộng khi đang trả lời' : 'Mở rộng'}
+                aria-label="Mở rộng"
+              >
+                <Maximize2 className="h-4 w-4" />
+                <span className="sr-only">Mở rộng</span>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-lg"
                 onClick={() => newThread()}
                 title="Cuộc trò chuyện mới"
                 aria-label="Cuộc trò chuyện mới"
-                type="button"
               >
-                <Plus className="h-4 w-4 opacity-80 hover:opacity-100" />
+                <Plus className="h-4 w-4" />
                 <span className="sr-only">Cuộc trò chuyện mới</span>
               </Button>
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10 rounded-xl"
+                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-lg"
                 onClick={() => setOpen(false)}
                 title="Đóng"
-                aria-label="Đóng cửa sổ trò chuyện"
-                type="button"
+                aria-label="Đóng"
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Đóng</span>
@@ -171,181 +216,90 @@ export function ChatbotWidget() {
             </div>
           </div>
 
-          {/* Chat area */}
-          <div
-            role="log"
-            aria-live="polite"
-            className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-slate-50/50 to-white/70 px-4 py-4 scrollbar-hide"
-          >
-            {/* Greeting */}
-            <div className="flex items-start gap-2.5 w-full justify-start">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
-                <Bot className="h-4 w-4" />
-              </div>
-              <div className="max-w-[80%] rounded-[1.5rem] rounded-tl-[0.25rem] border border-slate-100/90 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm">
-                <div className="whitespace-pre-line text-sm">{WELCOME_MESSAGE}</div>
-              </div>
-            </div>
+          {/* Chat scrollable log region + scroll-to-bottom pill */}
+          <div className="relative flex-1 min-h-0 flex flex-col">
+            <div
+              ref={scrollRef}
+              role="log"
+              aria-label="Lịch sử trò chuyện"
+              className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4"
+            >
+              {/* Welcome message */}
+              <ChatMessageItem
+                message={WELCOME_CHAT_MESSAGE}
+                variant="widget"
+                onDecide={decide}
+              />
 
-            {/* Message list */}
-            {visibleMessages.map((message) => {
-              const isUser = message.role === 'user';
-              if (!isUser) {
-                const hasAssistantContent =
-                  Boolean(message.content) ||
-                  (message.tools && message.tools.length > 0) ||
-                  Boolean(message.confirm) ||
-                  (message.sources && message.sources.length > 0) ||
-                  Boolean(message.error);
-                if (!hasAssistantContent) {
-                  return null;
-                }
-              }
+              {/* Thread messages */}
+              {messages.map((message, index) => {
+                const isLast = index === messages.length - 1;
+                return (
+                  <ChatMessageItem
+                    key={message.id}
+                    message={message}
+                    variant="widget"
+                    onDecide={decide}
+                    onRetry={isLast && message.error ? () => void retry() : undefined}
+                  />
+                );
+              })}
 
-              return (
-                <div
-                  key={message.id}
-                  className={`flex items-start gap-2.5 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
-                >
-                  {!isUser && (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
-                      <Bot className="h-4 w-4" />
-                    </div>
-                  )}
-                  <div
-                    className={`max-w-[80%] rounded-[1.5rem] px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300 ${
-                      isUser
-                        ? 'rounded-tr-[0.25rem] bg-gradient-to-tr from-primary to-emerald-950 text-white font-medium whitespace-pre-wrap break-words'
-                        : 'rounded-tl-[0.25rem] border border-slate-100/90 bg-white text-slate-800'
-                    }`}
-                  >
-                    {isUser ? (
-                      <div>{message.content}</div>
-                    ) : (
-                      <div className="space-y-2.5">
-                        {/* Tools rendered as ToolCallCard rows above text */}
-                        {message.tools && message.tools.length > 0 && (
-                          <div className="space-y-1.5">
-                            {message.tools.map((step) => (
-                              <ToolCallCard key={step.id} step={step} />
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Text rendered with ChatMarkdown */}
-                        {message.content ? (
-                          <ChatMarkdown content={message.content} />
-                        ) : null}
-
-                        {/* Confirm block */}
-                        {message.confirm && (
-                          <ConfirmActionCard
-                            calls={message.confirm.calls}
-                            decided={message.confirm.decided}
-                            onSubmit={(decisions) => decide(message.id, decisions)}
-                          />
-                        )}
-
-                        {/* Sources as product cards */}
-                        {message.sources && message.sources.length > 0 && (
-                          <div className="border-t border-dashed border-slate-150 pt-2.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                              <Sparkles className="h-3.5 w-3.5 text-primary fill-primary/10" /> Sản phẩm được đề xuất:
-                            </p>
-                            <div className="flex flex-col gap-2">
-                              {message.sources.map((source) => (
-                                <ChatbotSourceItem key={source.id} source={source} />
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Error in visible alert with role="alert" */}
-                        {message.error && (
-                          <div
-                            role="alert"
-                            className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-xs text-destructive"
-                          >
-                            {message.error}
-                          </div>
-                        )}
-                      </div>
-                    )}
+              {/* Quick suggestion chips (only while there are no messages) */}
+              {messages.length === 0 && (
+                <div className="space-y-2 pt-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Gợi ý nhanh
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {CHAT_SUGGESTIONS.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        disabled={isStreaming}
+                        onClick={() => {
+                          if (!isStreaming) {
+                            void send(suggestion);
+                          }
+                        }}
+                        className="min-h-[36px] rounded-full border border-border bg-card px-4 py-1.5 text-left text-sm font-medium text-foreground transition-colors duration-200 motion-reduce:transition-none hover:bg-primary hover:text-primary-foreground hover:border-primary active:scale-95 motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none shadow-sm flex items-center"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
+              )}
 
-            {/* Quick suggestions when no conversation yet */}
-            {visibleMessages.length === 0 ? (
-              <div className="space-y-2.5 px-1 pt-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Gợi ý nhanh</p>
-                <div className="flex flex-wrap gap-2">
-                  {SUGGESTIONS.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      disabled={isStreaming}
-                      onClick={() => {
-                        if (!isStreaming) {
-                          void send(suggestion);
-                        }
-                      }}
-                      className="rounded-full border border-slate-200 bg-white/80 hover:bg-primary hover:text-white hover:border-primary px-4 py-2 text-left text-xs font-semibold text-slate-700 transition duration-300 shadow-sm active:scale-95 disabled:opacity-50"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+              {/* Typing indicator */}
+              {showTyping && <ChatStreamingIndicator variant="widget" />}
+            </div>
 
-            {/* Streaming indicator */}
-            {isOwnerMatch && isStreaming ? (
-              <div className="flex justify-start items-start gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary border border-primary/10 shadow-sm mt-0.5">
-                  <Bot className="h-4 w-4 animate-bounce" />
-                </div>
-                <div className="flex items-center gap-2 rounded-[1.5rem] rounded-tl-[0.25rem] border border-slate-100 bg-white px-4 py-3 text-xs font-medium text-slate-500 shadow-sm">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                  Đang trả lời...
-                </div>
-              </div>
-            ) : null}
-
-            <div ref={messagesEndRef} />
+            {/* Floating scroll-to-bottom pill */}
+            {!isAtBottom && (
+              <button
+                type="button"
+                onClick={() => scrollToBottom('smooth')}
+                aria-label="Cuộn xuống"
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex min-h-[36px] items-center gap-1.5 rounded-full border border-border bg-card/95 px-3.5 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur transition-all duration-200 motion-reduce:transition-none hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95 motion-reduce:active:scale-100"
+              >
+                <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Cuộn xuống</span>
+              </button>
+            )}
           </div>
 
           {/* Composer Input Area */}
-          <div className="border-t bg-white/80 backdrop-blur p-4">
-            <div className="rounded-[24px] border border-slate-200 bg-white p-1.5 shadow-sm focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/5 transition-all flex items-end gap-2">
-              <Textarea
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                onKeyDown={handleComposerKeyDown}
-                placeholder="Nhập câu hỏi của bạn..."
-                aria-label="Nhập câu hỏi"
-                className="min-h-[40px] max-h-[120px] resize-none border-0 px-3 py-2 shadow-none focus-visible:ring-0 focus:outline-none w-full text-sm placeholder:text-slate-400"
-              />
-              <Button
-                onClick={handleSubmit}
-                disabled={!draft.trim() || isStreaming}
-                aria-label="Gửi tin nhắn"
-                title="Gửi tin nhắn"
-                size="icon"
-                className="h-9 w-9 rounded-full shrink-0 shadow-md transition-all duration-300 hover:scale-105 active:scale-95 bg-primary hover:bg-emerald-950 text-white p-0 flex items-center justify-center disabled:opacity-50"
-              >
-                {isStreaming ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <SendHorizonal className="h-4 w-4" />
-                )}
-                <span className="sr-only">Gửi tin nhắn</span>
-              </Button>
-            </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">
-              Nhấn Enter để gửi · Shift+Enter để xuống dòng
-            </p>
+          <div className="border-t border-border bg-card px-4 pt-3">
+            <ChatComposer
+              value={draft}
+              onChange={setDraft}
+              onSubmit={handleSubmit}
+              onStop={cancel}
+              isStreaming={isStreaming}
+              maxLength={CHAT_MAX_MESSAGE_LENGTH}
+              variant="widget"
+            />
           </div>
         </div>
       ) : null}
@@ -354,18 +308,20 @@ export function ChatbotWidget() {
         <Button
           ref={toggleButtonRef}
           type="button"
-          size="icon"
           aria-label="Mở khung trò chuyện"
           onClick={() => setOpen(true)}
-          className="fixed bottom-28 right-4 z-[60] h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-emerald-950 text-white shadow-[0_8px_30px_rgba(24,46,37,0.4)] transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center border border-white/20 md:bottom-6 md:right-6 animate-bounce"
+          className={cn(
+            'fixed bottom-24 right-4 z-[60] md:bottom-6 md:right-6',
+            'h-14 w-14 md:w-auto md:px-5 rounded-full',
+            'bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 hover:shadow-xl',
+            'transition-all duration-200 motion-reduce:transition-none',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'flex items-center justify-center gap-2.5 active:scale-95 motion-reduce:active:scale-100'
+          )}
         >
-          <div className="relative flex items-center justify-center">
-            <Bot className="h-6 w-6" />
-            <span className="absolute -right-7 -top-6 hidden rounded-full bg-foreground px-2 py-1 text-[10px] font-semibold text-white sm:block">
-              Tư vấn
-            </span>
-          </div>
-          <span className="sr-only">Mở khung trò chuyện</span>
+          <Bot className="h-6 w-6 shrink-0" />
+          <span className="hidden md:inline text-sm font-semibold">Tư vấn</span>
+          <span className="sr-only md:hidden">Mở khung trò chuyện</span>
         </Button>
       ) : null}
     </>
