@@ -6,6 +6,8 @@ export interface RetrievedSource {
   name: string;
   slug: string;
   score: number;
+  imageUrl?: string | null;
+  minPrice?: number | null;
 }
 
 export interface RetrievalResult {
@@ -85,6 +87,8 @@ export class ChatbotRetrievalService {
         name: product.name,
         slug: product.slug,
         score,
+        imageUrl: this.extractImageUrl(product.images),
+        minPrice: this.computeMinPrice(product),
       })),
     };
   }
@@ -216,8 +220,8 @@ export class ChatbotRetrievalService {
       .sort((left, right) => right.score - left.score || right.stock - left.stock)
       .slice(0, variantLimit);
 
+    const minPrice = this.computeMinPrice(product) ?? product.basePrice;
     const prices = product.variants.map((variant) => variant.salePrice ?? variant.price);
-    const minPrice = prices.length > 0 ? Math.min(...prices) : product.basePrice;
     const maxPrice = prices.length > 0 ? Math.max(...prices) : product.basePrice;
     const shortDescription = product.description.length > 180
       ? `${product.description.slice(0, 177)}...`
@@ -311,5 +315,25 @@ export class ChatbotRetrievalService {
     }
 
     return `${this.formatMoney(minPrice)} - ${this.formatMoney(maxPrice)}`;
+  }
+
+  private computeMinPrice(product: {
+    basePrice?: number | null;
+    variants?: Array<{
+      price: number;
+      salePrice: number | null;
+    }>;
+  }): number | null {
+    const variants = product.variants ?? [];
+    const prices = variants.map((variant) => variant.salePrice ?? variant.price);
+    return prices.length > 0 ? Math.min(...prices) : (product.basePrice ?? null);
+  }
+
+  private extractImageUrl(images?: string[] | null): string | null {
+    if (!images || !Array.isArray(images)) {
+      return null;
+    }
+    const match = images.find((img) => typeof img === 'string' && img.trim().length > 0);
+    return match ? match.trim() : null;
   }
 }
