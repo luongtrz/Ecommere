@@ -334,10 +334,13 @@ describe('Table UI components', () => {
         'align-middle',
         'text-xs',
         'font-semibold',
+        'text-slate-700',
+        '[&:has([role=checkbox])]:pr-0',
+      );
+      expect(head).not.toHaveClass(
         'uppercase',
         'tracking-wider',
         'text-slate-500',
-        '[&:has([role=checkbox])]:pr-0',
       );
       expect(head).toHaveTextContent('Header title');
     });
