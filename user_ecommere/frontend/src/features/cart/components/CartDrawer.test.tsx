@@ -450,7 +450,7 @@ describe('CartDrawer', () => {
 
     renderWithProviders(<CartDrawer />);
 
-    const closeBtn = screen.getByRole('button', { name: 'Close' });
+    const closeBtn = screen.getByRole('button', { name: 'Đóng' });
     fireEvent.click(closeBtn);
 
     expect(mockCloseCart).toHaveBeenCalledTimes(1);

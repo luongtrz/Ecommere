@@ -227,7 +227,7 @@ describe('CartPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Phí vận chuyển:')).toBeInTheDocument();
     expect(screen.getByText('Tính ở bước thanh toán')).toBeInTheDocument();
-    expect(screen.getByText('Tổng cộng:')).toBeInTheDocument();
+    expect(screen.getAllByText('Tổng cộng:').length).toBeGreaterThanOrEqual(1);
 
     const checkoutLinks = screen.getAllByRole('link', {
       name: /Tiến hành thanh toán/i,

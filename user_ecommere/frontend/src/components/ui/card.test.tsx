@@ -124,7 +124,8 @@ describe('Card UI components', () => {
       const title = screen.getByTestId('title-default');
 
       expect(title).toBeInTheDocument();
-      expect(title).tagName.toBe('H3');
+      expect(title).toBeInstanceOf(HTMLHeadingElement);
+      expect(title.tagName).toBe('H3');
       expect(title).toHaveClass(
         'font-sans',
         'font-semibold',

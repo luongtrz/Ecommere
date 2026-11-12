@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -392,8 +392,7 @@ describe('AddressesPage', () => {
     renderAddressesPage();
 
     const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
-    const deleteButton =
-      card2.querySelector('svg.lucide-trash-2')?.closest('button')!;
+    const deleteButton = within(card2).getByRole('button', { name: 'Xóa' });
 
     await user.click(deleteButton);
 
@@ -423,8 +422,7 @@ describe('AddressesPage', () => {
     renderAddressesPage();
 
     const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
-    const deleteButton =
-      card2.querySelector('svg.lucide-trash-2')?.closest('button')!;
+    const deleteButton = within(card2).getByRole('button', { name: 'Xóa' });
 
     await user.click(deleteButton);
 
@@ -450,12 +448,10 @@ describe('AddressesPage', () => {
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
       .closest('[data-testid="address-card"]')!;
-    const deleteButton1 =
-      card1.querySelector('svg.lucide-trash-2')?.closest('button')!;
+    const deleteButton1 = within(card1).getByRole('button', { name: 'Xóa' });
 
     const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
-    const deleteButton2 =
-      card2.querySelector('svg.lucide-trash-2')?.closest('button')!;
+    const deleteButton2 = within(card2).getByRole('button', { name: 'Xóa' });
 
     expect(deleteButton1).toBeDisabled();
     expect(deleteButton2).toBeDisabled();

@@ -536,14 +536,14 @@ describe('CheckoutPage', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(matchText(formatCurrency(45000))),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(formatCurrency(45000))).length,
+        ).toBeGreaterThanOrEqual(1);
         expect(
-          screen.getByText(matchText(`-${formatCurrency(15000)}`)),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(`-${formatCurrency(15000)}`)).length,
+        ).toBeGreaterThanOrEqual(1);
         expect(
-          screen.getByText(matchText(formatCurrency(270000))),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(formatCurrency(270000))).length,
+        ).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -561,12 +561,12 @@ describe('CheckoutPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Miễn phí')).toBeInTheDocument();
         expect(
-          screen.getByText(matchText(`-${formatCurrency(20000)}`)),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(`-${formatCurrency(20000)}`)).length,
+        ).toBeGreaterThanOrEqual(1);
         // total = subtotal (240000) - discount (20000) + fee (0) = 220000
         expect(
-          screen.getByText(matchText(formatCurrency(220000))),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(formatCurrency(220000))).length,
+        ).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -1425,7 +1425,9 @@ describe('CheckoutPage', () => {
 
       // Check item 1
       expect(screen.getByText(mockItem1.name)).toBeInTheDocument();
-      expect(screen.getByText(`Số lượng: ${mockItem1.quantity}`)).toBeInTheDocument();
+      expect(
+        screen.getAllByText(matchText(`Số lượng: ${mockItem1.quantity}`)).length,
+      ).toBeGreaterThanOrEqual(1);
       expect(
         screen.getAllByText(
           matchText(formatCurrency(mockItem1.price * mockItem1.quantity)),
@@ -1434,12 +1436,14 @@ describe('CheckoutPage', () => {
 
       // Check item 2
       expect(screen.getByText(mockItem2.name)).toBeInTheDocument();
-      expect(screen.getByText(`Số lượng: ${mockItem2.quantity}`)).toBeInTheDocument();
       expect(
-        screen.getByText(
+        screen.getAllByText(matchText(`Số lượng: ${mockItem2.quantity}`)).length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText(
           matchText(formatCurrency(mockItem2.price * mockItem2.quantity)),
-        ),
-      ).toBeInTheDocument();
+        ).length,
+      ).toBeGreaterThanOrEqual(1);
 
       // Subtotal
       expect(

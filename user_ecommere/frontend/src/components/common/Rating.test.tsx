@@ -16,37 +16,35 @@ describe('Rating', () => {
     expect(svgs[0]).toHaveClass(
       'h-4',
       'w-4',
-      'fill-amber-400',
-      'text-amber-400',
+      'fill-accent',
+      'text-accent',
     );
     expect(svgs[1]).toHaveClass(
       'h-4',
       'w-4',
-      'fill-amber-400',
-      'text-amber-400',
+      'fill-accent',
+      'text-accent',
     );
     expect(svgs[2]).toHaveClass(
       'h-4',
       'w-4',
-      'fill-amber-400',
-      'text-amber-400',
+      'fill-accent',
+      'text-accent',
     );
 
     // 2 empty stars
     expect(svgs[3]).toHaveClass(
       'h-4',
       'w-4',
-      'text-slate-200',
-      'fill-slate-100',
+      'text-muted-foreground/30',
     );
-    expect(svgs[3]).not.toHaveClass('fill-amber-400');
+    expect(svgs[3]).not.toHaveClass('fill-accent');
     expect(svgs[4]).toHaveClass(
       'h-4',
       'w-4',
-      'text-slate-200',
-      'fill-slate-100',
+      'text-muted-foreground/30',
     );
-    expect(svgs[4]).not.toHaveClass('fill-amber-400');
+    expect(svgs[4]).not.toHaveClass('fill-accent');
 
     // showValue is false by default
     expect(within(container).queryByText('3.0')).not.toBeInTheDocument();
@@ -58,16 +56,16 @@ describe('Rating', () => {
     expect(svgs).toHaveLength(5);
 
     // 3 full stars (value >= 1, 2, 3)
-    expect(svgs[0]).toHaveClass('fill-amber-400', 'text-amber-400');
-    expect(svgs[1]).toHaveClass('fill-amber-400', 'text-amber-400');
-    expect(svgs[2]).toHaveClass('fill-amber-400', 'text-amber-400');
+    expect(svgs[0]).toHaveClass('fill-accent', 'text-accent');
+    expect(svgs[1]).toHaveClass('fill-accent', 'text-accent');
+    expect(svgs[2]).toHaveClass('fill-accent', 'text-accent');
 
     // 4th star is half star (3.5 >= 4 - 0.5)
-    expect(svgs[3]).toHaveClass('fill-amber-400', 'text-amber-400');
+    expect(svgs[3]).toHaveClass('fill-accent', 'text-accent');
 
     // 5th star is empty star (3.5 < 5 - 0.5)
-    expect(svgs[4]).toHaveClass('text-slate-200', 'fill-slate-100');
-    expect(svgs[4]).not.toHaveClass('fill-amber-400');
+    expect(svgs[4]).toHaveClass('text-muted-foreground/30');
+    expect(svgs[4]).not.toHaveClass('fill-accent');
   });
 
   it('renders an empty star when value is below the half-star threshold', () => {
@@ -76,16 +74,16 @@ describe('Rating', () => {
     expect(svgs).toHaveLength(5);
 
     // 3 full stars
-    expect(svgs[0]).toHaveClass('fill-amber-400');
-    expect(svgs[1]).toHaveClass('fill-amber-400');
-    expect(svgs[2]).toHaveClass('fill-amber-400');
+    expect(svgs[0]).toHaveClass('fill-accent');
+    expect(svgs[1]).toHaveClass('fill-accent');
+    expect(svgs[2]).toHaveClass('fill-accent');
 
     // 4th star is empty because 3.2 < 3.5
-    expect(svgs[3]).toHaveClass('text-slate-200', 'fill-slate-100');
-    expect(svgs[3]).not.toHaveClass('fill-amber-400');
+    expect(svgs[3]).toHaveClass('text-muted-foreground/30');
+    expect(svgs[3]).not.toHaveClass('fill-accent');
 
     // 5th star is empty
-    expect(svgs[4]).toHaveClass('text-slate-200', 'fill-slate-100');
+    expect(svgs[4]).toHaveClass('text-muted-foreground/30');
   });
 
   it('renders a half star when value is between half and integer (e.g. 4.8)', () => {
@@ -95,11 +93,11 @@ describe('Rating', () => {
 
     // 4 full stars
     for (let i = 0; i < 4; i++) {
-      expect(svgs[i]).toHaveClass('fill-amber-400');
+      expect(svgs[i]).toHaveClass('fill-accent');
     }
 
     // 5th star is half star because 4.8 >= 4.5
-    expect(svgs[4]).toHaveClass('fill-amber-400');
+    expect(svgs[4]).toHaveClass('fill-accent');
   });
 
   it('renders all empty stars when value is 0', () => {
@@ -107,8 +105,8 @@ describe('Rating', () => {
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(5);
     svgs.forEach((svg) => {
-      expect(svg).toHaveClass('text-slate-200', 'fill-slate-100');
-      expect(svg).not.toHaveClass('fill-amber-400');
+      expect(svg).toHaveClass('text-muted-foreground/30');
+      expect(svg).not.toHaveClass('fill-accent');
     });
   });
 
@@ -117,7 +115,7 @@ describe('Rating', () => {
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(5);
     svgs.forEach((svg) => {
-      expect(svg).toHaveClass('fill-amber-400', 'text-amber-400');
+      expect(svg).toHaveClass('fill-accent', 'text-accent');
     });
   });
 
@@ -127,10 +125,10 @@ describe('Rating', () => {
     expect(svgs).toHaveLength(10);
 
     for (let i = 0; i < 8; i++) {
-      expect(svgs[i]).toHaveClass('fill-amber-400');
+      expect(svgs[i]).toHaveClass('fill-accent');
     }
     for (let i = 8; i < 10; i++) {
-      expect(svgs[i]).toHaveClass('text-slate-200', 'fill-slate-100');
+      expect(svgs[i]).toHaveClass('text-muted-foreground/30');
     }
   });
 
@@ -159,11 +157,9 @@ describe('Rating', () => {
     expect(valueSpan).toHaveClass(
       'ml-1',
       'text-xs',
-      'md:text-sm',
-      'font-semibold',
-      'tabular-nums',
-      'text-slate-700',
-      'font-sans',
+      'text-muted-foreground',
+      'tabular',
+      'font-medium',
     );
   });
 
@@ -177,7 +173,7 @@ describe('Rating', () => {
       <Rating value={4} className="custom-rating-class" />,
     );
     expect(container.firstChild).toHaveClass(
-      'flex',
+      'inline-flex',
       'items-center',
       'gap-1',
       'custom-rating-class',

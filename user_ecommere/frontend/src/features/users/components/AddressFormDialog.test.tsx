@@ -553,7 +553,7 @@ describe('AddressFormDialog', () => {
       onOpenChange: handleOpenChange,
     });
 
-    const closeButton = screen.getByRole('button', { name: 'Close' });
+    const closeButton = screen.getByRole('button', { name: 'Đóng' });
     await user.click(closeButton);
 
     expect(handleOpenChange).toHaveBeenCalledWith(false);

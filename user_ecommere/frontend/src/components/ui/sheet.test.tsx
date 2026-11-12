@@ -228,7 +228,7 @@ describe('Sheet components', () => {
       const header = screen.getByTestId('sheet-header');
       expect(header).toBeInTheDocument();
       expect(header).toHaveClass(
-        'flex flex-col space-y-1.5 text-center sm:text-left',
+        'flex flex-col space-y-2 text-center sm:text-left',
       );
       expect(header).toHaveClass('header-extra');
       expect(screen.getByText('Tiêu đề phần đầu')).toBeInTheDocument();
@@ -243,7 +243,7 @@ describe('Sheet components', () => {
 
       const header = screen.getByTestId('sheet-header-default');
       expect(header).toHaveClass(
-        'flex flex-col space-y-1.5 text-center sm:text-left',
+        'flex flex-col space-y-2 text-center sm:text-left',
       );
     });
 
