@@ -205,13 +205,8 @@ describe('ProductQuickView', () => {
 
       expect(screen.getByText('Xịt Phòng Tinh Dầu')).toBeInTheDocument();
       expect(
-        screen.getByText('Xịt Thơm Phòng Tự Nhiên', {
-          selector: 'h2.text-xl',
-        }),
+        screen.getByRole('heading', { name: 'Xịt Thơm Phòng Tự Nhiên' }),
       ).toBeInTheDocument();
-      expect(
-        screen.getAllByRole('heading', { name: 'Xịt Thơm Phòng Tự Nhiên' }),
-      ).toHaveLength(2);
       expect(
         screen.getByText(
           'Chiết xuất từ hoa cỏ thiên nhiên thơm ngát và dễ chịu.',
@@ -270,9 +265,7 @@ describe('ProductQuickView', () => {
       renderProductQuickView();
 
       expect(
-        screen.getByText('Xịt Thơm Phòng Tự Nhiên', {
-          selector: 'h2.text-xl',
-        }),
+        screen.getByRole('heading', { name: 'Xịt Thơm Phòng Tự Nhiên' }),
       ).toBeInTheDocument();
       expect(screen.queryByText('Xịt Phòng Tinh Dầu')).not.toBeInTheDocument();
     });
@@ -303,14 +296,14 @@ describe('ProductQuickView', () => {
 
       const thumbBtn1 = thumb1.closest('button')!;
       const thumbBtn2 = thumb2.closest('button')!;
-      expect(thumbBtn1).toHaveClass('border-teal-600');
-      expect(thumbBtn2).not.toHaveClass('border-teal-600');
+      expect(thumbBtn1).toHaveClass('border-primary');
+      expect(thumbBtn2).not.toHaveClass('border-primary');
 
       // Click second thumbnail
       fireEvent.click(thumbBtn2);
 
-      expect(thumbBtn2).toHaveClass('border-teal-600');
-      expect(thumbBtn1).not.toHaveClass('border-teal-600');
+      expect(thumbBtn2).toHaveClass('border-primary');
+      expect(thumbBtn1).not.toHaveClass('border-primary');
       expect(mainImage).toHaveAttribute(
         'src',
         getImageUrl('/images/spray-2.jpg'),
@@ -319,7 +312,7 @@ describe('ProductQuickView', () => {
       // Click third thumbnail
       const thumbBtn3 = thumb3.closest('button')!;
       fireEvent.click(thumbBtn3);
-      expect(thumbBtn3).toHaveClass('border-teal-600');
+      expect(thumbBtn3).toHaveClass('border-primary');
       expect(mainImage).toHaveAttribute(
         'src',
         getImageUrl('/images/spray-3.jpg'),
@@ -332,19 +325,17 @@ describe('ProductQuickView', () => {
       const user = userEvent.setup();
       renderProductQuickView();
 
-      const trigger = screen.getByRole('combobox');
-      await user.click(trigger);
-
       // Variant 3 is out of stock with "(Hết hàng)" text and is disabled
-      const outOfStockOption = await screen.findByRole('option', {
+      const outOfStockBtn = screen.getByRole('button', {
         name: /Sả Chanh/i,
       });
-      expect(outOfStockOption).toHaveAttribute('data-disabled');
+      expect(outOfStockBtn).toBeDisabled();
       expect(screen.getByText('(Hết hàng)')).toBeInTheDocument();
 
       // Select variant 2
-      const option2 = screen.getByRole('option', { name: /Cam Ngọt/i });
+      const option2 = screen.getByRole('button', { name: /Cam Ngọt/i });
       await user.click(option2);
+      expect(option2).toHaveAttribute('aria-pressed', 'true');
 
       // Variant 2 prices
       expect(screen.getByText(/220\.000/)).toBeInTheDocument();
@@ -406,34 +397,47 @@ describe('ProductQuickView', () => {
     it('increments quantity up to variant stock and decrements down to 1', () => {
       renderProductQuickView();
 
-      const quantityWrapper = screen.getByRole('group', { name: 'Số lượng:' });
+      const quantityWrapper = screen.getByRole('group', { name: /số lượng/i });
       const [decreaseBtn, increaseBtn] =
         quantityWrapper.querySelectorAll('button');
+      const input = screen.getByRole('spinbutton', { name: /số lượng/i });
 
       // Default quantity is 1
-      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(input).toHaveValue(1);
 
       // Decrement below 1 is prevented
       fireEvent.click(decreaseBtn);
-      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(input).toHaveValue(1);
 
       // Increment up to stock = 5
       fireEvent.click(increaseBtn); // 2
-      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(input).toHaveValue(2);
       fireEvent.click(increaseBtn); // 3
-      expect(screen.getByText('3')).toBeInTheDocument();
+      expect(input).toHaveValue(3);
       fireEvent.click(increaseBtn); // 4
-      expect(screen.getByText('4')).toBeInTheDocument();
+      expect(input).toHaveValue(4);
       fireEvent.click(increaseBtn); // 5
-      expect(screen.getByText('5')).toBeInTheDocument();
+      expect(input).toHaveValue(5);
 
       // Increment beyond stock is clamped
       fireEvent.click(increaseBtn);
-      expect(screen.getByText('5')).toBeInTheDocument();
+      expect(input).toHaveValue(5);
 
       // Decrement works
       fireEvent.click(decreaseBtn);
-      expect(screen.getByText('4')).toBeInTheDocument();
+      expect(input).toHaveValue(4);
+    });
+
+    it('allows typing direct numeric value into quantity input', () => {
+      renderProductQuickView();
+
+      const input = screen.getByRole('spinbutton', { name: /số lượng/i });
+      fireEvent.change(input, { target: { value: '3' } });
+      expect(input).toHaveValue(3);
+
+      // Clamps to max stock (5)
+      fireEvent.change(input, { target: { value: '10' } });
+      expect(input).toHaveValue(5);
     });
 
     it('uses fallback max quantity 99 when variant stock is not provided', () => {
@@ -456,11 +460,12 @@ describe('ProductQuickView', () => {
 
       renderProductQuickView();
 
-      const quantityWrapper = screen.getByRole('group', { name: 'Số lượng:' });
+      const quantityWrapper = screen.getByRole('group', { name: /số lượng/i });
       const [, increaseBtn] = quantityWrapper.querySelectorAll('button');
+      const input = screen.getByRole('spinbutton', { name: /số lượng/i });
 
       fireEvent.click(increaseBtn);
-      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(input).toHaveValue(2);
     });
   });
 
@@ -469,7 +474,7 @@ describe('ProductQuickView', () => {
       const handleOpenChange = vi.fn();
       renderProductQuickView({ onOpenChange: handleOpenChange });
 
-      const quantityWrapper = screen.getByRole('group', { name: 'Số lượng:' });
+      const quantityWrapper = screen.getByRole('group', { name: /số lượng/i });
       const [, increaseBtn] = quantityWrapper.querySelectorAll('button');
       fireEvent.click(increaseBtn); // quantity = 2
 
@@ -540,8 +545,8 @@ describe('ProductQuickView', () => {
       const heartIcon = document.querySelector('svg.lucide-heart')!;
       const wishlistBtn = heartIcon.closest('button')!;
 
-      expect(wishlistBtn).toHaveClass('text-slate-400');
-      expect(heartIcon).not.toHaveClass('fill-rose-600');
+      expect(wishlistBtn).toHaveClass('text-muted-foreground');
+      expect(heartIcon).not.toHaveClass('fill-destructive');
 
       fireEvent.click(wishlistBtn);
 
@@ -554,15 +559,15 @@ describe('ProductQuickView', () => {
       });
     });
 
-    it('renders wishlisted state with fill-rose-500 styling', () => {
+    it('renders wishlisted state with fill-destructive styling', () => {
       mockIsInWishlist.mockReturnValue(true);
       renderProductQuickView();
 
       const heartIcon = document.querySelector('svg.lucide-heart')!;
       const wishlistBtn = heartIcon.closest('button')!;
 
-      expect(wishlistBtn).toHaveClass('text-rose-600');
-      expect(heartIcon).toHaveClass('fill-rose-600');
+      expect(wishlistBtn).toHaveClass('text-destructive');
+      expect(heartIcon).toHaveClass('fill-destructive');
     });
 
     it('calls toggleItem with regular price when salePrice is absent', () => {
