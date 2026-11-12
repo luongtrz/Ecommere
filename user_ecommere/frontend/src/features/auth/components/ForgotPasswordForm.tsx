@@ -26,7 +26,7 @@ export function ForgotPasswordForm({ onSubmit, isLoading }: ForgotPasswordFormPr
           name="email"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Email
               </FormLabel>
               <FormControl>

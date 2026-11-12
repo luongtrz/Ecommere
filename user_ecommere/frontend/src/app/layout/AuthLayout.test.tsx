@@ -54,8 +54,8 @@ describe('AuthLayout', () => {
     expect(wrapper).toHaveClass(
       'min-h-screen',
       'w-full',
-      'bg-slate-50',
-      'text-slate-900',
+      'bg-background',
+      'text-foreground',
     );
   });
 

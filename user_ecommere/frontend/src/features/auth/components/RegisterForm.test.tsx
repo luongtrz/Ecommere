@@ -26,7 +26,7 @@ describe('RegisterForm', () => {
 
     // Labels & Placeholders
     expect(screen.getByText('Họ và tên')).toBeInTheDocument();
-    const nameInput = screen.getByPlaceholderText('Nguyễn Văn A');
+    const nameInput = screen.getByPlaceholderText('VD: Nguyễn Văn A');
     expect(nameInput).toBeInTheDocument();
     expect(nameInput).toHaveValue('');
 
@@ -47,7 +47,7 @@ describe('RegisterForm', () => {
     expect(passwordInput).toHaveValue('');
     expect(passwordInput).toHaveAttribute('type', 'password');
 
-    expect(screen.getByText('Xác nhận')).toBeInTheDocument();
+    expect(screen.getByText('Xác nhận mật khẩu')).toBeInTheDocument();
     const confirmPasswordInput =
       screen.getByPlaceholderText('Nhập lại mật khẩu');
     expect(confirmPasswordInput).toBeInTheDocument();
@@ -179,7 +179,7 @@ describe('RegisterForm', () => {
   it('displays validation error when phone number format is invalid', async () => {
     render(<RegisterForm onSubmit={mockOnSubmit} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Nguyễn Văn A'), {
+    fireEvent.change(screen.getByPlaceholderText('VD: Nguyễn Văn A'), {
       target: { value: 'Nguyễn Văn A' },
     });
     fireEvent.change(screen.getByPlaceholderText('0912 345 678'), {
@@ -209,7 +209,7 @@ describe('RegisterForm', () => {
   it('displays validation error when email format is invalid', async () => {
     render(<RegisterForm onSubmit={mockOnSubmit} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Nguyễn Văn A'), {
+    fireEvent.change(screen.getByPlaceholderText('VD: Nguyễn Văn A'), {
       target: { value: 'Nguyễn Văn A' },
     });
     fireEvent.change(screen.getByPlaceholderText('0912 345 678'), {
@@ -240,7 +240,7 @@ describe('RegisterForm', () => {
   it('displays validation error when password is less than 8 characters', async () => {
     render(<RegisterForm onSubmit={mockOnSubmit} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Nguyễn Văn A'), {
+    fireEvent.change(screen.getByPlaceholderText('VD: Nguyễn Văn A'), {
       target: { value: 'Nguyễn Văn A' },
     });
     fireEvent.change(screen.getByPlaceholderText('0912 345 678'), {
@@ -270,7 +270,7 @@ describe('RegisterForm', () => {
   it('displays validation error when password is missing complex characters', async () => {
     render(<RegisterForm onSubmit={mockOnSubmit} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Nguyễn Văn A'), {
+    fireEvent.change(screen.getByPlaceholderText('VD: Nguyễn Văn A'), {
       target: { value: 'Nguyễn Văn A' },
     });
     fireEvent.change(screen.getByPlaceholderText('0912 345 678'), {
@@ -302,7 +302,7 @@ describe('RegisterForm', () => {
   it('displays validation error when confirmPassword does not match password', async () => {
     render(<RegisterForm onSubmit={mockOnSubmit} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Nguyễn Văn A'), {
+    fireEvent.change(screen.getByPlaceholderText('VD: Nguyễn Văn A'), {
       target: { value: 'Nguyễn Văn A' },
     });
     fireEvent.change(screen.getByPlaceholderText('0912 345 678'), {
@@ -332,7 +332,7 @@ describe('RegisterForm', () => {
   it('submits valid data with all fields filled including email and referralCode', async () => {
     render(<RegisterForm onSubmit={mockOnSubmit} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Nguyễn Văn A'), {
+    fireEvent.change(screen.getByPlaceholderText('VD: Nguyễn Văn A'), {
       target: { value: 'Nguyễn Văn A' },
     });
     fireEvent.change(screen.getByPlaceholderText('0912 345 678'), {
@@ -384,7 +384,7 @@ describe('RegisterForm', () => {
   it('submits valid data when optional fields (email and referralCode) are omitted', async () => {
     render(<RegisterForm onSubmit={mockOnSubmit} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Nguyễn Văn A'), {
+    fireEvent.change(screen.getByPlaceholderText('VD: Nguyễn Văn A'), {
       target: { value: 'Lê Thị B' },
     });
     fireEvent.change(screen.getByPlaceholderText('0912 345 678'), {
