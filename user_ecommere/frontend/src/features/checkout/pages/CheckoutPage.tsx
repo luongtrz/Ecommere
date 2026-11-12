@@ -14,11 +14,12 @@ import {
   ArrowLeft,
   Truck,
   CreditCard,
+  Banknote,
   MapPin,
   Shield,
   ChevronRight,
   ChevronDown,
-  CheckCircle2,
+  ClipboardCheck,
   Loader2,
 } from 'lucide-react';
 import { AddressFormDialog } from '@/features/users/components/AddressFormDialog';
@@ -285,21 +286,23 @@ export function CheckoutPage() {
         // Ignore confetti errors
       }
 
+      toast.success('Đặt hàng thành công! Cảm ơn bạn đã mua sắm.');
+
       setTimeout(() => {
-        clearCart();
         navigate('/orders');
+        clearCart();
       }, 1000);
     }
   };
 
   // Redirect if cart is empty
   useEffect(() => {
-    if (items.length === 0) {
+    if (!isOrdered && items.length === 0) {
       navigate('/cart', { replace: true });
     }
-  }, [items, navigate]);
+  }, [items, navigate, isOrdered]);
 
-  if (items.length === 0) {
+  if (items.length === 0 && !isOrdered) {
     return null;
   }
 
@@ -307,43 +310,48 @@ export function CheckoutPage() {
     <>
       <SEO title="Thanh toán" />
 
-      <div className="min-h-screen bg-background pb-16 md:pb-24">
-        {/* Top Header */}
-        <header className="border-b border-border bg-card sticky top-0 z-40">
-          <div className="container flex h-14 items-center justify-between">
+      <div className="min-h-screen bg-background pb-28 lg:pb-16">
+        <main className="container max-w-6xl py-6 md:py-10">
+          {/* Back link & Security badge */}
+          <div className="flex items-center justify-between mb-6">
             <Link
               to="/cart"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-11 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Quay lại giỏ hàng</span>
             </Link>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Shield className="h-4 w-4 text-success" />
               <span>An toàn</span>
             </div>
           </div>
-        </header>
 
-        <main className="container max-w-6xl py-8 md:py-12">
           {/* Page Heading & Stepper */}
           <div className="mb-8 md:mb-12">
-            <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight text-foreground text-left mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-balance text-foreground mb-6">
               Thanh toán
             </h1>
-            <CheckoutSteps currentStep={step} />
+            <CheckoutSteps
+              currentStep={step}
+              onStepClick={(targetStep) => {
+                if (targetStep < step) {
+                  setStep(targetStep);
+                }
+              }}
+            />
           </div>
 
-          {/* Mobile Collapsed Summary */}
+          {/* Mobile Collapsible Summary */}
           <div className="lg:hidden mb-8 border border-border bg-card rounded-lg overflow-hidden">
             <button
               type="button"
               onClick={() => setIsMobileSummaryOpen(!isMobileSummaryOpen)}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-secondary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full p-4 flex items-center justify-between text-left hover:bg-secondary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-11"
               aria-expanded={isMobileSummaryOpen}
             >
               <div className="flex items-center gap-2">
-                <span className="font-medium text-sm text-foreground">
+                <span className="font-semibold text-sm text-foreground">
                   Đơn hàng của bạn ({items.length} sản phẩm)
                 </span>
                 <ChevronDown
@@ -382,12 +390,12 @@ export function CheckoutPage() {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-foreground truncate">
+                        <div className="font-medium text-sm text-foreground line-clamp-2 leading-snug">
                           {item.name}
                         </div>
                         <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                           <span>
-                            Sl: <span className="tabular">{item.quantity}</span>
+                            Số lượng: <span className="tabular">{item.quantity}</span>
                           </span>
                           <span className="font-medium text-foreground tabular">
                             {formatCurrency(item.price * item.quantity)}
@@ -398,7 +406,7 @@ export function CheckoutPage() {
                   ))}
                 </div>
 
-                <div className="space-y-2 pt-3 border-t border-border text-xs">
+                <div className="space-y-2 pt-3 border-t border-border text-sm">
                   <div className="flex justify-between text-muted-foreground">
                     <span>Tạm tính</span>
                     <span className="font-medium text-foreground tabular">
@@ -418,7 +426,7 @@ export function CheckoutPage() {
                     <span className="font-medium text-foreground tabular">
                       {isPreviewLoading ? (
                         <span className="inline-flex items-center gap-1 text-muted-foreground">
-                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           Đang tính...
                         </span>
                       ) : shippingFee !== null ? (
@@ -432,6 +440,24 @@ export function CheckoutPage() {
                       )}
                     </span>
                   </div>
+
+                  <div className="pt-3 border-t border-border flex justify-between items-baseline">
+                    <span className="font-semibold text-sm text-foreground">
+                      Tổng thanh toán
+                    </span>
+                    <span className="text-base font-semibold tabular text-foreground">
+                      {isPreviewLoading ? (
+                        <span className="inline-flex items-center gap-1 text-sm font-normal text-muted-foreground">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          Đang tính...
+                        </span>
+                      ) : finalTotal !== null ? (
+                        formatCurrency(finalTotal)
+                      ) : (
+                        '—'
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
@@ -439,7 +465,7 @@ export function CheckoutPage() {
 
           {/* Grid Layout: Left form (1fr) + Right summary (400px) */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 lg:gap-12 items-start">
-            {/* LEFT COLUMN: Form sections separated by 1px hairlines */}
+            {/* LEFT COLUMN: Form sections */}
             <div className="space-y-8">
               {/* STEP 1: ADDRESS & SHIPPING */}
               {step === 1 && (
@@ -449,7 +475,7 @@ export function CheckoutPage() {
                     <div className="flex items-center justify-between mb-4">
                       <h2
                         id="address-heading"
-                        className="font-sans font-semibold text-lg text-foreground flex items-center gap-2"
+                        className="text-xl sm:text-2xl font-semibold leading-snug text-foreground flex items-center gap-2"
                       >
                         <span className="text-muted-foreground">1.</span>
                         <span>Địa chỉ giao hàng</span>
@@ -458,7 +484,7 @@ export function CheckoutPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setIsAddressDialogOpen(true)}
-                        className="text-sm font-medium hover:bg-secondary"
+                        className="text-sm font-medium hover:bg-secondary min-h-11 px-3"
                       >
                         + Thêm mới
                       </Button>
@@ -470,7 +496,7 @@ export function CheckoutPage() {
                         <p className="text-sm text-muted-foreground mb-4">
                           Bạn chưa có địa chỉ nào
                         </p>
-                        <Button onClick={() => setIsAddressDialogOpen(true)}>
+                        <Button onClick={() => setIsAddressDialogOpen(true)} className="min-h-11 px-5">
                           Thêm địa chỉ ngay
                         </Button>
                       </div>
@@ -486,9 +512,16 @@ export function CheckoutPage() {
                             <label
                               key={addr.id}
                               htmlFor={`address-${addr.id}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === ' ' || e.key === 'Enter') {
+                                  e.preventDefault();
+                                  setSelectedAddressId(addr.id);
+                                }
+                              }}
                               className={`
-                                relative p-4 rounded-md border text-left cursor-pointer transition-colors
-                                focus-within:ring-2 focus-within:ring-ring
+                                relative p-4 rounded-lg border text-left cursor-pointer transition-colors
+                                focus-within:ring-2 focus-within:ring-ring focus:outline-none min-h-11
                                 ${
                                   isSelected
                                     ? 'border-primary bg-secondary'
@@ -496,32 +529,35 @@ export function CheckoutPage() {
                                 }
                               `}
                             >
-                              <div className="flex justify-between items-start mb-1">
-                                <div className="font-medium text-foreground text-sm">
-                                  {addr.fullName}
-                                </div>
+                              <div className="flex items-start gap-3">
                                 <RadioGroupItem
                                   value={addr.id}
                                   id={`address-${addr.id}`}
+                                  className="mt-1 shrink-0"
                                 />
-                              </div>
-                              <div className="text-xs text-muted-foreground mb-2">
-                                {addr.phone}
-                              </div>
-                              <div className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                                {addr.line1}, {addr.ward}, {addr.district},{' '}
-                                {addr.province}
-                              </div>
-                              {addr.isDefault && (
-                                <div className="mt-3">
-                                  <Badge
-                                    variant="secondary"
-                                    className="rounded-sm font-normal text-xs"
-                                  >
-                                    Mặc định
-                                  </Badge>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-foreground text-sm">
+                                    {addr.fullName}
+                                  </div>
+                                  <div className="text-sm text-foreground/85 mt-0.5 font-medium">
+                                    {addr.phone}
+                                  </div>
+                                  <div className="text-sm text-foreground/80 leading-relaxed mt-1">
+                                    {addr.line1}, {addr.ward}, {addr.district},{' '}
+                                    {addr.province}
+                                  </div>
+                                  {addr.isDefault && (
+                                    <div className="mt-2.5">
+                                      <Badge
+                                        variant="secondary"
+                                        className="rounded-sm font-normal text-xs"
+                                      >
+                                        Mặc định
+                                      </Badge>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
+                              </div>
                             </label>
                           );
                         })}
@@ -529,14 +565,14 @@ export function CheckoutPage() {
                     )}
                   </section>
 
-                  {/* Section 2: Shipping Method (Separated by border-t border-border pt-8) */}
+                  {/* Section 2: Shipping Method */}
                   <section
                     aria-labelledby="shipping-heading"
                     className="border-t border-border pt-8"
                   >
                     <h2
                       id="shipping-heading"
-                      className="font-sans font-semibold text-lg text-foreground flex items-center gap-2 mb-4"
+                      className="text-xl sm:text-2xl font-semibold leading-snug text-foreground flex items-center gap-2 mb-4"
                     >
                       <span className="text-muted-foreground">2.</span>
                       <span>Phương thức vận chuyển</span>
@@ -553,9 +589,16 @@ export function CheckoutPage() {
                           <label
                             key={method.id}
                             htmlFor={`shipping-${method.id}`}
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === ' ' || e.key === 'Enter') {
+                                e.preventDefault();
+                                setShippingMethod(method.id);
+                              }
+                            }}
                             className={`
-                              flex items-center justify-between p-4 rounded-md border cursor-pointer transition-colors
-                              focus-within:ring-2 focus-within:ring-ring
+                              flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors
+                              focus-within:ring-2 focus-within:ring-ring focus:outline-none min-h-11
                               ${
                                 isSelected
                                   ? 'border-primary bg-secondary'
@@ -567,10 +610,11 @@ export function CheckoutPage() {
                               <RadioGroupItem
                                 value={method.id}
                                 id={`shipping-${method.id}`}
+                                className="shrink-0"
                               />
                               <Truck className="h-5 w-5 text-muted-foreground shrink-0" />
                               <div>
-                                <div className="font-medium text-sm text-foreground">
+                                <div className="font-semibold text-sm text-foreground">
                                   {method.name}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
@@ -578,13 +622,17 @@ export function CheckoutPage() {
                                 </div>
                               </div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right shrink-0 min-h-[2.5rem] flex flex-col justify-center items-end">
                               <div className="font-semibold text-sm text-foreground tabular">
                                 {formatCurrency(method.price)}
                               </div>
-                              {isSelected && (
+                              {isSelected ? (
                                 <div className="text-xs text-muted-foreground mt-0.5">
                                   Đã chọn
+                                </div>
+                              ) : (
+                                <div className="text-xs invisible mt-0.5" aria-hidden="true">
+                                  &nbsp;
                                 </div>
                               )}
                             </div>
@@ -602,10 +650,9 @@ export function CheckoutPage() {
                   <section aria-labelledby="payment-heading">
                     <h2
                       id="payment-heading"
-                      className="font-sans font-semibold text-lg text-foreground flex items-center gap-2 mb-4"
+                      className="text-xl sm:text-2xl font-semibold leading-snug text-foreground flex items-center gap-2 mb-4"
                     >
-                      <span className="text-muted-foreground">1.</span>
-                      <span>Chọn phương thức thanh toán</span>
+                      <span>Phương thức thanh toán</span>
                     </h2>
 
                     <RadioGroup
@@ -621,50 +668,54 @@ export function CheckoutPage() {
                           <label
                             key={method.id}
                             htmlFor={`payment-${method.id}`}
+                            tabIndex={isCOD ? 0 : -1}
+                            aria-disabled={!isCOD}
+                            onKeyDown={(e) => {
+                              if (isCOD && (e.key === ' ' || e.key === 'Enter')) {
+                                e.preventDefault();
+                                setPaymentMethod(method.id);
+                              }
+                            }}
                             className={`
-                              relative p-4 rounded-md border transition-colors flex flex-col justify-between gap-4 text-left
+                              relative p-4 rounded-lg border transition-colors flex items-start gap-3 text-left min-h-11
                               ${
                                 isSelected
-                                  ? 'border-primary bg-secondary cursor-pointer focus-within:ring-2 focus-within:ring-ring'
+                                  ? 'border-primary bg-secondary cursor-pointer focus-within:ring-2 focus-within:ring-ring focus:outline-none'
                                   : isCOD
-                                  ? 'border-border hover:border-foreground/30 bg-card cursor-pointer focus-within:ring-2 focus-within:ring-ring'
+                                  ? 'border-border hover:border-foreground/30 bg-card cursor-pointer focus-within:ring-2 focus-within:ring-ring focus:outline-none'
                                   : 'border-border/60 bg-muted/40 opacity-60 cursor-not-allowed'
                               }
                             `}
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-3">
+                            <RadioGroupItem
+                              value={method.id}
+                              id={`payment-${method.id}`}
+                              disabled={!isCOD}
+                              className="mt-1 shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2.5">
                                 {method.id === 'COD' ? (
-                                  <Truck className="h-5 w-5 text-muted-foreground shrink-0" />
+                                  <Banknote className="h-5 w-5 text-muted-foreground shrink-0" />
                                 ) : (
                                   <CreditCard className="h-5 w-5 text-muted-foreground shrink-0" />
                                 )}
-                                <div>
-                                  <div className="font-medium text-sm text-foreground">
-                                    {method.name}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mt-0.5">
-                                    {method.id === 'COD' ? (
-                                      'Thanh toán khi nhận hàng'
-                                    ) : (
-                                      <Badge
-                                        variant="secondary"
-                                        className="rounded-sm font-normal text-xs"
-                                      >
-                                        Đang bảo trì
-                                      </Badge>
-                                    )}
-                                  </div>
+                                <div className="font-semibold text-sm text-foreground">
+                                  {method.name}
                                 </div>
                               </div>
-
-                              {isCOD && (
-                                <RadioGroupItem
-                                  value={method.id}
-                                  id={`payment-${method.id}`}
-                                  disabled={!isCOD}
-                                />
-                              )}
+                              <div className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                                {method.id === 'COD' ? (
+                                  'Kiểm tra hàng và thanh toán tiền mặt trực tiếp cho nhân viên giao hàng'
+                                ) : (
+                                  <Badge
+                                    variant="secondary"
+                                    className="rounded-sm font-normal text-xs"
+                                  >
+                                    Đang bảo trì
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </label>
                         );
@@ -676,10 +727,10 @@ export function CheckoutPage() {
 
               {/* STEP 3: CONFIRM */}
               {step === 3 && (
-                <div className="space-y-8">
-                  <div className="border border-border bg-card rounded-lg p-6 text-center">
-                    <CheckCircle2 className="h-8 w-8 text-success mx-auto mb-3" />
-                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-1">
+                <div className="space-y-6">
+                  <div className="border border-border bg-card rounded-lg p-4 sm:p-6 text-center">
+                    <ClipboardCheck className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">
                       Sẵn sàng đặt hàng!
                     </h2>
                     <p className="text-sm text-muted-foreground max-w-md mx-auto">
@@ -687,24 +738,33 @@ export function CheckoutPage() {
                     </p>
                   </div>
 
-                  <div className="space-y-8">
+                  <div className="space-y-6">
                     {/* Section 1: Delivery Address */}
                     <section aria-labelledby="confirm-address-heading">
-                      <h3
-                        id="confirm-address-heading"
-                        className="font-sans font-semibold text-lg text-foreground flex items-center gap-2 mb-3"
-                      >
-                        <span className="text-muted-foreground">1.</span>
-                        <span>Giao tới</span>
-                      </h3>
-                      <div className="border border-border bg-card rounded-lg p-4 space-y-1">
-                        <div className="font-medium text-foreground text-sm">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3
+                          id="confirm-address-heading"
+                          className="font-semibold text-lg text-foreground flex items-center gap-2"
+                        >
+                          <span>Giao tới</span>
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setStep(1)}
+                          className="min-h-11 px-3 text-sm text-primary hover:text-primary hover:bg-secondary font-medium"
+                        >
+                          Thay đổi
+                        </Button>
+                      </div>
+                      <div className="border border-border bg-card rounded-lg p-4 space-y-1.5">
+                        <div className="font-semibold text-foreground text-sm">
                           {selectedAddress?.fullName}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-sm text-foreground/85 font-medium">
                           {selectedAddress?.phone}
                         </div>
-                        <div className="text-xs text-muted-foreground leading-relaxed">
+                        <div className="text-sm text-foreground/80 leading-relaxed">
                           {selectedAddress?.line1}, {selectedAddress?.ward},{' '}
                           {selectedAddress?.district}, {selectedAddress?.province}
                         </div>
@@ -714,23 +774,32 @@ export function CheckoutPage() {
                     {/* Section 2: Payment & Shipping */}
                     <section
                       aria-labelledby="confirm-methods-heading"
-                      className="border-t border-border pt-8"
+                      className="border-t border-border pt-6"
                     >
-                      <h3
-                        id="confirm-methods-heading"
-                        className="font-sans font-semibold text-lg text-foreground flex items-center gap-2 mb-3"
-                      >
-                        <span className="text-muted-foreground">2.</span>
-                        <span>Thanh toán & Vận chuyển</span>
-                      </h3>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3
+                          id="confirm-methods-heading"
+                          className="font-semibold text-lg text-foreground flex items-center gap-2"
+                        >
+                          <span>Thanh toán & Vận chuyển</span>
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setStep(2)}
+                          className="min-h-11 px-3 text-sm text-primary hover:text-primary hover:bg-secondary font-medium"
+                        >
+                          Thay đổi
+                        </Button>
+                      </div>
                       <div className="border border-border bg-card rounded-lg p-4 divide-y divide-border">
                         <div className="pb-3">
                           <div className="text-xs text-muted-foreground mb-1">
                             Phương thức vận chuyển
                           </div>
                           <div className="font-medium text-sm text-foreground flex items-center gap-2">
-                            <Truck className="h-4 w-4 text-muted-foreground" />
-                            {selectedShipping?.name}
+                            <Truck className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span>{selectedShipping?.name}</span>
                           </div>
                         </div>
                         <div className="pt-3">
@@ -738,8 +807,12 @@ export function CheckoutPage() {
                             Phương thức thanh toán
                           </div>
                           <div className="font-medium text-sm text-foreground flex items-center gap-2">
-                            <CreditCard className="h-4 w-4 text-muted-foreground" />
-                            {PAYMENT_METHODS.find((p) => p.id === paymentMethod)?.name}
+                            {paymentMethod === 'COD' ? (
+                              <Banknote className="h-4 w-4 text-muted-foreground shrink-0" />
+                            ) : (
+                              <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
+                            )}
+                            <span>{PAYMENT_METHODS.find((p) => p.id === paymentMethod)?.name}</span>
                           </div>
                         </div>
                       </div>
@@ -749,24 +822,22 @@ export function CheckoutPage() {
               )}
 
               {/* Step Navigation for Left Column on Desktop */}
-              {step > 1 && (
-                <div className="hidden lg:flex items-center pt-6 border-t border-border">
+              <div className="hidden lg:flex items-center justify-between pt-6 border-t border-border">
+                {step > 1 ? (
                   <Button
                     variant="outline"
                     onClick={handleBackStep}
-                    className="gap-2"
+                    className="gap-2 min-h-11"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Quay lại
                   </Button>
-                </div>
-              )}
-
-              {/* Mobile Actions: Buttons at the end of the form */}
-              <div className="lg:hidden pt-6 border-t border-border space-y-3">
+                ) : (
+                  <div />
+                )}
                 <Button
                   size="lg"
-                  className="w-full"
+                  className="min-h-11 px-8 font-semibold"
                   onClick={step < 3 ? handleNextStep : handleSubmit}
                   disabled={
                     (step === 1 && !selectedAddress) ||
@@ -777,11 +848,11 @@ export function CheckoutPage() {
                   }
                 >
                   {step < 3 ? (
-                    <span className="flex items-center justify-center gap-2">
+                    <span className="flex items-center gap-2">
                       Tiếp tục <ChevronRight className="h-4 w-4" />
                     </span>
                   ) : (
-                    <span className="flex items-center justify-center gap-2">
+                    <span className="flex items-center gap-2">
                       {isSubmitting
                         ? 'Đang xử lý...'
                         : isPreviewLoading
@@ -790,24 +861,14 @@ export function CheckoutPage() {
                     </span>
                   )}
                 </Button>
-                {step > 1 && (
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={handleBackStep}
-                    className="w-full"
-                  >
-                    Quay lại
-                  </Button>
-                )}
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Order Summary (Sticky .surface block) */}
+            {/* RIGHT COLUMN: Order Summary (Sticky sidebar on Desktop) */}
             <div className="hidden lg:block lg:sticky lg:top-24">
               <div className="surface p-6 space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <h2 className="font-sans font-semibold text-base text-foreground">
+                  <h2 className="font-semibold text-base leading-snug text-foreground">
                     Đơn hàng của bạn
                   </h2>
                   <Badge
@@ -818,7 +879,7 @@ export function CheckoutPage() {
                   </Badge>
                 </div>
 
-                {/* Item rows (56px image, name, qty, price tabular) with divide-y */}
+                {/* Item rows */}
                 <div className="divide-y divide-border max-h-[360px] overflow-y-auto">
                   {items.map((item) => (
                     <div
@@ -833,12 +894,12 @@ export function CheckoutPage() {
                         />
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col justify-between">
-                        <div className="font-medium text-sm text-foreground truncate">
+                        <div className="font-medium text-sm text-foreground line-clamp-2 leading-snug">
                           {item.name}
                         </div>
-                        <div className="flex justify-between items-center text-xs text-muted-foreground">
+                        <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                           <span>
-                            Sl: <span className="tabular">{item.quantity}</span>
+                            Số lượng: <span className="tabular">{item.quantity}</span>
                           </span>
                           <span className="font-medium text-foreground tabular">
                             {formatCurrency(item.price * item.quantity)}
@@ -886,12 +947,12 @@ export function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Total line text-xl font-semibold */}
+                {/* Total line */}
                 <div className="pt-4 border-t border-border flex justify-between items-baseline">
                   <span className="font-semibold text-base text-foreground">
                     Tổng thanh toán
                   </span>
-                  <span className="text-xl font-semibold tabular text-foreground">
+                  <span className="text-xl font-bold tabular text-foreground">
                     {isPreviewLoading ? (
                       <span className="inline-flex items-center gap-1.5 text-base font-normal text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -905,10 +966,10 @@ export function CheckoutPage() {
                   </span>
                 </div>
 
-                {/* Primary full-width Button size="lg" to place the order */}
+                {/* Primary full-width button in summary */}
                 <Button
                   size="lg"
-                  className="w-full"
+                  className="w-full min-h-11 font-semibold"
                   onClick={step < 3 ? handleNextStep : handleSubmit}
                   disabled={
                     (step === 1 && !selectedAddress) ||
@@ -936,6 +997,69 @@ export function CheckoutPage() {
             </div>
           </div>
         </main>
+
+        {/* Mobile Sticky Bottom Bar (at bottom-0) */}
+        <div className="lg:hidden fixed bottom-0 inset-x-0 bg-card border-t border-border p-4 z-40 shadow-lg pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="flex items-center justify-between gap-3 max-w-xl mx-auto">
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs text-muted-foreground">Tổng thanh toán</span>
+              <span className="text-base sm:text-lg font-bold tabular text-foreground whitespace-nowrap">
+                {isPreviewLoading ? (
+                  <span className="inline-flex items-center gap-1 text-sm font-normal text-muted-foreground">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Đang tính...
+                  </span>
+                ) : finalTotal !== null ? (
+                  formatCurrency(finalTotal)
+                ) : (
+                  formatCurrency(totalPrice)
+                )}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {step > 1 && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleBackStep}
+                  className="min-h-11 min-w-11 px-3"
+                  aria-label="Quay lại"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Quay lại</span>
+                </Button>
+              )}
+
+              <Button
+                size="lg"
+                className="min-h-11 px-5 font-semibold"
+                onClick={step < 3 ? handleNextStep : handleSubmit}
+                disabled={
+                  (step === 1 && !selectedAddress) ||
+                  isSubmitting ||
+                  isOrdered ||
+                  isPreviewLoading ||
+                  !isPreviewConfirmed
+                }
+              >
+                {step < 3 ? (
+                  <span className="flex items-center gap-1.5">
+                    Tiếp tục <ChevronRight className="h-4 w-4" />
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    {isSubmitting
+                      ? 'Đang xử lý...'
+                      : isPreviewLoading
+                      ? 'Đang tính phí...'
+                      : 'Xác nhận đặt hàng'}
+                  </span>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
 
         <AddressFormDialog
           open={isAddressDialogOpen}
