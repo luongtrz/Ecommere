@@ -134,11 +134,12 @@ export function CategoryPage() {
   const clearFilters = useCallback(() => {
     setSearchInput('');
     const newParams: Record<string, string> = {};
-    if (viewMode && viewMode !== 'grid') {
-      newParams.view = viewMode;
+    const currentView = searchParams.get('view');
+    if (currentView) {
+      newParams.view = currentView;
     }
     setSearchParams(newParams);
-  }, [viewMode, setSearchParams]);
+  }, [searchParams, setSearchParams]);
 
   // Active filter chips (excluding categorySlug since we are on CategoryPage)
   const activeChips = useMemo(() => {
@@ -291,7 +292,7 @@ export function CategoryPage() {
 
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <h1 className="font-serif text-3xl md:text-4xl text-foreground font-normal tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-balance text-foreground">
                   {category.name}
                 </h1>
                 {category.description && (
@@ -307,7 +308,7 @@ export function CategoryPage() {
               {/* Controls */}
               <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-stretch sm:items-center">
                 {/* Search */}
-                <div className="relative w-full sm:w-60 md:w-56 lg:w-64">
+                <div className="relative hidden sm:block sm:w-60 md:w-56 lg:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={searchInput}
@@ -332,14 +333,14 @@ export function CategoryPage() {
                   <div className="lg:hidden flex-1 sm:flex-initial">
                     <Sheet>
                       <SheetTrigger asChild>
-                        <Button variant="outline" size="default" className="h-10 w-full sm:w-auto gap-2 rounded-md">
+                        <Button variant="outline" size="default" className="lg:hidden h-11 w-full sm:w-auto gap-2 rounded-md">
                           <Filter className="h-4 w-4" />
                           <span>Lọc</span>
                         </Button>
                       </SheetTrigger>
                       <SheetContent side="left" className="w-80 overflow-y-auto bg-card border-r border-border p-6">
                         <SheetHeader className="mb-4">
-                          <SheetTitle className="text-foreground font-serif text-xl">Bộ lọc</SheetTitle>
+                          <SheetTitle className="text-foreground text-xl sm:text-2xl font-semibold leading-snug">Bộ lọc</SheetTitle>
                         </SheetHeader>
                         <div>
                           {filterContent}
@@ -351,7 +352,7 @@ export function CategoryPage() {
                   {/* Sort */}
                   <div className="flex-1 sm:flex-initial">
                     <Select value={sortBy} onValueChange={handleSortChange}>
-                      <SelectTrigger className="h-10 w-full sm:w-[150px] md:w-[160px] text-sm rounded-md bg-background">
+                      <SelectTrigger className="h-11 sm:h-10 w-full sm:w-[150px] md:w-[160px] text-sm rounded-md bg-background">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-popover rounded-md shadow-md border-border">
@@ -467,7 +468,7 @@ export function CategoryPage() {
                   title="Không tìm thấy sản phẩm"
                   description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc"
                   action={
-                    <Button variant="outline" className="rounded-md" onClick={clearFilters}>
+                    <Button variant="outline" className="h-11 sm:h-10 rounded-md" onClick={clearFilters}>
                       Xóa bộ lọc
                     </Button>
                   }
@@ -510,7 +511,7 @@ export function CategoryPage() {
                           </div>
                           <div className="flex-1 min-w-0 py-1 flex flex-col justify-between">
                             <div>
-                              <h3 className="font-medium text-foreground truncate text-base">
+                              <h3 className="font-medium text-foreground line-clamp-2 text-base leading-snug">
                                 {product.name}
                               </h3>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
@@ -537,7 +538,7 @@ export function CategoryPage() {
                               </span>
                               <Button
                                 size="sm"
-                                className="h-9 rounded-md text-xs transition-colors"
+                                className="h-11 sm:h-9 rounded-md text-sm transition-colors"
                                 onClick={() => product.variants?.[0] && handleAddToCart(product, product.variants[0])}
                               >
                                 <ShoppingBag className="h-4 w-4 mr-1.5" /> Thêm vào giỏ
