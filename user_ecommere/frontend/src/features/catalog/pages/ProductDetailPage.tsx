@@ -46,11 +46,16 @@ export function ProductDetailPage() {
   }, [productSlug]);
 
   const selectedVariant =
-    product?.variants.find((v) => v.id === selectedVariantId) || product?.variants[0];
+    (selectedVariantId
+      ? product?.variants.find((v) => v.id === selectedVariantId)
+      : undefined) ||
+    product?.variants.find((v) => v.stock > 0) ||
+    product?.variants[0];
   const isWishlisted = product ? isInWishlist(product.id) : false;
+  const isSelectedVariantOutOfStock = !selectedVariant || selectedVariant.stock === 0;
 
   const handleAddToCart = () => {
-    if (!product || !selectedVariant) return;
+    if (!product || !selectedVariant || selectedVariant.stock === 0) return;
 
     addItem({
       productId: product.id,
@@ -68,7 +73,7 @@ export function ProductDetailPage() {
   };
 
   const handleBuyNow = () => {
-    if (!product || !selectedVariant) return;
+    if (!product || !selectedVariant || selectedVariant.stock === 0) return;
 
     addItem({
       productId: product.id,
@@ -111,13 +116,13 @@ export function ProductDetailPage() {
           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
             <Search className="h-8 w-8" />
           </div>
-          <h1 className="font-serif text-2xl md:text-3xl font-semibold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-balance text-foreground">
             Không tìm thấy sản phẩm
           </h1>
           <p className="text-sm text-muted-foreground max-w-[65ch]">
             Sản phẩm bạn đang tìm kiếm có thể đã hết hàng hoặc ngừng phân phối.
           </p>
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="min-h-11">
             <Link to="/catalog">Quay lại danh mục sản phẩm</Link>
           </Button>
         </div>
@@ -139,7 +144,7 @@ export function ProductDetailPage() {
         image={getImageUrl(product.images[0])}
       />
 
-      <div className="min-h-screen bg-background pb-16">
+      <div className="min-h-screen bg-background pb-20 sm:pb-16">
         {/* Breadcrumb Bar */}
         <div className="border-b border-border bg-card">
           <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
@@ -156,7 +161,6 @@ export function ProductDetailPage() {
             </Button>
             <Breadcrumb
               items={[
-                { label: 'Trang chủ', href: '/' },
                 { label: 'Sản phẩm', href: '/catalog' },
                 { label: product.category?.name || 'Danh mục', href: `/c/${product.category?.slug}` },
                 { label: product.name },
@@ -208,7 +212,7 @@ export function ProductDetailPage() {
                       type="button"
                       onClick={() => setSelectedImage(index)}
                       aria-label={`Xem ảnh ${index + 1}`}
-                      className={`aspect-square bg-muted rounded-md overflow-hidden border p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      className={`aspect-square min-h-11 min-w-11 bg-muted rounded-md overflow-hidden border p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                         selectedImage === index
                           ? 'border-primary ring-2 ring-primary'
                           : 'border-border hover:border-foreground/30 opacity-70 hover:opacity-100'
@@ -223,25 +227,6 @@ export function ProductDetailPage() {
                   ))}
                 </div>
               )}
-
-              {/* Trust Micro-Row Under Gallery */}
-              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border text-center">
-                <div className="space-y-1">
-                  <ShieldCheck className="h-5 w-5 text-foreground mx-auto" />
-                  <p className="text-xs font-semibold text-foreground">100% Nội Địa</p>
-                  <p className="text-xs text-muted-foreground">Mã vạch chuẩn Thái</p>
-                </div>
-                <div className="space-y-1">
-                  <PackageCheck className="h-5 w-5 text-foreground mx-auto" />
-                  <p className="text-xs font-semibold text-foreground">Chống Vỡ 3 Lớp</p>
-                  <p className="text-xs text-muted-foreground">Đóng gói an toàn</p>
-                </div>
-                <div className="space-y-1">
-                  <Truck className="h-5 w-5 text-foreground mx-auto" />
-                  <p className="text-xs font-semibold text-foreground">Giao Toàn Quốc</p>
-                  <p className="text-xs text-muted-foreground">Freeship từ 250k</p>
-                </div>
-              </div>
             </div>
 
             {/* RIGHT COLUMN: Info, Pricing & Purchasing */}
@@ -251,14 +236,14 @@ export function ProductDetailPage() {
                 <div className="mb-2">
                   <Link
                     to={`/c/${product.category?.slug}`}
-                    className="eyebrow hover:text-foreground transition-colors inline-block text-muted-foreground"
+                    className="eyebrow normal-case tracking-normal hover:text-foreground transition-colors inline-block text-muted-foreground"
                   >
                     {product.category?.name}
                   </Link>
                 </div>
 
                 {/* Product Title */}
-                <h1 className="font-serif text-3xl md:text-4xl font-semibold text-foreground leading-tight tracking-tight mb-3">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground leading-snug text-balance mb-3">
                   {product.name}
                 </h1>
 
@@ -273,7 +258,7 @@ export function ProductDetailPage() {
                       ({product.reviewCount || 38} đánh giá)
                     </span>
                   </div>
-                  <span className="text-border">|</span>
+                  <span className="hidden sm:inline text-border" aria-hidden="true">|</span>
                   <span className="text-xs text-muted-foreground font-medium">
                     🔥 Đã bán hơn 1.200 chai
                   </span>
@@ -291,18 +276,25 @@ export function ProductDetailPage() {
                       </span>
                     )}
                     {hasDiscount && (
-                      <Badge variant="default" className="rounded-sm text-xs font-medium tabular">
+                      <Badge variant="success" className="rounded-sm text-xs font-medium tabular">
                         Tiết kiệm {formatCurrency(discountSavings)}
                       </Badge>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
-                    <span className="inline-block h-2 w-2 rounded-full bg-success shrink-0" />
-                    <span className="font-medium text-foreground">Còn hàng trong kho</span>
-                    <span>•</span>
-                    <span>Đồng kiểm tra hàng trước khi thanh toán COD</span>
-                  </div>
+                  {isSelectedVariantOutOfStock ? (
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground pt-1">
+                      <span className="inline-block h-2 w-2 rounded-full bg-destructive shrink-0 mt-1.5" />
+                      <span className="font-medium text-destructive">Hết hàng</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground pt-1">
+                      <span className="inline-block h-2 w-2 rounded-full bg-success shrink-0 mt-1.5" />
+                      <span className="font-medium text-foreground">Còn hàng trong kho</span>
+                      <span>•</span>
+                      <span>Đồng kiểm tra hàng trước khi thanh toán COD</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Short Description */}
@@ -329,15 +321,19 @@ export function ProductDetailPage() {
                             type="button"
                             disabled={isOutOfStock}
                             onClick={() => setSelectedVariantId(v.id)}
-                            className={`inline-flex items-center gap-2 rounded-md border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                              isSelected
+                            className={`inline-flex items-center gap-2 rounded-md border min-h-11 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                              isOutOfStock
+                                ? isSelected
+                                  ? 'border-dashed border-border bg-muted/40 text-muted-foreground opacity-60 cursor-not-allowed'
+                                  : 'border-border text-muted-foreground line-through opacity-50 cursor-not-allowed'
+                                : isSelected
                                 ? 'border-primary bg-secondary text-foreground'
-                                : isOutOfStock
-                                ? 'border-border text-muted-foreground line-through opacity-50 cursor-not-allowed'
                                 : 'border-border bg-card text-foreground hover:border-foreground/30'
                             }`}
                           >
-                            {isSelected && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
+                            {isSelected && !isOutOfStock && (
+                              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                            )}
                             <span>{v.scent}</span>
                             {v.volumeMl ? (
                               <span className="text-muted-foreground font-normal">
@@ -365,7 +361,7 @@ export function ProductDetailPage() {
                         <button
                           type="button"
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          disabled={quantity <= 1}
+                          disabled={quantity <= 1 || isSelectedVariantOutOfStock}
                           aria-label="Giảm số lượng"
                           className="h-11 w-11 flex items-center justify-center text-foreground hover:bg-muted transition-colors rounded-l-md disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
@@ -377,9 +373,14 @@ export function ProductDetailPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            setQuantity(Math.min(selectedVariant?.stock || 999, quantity + 1))
+                            setQuantity(
+                              Math.min(selectedVariant?.stock ?? 0, quantity + 1)
+                            )
                           }
-                          disabled={quantity >= (selectedVariant?.stock || 999)}
+                          disabled={
+                            isSelectedVariantOutOfStock ||
+                            quantity >= (selectedVariant?.stock ?? 0)
+                          }
                           aria-label="Tăng số lượng"
                           className="h-11 w-11 flex items-center justify-center text-foreground hover:bg-muted transition-colors rounded-r-md disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
@@ -387,8 +388,8 @@ export function ProductDetailPage() {
                         </button>
                       </div>
 
-                      <span className="text-xs text-muted-foreground">
-                        (Có sẵn {selectedVariant?.stock || 50} sản phẩm)
+                      <span className="text-sm text-muted-foreground">
+                        (Có sẵn {selectedVariant?.stock ?? 0} sản phẩm)
                       </span>
                     </div>
                   </div>
@@ -399,12 +400,12 @@ export function ProductDetailPage() {
                   <div className="flex items-center gap-3">
                     <Button
                       size="lg"
-                      className="flex-1"
+                      className="flex-1 min-h-11"
                       onClick={handleAddToCart}
-                      disabled={!selectedVariant || selectedVariant.stock === 0}
+                      disabled={isSelectedVariantOutOfStock}
                     >
                       <ShoppingCart className="mr-2 h-4 w-4" />
-                      {selectedVariant?.stock === 0 ? 'Tạm Hết Hàng' : 'Thêm Vào Giỏ Hàng'}
+                      {isSelectedVariantOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
                     </Button>
 
                     <Button
@@ -425,11 +426,11 @@ export function ProductDetailPage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="w-full"
+                    className="w-full min-h-11"
                     onClick={handleBuyNow}
-                    disabled={!selectedVariant || selectedVariant.stock === 0}
+                    disabled={isSelectedVariantOutOfStock}
                   >
-                    Mua Ngay
+                    Mua ngay
                   </Button>
                 </div>
 
@@ -472,14 +473,14 @@ export function ProductDetailPage() {
               <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-border rounded-none gap-8">
                 <TabsTrigger
                   value="description"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground pb-3 font-medium text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="min-h-11 rounded-none border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground pb-3 font-medium text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Mô tả sản phẩm
                 </TabsTrigger>
                 <TabsTrigger
                   value="guide"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground pb-3 font-medium text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="min-h-11 rounded-none border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground pb-3 font-medium text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ShieldAlert className="h-4 w-4 mr-2" />
                   Hướng dẫn &amp; An toàn
@@ -488,20 +489,20 @@ export function ProductDetailPage() {
 
               <TabsContent value="description" className="mt-8">
                 <div className="surface p-6 md:p-8 space-y-6">
-                  <h3 className="text-lg font-semibold text-foreground">Chi tiết sản phẩm</h3>
+                  <h2 className="text-xl sm:text-2xl font-semibold leading-snug text-foreground">Chi tiết sản phẩm</h2>
                   <div className="text-foreground/90 whitespace-pre-line leading-relaxed text-sm max-w-[65ch]">
                     {product.description}
                   </div>
-                  <div className="pt-4 border-t border-border divide-y divide-border text-sm">
-                    <div className="py-2.5 first:pt-0 flex items-center justify-between">
+                  <div className="pt-4 border-t border-border divide-y divide-border text-sm max-w-xl">
+                    <div className="py-2.5 first:pt-0 grid grid-cols-[140px_1fr] sm:grid-cols-[160px_1fr] gap-4 items-center">
                       <span className="text-muted-foreground">Xuất xứ:</span>
                       <span className="font-medium text-foreground">Thái Lan (Thailand)</span>
                     </div>
-                    <div className="py-2.5 flex items-center justify-between">
+                    <div className="py-2.5 grid grid-cols-[140px_1fr] sm:grid-cols-[160px_1fr] gap-4 items-center">
                       <span className="text-muted-foreground">Thương hiệu:</span>
                       <span className="font-medium text-foreground">Nội địa Thái</span>
                     </div>
-                    <div className="py-2.5 last:pb-0 flex items-center justify-between">
+                    <div className="py-2.5 last:pb-0 grid grid-cols-[140px_1fr] sm:grid-cols-[160px_1fr] gap-4 items-center">
                       <span className="text-muted-foreground">Hạn sử dụng:</span>
                       <span className="font-medium text-foreground">3 năm kể từ ngày sản xuất</span>
                     </div>
@@ -511,9 +512,9 @@ export function ProductDetailPage() {
 
               <TabsContent value="guide" className="mt-8">
                 <div className="surface p-6 md:p-8 space-y-6">
-                  <h3 className="text-lg font-semibold text-foreground">
+                  <h2 className="text-xl sm:text-2xl font-semibold leading-snug text-foreground">
                     Hướng dẫn sử dụng &amp; Bảo quản an toàn
-                  </h3>
+                  </h2>
                   <div className="divide-y divide-border text-sm leading-relaxed">
                     <div className="py-4 first:pt-0 flex items-start gap-3">
                       <CheckCircle2 className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
