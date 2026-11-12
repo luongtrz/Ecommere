@@ -429,7 +429,7 @@ describe('AdminProductsPage', () => {
         name: 'Tổng sản phẩm',
       });
       const statCard =
-        totalProductsHeading.closest('.rounded-xl') ??
+        totalProductsHeading.closest<HTMLElement>('.rounded-xl') ??
         totalProductsHeading.parentElement?.parentElement!;
       expect(within(statCard).getByText('0')).toBeInTheDocument();
     });

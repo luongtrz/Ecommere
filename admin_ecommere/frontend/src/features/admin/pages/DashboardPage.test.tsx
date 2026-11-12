@@ -572,8 +572,8 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument();
 
     // Verify operational navigation links
-    const rhythmSection = (screen.getByText('Nhịp vận hành hôm nay').closest('.rounded-xl') ||
-      screen.getByText('Nhịp vận hành hôm nay').closest('section'))!;
+    const rhythmSection = (screen.getByText('Nhịp vận hành hôm nay').closest<HTMLElement>('.rounded-xl') ||
+      screen.getByText('Nhịp vận hành hôm nay').closest<HTMLElement>('section'))!;
 
     const pendingOrdersLink = within(rhythmSection).getByRole('link', {
       name: /Đơn đang chờ xử lý/i,
