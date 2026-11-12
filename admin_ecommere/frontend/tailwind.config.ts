@@ -16,7 +16,12 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: [
+          ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          {
+            fontFeatureSettings: '"cv02", "cv03", "cv04", "cv11", "tnum"',
+          },
+        ],
       },
       colors: {
         border: 'hsl(var(--border))',
