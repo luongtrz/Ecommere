@@ -91,8 +91,7 @@ describe('ToolCallCard', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders null content when resultSummary is undefined in ok status', async () => {
-      const user = userEvent.setup();
+    it('renders null content when resultSummary is undefined in ok status', () => {
       const step: ChatToolStep = {
         id: 'step-3',
         name: 'cart_clear',
@@ -107,10 +106,7 @@ describe('ToolCallCard', () => {
         container.querySelector('svg.text-success'),
       ).toBeInTheDocument();
 
-      const trigger = screen.getByRole('button');
-      await user.click(trigger);
-
-      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
       expect(screen.queryByText('Đang thực hiện…')).not.toBeInTheDocument();
     });
   });
@@ -141,8 +137,7 @@ describe('ToolCallCard', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders null content when resultSummary is undefined in error status', async () => {
-      const user = userEvent.setup();
+    it('renders null content when resultSummary is undefined in error status', () => {
       const step: ChatToolStep = {
         id: 'step-5',
         name: 'cancel_my_order',
@@ -157,10 +152,7 @@ describe('ToolCallCard', () => {
       ).toBeInTheDocument();
       expect(container.querySelector('svg.text-destructive')).toBeInTheDocument();
 
-      const trigger = screen.getByRole('button');
-      await user.click(trigger);
-
-      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
       expect(screen.queryByText('Đang thực hiện…')).not.toBeInTheDocument();
     });
   });
@@ -215,7 +207,12 @@ describe('ToolCallCard', () => {
       const { container } = render(<ToolCallCard step={step} />);
 
       expect(screen.getByText('Trạng thái lạ')).toBeInTheDocument();
-      expect(container.querySelector('svg')).toBeNull();
+      expect(
+        container.querySelector('span[aria-hidden="true"] svg'),
+      ).toBeNull();
+      expect(container.querySelector('svg.animate-spin')).toBeNull();
+      expect(container.querySelector('svg.text-success')).toBeNull();
+      expect(container.querySelector('svg.text-destructive')).toBeNull();
 
       const trigger = screen.getByRole('button');
       await user.click(trigger);

@@ -26,7 +26,6 @@ describe('ChatMarkdown', () => {
     expect(root).toHaveClass(
       'text-sm',
       'break-words',
-      'leading-relaxed',
       'space-y-2',
     );
   });

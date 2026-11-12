@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -53,6 +53,7 @@ vi.mock('../hooks/useChatAgent', () => ({
     send: mockSend,
     decide: mockDecide,
     newThread: mockNewThread,
+    cancel: vi.fn(),
   }),
 }));
 
@@ -95,12 +96,38 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 describe('ChatbotWidget', () => {
+  const originalScrollTo = Element.prototype.scrollTo;
+
+  beforeAll(() => {
+    Element.prototype.scrollTo = vi.fn();
+    // jsdom does not implement matchMedia; the widget reads it for responsive layout.
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+  });
+
+  afterAll(() => {
+    if (originalScrollTo) {
+      Element.prototype.scrollTo = originalScrollTo;
+    } else {
+      delete (Element.prototype as { scrollTo?: unknown }).scrollTo;
+    }
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockUser = null;
     mockIsStreaming = false;
 
-    // Mock scrollIntoView to prevent jsdom errors and verify invocation
+    // Mock scrollTo and scrollIntoView to prevent jsdom errors and verify invocation
+    Element.prototype.scrollTo = vi.fn();
     Element.prototype.scrollIntoView = vi.fn();
 
     // Mock localStorage to prevent unmocked browser storage access
@@ -279,6 +306,7 @@ describe('ChatbotWidget', () => {
         .mockImplementation(() => {});
       renderWithProviders(<ChatbotWidget />);
       expect(scrollToSpy).toHaveBeenCalled();
+      scrollToSpy.mockRestore();
     });
   });
 

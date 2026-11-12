@@ -303,17 +303,7 @@ describe('ConfirmActionCard', () => {
     );
 
     expect(screen.getByText('Đã gửi quyết định')).toBeInTheDocument();
-
-    const buttons = screen.getAllByRole('button');
-    for (const btn of buttons) {
-      expect(btn).toBeDisabled();
-    }
-
-    // Clicking buttons when busy does nothing
-    fireEvent.click(screen.getByRole('button', { name: 'Xác nhận tất cả' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Từ chối tất cả' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Gửi quyết định' }));
-
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(onSubmitMock).not.toHaveBeenCalled();
   });
 
