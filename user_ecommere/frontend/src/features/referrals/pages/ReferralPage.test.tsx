@@ -11,11 +11,23 @@ import {
 import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { ReferralPage } from './ReferralPage';
 
 const mockUseReferralInfo = vi.fn();
 const mockUseMyReferrals = vi.fn();
 const mockUseReferralCoupons = vi.fn();
+
+vi.mock('sonner', () => {
+  const mockToastFn: any = vi.fn();
+  mockToastFn.error = vi.fn();
+  mockToastFn.success = vi.fn();
+  mockToastFn.info = vi.fn();
+  return {
+    toast: mockToastFn,
+    default: mockToastFn,
+  };
+});
 
 vi.mock('../hooks/useReferral', () => ({
   useReferralInfo: () => mockUseReferralInfo(),
@@ -256,7 +268,7 @@ describe('ReferralPage', () => {
   });
 
   describe('Header and Left Column Info & Stats', () => {
-    it('renders SEO title, headers, referral code, referral link, and statistics', () => {
+    it('renders SEO title, headers, referral code, referral link, breadcrumb, and statistics', () => {
       mockUseReferralInfo.mockReturnValue({
         data: defaultInfo,
         isLoading: false,
@@ -278,6 +290,12 @@ describe('ReferralPage', () => {
         'Mời bạn bè - Thai Spray',
       );
 
+      // Breadcrumb
+      expect(screen.getByRole('navigation', { name: /breadcrumb/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Trang chủ/i })).toHaveAttribute('href', '/');
+      expect(screen.getByRole('link', { name: /Tài khoản/i })).toHaveAttribute('href', '/account');
+      expect(screen.getByText('Mời bạn bè')).toBeInTheDocument();
+
       // Header
       expect(screen.getByText('Mời bạn bè - Nhận ưu đãi')).toBeInTheDocument();
       expect(
@@ -295,7 +313,7 @@ describe('ReferralPage', () => {
       expect(screen.getByText('12')).toBeInTheDocument();
       expect(screen.getByText('Bạn bè đã mời')).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
-      expect(screen.getByText('Mã đã nhận')).toBeInTheDocument();
+      expect(screen.getByText('Mã giảm giá đã nhận')).toBeInTheDocument();
     });
 
     it('renders fallback values ("---", empty link, and 0 stats) when info is undefined', () => {
@@ -318,7 +336,7 @@ describe('ReferralPage', () => {
   });
 
   describe('Copy and Share Interactions', () => {
-    it('copies referral code to clipboard, changes button to "Đã chép", and reverts after 2 seconds', async () => {
+    it('copies referral code to clipboard, changes button to "Đã sao chép", and reverts after 2 seconds', async () => {
       vi.useFakeTimers();
 
       mockUseReferralInfo.mockReturnValue({
@@ -345,7 +363,7 @@ describe('ReferralPage', () => {
 
       expect(writeTextMock).toHaveBeenCalledWith('THAI2026');
       expect(
-        within(cardContainer).getByRole('button', { name: /Đã chép/i }),
+        within(cardContainer).getByRole('button', { name: /Đã sao chép/i }),
       ).toBeInTheDocument();
 
       act(() => {
@@ -440,7 +458,7 @@ describe('ReferralPage', () => {
 
       expect(execCommandSpy).toHaveBeenCalledWith('copy');
       expect(
-        within(cardContainer).getByRole('button', { name: /Đã chép/i }),
+        within(cardContainer).getByRole('button', { name: /Đã sao chép/i }),
       ).toBeInTheDocument();
 
       act(() => {
@@ -574,7 +592,7 @@ describe('ReferralPage', () => {
       expect(activeTabPanel?.querySelectorAll('.animate-pulse').length).toBe(2);
     });
 
-    it('renders empty message when coupons array is empty', () => {
+    it('renders empty message and link to catalog when coupons array is empty', () => {
       mockUseReferralInfo.mockReturnValue({
         data: defaultInfo,
         isLoading: false,
@@ -589,12 +607,15 @@ describe('ReferralPage', () => {
 
       expect(
         screen.getByText(
-          'Chưa có mã giảm giá nào. Hãy mời bạn bè để nhận ưu đãi!',
+          'Chưa có mã giảm giá nào. Hãy mời bạn bè để nhận mã giảm giá!',
         ),
       ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /Khám phá sản phẩm/i }),
+      ).toHaveAttribute('href', '/catalog');
     });
 
-    it('renders empty message when coupons is null', () => {
+    it('renders empty message and link to catalog when coupons is null', () => {
       mockUseReferralInfo.mockReturnValue({
         data: defaultInfo,
         isLoading: false,
@@ -609,9 +630,12 @@ describe('ReferralPage', () => {
 
       expect(
         screen.getByText(
-          'Chưa có mã giảm giá nào. Hãy mời bạn bè để nhận ưu đãi!',
+          'Chưa có mã giảm giá nào. Hãy mời bạn bè để nhận mã giảm giá!',
         ),
       ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /Khám phá sản phẩm/i }),
+      ).toHaveAttribute('href', '/catalog');
     });
 
     it('renders coupons of types PERCENT, FIXED, and FREESHIP with details and allows copying active coupon', async () => {
@@ -661,6 +685,63 @@ describe('ReferralPage', () => {
       });
 
       expect(writeTextMock).toHaveBeenCalledWith('GIAM20');
+      expect(toast.success).toHaveBeenCalledWith('Đã sao chép mã giảm giá');
+      expect(
+        within(couponRow).getByRole('button', { name: /Đã sao chép/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('tracks coupon copy state independently from the referral code and shows feedback', async () => {
+      vi.useFakeTimers();
+
+      mockUseReferralInfo.mockReturnValue({
+        data: defaultInfo,
+        isLoading: false,
+      });
+      mockUseMyReferrals.mockReturnValue({
+        data: defaultReferrals,
+        isLoading: false,
+      });
+      mockUseReferralCoupons.mockReturnValue({
+        data: defaultCoupons,
+        isLoading: false,
+      });
+
+      renderComponent();
+
+      const codeLabel = screen.getByText('Mã giới thiệu của bạn');
+      const cardContainer = codeLabel.parentElement as HTMLElement;
+      const mainCopyButton = within(cardContainer).getByRole('button', {
+        name: /Sao chép/i,
+      });
+
+      const couponRow = screen
+        .getByText('GIAM20')
+        .closest('.justify-between') as HTMLElement;
+      const couponCopyBtn = within(couponRow).getByRole('button', {
+        name: 'Sao chép',
+      });
+
+      await act(async () => {
+        fireEvent.click(couponCopyBtn);
+      });
+
+      // Coupon button shows feedback and fires toast
+      expect(
+        within(couponRow).getByRole('button', { name: /Đã sao chép/i }),
+      ).toBeInTheDocument();
+      expect(toast.success).toHaveBeenCalledWith('Đã sao chép mã giảm giá');
+
+      // Main referral code button remains unaffected
+      expect(mainCopyButton).toHaveTextContent('Sao chép');
+
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+
+      expect(
+        within(couponRow).getByRole('button', { name: /Sao chép/i }),
+      ).toBeInTheDocument();
     });
 
     it('renders "Hết hạn" badge and grayscale styling when coupon is expired', () => {
@@ -866,7 +947,7 @@ describe('ReferralPage', () => {
           new Date('2026-02-15T10:00:00Z').toLocaleDateString('vi-VN'),
         ),
       ).toBeInTheDocument();
-      expect(screen.getByText('Đã nhận quà')).toBeInTheDocument();
+      expect(screen.getByText('Đã nhận mã giảm giá')).toBeInTheDocument();
 
       // Item 2 (empty refereeName falls back to initial '?')
       expect(screen.getByText('anon@example.com')).toBeInTheDocument();
