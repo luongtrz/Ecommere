@@ -49,6 +49,7 @@ describe('NotFoundPage', () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByText('Rất tiếc, trang không tồn tại')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { level: 1, name: 'Không tìm thấy trang' }),
     ).toBeInTheDocument();
@@ -112,34 +113,32 @@ describe('NotFoundPage', () => {
     const catalogLink = screen.getByRole('link', { name: /Sản phẩm/i });
     expect(catalogLink).toBeInTheDocument();
     expect(catalogLink).toHaveAttribute('href', '/catalog');
-    expect(screen.getByText('Xem danh mục sản phẩm')).toBeInTheDocument();
+    expect(screen.getByText('Xem toàn bộ sản phẩm')).toBeInTheDocument();
 
     const categoriesLink = screen.getByRole('link', {
-      name: /Tìm theo danh mục/i,
+      name: /Danh mục/i,
     });
     expect(categoriesLink).toBeInTheDocument();
-    expect(categoriesLink).toHaveAttribute('href', '/categories');
+    expect(categoriesLink).toHaveAttribute('href', '/catalog');
     expect(screen.getByText('Tìm theo danh mục')).toBeInTheDocument();
 
     const supportLink = screen.getByRole('link', { name: /Hỗ trợ/i });
     expect(supportLink).toBeInTheDocument();
-    expect(supportLink).toHaveAttribute('href', '/support');
+    expect(supportLink).toHaveAttribute('href', '/chat');
     expect(screen.getByText('Liên hệ hỗ trợ')).toBeInTheDocument();
   });
 
-  it('renders tip section at the bottom', () => {
+  it('renders tip section at the bottom with actionable search link', () => {
     render(
       <MemoryRouter>
         <NotFoundPage />
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Mẹo:')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Kiểm tra lại đường dẫn URL hoặc sử dụng thanh tìm kiếm',
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText('💡 Mẹo:')).toBeInTheDocument();
+    const searchLink = screen.getByRole('link', { name: 'thanh tìm kiếm' });
+    expect(searchLink).toBeInTheDocument();
+    expect(searchLink).toHaveAttribute('href', '/search');
   });
 
   it('calls window.history.back when clicking "Quay lại" button with userEvent', async () => {
@@ -215,14 +214,14 @@ describe('NotFoundPage', () => {
     });
   });
 
-  it('navigates to "/categories" when clicking "Danh mục" link', async () => {
+  it('navigates to "/catalog" when clicking "Danh mục" link', async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={['/unknown-path']}>
         <Routes>
           <Route path="/unknown-path" element={<NotFoundPage />} />
           <Route
-            path="/categories"
+            path="/catalog"
             element={<div data-testid="categories-target">Trang danh mục</div>}
           />
         </Routes>
@@ -230,7 +229,7 @@ describe('NotFoundPage', () => {
     );
 
     const categoriesLink = screen.getByRole('link', {
-      name: /Tìm theo danh mục/i,
+      name: /Danh mục/i,
     });
     await user.click(categoriesLink);
 
@@ -239,15 +238,15 @@ describe('NotFoundPage', () => {
     });
   });
 
-  it('navigates to "/support" when clicking "Hỗ trợ" link', async () => {
+  it('navigates to "/chat" when clicking "Hỗ trợ" link', async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={['/unknown-path']}>
         <Routes>
           <Route path="/unknown-path" element={<NotFoundPage />} />
           <Route
-            path="/support"
-            element={<div data-testid="support-target">Trang hỗ trợ</div>}
+            path="/chat"
+            element={<div data-testid="support-target">Trang trợ lý ảo</div>}
           />
         </Routes>
       </MemoryRouter>,
@@ -258,6 +257,28 @@ describe('NotFoundPage', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('support-target')).toBeInTheDocument();
+    });
+  });
+
+  it('navigates to "/search" when clicking "thanh tìm kiếm" tip link', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/unknown-path']}>
+        <Routes>
+          <Route path="/unknown-path" element={<NotFoundPage />} />
+          <Route
+            path="/search"
+            element={<div data-testid="search-target">Trang tìm kiếm</div>}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const searchLink = screen.getByRole('link', { name: 'thanh tìm kiếm' });
+    await user.click(searchLink);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('search-target')).toBeInTheDocument();
     });
   });
 });

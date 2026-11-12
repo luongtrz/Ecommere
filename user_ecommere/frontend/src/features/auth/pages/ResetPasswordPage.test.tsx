@@ -179,6 +179,43 @@ describe('ResetPasswordPage', () => {
       ).toHaveAttribute('href', '/login');
     });
 
+    it('renders password requirement helper text', () => {
+      renderResetPasswordPage('/reset-password?token=valid-token-123');
+
+      expect(
+        screen.getByText(
+          'Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it('toggles password visibility when clicking eye button', async () => {
+      const user = userEvent.setup();
+      renderResetPasswordPage('/reset-password?token=valid-token-123');
+
+      const newPasswordInput = screen.getByLabelText('Mật khẩu mới');
+      expect(newPasswordInput).toHaveAttribute('type', 'password');
+
+      const toggleNewButton = screen.getByRole('button', { name: 'Hiện mật khẩu' });
+      await user.click(toggleNewButton);
+      expect(newPasswordInput).toHaveAttribute('type', 'text');
+
+      const toggleHideNewButton = screen.getByRole('button', { name: 'Ẩn mật khẩu' });
+      await user.click(toggleHideNewButton);
+      expect(newPasswordInput).toHaveAttribute('type', 'password');
+
+      const confirmPasswordInput = screen.getByLabelText('Xác nhận mật khẩu mới');
+      expect(confirmPasswordInput).toHaveAttribute('type', 'password');
+
+      const toggleConfirmButton = screen.getByRole('button', { name: 'Hiện mật khẩu xác nhận' });
+      await user.click(toggleConfirmButton);
+      expect(confirmPasswordInput).toHaveAttribute('type', 'text');
+
+      const toggleHideConfirmButton = screen.getByRole('button', { name: 'Ẩn mật khẩu xác nhận' });
+      await user.click(toggleHideConfirmButton);
+      expect(confirmPasswordInput).toHaveAttribute('type', 'password');
+    });
+
     it('submits form with valid matching passwords and trims whitespace from token', async () => {
       const user = userEvent.setup();
       renderResetPasswordPage('/reset-password?token=%20secret-token-xyz%20');
