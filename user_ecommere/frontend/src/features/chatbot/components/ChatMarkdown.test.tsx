@@ -47,7 +47,7 @@ describe('ChatMarkdown', () => {
     const boldElement = screen.getByText('tôi là trợ lý ảo');
 
     expect(boldElement.tagName).toBe('STRONG');
-    expect(boldElement).toHaveClass('font-semibold', 'text-slate-900');
+    expect(boldElement).toHaveClass('font-semibold', 'text-foreground');
   });
 
   it('renders unordered lists and list items with correct styles', () => {
@@ -87,40 +87,31 @@ describe('ChatMarkdown', () => {
     renderChatMarkdown(markdown);
 
     const h1 = screen.getByRole('heading', { level: 1, name: 'Tiêu đề 1' });
-    expect(h1).toHaveClass(
-      'font-sans',
-      'text-base',
-      'md:text-lg',
-      'font-bold',
-      'text-slate-900',
-      'mt-3',
-      'mb-1',
-      'tracking-tight',
-    );
+    expect(h1).toHaveClass('text-lg', 'font-bold', 'text-foreground', 'mt-3', 'mb-1');
 
     const h2 = screen.getByRole('heading', { level: 2, name: 'Tiêu đề 2' });
-    expect(h2).toHaveClass(
-      'font-sans',
-      'text-sm',
-      'md:text-base',
-      'font-bold',
-      'text-slate-900',
-      'mt-2.5',
-      'mb-1',
-      'tracking-tight',
-    );
+    expect(h2).toHaveClass('text-base', 'font-bold', 'text-foreground', 'mt-2.5', 'mb-1');
 
     const h3 = screen.getByRole('heading', { level: 3, name: 'Tiêu đề 3' });
-    expect(h3).toHaveClass(
-      'font-sans',
-      'text-xs',
-      'md:text-sm',
-      'font-semibold',
-      'text-slate-900',
-      'mt-2',
-      'mb-1',
-      'tracking-tight',
+    expect(h3).toHaveClass('text-sm', 'font-semibold', 'text-foreground', 'mt-2', 'mb-1');
+  });
+
+  it('renders h1, h2, and h3 headings with size="base" typography classes', () => {
+    const markdown = '# Tiêu đề 1\n## Tiêu đề 2\n### Tiêu đề 3';
+    render(
+      <MemoryRouter>
+        <ChatMarkdown content={markdown} size="base" />
+      </MemoryRouter>,
     );
+
+    const h1 = screen.getByRole('heading', { level: 1, name: 'Tiêu đề 1' });
+    expect(h1).toHaveClass('text-xl', 'font-bold', 'text-foreground');
+
+    const h2 = screen.getByRole('heading', { level: 2, name: 'Tiêu đề 2' });
+    expect(h2).toHaveClass('text-lg', 'font-bold', 'text-foreground');
+
+    const h3 = screen.getByRole('heading', { level: 3, name: 'Tiêu đề 3' });
+    expect(h3).toHaveClass('text-base', 'font-semibold', 'text-foreground');
   });
 
   it('renders tables with wrapper div, table, th, and td styles via remark-gfm', () => {
@@ -150,26 +141,20 @@ describe('ChatMarkdown', () => {
     expect(thElements.length).toBeGreaterThanOrEqual(3);
     expect(thElements[0]).toHaveClass(
       'border-b',
-      'border-slate-200',
-      'bg-slate-50',
-      'px-3',
-      'py-2',
+      'border-border',
+      'bg-muted',
+      'px-2.5',
+      'py-1.5',
       'font-semibold',
-      'text-slate-900',
-      'tracking-wider',
-      'text-[11px]',
-      'uppercase',
+      'text-foreground',
     );
     expect(thElements[0]).toHaveTextContent('Tên hàng');
 
     const tdElements = container.querySelectorAll('td');
     expect(tdElements.length).toBeGreaterThanOrEqual(6);
     expect(tdElements[0]).toHaveClass(
-      'border-b',
-      'border-slate-100',
-      'px-3',
-      'py-2',
-      'text-slate-700',
+      'px-2.5',
+      'py-1.5',
     );
     expect(tdElements[0]).toHaveTextContent('Áo sơ mi');
   });
@@ -181,14 +166,11 @@ describe('ChatMarkdown', () => {
     expect(codeElement.tagName).toBe('CODE');
     expect(codeElement).toHaveClass(
       'rounded',
-      'border',
-      'border-slate-200',
-      'bg-slate-100',
+      'bg-muted',
       'px-1.5',
       'py-0.5',
       'font-mono',
       'text-xs',
-      'text-slate-800',
     );
   });
 
@@ -201,29 +183,45 @@ describe('ChatMarkdown', () => {
     expect(preElement).toHaveClass(
       'my-2',
       'overflow-x-auto',
-      'rounded-lg',
-      'border',
-      'border-slate-200',
-      'bg-slate-50',
+      'rounded-md',
+      'bg-muted',
       'p-3',
       'font-mono',
       'text-xs',
-      'text-slate-800',
       '[&>code]:bg-transparent',
       '[&>code]:p-0',
       '[&>code]:rounded-none',
-      '[&>code]:border-0',
     );
   });
 
-  it('renders images as span elements with alt text and no img tags', () => {
+  it('renders images as span elements with alt text and no img tags when image url is not allowed', () => {
     const markdown = '![Ảnh sản phẩm giày chạy](https://example.com/shoes.png)';
     const { container } = renderChatMarkdown(markdown);
 
     const altSpan = screen.getByText('Ảnh sản phẩm giày chạy');
     expect(altSpan.tagName).toBe('SPAN');
-    expect(altSpan).toHaveClass('text-slate-400');
+    expect(altSpan).toHaveClass('text-muted-foreground');
     expect(container.querySelector('img')).toBeNull();
+  });
+
+  it('renders nothing when image url is blocked and alt text is absent', () => {
+    const markdown = '![](https://example.com/shoes.png)';
+    const { container } = renderChatMarkdown(markdown);
+
+    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('span.text-muted-foreground')).toBeNull();
+  });
+
+  it('renders img element when image url is on the origin allowlist', () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+    const markdown = `![Ảnh xịt phòng](${origin}/images/spray.png)`;
+    const { container } = renderChatMarkdown(markdown);
+
+    const img = container.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', `${origin}/images/spray.png`);
+    expect(img).toHaveAttribute('alt', 'Ảnh xịt phòng');
+    expect(img).toHaveClass('rounded-xl', 'border', 'border-border', 'object-cover');
   });
 
   describe('links (a component)', () => {
@@ -235,14 +233,10 @@ describe('ChatMarkdown', () => {
       expect(link).toHaveAttribute('href', '/cart');
       expect(link).not.toHaveAttribute('target');
       expect(link).toHaveClass(
-        'text-teal-600',
-        'font-medium',
+        'text-primary',
         'underline',
-        'underline-offset-4',
-        'decoration-teal-300',
-        'hover:text-teal-700',
-        'hover:decoration-teal-600',
-        'transition-colors',
+        'underline-offset-2',
+        'hover:opacity-80',
       );
     });
 
@@ -255,14 +249,10 @@ describe('ChatMarkdown', () => {
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer nofollow');
       expect(link).toHaveClass(
-        'text-teal-600',
-        'font-medium',
+        'text-primary',
         'underline',
-        'underline-offset-4',
-        'decoration-teal-300',
-        'hover:text-teal-700',
-        'hover:decoration-teal-600',
-        'transition-colors',
+        'underline-offset-2',
+        'hover:opacity-80',
       );
     });
 

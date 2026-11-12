@@ -108,7 +108,7 @@ export function ChatMessageItem({
         {/* 4. Recommended products */}
         {hasSources && message.sources && (
           <div className="w-full space-y-2 pt-1">
-            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
               <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
               <span>Sản phẩm gợi ý</span>
             </p>
@@ -139,7 +139,7 @@ export function ChatMessageItem({
                 variant="outline"
                 size="sm"
                 onClick={onRetry}
-                className="shrink-0 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive text-xs rounded-md"
+                className="shrink-0 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive text-xs rounded-md min-h-11 sm:min-h-9 px-3"
               >
                 <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Thử lại</span>

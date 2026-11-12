@@ -67,8 +67,8 @@ describe('ConfirmActionCard', () => {
     expect(
       screen.getByRole('button', { name: 'Gửi quyết định' }),
     ).toBeDisabled();
-    // "Đã phản hồi" should not be rendered when decided is false/undefined
-    expect(screen.queryByText('Đã phản hồi')).not.toBeInTheDocument();
+    // "Đã gửi quyết định" should not be rendered when decided is false/undefined
+    expect(screen.queryByText('Đã gửi quyết định')).not.toBeInTheDocument();
   });
 
   it('renders default risk badge when risk is unrecognized or custom', () => {
@@ -97,11 +97,12 @@ describe('ConfirmActionCard', () => {
     expect(screen.getByText('Thao tác không có ID')).toBeInTheDocument();
   });
 
-  it('disables submit button when calls array is empty', () => {
-    render(<ConfirmActionCard calls={[]} onSubmit={onSubmitMock} />);
+  it('renders null when calls array is empty', () => {
+    const { container } = render(
+      <ConfirmActionCard calls={[]} onSubmit={onSubmitMock} />,
+    );
 
-    const submitBtn = screen.getByRole('button', { name: 'Gửi quyết định' });
-    expect(submitBtn).toBeDisabled();
+    expect(container.firstChild).toBeNull();
   });
 
   it('allows user to pick approve or reject for individual calls', async () => {
@@ -237,16 +238,13 @@ describe('ConfirmActionCard', () => {
     const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
     await user.click(confirmBtn);
 
-    const submitBtn = screen.getByRole('button', { name: 'Gửi quyết định' });
-    await user.click(submitBtn);
-
     expect(onSubmitMock).toHaveBeenCalledWith([
       { callId: 'call-write', approve: true },
     ]);
 
     // Submitting state should reset after catch block
     await waitFor(() => {
-      expect(submitBtn).toBeEnabled();
+      expect(confirmBtn).toBeEnabled();
     });
   });
 
@@ -262,15 +260,12 @@ describe('ConfirmActionCard', () => {
     const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
     await user.click(confirmBtn);
 
-    const submitBtn = screen.getByRole('button', { name: 'Gửi quyết định' });
-    await user.click(submitBtn);
-
     expect(onSubmitMock).toHaveBeenCalledWith([
       { callId: 'call-write', approve: true },
     ]);
 
     // Should not throw to caller and reset submitting
-    expect(submitBtn).toBeEnabled();
+    expect(confirmBtn).toBeEnabled();
   });
 
   it('handles synchronous non-promise return from onSubmit', async () => {
@@ -285,9 +280,6 @@ describe('ConfirmActionCard', () => {
     const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
     await user.click(confirmBtn);
 
-    const submitBtn = screen.getByRole('button', { name: 'Gửi quyết định' });
-    await user.click(submitBtn);
-
     expect(onSubmitMock).toHaveBeenCalledTimes(1);
 
     // Re-rendering with decided={true} resets submitting
@@ -298,10 +290,10 @@ describe('ConfirmActionCard', () => {
         onSubmit={onSubmitMock}
       />,
     );
-    expect(screen.getByText('Đã phản hồi')).toBeInTheDocument();
+    expect(screen.getByText('Đã gửi quyết định')).toBeInTheDocument();
   });
 
-  it('renders "Đã phản hồi" and disables all buttons when decided is true', async () => {
+  it('renders "Đã gửi quyết định" and disables all buttons when decided is true', async () => {
     render(
       <ConfirmActionCard
         calls={mockCalls}
@@ -310,7 +302,7 @@ describe('ConfirmActionCard', () => {
       />,
     );
 
-    expect(screen.getByText('Đã phản hồi')).toBeInTheDocument();
+    expect(screen.getByText('Đã gửi quyết định')).toBeInTheDocument();
 
     const buttons = screen.getAllByRole('button');
     for (const btn of buttons) {

@@ -29,8 +29,6 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
   return (
     <a
       href={`/p/${source.slug}`}
-      target="_blank"
-      rel="noopener noreferrer"
       className={cn(
         'group flex items-center rounded-lg border border-border bg-card text-card-foreground transition-colors duration-200 motion-reduce:transition-none',
         'hover:border-foreground/30 hover:bg-secondary/40',
@@ -70,14 +68,14 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
           {source.name}
         </p>
         {hasPrice && (
-          <p className="text-xs font-semibold text-foreground tabular">
+          <p className="text-sm font-semibold text-foreground tabular">
             Từ {formatCurrency(item.minPrice as number)}
           </p>
         )}
-        <div className="flex items-center gap-0.5 text-xs font-medium text-primary">
+        <div className="flex items-center gap-0.5 text-xs font-medium text-primary group-hover:underline underline-offset-2">
           <span>Xem chi tiết</span>
           <ArrowUpRight
-            className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 motion-reduce:transition-none group-hover:translate-x-0.5"
+            className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 motion-reduce:transition-none group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             aria-hidden="true"
           />
         </div>

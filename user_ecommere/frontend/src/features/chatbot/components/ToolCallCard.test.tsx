@@ -27,7 +27,7 @@ describe('ToolCallCard', () => {
 
       const loaderIcon = container.querySelector('svg.animate-spin');
       expect(loaderIcon).toBeInTheDocument();
-      expect(loaderIcon).toHaveClass('h-3.5', 'w-3.5', 'text-teal-600');
+      expect(loaderIcon).toHaveClass('h-3.5', 'w-3.5', 'text-muted-foreground');
 
       const trigger = screen.getByRole('button');
       expect(trigger).toHaveAttribute('aria-expanded', 'false');
@@ -73,7 +73,7 @@ describe('ToolCallCard', () => {
 
       expect(screen.getByText('Thêm vào giỏ hàng')).toBeInTheDocument();
 
-      const checkIcon = container.querySelector('svg.text-emerald-600');
+      const checkIcon = container.querySelector('svg.text-success');
       expect(checkIcon).toBeInTheDocument();
       expect(checkIcon).toHaveClass('h-3.5', 'w-3.5');
 
@@ -81,7 +81,7 @@ describe('ToolCallCard', () => {
         container.querySelector('svg.animate-spin'),
       ).not.toBeInTheDocument();
       expect(
-        container.querySelector('svg.text-rose-600'),
+        container.querySelector('svg.text-destructive'),
       ).not.toBeInTheDocument();
 
       const trigger = screen.getByRole('button');
@@ -104,7 +104,7 @@ describe('ToolCallCard', () => {
 
       expect(screen.getByText('Xóa toàn bộ giỏ hàng')).toBeInTheDocument();
       expect(
-        container.querySelector('svg.text-emerald-600'),
+        container.querySelector('svg.text-success'),
       ).toBeInTheDocument();
 
       const trigger = screen.getByRole('button');
@@ -130,7 +130,7 @@ describe('ToolCallCard', () => {
 
       expect(screen.getByText('Thanh toán thất bại')).toBeInTheDocument();
 
-      const errorIcon = container.querySelector('svg.text-rose-600');
+      const errorIcon = container.querySelector('svg.text-destructive');
       expect(errorIcon).toBeInTheDocument();
       expect(errorIcon).toHaveClass('h-3.5', 'w-3.5');
 
@@ -155,7 +155,7 @@ describe('ToolCallCard', () => {
       expect(
         screen.getByText('Hủy đơn hàng không thành công'),
       ).toBeInTheDocument();
-      expect(container.querySelector('svg.text-rose-600')).toBeInTheDocument();
+      expect(container.querySelector('svg.text-destructive')).toBeInTheDocument();
 
       const trigger = screen.getByRole('button');
       await user.click(trigger);

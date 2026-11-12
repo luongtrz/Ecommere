@@ -19,7 +19,7 @@ export function ToolCallCard({ step }: { step: ChatToolStep }) {
               <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
             )}
             {step.status === 'ok' && (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" />
             )}
             {step.status === 'error' && (
               <XCircle className="h-3.5 w-3.5 text-destructive" />
@@ -33,13 +33,13 @@ export function ToolCallCard({ step }: { step: ChatToolStep }) {
 
   return (
     <Collapsible className="group w-full rounded-xl border border-border bg-card text-card-foreground text-xs overflow-hidden shadow-sm">
-      <CollapsibleTrigger className="flex min-h-[36px] w-full items-center gap-2 px-3 py-2 text-left font-medium hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+      <CollapsibleTrigger className="flex min-h-11 sm:min-h-[36px] w-full items-center gap-2 px-3 py-2 text-left font-medium hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
         <span className="flex h-3.5 w-3.5 items-center justify-center shrink-0" aria-hidden="true">
           {step.status === 'running' && (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
           )}
           {step.status === 'ok' && (
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-success" />
           )}
           {step.status === 'error' && (
             <XCircle className="h-3.5 w-3.5 text-destructive" />
