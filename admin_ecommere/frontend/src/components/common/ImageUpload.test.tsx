@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, createEvent, waitFor } from '@testing-library/react';
 import { ImageUpload } from './ImageUpload';
 import apiClient from '@/lib/api';
 
@@ -41,7 +41,7 @@ describe('ImageUpload', () => {
     expect(screen.getByText('0/5 ảnh')).toBeInTheDocument();
     expect(screen.getByText('Chưa có ảnh nào')).toBeInTheDocument();
     expect(
-      screen.getByText('Click "Chọn ảnh" để upload (tối đa 5 ảnh)'),
+      screen.getByText('Nhấp hoặc kéo thả ảnh vào đây để tải lên (tối đa 5 ảnh)'),
     ).toBeInTheDocument();
 
     const uploadButton = screen.getByRole('button', { name: 'Chọn ảnh' });
@@ -53,11 +53,12 @@ describe('ImageUpload', () => {
     expect(fileInput).toBeInTheDocument();
     expect(fileInput).not.toBeDisabled();
 
+    // Reorder hint should NOT be shown when there are fewer than 2 images
     expect(
-      screen.getByText(
+      screen.queryByText(
         'Kéo thả ảnh để sắp xếp lại thứ tự. Ảnh đầu tiên sẽ là ảnh chính của sản phẩm.',
       ),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
   });
 
   it('renders custom maxImages correctly', () => {
@@ -66,7 +67,7 @@ describe('ImageUpload', () => {
 
     expect(screen.getByText('0/3 ảnh')).toBeInTheDocument();
     expect(
-      screen.getByText('Click "Chọn ảnh" để upload (tối đa 3 ảnh)'),
+      screen.getByText('Nhấp hoặc kéo thả ảnh vào đây để tải lên (tối đa 3 ảnh)'),
     ).toBeInTheDocument();
   });
 
@@ -107,6 +108,31 @@ describe('ImageUpload', () => {
     expect(clickSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('triggers file input click when dropzone is clicked or activated with Enter/Space', () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <ImageUpload images={[]} onChange={onChange} />,
+    );
+
+    const fileInput = container.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    const clickSpy = vi.spyOn(fileInput, 'click');
+
+    const dropzone = screen.getByRole('button', {
+      name: /Nhấp hoặc kéo thả ảnh vào đây để tải lên/,
+    });
+
+    fireEvent.click(dropzone);
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(dropzone, { key: 'Enter' });
+    expect(clickSpy).toHaveBeenCalledTimes(2);
+
+    fireEvent.keyDown(dropzone, { key: ' ' });
+    expect(clickSpy).toHaveBeenCalledTimes(3);
+  });
+
   it('renders image cards and displays "Ảnh chính" only for the first image', () => {
     const onChange = vi.fn();
     const images = [
@@ -117,21 +143,44 @@ describe('ImageUpload', () => {
     render(<ImageUpload images={images} onChange={onChange} />);
 
     expect(screen.queryByText('Chưa có ảnh nào')).not.toBeInTheDocument();
-    expect(screen.getByAltText('Product 1')).toHaveAttribute(
+    expect(screen.getByAltText('Ảnh sản phẩm 1')).toHaveAttribute(
       'src',
       'https://example.com/cover.jpg',
     );
-    expect(screen.getByAltText('Product 2')).toHaveAttribute(
+    expect(screen.getByAltText('Ảnh sản phẩm 2')).toHaveAttribute(
       'src',
       'https://example.com/gallery1.jpg',
     );
-    expect(screen.getByAltText('Product 3')).toHaveAttribute(
+    expect(screen.getByAltText('Ảnh sản phẩm 3')).toHaveAttribute(
       'src',
       'https://example.com/gallery2.jpg',
     );
 
     const mainBadges = screen.getAllByText('Ảnh chính');
     expect(mainBadges).toHaveLength(1);
+
+    // Reorder hint is displayed when there are 2 or more images
+    expect(
+      screen.getByText(
+        'Kéo thả ảnh để sắp xếp lại thứ tự. Ảnh đầu tiên sẽ là ảnh chính của sản phẩm.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('does not display reorder hint when exactly 1 image exists', () => {
+    const onChange = vi.fn();
+    render(
+      <ImageUpload
+        images={['https://example.com/single.jpg']}
+        onChange={onChange}
+      />,
+    );
+
+    expect(
+      screen.queryByText(
+        'Kéo thả ảnh để sắp xếp lại thứ tự. Ảnh đầu tiên sẽ là ảnh chính của sản phẩm.',
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it('removes an image and notifies via toast when delete button is clicked', () => {
@@ -272,7 +321,7 @@ describe('ImageUpload', () => {
       fireEvent.change(fileInput, { target: { files: [file1, file2] } });
 
       expect(mockToast.warning).toHaveBeenCalledWith(
-        'Chỉ có thể upload tối đa 5 ảnh. Còn 1 slot trống.',
+        'Chỉ có thể tải lên tối đa 5 ảnh. Còn 1 vị trí trống.',
       );
       expect(apiClient.post).not.toHaveBeenCalled();
       expect(onChange).not.toHaveBeenCalled();
@@ -331,7 +380,7 @@ describe('ImageUpload', () => {
       });
 
       expect(mockToast.success).toHaveBeenCalledWith(
-        'Đã upload 2 ảnh thành công!',
+        'Đã tải lên 2 ảnh thành công!',
       );
     });
 
@@ -354,9 +403,9 @@ describe('ImageUpload', () => {
       const file = new File(['content'], 'pic.png', { type: 'image/png' });
       fireEvent.change(fileInput, { target: { files: [file] } });
 
-      expect(screen.getByText('Đang upload...')).toBeInTheDocument();
+      expect(screen.getByText('Đang tải lên...')).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: 'Đang upload...' }),
+        screen.getByRole('button', { name: 'Đang tải lên...' }),
       ).toBeDisabled();
 
       resolveUpload!({
@@ -393,7 +442,7 @@ describe('ImageUpload', () => {
 
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalledWith(
-          'Upload thất bại: Network error 500',
+          'Tải ảnh lên thất bại: Network error 500',
         );
       });
 
@@ -422,7 +471,7 @@ describe('ImageUpload', () => {
 
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalledWith(
-          'Upload thất bại: Lỗi không xác định',
+          'Tải ảnh lên thất bại: Lỗi không xác định',
         );
       });
 
@@ -470,8 +519,176 @@ describe('ImageUpload', () => {
       });
 
       expect(mockToast.success).toHaveBeenCalledWith(
-        'Đã upload 1 ảnh thành công!',
+        'Đã tải lên 1 ảnh thành công!',
       );
+    });
+  });
+
+  describe('native OS drag and drop file upload', () => {
+    it('activates drag styles on dragOver and reverts on dragLeave', () => {
+      const onChange = vi.fn();
+      render(<ImageUpload images={[]} onChange={onChange} />);
+
+      const dropzone = screen.getByRole('button', {
+        name: /Nhấp hoặc kéo thả ảnh vào đây để tải lên/,
+      });
+
+      expect(dropzone).toHaveClass('border-slate-200');
+      expect(dropzone).toHaveClass('bg-slate-50/60');
+      expect(dropzone).not.toHaveClass('border-teal-500');
+
+      // fireEvent accepts dataTransfer directly; defining it on a createEvent result throws in jsdom.
+      fireEvent.dragOver(dropzone, {
+        dataTransfer: { dropEffect: 'none' },
+      });
+
+      expect(dropzone).toHaveClass('border-teal-500');
+      expect(dropzone).toHaveClass('bg-teal-50/50');
+      expect(dropzone).not.toHaveClass('border-slate-200');
+
+      // DragLeave with internal target does not revert drag styles
+      const innerText = screen.getByText('Chưa có ảnh nào');
+      const dragLeaveInternal = createEvent.dragLeave(dropzone);
+      Object.defineProperty(dragLeaveInternal, 'relatedTarget', {
+        value: innerText,
+        configurable: true,
+        enumerable: true,
+      });
+      fireEvent(dropzone, dragLeaveInternal);
+
+      expect(dropzone).toHaveClass('border-teal-500');
+      expect(dropzone).toHaveClass('bg-teal-50/50');
+
+      // DragLeave outside reverts to idle styles
+      const dragLeaveOutside = createEvent.dragLeave(dropzone);
+      Object.defineProperty(dragLeaveOutside, 'relatedTarget', {
+        value: document.body,
+        configurable: true,
+        enumerable: true,
+      });
+      fireEvent(dropzone, dragLeaveOutside);
+      expect(dropzone).toHaveClass('border-slate-200');
+      expect(dropzone).toHaveClass('bg-slate-50/60');
+      expect(dropzone).not.toHaveClass('border-teal-500');
+    });
+
+    it('uploads files dropped from OS directly onto the empty dropzone', async () => {
+      const onChange = vi.fn();
+      render(<ImageUpload images={[]} onChange={onChange} />);
+
+      const dropzone = screen.getByRole('button', {
+        name: /Nhấp hoặc kéo thả ảnh vào đây để tải lên/,
+      });
+
+      const file = new File(['dropped-image-bytes'], 'drop.jpg', {
+        type: 'image/jpeg',
+      });
+
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
+        data: {
+          data: [{ url: 'https://example.com/dropped.jpg' }],
+        },
+      });
+
+      fireEvent.drop(dropzone, {
+        dataTransfer: {
+          files: [file],
+        },
+      });
+
+      await waitFor(() => {
+        expect(apiClient.post).toHaveBeenCalledWith(
+          '/uploads/multiple?folder=products',
+          expect.any(FormData),
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith([
+          'https://example.com/dropped.jpg',
+        ]);
+      });
+
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Đã tải lên 1 ảnh thành công!',
+      );
+    });
+
+    it('uploads files dropped onto the secondary "add more" dropzone', async () => {
+      const onChange = vi.fn();
+      render(
+        <ImageUpload
+          images={['https://example.com/existing.jpg']}
+          onChange={onChange}
+          maxImages={3}
+        />,
+      );
+
+      const secondaryDropzone = screen.getByRole('button', {
+        name: /Nhấn để thêm ảnh khác/,
+      });
+
+      const file = new File(['dropped-image-2'], 'drop2.png', {
+        type: 'image/png',
+      });
+
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
+        data: {
+          data: [{ url: 'https://example.com/dropped2.png' }],
+        },
+      });
+
+      fireEvent.drop(secondaryDropzone, {
+        dataTransfer: {
+          files: [file],
+        },
+      });
+
+      await waitFor(() => {
+        expect(apiClient.post).toHaveBeenCalledTimes(1);
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith([
+          'https://example.com/existing.jpg',
+          'https://example.com/dropped2.png',
+        ]);
+      });
+
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Đã tải lên 1 ảnh thành công!',
+      );
+    });
+
+    it('does not process drops when draggedIndex is not null (card reordering in progress)', () => {
+      const onChange = vi.fn();
+      const images = ['img1.jpg', 'img2.jpg'];
+      const { container } = render(
+        <ImageUpload images={images} onChange={onChange} maxImages={3} />,
+      );
+
+      const cards = container.querySelectorAll('.aspect-square');
+      fireEvent.dragStart(cards[0]);
+
+      const secondaryDropzone = screen.getByRole('button', {
+        name: /Nhấn để thêm ảnh khác/,
+      });
+      const file = new File(['dropped-data'], 'drop.jpg', {
+        type: 'image/jpeg',
+      });
+
+      fireEvent.drop(secondaryDropzone, {
+        dataTransfer: {
+          files: [file],
+        },
+      });
+
+      expect(apiClient.post).not.toHaveBeenCalled();
     });
   });
 });
