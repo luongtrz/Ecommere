@@ -30,7 +30,7 @@ import {
   AlertCircle,
   Search,
   Save,
-  RotateCcw,
+  RefreshCw,
   ArrowLeft,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -57,28 +57,24 @@ function CategoryTreeNode({
   onDelete,
 }: TreeNodeProps) {
   const [expanded, setExpanded] = useState(true);
-  const hasChildren = category.children && category.children.length > 0;
+  const hasChildren = Boolean(category.children && category.children.length > 0);
   const isSelected = selectedId === category.id;
+  const isDeleteDisabled = Boolean(
+    hasChildren ||
+      (category.productCount !== undefined && category.productCount > 0),
+  );
 
   return (
     <div className="space-y-1">
       <div
-        role="button"
-        tabIndex={0}
         className={cn(
-          'flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer group border text-xs md:text-sm',
+          'flex items-center gap-2 p-2 rounded-lg transition-all group border text-xs md:text-sm',
           isSelected
             ? 'bg-teal-50 border-teal-200 text-teal-900 font-medium shadow-sm'
             : 'border-transparent hover:bg-slate-100/80 hover:border-slate-200 text-slate-800',
         )}
         style={{ paddingLeft: `${Math.max(8, level * 16 + 8)}px` }}
         onClick={() => onSelect(category)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onSelect(category);
-          }
-        }}
       >
         {hasChildren ? (
           <button
@@ -87,16 +83,21 @@ function CategoryTreeNode({
               e.stopPropagation();
               setExpanded(!expanded);
             }}
-            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-md transition"
+            aria-label={
+              expanded
+                ? `Thu gọn danh mục ${category.name}`
+                : `Mở rộng danh mục ${category.name}`
+            }
+            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-md transition min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center shrink-0"
           >
             {expanded ? (
-              <ChevronDown className="h-3.5 w-3.5" />
+              <ChevronDown className="h-4 w-4" />
             ) : (
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-4 w-4" />
             )}
           </button>
         ) : (
-          <div className="w-5" />
+          <div className="w-5 shrink-0" />
         )}
 
         {category.isLeaf ? (
@@ -105,48 +106,63 @@ function CategoryTreeNode({
           <FolderTree className="h-4 w-4 text-teal-600 shrink-0" />
         )}
 
-        <div className="flex-1 min-w-0 flex items-center gap-2 truncate">
-          <span className="truncate">{category.name}</span>
-          <span className="text-[10px] font-semibold tabular-nums px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border-0 ring-1 ring-slate-200 shrink-0">
-            {category.productCount || 0} SP
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(category);
+          }}
+          className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-left bg-transparent border-0 p-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded"
+          aria-label={`Chọn danh mục ${category.name}`}
+        >
+          <span className="font-medium text-slate-900 break-words sm:truncate">
+            {category.name}
           </span>
-          {!category.isLeaf && (
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border-0 ring-1 ring-teal-200 shrink-0">
-              Mục cha
+          <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+            <span className="text-xs font-semibold tabular-nums px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border-0 ring-1 ring-slate-200 shrink-0">
+              {category.productCount || 0} SP
             </span>
-          )}
-        </div>
+            {hasChildren && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border-0 ring-1 ring-teal-200 shrink-0">
+                Mục cha
+              </span>
+            )}
+          </div>
+        </button>
 
-        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-2 sm:gap-1 shrink-0 opacity-100 md:opacity-70 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
           <Button
             type="button"
             size="icon"
             variant="ghost"
-            className="h-7 w-7 rounded-lg text-slate-500 hover:text-teal-700 hover:bg-teal-50"
+            className="h-11 w-11 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 rounded-lg text-slate-500 hover:text-teal-700 hover:bg-teal-50 flex items-center justify-center"
             onClick={(e) => {
               e.stopPropagation();
               onAddChild(category.id, category.name);
             }}
             title="Thêm danh mục con"
+            aria-label="Thêm danh mục con"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-4 w-4" />
           </Button>
           <Button
             type="button"
             size="icon"
             variant="ghost"
-            className="h-7 w-7 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 disabled:opacity-30 disabled:pointer-events-none"
+            className="h-11 w-11 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 disabled:opacity-30 disabled:pointer-events-auto flex items-center justify-center"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(category);
             }}
-            disabled={
-              hasChildren ||
-              (category.productCount !== undefined && category.productCount > 0)
+            disabled={isDeleteDisabled}
+            title={
+              isDeleteDisabled
+                ? 'Không thể xóa danh mục đang có sản phẩm hoặc danh mục con'
+                : 'Xóa danh mục'
             }
-            title="Xóa danh mục"
+            aria-label="Xóa danh mục"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -267,6 +283,7 @@ export function AdminCategoriesPage() {
         setIsCreatingNew(false);
         setFormName('');
         setFormParentId(null);
+        setActivePaneTab('tree');
       }
     },
     onError: (error: any) => {
@@ -352,10 +369,99 @@ export function AdminCategoriesPage() {
 
   const totalCategoriesCount = flatCategories.length;
 
+  // Recursively collect all descendant IDs of selectedCategory to prevent circular loops (A08-02)
+  const descendantIds = useMemo(() => {
+    if (!selectedCategory) return new Set<string>();
+
+    const ids = new Set<string>();
+
+    const collectFromTree = (nodes: Category[]): boolean => {
+      for (const node of nodes) {
+        if (node.id === selectedCategory.id) {
+          const addDescendants = (children: Category[]) => {
+            for (const child of children) {
+              ids.add(child.id);
+              if (child.children && child.children.length > 0) {
+                addDescendants(child.children);
+              }
+            }
+          };
+          if (node.children && node.children.length > 0) {
+            addDescendants(node.children);
+          }
+          return true;
+        }
+        if (node.children && node.children.length > 0) {
+          if (collectFromTree(node.children)) return true;
+        }
+      }
+      return false;
+    };
+
+    collectFromTree(treeData);
+
+    let added = true;
+    while (added) {
+      added = false;
+      for (const cat of flatCategories) {
+        if (!ids.has(cat.id) && cat.parentId) {
+          if (cat.parentId === selectedCategory.id || ids.has(cat.parentId)) {
+            ids.add(cat.id);
+            added = true;
+          }
+        }
+      }
+    }
+
+    return ids;
+  }, [selectedCategory, treeData, flatCategories]);
+
+  // Flatten categories with hierarchy depth indentation for parent dropdown (A08-02)
+  const parentOptions = useMemo(() => {
+    interface OptionItem {
+      id: string;
+      name: string;
+    }
+
+    const options: OptionItem[] = [];
+    const visited = new Set<string>();
+
+    const traverse = (nodes: Category[], depth: number) => {
+      for (const node of nodes) {
+        options.push({
+          id: node.id,
+          name: depth > 0 ? `${'— '.repeat(depth)}${node.name}` : node.name,
+        });
+        visited.add(node.id);
+        if (node.children && node.children.length > 0) {
+          traverse(node.children, depth + 1);
+        }
+      }
+    };
+
+    traverse(treeData, 0);
+
+    for (const cat of flatCategories) {
+      if (!visited.has(cat.id)) {
+        options.push({
+          id: cat.id,
+          name: cat.name,
+        });
+      }
+    }
+
+    return options.filter((opt) => {
+      if (!selectedCategory) return true;
+      if (opt.id === selectedCategory.id) return false;
+      if (descendantIds.has(opt.id)) return false;
+      return true;
+    });
+  }, [treeData, flatCategories, selectedCategory, descendantIds]);
+
   return (
     <>
       <SEO title="Quản lý danh mục - Admin" />
-      <div className="min-h-screen bg-slate-50 font-sans space-y-8 p-4 md:p-6 lg:p-8">
+      <div className="min-h-screen bg-slate-50 font-sans space-y-4 md:space-y-6 lg:space-y-8 p-4 md:p-6 lg:p-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -371,15 +477,17 @@ export function AdminCategoriesPage() {
               variant="outline"
               size="sm"
               onClick={() => refetch()}
-              className="gap-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm"
+              aria-label="Làm mới"
+              title="Làm mới"
+              className="gap-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm h-9 px-2.5 sm:px-3"
             >
-              <RotateCcw className="h-4 w-4 text-slate-500" />
-              Tải lại
+              <RefreshCw className="h-4 w-4 text-slate-500" />
+              <span className="hidden sm:inline">Làm mới</span>
             </Button>
             <Button
               size="sm"
               onClick={handleStartAddRoot}
-              className="gap-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 font-medium"
+              className="gap-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 font-medium h-9"
             >
               <Plus className="h-4 w-4" />
               Thêm danh mục gốc
@@ -429,30 +537,19 @@ export function AdminCategoriesPage() {
             )}
           >
             <Card className="border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden">
-              <CardHeader className="border-b border-slate-200 p-4 bg-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-base font-semibold text-slate-900">
-                      Cây phân cấp danh mục
-                    </CardTitle>
-                    <Badge
-                      variant="outline"
-                      className="bg-teal-50 text-teal-700 border-0 ring-1 ring-teal-200 tabular-nums text-xs font-medium"
-                    >
-                      {totalCategoriesCount}
-                    </Badge>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleStartAddRoot}
-                    className="h-8 px-2.5 text-xs text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg font-medium"
+              <CardHeader className="border-b border-slate-200 p-3 sm:p-4 bg-white">
+                <div className="hidden lg:flex items-center gap-2 mb-2">
+                  <CardTitle className="text-base font-semibold text-slate-900">
+                    Cây phân cấp danh mục
+                  </CardTitle>
+                  <Badge
+                    variant="outline"
+                    className="bg-teal-50 text-teal-700 border-0 ring-1 ring-teal-200 tabular-nums text-xs font-medium"
                   >
-                    <Plus className="h-3.5 w-3.5 mr-1" />
-                    Thêm gốc
-                  </Button>
+                    {totalCategoriesCount}
+                  </Badge>
                 </div>
-                <div className="relative mt-2">
+                <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                   <Input
                     value={treeSearch}
@@ -520,7 +617,7 @@ export function AdminCategoriesPage() {
 
             <Card className="border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden sticky top-6">
               <CardHeader className="border-b border-slate-200 p-4 md:p-6 bg-white">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <CardTitle className="text-lg md:text-xl font-semibold text-slate-900">
                       {isCreatingNew
@@ -539,21 +636,40 @@ export function AdminCategoriesPage() {
                           : 'Chọn một danh mục từ cây bên trái để xem chi tiết hoặc chỉnh sửa'}
                     </CardDescription>
                   </div>
-                  {isCreatingNew ? (
-                    <Badge
-                      variant="outline"
-                      className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs font-medium"
-                    >
-                      Tạo mới
-                    </Badge>
-                  ) : selectedCategory ? (
-                    <Badge
-                      variant="outline"
-                      className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium"
-                    >
-                      Chỉnh sửa
-                    </Badge>
-                  ) : null}
+                  <div className="flex items-center gap-2">
+                    {selectedCategory && !isCreatingNew && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleStartAddChild(
+                            selectedCategory.id,
+                            selectedCategory.name,
+                          )
+                        }
+                        className="h-8 rounded-lg border-slate-200 text-teal-700 hover:bg-teal-50 text-xs font-medium gap-1.5 shadow-sm"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        Thêm danh mục con
+                      </Button>
+                    )}
+                    {isCreatingNew ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-emerald-50 text-emerald-700 border-0 ring-1 ring-emerald-200 text-xs font-medium"
+                      >
+                        Tạo mới
+                      </Badge>
+                    ) : selectedCategory ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium"
+                      >
+                        Chỉnh sửa
+                      </Badge>
+                    ) : null}
+                  </div>
                 </div>
               </CardHeader>
 
@@ -582,7 +698,7 @@ export function AdminCategoriesPage() {
                   <form onSubmit={handleFormSubmit} className="space-y-6">
                     {/* Section 1: Thông tin cơ bản */}
                     <div className="space-y-4">
-                      <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <div className="text-xs font-semibold text-slate-600">
                         Thông tin cơ bản
                       </div>
 
@@ -624,7 +740,7 @@ export function AdminCategoriesPage() {
 
                     {/* Section 2: Vị trí phân cấp */}
                     <div className="space-y-4 border-t border-slate-200 pt-4">
-                      <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <div className="text-xs font-semibold text-slate-600">
                         Vị trí trong phân cấp
                       </div>
 
@@ -646,17 +762,11 @@ export function AdminCategoriesPage() {
                           <option value="">
                             -- Là danh mục gốc (không có mục cha) --
                           </option>
-                          {flatCategories
-                            .filter(
-                              (c) =>
-                                !selectedCategory ||
-                                c.id !== selectedCategory.id,
-                            )
-                            .map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.name}
-                              </option>
-                            ))}
+                          {parentOptions.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.name}
+                            </option>
+                          ))}
                         </select>
                         <p className="text-xs text-slate-500">
                           {formParentId
@@ -669,7 +779,7 @@ export function AdminCategoriesPage() {
                     {/* Section 3: Thống kê & Trạng thái */}
                     {selectedCategory && (
                       <div className="space-y-4 border-t border-slate-200 pt-4">
-                        <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        <div className="text-xs font-semibold text-slate-600">
                           Thống kê & Trạng thái
                         </div>
 
@@ -688,21 +798,21 @@ export function AdminCategoriesPage() {
                               Cấu trúc nhánh
                             </span>
                             <div className="mt-1">
-                              {selectedCategory.isLeaf ? (
+                              {selectedCategory.children &&
+                              selectedCategory.children.length > 0 ? (
                                 <Badge
                                   variant="outline"
-                                  className="bg-slate-100 text-slate-700 border-0 ring-1 ring-slate-200 text-xs font-medium"
+                                  className="bg-teal-50 text-teal-700 border-0 ring-1 ring-teal-200 text-xs font-medium"
                                 >
-                                  Mục lá (Không có con)
+                                  Mục cha (
+                                  {selectedCategory.children.length} danh mục con)
                                 </Badge>
                               ) : (
                                 <Badge
                                   variant="outline"
-                                  className="bg-amber-50 text-amber-700 border-0 ring-1 ring-amber-200 text-xs font-medium"
+                                  className="bg-slate-100 text-slate-700 border-0 ring-1 ring-slate-200 text-xs font-medium"
                                 >
-                                  Mục cha (
-                                  {selectedCategory.children?.length || 0} mục
-                                  con)
+                                  Không có danh mục con
                                 </Badge>
                               )}
                             </div>
@@ -714,27 +824,43 @@ export function AdminCategoriesPage() {
                     {/* Footer Action Bar */}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-slate-200">
                       <div>
-                        {selectedCategory && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setCategoryToDelete(selectedCategory);
-                              setIsDeleteOpen(true);
-                            }}
-                            disabled={
-                              (selectedCategory.children &&
-                                selectedCategory.children.length > 0) ||
+                        {selectedCategory && (() => {
+                          const isDetailDeleteDisabled = Boolean(
+                            (selectedCategory.children &&
+                              selectedCategory.children.length > 0) ||
                               (selectedCategory.productCount !== undefined &&
-                                selectedCategory.productCount > 0)
-                            }
-                            className="rounded-lg text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 disabled:opacity-40"
-                          >
-                            <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                            Xóa danh mục
-                          </Button>
-                        )}
+                                selectedCategory.productCount > 0),
+                          );
+                          return (
+                            <div className="space-y-1">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setCategoryToDelete(selectedCategory);
+                                  setIsDeleteOpen(true);
+                                }}
+                                disabled={isDetailDeleteDisabled}
+                                className="rounded-lg text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 disabled:opacity-40 disabled:pointer-events-auto h-9"
+                                title={
+                                  isDetailDeleteDisabled
+                                    ? 'Không thể xóa danh mục đang có sản phẩm hoặc danh mục con'
+                                    : 'Xóa danh mục'
+                                }
+                                aria-label="Xóa danh mục"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                                Xóa danh mục
+                              </Button>
+                              {isDetailDeleteDisabled && (
+                                <p className="text-xs text-slate-500">
+                                  Không thể xóa danh mục đang có sản phẩm hoặc danh mục con.
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
@@ -748,8 +874,11 @@ export function AdminCategoriesPage() {
                             } else {
                               setSelectedCategory(null);
                             }
+                            setFormName('');
+                            setFormParentId(null);
+                            setActivePaneTab('tree');
                           }}
-                          className="rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium"
+                          className="rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium h-9"
                         >
                           Hủy / Bỏ chọn
                         </Button>
@@ -761,7 +890,7 @@ export function AdminCategoriesPage() {
                             updateMutation.isPending ||
                             !formName.trim()
                           }
-                          className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 text-xs font-medium gap-1.5 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500"
+                          className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 text-xs font-medium gap-1.5 shadow-sm focus-visible:ring-2 focus-visible:ring-teal-500 h-9"
                         >
                           {(createMutation.isPending ||
                             updateMutation.isPending) && (

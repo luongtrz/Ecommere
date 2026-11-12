@@ -139,7 +139,7 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 function getCategoryRow(name: string): HTMLElement {
-  const nameElement = screen.getByText(name);
+  const nameElement = screen.getAllByText(name)[0];
   const row = nameElement.closest('.group');
   if (!row) {
     throw new Error(`Could not find category row containing "${name}"`);
@@ -198,19 +198,19 @@ describe('AdminCategoriesPage', () => {
     renderWithProviders(<AdminCategoriesPage />);
 
     expect(
-      await screen.findByText('Xịt thơm phòng Thái Lan'),
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
     ).toBeInTheDocument();
     expect(screen.getByText('12 SP')).toBeInTheDocument();
     expect(screen.getByText('Mục cha')).toBeInTheDocument();
 
-    expect(screen.getByText('Hương Hoa Nhài')).toBeInTheDocument();
+    expect(screen.getAllByText('Hương Hoa Nhài')[0]).toBeInTheDocument();
     expect(screen.getByText('5 SP')).toBeInTheDocument();
 
-    expect(screen.getByText('Hương Bạc Hà')).toBeInTheDocument();
+    expect(screen.getAllByText('Hương Bạc Hà')[0]).toBeInTheDocument();
 
-    expect(screen.getByText('Xịt côn trùng ARS')).toBeInTheDocument();
+    expect(screen.getAllByText('Xịt côn trùng ARS')[0]).toBeInTheDocument();
 
-    expect(screen.getByText('Danh mục chưa phân loại')).toBeInTheDocument();
+    expect(screen.getAllByText('Danh mục chưa phân loại')[0]).toBeInTheDocument();
     expect(screen.getAllByText('0 SP').length).toBeGreaterThanOrEqual(2);
   });
 
@@ -218,7 +218,9 @@ describe('AdminCategoriesPage', () => {
     vi.mocked(categoriesApi.getTree).mockResolvedValueOnce(mockCategoriesTree);
     renderWithProviders(<AdminCategoriesPage />);
 
-    expect(await screen.findByText('Hương Hoa Nhài')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText('Hương Hoa Nhài'))[0],
+    ).toBeInTheDocument();
 
     const parentRow = getCategoryRow('Xịt thơm phòng Thái Lan');
     const toggleButton = parentRow.querySelector(
@@ -233,8 +235,8 @@ describe('AdminCategoriesPage', () => {
 
     // Click again to expand
     fireEvent.click(toggleButton);
-    expect(screen.getByText('Hương Hoa Nhài')).toBeInTheDocument();
-    expect(screen.getByText('Hương Bạc Hà')).toBeInTheDocument();
+    expect(screen.getAllByText('Hương Hoa Nhài')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Hương Bạc Hà')[0]).toBeInTheDocument();
   });
 
   it('opens add dialog and creates a new root category', async () => {
@@ -250,7 +252,7 @@ describe('AdminCategoriesPage', () => {
     );
 
     expect(
-      await screen.findByText('Xịt thơm phòng Thái Lan'),
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
     ).toBeInTheDocument();
 
     const addRootButton = screen.getByRole('button', {
@@ -301,7 +303,7 @@ describe('AdminCategoriesPage', () => {
     );
 
     expect(
-      await screen.findByText('Xịt thơm phòng Thái Lan'),
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
     ).toBeInTheDocument();
 
     const parentRow = getCategoryRow('Xịt thơm phòng Thái Lan');
@@ -343,7 +345,7 @@ describe('AdminCategoriesPage', () => {
     renderWithProviders(<AdminCategoriesPage />);
 
     expect(
-      await screen.findByText('Xịt thơm phòng Thái Lan'),
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
     ).toBeInTheDocument();
 
     const addRootButton = screen.getByRole('button', {
@@ -375,7 +377,7 @@ describe('AdminCategoriesPage', () => {
     renderWithProviders(<AdminCategoriesPage />);
 
     expect(
-      await screen.findByText('Xịt thơm phòng Thái Lan'),
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Thêm danh mục gốc/i }));
@@ -408,7 +410,9 @@ describe('AdminCategoriesPage', () => {
       <AdminCategoriesPage />,
     );
 
-    expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText('Xịt côn trùng ARS'))[0],
+    ).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
     fireEvent.click(row);
@@ -448,40 +452,63 @@ describe('AdminCategoriesPage', () => {
     renderWithProviders(<AdminCategoriesPage />);
 
     expect(
-      await screen.findByText('Xịt thơm phòng Thái Lan'),
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
     ).toBeInTheDocument();
 
     // cat-parent-1: has children -> disabled
     const parentRow = getCategoryRow('Xịt thơm phòng Thái Lan');
-    const parentDeleteBtn = within(parentRow).getByTitle('Xóa danh mục');
+    const parentDeleteBtn = within(parentRow).getByRole('button', {
+      name: 'Xóa danh mục',
+    });
     expect(parentDeleteBtn).toBeDisabled();
+    expect(parentDeleteBtn).toHaveAttribute(
+      'title',
+      'Không thể xóa danh mục đang có sản phẩm hoặc danh mục con',
+    );
 
     // cat-child-1: productCount = 5 -> disabled
     const child1Row = getCategoryRow('Hương Hoa Nhài');
-    const child1DeleteBtn = within(child1Row).getByTitle('Xóa danh mục');
+    const child1DeleteBtn = within(child1Row).getByRole('button', {
+      name: 'Xóa danh mục',
+    });
     expect(child1DeleteBtn).toBeDisabled();
+    expect(child1DeleteBtn).toHaveAttribute(
+      'title',
+      'Không thể xóa danh mục đang có sản phẩm hoặc danh mục con',
+    );
 
     // cat-child-2: productCount = 0, no children -> enabled
     const child2Row = getCategoryRow('Hương Bạc Hà');
-    const child2DeleteBtn = within(child2Row).getByTitle('Xóa danh mục');
+    const child2DeleteBtn = within(child2Row).getByRole('button', {
+      name: 'Xóa danh mục',
+    });
     expect(child2DeleteBtn).not.toBeDisabled();
+    expect(child2DeleteBtn).toHaveAttribute('title', 'Xóa danh mục');
 
     // cat-leaf-2: productCount = 0, no children -> enabled
     const leaf2Row = getCategoryRow('Xịt côn trùng ARS');
-    const leaf2DeleteBtn = within(leaf2Row).getByTitle('Xóa danh mục');
+    const leaf2DeleteBtn = within(leaf2Row).getByRole('button', {
+      name: 'Xóa danh mục',
+    });
     expect(leaf2DeleteBtn).not.toBeDisabled();
+    expect(leaf2DeleteBtn).toHaveAttribute('title', 'Xóa danh mục');
 
     // cat-leaf-3: productCount = undefined, no children -> enabled
     const leaf3Row = getCategoryRow('Danh mục chưa phân loại');
-    const leaf3DeleteBtn = within(leaf3Row).getByTitle('Xóa danh mục');
+    const leaf3DeleteBtn = within(leaf3Row).getByRole('button', {
+      name: 'Xóa danh mục',
+    });
     expect(leaf3DeleteBtn).not.toBeDisabled();
+    expect(leaf3DeleteBtn).toHaveAttribute('title', 'Xóa danh mục');
   });
 
   it('opens delete confirmation dialog and cancels deletion when clicking Hủy', async () => {
     vi.mocked(categoriesApi.getTree).mockResolvedValue(mockCategoriesTree);
     renderWithProviders(<AdminCategoriesPage />);
 
-    expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText('Xịt côn trùng ARS'))[0],
+    ).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
     const deleteButton = within(row).getByTitle('Xóa danh mục');
@@ -515,7 +542,9 @@ describe('AdminCategoriesPage', () => {
       <AdminCategoriesPage />,
     );
 
-    expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText('Xịt côn trùng ARS'))[0],
+    ).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
     const deleteButton = within(row).getByTitle('Xóa danh mục');
@@ -576,7 +605,7 @@ describe('AdminCategoriesPage', () => {
     renderWithProviders(<AdminCategoriesPage />);
 
     expect(
-      await screen.findByText('Xịt thơm phòng Thái Lan'),
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Thêm danh mục gốc/i }));
@@ -602,7 +631,9 @@ describe('AdminCategoriesPage', () => {
 
     renderWithProviders(<AdminCategoriesPage />);
 
-    expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText('Xịt côn trùng ARS'))[0],
+    ).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
     fireEvent.click(row);
@@ -633,7 +664,9 @@ describe('AdminCategoriesPage', () => {
 
     renderWithProviders(<AdminCategoriesPage />);
 
-    expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText('Xịt côn trùng ARS'))[0],
+    ).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
     fireEvent.click(within(row).getByTitle('Xóa danh mục'));
@@ -662,7 +695,9 @@ describe('AdminCategoriesPage', () => {
 
     renderWithProviders(<AdminCategoriesPage />);
 
-    expect(await screen.findByText('Xịt côn trùng ARS')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText('Xịt côn trùng ARS'))[0],
+    ).toBeInTheDocument();
 
     const row = getCategoryRow('Xịt côn trùng ARS');
     fireEvent.click(within(row).getByTitle('Xóa danh mục'));
@@ -681,5 +716,182 @@ describe('AdminCategoriesPage', () => {
         'Không thể xóa danh mục: Lỗi hệ thống khi xóa',
       );
     });
+  });
+
+  it('excludes category and its descendants from parent category dropdown and indents child options', async () => {
+    vi.mocked(categoriesApi.getTree).mockResolvedValue(mockCategoriesTree);
+    vi.mocked(categoriesApi.getAll).mockResolvedValue([
+      {
+        id: 'cat-parent-1',
+        name: 'Xịt thơm phòng Thái Lan',
+        slug: 'xit-thom-phong-thai-lan',
+      },
+      {
+        id: 'cat-child-1',
+        name: 'Hương Hoa Nhài',
+        slug: 'huong-hoa-nhai',
+        parentId: 'cat-parent-1',
+      },
+      {
+        id: 'cat-child-2',
+        name: 'Hương Bạc Hà',
+        slug: 'huong-bac-ha',
+        parentId: 'cat-parent-1',
+      },
+      {
+        id: 'cat-leaf-2',
+        name: 'Xịt côn trùng ARS',
+        slug: 'xit-con-trung-ars',
+      },
+      {
+        id: 'cat-leaf-3',
+        name: 'Danh mục chưa phân loại',
+        slug: 'danh-muc-chua-phan-loai',
+      },
+    ]);
+
+    renderWithProviders(<AdminCategoriesPage />);
+
+    expect(
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
+    ).toBeInTheDocument();
+
+    // Select the parent category 'Xịt thơm phòng Thái Lan'
+    const parentRow = getCategoryRow('Xịt thơm phòng Thái Lan');
+    fireEvent.click(parentRow);
+
+    expect(
+      await screen.findByText('Chỉnh sửa danh mục: Xịt thơm phòng Thái Lan'),
+    ).toBeInTheDocument();
+
+    const parentSelect = screen.getByLabelText(
+      /Danh mục cha/i,
+    ) as HTMLSelectElement;
+    const options = Array.from(parentSelect.options).map((o) => ({
+      value: o.value,
+      text: o.text,
+    }));
+
+    // Must NOT contain cat-parent-1 (self) or cat-child-1 / cat-child-2 (descendants)
+    const optionValues = options.map((o) => o.value);
+    expect(optionValues).not.toContain('cat-parent-1');
+    expect(optionValues).not.toContain('cat-child-1');
+    expect(optionValues).not.toContain('cat-child-2');
+
+    // Must contain root and unaffected leaf categories
+    expect(optionValues).toContain('');
+    expect(optionValues).toContain('cat-leaf-2');
+    expect(optionValues).toContain('cat-leaf-3');
+
+    // Now select a leaf category to check indentation
+    const leafRow = getCategoryRow('Xịt côn trùng ARS');
+    fireEvent.click(leafRow);
+
+    expect(
+      await screen.findByText('Chỉnh sửa danh mục: Xịt côn trùng ARS'),
+    ).toBeInTheDocument();
+
+    const leafParentSelect = screen.getByLabelText(
+      /Danh mục cha/i,
+    ) as HTMLSelectElement;
+    const leafOptions = Array.from(leafParentSelect.options).map((o) => o.text);
+
+    // Child categories must have indentation prefix '— '
+    expect(leafOptions).toContain('— Hương Hoa Nhài');
+    expect(leafOptions).toContain('— Hương Bạc Hà');
+  });
+
+  it('allows creating a subcategory directly from the detail pane header', async () => {
+    vi.mocked(categoriesApi.getTree).mockResolvedValue(mockCategoriesTree);
+    renderWithProviders(<AdminCategoriesPage />);
+
+    expect(
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
+    ).toBeInTheDocument();
+
+    const parentRow = getCategoryRow('Xịt thơm phòng Thái Lan');
+    fireEvent.click(parentRow);
+
+    expect(
+      await screen.findByText('Chỉnh sửa danh mục: Xịt thơm phòng Thái Lan'),
+    ).toBeInTheDocument();
+
+    // Find the "Thêm danh mục con" button in detail header
+    // The detail header and the mobile pane both expose this action; the first is the header.
+    const addChildHeaderBtn = screen.getAllByRole('button', {
+      name: /Thêm danh mục con/i,
+    })[0];
+    expect(addChildHeaderBtn).toBeInTheDocument();
+    fireEvent.click(addChildHeaderBtn);
+
+    expect(
+      await screen.findByText(
+        'Thêm danh mục con cho "Xịt thơm phòng Thái Lan"',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('resets selection and returns to tree pane when canceling on mobile', async () => {
+    vi.mocked(categoriesApi.getTree).mockResolvedValue(mockCategoriesTree);
+    renderWithProviders(<AdminCategoriesPage />);
+
+    expect(
+      (await screen.findAllByText('Xịt thơm phòng Thái Lan'))[0],
+    ).toBeInTheDocument();
+
+    const row = getCategoryRow('Xịt côn trùng ARS');
+    fireEvent.click(row);
+
+    expect(
+      await screen.findByText('Chỉnh sửa danh mục: Xịt côn trùng ARS'),
+    ).toBeInTheDocument();
+
+    const cancelButton = screen.getByRole('button', { name: 'Hủy / Bỏ chọn' });
+    fireEvent.click(cancelButton);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText('Chỉnh sửa danh mục: Xịt côn trùng ARS'),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders refresh button labeled Làm mới and calls refetch when clicked', async () => {
+    vi.mocked(categoriesApi.getTree).mockResolvedValue(mockCategoriesTree);
+    renderWithProviders(<AdminCategoriesPage />);
+
+    expect(await screen.findByText('Quản lý danh mục')).toBeInTheDocument();
+
+    const refreshButton = screen.getByRole('button', { name: /Làm mới/i });
+    expect(refreshButton).toBeInTheDocument();
+    fireEvent.click(refreshButton);
+
+    expect(categoriesApi.getTree).toHaveBeenCalled();
+  });
+
+  it('does not render redundant Thêm gốc button in category tree card header', async () => {
+    vi.mocked(categoriesApi.getTree).mockResolvedValue(mockCategoriesTree);
+    renderWithProviders(<AdminCategoriesPage />);
+
+    expect(await screen.findByText('Quản lý danh mục')).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole('button', { name: 'Thêm gốc' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('displays Không có danh mục con instead of CS jargon Mục lá in detail pane', async () => {
+    vi.mocked(categoriesApi.getTree).mockResolvedValue(mockCategoriesTree);
+    renderWithProviders(<AdminCategoriesPage />);
+
+    expect(
+      (await screen.findAllByText('Xịt côn trùng ARS'))[0],
+    ).toBeInTheDocument();
+
+    const row = getCategoryRow('Xịt côn trùng ARS');
+    fireEvent.click(row);
+
+    expect(await screen.findByText('Không có danh mục con')).toBeInTheDocument();
+    expect(screen.queryByText(/Mục lá/i)).not.toBeInTheDocument();
   });
 });
