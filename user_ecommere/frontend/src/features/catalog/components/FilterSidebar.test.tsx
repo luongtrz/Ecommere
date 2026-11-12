@@ -273,6 +273,13 @@ describe('FilterSidebar', () => {
       expect(priceTrigger).toBeInTheDocument();
       fireEvent.click(priceTrigger);
     });
+
+    it('hides the header when hideHeader is true', () => {
+      renderFilterSidebar({ hideHeader: true });
+
+      expect(screen.queryByText('Bộ lọc')).not.toBeInTheDocument();
+      expect(screen.getByText('Khoảng giá')).toBeInTheDocument();
+    });
   });
 
   describe('CategoryTreeItem and category selection', () => {
@@ -354,15 +361,15 @@ describe('FilterSidebar', () => {
 
       const selectedBtn = screen.getByRole('button', { name: /Nước hoa nam/i });
       expect(selectedBtn).toHaveClass(
-        'bg-teal-50',
-        'text-teal-700',
+        'bg-secondary',
+        'text-primary',
         'font-semibold',
       );
 
       const unselectedBtn = screen.getByRole('button', {
         name: /Nước hoa nữ/i,
       });
-      expect(unselectedBtn).toHaveClass('text-slate-700');
+      expect(unselectedBtn).toHaveClass('text-foreground/80');
 
       fireEvent.click(selectedBtn);
       expect(onFilterChange).toHaveBeenCalledWith({ categorySlug: undefined });
@@ -393,8 +400,8 @@ describe('FilterSidebar', () => {
     it('handles clicking each price preset and updates inputs', () => {
       const { onFilterChange } = renderFilterSidebar();
 
-      const minInput = screen.getByPlaceholderText('Từ');
-      const maxInput = screen.getByPlaceholderText('Đến');
+      const minInput = screen.getByPlaceholderText('Từ giá');
+      const maxInput = screen.getByPlaceholderText('Đến giá');
 
       fireEvent.click(screen.getByRole('button', { name: 'Dưới 50.000đ' }));
       expect(onFilterChange).toHaveBeenCalledWith({
@@ -445,13 +452,13 @@ describe('FilterSidebar', () => {
       });
 
       expect(screen.getByRole('button', { name: 'Dưới 50.000đ' })).toHaveClass(
-        'bg-teal-50',
-        'text-teal-700',
+        'bg-secondary',
+        'text-primary',
         'font-semibold',
       );
       expect(
         screen.getByRole('button', { name: '50.000đ - 100.000đ' }),
-      ).not.toHaveClass('bg-teal-50');
+      ).not.toHaveClass('bg-secondary');
 
       // Preset 5 (min 500000, no max)
       rerender(
@@ -469,7 +476,7 @@ describe('FilterSidebar', () => {
         </QueryClientProvider>,
       );
       expect(screen.getByRole('button', { name: 'Trên 500.000đ' })).toHaveClass(
-        'bg-teal-50',
+        'bg-secondary',
       );
 
       // Preset 5 with maxPrice should not be active
@@ -489,7 +496,7 @@ describe('FilterSidebar', () => {
       );
       expect(
         screen.getByRole('button', { name: 'Trên 500.000đ' }),
-      ).not.toHaveClass('bg-teal-50');
+      ).not.toHaveClass('bg-secondary');
 
       // Arbitrary prices do not highlight presets
       rerender(
@@ -508,7 +515,7 @@ describe('FilterSidebar', () => {
       );
       expect(
         screen.getByRole('button', { name: 'Dưới 50.000đ' }),
-      ).not.toHaveClass('bg-teal-50');
+      ).not.toHaveClass('bg-secondary');
     });
   });
 
@@ -518,22 +525,22 @@ describe('FilterSidebar', () => {
         currentFilters: { minPrice: 15000, maxPrice: 45000 },
       });
 
-      expect(screen.getByPlaceholderText('Từ')).toHaveValue(15000);
-      expect(screen.getByPlaceholderText('Đến')).toHaveValue(45000);
+      expect(screen.getByPlaceholderText('Từ giá')).toHaveValue(15000);
+      expect(screen.getByPlaceholderText('Đến giá')).toHaveValue(45000);
     });
 
     it('initializes inputs as empty when currentFilters has no price', () => {
       renderFilterSidebar();
 
-      expect(screen.getByPlaceholderText('Từ')).toHaveValue(null);
-      expect(screen.getByPlaceholderText('Đến')).toHaveValue(null);
+      expect(screen.getByPlaceholderText('Từ giá')).toHaveValue(null);
+      expect(screen.getByPlaceholderText('Đến giá')).toHaveValue(null);
     });
 
     it('applies custom price on button click and trims values', () => {
       const { onFilterChange } = renderFilterSidebar();
 
-      const minInput = screen.getByPlaceholderText('Từ');
-      const maxInput = screen.getByPlaceholderText('Đến');
+      const minInput = screen.getByPlaceholderText('Từ giá');
+      const maxInput = screen.getByPlaceholderText('Đến giá');
       const applyBtn = screen.getByRole('button', { name: 'Áp dụng' });
 
       fireEvent.change(minInput, { target: { value: '25000' } });
@@ -549,8 +556,8 @@ describe('FilterSidebar', () => {
     it('converts empty price input values to undefined on apply', () => {
       const { onFilterChange } = renderFilterSidebar();
 
-      const minInput = screen.getByPlaceholderText('Từ');
-      const maxInput = screen.getByPlaceholderText('Đến');
+      const minInput = screen.getByPlaceholderText('Từ giá');
+      const maxInput = screen.getByPlaceholderText('Đến giá');
       const applyBtn = screen.getByRole('button', { name: 'Áp dụng' });
 
       // Only min entered
@@ -584,8 +591,8 @@ describe('FilterSidebar', () => {
     it('applies custom price on Enter key press in min or max input', () => {
       const { onFilterChange } = renderFilterSidebar();
 
-      const minInput = screen.getByPlaceholderText('Từ');
-      const maxInput = screen.getByPlaceholderText('Đến');
+      const minInput = screen.getByPlaceholderText('Từ giá');
+      const maxInput = screen.getByPlaceholderText('Đến giá');
 
       fireEvent.change(minInput, { target: { value: '40000' } });
       fireEvent.change(maxInput, { target: { value: '80000' } });
@@ -607,8 +614,8 @@ describe('FilterSidebar', () => {
     it('does not trigger apply on other key presses', () => {
       const { onFilterChange } = renderFilterSidebar();
 
-      const minInput = screen.getByPlaceholderText('Từ');
-      const maxInput = screen.getByPlaceholderText('Đến');
+      const minInput = screen.getByPlaceholderText('Từ giá');
+      const maxInput = screen.getByPlaceholderText('Đến giá');
 
       fireEvent.change(minInput, { target: { value: '40000' } });
       fireEvent.change(maxInput, { target: { value: '80000' } });
@@ -622,8 +629,8 @@ describe('FilterSidebar', () => {
     it('shows error and blocks applying when minPrice > maxPrice', () => {
       const { onFilterChange } = renderFilterSidebar();
 
-      const minInput = screen.getByPlaceholderText('Từ');
-      const maxInput = screen.getByPlaceholderText('Đến');
+      const minInput = screen.getByPlaceholderText('Từ giá');
+      const maxInput = screen.getByPlaceholderText('Đến giá');
       const applyBtn = screen.getByRole('button', { name: 'Áp dụng' });
 
       fireEvent.change(minInput, { target: { value: '100000' } });
@@ -657,8 +664,8 @@ describe('FilterSidebar', () => {
     it('treats non-numeric inputs gracefully (isPriceRangeInvalid returns false)', () => {
       renderFilterSidebar();
 
-      const minInput = screen.getByPlaceholderText('Từ');
-      const maxInput = screen.getByPlaceholderText('Đến');
+      const minInput = screen.getByPlaceholderText('Từ giá');
+      const maxInput = screen.getByPlaceholderText('Đến giá');
 
       fireEvent.change(minInput, { target: { value: 'abc' } });
       fireEvent.change(maxInput, { target: { value: 'xyz' } });
@@ -684,7 +691,7 @@ describe('FilterSidebar', () => {
       expect(citrusCheckbox).toHaveAttribute('data-state', 'unchecked');
 
       expect(getFilterOptionSpan('Gỗ')).toHaveClass('font-semibold');
-      expect(getFilterOptionSpan('Cam chanh')).toHaveClass('text-slate-600');
+      expect(getFilterOptionSpan('Cam chanh')).toHaveClass('text-muted-foreground');
     });
 
     it('toggles scent selection on and off', () => {
@@ -739,9 +746,9 @@ describe('FilterSidebar', () => {
       const vol50 = screen.getByRole('button', { name: '50ml' });
       const vol100 = screen.getByRole('button', { name: '100ml' });
 
-      expect(vol50).toHaveClass('bg-teal-600');
-      expect(vol30).toHaveClass('bg-white');
-      expect(vol100).toHaveClass('bg-white');
+      expect(vol50).toHaveClass('bg-primary');
+      expect(vol30).toHaveClass('bg-card');
+      expect(vol100).toHaveClass('bg-card');
     });
 
     it('toggles volume selection on and off', () => {
@@ -776,13 +783,13 @@ describe('FilterSidebar', () => {
       });
 
       expect(screen.getByRole('button', { name: '30ml' })).toHaveClass(
-        'bg-teal-600',
+        'bg-primary',
       );
       expect(screen.getByRole('button', { name: '50ml' })).toHaveClass(
-        'bg-teal-600',
+        'bg-primary',
       );
       expect(screen.getByRole('button', { name: '100ml' })).not.toHaveClass(
-        'bg-teal-600',
+        'bg-primary',
       );
     });
   });
@@ -799,7 +806,7 @@ describe('FilterSidebar', () => {
       expect(chanelCb).toHaveAttribute('data-state', 'checked');
       expect(diorCb).toHaveAttribute('data-state', 'unchecked');
       expect(getFilterOptionSpan('Chanel')).toHaveClass('font-semibold');
-      expect(getFilterOptionSpan('Dior')).toHaveClass('text-slate-600');
+      expect(getFilterOptionSpan('Dior')).toHaveClass('text-muted-foreground');
     });
 
     it('toggles brand selection on and off', () => {
@@ -848,8 +855,41 @@ describe('FilterSidebar', () => {
     it('does not render active badge, clear button, or "Đang lọc" section when no filters are active', () => {
       renderFilterSidebar({ currentFilters: {} });
 
-      expect(screen.queryByText('Xóa')).not.toBeInTheDocument();
+      expect(screen.queryByText('Xóa bộ lọc')).not.toBeInTheDocument();
       expect(screen.queryByText('Đang lọc')).not.toBeInTheDocument();
+    });
+
+    it('hides active filters section when hideActiveFilters is true', () => {
+      renderFilterSidebar({
+        currentFilters: { categorySlug: 'nuoc-hoa-nam' },
+        hideActiveFilters: true,
+      });
+
+      expect(screen.queryByText('Đang lọc')).not.toBeInTheDocument();
+    });
+
+    it('syncs custom price inputs when currentFilters change externally', () => {
+      const { rerender } = renderFilterSidebar({
+        currentFilters: { minPrice: 10000, maxPrice: 50000 },
+      });
+
+      expect(screen.getByPlaceholderText('Từ giá')).toHaveValue(10000);
+      expect(screen.getByPlaceholderText('Đến giá')).toHaveValue(50000);
+
+      rerender(
+        <QueryClientProvider
+          client={
+            new QueryClient({ defaultOptions: { queries: { retry: false } } })
+          }
+        >
+          <MemoryRouter>
+            <FilterSidebar currentFilters={{}} onFilterChange={vi.fn()} />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      expect(screen.getByPlaceholderText('Từ giá')).toHaveValue(null);
+      expect(screen.getByPlaceholderText('Đến giá')).toHaveValue(null);
     });
 
     it('calculates activeFilterCount correctly across all filter types', () => {
@@ -941,7 +981,7 @@ describe('FilterSidebar', () => {
       expect(screen.getByText('5')).toBeInTheDocument();
     });
 
-    it('clears all active filters when header "Xóa" button is clicked', () => {
+    it('clears all active filters when header "Xóa bộ lọc" button is clicked', () => {
       const { onFilterChange } = renderFilterSidebar({
         currentFilters: {
           categorySlug: 'nuoc-hoa-nam',
@@ -953,7 +993,7 @@ describe('FilterSidebar', () => {
         },
       });
 
-      const clearAllBtn = screen.getByRole('button', { name: 'Xóa' });
+      const clearAllBtn = screen.getByRole('button', { name: 'Xóa bộ lọc' });
       fireEvent.click(clearAllBtn);
 
       expect(onFilterChange).toHaveBeenCalledWith({
@@ -965,8 +1005,8 @@ describe('FilterSidebar', () => {
         brand: undefined,
       });
 
-      expect(screen.getByPlaceholderText('Từ')).toHaveValue(null);
-      expect(screen.getByPlaceholderText('Đến')).toHaveValue(null);
+      expect(screen.getByPlaceholderText('Từ giá')).toHaveValue(null);
+      expect(screen.getByPlaceholderText('Đến giá')).toHaveValue(null);
     });
 
     it('renders and removes active filter badge for category', () => {
@@ -974,7 +1014,7 @@ describe('FilterSidebar', () => {
         currentFilters: { categorySlug: 'nuoc-hoa-nam' },
       });
 
-      const { removeButton } = getActiveFilterBadge(/Danh mục:\s*nuoc-hoa-nam/);
+      const { removeButton } = getActiveFilterBadge(/Danh mục:\s*Nước hoa nam/);
       fireEvent.click(removeButton);
 
       expect(onFilterChange).toHaveBeenCalledWith({ categorySlug: undefined });
@@ -996,8 +1036,8 @@ describe('FilterSidebar', () => {
         minPrice: undefined,
         maxPrice: undefined,
       });
-      expect(screen.getByPlaceholderText('Từ')).toHaveValue(null);
-      expect(screen.getByPlaceholderText('Đến')).toHaveValue(null);
+      expect(screen.getByPlaceholderText('Từ giá')).toHaveValue(null);
+      expect(screen.getByPlaceholderText('Đến giá')).toHaveValue(null);
     });
 
     it('renders price badge with only minPrice', () => {

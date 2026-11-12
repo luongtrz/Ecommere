@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useCategoryTree } from '../hooks/useCategories';
 import { useFilterOptions } from '../hooks/useFilterOptions';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -26,6 +26,20 @@ interface FilterSidebarProps {
     };
     onFilterChange: (filters: Record<string, string | undefined>) => void;
     hideCategoryFilter?: boolean;
+    hideHeader?: boolean;
+    hideActiveFilters?: boolean;
+}
+
+function findCategoryName(tree: CategoryTreeNode[] | undefined, slug: string | undefined): string | undefined {
+    if (!tree || !slug) return undefined;
+    for (const node of tree) {
+        if (node.slug === slug) return node.name;
+        if (node.children && node.children.length > 0) {
+            const found = findCategoryName(node.children, slug);
+            if (found) return found;
+        }
+    }
+    return undefined;
 }
 
 // Component hien thi 1 category va children cua no
@@ -54,7 +68,7 @@ function CategoryTreeItem({
                     }
                     onSelect(node.slug);
                 }}
-                className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-md text-sm transition-colors hover:bg-secondary/40 ${isSelected ? 'bg-secondary text-primary font-semibold' : 'text-foreground/80'
+                className={`w-full flex items-center gap-2 min-h-11 py-2.5 px-2 rounded-md text-sm transition-colors hover:bg-secondary/40 ${isSelected ? 'bg-secondary text-primary font-semibold' : 'text-foreground/80'
                     }`}
                 style={{ paddingLeft: `${depth * 16 + 8}px` }}
             >
@@ -98,12 +112,30 @@ const PRICE_RANGES = [
     { label: 'Trên 500.000đ', min: 500000, max: undefined },
 ];
 
-export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilter = false }: FilterSidebarProps) {
+export function FilterSidebar({
+    currentFilters,
+    onFilterChange,
+    hideCategoryFilter = false,
+    hideHeader = false,
+    hideActiveFilters = false,
+}: FilterSidebarProps) {
     const { data: categoryTree } = useCategoryTree();
     const { data: filterOptions } = useFilterOptions();
 
     const [minPriceInput, setMinPriceInput] = useState(currentFilters.minPrice?.toString() || '');
     const [maxPriceInput, setMaxPriceInput] = useState(currentFilters.maxPrice?.toString() || '');
+
+    useEffect(() => {
+        setMinPriceInput(currentFilters.minPrice !== undefined ? currentFilters.minPrice.toString() : '');
+    }, [currentFilters.minPrice]);
+
+    useEffect(() => {
+        setMaxPriceInput(currentFilters.maxPrice !== undefined ? currentFilters.maxPrice.toString() : '');
+    }, [currentFilters.maxPrice]);
+
+    const activeCategoryName = useMemo(() => {
+        return findCategoryName(categoryTree, currentFilters.categorySlug);
+    }, [categoryTree, currentFilters.categorySlug]);
 
     // Parse selected values tu comma-separated string
     const selectedScents = useMemo(() => {
@@ -197,33 +229,35 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
     return (
         <div className="space-y-0">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-border">
-                <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="h-4 w-4 text-foreground" />
-                    <span className="font-semibold text-foreground text-sm">Bộ lọc</span>
+            {!hideHeader && (
+                <div className="flex items-center justify-between pb-4 border-b border-border">
+                    <div className="flex items-center gap-2">
+                        <SlidersHorizontal className="h-4 w-4 text-foreground" />
+                        <span className="font-semibold text-foreground text-sm">Bộ lọc</span>
+                        {activeFilterCount > 0 && (
+                            <Badge variant="secondary" className="h-5 px-1.5 text-xs rounded-sm font-normal tabular">
+                                {activeFilterCount}
+                            </Badge>
+                        )}
+                    </div>
                     {activeFilterCount > 0 && (
-                        <Badge variant="secondary" className="h-5 px-1.5 text-xs rounded-sm font-normal tabular">
-                            {activeFilterCount}
-                        </Badge>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearAll}
+                            className="h-9 px-2 text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+                        >
+                            Xóa bộ lọc
+                        </Button>
                     )}
                 </div>
-                {activeFilterCount > 0 && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleClearAll}
-                        className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
-                    >
-                        Xóa bộ lọc
-                    </Button>
-                )}
-            </div>
+            )}
 
             <Accordion type="multiple" defaultValue={defaultOpenValues} className="w-full">
                 {/* Category Filter */}
                 {!hideCategoryFilter && categoryTree && categoryTree.length > 0 && (
                     <AccordionItem value="category" className="border-b border-border py-5">
-                        <AccordionTrigger className="py-0 mb-3 hover:no-underline text-sm font-semibold text-foreground">
+                        <AccordionTrigger className="min-h-11 py-2.5 mb-2 hover:no-underline text-sm font-semibold text-foreground">
                             Danh mục
                         </AccordionTrigger>
                         <AccordionContent className="pt-1 pb-0">
@@ -243,12 +277,12 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
 
                 {/* Price Range Filter */}
                 <AccordionItem value="price" className="border-b border-border py-5">
-                    <AccordionTrigger className="py-0 mb-3 hover:no-underline text-sm font-semibold text-foreground">
+                    <AccordionTrigger className="min-h-11 py-2.5 mb-2 hover:no-underline text-sm font-semibold text-foreground">
                         Khoảng giá
                     </AccordionTrigger>
                     <AccordionContent className="pt-1 pb-0">
                         {/* Preset ranges */}
-                        <div className="space-y-1 mb-3">
+                        <div className="space-y-1 mb-4">
                             {PRICE_RANGES.map((range, idx) => {
                                 const isActive = currentFilters.minPrice === range.min &&
                                     (range.max === undefined ? !currentFilters.maxPrice : currentFilters.maxPrice === range.max);
@@ -257,8 +291,8 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                         key={idx}
                                         type="button"
                                         onClick={() => handlePricePreset(range.min, range.max)}
-                                        className={`w-full text-left text-sm py-1.5 px-2 rounded-md transition-colors ${isActive
-                                            ? 'bg-secondary text-primary font-medium'
+                                        className={`w-full text-left text-sm min-h-11 py-2.5 px-3 rounded-md transition-colors ${isActive
+                                            ? 'bg-secondary text-primary font-semibold'
                                             : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
                                             }`}
                                     >
@@ -269,36 +303,52 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                         </div>
 
                         {/* Custom price range */}
-                        <div className="flex items-center gap-2">
-                            <Input
-                                type="number"
-                                placeholder="Từ"
-                                value={minPriceInput}
-                                onChange={(e) => setMinPriceInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        handlePriceApply();
-                                    }
-                                }}
-                                className="h-9 text-sm tabular rounded-md"
-                            />
-                            <span className="text-muted-foreground text-sm shrink-0">-</span>
-                            <Input
-                                type="number"
-                                placeholder="Đến"
-                                value={maxPriceInput}
-                                onChange={(e) => setMaxPriceInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        handlePriceApply();
-                                    }
-                                }}
-                                className="h-9 text-sm tabular rounded-md"
-                            />
+                        <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="relative">
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        placeholder="Từ giá"
+                                        value={minPriceInput}
+                                        onChange={(e) => setMinPriceInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handlePriceApply();
+                                            }
+                                        }}
+                                        className="h-11 pr-7 text-sm tabular rounded-md"
+                                        aria-label="Giá tối thiểu"
+                                    />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none select-none">
+                                        đ
+                                    </span>
+                                </div>
+                                <div className="relative">
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        placeholder="Đến giá"
+                                        value={maxPriceInput}
+                                        onChange={(e) => setMaxPriceInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handlePriceApply();
+                                            }
+                                        }}
+                                        className="h-11 pr-7 text-sm tabular rounded-md"
+                                        aria-label="Giá tối đa"
+                                    />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none select-none">
+                                        đ
+                                    </span>
+                                </div>
+                            </div>
                             <Button
+                                type="button"
                                 size="sm"
                                 variant="outline"
-                                className="h-9 px-3 text-sm shrink-0 rounded-md"
+                                className="w-full h-11 text-sm rounded-md font-medium"
                                 onClick={handlePriceApply}
                             >
                                 Áp dụng
@@ -315,7 +365,7 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                 {/* Scent Filter */}
                 {filterOptions && filterOptions.scents.length > 0 && (
                     <AccordionItem value="scent" className="border-b border-border py-5">
-                        <AccordionTrigger className="py-0 mb-3 hover:no-underline text-sm font-semibold text-foreground">
+                        <AccordionTrigger className="min-h-11 py-2.5 mb-2 hover:no-underline text-sm font-semibold text-foreground">
                             Hương
                         </AccordionTrigger>
                         <AccordionContent className="pt-1 pb-0">
@@ -325,14 +375,14 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                     return (
                                         <label
                                             key={scentName}
-                                            className="flex items-center gap-2.5 cursor-pointer hover:bg-secondary/40 py-1 px-1.5 rounded-md transition-colors"
+                                            className="flex items-center gap-2.5 cursor-pointer hover:bg-secondary/40 min-h-11 py-2.5 px-2 rounded-md transition-colors"
                                         >
                                             <Checkbox
                                                 checked={isChecked}
                                                 onCheckedChange={() => toggleArrayFilter('scent', scentName, selectedScents)}
                                                 className="rounded-sm"
                                             />
-                                            <span className={`text-sm ${isChecked ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                                            <span className={`text-sm ${isChecked ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
                                                 {scentName}
                                             </span>
                                         </label>
@@ -346,11 +396,11 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                 {/* Volume Filter */}
                 {filterOptions && filterOptions.volumes.length > 0 && (
                     <AccordionItem value="volume" className="border-b border-border py-5">
-                        <AccordionTrigger className="py-0 mb-3 hover:no-underline text-sm font-semibold text-foreground">
+                        <AccordionTrigger className="min-h-11 py-2.5 mb-2 hover:no-underline text-sm font-semibold text-foreground">
                             Dung tích
                         </AccordionTrigger>
                         <AccordionContent className="pt-1 pb-0">
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="flex flex-wrap gap-2">
                                 {filterOptions.volumes.map((vol) => {
                                     const isSelected = selectedVolumes.includes(vol);
                                     return (
@@ -358,7 +408,7 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                                             key={vol}
                                             type="button"
                                             onClick={() => toggleArrayFilter('volumeMl', vol.toString(), selectedVolumes.map(String))}
-                                            className={`px-3 py-1 rounded-full text-sm border tabular transition-colors ${isSelected
+                                            className={`min-h-11 min-w-11 px-3.5 py-2 rounded-full text-sm border tabular transition-colors inline-flex items-center justify-center ${isSelected
                                                 ? 'bg-primary text-primary-foreground border-primary font-medium'
                                                 : 'bg-card text-muted-foreground border-border hover:border-foreground/30 hover:text-foreground'
                                                 }`}
@@ -375,24 +425,24 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
                 {/* Brand Filter */}
                 {filterOptions && filterOptions.brands.length > 0 && (
                     <AccordionItem value="brand" className="border-b border-border py-5">
-                        <AccordionTrigger className="py-0 mb-3 hover:no-underline text-sm font-semibold text-foreground">
+                        <AccordionTrigger className="min-h-11 py-2.5 mb-2 hover:no-underline text-sm font-semibold text-foreground">
                             Thương hiệu
                         </AccordionTrigger>
                         <AccordionContent className="pt-1 pb-0">
-                            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                            <div className="space-y-1 max-h-48 overflow-y-auto">
                                 {filterOptions.brands.map((brandName) => {
                                     const isChecked = selectedBrands.includes(brandName);
                                     return (
                                         <label
                                             key={brandName}
-                                            className="flex items-center gap-2.5 cursor-pointer hover:bg-secondary/40 py-1 px-1.5 rounded-md transition-colors"
+                                            className="flex items-center gap-2.5 cursor-pointer hover:bg-secondary/40 min-h-11 py-2.5 px-2 rounded-md transition-colors"
                                         >
                                             <Checkbox
                                                 checked={isChecked}
                                                 onCheckedChange={() => toggleArrayFilter('brand', brandName, selectedBrands)}
                                                 className="rounded-sm"
                                             />
-                                            <span className={`text-sm ${isChecked ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                                            <span className={`text-sm ${isChecked ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
                                                 {brandName}
                                             </span>
                                         </label>
@@ -405,13 +455,13 @@ export function FilterSidebar({ currentFilters, onFilterChange, hideCategoryFilt
             </Accordion>
 
             {/* Active Filters Tags */}
-            {activeFilterCount > 0 && (
+            {!hideActiveFilters && activeFilterCount > 0 && (
                 <div className="pt-5">
                     <h3 className="text-sm font-semibold text-foreground mb-3">Đang lọc</h3>
                     <div className="flex flex-wrap gap-1.5">
                         {currentFilters.categorySlug && (
                             <Badge variant="secondary" className="text-xs rounded-sm gap-1.5 pr-1 font-normal">
-                                Danh mục: {currentFilters.categorySlug}
+                                Danh mục: {activeCategoryName || currentFilters.categorySlug}
                                 <button
                                     type="button"
                                     onClick={() => onFilterChange({ categorySlug: undefined })}

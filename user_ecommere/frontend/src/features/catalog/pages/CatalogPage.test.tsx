@@ -17,6 +17,17 @@ vi.mock('@/features/cart/hooks/useCart', () => ({
   }),
 }));
 
+const mockCategoryTree = [
+  { id: 'cat-1', name: 'Xịt phòng', slug: 'room-spray', children: [] },
+  { id: 'cat-2', name: 'Nước hoa nam', slug: 'nuoc-hoa-nam', children: [] },
+];
+vi.mock('../hooks/useCategories', () => ({
+  useCategoryTree: () => ({
+    data: mockCategoryTree,
+    isLoading: false,
+  }),
+}));
+
 const mockUseProducts = vi.fn();
 vi.mock('../hooks/useProducts', () => ({
   useProducts: (filters: any, options: any) =>
@@ -215,12 +226,21 @@ vi.mock('@/components/ui/sheet', () => {
     },
     SheetTrigger: ({
       children,
-      asChild: _asChild,
+      asChild,
     }: {
       children: React.ReactNode;
       asChild?: boolean;
     }) => {
       const { setOpen } = React.useContext(SheetContext);
+      if (asChild && React.isValidElement(children)) {
+        return React.cloneElement(children as React.ReactElement<any>, {
+          onClick: (e: any) => {
+            (children as any).props?.onClick?.(e);
+            setOpen(true);
+          },
+          'data-testid': 'mock-sheet-trigger',
+        });
+      }
       return (
         <button
           type="button"
@@ -266,6 +286,33 @@ vi.mock('@/components/ui/sheet', () => {
         {children}
       </h2>
     ),
+    SheetClose: ({
+      children,
+      asChild,
+    }: {
+      children: React.ReactNode;
+      asChild?: boolean;
+    }) => {
+      const { setOpen } = React.useContext(SheetContext);
+      if (asChild && React.isValidElement(children)) {
+        return React.cloneElement(children as React.ReactElement<any>, {
+          onClick: (e: any) => {
+            (children as any).props?.onClick?.(e);
+            setOpen(false);
+          },
+          'data-testid': 'mock-sheet-close',
+        });
+      }
+      return (
+        <button
+          type="button"
+          data-testid="mock-sheet-close"
+          onClick={() => setOpen(false)}
+        >
+          {children}
+        </button>
+      );
+    },
   };
 });
 
@@ -453,7 +500,7 @@ describe('CatalogPage', () => {
         'Sản phẩm',
       );
       expect(screen.getByText('5 kết quả tìm thấy')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Tìm kiếm...')).toHaveValue('');
+      expect(screen.getByPlaceholderText('Tìm trong danh mục này...')).toHaveValue('');
       expect(screen.getByText('Ẩn bộ lọc')).toBeInTheDocument();
       expect(screen.getByTestId('mock-filter-sidebar')).toBeInTheDocument();
 
@@ -483,7 +530,7 @@ describe('CatalogPage', () => {
 
       renderCatalogPage('/catalog');
 
-      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+      expect(screen.getByRole('status', { name: 'Đang tải sản phẩm' })).toBeInTheDocument();
       expect(
         screen.queryByText('Không tìm thấy sản phẩm'),
       ).not.toBeInTheDocument();
@@ -673,7 +720,7 @@ describe('CatalogPage', () => {
     it('initializes search input from URL param q and renders clear button', () => {
       renderCatalogPage('/catalog?q=lavender');
 
-      const input = screen.getByPlaceholderText('Tìm kiếm...');
+      const input = screen.getByPlaceholderText('Tìm trong danh mục này...');
       expect(input).toHaveValue('lavender');
 
       // The clear button (with X icon) should be present
@@ -684,7 +731,7 @@ describe('CatalogPage', () => {
     it('does not render clear button when search input is empty', () => {
       renderCatalogPage('/catalog');
 
-      const input = screen.getByPlaceholderText('Tìm kiếm...');
+      const input = screen.getByPlaceholderText('Tìm trong danh mục này...');
       expect(input).toHaveValue('');
 
       const clearBtn = input.parentElement?.querySelector('button');
@@ -694,7 +741,7 @@ describe('CatalogPage', () => {
     it('updates URL param q and resets page to 1 when user types a search term', () => {
       renderCatalogPage('/catalog?page=3');
 
-      const input = screen.getByPlaceholderText('Tìm kiếm...');
+      const input = screen.getByPlaceholderText('Tìm trong danh mục này...');
       fireEvent.change(input, { target: { value: 'citrus' } });
 
       expect(input).toHaveValue('citrus');
@@ -706,7 +753,7 @@ describe('CatalogPage', () => {
     it('clears search param and input when clicking the clear (X) button', () => {
       renderCatalogPage('/catalog?q=perfume&page=2');
 
-      const input = screen.getByPlaceholderText('Tìm kiếm...');
+      const input = screen.getByPlaceholderText('Tìm trong danh mục này...');
       const clearBtn = input.parentElement?.querySelector('button');
       expect(clearBtn).toBeInTheDocument();
 
@@ -724,7 +771,7 @@ describe('CatalogPage', () => {
 
       renderCatalogPage('/catalog?q=spray');
 
-      const input = screen.getByPlaceholderText('Tìm kiếm...');
+      const input = screen.getByPlaceholderText('Tìm trong danh mục này...');
       fireEvent.change(input, { target: { value: 'spray' } });
 
       const probe = screen.getByTestId('search-params-probe');
@@ -763,12 +810,10 @@ describe('CatalogPage', () => {
       expect(
         screen.queryByTestId('mock-filter-sidebar'),
       ).not.toBeInTheDocument();
-      expect(toggleBtn.className).toContain('bg-white');
 
       // Click again to show filters
       fireEvent.click(toggleBtn);
       expect(toggleBtn).toHaveTextContent('Ẩn bộ lọc');
-      expect(toggleBtn.className).toContain('bg-teal-50');
       expect(screen.getByTestId('mock-filter-sidebar')).toBeInTheDocument();
     });
 
@@ -832,6 +877,39 @@ describe('CatalogPage', () => {
       // When mobile sheet is open, two filter sidebars are in the DOM (desktop + mobile)
       expect(screen.getAllByTestId('mock-filter-sidebar').length).toBe(2);
     });
+
+    it('renders mobile sheet with active badge, footer actions and handles close', () => {
+      renderCatalogPage('/catalog?category=room-spray');
+
+      // Active category chip shows Vietnamese name from categoryTree lookup
+      expect(screen.getByText('Danh mục: Xịt phòng')).toBeInTheDocument();
+
+      // Mobile filter trigger shows count badge
+      const trigger = screen.getByTestId('mock-sheet-trigger');
+      expect(trigger).toHaveTextContent('Lọc');
+      expect(trigger).toHaveTextContent('1');
+
+      // Click trigger to open mobile sheet
+      fireEvent.click(trigger);
+
+      expect(screen.getByTestId('mock-sheet-content')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-sheet-title')).toHaveTextContent(
+        'Bộ lọc',
+      );
+      expect(screen.getByRole('button', { name: 'Xem kết quả' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Xóa bộ lọc' })).toBeInTheDocument();
+
+      // Click Xem ket qua closes the sheet
+      fireEvent.click(screen.getByRole('button', { name: 'Xem kết quả' }));
+      expect(
+        screen.queryByTestId('mock-sheet-content'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('falls back to category slug in active chips if category is not found in tree', () => {
+      renderCatalogPage('/catalog?category=unknown-cat');
+      expect(screen.getByText('Danh mục: unknown-cat')).toBeInTheDocument();
+    });
   });
 
   describe('View Mode Switching (Grid vs List)', () => {
@@ -868,11 +946,25 @@ describe('CatalogPage', () => {
       // Check currency text using regex to tolerate non-breaking spaces
       expect(screen.getByText(/120\.000/)).toBeInTheDocument();
 
-      // Image has getImageUrl source and alt
+      // Title is clickable link to detail page
+      const titleLink = screen
+        .getByText('Chai Xịt Phòng Tinh Dầu Bưởi')
+        .closest('a');
+      expect(titleLink).toHaveAttribute(
+        'href',
+        '/p/chai-xit-phong-tinh-dau-buoi',
+      );
+
+      // Image has getImageUrl source, alt, and is wrapped in link
       const img1 = screen.getByAltText('Chai Xịt Phòng Tinh Dầu Bưởi');
       expect(img1).toHaveAttribute(
         'src',
         getImageUrl('/images/product1.jpg', { width: 200 }),
+      );
+      const imgLink = img1.closest('a');
+      expect(imgLink).toHaveAttribute(
+        'href',
+        '/p/chai-xit-phong-tinh-dau-buoi',
       );
 
       // Scents badge (up to 3) for Product 5

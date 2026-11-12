@@ -1,7 +1,9 @@
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { SEO } from '@/lib/seo';
 import { useProducts } from '../hooks/useProducts';
+import { useCategoryTree } from '../hooks/useCategories';
+import type { CategoryTreeNode } from '../api/categories.api';
 import { useDebounce } from '@/hooks/useDebounce';
 import { ProductCard } from '@/components/common/ProductCard';
 import { Breadcrumb } from '@/components/common/Breadcrumb';
@@ -15,9 +17,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Grid3X3, List, ShoppingBag, X, Filter } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Search, Grid3X3, List, ShoppingBag, X, Filter, SlidersHorizontal } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { FilterSidebar } from '../components/FilterSidebar';
+
+function findCategoryName(tree: CategoryTreeNode[] | undefined, slug: string | undefined): string | undefined {
+  if (!tree || !slug) return undefined;
+  for (const node of tree) {
+    if (node.slug === slug) return node.name;
+    if (node.children && node.children.length > 0) {
+      const found = findCategoryName(node.children, slug);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
 
 function parseNumericParam(
   value: string | null,
@@ -89,6 +103,11 @@ export function CatalogPage() {
     volumeMl,
     brand,
   });
+
+  const { data: categoryTree } = useCategoryTree();
+  const activeCategoryName = useMemo(() => {
+    return findCategoryName(categoryTree, categorySlug);
+  }, [categoryTree, categorySlug]);
 
   const { addItem } = useCart();
 
@@ -195,7 +214,7 @@ export function CatalogPage() {
     if (categorySlug) {
       chips.push({
         id: 'category',
-        label: `Danh mục: ${categorySlug}`,
+        label: `Danh mục: ${activeCategoryName || categorySlug}`,
         onRemove: () => handleFilterChange({ categorySlug: undefined }),
       });
     }
@@ -256,10 +275,10 @@ export function CatalogPage() {
     }
 
     return chips;
-  }, [searchQuery, categorySlug, minPrice, maxPrice, scent, volumeMl, brand, handleFilterChange, updateParams]);
+  }, [searchQuery, categorySlug, activeCategoryName, minPrice, maxPrice, scent, volumeMl, brand, handleFilterChange, updateParams]);
 
-  // Filter sidebar content (dung chung cho desktop va mobile)
-  const filterContent = (
+  // Filter sidebar content
+  const desktopFilterContent = (
     <FilterSidebar
       currentFilters={{
         categorySlug,
@@ -270,6 +289,23 @@ export function CatalogPage() {
         brand,
       }}
       onFilterChange={handleFilterChange}
+      hideActiveFilters
+    />
+  );
+
+  const mobileFilterContent = (
+    <FilterSidebar
+      currentFilters={{
+        categorySlug,
+        minPrice,
+        maxPrice,
+        scent,
+        volumeMl,
+        brand,
+      }}
+      onFilterChange={handleFilterChange}
+      hideHeader
+      hideActiveFilters
     />
   );
 
@@ -278,7 +314,7 @@ export function CatalogPage() {
       <SEO title="Sản phẩm" />
 
       <div className="min-h-screen bg-background">
-        <div className="container section-y">
+        <div className="container section-y pb-24 md:pb-20">
           {/* Page Header */}
           <header className="border-b border-border pb-6 mb-8 md:mb-10">
             <Breadcrumb
@@ -290,7 +326,7 @@ export function CatalogPage() {
 
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <h1 className="font-serif text-3xl md:text-4xl text-foreground font-normal tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-balance text-foreground">
                   Sản phẩm
                 </h1>
                 <p className="text-sm text-muted-foreground mt-2 max-w-[65ch]">
@@ -301,13 +337,14 @@ export function CatalogPage() {
               {/* Controls */}
               <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-stretch sm:items-center">
                 {/* Search */}
-                <div className="relative w-full sm:w-60 md:w-56 lg:w-64">
+                <div className="relative hidden md:block w-full sm:w-60 md:w-56 lg:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={searchInput}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    placeholder="Tìm kiếm..."
+                    placeholder="Tìm trong danh mục này..."
                     className="h-10 pl-9 pr-8 text-sm rounded-md bg-background"
+                    aria-label="Tìm kiếm trong danh mục"
                   />
                   {searchInput && (
                     <button
@@ -337,17 +374,55 @@ export function CatalogPage() {
                   <div className="lg:hidden flex-1 sm:flex-initial">
                     <Sheet>
                       <SheetTrigger asChild>
-                        <Button variant="outline" size="default" className="h-10 w-full sm:w-auto gap-2 rounded-md">
+                        <Button
+                          variant="outline"
+                          size="default"
+                          className={`h-11 min-h-11 w-full sm:w-auto gap-2 rounded-md ${
+                            activeChips.length > 0 ? 'border-primary/50' : ''
+                          }`}
+                        >
                           <Filter className="h-4 w-4" />
                           <span>Lọc</span>
+                          {activeChips.length > 0 && (
+                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-semibold tabular">
+                              {activeChips.length}
+                            </Badge>
+                          )}
                         </Button>
                       </SheetTrigger>
-                      <SheetContent side="left" className="w-80 overflow-y-auto bg-card border-r border-border p-6">
-                        <SheetHeader className="mb-4">
-                          <SheetTitle className="text-foreground font-serif text-xl">Bộ lọc</SheetTitle>
+                      <SheetContent side="left" className="w-80 max-w-[85vw] flex flex-col h-full p-0 bg-card border-r border-border">
+                        <SheetHeader className="px-6 py-4 border-b border-border text-left">
+                          <div className="flex items-center gap-2 pr-8">
+                            <SlidersHorizontal className="h-4 w-4 text-foreground" />
+                            <SheetTitle className="font-semibold text-foreground text-base">Bộ lọc</SheetTitle>
+                            {activeChips.length > 0 && (
+                              <Badge variant="secondary" className="h-5 px-1.5 text-xs rounded-sm font-normal tabular">
+                                {activeChips.length}
+                              </Badge>
+                            )}
+                          </div>
                         </SheetHeader>
-                        <div>
-                          {filterContent}
+                        <div className="flex-1 overflow-y-auto px-6 py-4">
+                          {mobileFilterContent}
+                        </div>
+                        <div className="p-4 border-t border-border bg-card flex gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={clearFilters}
+                            disabled={activeChips.length === 0}
+                            className="flex-1 min-h-11 rounded-md text-sm"
+                          >
+                            Xóa bộ lọc
+                          </Button>
+                          <SheetClose asChild>
+                            <Button
+                              type="button"
+                              className="flex-1 min-h-11 rounded-md text-sm font-medium"
+                            >
+                              Xem kết quả
+                            </Button>
+                          </SheetClose>
                         </div>
                       </SheetContent>
                     </Sheet>
@@ -356,7 +431,7 @@ export function CatalogPage() {
                   {/* Sort */}
                   <div className="flex-1 sm:flex-initial">
                     <Select value={sortBy} onValueChange={handleSortChange}>
-                      <SelectTrigger className="h-10 w-full sm:w-[150px] md:w-[160px] text-sm rounded-md bg-background">
+                      <SelectTrigger className="h-11 min-h-11 sm:h-10 sm:min-h-10 w-full sm:w-[150px] md:w-[160px] text-sm rounded-md bg-background">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-popover rounded-md shadow-md border-border">
@@ -402,7 +477,7 @@ export function CatalogPage() {
               <aside className="hidden lg:block">
                 <div className="lg:sticky lg:top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
                   <div className="surface p-5">
-                    {filterContent}
+                    {desktopFilterContent}
                   </div>
                 </div>
               </aside>
@@ -434,7 +509,7 @@ export function CatalogPage() {
                     variant="ghost"
                     size="sm"
                     onClick={clearFilters}
-                    className="h-8 text-xs text-muted-foreground hover:text-foreground px-2"
+                    className="min-h-11 sm:min-h-8 h-9 sm:h-8 text-xs text-muted-foreground hover:text-foreground px-2"
                   >
                     Xóa tất cả
                   </Button>
@@ -515,19 +590,27 @@ export function CatalogPage() {
                           key={product.id}
                           className="flex gap-4 p-4 border border-border bg-card rounded-lg transition-colors hover:border-foreground/30"
                         >
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 bg-muted rounded-lg overflow-hidden shrink-0 border border-border">
+                          <Link
+                            to={`/p/${product.slug}`}
+                            className="w-24 h-24 sm:w-28 sm:h-28 bg-muted rounded-lg overflow-hidden shrink-0 border border-border block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
                             <img
                               src={getImageUrl(product.images[0], { width: 200 })}
                               alt={product.name}
                               loading="lazy"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition-transform duration-300 motion-reduce:transform-none hover:scale-105"
                             />
-                          </div>
+                          </Link>
                           <div className="flex-1 min-w-0 py-1 flex flex-col justify-between">
                             <div>
-                              <h3 className="font-medium text-foreground truncate text-base">
-                                {product.name}
-                              </h3>
+                              <Link
+                                to={`/p/${product.slug}`}
+                                className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring block mb-1"
+                              >
+                                <h3 className="font-semibold text-foreground text-base leading-snug line-clamp-2 hover:underline">
+                                  {product.name}
+                                </h3>
+                              </Link>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                                 <div className="flex items-center text-accent font-semibold">
                                   <span className="mr-0.5" aria-hidden="true">&#9733;</span>
@@ -546,13 +629,13 @@ export function CatalogPage() {
                                 ))}
                               </div>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
                               <span className="font-semibold text-foreground text-base tabular">
                                 {formatCurrency(product.basePrice)}
                               </span>
                               <Button
                                 size="sm"
-                                className="h-9 rounded-md text-xs transition-colors"
+                                className="h-11 sm:h-9 min-h-11 sm:min-h-9 rounded-md text-sm transition-colors"
                                 onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
                               >
                                 <ShoppingBag className="h-4 w-4 mr-1.5" /> Thêm vào giỏ
