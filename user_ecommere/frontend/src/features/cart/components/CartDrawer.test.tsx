@@ -113,7 +113,7 @@ describe('CartDrawer', () => {
 
     renderWithProviders(<CartDrawer />);
 
-    expect(screen.queryByText('Giỏ Hàng Của Bạn')).not.toBeInTheDocument();
+    expect(screen.queryByText('Giỏ hàng')).not.toBeInTheDocument();
   });
 
   it('renders empty cart drawer correctly when isOpen is true and cart is empty', () => {
@@ -129,15 +129,15 @@ describe('CartDrawer', () => {
     renderWithProviders(<CartDrawer />);
 
     // Header
-    expect(screen.getByText('Giỏ Hàng Của Bạn')).toBeInTheDocument();
-    expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+    expect(screen.getByText('Giỏ hàng')).toBeInTheDocument();
+    expect(screen.getByText('(0 sản phẩm)')).toBeInTheDocument();
 
     // Freeship Progress Meter
     expect(screen.getByText(/Mua thêm/i)).toBeInTheDocument();
     expect(
       screen.getByText(matchText(formatCurrency(250000))),
     ).toBeInTheDocument();
-    expect(screen.getByText(/để được Freeship/i)).toBeInTheDocument();
+    expect(screen.getByText(/để được miễn phí vận chuyển/i)).toBeInTheDocument();
     expect(screen.getByText('0%')).toBeInTheDocument();
 
     // Empty state
@@ -149,7 +149,7 @@ describe('CartDrawer', () => {
     ).toBeInTheDocument();
 
     const discoverBtn = screen.getByRole('link', {
-      name: 'Khám Phá Sản Phẩm Ngay',
+      name: 'Khám phá sản phẩm ngay',
     });
     expect(discoverBtn).toBeInTheDocument();
     expect(discoverBtn).toHaveAttribute('href', '/catalog');
@@ -160,6 +160,7 @@ describe('CartDrawer', () => {
 
   it('renders cart items, line totals, and footer when items exist below freeship threshold', () => {
     const items = [mockItem1];
+    const totalQuantity = mockItem1.quantity; // 2
     const totalPrice = mockItem1.price * mockItem1.quantity; // 240,000 (< 250,000)
     const freeshipRemaining = 250000 - totalPrice; // 10,000
     const freeshipProgress = Math.min(
@@ -179,49 +180,60 @@ describe('CartDrawer', () => {
     renderWithProviders(<CartDrawer />);
 
     // Header
-    expect(screen.getByText('Giỏ Hàng Của Bạn')).toBeInTheDocument();
-    expect(screen.getByText('1 sản phẩm')).toBeInTheDocument();
+    expect(screen.getByText('Giỏ hàng')).toBeInTheDocument();
+    expect(screen.getByText(`(${totalQuantity} sản phẩm)`)).toBeInTheDocument();
 
     // Freeship meter below threshold
     expect(screen.getByText(/Mua thêm/i)).toBeInTheDocument();
     expect(
       screen.getByText(matchText(formatCurrency(freeshipRemaining))),
     ).toBeInTheDocument();
-    expect(screen.getByText(/để được Freeship/i)).toBeInTheDocument();
+    expect(screen.getByText(/để được miễn phí vận chuyển/i)).toBeInTheDocument();
     expect(screen.getByText(`${freeshipProgress}%`)).toBeInTheDocument();
     expect(
-      screen.queryByText('🎉 Bạn đã đủ điều kiện FREESHIP!'),
+      screen.queryByText('🎉 Bạn đã được miễn phí vận chuyển!'),
     ).not.toBeInTheDocument();
 
     // Item details
     expect(screen.getByText(mockItem1.name)).toBeInTheDocument();
-    expect(screen.getByText(mockItem1.scent)).toBeInTheDocument();
-    expect(screen.getByText(`${mockItem1.volumeMl}ml`)).toBeInTheDocument();
+    expect(screen.getByText(matchText(mockItem1.scent))).toBeInTheDocument();
+    expect(
+      screen.getByText(matchText(`${mockItem1.volumeMl}ml`)),
+    ).toBeInTheDocument();
     expect(
       screen.getAllByText(matchText(formatCurrency(totalPrice))).length,
     ).toBeGreaterThanOrEqual(1);
 
+    // Unit price is displayed when quantity > 1
+    expect(
+      screen.getByText(
+        matchText(`${formatCurrency(mockItem1.price)} / sản phẩm`),
+      ),
+    ).toBeInTheDocument();
+
     // Footer summary
-    expect(screen.getByText('Tạm tính (1 sản phẩm):')).toBeInTheDocument();
+    expect(
+      screen.getByText(`Tạm tính (${totalQuantity} sản phẩm):`),
+    ).toBeInTheDocument();
     expect(screen.getByText('Vận chuyển:')).toBeInTheDocument();
 
     const shippingFee = screen.getByText('Tính khi thanh toán');
     expect(shippingFee).toBeInTheDocument();
-    expect(shippingFee).toHaveClass('text-slate-900');
-    expect(shippingFee).not.toHaveClass('text-emerald-600');
+    expect(shippingFee).toHaveClass('text-foreground');
+    expect(shippingFee).not.toHaveClass('text-success');
 
     expect(screen.getByText('Tổng cộng:')).toBeInTheDocument();
 
     // Action buttons in footer
     const checkoutBtn = screen.getByRole('link', {
-      name: /Tiến Hành Thanh Toán/i,
+      name: /Tiến hành thanh toán/i,
     });
     expect(checkoutBtn).toHaveAttribute('href', '/checkout');
     fireEvent.click(checkoutBtn);
     expect(mockCloseCart).toHaveBeenCalledTimes(1);
 
     const viewCartBtn = screen.getByRole('link', {
-      name: 'Xem Trang Giỏ Hàng Chi Tiết',
+      name: 'Xem giỏ hàng',
     });
     expect(viewCartBtn).toHaveAttribute('href', '/cart');
     fireEvent.click(viewCartBtn);
@@ -245,7 +257,7 @@ describe('CartDrawer', () => {
 
     // Freeship meter qualified
     expect(
-      screen.getByText('Bạn đã đủ điều kiện FREESHIP!'),
+      screen.getByText('🎉 Bạn đã được miễn phí vận chuyển!'),
     ).toBeInTheDocument();
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.queryByText(/Mua thêm/i)).not.toBeInTheDocument();
@@ -253,7 +265,7 @@ describe('CartDrawer', () => {
     // Footer shipping qualified
     const freeShipping = screen.getByText('Miễn phí');
     expect(freeShipping).toBeInTheDocument();
-    expect(freeShipping).toHaveClass('text-emerald-600 font-semibold');
+    expect(freeShipping).toHaveClass('text-success font-medium');
   });
 
   it('handles quantity reduction via minus button', () => {
@@ -271,9 +283,8 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem1.name)
       .closest('div.py-4') as HTMLElement;
-    const minusBtn = (drawerItem
-      .querySelector('svg.lucide-minus')
-      ?.closest('button') ||
+    const minusBtn = (drawerItem.querySelector('button[aria-label="Giảm số lượng"]') ||
+      drawerItem.querySelector('svg.lucide-minus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[0]) as HTMLButtonElement;
 
     expect(minusBtn).not.toBeDisabled();
@@ -301,9 +312,8 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem2.name)
       .closest('div.py-4') as HTMLElement;
-    const minusBtn = (drawerItem
-      .querySelector('svg.lucide-minus')
-      ?.closest('button') ||
+    const minusBtn = (drawerItem.querySelector('button[aria-label="Giảm số lượng"]') ||
+      drawerItem.querySelector('svg.lucide-minus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[0]) as HTMLButtonElement;
 
     expect(minusBtn).toBeDisabled();
@@ -324,9 +334,8 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem1.name)
       .closest('div.py-4') as HTMLElement;
-    const plusBtn = (drawerItem
-      .querySelector('svg.lucide-plus')
-      ?.closest('button') ||
+    const plusBtn = (drawerItem.querySelector('button[aria-label="Tăng số lượng"]') ||
+      drawerItem.querySelector('svg.lucide-plus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[1]) as HTMLButtonElement;
 
     expect(plusBtn).not.toBeDisabled();
@@ -354,9 +363,8 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem2.name)
       .closest('div.py-4') as HTMLElement;
-    const plusBtn = (drawerItem
-      .querySelector('svg.lucide-plus')
-      ?.closest('button') ||
+    const plusBtn = (drawerItem.querySelector('button[aria-label="Tăng số lượng"]') ||
+      drawerItem.querySelector('svg.lucide-plus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[1]) as HTMLButtonElement;
 
     expect(plusBtn).toBeDisabled();
@@ -377,9 +385,8 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem3.name)
       .closest('div.py-4') as HTMLElement;
-    const plusBtn = (drawerItem
-      .querySelector('svg.lucide-plus')
-      ?.closest('button') ||
+    const plusBtn = (drawerItem.querySelector('button[aria-label="Tăng số lượng"]') ||
+      drawerItem.querySelector('svg.lucide-plus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[1]) as HTMLButtonElement;
 
     expect(plusBtn).not.toBeDisabled();
@@ -461,9 +468,9 @@ describe('CartDrawer', () => {
     });
 
     const { rerender } = renderWithProviders(<CartDrawer />);
-    expect(screen.queryByText('Giỏ Hàng Của Bạn')).not.toBeInTheDocument();
+    expect(screen.queryByText('Giỏ hàng')).not.toBeInTheDocument();
 
-    // State change: drawer opens
+    // State change: drawer opens (mockItem1 qty: 2, mockItem2 qty: 1 => total: 3)
     mockUseCart.mockReturnValue({
       items: [mockItem1, mockItem2],
       isOpen: true,
@@ -478,10 +485,10 @@ describe('CartDrawer', () => {
         <CartDrawer />
       </MemoryRouter>,
     );
-    expect(screen.getByText('Giỏ Hàng Của Bạn')).toBeInTheDocument();
-    expect(screen.getByText('2 sản phẩm')).toBeInTheDocument();
+    expect(screen.getByText('Giỏ hàng')).toBeInTheDocument();
+    expect(screen.getByText('(3 sản phẩm)')).toBeInTheDocument();
 
-    // State change: 1 item removed
+    // State change: 1 item removed (mockItem2 qty: 1 => total: 1)
     mockUseCart.mockReturnValue({
       items: [mockItem2],
       isOpen: true,
@@ -496,7 +503,7 @@ describe('CartDrawer', () => {
         <CartDrawer />
       </MemoryRouter>,
     );
-    expect(screen.getByText('1 sản phẩm')).toBeInTheDocument();
+    expect(screen.getByText('(1 sản phẩm)')).toBeInTheDocument();
     expect(screen.queryByText(mockItem1.name)).not.toBeInTheDocument();
     expect(screen.getByText(mockItem2.name)).toBeInTheDocument();
 
@@ -515,7 +522,7 @@ describe('CartDrawer', () => {
         <CartDrawer />
       </MemoryRouter>,
     );
-    expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+    expect(screen.getByText('(0 sản phẩm)')).toBeInTheDocument();
     expect(screen.getByText('Giỏ hàng của bạn đang trống')).toBeInTheDocument();
   });
 });
