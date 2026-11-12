@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/lib/validators';
@@ -12,6 +13,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
 import { STORE_URL } from '@/lib/constants';
@@ -22,13 +31,36 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
+  ExternalLink,
   CheckCircle2,
   Sparkles,
+  AlertCircle,
 } from 'lucide-react';
 
 export function LoginPage() {
-  const { login, isLoginLoading } = useAuth();
+  const { login, isLoginLoading, loginError, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Read destination from location.state.from if redirected by RequireAuth
+  const stateFrom = (
+    location.state as
+      | { from?: { pathname?: string; search?: string; hash?: string } }
+      | undefined
+  )?.from;
+  const from = stateFrom
+    ? `${stateFrom.pathname || '/admin'}${stateFrom.search || ''}${stateFrom.hash || ''}`
+    : '/admin';
+
+  useEffect(() => {
+    if (user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, from]);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -39,8 +71,31 @@ export function LoginPage() {
   });
 
   const onSubmit = (data: LoginInput) => {
-    login(data);
+    if (rememberMe) {
+      try {
+        localStorage.setItem('admin_remembered_phone', data.phone);
+      } catch {
+        // Ignore localStorage errors
+      }
+    } else {
+      try {
+        localStorage.removeItem('admin_remembered_phone');
+      } catch {
+        // Ignore localStorage errors
+      }
+    }
+
+    login(data, {
+      onSuccess: () => {
+        navigate(from, { replace: true });
+      },
+    });
   };
+
+  const errorMessage =
+    (loginError?.response?.data as { message?: string } | undefined)?.message ||
+    loginError?.message ||
+    'Đăng nhập thất bại. Vui lòng kiểm tra lại số điện thoại và mật khẩu.';
 
   return (
     <>
@@ -64,8 +119,8 @@ export function LoginPage() {
                 <span className="text-xl font-bold tracking-tight text-slate-900 block">
                   Thai Spray <span className="text-teal-600">Admin</span>
                 </span>
-                <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
-                  Hệ Thống Quản Trị Trung Tâm
+                <span className="text-xs text-slate-500 font-medium">
+                  Hệ thống Quản trị Trung tâm
                 </span>
               </div>
             </div>
@@ -97,8 +152,7 @@ export function LoginPage() {
           {/* Bottom Security Footer */}
           <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-200">
             <span>
-              &copy; {new Date().getFullYear()} Thai Spray Việt Nam • Control
-              Platform
+              &copy; {new Date().getFullYear()} Thai Spray Việt Nam • Nền tảng Quản trị
             </span>
             <span className="flex items-center gap-1.5 font-medium text-slate-700">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
@@ -119,8 +173,8 @@ export function LoginPage() {
                 <p className="text-lg font-bold text-slate-900">
                   Thai Spray Admin
                 </p>
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  Cổng Quản Trị Hệ Thống
+                <p className="text-xs text-slate-500 font-medium">
+                  Hệ thống Quản trị Trung tâm
                 </p>
               </div>
             </div>
@@ -129,7 +183,7 @@ export function LoginPage() {
             <div className="space-y-1.5 text-left">
               <div className="inline-flex items-center gap-2 rounded-lg bg-teal-50 border border-teal-200 px-3 py-1 text-xs font-semibold text-teal-700">
                 <Lock className="h-3.5 w-3.5 text-teal-600" />
-                Xác Thực Quyền Quản Trị (Role: ADMIN)
+                Cổng Đăng Nhập Quản Trị Viên
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 Đăng Nhập Quản Trị
@@ -147,13 +201,24 @@ export function LoginPage() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-4"
                 >
+                  {/* Persistent inline error alert */}
+                  {loginError && (
+                    <div
+                      role="alert"
+                      className="rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700 font-medium flex items-start gap-2.5"
+                    >
+                      <AlertCircle className="h-4 w-4 shrink-0 text-red-600 mt-0.5" />
+                      <div className="flex-1">{errorMessage}</div>
+                    </div>
+                  )}
+
                   <FormField
                     control={form.control}
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                          Số điện thoại Quản trị
+                        <FormLabel className="text-xs font-medium text-slate-700">
+                          Số điện thoại quản trị
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
@@ -163,6 +228,7 @@ export function LoginPage() {
                             <Input
                               type="tel"
                               placeholder="0901234567"
+                              autoComplete="tel username"
                               className="pl-10 h-11 rounded-lg border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-sm font-medium"
                               {...field}
                             />
@@ -179,12 +245,16 @@ export function LoginPage() {
                     render={({ field }) => (
                       <FormItem>
                         <div className="flex items-center justify-between">
-                          <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                          <FormLabel className="text-xs font-medium text-slate-700">
                             Mật khẩu truy cập
                           </FormLabel>
-                          <span className="text-xs text-teal-600 hover:text-teal-700 cursor-pointer font-medium transition-colors">
+                          <button
+                            type="button"
+                            onClick={() => setForgotPasswordOpen(true)}
+                            className="text-xs text-teal-600 hover:text-teal-700 cursor-pointer font-medium transition-colors focus-visible:outline-none focus-visible:underline min-h-[32px] sm:min-h-0 inline-flex items-center"
+                          >
                             Quên mật khẩu?
-                          </span>
+                          </button>
                         </div>
                         <FormControl>
                           <div className="relative">
@@ -194,13 +264,15 @@ export function LoginPage() {
                             <Input
                               type={showPassword ? 'text' : 'password'}
                               placeholder="Nhập mật khẩu quản trị"
-                              className="pl-10 pr-10 h-11 rounded-lg border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-sm font-medium"
+                              autoComplete="current-password"
+                              className="pl-10 pr-12 h-11 rounded-lg border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-sm font-medium"
                               {...field}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                              className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded-r-lg"
                             >
                               {showPassword ? (
                                 <EyeOff className="h-4 w-4" />
@@ -216,13 +288,20 @@ export function LoginPage() {
                   />
 
                   <div className="flex items-center justify-between text-xs text-slate-600 pt-1">
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <label
+                      htmlFor="remember-me"
+                      className="flex items-center gap-2 cursor-pointer select-none min-h-[44px] py-1"
+                    >
                       <input
                         type="checkbox"
-                        defaultChecked
-                        className="rounded border-slate-300 bg-white text-teal-600 focus:ring-teal-500 h-4 w-4"
+                        id="remember-me"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="rounded border-slate-300 bg-white text-teal-600 focus:ring-teal-500 h-4 w-4 cursor-pointer"
                       />
-                      <span>Ghi nhớ phiên đăng nhập này</span>
+                      <span className="text-xs text-slate-700 font-medium">
+                        Ghi nhớ phiên đăng nhập này
+                      </span>
                     </label>
                   </div>
 
@@ -243,12 +322,9 @@ export function LoginPage() {
                 </form>
               </Form>
 
-              <div className="mt-6 pt-5 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
+              <div className="mt-6 pt-5 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
                 <span className="flex items-center gap-1.5 text-emerald-700 font-medium">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
+                  <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                   Cổng kết nối an toàn
                 </span>
                 <span className="flex items-center gap-1 text-slate-500">
@@ -264,15 +340,43 @@ export function LoginPage() {
                 href={STORE_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-600 transition-colors font-medium"
+                className="inline-flex items-center justify-center gap-1.5 text-xs text-slate-500 hover:text-teal-600 transition-colors font-medium py-2.5 px-3 min-h-[44px] rounded-lg"
               >
-                <span>Chuyển sang Giao diện Cửa hàng Khách Hàng </span>
-                <ArrowRight className="h-3 w-3" />
+                <span>Chuyển sang giao diện cửa hàng khách hàng</span>
+                <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Support Dialog */}
+      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+        <DialogContent className="sm:max-w-md bg-white border-slate-200 text-slate-900">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold text-slate-900">
+              Khôi phục mật khẩu quản trị
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-600 pt-2 space-y-2">
+              <span className="block">
+                Hệ thống quản trị Thai Spray không hỗ trợ tự cấp lại mật khẩu trực tuyến nhằm bảo vệ an toàn dữ liệu nội bộ.
+              </span>
+              <span className="block">
+                Vui lòng liên hệ trực tiếp <strong>Quản trị viên cấp cao</strong> hoặc bộ phận Kỹ thuật nội bộ để xác minh danh tính và được cấp lại mật khẩu truy cập.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 sm:justify-end">
+            <Button
+              type="button"
+              className="w-full sm:w-auto h-10 px-4 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold"
+              onClick={() => setForgotPasswordOpen(false)}
+            >
+              Đã hiểu
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
