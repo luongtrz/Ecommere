@@ -10,6 +10,7 @@ import type { AdminOrder } from '../api/admin-orders.api';
 const mockUseAdminOrders = vi.fn();
 const mockMutate = vi.fn();
 const mockUseUpdateOrderStatus = vi.fn();
+const mockUseDashboardStats = vi.fn();
 
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
@@ -18,6 +19,10 @@ const mockToast = vi.fn();
 vi.mock('../hooks/useAdminOrders', () => ({
   useAdminOrders: (params: any) => mockUseAdminOrders(params),
   useUpdateOrderStatus: () => mockUseUpdateOrderStatus(),
+}));
+
+vi.mock('../hooks/useDashboardStats', () => ({
+  useDashboardStats: () => mockUseDashboardStats(),
 }));
 
 vi.mock('../api/admin-orders.api', () => ({
@@ -58,6 +63,67 @@ vi.mock('@/hooks/useToast', () => ({
     loading: vi.fn(),
     dismiss: vi.fn(),
   }),
+}));
+
+vi.mock('@/components/ui/dropdown-menu', () => ({
+  DropdownMenu: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dropdown-menu">{children}</div>
+  ),
+  DropdownMenuTrigger: ({
+    children,
+  }: {
+    children: React.ReactNode;
+    asChild?: boolean;
+  }) => <>{children}</>,
+  DropdownMenuContent: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => (
+    <div data-testid="dropdown-menu-content" className={className}>
+      {children}
+    </div>
+  ),
+  DropdownMenuItem: ({
+    children,
+    onClick,
+    disabled,
+    className,
+    asChild,
+  }: {
+    children: React.ReactNode;
+    onClick?: (e?: any) => void;
+    disabled?: boolean;
+    className?: string;
+    asChild?: boolean;
+  }) => {
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement<any>, {
+        onClick: (e: any) => {
+          if (!disabled) {
+            (children as any).props.onClick?.(e);
+            onClick?.(e);
+          }
+        },
+        'aria-disabled': disabled,
+        className:
+          `${(children as any).props.className || ''} ${className || ''}`.trim(),
+      });
+    }
+    return (
+      <button
+        type="button"
+        role="menuitem"
+        disabled={disabled}
+        onClick={disabled ? undefined : onClick}
+        className={className}
+      >
+        {children}
+      </button>
+    );
+  },
 }));
 
 vi.mock('@/components/ui/select', async () => {
@@ -448,6 +514,24 @@ describe('AdminOrdersPage', () => {
       mutate: mockMutate,
       isPending: false,
     });
+    mockUseDashboardStats.mockReturnValue({
+      data: {
+        orders: {
+          totalOrders: 1250,
+          monthlyOrders: 150,
+          monthlyChange: 5.0,
+          pendingOrders: 18,
+          shippingOrders: 32,
+        },
+        revenue: {
+          totalRevenue: 500000000,
+          monthlyRevenue: 45000000,
+          monthlyChange: 15.2,
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('renders loading state with skeleton placeholders', () => {
@@ -455,6 +539,7 @@ describe('AdminOrdersPage', () => {
       data: undefined,
       isLoading: true,
       isError: false,
+      refetch: vi.fn(),
     });
 
     const { container } = renderPage();
@@ -467,32 +552,27 @@ describe('AdminOrdersPage', () => {
     expect(screen.queryByText('Mã đơn')).not.toBeInTheDocument();
   });
 
-  it('renders error state and reloads window when clicking retry button', () => {
+  it('renders error state within table card container and refetches query when clicking retry', () => {
+    const mockRefetch = vi.fn();
     mockUseAdminOrders.mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: true,
+      refetch: mockRefetch,
     });
 
-    const reloadMock = vi.fn();
-    const originalLocation = window.location;
-    delete (window as any).location;
-    (window as any).location = { ...originalLocation, reload: reloadMock };
+    renderPage();
 
-    try {
-      renderPage();
+    // Page shell and header are preserved
+    expect(screen.getByText('Quản lý đơn hàng')).toBeInTheDocument();
+    expect(
+      screen.getByText('Không thể tải danh sách đơn hàng'),
+    ).toBeInTheDocument();
+    const retryBtn = screen.getByRole('button', { name: 'Thử lại' });
+    expect(retryBtn).toBeInTheDocument();
 
-      expect(
-        screen.getByText('Không thể tải danh sách đơn hàng'),
-      ).toBeInTheDocument();
-      const retryBtn = screen.getByRole('button', { name: 'Thử lại' });
-      expect(retryBtn).toBeInTheDocument();
-
-      fireEvent.click(retryBtn);
-      expect(reloadMock).toHaveBeenCalledTimes(1);
-    } finally {
-      (window as any).location = originalLocation;
-    }
+    fireEvent.click(retryBtn);
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 
   it('renders empty state when no orders exist', () => {
@@ -506,14 +586,15 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
 
     expect(screen.getByText('Không tìm thấy đơn hàng nào')).toBeInTheDocument();
-    expect(screen.getByText('Tổng đơn hàng tháng này')).toBeInTheDocument();
+    expect(screen.getByText('Tổng đơn hàng')).toBeInTheDocument();
     expect(screen.getByText('Đang chờ xử lý')).toBeInTheDocument();
-    expect(screen.getByText('Doanh thu hôm nay')).toBeInTheDocument();
+    expect(screen.getByText('Doanh thu tháng này')).toBeInTheDocument();
 
     // Total should display 0
     expect(screen.getAllByText('0')[0]).toBeInTheDocument();
@@ -533,6 +614,7 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
@@ -543,9 +625,10 @@ describe('AdminOrdersPage', () => {
       screen.getByText('Theo dõi và xử lý các đơn hàng của cửa hàng.'),
     ).toBeInTheDocument();
     expect(screen.getByText(/Hôm nay:/)).toBeInTheDocument();
+    // Dead button "+ Tạo đơn hàng" is removed
     expect(
-      screen.getByRole('button', { name: '+ Tạo đơn hàng' }),
-    ).toBeInTheDocument();
+      screen.queryByRole('button', { name: '+ Tạo đơn hàng' }),
+    ).not.toBeInTheDocument();
 
     // Stats
     expect(screen.getAllByText('4')[0]).toBeInTheDocument();
@@ -559,73 +642,99 @@ describe('AdminOrdersPage', () => {
     expect(screen.getByText('Thao tác')).toBeInTheDocument();
 
     // Order 1 checks
-    const code1Link = screen.getByRole('link', { name: 'ORD-001' });
-    expect(code1Link).toHaveAttribute('href', '/admin/orders/ord-1');
-    expect(screen.getByText('Xịt Thơm Classic')).toBeInTheDocument();
-    expect(screen.getByText(/• Chanh Sả/)).toBeInTheDocument();
-    expect(screen.getByText('+1 sản phẩm khác')).toBeInTheDocument();
-    expect(screen.getByText('Nguyễn Văn A')).toBeInTheDocument();
-    expect(screen.getByText('0912345678')).toBeInTheDocument();
+    const code1Links = screen.getAllByRole('link', { name: 'ORD-001' });
+    expect(code1Links[0]).toHaveAttribute('href', '/admin/orders/ord-1');
     expect(
-      screen.getByText('123 Lê Lợi, Phường Bến Nghé, Quận 1, TP Hồ Chí Minh'),
-    ).toBeInTheDocument();
+      screen.getAllByText('Xịt Thơm Classic').length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/• Chanh Sả/).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText('+1 sản phẩm khác').length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Nguyễn Văn A').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('0912345678').length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText(
+        '123 Lê Lợi, Phường Bến Nghé, Quận 1, TP Hồ Chí Minh',
+      ).length,
+    ).toBeGreaterThanOrEqual(1);
 
-    const row1 = screen.getByText('ORD-001').closest('tr')!;
+    const row1 = screen.getAllByText('ORD-001')[0].closest('tr')!;
     expect(row1.querySelectorAll('td')[4]).toHaveTextContent('Chờ thanh toán');
     expect(screen.getAllByText('Chờ thanh toán').length).toBeGreaterThanOrEqual(
       1,
     );
     expect(within(row1).getByText('COD')).toBeInTheDocument();
 
-    const productImg = screen.getByRole('img', { name: 'Product' });
-    expect(productImg).toHaveAttribute(
+    const productImgs = screen.getAllByRole('img', {
+      name: /Xịt Thơm Classic|Product/,
+    });
+    expect(productImgs[0]).toHaveAttribute(
       'src',
       'https://example.com/classic.png',
     );
 
-    // Order 2 checks (fallback email, fallback phone, simple address, empty scent)
-    const code2Link = screen.getByRole('link', { name: 'ORD-002' });
-    expect(code2Link).toHaveAttribute('href', '/admin/orders/ord-2');
-    expect(screen.getByText('user2@example.com')).toBeInTheDocument();
-    expect(screen.getByText('456 Phố Huế, Hà Nội')).toBeInTheDocument();
+    // Primary workflow action for ORD-001 (PENDING_PAYMENT)
+    expect(
+      within(row1).getByRole('button', { name: 'Xác nhận thanh toán' }),
+    ).toBeInTheDocument();
 
-    const row2 = screen.getByText('ORD-002').closest('tr')!;
+    // Order 2 checks (fallback email, fallback phone, simple address, empty scent)
+    const code2Links = screen.getAllByRole('link', { name: 'ORD-002' });
+    expect(code2Links[0]).toHaveAttribute('href', '/admin/orders/ord-2');
+    expect(
+      screen.getAllByText('user2@example.com').length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText('456 Phố Huế, Hà Nội').length,
+    ).toBeGreaterThanOrEqual(1);
+
+    const row2 = screen.getAllByText('ORD-002')[0].closest('tr')!;
     expect(row2.querySelectorAll('td')[4]).toHaveTextContent('Đã thanh toán');
     expect(screen.getAllByText('Đã thanh toán').length).toBeGreaterThanOrEqual(
       1,
     );
     expect(within(row2).getByText('VNPAY')).toBeInTheDocument();
+    expect(
+      within(row2).getByRole('button', { name: 'Xác nhận đóng gói' }),
+    ).toBeInTheDocument();
 
     // Order 3 checks (undefined user, empty address, undefined items)
-    expect(screen.getByText('ORD-003')).toBeInTheDocument();
+    expect(screen.getAllByText('ORD-003').length).toBeGreaterThanOrEqual(1);
 
-    const row3 = screen.getByText('ORD-003').closest('tr')!;
+    const row3 = screen.getAllByText('ORD-003')[0].closest('tr')!;
     expect(row3.querySelectorAll('td')[4]).toHaveTextContent('Đang đóng gói');
     expect(screen.getAllByText('Đang đóng gói').length).toBeGreaterThanOrEqual(
       1,
     );
     expect(within(row3).getByText('MOMO')).toBeInTheDocument();
+    expect(
+      within(row3).getByRole('button', { name: 'Giao hàng' }),
+    ).toBeInTheDocument();
 
     // Fallback phone count: ord-2 and ord-3 both display 'Chưa cập nhật SĐT'
     const fallbackPhones = screen.getAllByText('Chưa cập nhật SĐT');
     expect(fallbackPhones.length).toBeGreaterThanOrEqual(2);
 
     // Order 4 checks (empty address object, user name without email)
-    expect(screen.getByText('ORD-004')).toBeInTheDocument();
-    expect(screen.getByText('Trần Văn B')).toBeInTheDocument();
+    expect(screen.getAllByText('ORD-004').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Trần Văn B').length).toBeGreaterThanOrEqual(1);
 
-    const row4 = screen.getByText('ORD-004').closest('tr')!;
+    const row4 = screen.getAllByText('ORD-004')[0].closest('tr')!;
     expect(row4.querySelectorAll('td')[4]).toHaveTextContent('Đang giao hàng');
     expect(screen.getAllByText('Đang giao hàng').length).toBeGreaterThanOrEqual(
       1,
     );
     expect(within(row4).getByText('COD')).toBeInTheDocument();
+    expect(
+      within(row4).getByRole('button', { name: 'Giao thành công' }),
+    ).toBeInTheDocument();
 
     // Detail action eye buttons
-    const viewLink = within(row1).getByRole('link', {
+    const viewLinks = screen.getAllByRole('link', {
       name: 'Xem chi tiết đơn hàng ORD-001',
     });
-    expect(viewLink).toHaveAttribute('href', '/admin/orders/ord-1');
+    expect(viewLinks[0]).toHaveAttribute('href', '/admin/orders/ord-1');
   });
 
   it('renders order with unknown status and invalid addressJson, exercising fallbacks', () => {
@@ -639,23 +748,19 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
 
-    expect(screen.getByText('ORD-005')).toBeInTheDocument();
+    expect(screen.getAllByText('ORD-005').length).toBeGreaterThanOrEqual(1);
 
-    const row = screen.getByText('ORD-005').closest('tr')!;
+    const row = screen.getAllByText('ORD-005')[0].closest('tr')!;
     // StatusBadge in cell 4 renders unknown status label fallback
     expect(row.querySelectorAll('td')[4]).toHaveTextContent('UNKNOWN_STATUS');
     expect(screen.getAllByText('UNKNOWN_STATUS').length).toBeGreaterThanOrEqual(
       1,
     );
-
-    // Quick status update select renders fallback option
-    expect(
-      within(row).getByTestId('select-item-UNKNOWN_STATUS'),
-    ).toBeInTheDocument();
   });
 
   it('renders orders with DELIVERED, CANCELED, and REFUNDED statuses and allowed transitions', () => {
@@ -669,38 +774,39 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
 
-    expect(screen.getByText('ORD-006')).toBeInTheDocument();
-    const row6 = screen.getByText('ORD-006').closest('tr')!;
+    expect(screen.getAllByText('ORD-006').length).toBeGreaterThanOrEqual(1);
+    const row6 = screen.getAllByText('ORD-006')[0].closest('tr')!;
     expect(row6.querySelectorAll('td')[4]).toHaveTextContent('Giao thành công');
     expect(
       screen.getAllByText('Giao thành công').length,
     ).toBeGreaterThanOrEqual(1);
 
-    expect(screen.getByText('ORD-007')).toBeInTheDocument();
-    const row7 = screen.getByText('ORD-007').closest('tr')!;
+    expect(screen.getAllByText('ORD-007').length).toBeGreaterThanOrEqual(1);
+    const row7 = screen.getAllByText('ORD-007')[0].closest('tr')!;
     expect(row7.querySelectorAll('td')[4]).toHaveTextContent('Đã hủy');
     expect(screen.getAllByText('Đã hủy').length).toBeGreaterThanOrEqual(1);
 
-    expect(screen.getByText('ORD-008')).toBeInTheDocument();
-    const row8 = screen.getByText('ORD-008').closest('tr')!;
+    expect(screen.getAllByText('ORD-008').length).toBeGreaterThanOrEqual(1);
+    const row8 = screen.getAllByText('ORD-008')[0].closest('tr')!;
     expect(row8.querySelectorAll('td')[4]).toHaveTextContent('Đã hoàn tiền');
     expect(screen.getAllByText('Đã hoàn tiền').length).toBeGreaterThanOrEqual(
       1,
     );
 
-    // DELIVERED has allowed next status REFUNDED
+    // DELIVERED has secondary action "Hoàn tiền" in overflow menu
     expect(
-      within(row6).getByTestId('select-item-REFUNDED'),
+      within(row6).getByRole('menuitem', { name: /Hoàn tiền/ }),
     ).toBeInTheDocument();
 
-    // CANCELED has empty allowed next statuses
+    // CANCELED has terminal status with no action buttons
     expect(
-      within(row7).getByTestId('select-item-CANCELED'),
-    ).toBeInTheDocument();
+      within(row7).queryByRole('menuitem', { name: /Hủy đơn hàng/ }),
+    ).not.toBeInTheDocument();
   });
 
   it('filters orders by status and resets page to 1', () => {
@@ -714,6 +820,7 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
@@ -754,6 +861,7 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     try {
@@ -800,6 +908,7 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     try {
@@ -837,7 +946,7 @@ describe('AdminOrdersPage', () => {
     }
   });
 
-  it('triggers updateStatusMutation on row status select and handles onSuccess toast', () => {
+  it('triggers updateStatusMutation on primary workflow action and handles onSuccess toast', () => {
     mockUseAdminOrders.mockReturnValue({
       data: {
         data: [mockOrders[0]], // ORD-001 with status PENDING_PAYMENT
@@ -848,14 +957,18 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
 
-    const row = screen.getByText('ORD-001').closest('tr')!;
-    const paidOption = within(row).getByTestId('select-item-PAID');
+    const row = screen.getAllByText('ORD-001')[0].closest('tr')!;
+    // Primary forward workflow button for PENDING_PAYMENT is 'Xác nhận thanh toán'
+    const confirmPaymentBtn = within(row).getByRole('button', {
+      name: 'Xác nhận thanh toán',
+    });
 
-    fireEvent.click(paidOption);
+    fireEvent.click(confirmPaymentBtn);
 
     expect(mockMutate).toHaveBeenCalledTimes(1);
     expect(mockMutate).toHaveBeenCalledWith(
@@ -881,7 +994,7 @@ describe('AdminOrdersPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('handles onError callback in updateStatusMutation when error response message is a string', () => {
+  it('requires confirmation dialog before canceling an order and handles onError callback with string message', () => {
     mockUseAdminOrders.mockReturnValue({
       data: {
         data: [mockOrders[0]],
@@ -892,14 +1005,38 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
 
-    const row = screen.getByText('ORD-001').closest('tr')!;
-    const canceledOption = within(row).getByTestId('select-item-CANCELED');
+    const row = screen.getAllByText('ORD-001')[0].closest('tr')!;
+    const cancelMenuItem = within(row).getByRole('menuitem', {
+      name: /Hủy đơn hàng/,
+    });
 
-    fireEvent.click(canceledOption);
+    // Clicking cancel menu item does not mutate immediately; it opens confirmation dialog
+    fireEvent.click(cancelMenuItem);
+    expect(mockMutate).not.toHaveBeenCalled();
+
+    // Dialog title and content appear
+    expect(screen.getByText('Xác nhận hủy đơn hàng')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Bạn có chắc chắn muốn hủy đơn hàng #ORD-001/),
+    ).toBeInTheDocument();
+
+    // Confirm cancellation in dialog
+    const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
+    fireEvent.click(confirmBtn);
+
+    expect(mockMutate).toHaveBeenCalledTimes(1);
+    expect(mockMutate).toHaveBeenCalledWith(
+      { orderId: 'ord-1', status: 'CANCELED' },
+      expect.objectContaining({
+        onSuccess: expect.any(Function),
+        onError: expect.any(Function),
+      }),
+    );
 
     const { onError } = mockMutate.mock.calls[0][1];
 
@@ -918,6 +1055,37 @@ describe('AdminOrdersPage', () => {
     );
   });
 
+  it('cancels destructive action when clicking close button in confirmation dialog', () => {
+    mockUseAdminOrders.mockReturnValue({
+      data: {
+        data: [mockOrders[0]],
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    renderPage();
+
+    const row = screen.getAllByText('ORD-001')[0].closest('tr')!;
+    const cancelMenuItem = within(row).getByRole('menuitem', {
+      name: /Hủy đơn hàng/,
+    });
+
+    fireEvent.click(cancelMenuItem);
+    expect(screen.getByText('Xác nhận hủy đơn hàng')).toBeInTheDocument();
+
+    const closeBtn = screen.getByRole('button', { name: 'Đóng' });
+    fireEvent.click(closeBtn);
+
+    expect(mockMutate).not.toHaveBeenCalled();
+    expect(screen.queryByText('Xác nhận hủy đơn hàng')).not.toBeInTheDocument();
+  });
+
   it('handles onError callback in updateStatusMutation with default message when error response message is not a string', () => {
     mockUseAdminOrders.mockReturnValue({
       data: {
@@ -929,14 +1097,19 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
 
-    const row = screen.getByText('ORD-001').closest('tr')!;
-    const canceledOption = within(row).getByTestId('select-item-CANCELED');
+    const row = screen.getAllByText('ORD-001')[0].closest('tr')!;
+    const cancelMenuItem = within(row).getByRole('menuitem', {
+      name: /Hủy đơn hàng/,
+    });
 
-    fireEvent.click(canceledOption);
+    fireEvent.click(cancelMenuItem);
+    const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
+    fireEvent.click(confirmBtn);
 
     const { onError } = mockMutate.mock.calls[0][1];
 
@@ -976,6 +1149,7 @@ describe('AdminOrdersPage', () => {
       },
       isLoading: false,
       isError: false,
+      refetch: vi.fn(),
     });
 
     renderPage();
