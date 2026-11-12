@@ -319,8 +319,8 @@ export function ChatbotWidget() {
           onClick={() => setOpen(true)}
           className={cn(
             'fixed z-30 transition-colors duration-200 motion-reduce:transition-none',
-            // Desktop: icon-only, bottom-left, so it never covers the right-hand purchase column or header actions.
-            'bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] right-3 md:bottom-6 md:left-6 md:right-auto',
+            // Desktop: icon-only 48px circle in the right margin, outside the content column, so it does not cover purchase buttons.
+            'bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] right-3 md:bottom-6 md:right-6',
             'h-12 w-12 rounded-full',
             'bg-primary text-primary-foreground shadow-md hover:bg-primary/90',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
