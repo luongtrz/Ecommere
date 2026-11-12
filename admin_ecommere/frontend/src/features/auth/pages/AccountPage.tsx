@@ -5,12 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   User,
   Mail,
   Calendar,
   Shield,
   ShoppingBag,
-  Heart,
   Settings,
   LogOut,
   Phone,
@@ -23,6 +30,7 @@ export function AccountPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   if (!user) return null;
 
@@ -33,6 +41,10 @@ export function AccountPage() {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const getRoleLabel = (role: string) => {
+    return role === 'ADMIN' ? 'Quản trị viên' : 'Nhân viên vận hành';
   };
 
   const getRoleColor = (role: string) => {
@@ -50,7 +62,7 @@ export function AccountPage() {
             Tài khoản của tôi
           </h1>
           <p className="text-sm text-slate-600 font-normal">
-            Quản lý thông tin cá nhân và hoạt động mua sắm
+            Quản lý thông tin tài khoản và phiên làm việc quản trị
           </p>
         </div>
 
@@ -72,14 +84,13 @@ export function AccountPage() {
                       variant="secondary"
                       className={getRoleColor(user.role)}
                     >
-                      {user.role === 'ADMIN' ? 'Quản trị viên' : 'Khách hàng'}
+                      {getRoleLabel(user.role)}
                     </Badge>
                   </div>
 
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="w-full rounded-lg border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-900 transition-colors font-medium text-slate-700 shadow-sm"
+                    className="w-full h-11 sm:h-9 rounded-lg border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-900 transition-colors font-medium text-slate-700 shadow-sm"
                     onClick={() => setIsProfileDialogOpen(true)}
                   >
                     <Settings className="h-4 w-4 mr-2 text-teal-600" />
@@ -100,8 +111,8 @@ export function AccountPage() {
                 <div className="flex gap-3">
                   <Button
                     variant="destructive"
-                    onClick={logout}
-                    className="flex-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 font-semibold shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-rose-500"
+                    onClick={() => setIsLogoutDialogOpen(true)}
+                    className="flex-1 h-11 sm:h-9 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 font-semibold shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-rose-500"
                   >
                     <LogOut className="h-4 w-4 mr-2" />
                     Đăng xuất
@@ -128,7 +139,7 @@ export function AccountPage() {
                       <Mail className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <p className="text-xs font-medium text-slate-600">
                         Email
                       </p>
                       <p className="font-medium text-slate-900 truncate">
@@ -142,7 +153,7 @@ export function AccountPage() {
                       <Phone className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <p className="text-xs font-medium text-slate-600">
                         Số điện thoại
                       </p>
                       <p className="font-medium text-slate-900 tabular-nums">
@@ -156,7 +167,7 @@ export function AccountPage() {
                       <Calendar className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <p className="text-xs font-medium text-slate-600">
                         Ngày tham gia
                       </p>
                       <p className="font-medium text-slate-900">
@@ -181,8 +192,25 @@ export function AccountPage() {
               <CardContent className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50">
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-slate-600">
+                        Mật khẩu đăng nhập
+                      </p>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Bảo vệ bằng mật khẩu
+                      </p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent font-medium text-xs shrink-0 whitespace-nowrap"
+                    >
+                      Đã kích hoạt
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50">
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-slate-600">
                         Xác thực hai lớp
                       </p>
                       <p className="text-sm font-semibold text-slate-900">
@@ -191,26 +219,9 @@ export function AccountPage() {
                     </div>
                     <Badge
                       variant="outline"
-                      className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent font-medium"
+                      className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent font-medium text-xs shrink-0 whitespace-nowrap"
                     >
                       Đang bật
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50">
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                        Mã hóa kết nối
-                      </p>
-                      <p className="text-sm font-semibold text-slate-900">
-                        Bảo mật SSL / TLS
-                      </p>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent font-medium"
-                    >
-                      Chuẩn cao cấp
                     </Badge>
                   </div>
                 </div>
@@ -226,26 +237,23 @@ export function AccountPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-slate-200 bg-slate-50">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50">
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold text-slate-900">
                         Phiên quản trị hiện tại
                       </p>
                       <Badge
                         variant="outline"
-                        className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent text-[10px] py-0 px-2 font-medium"
+                        className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 border-transparent text-xs py-0.5 px-2 font-medium shrink-0 whitespace-nowrap"
                       >
                         Đang hoạt động
                       </Badge>
                     </div>
-                    <p className="text-xs text-slate-500">
-                      Khu vực làm việc Thai Spray Admin Control Platform
+                    <p className="text-xs text-slate-600">
+                      Trình duyệt web hiện tại • Kết nối an toàn
                     </p>
                   </div>
-                  <span className="text-xs text-slate-400 shrink-0 font-medium">
-                    Phiên hiện thời
-                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -258,48 +266,20 @@ export function AccountPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <Button
                     variant="outline"
-                    className="h-auto p-4 justify-start border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-200 transition-all text-slate-900 rounded-lg group shadow-sm"
+                    className="h-auto min-h-[44px] p-4 justify-start border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-200 transition-all text-slate-900 rounded-lg group shadow-sm"
                     onClick={() => navigate('/admin/orders')}
                   >
                     <ShoppingBag className="h-5 w-5 mr-3 text-teal-600 shrink-0 transition-transform group-hover:scale-110" />
                     <div className="text-left">
                       <div className="font-semibold text-slate-900 text-sm">
-                        Đơn hàng của tôi
+                        Quản lý đơn hàng
                       </div>
-                      <div className="text-xs text-slate-500">
-                        Xem lịch sử mua hàng
+                      <div className="text-xs text-slate-600">
+                        Xem và xử lý đơn hàng của shop
                       </div>
-                    </div>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="h-auto p-4 justify-start border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-200 transition-all text-slate-900 rounded-lg group shadow-sm"
-                  >
-                    <Heart className="h-5 w-5 mr-3 text-teal-600 shrink-0 transition-transform group-hover:scale-110" />
-                    <div className="text-left">
-                      <div className="font-semibold text-slate-900 text-sm">
-                        Danh sách yêu thích
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        Sản phẩm đã lưu
-                      </div>
-                    </div>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="h-auto p-4 justify-start border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-200 transition-all text-slate-900 rounded-lg md:col-span-2 group shadow-sm"
-                  >
-                    <Shield className="h-5 w-5 mr-3 text-teal-600 shrink-0 transition-transform group-hover:scale-110" />
-                    <div className="text-left">
-                      <div className="font-semibold text-slate-900 text-sm">
-                        Bảo mật tài khoản
-                      </div>
-                      <div className="text-xs text-slate-500">Đổi mật khẩu</div>
                     </div>
                   </Button>
                 </div>
@@ -307,6 +287,41 @@ export function AccountPage() {
             </Card>
           </div>
         </div>
+
+        {/* Logout Confirmation Dialog */}
+        <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+          <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-6 font-sans">
+            <DialogHeader className="space-y-2">
+              <DialogTitle className="text-lg font-bold text-slate-900">
+                Xác nhận đăng xuất
+              </DialogTitle>
+              <DialogDescription className="text-sm text-slate-600">
+                Bạn có chắc chắn muốn đăng xuất khỏi phiên làm việc quản trị hiện tại không?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsLogoutDialogOpen(false)}
+                className="h-11 sm:h-9 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium"
+              >
+                Hủy
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => {
+                  setIsLogoutDialogOpen(false);
+                  logout();
+                }}
+                className="h-11 sm:h-9 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-medium"
+              >
+                Đăng xuất
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <ProfileFormDialog
           open={isProfileDialogOpen}
