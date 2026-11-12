@@ -45,9 +45,16 @@ vi.mock('./guards/RequireAuth', () => ({
   ),
 }));
 
-vi.mock('@/components/common/LoadingSpinner', () => ({
-  LoadingSpinner: () => (
-    <div data-testid="loading-spinner">Đang tải dữ liệu...</div>
+vi.mock('@/components/common/PageSkeleton', () => ({
+  PageSkeleton: () => (
+    <div
+      data-testid="page-skeleton"
+      role="status"
+      aria-busy="true"
+      aria-label="Đang tải trang"
+    >
+      <span className="sr-only">Đang tải trang</span>
+    </div>
   ),
 }));
 
@@ -321,19 +328,14 @@ describe('AppRouter', () => {
     document.body.innerHTML = '';
   });
 
-  it('renders fallback loading spinner while route is loading, then displays page after resolution', async () => {
+  it('renders fallback page skeleton while route is loading, then displays page after resolution', async () => {
     window.history.pushState({}, '', '/catalog');
     render(<AppRouter />);
 
-    const spinner = screen.getByTestId('loading-spinner');
-    expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveTextContent('Đang tải dữ liệu...');
-    expect(spinner.parentElement).toHaveClass(
-      'min-h-screen',
-      'flex',
-      'items-center',
-      'justify-center',
-    );
+    const skeleton = screen.getByTestId('page-skeleton');
+    expect(skeleton).toBeInTheDocument();
+    expect(skeleton).toHaveAttribute('aria-busy', 'true');
+    expect(skeleton).toHaveAttribute('role', 'status');
 
     act(() => {
       resolveCatalog({
@@ -347,7 +349,7 @@ describe('AppRouter', () => {
       expect(screen.getByTestId('catalog-page')).toBeInTheDocument();
     });
     expect(screen.getByText('Tất cả sản phẩm')).toBeInTheDocument();
-    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('page-skeleton')).not.toBeInTheDocument();
     expect(screen.getByTestId('main-layout')).toBeInTheDocument();
   });
 

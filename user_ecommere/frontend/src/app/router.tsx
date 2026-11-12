@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, matchRoutes, type RouteObject } from 'rea
 import { MainLayout } from './layout/MainLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { RequireAuth } from './guards/RequireAuth';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { PageSkeleton } from '@/components/common/PageSkeleton';
 
 // Lazy load all pages
 const HomePage = lazy(() => import('@/features/catalog/pages/HomePage').then(m => ({ default: m.HomePage })));
@@ -44,46 +44,44 @@ export function isProtectedRoute(pathname: string): boolean {
 }
 
 export function AppRouter() {
-  const fallback = <div className="min-h-screen flex items-center justify-center"><LoadingSpinner /></div>;
-
   return (
     <BrowserRouter>
-      <Suspense fallback={fallback}>
-      <Routes>
-        {/* Public Routes */}
-        <Route element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="catalog" element={<CatalogPage />} />
-          <Route path="c/:categorySlug" element={<CategoryPage />} />
-          <Route path="p/:productSlug" element={<ProductDetailPage />} />
-          <Route path="search" element={<SearchPage />} />
-          <Route path="cart" element={<CartPage />} />
-          <Route path="wishlist" element={<WishlistPage />} />
-        </Route>
+      <Suspense fallback={<PageSkeleton />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route element={<MainLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="catalog" element={<CatalogPage />} />
+            <Route path="c/:categorySlug" element={<CategoryPage />} />
+            <Route path="p/:productSlug" element={<ProductDetailPage />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path="cart" element={<CartPage />} />
+            <Route path="wishlist" element={<WishlistPage />} />
+          </Route>
 
-        {/* Auth Routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          <Route path="forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="reset-password" element={<ResetPasswordPage />} />
-        </Route>
+          {/* Auth Routes */}
+          <Route element={<AuthLayout />}>
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
+          </Route>
 
-        {/* Standalone Chat Route */}
-        <Route path="chat" element={<ChatbotPage />} />
+          {/* Standalone Chat Route */}
+          <Route path="chat" element={<ChatbotPage />} />
 
-        {/* Protected User Routes */}
-        <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
-          {protectedRoutes.map(route => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
-        </Route>
+          {/* Protected User Routes */}
+          <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
+            {protectedRoutes.map(route => (
+              <Route key={route.path} path={route.path} element={route.element} />
+            ))}
+          </Route>
 
-        {/* Error Routes */}
-        <Route path="error" element={<ErrorPage />} />
-        <Route path="404" element={<NotFoundPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          {/* Error Routes */}
+          <Route path="error" element={<ErrorPage />} />
+          <Route path="404" element={<NotFoundPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       </Suspense>
     </BrowserRouter>
   );
