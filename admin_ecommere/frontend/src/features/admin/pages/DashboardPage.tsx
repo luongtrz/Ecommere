@@ -35,10 +35,11 @@ import { cn, formatCurrency, formatDateTime, getImageUrl } from '@/lib/utils';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 
 function formatCompactCurrency(value: number) {
-  return new Intl.NumberFormat('vi-VN', {
+  const formatted = new Intl.NumberFormat('vi-VN', {
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(value);
+  return `${formatted} ₫`;
 }
 
 function getStatusBadge(status: string) {
@@ -59,12 +60,12 @@ function getStatusBadge(status: string) {
         'bg-amber-50 text-amber-700 ring-1 ring-amber-200/80 border-transparent',
     },
     SHIPPED: {
-      label: 'Đang giao',
+      label: 'Đang giao hàng',
       className:
         'bg-sky-50 text-sky-700 ring-1 ring-sky-200/80 border-transparent',
     },
     DELIVERED: {
-      label: 'Đã giao',
+      label: 'Giao thành công',
       className:
         'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80 border-transparent',
     },
@@ -74,9 +75,9 @@ function getStatusBadge(status: string) {
         'bg-rose-50 text-rose-700 ring-1 ring-rose-200/80 border-transparent',
     },
     REFUNDED: {
-      label: 'Hoàn tiền',
+      label: 'Đã hoàn tiền',
       className:
-        'bg-slate-100 text-slate-700 ring-1 ring-slate-200 border-transparent',
+        'bg-rose-50 text-rose-700 ring-1 ring-rose-200/80 border-transparent',
     },
   };
 
@@ -89,7 +90,7 @@ function getStatusBadge(status: string) {
     <Badge
       variant="outline"
       className={cn(
-        'rounded-full px-2.5 py-0.5 text-[11px] font-medium tracking-tight shadow-none transition-colors duration-200',
+        'rounded-full px-2.5 py-0.5 text-xs font-medium tracking-tight shadow-none transition-colors duration-200',
         config.className,
       )}
     >
@@ -111,15 +112,15 @@ export function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-6 pb-8 md:space-y-8 font-sans px-1 sm:px-0 w-full max-w-full min-w-0">
-        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm md:p-8">
+        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm md:p-8">
           <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr] xl:items-center">
             <div className="space-y-4">
               <Skeleton className="h-5 w-36 rounded-full bg-slate-200/70" />
               <Skeleton className="h-10 w-full max-w-xl rounded-lg bg-slate-200/70" />
               <Skeleton className="h-4 w-full max-w-md rounded bg-slate-200/70" />
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <Skeleton className="h-10 w-36 rounded-xl bg-slate-200/70" />
-                <Skeleton className="h-10 w-40 rounded-xl bg-slate-200/70" />
+                <Skeleton className="h-11 sm:h-10 w-36 rounded-xl bg-slate-200/70" />
+                <Skeleton className="h-11 sm:h-10 w-40 rounded-xl bg-slate-200/70" />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
@@ -160,7 +161,7 @@ export function DashboardPage() {
               <Skeleton className="h-5 w-40 rounded bg-slate-200/70" />
               <Skeleton className="h-3.5 w-64 rounded bg-slate-200/70" />
             </div>
-            <Skeleton className="h-[340px] w-full rounded-xl bg-slate-200/70" />
+            <Skeleton className="h-[200px] sm:h-[340px] w-full rounded-xl bg-slate-200/70" />
           </div>
         </div>
 
@@ -202,7 +203,7 @@ export function DashboardPage() {
         </div>
         <Button
           onClick={() => window.location.reload()}
-          className="mt-4 rounded-xl bg-teal-600 px-6 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-teal-700 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98]"
+          className="mt-4 min-h-[44px] rounded-xl bg-teal-600 px-6 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-teal-700 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98]"
         >
           Tải lại
         </Button>
@@ -218,30 +219,35 @@ export function DashboardPage() {
       change: stats.revenue.monthlyChange,
       description: 'so với tháng trước',
       iconClass: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+      to: '/admin/orders',
     },
     {
       title: 'Đơn hàng mới',
-      value: stats.orders.monthlyOrders.toString(),
+      value: stats.orders.monthlyOrders.toLocaleString('vi-VN'),
       icon: ShoppingCart,
       change: stats.orders.monthlyChange,
-      description: `${stats.orders.pendingOrders} đơn đang chờ xử lý`,
+      description: `${stats.orders.pendingOrders.toLocaleString('vi-VN')} đơn đang chờ xử lý`,
       iconClass: 'bg-teal-50 text-teal-600 border border-teal-100',
+      to: '/admin/orders',
     },
     {
       title: 'Sản phẩm hoạt động',
-      value: stats.products.activeProducts.toString(),
+      value: stats.products.activeProducts.toLocaleString('vi-VN'),
       icon: Package,
       change: undefined,
-      description: `${stats.products.lowStockProducts} sản phẩm sắp hết hàng`,
+      isWarning: stats.products.lowStockProducts > 0,
+      description: `${stats.products.lowStockProducts.toLocaleString('vi-VN')} sản phẩm sắp hết hàng`,
       iconClass: 'bg-amber-50 text-amber-600 border border-amber-100',
+      to: '/admin/inventory',
     },
     {
       title: 'Khách hàng mới',
-      value: stats.customers.newCustomersThisMonth.toString(),
+      value: stats.customers.newCustomersThisMonth.toLocaleString('vi-VN'),
       icon: Users,
       change: stats.customers.monthlyChange,
-      description: `${stats.customers.totalCustomers} tài khoản toàn hệ thống`,
+      description: `${stats.customers.totalCustomers.toLocaleString('vi-VN')} tài khoản toàn hệ thống`,
       iconClass: 'bg-slate-100 text-slate-600 border border-slate-200',
+      to: '/admin/account',
     },
   ];
 
@@ -250,29 +256,29 @@ export function DashboardPage() {
       <SEO title="Dashboard - Admin" />
 
       <div className="space-y-6 pb-10 md:space-y-8 font-sans px-1 sm:px-0 w-full max-w-full min-w-0">
-        <section className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm md:p-8 transition-all duration-200">
+        <section className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 sm:p-6 md:p-8 shadow-sm transition-all duration-200">
           <div
             className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-teal-500/5 blur-3xl"
             aria-hidden="true"
           />
           <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr] xl:items-center">
             <div>
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 border border-teal-200/60 text-xs font-semibold uppercase tracking-wider text-teal-700">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 border border-teal-200/60 text-xs font-semibold text-teal-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
                 Tổng quan vận hành
               </div>
-              <h2 className="mt-3 max-w-3xl text-2xl font-bold tracking-tight text-slate-900 md:text-3xl lg:text-4xl leading-tight">
-                Doanh thu, đơn hàng và hàng bán chạy đang nằm trên cùng một màn
-                hình gọn hơn.
+              <h2 className="mt-2.5 max-w-3xl text-xl font-bold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl leading-snug">
+                {stats.orders.pendingOrders > 0 || stats.products.lowStockProducts > 0
+                  ? `Hôm nay có ${stats.orders.pendingOrders.toLocaleString('vi-VN')} đơn hàng chờ xử lý và ${stats.products.lowStockProducts.toLocaleString('vi-VN')} sản phẩm sắp hết hàng.`
+                  : 'Hôm nay hệ thống vận hành ổn định, không có đơn chờ xử lý.'}
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
-                Theo dõi thay đổi theo tháng, đơn hàng cần chú ý và nhóm sản
-                phẩm kéo doanh thu tốt nhất để quyết định nhanh hơn.
+              <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-600">
+                Theo dõi trạng thái đơn hàng, doanh thu và cảnh báo tồn kho để xử lý kịp thời trong ngày.
               </p>
-              <div className="mt-6 flex flex-col sm:flex-row flex-wrap gap-3">
+              <div className="mt-5 flex flex-col sm:flex-row flex-wrap gap-3">
                 <Button
                   asChild
-                  className="group inline-flex items-center justify-center rounded-xl bg-teal-600 px-5 py-2.5 font-semibold text-white shadow-sm transition-all duration-200 hover:bg-teal-700 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98]"
+                  className="group inline-flex min-h-[44px] items-center justify-center rounded-xl bg-teal-600 px-5 py-2.5 font-semibold text-white shadow-sm transition-all duration-200 hover:bg-teal-700 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98]"
                 >
                   <Link to="/admin/orders">
                     Xử lý đơn hàng
@@ -282,7 +288,7 @@ export function DashboardPage() {
                 <Button
                   asChild
                   variant="outline"
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 font-medium text-slate-700 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98]"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 font-medium text-slate-700 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98]"
                 >
                   <Link to="/admin/products">Cập nhật sản phẩm</Link>
                 </Button>
@@ -291,7 +297,7 @@ export function DashboardPage() {
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
               <div className="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50/70 p-5 shadow-xs transition-all duration-200 hover:border-slate-300 hover:bg-white hover:shadow-md hover:-translate-y-0.5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <p className="text-xs font-semibold text-slate-500">
                   Doanh thu toàn hệ thống
                 </p>
                 <p className="mt-2 text-2xl md:text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
@@ -301,17 +307,23 @@ export function DashboardPage() {
                   Tổng doanh thu đã ghi nhận từ trước đến nay trên hệ thống.
                 </p>
               </div>
-              <div className="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50/70 p-5 shadow-xs transition-all duration-200 hover:border-slate-300 hover:bg-white hover:shadow-md hover:-translate-y-0.5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Tốc độ giao dịch gần nhất
-                </p>
+              <Link
+                to="/admin/orders?status=SHIPPED"
+                className="group relative block overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50/70 p-5 shadow-xs transition-all duration-200 hover:border-teal-300 hover:bg-white hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-500">
+                    Đơn hàng đang giao
+                  </p>
+                  <ArrowRight className="h-4 w-4 text-slate-400 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:text-teal-600" />
+                </div>
                 <p className="mt-2 text-2xl md:text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
-                  {stats.orders.shippingOrders} đơn
+                  {stats.orders.shippingOrders.toLocaleString('vi-VN')} đơn
                 </p>
                 <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                  Tổng số đơn hàng đang trong trạng thái giao vận thực tế.
+                  Tổng số đơn hàng đang được giao tới khách hàng.
                 </p>
-              </div>
+              </Link>
             </div>
           </div>
         </section>
@@ -320,67 +332,77 @@ export function DashboardPage() {
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4 xl:col-span-1">
             {statCards.map((card) => (
-              <Card
+              <Link
                 key={card.title}
-                className="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                to={card.to}
+                className="block group"
               >
-                <CardHeader className="flex flex-row items-start justify-between space-y-0 p-4 pb-2">
-                  <div className="space-y-1 min-w-0 pr-2">
-                    <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500 truncate">
-                      {card.title}
-                    </CardTitle>
-                    <div className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
-                      {card.value}
+                <Card className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:border-teal-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
+                  <CardHeader className="flex flex-row items-start justify-between space-y-0 p-4 pb-2">
+                    <div className="space-y-1 min-w-0 pr-2">
+                      <CardTitle className="text-xs font-semibold text-slate-500 truncate">
+                        {card.title}
+                      </CardTitle>
+                      <div className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
+                        {card.value}
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className={cn(
-                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-xs transition-colors duration-200',
-                      card.iconClass,
-                    )}
-                  >
-                    <card.icon className="h-5 w-5" />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 pt-1">
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
-                    {card.change !== undefined ? (
-                      <span
-                        className={cn(
-                          'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ring-1 transition-colors',
-                          card.change >= 0
-                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                            : 'bg-rose-50 text-rose-700 ring-rose-200',
-                        )}
-                      >
-                        {card.change >= 0 ? (
-                          <TrendingUp className="h-3.5 w-3.5 shrink-0" />
-                        ) : (
-                          <TrendingDown className="h-3.5 w-3.5 shrink-0" />
-                        )}
-                        {Math.abs(card.change).toFixed(1)}%
-                      </span>
-                    ) : null}
-                    <span className="text-xs font-medium text-slate-500 tabular-nums">
-                      {card.description}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div
+                      className={cn(
+                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-xs transition-colors duration-200',
+                        card.iconClass,
+                      )}
+                    >
+                      <card.icon className="h-5 w-5" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-1">
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                      {card.change !== undefined ? (
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ring-1 transition-colors',
+                            card.change >= 0
+                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                              : 'bg-rose-50 text-rose-700 ring-rose-200',
+                          )}
+                        >
+                          {card.change >= 0 ? (
+                            <TrendingUp className="h-3.5 w-3.5 shrink-0" />
+                          ) : (
+                            <TrendingDown className="h-3.5 w-3.5 shrink-0" />
+                          )}
+                          {Math.abs(card.change).toFixed(1)}%
+                        </span>
+                      ) : null}
+                      {card.isWarning ? (
+                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ring-1 bg-amber-50 text-amber-700 ring-amber-200 tabular-nums">
+                          <AlertCircle className="h-3 w-3 shrink-0" />
+                          {card.description}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium text-slate-500 tabular-nums">
+                          {card.description}
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 
           <Card className="rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:shadow-md xl:col-span-2 overflow-hidden">
             <CardHeader className="p-5 pb-2">
               <CardTitle className="text-base md:text-lg font-bold tracking-tight text-slate-900">
-                Tín hiệu doanh thu
+                Biểu đồ doanh thu (VNĐ)
               </CardTitle>
               <CardDescription className="text-xs font-medium text-slate-500">
-                Xu hướng doanh thu 7 kỳ gần nhất dựa trên dữ liệu hệ thống.
+                Xu hướng doanh thu 7 ngày gần nhất dựa trên dữ liệu hệ thống.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-5 pt-2 pl-0 pr-2 md:pl-2">
-              <div className="h-[360px] w-full min-w-0">
+              <div className="h-[200px] sm:h-[360px] w-full min-w-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={stats.revenueHistory}
@@ -415,14 +437,20 @@ export function DashboardPage() {
                       dataKey="name"
                       tickLine={false}
                       axisLine={false}
-                      fontSize={11}
+                      fontSize={12}
                       stroke="rgb(148, 163, 184)"
                       dy={8}
+                      tickFormatter={(val) => {
+                        if (typeof val === 'string' && /^T\d+$/i.test(val)) {
+                          return `Thg ${val.slice(1)}`;
+                        }
+                        return String(val);
+                      }}
                     />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      fontSize={11}
+                      fontSize={12}
                       stroke="rgb(148, 163, 184)"
                       tickFormatter={(value) =>
                         formatCompactCurrency(Number(value))
@@ -477,7 +505,7 @@ export function DashboardPage() {
                 variant="ghost"
                 size="icon"
                 asChild
-                className="h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 transition-colors duration-200"
+                className="h-11 w-11 min-h-[44px] min-w-[44px] rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 transition-colors duration-200"
               >
                 <Link to="/admin/orders" aria-label="Xem tất cả đơn hàng">
                   <ArrowRight className="h-4 w-4" />
@@ -511,13 +539,13 @@ export function DashboardPage() {
                               : 'KH'}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-semibold text-sm text-slate-900 tracking-tight truncate group-hover:text-teal-700 transition-colors">
+                            <p className="font-semibold text-sm text-slate-900 tracking-tight group-hover:text-teal-700 transition-colors">
                               {order.orderNumber}
                             </p>
-                            <p className="mt-0.5 text-xs text-slate-600 truncate max-w-[130px]">
+                            <p className="mt-0.5 text-xs text-slate-600">
                               {order.customerName}
                             </p>
-                            <p className="mt-0.5 text-[11px] text-slate-400 font-normal tabular-nums">
+                            <p className="mt-0.5 text-xs text-slate-500 font-normal tabular-nums">
                               {formatDateTime(order.createdAt)}
                             </p>
                           </div>
@@ -557,7 +585,7 @@ export function DashboardPage() {
                     key={product.id}
                     className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white p-3 shadow-xs transition-all duration-200 hover:border-slate-300 hover:bg-slate-50/70 hover:shadow-sm hover:-translate-y-0.5"
                   >
-                    <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-3 flex-1">
                       <div
                         className={cn(
                           'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold tabular-nums',
@@ -577,12 +605,12 @@ export function DashboardPage() {
                           className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                         />
                       </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-900 tracking-tight">
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-sm font-semibold text-slate-900 tracking-tight">
                           {product.name}
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500 tabular-nums">
-                          Đã bán {product.soldQuantity} sản phẩm
+                          Đã bán {product.soldQuantity.toLocaleString('vi-VN')} sản phẩm
                         </p>
                       </div>
                     </div>
@@ -610,37 +638,49 @@ export function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="p-5 pt-0 space-y-3 flex-1">
-              <div className="group rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-xs">
-                <p className="text-xs font-semibold text-slate-600">
-                  Đơn đang chờ xử lý
-                </p>
+              <Link
+                to="/admin/orders?status=PENDING_PAYMENT"
+                className="group block rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all duration-200 hover:border-teal-300 hover:bg-teal-50/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-700 group-hover:text-teal-700 transition-colors">
+                    Đơn đang chờ xử lý
+                  </p>
+                  <ArrowRight className="h-4 w-4 text-slate-400 opacity-70 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:text-teal-600" />
+                </div>
                 <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
-                  {stats.orders.pendingOrders}
+                  {stats.orders.pendingOrders.toLocaleString('vi-VN')}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   Nên ưu tiên xác nhận và đẩy sang đóng gói sớm.
                 </p>
-              </div>
-              <div className="group rounded-xl border border-amber-200/80 bg-amber-50/80 p-4 transition-all duration-200 hover:border-amber-300 hover:bg-amber-50 hover:shadow-xs">
-                <p className="text-xs font-semibold text-amber-800">
-                  Sản phẩm sắp hết hàng
-                </p>
+              </Link>
+              <Link
+                to="/admin/inventory"
+                className="group block rounded-xl border border-amber-200/80 bg-amber-50/80 p-4 transition-all duration-200 hover:border-amber-300 hover:bg-amber-50 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-amber-800">
+                    Sản phẩm sắp hết hàng
+                  </p>
+                  <ArrowRight className="h-4 w-4 text-amber-600/70 opacity-70 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:text-amber-800" />
+                </div>
                 <p className="mt-1 text-2xl font-bold text-amber-700 tabular-nums">
-                  {stats.products.lowStockProducts}
+                  {stats.products.lowStockProducts.toLocaleString('vi-VN')}
                 </p>
                 <p className="mt-1 text-xs text-amber-700/90">
-                  Theo dõi để tránh out-of-stock ở nhóm bán tốt.
+                  Theo dõi để tránh hết hàng ở các sản phẩm bán chạy.
                 </p>
-              </div>
+              </Link>
               <div className="group rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-xs">
                 <p className="text-xs font-semibold text-slate-600">
                   Khách hàng mới trong tháng
                 </p>
                 <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
-                  {stats.customers.newCustomersThisMonth}
+                  {stats.customers.newCustomersThisMonth.toLocaleString('vi-VN')}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  Có thể tận dụng để chạy cross-sell hoặc referral.
+                  Số lượng khách hàng mới đăng ký trong tháng.
                 </p>
               </div>
             </CardContent>

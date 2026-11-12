@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
@@ -361,12 +361,12 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Tổng quan vận hành')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Doanh thu, đơn hàng và hàng bán chạy đang nằm trên cùng một màn hình gọn hơn.',
+        `Hôm nay có ${mockStatsPositive.orders.pendingOrders} đơn hàng chờ xử lý và ${mockStatsPositive.products.lowStockProducts} sản phẩm sắp hết hàng.`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Theo dõi thay đổi theo tháng, đơn hàng cần chú ý và nhóm sản phẩm kéo doanh thu tốt nhất để quyết định nhanh hơn.',
+        'Theo dõi trạng thái đơn hàng, doanh thu và cảnh báo tồn kho để xử lý kịp thời trong ngày.',
       ),
     ).toBeInTheDocument();
 
@@ -392,13 +392,13 @@ describe('DashboardPage', () => {
       ),
     ).toBeInTheDocument();
 
-    expect(screen.getByText('Tốc độ giao dịch gần nhất')).toBeInTheDocument();
+    expect(screen.getByText('Đơn hàng đang giao')).toBeInTheDocument();
     expect(
       screen.getByText(`${mockStatsPositive.orders.shippingOrders} đơn`),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Tổng số đơn hàng đang trong trạng thái giao vận thực tế.',
+        'Tổng số đơn hàng đang được giao tới khách hàng.',
       ),
     ).toBeInTheDocument();
 
@@ -443,10 +443,10 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument();
 
     // Revenue signal chart
-    expect(screen.getByText('Tín hiệu doanh thu')).toBeInTheDocument();
+    expect(screen.getByText('Biểu đồ doanh thu (VNĐ)')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Xu hướng doanh thu 7 kỳ gần nhất dựa trên dữ liệu hệ thống.',
+        'Xu hướng doanh thu 7 ngày gần nhất dựa trên dữ liệu hệ thống.',
       ),
     ).toBeInTheDocument();
     expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
@@ -492,12 +492,12 @@ describe('DashboardPage', () => {
     expect(screen.getByText('ORD-1004')).toBeInTheDocument();
     expect(screen.getByText('Phạm D')).toBeInTheDocument();
     expect(screen.getByText('PD')).toBeInTheDocument();
-    expect(screen.getByText('Đang giao')).toBeInTheDocument();
+    expect(screen.getByText('Đang giao hàng')).toBeInTheDocument();
 
     expect(screen.getByText('ORD-1005')).toBeInTheDocument();
     expect(screen.getByText('Hoàng E')).toBeInTheDocument();
     expect(screen.getByText('HE')).toBeInTheDocument();
-    expect(screen.getByText('Đã giao')).toBeInTheDocument();
+    expect(screen.getByText('Giao thành công')).toBeInTheDocument();
 
     expect(screen.getByText('ORD-1006')).toBeInTheDocument();
     expect(screen.getByText('Vũ F')).toBeInTheDocument();
@@ -507,7 +507,7 @@ describe('DashboardPage', () => {
     expect(screen.getByText('ORD-1007')).toBeInTheDocument();
     expect(screen.getByText('Đặng G')).toBeInTheDocument();
     expect(screen.getByText('ĐG')).toBeInTheDocument();
-    expect(screen.getByText('Hoàn tiền')).toBeInTheDocument();
+    expect(screen.getByText('Đã hoàn tiền')).toBeInTheDocument();
 
     // Order 8 with empty name fallback 'KH' and custom unknown status fallback
     expect(screen.getByText('ORD-1008')).toBeInTheDocument();
@@ -562,14 +562,39 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Sản phẩm sắp hết hàng')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(
-      screen.getByText('Theo dõi để tránh out-of-stock ở nhóm bán tốt.'),
+      screen.getByText('Theo dõi để tránh hết hàng ở các sản phẩm bán chạy.'),
     ).toBeInTheDocument();
 
     expect(screen.getByText('Khách hàng mới trong tháng')).toBeInTheDocument();
     expect(screen.getAllByText('64')).toHaveLength(2);
     expect(
-      screen.getByText('Có thể tận dụng để chạy cross-sell hoặc referral.'),
+      screen.getByText('Số lượng khách hàng mới đăng ký trong tháng.'),
     ).toBeInTheDocument();
+
+    // Verify operational navigation links
+    const rhythmSection = (screen.getByText('Nhịp vận hành hôm nay').closest('.rounded-xl') ||
+      screen.getByText('Nhịp vận hành hôm nay').closest('section'))!;
+
+    const pendingOrdersLink = within(rhythmSection).getByRole('link', {
+      name: /Đơn đang chờ xử lý/i,
+    });
+    expect(pendingOrdersLink).toHaveAttribute(
+      'href',
+      '/admin/orders?status=PENDING_PAYMENT',
+    );
+
+    const lowStockLink = within(rhythmSection).getByRole('link', {
+      name: /Sản phẩm sắp hết hàng/i,
+    });
+    expect(lowStockLink).toHaveAttribute('href', '/admin/inventory');
+
+    const shippingLink = screen.getByRole('link', {
+      name: /Đơn hàng đang giao/i,
+    });
+    expect(shippingLink).toHaveAttribute(
+      'href',
+      '/admin/orders?status=SHIPPED',
+    );
   });
 
   it('renders negative changes, zero change, and empty recent orders list', () => {
@@ -580,6 +605,11 @@ describe('DashboardPage', () => {
     });
 
     renderDashboardPage();
+
+    // Operational greeting for zero pending / low stock
+    expect(
+      screen.getByText('Hôm nay hệ thống vận hành ổn định, không có đơn chờ xử lý.'),
+    ).toBeInTheDocument();
 
     // Negative trend indicators rendered with Math.abs and percentage
     expect(screen.getByText('5.5%')).toBeInTheDocument();
