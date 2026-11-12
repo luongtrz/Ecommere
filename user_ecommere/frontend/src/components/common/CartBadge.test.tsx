@@ -43,6 +43,7 @@ describe('CartBadge', () => {
       'items-center',
       'justify-center',
     );
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng');
 
     const icon = container.querySelector('svg');
     expect(icon).toBeInTheDocument();
@@ -58,6 +59,8 @@ describe('CartBadge', () => {
     });
 
     const { container } = render(<CartBadge />);
+    const wrapper = container.firstElementChild;
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng');
     expect(screen.queryByText(/^[0-9]/)).not.toBeInTheDocument();
     expect(container.querySelector('.rounded-full')).not.toBeInTheDocument();
   });
@@ -68,6 +71,8 @@ describe('CartBadge', () => {
     });
 
     const { container } = render(<CartBadge />);
+    const wrapper = container.firstElementChild;
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng, 1 sản phẩm');
 
     const badge = container.querySelector('.rounded-full');
     expect(badge).toBeInTheDocument();
@@ -75,10 +80,9 @@ describe('CartBadge', () => {
     expect(badge?.textContent).toBe('1');
     expect(badge).toHaveClass(
       'absolute',
-      '-right-1.5',
-      '-top-1.5',
+      '-right-1',
+      '-top-1',
       'rounded-full',
-      'bg-rose-600',
     );
   });
 
@@ -91,6 +95,8 @@ describe('CartBadge', () => {
     });
 
     const { container } = render(<CartBadge />);
+    const wrapper = container.firstElementChild;
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng, 7 sản phẩm');
 
     const badge = container.querySelector('.rounded-full');
     expect(badge).toBeInTheDocument();
@@ -104,6 +110,8 @@ describe('CartBadge', () => {
     });
 
     const { container } = render(<CartBadge />);
+    const wrapper = container.firstElementChild;
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng, 99 sản phẩm');
 
     const badge = container.querySelector('.rounded-full');
     expect(badge).toBeInTheDocument();
@@ -117,6 +125,8 @@ describe('CartBadge', () => {
     });
 
     const { container } = render(<CartBadge />);
+    const wrapper = container.firstElementChild;
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng, 100 sản phẩm');
 
     const badge = container.querySelector('.rounded-full');
     expect(badge).toBeInTheDocument();
@@ -133,6 +143,8 @@ describe('CartBadge', () => {
     });
 
     const { container } = render(<CartBadge />);
+    const wrapper = container.firstElementChild;
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng, 130 sản phẩm');
 
     const badge = container.querySelector('.rounded-full');
     expect(badge).toBeInTheDocument();
@@ -142,8 +154,10 @@ describe('CartBadge', () => {
 
   it('updates dynamically when store items change', () => {
     const { container } = render(<CartBadge />);
+    const wrapper = container.firstElementChild;
 
     // Initially empty -> no badge
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng');
     expect(screen.queryByText(/^[0-9]/)).not.toBeInTheDocument();
     expect(container.querySelector('.rounded-full')).not.toBeInTheDocument();
 
@@ -153,6 +167,7 @@ describe('CartBadge', () => {
         items: [createMockCartItem({ quantity: 2 })],
       });
     });
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng, 2 sản phẩm');
     const badge = container.querySelector('.rounded-full');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent('2');
@@ -162,6 +177,7 @@ describe('CartBadge', () => {
     act(() => {
       useCartStore.setState({ items: [] });
     });
+    expect(wrapper).toHaveAttribute('aria-label', 'Giỏ hàng');
     expect(screen.queryByText(/^[0-9]/)).not.toBeInTheDocument();
     expect(container.querySelector('.rounded-full')).not.toBeInTheDocument();
   });

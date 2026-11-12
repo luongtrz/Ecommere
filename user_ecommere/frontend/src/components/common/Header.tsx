@@ -5,6 +5,7 @@ import { SearchBox } from './SearchBox';
 import { CartBadge } from './CartBadge';
 import { CategoryNav } from './CategoryNav';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useCategories } from '@/features/catalog/hooks/useCategories';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,16 +17,15 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { CartDrawer } from '@/features/cart/components/CartDrawer';
 import { useCart } from '@/features/cart/hooks/useCart';
 
-const mobileLinks = [
-  { to: '/', label: 'Trang chủ' },
-  { to: '/catalog', label: 'Tất cả sản phẩm' },
-  { to: '/catalog?sort=best_selling', label: 'Bán chạy nhất' },
-  { to: '/search?q=x%E1%BB%8Bt%20ph%C3%B2ng', label: 'Xịt phòng nổi bật' },
-];
-
 export function Header() {
   const { user, logout } = useAuth();
-  const { openCart } = useCart();
+  const { totalItems, items, openCart } = useCart();
+  const { data: categories } = useCategories();
+
+  const cartItemCount =
+    items?.reduce((sum, item) => sum + item.quantity, 0) || totalItems || 0;
+
+  const rootCategories = categories?.filter((c) => !c.parentId) || [];
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background">
@@ -52,16 +52,16 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 rounded-full md:hidden"
+                    className="h-11 w-11 rounded-full md:hidden"
                     aria-label="Mở menu điều hướng"
                   >
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[86vw] max-w-sm border-r border-border bg-card p-6">
-                  <div className="mt-6 flex flex-col gap-6">
+                <SheetContent side="left" className="flex h-full w-[86vw] max-w-sm flex-col overflow-y-auto border-r border-border bg-card p-6">
+                  <div className="mt-6 flex flex-1 flex-col gap-6">
                     <Link to="/" className="flex flex-col">
-                      <span className="font-serif text-xl font-bold tracking-tight text-foreground">
+                      <span className="text-xl font-bold text-foreground">
                         Thai Spray
                       </span>
                       <span className="text-xs text-muted-foreground">
@@ -74,17 +74,45 @@ export function Header() {
                         Điều hướng nhanh
                       </p>
                       <div className="divide-y divide-border border-y border-border">
-                        {mobileLinks.map((link) => (
-                          <Link
-                            key={link.to}
-                            to={link.to}
-                            className="block py-3 text-sm font-medium text-foreground transition-colors hover:text-primary"
-                          >
-                            {link.label}
-                          </Link>
-                        ))}
+                        <Link
+                          to="/"
+                          className="flex min-h-11 items-center py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                        >
+                          Trang chủ
+                        </Link>
+                        <Link
+                          to="/catalog"
+                          className="flex min-h-11 items-center py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                        >
+                          Tất cả sản phẩm
+                        </Link>
+                        <Link
+                          to="/catalog?sort=best_selling"
+                          className="flex min-h-11 items-center py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                        >
+                          Bán chạy nhất
+                        </Link>
                       </div>
                     </div>
+
+                    {rootCategories.length > 0 && (
+                      <div>
+                        <p className="eyebrow mb-2 text-muted-foreground">
+                          Danh mục sản phẩm
+                        </p>
+                        <div className="divide-y divide-border border-y border-border">
+                          {rootCategories.map((cat) => (
+                            <Link
+                              key={cat.id}
+                              to={`/c/${cat.slug}`}
+                              className="flex min-h-11 items-center py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                            >
+                              {cat.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <div>
                       <p className="eyebrow mb-2 text-muted-foreground">
@@ -95,26 +123,26 @@ export function Header() {
                           <>
                             <Link
                               to="/account"
-                              className="block py-3 font-medium text-foreground transition-colors hover:text-primary"
+                              className="flex min-h-11 items-center py-2 font-medium text-foreground transition-colors hover:text-primary"
                             >
-                              Thông tin cá nhân
+                              Tài khoản
                             </Link>
                             <Link
                               to="/orders"
-                              className="block py-3 font-medium text-foreground transition-colors hover:text-primary"
+                              className="flex min-h-11 items-center py-2 font-medium text-foreground transition-colors hover:text-primary"
                             >
-                              Theo dõi đơn hàng
+                              Đơn hàng
                             </Link>
                             <Link
                               to="/referral"
-                              className="block py-3 font-medium text-foreground transition-colors hover:text-primary"
+                              className="flex min-h-11 items-center py-2 font-medium text-foreground transition-colors hover:text-primary"
                             >
                               Mời bạn bè
                             </Link>
                             <button
                               type="button"
                               onClick={logout}
-                              className="block w-full py-3 text-left font-medium text-destructive transition-colors hover:underline"
+                              className="flex min-h-11 w-full items-center py-2 text-left font-medium text-destructive transition-colors hover:underline"
                             >
                               Đăng xuất
                             </button>
@@ -122,19 +150,24 @@ export function Header() {
                         ) : (
                           <Link
                             to="/login"
-                            className="block py-3 font-medium text-foreground transition-colors hover:text-primary"
+                            className="flex min-h-11 items-center py-2 font-medium text-foreground transition-colors hover:text-primary"
                           >
                             Đăng nhập / Đăng ký
                           </Link>
                         )}
                       </div>
                     </div>
+
+                    <div className="mt-auto border-t border-border pt-4 text-sm text-muted-foreground">
+                      <p>Hàng chính hãng Thái Lan</p>
+                      <p className="mt-1">Giao nhanh nội thành • Đổi trả 7 ngày</p>
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>
 
               <Link to="/" className="flex flex-col">
-                <span className="font-serif text-xl font-bold tracking-tight text-foreground transition-colors hover:text-primary md:text-2xl">
+                <span className="text-xl font-bold text-foreground transition-colors hover:text-primary md:text-2xl">
                   Thai Spray
                 </span>
                 <span className="hidden text-xs text-muted-foreground sm:inline-block">
@@ -143,7 +176,7 @@ export function Header() {
               </Link>
             </div>
 
-            <div className="hidden flex-1 max-w-md mx-auto md:block">
+            <div className="hidden flex-1 max-w-xl mx-auto md:block">
               <SearchBox />
             </div>
 
@@ -160,9 +193,13 @@ export function Header() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="relative rounded-full text-muted-foreground hover:text-foreground"
+                className="relative h-11 w-11 rounded-full text-muted-foreground hover:text-foreground"
                 onClick={openCart}
-                aria-label="Mở giỏ hàng"
+                aria-label={
+                  cartItemCount > 0
+                    ? `Giỏ hàng, ${cartItemCount} sản phẩm`
+                    : 'Giỏ hàng'
+                }
               >
                 <CartBadge />
               </Button>
@@ -172,7 +209,7 @@ export function Header() {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2 rounded-md px-2 hover:bg-muted">
+                    <Button variant="ghost" className="flex min-h-11 items-center gap-2 rounded-md px-2 hover:bg-muted">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-foreground">
                         <User className="h-4 w-4" />
                       </div>
@@ -204,9 +241,22 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild size="sm">
-                  <Link to="/login">Đăng nhập</Link>
-                </Button>
+                <>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground md:hidden"
+                    aria-label="Tài khoản"
+                  >
+                    <Link to="/login">
+                      <User className="h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="hidden md:inline-flex">
+                    <Link to="/login">Đăng nhập</Link>
+                  </Button>
+                </>
               )}
             </nav>
           </div>

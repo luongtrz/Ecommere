@@ -19,6 +19,18 @@ const mockLogout = vi.fn();
 const mockOpenCart = vi.fn();
 let mockUser: any = null;
 
+const mockCategories = [
+  { id: 'cat-1', name: 'Xịt phòng', slug: 'xit-phong', parentId: null },
+  { id: 'cat-2', name: 'Xịt xe hơi', slug: 'xit-xe-hoi', parentId: null },
+];
+
+vi.mock('@/features/catalog/hooks/useCategories', () => ({
+  useCategories: () => ({
+    data: mockCategories,
+    isLoading: false,
+  }),
+}));
+
 vi.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     user: mockUser,
@@ -30,6 +42,7 @@ vi.mock('@/features/auth/hooks/useAuth', () => ({
 vi.mock('@/features/cart/hooks/useCart', () => ({
   useCart: () => ({
     items: [],
+    totalItems: 0,
     openCart: mockOpenCart,
   }),
 }));
@@ -187,7 +200,7 @@ describe('Header', () => {
     expect(screen.getByTestId('category-nav')).toBeInTheDocument();
   });
 
-  it('renders all mobile navigation links in the sheet', () => {
+  it('renders all mobile navigation links and dynamic categories in the sheet', () => {
     renderHeader();
 
     expect(screen.getByText('Điều hướng nhanh')).toBeInTheDocument();
@@ -202,9 +215,17 @@ describe('Header', () => {
       'href',
       '/catalog?sort=best_selling',
     );
-    expect(
-      screen.getByRole('link', { name: 'Xịt phòng nổi bật' }),
-    ).toHaveAttribute('href', '/search?q=x%E1%BB%8Bt%20ph%C3%B2ng');
+
+    // Categories rendered dynamically from useCategories()
+    expect(screen.getByText('Danh mục sản phẩm')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Xịt phòng' })).toHaveAttribute(
+      'href',
+      '/c/xit-phong',
+    );
+    expect(screen.getByRole('link', { name: 'Xịt xe hơi' })).toHaveAttribute(
+      'href',
+      '/c/xit-xe-hoi',
+    );
   });
 
   it('renders guest state when user is not logged in', () => {
@@ -215,6 +236,10 @@ describe('Header', () => {
     const desktopLoginLink = screen.getByRole('link', { name: 'Đăng nhập' });
     expect(desktopLoginLink).toHaveAttribute('href', '/login');
 
+    // Mobile header shows "Tài khoản" icon linking to /login
+    const mobileAccountLink = screen.getByRole('link', { name: 'Tài khoản' });
+    expect(mobileAccountLink).toHaveAttribute('href', '/login');
+
     // Mobile sheet shows "Đăng nhập / Đăng ký" link
     const mobileLoginLink = screen.getByRole('link', {
       name: 'Đăng nhập / Đăng ký',
@@ -222,8 +247,7 @@ describe('Header', () => {
     expect(mobileLoginLink).toHaveAttribute('href', '/login');
 
     // Authenticated links should not be present
-    expect(screen.queryByText('Thông tin cá nhân')).not.toBeInTheDocument();
-    expect(screen.queryByText('Theo dõi đơn hàng')).not.toBeInTheDocument();
+    expect(screen.queryByText('Đơn hàng')).not.toBeInTheDocument();
     expect(screen.queryByText('Đăng xuất')).not.toBeInTheDocument();
   });
 
@@ -241,23 +265,19 @@ describe('Header', () => {
     expect(screen.getByText('Nguyễn Văn A')).toBeInTheDocument();
     expect(screen.getByText('nguyenvana@example.com')).toBeInTheDocument();
 
-    // Desktop dropdown menu items
-    expect(screen.getByRole('link', { name: 'Tài khoản' })).toHaveAttribute(
-      'href',
-      '/account',
-    );
-    expect(screen.getByRole('link', { name: 'Đơn hàng' })).toHaveAttribute(
-      'href',
-      '/orders',
-    );
+    // "Tài khoản" links (desktop dropdown and mobile sheet)
+    const accountLinks = screen.getAllByRole('link', { name: 'Tài khoản' });
+    expect(accountLinks.length).toBeGreaterThanOrEqual(1);
+    accountLinks.forEach((link) => {
+      expect(link).toHaveAttribute('href', '/account');
+    });
 
-    // Mobile sheet links
-    expect(
-      screen.getByRole('link', { name: 'Thông tin cá nhân' }),
-    ).toHaveAttribute('href', '/account');
-    expect(
-      screen.getByRole('link', { name: 'Theo dõi đơn hàng' }),
-    ).toHaveAttribute('href', '/orders');
+    // "Đơn hàng" links (desktop dropdown and mobile sheet)
+    const orderLinks = screen.getAllByRole('link', { name: 'Đơn hàng' });
+    expect(orderLinks.length).toBeGreaterThanOrEqual(1);
+    orderLinks.forEach((link) => {
+      expect(link).toHaveAttribute('href', '/orders');
+    });
 
     // "Mời bạn bè" is present in both mobile sheet and desktop dropdown
     const referralLinks = screen.getAllByRole('link', { name: 'Mời bạn bè' });

@@ -65,9 +65,9 @@ export function CategoryNav() {
 
   if (isLoading) {
     return (
-      <div className="border-b border-border bg-card">
+      <div className="border-b border-border bg-background">
         <div className="container">
-          <div className="flex gap-6 py-2.5">
+          <div className="flex h-11 items-center gap-6 py-0">
             {[...Array(5)].map((_, i) => (
               <Skeleton key={i} className="h-5 w-20 rounded-md" />
             ))}
@@ -77,10 +77,12 @@ export function CategoryNav() {
     );
   }
 
+  const hasSubCategories = Boolean(activeCategory && subCategories.length > 0);
+
   return (
     <div
       ref={navRef}
-      className="relative z-10 border-b border-border bg-card"
+      className="relative z-10 border-b border-border bg-background"
       onMouseLeave={() => setActiveCategory(null)}
     >
       <div className="container relative">
@@ -88,7 +90,7 @@ export function CategoryNav() {
           <button
             type="button"
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+            className="absolute left-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
             aria-label="Cuộn sang trái"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -99,22 +101,36 @@ export function CategoryNav() {
           <button
             type="button"
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+            className="absolute right-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
             aria-label="Cuộn sang phải"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
         )}
 
+        {/* Mobile scroll hint edge fades */}
+        {showLeftArrow && (
+          <div
+            className="pointer-events-none absolute left-0 top-0 bottom-0 z-[5] w-8 bg-gradient-to-r from-background to-transparent md:hidden"
+            aria-hidden="true"
+          />
+        )}
+        {showRightArrow && (
+          <div
+            className="pointer-events-none absolute right-0 top-0 bottom-0 z-[5] w-8 bg-gradient-to-l from-background to-transparent md:hidden"
+            aria-hidden="true"
+          />
+        )}
+
         <ul
           ref={scrollContainerRef}
-          className="scrollbar-hide flex items-center gap-6 overflow-x-auto py-2.5 scroll-smooth"
+          className="scrollbar-hide flex h-11 items-center gap-6 overflow-x-auto py-0 scroll-smooth"
         >
           <li className="shrink-0">
             <Link
               to="/catalog"
               className={cn(
-                'relative block whitespace-nowrap py-1 text-sm font-medium transition-colors',
+                'relative flex h-11 items-center whitespace-nowrap px-1 text-sm font-medium transition-colors',
                 'after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-accent after:transition-transform after:duration-150',
                 isActive('/catalog')
                   ? 'text-foreground font-semibold after:scale-x-100'
@@ -133,7 +149,7 @@ export function CategoryNav() {
                 <Link
                   to={`/c/${category.slug}`}
                   className={cn(
-                    'relative block whitespace-nowrap py-1 text-sm font-medium transition-colors',
+                    'relative flex h-11 items-center whitespace-nowrap px-1 text-sm font-medium transition-colors',
                     'after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-accent after:transition-transform after:duration-150',
                     active
                       ? 'text-foreground font-semibold after:scale-x-100'
@@ -149,46 +165,33 @@ export function CategoryNav() {
         </ul>
       </div>
 
-      {/* Dropdown */}
-      <div
-        style={{ left: menuPosition }}
-        className={cn(
-          'absolute top-full z-20 mt-1 min-w-[210px] rounded-md border border-border bg-popover p-1 shadow-md transition-opacity duration-150',
-          activeCategory
-            ? 'visible opacity-100'
-            : 'pointer-events-none invisible opacity-0',
-        )}
-      >
-        {activeCategory && (
+      {/* Dropdown mega menu (only shown when category has subcategories) */}
+      {hasSubCategories && (
+        <div
+          style={{ left: menuPosition }}
+          className="absolute top-full z-20 mt-1 min-w-[210px] rounded-md border border-border bg-popover p-1 shadow-md transition-opacity duration-150 visible opacity-100"
+        >
           <div className="flex flex-col gap-0.5">
-            {subCategories.length > 0 ? (
-              <>
-                {subCategories.map((sub) => (
-                  <Link
-                    key={sub.id}
-                    to={`/c/${sub.slug}`}
-                    className="block rounded-sm px-3 py-2 text-sm font-medium text-popover-foreground transition-colors hover:bg-muted"
-                  >
-                    {sub.name}
-                  </Link>
-                ))}
-                <div className="mt-1 border-t border-border pt-1">
-                  <Link
-                    to={`/c/${activeCategory.slug}`}
-                    className="block rounded-sm px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-muted"
-                  >
-                    Xem tất cả
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <div className="px-3 py-2 text-xs text-muted-foreground">
-                Chưa có danh mục con
-              </div>
-            )}
+            {subCategories.map((sub) => (
+              <Link
+                key={sub.id}
+                to={`/c/${sub.slug}`}
+                className="flex min-h-11 items-center rounded-sm px-3 py-2 text-sm font-medium text-popover-foreground transition-colors hover:bg-muted"
+              >
+                {sub.name}
+              </Link>
+            ))}
+            <div className="mt-1 border-t border-border pt-1">
+              <Link
+                to={`/c/${activeCategory.slug}`}
+                className="flex min-h-11 items-center rounded-sm px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-muted"
+              >
+                Xem tất cả
+              </Link>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Grid3X3, Home, ShoppingBag, User } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingCart, User } from 'lucide-react';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -9,10 +9,14 @@ export function MobileNav() {
   const { totalItems, openCart } = useCart();
   const { user } = useAuth();
 
+  if (location.pathname === '/checkout' || location.pathname.startsWith('/checkout')) {
+    return null;
+  }
+
   const navItems = [
     { label: 'Trang chủ', icon: Home, href: '/' },
-    { label: 'Khám phá', icon: Grid3X3, href: '/catalog' },
-    { label: 'Giỏ hàng', icon: ShoppingBag, action: openCart, badge: totalItems },
+    { label: 'Sản phẩm', icon: LayoutGrid, href: '/catalog' },
+    { label: 'Giỏ hàng', icon: ShoppingCart, action: openCart, badge: totalItems },
     { label: 'Tài khoản', icon: User, href: user ? '/account' : '/login' },
   ];
 
@@ -23,7 +27,14 @@ export function MobileNav() {
     >
       <div className="grid h-16 grid-cols-4 items-center">
         {navItems.map((item, index) => {
-          const isActive = item.href ? location.pathname === item.href : false;
+          const isActive = item.href
+            ? item.href === '/'
+              ? location.pathname === '/'
+              : location.pathname === item.href ||
+                (item.href === '/catalog' &&
+                  (location.pathname.startsWith('/catalog') ||
+                    location.pathname.startsWith('/c/')))
+            : false;
 
           if (item.action) {
             return (
@@ -31,12 +42,20 @@ export function MobileNav() {
                 key={index}
                 type="button"
                 onClick={item.action}
-                className="relative flex h-full w-full flex-col items-center justify-center gap-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="relative flex h-full w-full min-h-11 flex-col items-center justify-center gap-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={
+                  item.badge && item.badge > 0
+                    ? `Giỏ hàng, ${item.badge} sản phẩm`
+                    : 'Giỏ hàng'
+                }
               >
                 <div className="relative">
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-5 w-5" aria-hidden="true" />
                   {item.badge && item.badge > 0 ? (
-                    <span className="tabular absolute -right-2.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground">
+                    <span
+                      className="tabular absolute -right-2.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground"
+                      aria-hidden="true"
+                    >
                       {item.badge > 99 ? '99+' : item.badge}
                     </span>
                   ) : null}
@@ -51,16 +70,19 @@ export function MobileNav() {
               key={index}
               to={item.href!}
               className={cn(
-                'relative flex h-full w-full flex-col items-center justify-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'relative flex h-full w-full min-h-11 flex-col items-center justify-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 isActive
                   ? 'text-primary font-medium'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
               {isActive ? (
-                <span className="absolute inset-x-3 top-0 h-[2px] bg-accent" aria-hidden="true" />
+                <span
+                  className="absolute inset-x-3 top-0 h-[2px] bg-accent"
+                  aria-hidden="true"
+                />
               ) : null}
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5" aria-hidden="true" />
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );

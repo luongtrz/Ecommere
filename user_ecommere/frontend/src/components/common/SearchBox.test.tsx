@@ -73,12 +73,26 @@ describe('SearchBox', () => {
         'Tìm chai xịt chuột, kiến gián, tẩy rửa, nước giặt...',
       );
       const wrapper = input.parentElement;
-      expect(wrapper).toHaveClass('border-slate-200');
+      expect(wrapper).toHaveClass('border-input');
 
       fireEvent.focus(input);
-      expect(wrapper).toHaveClass('border-teal-500');
+      expect(wrapper).toHaveClass('border-ring');
       expect(screen.getByText('Gợi ý phổ biến')).toBeInTheDocument();
       expect(screen.getByText('Sản phẩm tìm kiếm nhiều')).toBeInTheDocument();
+    });
+
+    it('renders submit button that submits search query when clicked', () => {
+      renderSearchBox();
+      const input = screen.getByPlaceholderText(
+        'Tìm chai xịt chuột, kiến gián, tẩy rửa, nước giặt...',
+      );
+      const submitBtn = screen.getByRole('button', { name: 'Tìm kiếm' });
+      expect(submitBtn).toHaveAttribute('type', 'submit');
+
+      fireEvent.change(input, { target: { value: 'diệt gián' } });
+      fireEvent.click(submitBtn);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/search?q=di%E1%BB%87t%20gi%C3%A1n');
     });
 
     it('closes suggestions when clicking outside the container', () => {

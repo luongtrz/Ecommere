@@ -88,26 +88,33 @@ export function SearchBox() {
       <form onSubmit={handleSubmit} className="relative">
         <div
           className={cn(
-            'flex h-11 items-center rounded-md border border-input bg-card px-3 transition-colors',
+            'flex h-11 items-center rounded-md border border-input bg-card pl-0.5 pr-0.5 transition-colors',
             showingSuggestions
               ? 'border-ring ring-1 ring-ring'
               : 'hover:border-foreground/30',
           )}
         >
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <button
+            type="submit"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Tìm kiếm"
+          >
+            <Search className="h-4 w-4" />
+          </button>
           <input
             type="search"
+            inputMode="search"
             placeholder="Tìm chai xịt chuột, kiến gián, tẩy rửa, nước giặt..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onFocus={() => setIsFocused(true)}
-            className="w-full bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="w-full bg-transparent px-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:hidden"
           />
           {query ? (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Xóa tìm kiếm"
             >
               <X className="h-4 w-4" />
@@ -117,23 +124,23 @@ export function SearchBox() {
       </form>
 
       {showingSuggestions ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md">
-          <div className="grid gap-0 divide-y divide-border md:grid-cols-[1.2fr_0.8fr] md:divide-x md:divide-y-0">
-            <div className="p-4">
+        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] max-h-[60vh] overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md md:left-1/2 md:w-[560px] md:-translate-x-1/2">
+          <div className="grid gap-0 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
+            <div className="min-w-0 p-4">
               {deferredQuery ? (
                 <div className="space-y-2">
                   <button
                     type="button"
                     onClick={() => handleSearch(deferredQuery)}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                    className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted"
                   >
-                    <Search className="h-4 w-4 text-primary" />
-                    <span className="flex-1">
+                    <Search className="h-4 w-4 shrink-0 text-primary" />
+                    <span className="min-w-0 flex-1 break-words">
                       Tìm kiếm cho <strong className="font-semibold text-primary">“{deferredQuery}”</strong>
                     </span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </button>
-                  <p className="px-3 text-xs text-muted-foreground">
+                  <p className="px-3 text-sm leading-relaxed text-muted-foreground">
                     Mẹo: Nhập tên sản phẩm, công dụng (đuổi chuột, diệt gián, tẩy bồn cầu) để xem nhanh.
                   </p>
                 </div>
@@ -141,7 +148,7 @@ export function SearchBox() {
                 <>
                   {recentSearches.length > 0 ? (
                     <div className="mb-4">
-                      <p className="mb-2 flex items-center gap-2 px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      <p className="mb-2 flex items-center gap-2 px-1 text-xs font-medium text-muted-foreground">
                         <History className="h-3.5 w-3.5 text-muted-foreground" />
                         Tìm gần đây
                       </p>
@@ -149,14 +156,23 @@ export function SearchBox() {
                         {recentSearches.map((term) => (
                           <div
                             key={term}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => handleSearch(term)}
-                            className="group flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
+                            onKeyDown={(event) => {
+                              if (event.target !== event.currentTarget) return;
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                handleSearch(term);
+                              }
+                            }}
+                            className="group flex min-h-11 cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
-                            <span>{term}</span>
+                            <span className="min-w-0 flex-1 truncate">{term}</span>
                             <button
                               type="button"
                               onClick={(event) => removeRecent(event, term)}
-                              className="rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-secondary hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-opacity hover:bg-secondary hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-8 md:w-8 md:opacity-0 md:group-hover:opacity-100"
                               aria-label={`Xóa ${term}`}
                             >
                               <X className="h-3.5 w-3.5" />
@@ -168,7 +184,7 @@ export function SearchBox() {
                   ) : null}
 
                   <div>
-                    <p className="mb-2.5 px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <p className="mb-2.5 px-1 text-xs font-medium text-muted-foreground">
                       Gợi ý phổ biến
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -177,7 +193,7 @@ export function SearchBox() {
                           key={keyword}
                           type="button"
                           onClick={() => handleSearch(keyword)}
-                          className="rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:border-foreground/30 hover:bg-muted"
+                          className="inline-flex min-h-11 items-center rounded-full border border-border bg-secondary px-3.5 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:border-foreground/30 hover:bg-muted"
                         >
                           {keyword}
                         </button>
@@ -188,8 +204,8 @@ export function SearchBox() {
               )}
             </div>
 
-            <div className="bg-muted/30 p-4">
-              <p className="mb-3 px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="min-w-0 bg-muted/30 p-4">
+              <p className="mb-3 px-1 text-xs font-medium text-muted-foreground">
                 Sản phẩm tìm kiếm nhiều
               </p>
               <div className="space-y-2">
@@ -198,18 +214,22 @@ export function SearchBox() {
                     key={product.id}
                     type="button"
                     onClick={() => handleSearch(product.query)}
-                    className="group flex w-full items-center gap-3 rounded-md border border-border bg-card p-2.5 text-left transition-colors hover:border-foreground/30"
+                    className="group flex min-h-11 w-full items-center gap-3 rounded-md border border-border bg-card p-2.5 text-left transition-colors hover:border-foreground/30"
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-secondary font-serif text-xs font-semibold text-foreground">
-                      TS
-                    </div>
+                    {'image' in product && (product as any).image ? (
+                      <img
+                        src={(product as any).image}
+                        alt=""
+                        className="h-8 w-8 shrink-0 rounded-md object-cover"
+                      />
+                    ) : null}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-semibold text-foreground group-hover:text-primary">
                         {product.name}
                       </p>
                       <p className="text-xs text-muted-foreground">Chính hãng Thái Lan</p>
                     </div>
-                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
                   </button>
                 ))}
               </div>
