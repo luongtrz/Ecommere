@@ -202,6 +202,17 @@ describe('Input', () => {
     expect(input).toHaveAttribute('aria-required', 'true');
   });
 
+  it('applies error state styles when aria-invalid is true', () => {
+    render(<Input aria-invalid="true" data-testid="invalid-input" />);
+    const input = screen.getByTestId('invalid-input');
+
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveClass(
+      'aria-[invalid=true]:border-rose-500',
+      'aria-[invalid=true]:focus-visible:ring-rose-500',
+    );
+  });
+
   it('has displayName set to "Input"', () => {
     expect(Input.displayName).toBe('Input');
   });
