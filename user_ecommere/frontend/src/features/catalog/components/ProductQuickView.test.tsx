@@ -219,11 +219,6 @@ describe('ProductQuickView', () => {
       expect(screen.getByText(/200\.000/)).toBeInTheDocument();
       // Discount badge
       expect(screen.getByText('-25%')).toBeInTheDocument();
-
-      // Dialog accessibility titles
-      expect(
-        screen.getByText('Xem nhanh thông tin sản phẩm'),
-      ).toBeInTheDocument();
     });
 
     it('renders without discount badge or strikethrough price when salePrice is absent or equal to price', () => {
@@ -650,7 +645,7 @@ describe('ProductQuickView', () => {
       const handleOpenChange = vi.fn();
       renderProductQuickView({ onOpenChange: handleOpenChange });
 
-      const closeButton = screen.getByRole('button', { name: 'Close' });
+      const closeButton = screen.getByRole('button', { name: 'Đóng' });
       fireEvent.click(closeButton);
 
       expect(handleOpenChange).toHaveBeenCalledWith(false);

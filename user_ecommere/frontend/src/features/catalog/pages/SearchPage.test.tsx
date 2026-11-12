@@ -542,7 +542,9 @@ describe('SearchPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: /Kết quả tìm kiếm cho "rose"/i }),
       ).toBeInTheDocument();
-      expect(screen.getByText('2 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '2 sản phẩm'),
+      ).toBeInTheDocument();
       expect(screen.getByText('Danh mục: cat1')).toBeInTheDocument();
       expect(
         screen.getByRole('button', { name: 'Xóa tìm kiếm' }),
@@ -701,7 +703,7 @@ describe('SearchPage', () => {
     });
 
     it('renders LoadingSpinner when isPlaceholderData is true with active query and empty products', () => {
-      mockUseProductSearch.mockReturnValue(placeholderResult);
+      mockUseProductSearch.mockReturnValue(emptyTotal0Placeholder);
       const { container } = renderPage(['/search?q=rose']);
       expect(container.querySelector('.animate-spin')).toBeInTheDocument();
     });
@@ -761,7 +763,9 @@ describe('SearchPage', () => {
     it('shows 0 sản phẩm when query is present and data is undefined', () => {
       mockUseProductSearch.mockReturnValue(undefinedDataResult);
       renderPage(['/search?q=rose']);
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -846,7 +850,9 @@ describe('SearchPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: /Kết quả tìm kiếm cho "rose"/i }),
       ).toBeInTheDocument();
-      expect(screen.getByText('2 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '2 sản phẩm'),
+      ).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('add-to-cart-grid-p1'));
       expect(mockAddItem).toHaveBeenCalledWith({
@@ -1006,7 +1012,7 @@ describe('SearchPage', () => {
       // Clear all filters
       const clearAllBtn = screen.getByRole('button', { name: 'Xóa tất cả' });
       fireEvent.click(clearAllBtn);
-      const loc = screen.getByTestId('loc').textContent;
+      const loc = screen.getByTestId('loc');
       expect(loc).not.toHaveTextContent('category=');
       expect(loc).not.toHaveTextContent('minPrice=');
       expect(loc).not.toHaveTextContent('maxPrice=');
@@ -1100,7 +1106,9 @@ describe('SearchPage', () => {
       mockUseProductSearch.mockReturnValue(undefinedDataResult);
 
       renderPage(['/search']);
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
     });
   });
 });

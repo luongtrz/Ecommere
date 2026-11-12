@@ -501,7 +501,9 @@ describe('CategoryPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: 'Xịt thơm phòng' }),
       ).toBeInTheDocument();
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
       expect(
         screen.getByRole('status', { name: 'Đang tải sản phẩm' }),
       ).toBeInTheDocument();
@@ -564,7 +566,9 @@ describe('CategoryPage', () => {
 
       renderCategoryPage();
 
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
       expect(
         screen.queryByRole('status', { name: 'Đang tải sản phẩm' }),
       ).not.toBeInTheDocument();
@@ -616,7 +620,9 @@ describe('CategoryPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: 'Xịt thơm phòng' }),
       ).toBeInTheDocument();
-      expect(screen.getByText('7 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '7 sản phẩm'),
+      ).toBeInTheDocument();
     });
 
     it('renders 0 sản phẩm when products total is 0', () => {
@@ -627,7 +633,9 @@ describe('CategoryPage', () => {
 
       renderCategoryPage();
 
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
     });
 
     it('renders 0 sản phẩm when products total is undefined', () => {
@@ -642,7 +650,9 @@ describe('CategoryPage', () => {
 
       renderCategoryPage();
 
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -1014,11 +1024,15 @@ describe('CategoryPage', () => {
       expect(screen.getByText('4.5')).toBeInTheDocument();
       expect(screen.getByText('0.0')).toBeInTheDocument();
 
-      expect(screen.getByText(/120.*đánh giá/)).toBeInTheDocument();
-      expect(screen.getByText(/85.*đánh giá/)).toBeInTheDocument();
-      expect(screen.getAllByText(/0.*đánh giá/).length).toBeGreaterThanOrEqual(
-        1,
-      );
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '120 đánh giá'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '85 đánh giá'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByText((_, el) => el?.textContent?.trim() === '0 đánh giá').length,
+      ).toBeGreaterThanOrEqual(1);
 
       expect(screen.getByText('Lavender')).toBeInTheDocument();
       expect(screen.getByText('Sả chanh')).toBeInTheDocument();

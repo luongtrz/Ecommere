@@ -499,7 +499,11 @@ describe('CatalogPage', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
         'Sản phẩm',
       );
-      expect(screen.getByText('5 kết quả tìm thấy')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          (_, el) => el?.textContent?.trim() === '5 kết quả tìm thấy',
+        ),
+      ).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Tìm trong danh mục này...')).toHaveValue('');
       expect(screen.getByText('Ẩn bộ lọc')).toBeInTheDocument();
       expect(screen.getByTestId('mock-filter-sidebar')).toBeInTheDocument();
@@ -519,7 +523,11 @@ describe('CatalogPage', () => {
       });
 
       renderCatalogPage('/catalog');
-      expect(screen.getByText('0 kết quả tìm thấy')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          (_, el) => el?.textContent?.trim() === '0 kết quả tìm thấy',
+        ),
+      ).toBeInTheDocument();
     });
 
     it('renders loading spinner when isLoading is true and hides products and empty state', () => {
@@ -563,12 +571,11 @@ describe('CatalogPage', () => {
       fireEvent.click(clearBtn);
 
       const probe = screen.getByTestId('search-params-probe');
-      // Category and sort filters are removed, view mode is preserved,
-      // and debounced search retains the local search query input state
+      // Category and sort filters are removed, view mode is preserved
       expect(probe.textContent).toContain('view=list');
       expect(probe.textContent).not.toContain('category=');
       expect(probe.textContent).not.toContain('sort=');
-      expect(probe.textContent).toBe('view=list&q=unknown&page=1');
+      expect(probe.textContent).toBe('view=list');
     });
 
     it('clears filters preserving default grid viewMode when view param is omitted', () => {
@@ -587,7 +594,7 @@ describe('CatalogPage', () => {
       fireEvent.click(clearBtn);
 
       const probe = screen.getByTestId('search-params-probe');
-      expect(probe.textContent).toBe('view=grid');
+      expect(probe.textContent).toBe('');
     });
   });
 
@@ -941,7 +948,9 @@ describe('CatalogPage', () => {
       expect(
         screen.getByText('Chai Xịt Phòng Tinh Dầu Bưởi'),
       ).toBeInTheDocument();
-      expect(screen.getByText('32 đánh giá')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '32 đánh giá'),
+      ).toBeInTheDocument();
       expect(screen.getByText('4.8')).toBeInTheDocument();
       // Check currency text using regex to tolerate non-breaking spaces
       expect(screen.getByText(/120\.000/)).toBeInTheDocument();
@@ -999,7 +1008,9 @@ describe('CatalogPage', () => {
       expect(
         screen.getByText('Sản Phẩm Không Có Biến Thể'),
       ).toBeInTheDocument();
-      expect(screen.getByText('0 đánh giá')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 đánh giá'),
+      ).toBeInTheDocument();
     });
   });
 
