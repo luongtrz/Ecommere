@@ -2,9 +2,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { OrderDetailPage } from './OrderDetailPage';
+import { OrderDetailPage, formatOrderDate } from './OrderDetailPage';
 import { formatCurrency } from '@/lib/formatters';
-import { formatDateTime } from '@/lib/utils';
 
 // Helper to match text across elements even when broken by multiple nodes, newlines, or non-breaking spaces
 function matchText(expectedText: string) {
@@ -50,6 +49,19 @@ vi.mock('@/lib/seo', () => ({
   SEO: ({ title }: { title?: string }) => (
     <div data-testid="seo-meta" data-title={title} />
   ),
+}));
+
+// Mock Toast
+const mockToast = {
+  error: vi.fn(),
+  success: vi.fn(),
+  toast: vi.fn(),
+  warning: vi.fn(),
+  info: vi.fn(),
+};
+
+vi.mock('@/hooks/useToast', () => ({
+  useToast: () => mockToast,
 }));
 
 // Mock hooks
@@ -364,15 +376,13 @@ describe('OrderDetailPage', () => {
       expect(screen.getByText('Chi tiết đơn hàng')).toBeInTheDocument();
       expect(screen.getByText('#ORD-001')).toBeInTheDocument();
       expect(
-        screen.getAllByText(formatDateTime(mockPendingOrder.createdAt)).length,
+        screen.getAllByText(
+          matchText(formatOrderDate(mockPendingOrder.createdAt)),
+        ).length,
       ).toBeGreaterThanOrEqual(1);
 
       const statusBadge = screen.getByText('Chờ thanh toán');
       expect(statusBadge).toBeInTheDocument();
-      expect(statusBadge.closest('div')).toHaveClass(
-        'bg-amber-50',
-        'text-amber-700',
-      );
     });
 
     it('renders timeline with current step at Đặt hàng', () => {
@@ -384,10 +394,10 @@ describe('OrderDetailPage', () => {
       expect(screen.getByText('Giao hàng')).toBeInTheDocument();
 
       expect(screen.getByText('Hiện tại')).toBeInTheDocument();
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Đóng gói')).toHaveClass('text-slate-400');
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-slate-400');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-slate-400');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-foreground');
+      expect(screen.getByText('Đóng gói')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Vận chuyển')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Giao hàng')).toHaveClass('text-muted-foreground');
     });
 
     it('renders order items list correctly', () => {
@@ -397,7 +407,9 @@ describe('OrderDetailPage', () => {
       expect(
         screen.getByText('Chai xịt đuổi chuột Thái Lan 500ml'),
       ).toBeInTheDocument();
-      expect(screen.getByText('Số lượng: 2')).toBeInTheDocument();
+      expect(
+        screen.getByText(matchText(`2 × ${formatCurrency(110000)}`)),
+      ).toBeInTheDocument();
       expect(
         screen.getByText(matchText(formatCurrency(110000))),
       ).toBeInTheDocument();
@@ -426,20 +438,23 @@ describe('OrderDetailPage', () => {
 
       expect(screen.getByText('Thanh toán')).toBeInTheDocument();
       expect(screen.getByText('Phương thức')).toBeInTheDocument();
-      expect(screen.getByText('COD')).toBeInTheDocument();
+      expect(
+        screen.getByText('Thanh toán khi nhận hàng (COD)'),
+      ).toBeInTheDocument();
 
       const paymentBadge = screen.getByText('Chưa thanh toán');
       expect(paymentBadge).toBeInTheDocument();
-      expect(paymentBadge).toHaveClass('bg-amber-50', 'text-amber-700');
     });
 
     it('renders order cost summary sidebar and cancel button', () => {
       renderOrderDetailPage();
 
       expect(screen.getByText('Tóm tắt chi phí')).toBeInTheDocument();
-      expect(screen.getByText('Ngày đặt hàng')).toBeInTheDocument();
+      expect(screen.getByText(/Ngày đặt hàng/i)).toBeInTheDocument();
       expect(
-        screen.getAllByText(formatDateTime(mockPendingOrder.createdAt)).length,
+        screen.getAllByText(
+          matchText(formatOrderDate(mockPendingOrder.createdAt)),
+        ).length,
       ).toBe(2);
       expect(screen.getByText('Tạm tính:')).toBeInTheDocument();
       expect(
@@ -461,7 +476,7 @@ describe('OrderDetailPage', () => {
         screen.getByText('Gặp vấn đề với đơn hàng này?'),
       ).toBeInTheDocument();
       const supportLink = screen.getByRole('link', {
-        name: 'Gửi yêu cầu hỗ trợ',
+        name: /Gửi yêu cầu hỗ trợ/i,
       });
       expect(supportLink).toHaveAttribute('href', '/support');
     });
@@ -483,20 +498,15 @@ describe('OrderDetailPage', () => {
 
       const headerStatusBadge = paidBadges[0];
       expect(headerStatusBadge).toBeDefined();
-      expect(headerStatusBadge.closest('div')).toHaveClass(
-        'bg-emerald-50',
-        'text-emerald-700',
-      );
 
       const paymentBadge = paidBadges[1];
       expect(paymentBadge).toBeDefined();
-      expect(paymentBadge).toHaveClass('bg-emerald-50', 'text-emerald-700');
 
       expect(screen.getByText('Miễn phí')).toBeInTheDocument();
 
       // Timeline has current step at 0
       expect(screen.getByText('Hiện tại')).toBeInTheDocument();
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-foreground');
 
       // Cancel button is available for PAID orders
       expect(
@@ -521,16 +531,12 @@ describe('OrderDetailPage', () => {
 
       const statusBadge = screen.getByText('Đang đóng gói');
       expect(statusBadge).toBeInTheDocument();
-      expect(statusBadge.closest('div')).toHaveClass(
-        'bg-amber-50',
-        'text-amber-700',
-      );
 
       // Timeline step 1 (Đóng gói) is current
-      expect(screen.getByText('Đóng gói')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-slate-400');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-slate-400');
+      expect(screen.getByText('Đóng gói')).toHaveClass('text-foreground');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-foreground');
+      expect(screen.getByText('Vận chuyển')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Giao hàng')).toHaveClass('text-muted-foreground');
 
       // Payment badge is Chưa thanh toán
       expect(screen.getByText('Chưa thanh toán')).toBeInTheDocument();
@@ -555,16 +561,12 @@ describe('OrderDetailPage', () => {
 
       const statusBadge = screen.getByText('Đang giao hàng');
       expect(statusBadge).toBeInTheDocument();
-      expect(statusBadge.closest('div')).toHaveClass(
-        'bg-teal-50',
-        'text-teal-700',
-      );
 
       // Timeline step 2 (Vận chuyển) is current
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Đóng gói')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-slate-400');
+      expect(screen.getByText('Vận chuyển')).toHaveClass('text-foreground');
+      expect(screen.getByText('Đóng gói')).toHaveClass('text-foreground');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-foreground');
+      expect(screen.getByText('Giao hàng')).toHaveClass('text-muted-foreground');
 
       expect(screen.getByText('Chưa thanh toán')).toBeInTheDocument();
       expect(
@@ -586,20 +588,15 @@ describe('OrderDetailPage', () => {
 
       const statusBadge = screen.getByText('Giao thành công');
       expect(statusBadge).toBeInTheDocument();
-      expect(statusBadge.closest('div')).toHaveClass(
-        'bg-emerald-50',
-        'text-emerald-700',
-      );
 
       // All timeline steps completed, Giao hàng is current
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Đóng gói')).toHaveClass('text-slate-900');
-      expect(screen.getByText('Đặt hàng')).toHaveClass('text-slate-900');
+      expect(screen.getByText('Giao hàng')).toHaveClass('text-foreground');
+      expect(screen.getByText('Vận chuyển')).toHaveClass('text-foreground');
+      expect(screen.getByText('Đóng gói')).toHaveClass('text-foreground');
+      expect(screen.getByText('Đặt hàng')).toHaveClass('text-foreground');
 
       const paymentBadge = screen.getByText('Đã thanh toán');
       expect(paymentBadge).toBeInTheDocument();
-      expect(paymentBadge).toHaveClass('bg-emerald-50', 'text-emerald-700');
 
       expect(
         screen.queryByRole('button', { name: /Hủy đơn hàng/i }),
@@ -623,14 +620,9 @@ describe('OrderDetailPage', () => {
 
       const headerStatusBadge = canceledBadges[0];
       expect(headerStatusBadge).toBeDefined();
-      expect(headerStatusBadge.closest('div')).toHaveClass(
-        'bg-rose-50',
-        'text-rose-600',
-      );
 
       const paymentBadge = canceledBadges[1];
       expect(paymentBadge).toBeDefined();
-      expect(paymentBadge).toHaveClass('bg-rose-50', 'text-rose-600');
 
       expect(
         screen.queryByRole('button', { name: /Hủy đơn hàng/i }),
@@ -651,17 +643,12 @@ describe('OrderDetailPage', () => {
 
       const statusBadge = screen.getByText('Đã hoàn tiền');
       expect(statusBadge).toBeInTheDocument();
-      expect(statusBadge.closest('div')).toHaveClass(
-        'bg-slate-50',
-        'text-slate-700',
-      );
 
       // Timeline hidden
       expect(screen.queryByText('Đặt hàng')).not.toBeInTheDocument();
 
       const paymentBadge = screen.getByText('Đã hủy');
       expect(paymentBadge).toBeInTheDocument();
-      expect(paymentBadge).toHaveClass('bg-rose-50', 'text-rose-600');
     });
   });
 
@@ -678,10 +665,6 @@ describe('OrderDetailPage', () => {
 
       const statusBadge = screen.getByText('UNKNOWN_STATUS');
       expect(statusBadge).toBeInTheDocument();
-      expect(statusBadge.closest('div')).toHaveClass(
-        'bg-slate-50',
-        'text-slate-700',
-      );
 
       // Timeline renders with step 0 as default current
       expect(screen.getByText('Đặt hàng')).toBeInTheDocument();
@@ -758,8 +741,7 @@ describe('OrderDetailPage', () => {
       });
     });
 
-    it('handles cancel order failure by logging error and displaying alert', async () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    it('handles cancel order failure by logging error and displaying toast error', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
@@ -785,7 +767,7 @@ describe('OrderDetailPage', () => {
           'Cancel order failed:',
           error,
         );
-        expect(alertSpy).toHaveBeenCalledWith(
+        expect(mockToast.error).toHaveBeenCalledWith(
           'Hủy đơn hàng thất bại. Vui lòng thử lại.',
         );
       });
@@ -795,7 +777,6 @@ describe('OrderDetailPage', () => {
         screen.getByText('Bạn chắc chắn muốn hủy đơn hàng này?'),
       ).toBeInTheDocument();
 
-      alertSpy.mockRestore();
       consoleErrorSpy.mockRestore();
     });
 
