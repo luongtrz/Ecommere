@@ -78,25 +78,39 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
     children,
     onClick,
     className,
+    asChild,
   }: {
     children: React.ReactNode;
     onClick?: () => void;
     className?: string;
-  }) => (
-    <button
-      type="button"
-      role="menuitem"
-      onClick={onClick}
-      className={className}
-    >
-      {children}
-    </button>
-  ),
+    asChild?: boolean;
+  }) => {
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement<any>, {
+        onClick,
+        className: [className, (children.props as any)?.className]
+          .filter(Boolean)
+          .join(' '),
+        role: 'menuitem',
+      });
+    }
+    return (
+      <button
+        type="button"
+        role="menuitem"
+        onClick={onClick}
+        className={className}
+      >
+        {children}
+      </button>
+    );
+  },
 }));
 
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  document.body.style.overflow = '';
 });
 
 beforeEach(() => {
@@ -107,6 +121,7 @@ beforeEach(() => {
     email: 'admin@thaispray.com',
     role: 'ADMIN',
   };
+  document.body.style.overflow = '';
 });
 
 function renderAdminLayout(initialRoute = '/admin') {
@@ -143,6 +158,10 @@ function renderAdminLayout(initialRoute = '/admin') {
             path="/admin/categories"
             element={<div>Trang Quản Lý Danh Mục</div>}
           />
+          <Route
+            path="/admin/account"
+            element={<div>Trang Hồ Sơ Cá Nhân</div>}
+          />
         </Route>
       </Routes>
     </MemoryRouter>,
@@ -165,41 +184,44 @@ describe('AdminLayout', () => {
       );
 
       // Sidebar brand link
-      const brandLink = screen.getByRole('link', {
+      const brandLink = screen.getAllByRole('link', {
         name: /Thai Spray Admin/i,
-      });
+      })[0];
       expect(brandLink).toHaveAttribute('href', '/admin');
-      expect(screen.getByText('TS')).toBeInTheDocument();
-      expect(screen.getByText('Thai Spray Admin')).toBeInTheDocument();
+      expect(screen.getAllByText('TS')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Thai Spray Admin')[0]).toBeInTheDocument();
       expect(
-        screen.getByText('Điều phối nội dung, đơn hàng và doanh thu.'),
+        screen.getAllByText('Điều phối nội dung, đơn hàng và doanh thu.')[0],
       ).toBeInTheDocument();
 
       // Session card in sidebar
-      expect(screen.getByText('Phiên quản trị')).toBeInTheDocument();
+      expect(screen.getAllByText('Phiên quản trị')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Đang hoạt động')[0]).toBeInTheDocument();
       expect(
-        screen.getByText(
+        screen.queryByText(
           'Theo dõi chỉ số quan trọng và xử lý công việc trong một luồng gọn.',
         ),
-      ).toBeInTheDocument();
+      ).not.toBeInTheDocument();
 
-      // Header static texts
-      expect(screen.getByText('Không gian vận hành')).toBeInTheDocument();
+      // Header dynamic texts & breadcrumbs
+      expect(screen.getAllByText('Quản trị')[0]).toBeInTheDocument();
       expect(
         screen.getByRole('heading', {
-          level: 1,
-          name: 'Bảng điều khiển Thai Spray',
+          level: 2,
+          name: 'Bảng điều khiển',
         }),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('Dữ liệu đồng bộ theo phiên gần nhất'),
-      ).toBeInTheDocument();
+        screen.queryByText('Dữ liệu đồng bộ theo phiên gần nhất'),
+      ).not.toBeInTheDocument();
       expect(screen.getAllByText('Quyền quản trị viên')[0]).toBeInTheDocument();
 
       // Dropdown menu texts
-      expect(screen.getByText('Tài khoản')).toBeInTheDocument();
       expect(
-        screen.getByRole('menuitem', { name: /Đăng xuất/i }),
+        screen.getAllByRole('menuitem', { name: /Hồ sơ cá nhân/i })[0],
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByRole('menuitem', { name: /Đăng xuất/i })[0],
       ).toBeInTheDocument();
 
       // Main element
@@ -209,11 +231,13 @@ describe('AdminLayout', () => {
     });
 
     it('renders all 7 navigation items with exact names, descriptions, and hrefs', () => {
-      renderAdminLayout('/admin');
+      const { container } = renderAdminLayout('/admin');
+      const aside = container.querySelector('aside');
+      const scope = aside || container;
 
       const expectedNavigation = [
         {
-          name: 'Dashboard',
+          name: 'Bảng điều khiển',
           description: 'Tổng quan hiệu suất',
           href: '/admin',
         },
@@ -233,7 +257,7 @@ describe('AdminLayout', () => {
           href: '/admin/orders',
         },
         {
-          name: 'Mã giảm giá',
+          name: 'Mã giảm giá & Referral',
           description: 'Chiến dịch và ưu đãi',
           href: '/admin/coupons',
         },
@@ -250,26 +274,39 @@ describe('AdminLayout', () => {
       ];
 
       for (const item of expectedNavigation) {
-        expect(screen.getByText(item.name)).toBeInTheDocument();
-        expect(screen.getByText(item.description)).toBeInTheDocument();
+        expect(within(scope).getAllByText(item.name)[0]).toBeInTheDocument();
+        expect(within(scope).getAllByText(item.description)[0]).toBeInTheDocument();
 
-        const link = screen.getByRole('link', {
+        const links = within(scope).getAllByRole('link', {
           name: new RegExp(`${item.name}.*${item.description}`, 'i'),
         });
-        expect(link).toHaveAttribute('href', item.href);
+        expect(links[0]).toHaveAttribute('href', item.href);
       }
     });
 
-    it('renders customer store quick link with correct attributes', () => {
-      renderAdminLayout('/admin');
+    it('renders customer store quick link with correct attributes and closes mobile drawer on click', () => {
+      const { container } = renderAdminLayout('/admin');
 
-      const storeLink = screen.getByRole('link', {
+      const aside = container.querySelector('aside')!;
+      const header = container.querySelector('header')!;
+      const openMenuBtn = header.querySelector('button.lg\\:hidden')!;
+
+      // Open drawer
+      fireEvent.click(openMenuBtn);
+      expect(aside).toHaveClass('translate-x-0');
+
+      const storeLinks = screen.getAllByRole('link', {
         name: /Xem Cửa Hàng/i,
       });
+      const storeLink = storeLinks[0];
       expect(storeLink).toHaveAttribute('href', STORE_URL);
       expect(storeLink).toHaveAttribute('target', '_blank');
       expect(storeLink).toHaveAttribute('rel', 'noreferrer');
-      expect(screen.getByText('Live')).toBeInTheDocument();
+      expect(screen.queryByText('Live')).not.toBeInTheDocument();
+
+      // Clicking store link should close mobile drawer
+      fireEvent.click(storeLink);
+      expect(aside).toHaveClass('-translate-x-full');
     });
   });
 
@@ -302,12 +339,12 @@ describe('AdminLayout', () => {
       mockUser = null;
       expect(() => renderAdminLayout('/admin')).not.toThrow();
 
-      expect(screen.getByText('Phiên quản trị')).toBeInTheDocument();
+      expect(screen.getAllByText('Phiên quản trị')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Quyền quản trị viên')[0]).toBeInTheDocument();
     });
   });
 
-  describe('Sidebar Toggle & Mobile Responsiveness (isSidebarOpen)', () => {
+  describe('Sidebar Toggle, Mobile Responsiveness & Keyboard/Scroll Lock', () => {
     it('is initially closed with -translate-x-full and no backdrop', () => {
       const { container } = renderAdminLayout('/admin');
 
@@ -317,9 +354,10 @@ describe('AdminLayout', () => {
 
       const backdrop = container.querySelector('button.fixed.inset-0');
       expect(backdrop).not.toBeInTheDocument();
+      expect(document.body.style.overflow).toBe('');
     });
 
-    it('opens sidebar with translate-x-0 and renders backdrop when header menu button is clicked', () => {
+    it('opens sidebar with translate-x-0, renders backdrop and locks scroll', () => {
       const { container } = renderAdminLayout('/admin');
 
       const aside = container.querySelector('aside')!;
@@ -333,9 +371,10 @@ describe('AdminLayout', () => {
 
       const backdrop = container.querySelector('button.fixed.inset-0');
       expect(backdrop).toBeInTheDocument();
+      expect(document.body.style.overflow).toBe('hidden');
     });
 
-    it('closes sidebar when clicking on the backdrop button', () => {
+    it('closes sidebar and restores scroll when clicking on the backdrop button', () => {
       const { container } = renderAdminLayout('/admin');
 
       const aside = container.querySelector('aside')!;
@@ -346,6 +385,7 @@ describe('AdminLayout', () => {
       fireEvent.click(openMenuBtn);
       const backdrop = container.querySelector('button.fixed.inset-0')!;
       expect(backdrop).toBeInTheDocument();
+      expect(document.body.style.overflow).toBe('hidden');
 
       // Click backdrop to close
       fireEvent.click(backdrop);
@@ -354,6 +394,7 @@ describe('AdminLayout', () => {
       expect(
         container.querySelector('button.fixed.inset-0'),
       ).not.toBeInTheDocument();
+      expect(document.body.style.overflow).toBe('');
     });
 
     it('closes sidebar when clicking the mobile close button (X) inside aside', () => {
@@ -371,6 +412,23 @@ describe('AdminLayout', () => {
       // Click close button
       fireEvent.click(closeBtn);
       expect(aside).toHaveClass('-translate-x-full');
+      expect(document.body.style.overflow).toBe('');
+    });
+
+    it('closes sidebar when pressing Escape key', () => {
+      const { container } = renderAdminLayout('/admin');
+
+      const aside = container.querySelector('aside')!;
+      const header = container.querySelector('header')!;
+      const openMenuBtn = header.querySelector('button.lg\\:hidden')!;
+
+      fireEvent.click(openMenuBtn);
+      expect(aside).toHaveClass('translate-x-0');
+      expect(document.body.style.overflow).toBe('hidden');
+
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(aside).toHaveClass('-translate-x-full');
+      expect(document.body.style.overflow).toBe('');
     });
 
     it('closes sidebar when clicking any navigation link', () => {
@@ -385,25 +443,43 @@ describe('AdminLayout', () => {
       expect(aside).toHaveClass('translate-x-0');
 
       // Click a nav link
-      const productsLink = screen.getByRole('link', {
+      const productsLinks = screen.getAllByRole('link', {
         name: /Sản phẩm.*Danh mục và nội dung bán hàng/i,
       });
-      fireEvent.click(productsLink);
+      fireEvent.click(productsLinks[0]);
 
       expect(aside).toHaveClass('-translate-x-full');
+      expect(document.body.style.overflow).toBe('');
+    });
+
+    it('ensures interactive controls have at least 44px touch targets', () => {
+      const { container } = renderAdminLayout('/admin');
+
+      const header = container.querySelector('header')!;
+      const openMenuBtn = header.querySelector('button.lg\\:hidden')!;
+      expect(openMenuBtn).toHaveClass('h-11', 'w-11');
+
+      const aside = container.querySelector('aside')!;
+      const closeBtn = aside.querySelector('button.lg\\:hidden')!;
+      expect(closeBtn).toHaveClass('h-11', 'w-11');
+
+      const sidebarLogoutBtn = within(aside).getAllByRole('button', {
+        name: 'Đăng xuất',
+      })[0];
+      expect(sidebarLogoutBtn).toHaveClass('h-11', 'w-11');
     });
   });
 
   describe('Active Route Styling (isActive)', () => {
-    it('marks Dashboard as active when location is /admin and others as inactive', () => {
+    it('marks Bảng điều khiển as active when location is /admin and others as inactive', () => {
       renderAdminLayout('/admin');
 
-      const dashboardLink = screen.getByRole('link', {
-        name: /Dashboard.*Tổng quan hiệu suất/i,
-      });
-      const productsLink = screen.getByRole('link', {
+      const dashboardLink = screen.getAllByRole('link', {
+        name: /Bảng điều khiển.*Tổng quan hiệu suất/i,
+      })[0];
+      const productsLink = screen.getAllByRole('link', {
         name: /Sản phẩm.*Danh mục và nội dung bán hàng/i,
-      });
+      })[0];
 
       // Dashboard should have active styles
       expect(dashboardLink).toHaveClass('bg-teal-50');
@@ -417,14 +493,14 @@ describe('AdminLayout', () => {
     it('marks Products as active and Dashboard as inactive when location is /admin/products', () => {
       renderAdminLayout('/admin/products');
 
-      const dashboardLink = screen.getByRole('link', {
-        name: /Dashboard.*Tổng quan hiệu suất/i,
-      });
-      const productsLink = screen.getByRole('link', {
+      const dashboardLink = screen.getAllByRole('link', {
+        name: /Bảng điều khiển.*Tổng quan hiệu suất/i,
+      })[0];
+      const productsLink = screen.getAllByRole('link', {
         name: /Sản phẩm.*Danh mục và nội dung bán hàng/i,
-      });
+      })[0];
 
-      // Dashboard should NOT be active on /admin/products (checks exact match for /admin)
+      // Dashboard should NOT be active on /admin/products
       expect(dashboardLink).toHaveClass('text-slate-600');
       expect(dashboardLink).not.toHaveClass('bg-teal-50');
 
@@ -436,12 +512,12 @@ describe('AdminLayout', () => {
     it('marks parent nav as active on nested subroutes via startsWith', () => {
       renderAdminLayout('/admin/products/new');
 
-      const dashboardLink = screen.getByRole('link', {
-        name: /Dashboard.*Tổng quan hiệu suất/i,
-      });
-      const productsLink = screen.getByRole('link', {
+      const dashboardLink = screen.getAllByRole('link', {
+        name: /Bảng điều khiển.*Tổng quan hiệu suất/i,
+      })[0];
+      const productsLink = screen.getAllByRole('link', {
         name: /Sản phẩm.*Danh mục và nội dung bán hàng/i,
-      });
+      })[0];
 
       expect(dashboardLink).toHaveClass('text-slate-600');
       expect(productsLink).toHaveClass('bg-teal-50');
@@ -462,18 +538,81 @@ describe('AdminLayout', () => {
         const { container } = renderAdminLayout(path);
         const nav = container.querySelector('nav')!;
 
-        const activeLink = within(nav).getByRole('link', { name });
+        const activeLink = within(nav).getAllByRole('link', { name })[0];
         expect(activeLink).toHaveClass('bg-teal-50');
 
-        const dashboardLink = within(nav).getByRole('link', {
-          name: /^Dashboard/i,
-        });
+        const dashboardLink = within(nav).getAllByRole('link', {
+          name: /^Bảng điều khiển/i,
+        })[0];
         expect(dashboardLink).toHaveClass('text-slate-600');
       }
     });
   });
 
-  describe('Route Navigation', () => {
+  describe('Dynamic Header Title & Breadcrumbs', () => {
+    it('displays dynamic header title and breadcrumbs for each route', () => {
+      const routeTitlePairs = [
+        {
+          path: '/admin',
+          expectedTitle: 'Bảng điều khiển',
+          expectedBreadcrumb: 'Bảng điều khiển',
+        },
+        {
+          path: '/admin/chatbot',
+          expectedTitle: 'Trợ lý AI',
+          expectedBreadcrumb: 'Trợ lý AI',
+        },
+        {
+          path: '/admin/products',
+          expectedTitle: 'Quản lý sản phẩm',
+          expectedBreadcrumb: 'Sản phẩm',
+        },
+        {
+          path: '/admin/products/new',
+          expectedTitle: 'Thêm sản phẩm mới',
+          expectedBreadcrumb: 'Thêm mới',
+        },
+        {
+          path: '/admin/orders',
+          expectedTitle: 'Quản lý đơn hàng',
+          expectedBreadcrumb: 'Đơn hàng',
+        },
+        {
+          path: '/admin/coupons',
+          expectedTitle: 'Mã giảm giá & Referral',
+          expectedBreadcrumb: 'Mã giảm giá & Referral',
+        },
+        {
+          path: '/admin/inventory',
+          expectedTitle: 'Quản lý kho hàng',
+          expectedBreadcrumb: 'Kho hàng',
+        },
+        {
+          path: '/admin/categories',
+          expectedTitle: 'Quản lý danh mục',
+          expectedBreadcrumb: 'Danh mục',
+        },
+        {
+          path: '/admin/account',
+          expectedTitle: 'Hồ sơ cá nhân',
+          expectedBreadcrumb: 'Hồ sơ cá nhân',
+        },
+      ];
+
+      for (const { path, expectedTitle, expectedBreadcrumb } of routeTitlePairs) {
+        cleanup();
+        renderAdminLayout(path);
+
+        expect(
+          screen.getByRole('heading', { level: 2, name: expectedTitle }),
+        ).toBeInTheDocument();
+        expect(screen.getByText('Quản trị')).toBeInTheDocument();
+        expect(screen.getAllByText(expectedBreadcrumb).length).toBeGreaterThanOrEqual(1);
+      }
+    });
+  });
+
+  describe('Route Navigation & Account Links', () => {
     it('navigates between routes when navigation links are clicked', async () => {
       const user = userEvent.setup();
       const { container } = renderAdminLayout('/admin');
@@ -482,52 +621,127 @@ describe('AdminLayout', () => {
       expect(screen.getByText('Trang Tổng Quan Dashboard')).toBeInTheDocument();
 
       // Navigate to Chatbot
-      await user.click(within(nav).getByRole('link', { name: /^Trợ lý AI/i }));
+      await user.click(within(nav).getAllByRole('link', { name: /^Trợ lý AI/i })[0]);
       expect(screen.getByText('Trang Trợ Lý AI Chatbot')).toBeInTheDocument();
 
       // Navigate to Products
-      await user.click(within(nav).getByRole('link', { name: /^Sản phẩm/i }));
+      await user.click(within(nav).getAllByRole('link', { name: /^Sản phẩm/i })[0]);
       expect(screen.getByText('Trang Quản Lý Sản Phẩm')).toBeInTheDocument();
 
       // Navigate to Orders
-      await user.click(within(nav).getByRole('link', { name: /^Đơn hàng/i }));
+      await user.click(within(nav).getAllByRole('link', { name: /^Đơn hàng/i })[0]);
       expect(screen.getByText('Trang Quản Lý Đơn Hàng')).toBeInTheDocument();
 
       // Navigate to Coupons
       await user.click(
-        within(nav).getByRole('link', { name: /^Mã giảm giá/i }),
+        within(nav).getAllByRole('link', { name: /^Mã giảm giá/i })[0],
       );
       expect(screen.getByText('Trang Quản Lý Mã Giảm Giá')).toBeInTheDocument();
 
       // Navigate to Inventory
-      await user.click(within(nav).getByRole('link', { name: /^Kho hàng/i }));
+      await user.click(within(nav).getAllByRole('link', { name: /^Kho hàng/i })[0]);
       expect(screen.getByText('Trang Quản Lý Kho Hàng')).toBeInTheDocument();
 
       // Navigate to Categories
-      await user.click(within(nav).getByRole('link', { name: /^Danh mục/i }));
+      await user.click(within(nav).getAllByRole('link', { name: /^Danh mục/i })[0]);
       expect(screen.getByText('Trang Quản Lý Danh Mục')).toBeInTheDocument();
 
       // Navigate back to Dashboard via Brand link
-      await user.click(screen.getByRole('link', { name: /Thai Spray Admin/i }));
+      const brandLinks = screen.getAllByRole('link', { name: /Thai Spray Admin/i });
+      await user.click(brandLinks[0]);
       expect(screen.getByText('Trang Tổng Quan Dashboard')).toBeInTheDocument();
     });
-  });
 
-  describe('Logout User Action', () => {
-    it('calls logout callback when clicking the Đăng xuất menu item', async () => {
+    it('navigates to account page from sidebar user block and dropdown item', async () => {
       const user = userEvent.setup();
       renderAdminLayout('/admin');
 
-      const logoutItem = screen.getByRole('menuitem', { name: /Đăng xuất/i });
+      // Click dropdown item
+      const accountDropdownItems = screen.getAllByRole('menuitem', {
+        name: /Hồ sơ cá nhân/i,
+      });
+      const accountDropdownItem = accountDropdownItems[0];
+      expect(accountDropdownItem).toHaveAttribute('href', '/admin/account');
+
+      await user.click(accountDropdownItem);
+      expect(screen.getByText('Trang Hồ Sơ Cá Nhân')).toBeInTheDocument();
+    });
+  });
+
+  describe('Logout User Action with In-Page Confirmation Dialog', () => {
+    it('opens confirmation dialog and calls logout when confirmed from menu item', async () => {
+      const user = userEvent.setup();
+      renderAdminLayout('/admin');
+
+      const logoutItems = screen.getAllByRole('menuitem', { name: /Đăng xuất/i });
+      const logoutItem = logoutItems[0];
       expect(logoutItem).toBeInTheDocument();
 
       await user.click(logoutItem);
+      expect(mockLogout).not.toHaveBeenCalled();
+
+      // Confirmation dialog should appear
+      expect(
+        screen.getByRole('heading', { name: 'Xác nhận đăng xuất' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Bạn có chắc chắn muốn đăng xuất khỏi phiên làm việc quản trị/i,
+        ),
+      ).toBeInTheDocument();
+
+      // Click confirm
+      const confirmButton = screen.getByRole('button', { name: 'Đăng xuất' });
+      await user.click(confirmButton);
+      expect(mockLogout).toHaveBeenCalledTimes(1);
+    });
+
+    it('cancels logout when clicking cancel in confirmation dialog', async () => {
+      const user = userEvent.setup();
+      renderAdminLayout('/admin');
+
+      const logoutItems = screen.getAllByRole('menuitem', { name: /Đăng xuất/i });
+      const logoutItem = logoutItems[0];
+      await user.click(logoutItem);
+
+      expect(
+        screen.getByRole('heading', { name: 'Xác nhận đăng xuất' }),
+      ).toBeInTheDocument();
+
+      const cancelButton = screen.getByRole('button', { name: 'Hủy' });
+      await user.click(cancelButton);
+
+      expect(mockLogout).not.toHaveBeenCalled();
+      expect(
+        screen.queryByRole('heading', { name: 'Xác nhận đăng xuất' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens confirmation dialog when clicking sidebar logout button', async () => {
+      const user = userEvent.setup();
+      const { container } = renderAdminLayout('/admin');
+      const aside = container.querySelector('aside');
+      const scope = aside || container;
+
+      const sidebarLogoutBtns = within(scope).getAllByRole('button', {
+        name: 'Đăng xuất',
+      });
+      const sidebarLogoutBtn = sidebarLogoutBtns[0];
+      await user.click(sidebarLogoutBtn);
+
+      expect(mockLogout).not.toHaveBeenCalled();
+      expect(
+        screen.getByRole('heading', { name: 'Xác nhận đăng xuất' }),
+      ).toBeInTheDocument();
+
+      const confirmButton = screen.getByRole('button', { name: 'Đăng xuất' });
+      await user.click(confirmButton);
       expect(mockLogout).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('Suspense Fallback', () => {
-    it('renders fallback loading spinner while child route suspends, then shows loaded content', async () => {
+    it('renders fallback loading spinner with Vietnamese text while child route suspends, then shows loaded content', async () => {
       let resolveLazyRoute: (component: {
         default: React.ComponentType;
       }) => void;
@@ -548,7 +762,7 @@ describe('AdminLayout', () => {
         </MemoryRouter>,
       );
 
-      // Fallback spinner should be displayed
+      // Fallback spinner and text should be displayed
       const spinner = container.querySelector('.animate-spin');
       expect(spinner).toBeInTheDocument();
       expect(spinner).toHaveClass(
@@ -560,6 +774,7 @@ describe('AdminLayout', () => {
         'border-teal-600',
         'border-t-transparent',
       );
+      expect(screen.getByText('Đang tải trang...')).toBeInTheDocument();
 
       // Resolve the lazy component
       await act(async () => {
@@ -572,6 +787,7 @@ describe('AdminLayout', () => {
         await screen.findByText('Nội dung tải chậm đã sẵn sàng'),
       ).toBeInTheDocument();
       expect(container.querySelector('.animate-spin')).not.toBeInTheDocument();
+      expect(screen.queryByText('Đang tải trang...')).not.toBeInTheDocument();
     });
   });
 });

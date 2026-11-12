@@ -65,7 +65,13 @@ function setAuthState({
 
 function LocationTracker() {
   const location = useLocation();
-  return <div data-testid="current-path">{location.pathname}</div>;
+  return (
+    <div>
+      <div data-testid="current-path">{location.pathname}</div>
+      <div data-testid="current-search">{location.search}</div>
+      <div data-testid="current-state">{JSON.stringify(location.state)}</div>
+    </div>
+  );
 }
 
 function renderWithProviders(
@@ -158,11 +164,12 @@ describe('RequireAdmin', () => {
     );
 
     expect(screen.getByTestId('current-path')).toHaveTextContent('/login');
+    expect(screen.getByTestId('current-search')).toHaveTextContent('');
     expect(screen.getByText('Trang đăng nhập')).toBeInTheDocument();
     expect(screen.queryByText('Nội dung quản trị')).not.toBeInTheDocument();
   });
 
-  it('redirects authenticated non-admin user (CUSTOMER role) to /login', () => {
+  it('redirects authenticated non-admin user (CUSTOMER role) to /login with error query and state', () => {
     setAuthState({ isLoading: false, user: mockCustomerUser });
 
     renderWithProviders(
@@ -181,11 +188,15 @@ describe('RequireAdmin', () => {
     );
 
     expect(screen.getByTestId('current-path')).toHaveTextContent('/login');
+    expect(screen.getByTestId('current-search')).toHaveTextContent('?error=forbidden');
+    expect(screen.getByTestId('current-state')).toHaveTextContent(
+      'Tài khoản không có quyền truy cập trang quản trị.',
+    );
     expect(screen.getByText('Trang đăng nhập')).toBeInTheDocument();
     expect(screen.queryByText('Nội dung quản trị')).not.toBeInTheDocument();
   });
 
-  it('redirects authenticated user with an unexpected non-admin role to /login', () => {
+  it('redirects authenticated user with an unexpected non-admin role to /login with error query and state', () => {
     const unknownRoleUser = {
       ...mockCustomerUser,
       role: 'STAFF' as unknown as 'CUSTOMER',
@@ -208,6 +219,10 @@ describe('RequireAdmin', () => {
     );
 
     expect(screen.getByTestId('current-path')).toHaveTextContent('/login');
+    expect(screen.getByTestId('current-search')).toHaveTextContent('?error=forbidden');
+    expect(screen.getByTestId('current-state')).toHaveTextContent(
+      'Tài khoản không có quyền truy cập trang quản trị.',
+    );
     expect(screen.getByText('Trang đăng nhập')).toBeInTheDocument();
     expect(screen.queryByText('Nội dung quản trị')).not.toBeInTheDocument();
   });
@@ -349,6 +364,7 @@ describe('RequireAdmin', () => {
     const { rerender, container } = render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/admin']}>
+          <LocationTracker />
           <Routes>
             <Route
               path="/admin"
@@ -372,6 +388,7 @@ describe('RequireAdmin', () => {
     rerender(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/admin']}>
+          <LocationTracker />
           <Routes>
             <Route
               path="/admin"
@@ -389,6 +406,8 @@ describe('RequireAdmin', () => {
 
     expect(container.querySelector('.animate-spin')).not.toBeInTheDocument();
     expect(screen.getByText('Trang đăng nhập')).toBeInTheDocument();
+    expect(screen.getByTestId('current-path')).toHaveTextContent('/login');
+    expect(screen.getByTestId('current-search')).toHaveTextContent('?error=forbidden');
   });
 
   it('transitions from authenticated admin to login redirect when user logs out', () => {
