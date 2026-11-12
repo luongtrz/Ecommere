@@ -177,4 +177,21 @@ describe('Pagination', () => {
     );
     expect(container.firstChild).toHaveClass('custom-pagination-root');
   });
+
+  it('renders mobile page indicator "Trang X / Y"', () => {
+    render(
+      <Pagination currentPage={3} totalPages={10} onPageChange={vi.fn()} />,
+    );
+    expect(screen.getByText(/Trang\s+3\s+\/\s+10/)).toBeInTheDocument();
+  });
+
+  it('renders all buttons with 44x44 touch targets', () => {
+    const { container } = render(
+      <Pagination currentPage={2} totalPages={5} onPageChange={vi.fn()} />,
+    );
+    const buttons = container.querySelectorAll('button');
+    buttons.forEach((btn) => {
+      expect(btn).toHaveClass('h-11', 'w-11');
+    });
+  });
 });

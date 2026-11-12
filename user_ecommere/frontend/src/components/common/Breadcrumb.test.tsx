@@ -21,32 +21,30 @@ describe('Breadcrumb', () => {
     expect(nav).toBeInTheDocument();
     expect(nav).toHaveClass(
       'flex',
-      'flex-wrap',
       'items-center',
-      'gap-1.5',
-      'text-xs',
-      'md:text-sm',
-      'text-slate-500',
-      'font-sans',
+      'gap-1',
+      'text-sm',
+      'text-muted-foreground',
+      'overflow-x-auto',
+      'whitespace-nowrap',
     );
 
-    const homeLink = within(container).getByRole('link');
+    const homeLink = within(container).getByRole('link', { name: 'Trang chủ' });
     expect(homeLink).toHaveAttribute('href', '/');
     expect(homeLink).toHaveClass(
       'inline-flex',
       'items-center',
       'justify-center',
-      'p-1',
-      'rounded-md',
-      'text-slate-400',
-      'hover:text-teal-600',
-      'hover:bg-slate-100',
+      'min-h-11',
+      'min-w-11',
+      'text-muted-foreground',
+      'hover:text-foreground',
       'transition-colors',
     );
 
     const homeSvg = homeLink.querySelector('svg');
     expect(homeSvg).toBeInTheDocument();
-    expect(homeSvg).toHaveClass('h-3.5', 'w-3.5');
+    expect(homeSvg).toHaveClass('h-4', 'w-4');
 
     // No ChevronRight icons rendered when items is empty
     expect(container.querySelectorAll('svg')).toHaveLength(1);
@@ -62,16 +60,19 @@ describe('Breadcrumb', () => {
     expect(categoryLink).toBeInTheDocument();
     expect(categoryLink).toHaveAttribute('href', '/categories');
     expect(categoryLink).toHaveClass(
-      'font-medium',
-      'text-slate-600',
-      'hover:text-teal-600',
+      'inline-flex',
+      'items-center',
+      'min-h-11',
+      'text-muted-foreground',
+      'hover:text-foreground',
+      'hover:underline',
       'transition-colors',
     );
 
     // 2 SVGs: Home icon and 1 ChevronRight icon
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(2);
-    expect(svgs[1]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
+    expect(svgs[1]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/50', 'shrink-0');
   });
 
   it('renders breadcrumb item without href as a non-clickable span with font-medium class', () => {
@@ -81,7 +82,14 @@ describe('Breadcrumb', () => {
     const activeSpan = within(container).getByText('Chi tiết sản phẩm');
     expect(activeSpan).toBeInTheDocument();
     expect(activeSpan.tagName).toBe('SPAN');
-    expect(activeSpan).toHaveClass('font-semibold', 'text-slate-900');
+    expect(activeSpan).toHaveAttribute('aria-current', 'page');
+    expect(activeSpan).toHaveClass(
+      'font-medium',
+      'text-foreground',
+      'truncate',
+      'max-w-[180px]',
+      'min-h-11',
+    );
 
     // Only 1 link exists (the Home link)
     expect(within(container).getAllByRole('link')).toHaveLength(1);
@@ -112,14 +120,15 @@ describe('Breadcrumb', () => {
     // Last item is a span
     const terminalItem = within(container).getByText('iPhone 15 Pro Max 256GB');
     expect(terminalItem.tagName).toBe('SPAN');
-    expect(terminalItem).toHaveClass('font-semibold', 'text-slate-900');
+    expect(terminalItem).toHaveAttribute('aria-current', 'page');
+    expect(terminalItem).toHaveClass('font-medium', 'text-foreground', 'truncate');
 
     // SVGs: 1 Home + 3 ChevronRight separators
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(4);
-    expect(svgs[1]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
-    expect(svgs[2]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
-    expect(svgs[3]).toHaveClass('h-3.5', 'w-3.5', 'text-slate-400', 'shrink-0');
+    expect(svgs[1]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/50', 'shrink-0');
+    expect(svgs[2]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/50', 'shrink-0');
+    expect(svgs[3]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/50', 'shrink-0');
   });
 
   it('applies custom className to the nav element', () => {
@@ -134,17 +143,39 @@ describe('Breadcrumb', () => {
       name: 'Breadcrumb',
     });
     expect(nav).toHaveClass(
-      'flex',
-      'flex-wrap',
-      'items-center',
-      'gap-1.5',
-      'text-xs',
-      'md:text-sm',
-      'text-slate-500',
-      'font-sans',
       'custom-breadcrumb-container',
       'px-4',
       'py-2',
     );
+  });
+
+  it('skips leading duplicate "Trang chủ" or "/" link so Home is not duplicated', () => {
+    const itemsWithHref = [
+      { label: 'Trang chủ', href: '/' },
+      { label: 'Sản phẩm', href: '/catalog' },
+      { label: 'Xịt phòng Lavender' },
+    ];
+    const { container } = renderBreadcrumb(<Breadcrumb items={itemsWithHref} />);
+
+    const links = within(container).getAllByRole('link');
+    expect(links).toHaveLength(2); // Only Home icon link + 'Sản phẩm'
+    expect(links[0]).toHaveAttribute('href', '/');
+    expect(links[1]).toHaveTextContent('Sản phẩm');
+    expect(links[1]).toHaveAttribute('href', '/catalog');
+
+    // Separators: Home > Sản phẩm > Xịt phòng Lavender
+    // SVGs: 1 Home icon + 2 ChevronRight = 3
+    expect(container.querySelectorAll('svg')).toHaveLength(3);
+  });
+
+  it('skips leading item if label is "Trang chủ" even without href', () => {
+    const items = [
+      { label: 'Trang chủ' },
+      { label: 'Danh mục', href: '/catalog' },
+    ];
+    const { container } = renderBreadcrumb(<Breadcrumb items={items} />);
+    const links = within(container).getAllByRole('link');
+    expect(links).toHaveLength(2);
+    expect(within(container).queryByText('Trang chủ')).not.toBeInTheDocument();
   });
 });
