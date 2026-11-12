@@ -36,7 +36,7 @@ const WELCOME_CHAT_MESSAGE: ChatMessage = {
 export function ChatbotWidget() {
   const { open, setOpen } = useChatStore();
   const { isStreaming, send, decide, cancel, newThread, retry } = useChatAgent();
-  const { messages } = useChatOwnerSync(newThread);
+  const { messages, isOwnerMatch } = useChatOwnerSync(newThread);
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,7 +56,8 @@ export function ChatbotWidget() {
     isStreaming,
   ]);
 
-  const showTyping = shouldShowTypingIndicator(messages, isStreaming);
+  // Only show the typing indicator for the conversation this session owns.
+  const showTyping = isOwnerMatch && shouldShowTypingIndicator(messages, isStreaming);
 
   // Screen reader polite announcements for streaming state
   useEffect(() => {
@@ -318,8 +319,9 @@ export function ChatbotWidget() {
           onClick={() => setOpen(true)}
           className={cn(
             'fixed z-30 transition-colors duration-200 motion-reduce:transition-none',
-            'bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] right-3 md:bottom-6 md:right-6',
-            'h-12 w-12 md:h-12 md:w-auto md:px-4 rounded-full',
+            // Desktop: icon-only, bottom-left, so it never covers the right-hand purchase column or header actions.
+            'bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] right-3 md:bottom-6 md:left-6 md:right-auto',
+            'h-12 w-12 rounded-full',
             'bg-primary text-primary-foreground shadow-md hover:bg-primary/90',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             'flex items-center justify-center gap-2 active:scale-95 motion-reduce:active:scale-100',
@@ -327,8 +329,7 @@ export function ChatbotWidget() {
           )}
         >
           <Bot className="h-6 w-6 shrink-0" />
-          <span className="hidden md:inline text-sm font-semibold">Tư vấn</span>
-          <span className="sr-only md:hidden">Mở khung trò chuyện</span>
+          <span className="sr-only">Mở khung trò chuyện</span>
         </Button>
       ) : null}
     </>

@@ -183,7 +183,8 @@ describe('ChatbotWidget', () => {
         name: 'Mở khung trò chuyện',
       });
       expect(toggleButton).toBeInTheDocument();
-      expect(screen.getByText('Tư vấn')).toBeInTheDocument();
+      // The launcher is icon-only on every breakpoint (desktop no longer shows a text label).
+      expect(screen.queryByText('Tư vấn')).not.toBeInTheDocument();
 
       // Chat window content is not present
       expect(
