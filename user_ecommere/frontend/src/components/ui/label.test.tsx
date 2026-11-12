@@ -23,6 +23,7 @@ describe('Label', () => {
     expect(label).toHaveClass(
       'text-sm',
       'font-medium',
+      'text-foreground',
       'leading-none',
       'peer-disabled:cursor-not-allowed',
       'peer-disabled:opacity-70',

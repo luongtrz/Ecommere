@@ -28,12 +28,11 @@ describe('Alert UI components', () => {
       expect(alert).toHaveClass(
         'relative',
         'w-full',
-        'rounded-xl',
+        'rounded-lg',
         'border',
         'p-4',
-        'border-slate-200',
-        'bg-white',
-        'text-slate-900',
+        'bg-card',
+        'text-foreground',
       );
       expect(alert).toHaveTextContent('Default alert text');
     });
@@ -47,9 +46,8 @@ describe('Alert UI components', () => {
       const alert = screen.getByTestId('alert-variant-default');
 
       expect(alert).toHaveClass(
-        'border-slate-200',
-        'bg-white',
-        'text-slate-900',
+        'bg-card',
+        'text-foreground',
       );
     });
 
@@ -62,10 +60,10 @@ describe('Alert UI components', () => {
       const alert = screen.getByTestId('alert-variant-destructive');
 
       expect(alert).toHaveClass(
-        'border-rose-200',
-        'bg-rose-50',
-        'text-rose-700',
-        '[&>svg]:text-rose-600',
+        'border-destructive/30',
+        'bg-destructive/5',
+        'text-destructive',
+        '[&>svg]:text-destructive',
       );
     });
 
@@ -82,7 +80,7 @@ describe('Alert UI components', () => {
         'custom-alert-class',
         'shadow-md',
         'relative',
-        'rounded-xl',
+        'rounded-lg',
       );
     });
 
@@ -126,9 +124,8 @@ describe('Alert UI components', () => {
       expect(title.tagName).toBe('H5');
       expect(title).toHaveClass(
         'mb-1',
-        'font-semibold',
-        'leading-none',
-        'tracking-tight',
+        'font-medium',
+        'leading-tight',
       );
       expect(title).toHaveTextContent('Tiêu đề cảnh báo');
     });
@@ -145,7 +142,7 @@ describe('Alert UI components', () => {
       );
       const title = screen.getByTestId('alert-title-custom');
 
-      expect(title).toHaveClass('custom-title-class', 'mb-1', 'font-semibold');
+      expect(title).toHaveClass('custom-title-class', 'mb-1', 'font-medium');
       expect(title).toHaveAttribute('id', 'custom-alert-title-id');
     });
 
@@ -245,7 +242,7 @@ describe('Alert UI components', () => {
       );
 
       const alert = screen.getByTestId('composite-alert-destructive');
-      expect(alert).toHaveClass('text-rose-700');
+      expect(alert).toHaveClass('text-destructive');
       expect(
         screen.getByRole('heading', { level: 5, name: 'Có lỗi xảy ra' }),
       ).toBeInTheDocument();

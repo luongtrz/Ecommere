@@ -85,10 +85,10 @@ describe('ScrollArea', () => {
       'select-none',
       'transition-colors',
       'h-full',
-      'w-2.5',
+      'w-2',
       'border-l',
       'border-l-transparent',
-      'p-[1px]',
+      'p-0.5',
     );
   });
 });
@@ -113,10 +113,10 @@ describe('ScrollBar', () => {
       'select-none',
       'transition-colors',
       'h-full',
-      'w-2.5',
+      'w-2',
       'border-l',
       'border-l-transparent',
-      'p-[1px]',
+      'p-0.5',
     );
     expect(bar).not.toHaveClass('flex-col', 'border-t');
   });
@@ -135,10 +135,10 @@ describe('ScrollBar', () => {
     expect(bar).toHaveAttribute('data-orientation', 'vertical');
     expect(bar).toHaveClass(
       'h-full',
-      'w-2.5',
+      'w-2',
       'border-l',
       'border-l-transparent',
-      'p-[1px]',
+      'p-0.5',
     );
     expect(bar).not.toHaveClass('flex-col', 'border-t');
   });
@@ -163,11 +163,11 @@ describe('ScrollBar', () => {
       'touch-none',
       'select-none',
       'transition-colors',
-      'h-2.5',
+      'h-2',
       'flex-col',
       'border-t',
       'border-t-transparent',
-      'p-[1px]',
+      'p-0.5',
     );
     expect(bar).not.toHaveClass('border-l', 'border-l-transparent');
   });
@@ -180,7 +180,7 @@ describe('ScrollBar', () => {
         </ScrollAreaPrimitive.Viewport>
         <ScrollBar
           orientation="horizontal"
-          className="custom-bar-class bg-slate-100"
+          className="custom-bar-class bg-muted"
           data-testid="scrollbar-custom"
         />
       </ScrollAreaPrimitive.Root>,
@@ -189,8 +189,8 @@ describe('ScrollBar', () => {
     const bar = screen.getByTestId('scrollbar-custom');
     expect(bar).toHaveClass(
       'custom-bar-class',
-      'bg-slate-100',
-      'h-2.5',
+      'bg-muted',
+      'h-2',
       'flex-col',
     );
   });

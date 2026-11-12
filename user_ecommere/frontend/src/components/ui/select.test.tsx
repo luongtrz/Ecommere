@@ -65,7 +65,7 @@ describe('Select components', () => {
 
     expect(triggerRef.current).toBeInstanceOf(HTMLButtonElement);
     expect(triggerRef.current).toHaveClass('custom-trigger-class');
-    expect(triggerRef.current).toHaveClass('h-10');
+    expect(triggerRef.current).toHaveClass('h-11');
     expect(screen.getByText('Chọn danh mục')).toBeInTheDocument();
     // ChevronDown icon is rendered
     expect(triggerRef.current?.querySelector('svg')).toBeInTheDocument();

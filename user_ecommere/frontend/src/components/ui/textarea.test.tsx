@@ -16,15 +16,16 @@ describe('Textarea', () => {
     expect(textarea.tagName).toBe('TEXTAREA');
     expect(textarea).toHaveClass(
       'flex',
-      'min-h-[80px]',
+      'min-h-[96px]',
       'w-full',
-      'rounded-lg',
+      'rounded-md',
       'border',
-      'border-slate-200',
-      'bg-white',
+      'border-input',
+      'bg-card',
       'px-3',
       'py-2',
-      'text-sm',
+      'text-base',
+      'md:text-sm',
     );
   });
 
@@ -37,7 +38,7 @@ describe('Textarea', () => {
     );
     const textarea = getByTestId('textarea-custom');
     expect(textarea).toHaveClass('custom-textarea', 'extra-style');
-    expect(textarea).toHaveClass('min-h-[80px]');
+    expect(textarea).toHaveClass('min-h-[96px]');
   });
 
   it('renders correctly without custom className (undefined className)', () => {
@@ -45,7 +46,7 @@ describe('Textarea', () => {
       <Textarea data-testid="textarea-undefined" />,
     );
     const textarea = getByTestId('textarea-undefined');
-    expect(textarea).toHaveClass('min-h-[80px]');
+    expect(textarea).toHaveClass('min-h-[96px]');
   });
 
   it('forwards ref to the underlying HTMLTextAreaElement', () => {

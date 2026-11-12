@@ -15,16 +15,16 @@ describe('Badge Component', () => {
     expect(badge).toHaveClass(
       'inline-flex',
       'items-center',
-      'rounded-full',
+      'rounded-sm',
       'border',
-      'px-2.5',
+      'px-2',
       'py-0.5',
       'text-xs',
-      'font-semibold',
+      'font-medium',
       'transition-colors',
       'border-transparent',
-      'bg-teal-600',
-      'text-white',
+      'bg-primary',
+      'text-primary-foreground',
     );
   });
 
@@ -34,8 +34,8 @@ describe('Badge Component', () => {
     const badge = screen.getByText('Mặc định');
     expect(badge).toHaveClass(
       'border-transparent',
-      'bg-teal-600',
-      'text-white',
+      'bg-primary',
+      'text-primary-foreground',
     );
   });
 
@@ -44,9 +44,9 @@ describe('Badge Component', () => {
 
     const badge = screen.getByText('Đang xử lý');
     expect(badge).toHaveClass(
-      'border-slate-200',
-      'bg-slate-100',
-      'text-slate-700',
+      'border-transparent',
+      'bg-secondary',
+      'text-secondary-foreground',
     );
   });
 
@@ -54,19 +54,23 @@ describe('Badge Component', () => {
     render(<Badge variant="destructive">Đã hủy</Badge>);
 
     const badge = screen.getByText('Đã hủy');
-    expect(badge).toHaveClass('border-rose-200', 'bg-rose-50', 'text-rose-600');
+    expect(badge).toHaveClass(
+      'border-transparent',
+      'bg-destructive',
+      'text-destructive-foreground',
+    );
   });
 
   it('renders with variant="outline"', () => {
     render(<Badge variant="outline">Hết hàng</Badge>);
 
     const badge = screen.getByText('Hết hàng');
-    expect(badge).toHaveClass('text-slate-700');
+    expect(badge).toHaveClass('text-foreground');
     expect(badge).not.toHaveClass(
       'border-transparent',
-      'bg-teal-600',
-      'bg-slate-100',
-      'bg-rose-50',
+      'bg-primary',
+      'bg-secondary',
+      'bg-destructive',
     );
   });
 
@@ -85,7 +89,7 @@ describe('Badge Component', () => {
     expect(badge).toHaveClass(
       'custom-extra-class',
       'shadow-sm',
-      'bg-slate-100',
+      'bg-secondary',
     );
   });
 
@@ -116,43 +120,42 @@ describe('Badge Component', () => {
 describe('badgeVariants helper function', () => {
   it('returns default variant classes when invoked without arguments', () => {
     const classes = badgeVariants();
-    expect(classes).toContain('bg-teal-600');
-    expect(classes).toContain('text-white');
-    expect(classes).toContain('rounded-full');
+    expect(classes).toContain('bg-primary');
+    expect(classes).toContain('text-primary-foreground');
+    expect(classes).toContain('rounded-sm');
   });
 
   it('returns default variant classes when variant is explicitly "default"', () => {
     const classes = badgeVariants({ variant: 'default' });
-    expect(classes).toContain('bg-teal-600');
+    expect(classes).toContain('bg-primary');
     expect(classes).toContain('border-transparent');
   });
 
   it('returns secondary variant classes', () => {
     const classes = badgeVariants({ variant: 'secondary' });
-    expect(classes).toContain('bg-slate-100');
-    expect(classes).toContain('text-slate-700');
+    expect(classes).toContain('bg-secondary');
+    expect(classes).toContain('text-secondary-foreground');
   });
 
   it('returns destructive variant classes', () => {
     const classes = badgeVariants({ variant: 'destructive' });
-    expect(classes).toContain('bg-rose-50');
-    expect(classes).toContain('text-rose-600');
+    expect(classes).toContain('bg-destructive');
+    expect(classes).toContain('text-destructive-foreground');
   });
 
   it('returns outline variant classes', () => {
     const classes = badgeVariants({ variant: 'outline' });
-    expect(classes).toContain('text-slate-700');
-    expect(classes).not.toContain('bg-teal-600');
+    expect(classes).toContain('text-foreground');
+    expect(classes).not.toContain('bg-primary');
     expect(classes).not.toContain('border-transparent');
   });
 
   it('appends custom className passed to badgeVariants', () => {
     const classes = badgeVariants({
       variant: 'outline',
-      className: 'uppercase tracking-wider',
+      className: 'custom-class',
     });
-    expect(classes).toContain('uppercase');
-    expect(classes).toContain('tracking-wider');
-    expect(classes).toContain('text-slate-700');
+    expect(classes).toContain('custom-class');
+    expect(classes).toContain('text-foreground');
   });
 });

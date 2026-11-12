@@ -74,7 +74,7 @@ describe('Form components and useFormField', () => {
 
     expect(labelRef.current).toBeInstanceOf(HTMLLabelElement);
     expect(labelRef.current).toHaveClass('custom-label');
-    expect(labelRef.current).not.toHaveClass('text-rose-600');
+    expect(labelRef.current).not.toHaveClass('text-destructive');
 
     const input = screen.getByPlaceholderText('Nhập tên');
     expect(controlRef.current).toBe(input);
@@ -124,7 +124,7 @@ describe('Form components and useFormField', () => {
 
     expect(messageRef.current).toBeInstanceOf(HTMLParagraphElement);
     expect(messageRef.current).toHaveClass('custom-msg-fallback');
-    expect(messageRef.current).toHaveClass('text-rose-600');
+    expect(messageRef.current).toHaveClass('text-destructive');
     expect(messageRef.current).toHaveTextContent('Vui lòng nhập email hợp lệ');
   });
 
@@ -177,7 +177,7 @@ describe('Form components and useFormField', () => {
     const desc = screen.getByTestId('desc');
 
     // Initially without error: fallback text is shown because children were passed
-    expect(label).not.toHaveClass('text-rose-600');
+    expect(label).not.toHaveClass('text-destructive');
     expect(input).toHaveAttribute('aria-invalid', 'false');
     expect(input).toHaveAttribute('aria-describedby', desc.id);
     expect(screen.getByTestId('message')).toHaveTextContent(
@@ -193,7 +193,7 @@ describe('Form components and useFormField', () => {
     });
 
     const errorMsg = screen.getByTestId('message');
-    expect(label).toHaveClass('text-rose-600');
+    expect(label).toHaveClass('text-destructive');
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAttribute(
       'aria-describedby',
@@ -208,12 +208,49 @@ describe('Form components and useFormField', () => {
       clearErrorsFn('username');
     });
 
-    expect(label).not.toHaveClass('text-rose-600');
+    expect(label).not.toHaveClass('text-destructive');
     expect(input).toHaveAttribute('aria-invalid', 'false');
     expect(input).toHaveAttribute('aria-describedby', desc.id);
     expect(screen.getByTestId('message')).toHaveTextContent(
       'Fallback text khi không có lỗi',
     );
+  });
+
+  it('ensures error state in FormLabel overrides passed text-muted-foreground', () => {
+    let setErrorFn: any;
+    const TestForm = () => {
+      const form = useForm({ defaultValues: { phone: '' } });
+      setErrorFn = form.setError;
+      return (
+        <Form {...form}>
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-muted-foreground" data-testid="override-label">
+                  Số điện thoại
+                </FormLabel>
+                <FormControl>
+                  <input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </Form>
+      );
+    };
+
+    render(<TestForm />);
+    const label = screen.getByTestId('override-label');
+    expect(label).toHaveClass('text-muted-foreground');
+    expect(label).not.toHaveClass('text-destructive');
+
+    act(() => {
+      setErrorFn('phone', { type: 'manual', message: 'Lỗi' });
+    });
+
+    expect(label).toHaveClass('text-destructive');
   });
 
   it('exposes all fieldState properties from useFormField hook', () => {
