@@ -1079,7 +1079,8 @@ describe('AdminOrdersPage', () => {
     fireEvent.click(cancelMenuItem);
     expect(screen.getByText('Xác nhận hủy đơn hàng')).toBeInTheDocument();
 
-    const closeBtn = screen.getByRole('button', { name: 'Đóng' });
+    // Scope to the dialog; its built-in X (first in DOM order) is the close control under test.
+    const closeBtn = within(screen.getByRole('dialog')).getAllByRole('button', { name: 'Đóng' })[0];
     fireEvent.click(closeBtn);
 
     expect(mockMutate).not.toHaveBeenCalled();
