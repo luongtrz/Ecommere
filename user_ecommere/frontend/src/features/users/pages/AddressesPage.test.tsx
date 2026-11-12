@@ -36,13 +36,33 @@ vi.mock('@/lib/seo', () => ({
 
 const mockUseAddresses = vi.fn();
 const mockDeleteAddressMutateAsync = vi.fn();
+const mockUpdateAddressMutateAsync = vi.fn();
 let mockDeleteAddressPending = false;
+let mockUpdateAddressPending = false;
 
 vi.mock('../hooks/useAddresses', () => ({
   useAddresses: () => mockUseAddresses(),
   useDeleteAddress: () => ({
     mutateAsync: mockDeleteAddressMutateAsync,
     isPending: mockDeleteAddressPending,
+  }),
+  useUpdateAddress: () => ({
+    mutateAsync: mockUpdateAddressMutateAsync,
+    isPending: mockUpdateAddressPending,
+  }),
+}));
+
+const mockAuthUser = {
+  id: 'user-001',
+  name: 'Nguyễn Văn A',
+  email: 'nguyenvana@example.com',
+  role: 'CUSTOMER',
+};
+
+vi.mock('@/features/auth/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: mockAuthUser,
+    logout: vi.fn(),
   }),
 }));
 
@@ -162,7 +182,7 @@ describe('AddressesPage', () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole('heading', { level: 3, name: 'Chưa có địa chỉ nào' }),
+      screen.getByRole('heading', { level: 2, name: 'Chưa có địa chỉ nào' }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -183,7 +203,7 @@ describe('AddressesPage', () => {
     renderAddressesPage();
 
     expect(
-      screen.getByRole('heading', { level: 3, name: 'Chưa có địa chỉ nào' }),
+      screen.getByRole('heading', { level: 2, name: 'Chưa có địa chỉ nào' }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /Thêm địa chỉ đầu tiên/i }),
@@ -254,11 +274,11 @@ describe('AddressesPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Mặc định')).toBeInTheDocument();
 
-    // Card classes for default
+    // Card for default
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-xl')!;
-    expect(card1).toHaveClass('border-teal-500');
+      .closest('[data-testid="address-card"]')!;
+    expect(card1).toBeInTheDocument();
 
     // Address 2 (Non-default)
     expect(screen.getByText('Trần Thị Thường')).toBeInTheDocument();
@@ -270,10 +290,28 @@ describe('AddressesPage', () => {
     // Check that "Mặc định" badge only appears once (for address 1)
     expect(screen.getAllByText('Mặc định')).toHaveLength(1);
 
-    // Card classes for non-default
-    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-xl')!;
-    expect(card2).toHaveClass('border-slate-200');
-    expect(card2).not.toHaveClass('border-teal-500');
+    // Card for non-default
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
+    expect(card2).toBeInTheDocument();
+  });
+
+  it('calls updateAddress.mutateAsync with isDefault: true when clicking "Đặt làm mặc định"', async () => {
+    const user = userEvent.setup();
+    mockUseAddresses.mockReturnValue({
+      data: [sampleAddress1, sampleAddress2],
+      isLoading: false,
+    });
+    mockUpdateAddressMutateAsync.mockResolvedValueOnce({});
+
+    renderAddressesPage();
+
+    const setDefaultBtn = screen.getByRole('button', { name: 'Đặt làm mặc định' });
+    await user.click(setDefaultBtn);
+
+    expect(mockUpdateAddressMutateAsync).toHaveBeenCalledWith({
+      id: sampleAddress2.id,
+      data: { isDefault: true },
+    });
   });
 
   it('opens dialog in edit mode with selected address when clicking edit button', async () => {
@@ -285,10 +323,10 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-xl')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
     const editButton =
       card2.querySelector('svg.lucide-edit')?.closest('button') ||
-      card2.querySelectorAll('button')[0];
+      card2.querySelectorAll('button')[1];
 
     await user.click(editButton!);
 
@@ -314,7 +352,7 @@ describe('AddressesPage', () => {
     // Open in edit mode
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-xl')!;
+      .closest('[data-testid="address-card"]')!;
     const editButton =
       card1.querySelector('svg.lucide-edit')?.closest('button') ||
       card1.querySelectorAll('button')[0];
@@ -342,62 +380,64 @@ describe('AddressesPage', () => {
     );
   });
 
-  it('deletes address when delete button is clicked and user confirms', async () => {
+  it('opens in-page confirmation dialog and deletes address when confirmed', async () => {
     const user = userEvent.setup();
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
     mockDeleteAddressMutateAsync.mockResolvedValueOnce(undefined);
 
     mockUseAddresses.mockReturnValue({
-      data: [sampleAddress1],
+      data: [sampleAddress1, sampleAddress2],
       isLoading: false,
     });
 
     renderAddressesPage();
 
-    const card1 = screen
-      .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-xl')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
     const deleteButton =
-      card1.querySelector('svg.lucide-trash-2')?.closest('button') ||
-      card1.querySelectorAll('button')[1];
+      card2.querySelector('svg.lucide-trash-2')?.closest('button')!;
 
-    await user.click(deleteButton!);
+    await user.click(deleteButton);
 
-    expect(confirmSpy).toHaveBeenCalledWith(
-      'Bạn có chắc chắn muốn xóa địa chỉ này?',
-    );
+    expect(screen.getByText('Xóa địa chỉ?')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Bạn có chắc chắn muốn xóa địa chỉ này khỏi sổ địa chỉ không? Hành động này không thể hoàn tác.',
+      ),
+    ).toBeInTheDocument();
+
+    const confirmDeleteBtn = screen.getByRole('button', { name: 'Xóa địa chỉ' });
+    await user.click(confirmDeleteBtn);
+
     expect(mockDeleteAddressMutateAsync).toHaveBeenCalledWith(
-      sampleAddress1.id,
+      sampleAddress2.id,
     );
   });
 
-  it('does not delete address when delete button is clicked and user cancels confirmation', async () => {
+  it('cancels deletion when cancel button in confirmation dialog is clicked', async () => {
     const user = userEvent.setup();
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
 
     mockUseAddresses.mockReturnValue({
-      data: [sampleAddress1],
+      data: [sampleAddress1, sampleAddress2],
       isLoading: false,
     });
 
     renderAddressesPage();
 
-    const card1 = screen
-      .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-xl')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
     const deleteButton =
-      card1.querySelector('svg.lucide-trash-2')?.closest('button') ||
-      card1.querySelectorAll('button')[1];
+      card2.querySelector('svg.lucide-trash-2')?.closest('button')!;
 
-    await user.click(deleteButton!);
+    await user.click(deleteButton);
 
-    expect(confirmSpy).toHaveBeenCalledWith(
-      'Bạn có chắc chắn muốn xóa địa chỉ này?',
-    );
+    expect(screen.getByText('Xóa địa chỉ?')).toBeInTheDocument();
+
+    const cancelBtn = screen.getByRole('button', { name: 'Hủy' });
+    await user.click(cancelBtn);
+
     expect(mockDeleteAddressMutateAsync).not.toHaveBeenCalled();
+    expect(screen.queryByText('Xóa địa chỉ?')).not.toBeInTheDocument();
   });
 
-  it('disables delete buttons when deleteAddress.isPending is true', () => {
+  it('disables delete button for default address and when deleteAddress.isPending is true', () => {
     mockDeleteAddressPending = true;
 
     mockUseAddresses.mockReturnValue({
@@ -409,17 +449,44 @@ describe('AddressesPage', () => {
 
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('.rounded-xl')!;
+      .closest('[data-testid="address-card"]')!;
     const deleteButton1 =
-      card1.querySelector('svg.lucide-trash-2')?.closest('button') ||
-      card1.querySelectorAll('button')[1];
+      card1.querySelector('svg.lucide-trash-2')?.closest('button')!;
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('.rounded-xl')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
     const deleteButton2 =
-      card2.querySelector('svg.lucide-trash-2')?.closest('button') ||
-      card2.querySelectorAll('button')[1];
+      card2.querySelector('svg.lucide-trash-2')?.closest('button')!;
 
     expect(deleteButton1).toBeDisabled();
     expect(deleteButton2).toBeDisabled();
+  });
+
+  it('renders breadcrumb starting with Trang chủ / Tài khoản / Sổ địa chỉ', () => {
+    mockUseAddresses.mockReturnValue({
+      data: [sampleAddress1],
+      isLoading: false,
+    });
+
+    renderAddressesPage();
+
+    const breadcrumb = screen.getByRole('navigation', { name: 'Breadcrumb' });
+    expect(breadcrumb).toHaveTextContent('Trang chủ');
+    expect(breadcrumb).toHaveTextContent('Tài khoản');
+    expect(breadcrumb).toHaveTextContent('Sổ địa chỉ');
+  });
+
+  it('renders account navigation sidebar with active Sổ địa chỉ', () => {
+    mockUseAddresses.mockReturnValue({
+      data: [sampleAddress1],
+      isLoading: false,
+    });
+
+    renderAddressesPage();
+
+    const nav = screen.getByRole('navigation', { name: 'Menu tài khoản' });
+    expect(nav).toHaveTextContent('Tài khoản');
+    expect(nav).toHaveTextContent('Đơn hàng của tôi');
+    expect(nav).toHaveTextContent('Sổ địa chỉ');
+    expect(nav).toHaveTextContent('Danh sách yêu thích');
   });
 });

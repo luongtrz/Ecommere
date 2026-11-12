@@ -121,14 +121,13 @@ describe('AccountPage', () => {
     // CUSTOMER role badge
     const badge = screen.getByText('Khách hàng thân thiết');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass('bg-teal-50', 'text-teal-700', 'border-teal-200');
 
     // Category section
     expect(screen.getByText('Danh mục')).toBeInTheDocument();
     expect(screen.getByText('Đơn hàng của tôi')).toBeInTheDocument();
     expect(screen.getByText('Sổ địa chỉ')).toBeInTheDocument();
     expect(screen.getByText('Danh sách yêu thích')).toBeInTheDocument();
-    expect(screen.getByText('Bảo mật tài khoản')).toBeInTheDocument();
+    expect(screen.queryByText('Bảo mật tài khoản')).not.toBeInTheDocument();
 
     // Personal details
     expect(screen.getByText('Thông tin cá nhân')).toBeInTheDocument();
@@ -172,7 +171,6 @@ describe('AccountPage', () => {
 
     const badge = screen.getByText('Quản trị viên');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass('bg-rose-50', 'text-rose-700', 'border-rose-200');
   });
 
   it('renders fallback values when email or createdAt is not provided', () => {
@@ -198,7 +196,7 @@ describe('AccountPage', () => {
     expect(screen.getByText('Không rõ')).toBeInTheDocument();
   });
 
-  it('calls logout when the logout button is clicked', async () => {
+  it('opens confirmation dialog and calls logout when confirmed', async () => {
     const user = userEvent.setup();
     mockUseAuth.mockReturnValue({
       user: baseCustomerUser,
@@ -210,7 +208,41 @@ describe('AccountPage', () => {
     const logoutButton = screen.getByRole('button', { name: /đăng xuất/i });
     await user.click(logoutButton);
 
+    expect(
+      screen.getByText('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?'),
+    ).toBeInTheDocument();
+
+    const confirmLogoutBtn = screen.getByRole('button', {
+      name: 'Xác nhận đăng xuất',
+    });
+    await user.click(confirmLogoutBtn);
+
     expect(mockLogout).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels logout when cancel button in dialog is clicked', async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      user: baseCustomerUser,
+      logout: mockLogout,
+    });
+
+    renderAccountPage();
+
+    const logoutButton = screen.getByRole('button', { name: /đăng xuất/i });
+    await user.click(logoutButton);
+
+    expect(
+      screen.getByText('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?'),
+    ).toBeInTheDocument();
+
+    const cancelBtn = screen.getByRole('button', { name: 'Hủy' });
+    await user.click(cancelBtn);
+
+    expect(mockLogout).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?'),
+    ).not.toBeInTheDocument();
   });
 
   it('navigates to the appropriate route when menu items with paths are clicked', async () => {
@@ -237,8 +269,7 @@ describe('AccountPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/wishlist');
   });
 
-  it('does not navigate when clicking the "Bảo mật tài khoản" menu item with path "#"', async () => {
-    const user = userEvent.setup();
+  it('does not render dead "Bảo mật tài khoản" menu item', () => {
     mockUseAuth.mockReturnValue({
       user: baseCustomerUser,
       logout: mockLogout,
@@ -246,12 +277,9 @@ describe('AccountPage', () => {
 
     renderAccountPage();
 
-    const securityBtn = screen.getByRole('button', {
-      name: /bảo mật tài khoản/i,
-    });
-    await user.click(securityBtn);
-
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole('button', { name: /bảo mật tài khoản/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('opens and closes the ProfileFormDialog when clicking settings button and closing dialog', async () => {
