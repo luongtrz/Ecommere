@@ -18,9 +18,12 @@ import {
   Tags,
   Loader2,
   Star,
+  X,
+  ArrowUpDown,
 } from 'lucide-react';
 import { useInfiniteAdminProducts } from '@/features/catalog/hooks/useProducts';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { EmptyState } from '@/components/common/EmptyState';
 import { formatCurrency } from '@/lib/formatters';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -42,6 +45,14 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 import { useDeleteProduct } from '../hooks/useAdminProducts';
 import { useToast } from '@/hooks/useToast';
@@ -53,12 +64,22 @@ const STORE_URL = (
 export function AdminProductsPage() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [sortBy, setSortBy] = useState<
+    'newest' | 'price_asc' | 'price_desc' | 'best_selling' | 'rating'
+  >('newest');
   const observerTarget = useRef<HTMLDivElement>(null);
 
   /* State for category filter */
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
   const [categories, setCategories] = useState<any[]>([]); // Flattened for lookup
   const [categoryTree, setCategoryTree] = useState<any[]>([]); // Tree for dropdown
+
+  /* State for delete confirmation dialog */
+  const [productToDelete, setProductToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   /* Fetch categories */
   useEffect(() => {
@@ -99,14 +120,16 @@ export function AdminProductsPage() {
     data,
     isLoading,
     isError,
+    refetch,
+    isRefetching,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteAdminProducts({
     limit: 20,
     search: debouncedSearch,
-    sortBy: 'newest',
-    categoryId, // Pass categoryId to hook
+    sortBy,
+    categoryId,
   });
 
   const deleteProduct = useDeleteProduct();
@@ -142,31 +165,35 @@ export function AdminProductsPage() {
     };
   }, [hasNextPage, fetchNextPage]);
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = (id: string, name: string) => {
+    setProductToDelete({ id, name });
+    setIsDeleteOpen(true);
+  };
+
+  const handleExecuteDelete = () => {
+    if (!productToDelete) return;
+    const { id } = productToDelete;
     if (
       deletingIdRef.current === id ||
       (deleteProduct.isPending && deleteProduct.variables === id)
     ) {
       return;
     }
-    if (
-      window.confirm(
-        `Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`,
-      )
-    ) {
-      deletingIdRef.current = id;
-      deleteProduct.mutate(id, {
-        onSuccess: () => {
-          toast.success('Xóa sản phẩm thành công');
-        },
-        onError: () => {
-          toast.error('Xóa sản phẩm thất bại. Vui lòng thử lại.');
-        },
-        onSettled: () => {
-          deletingIdRef.current = null;
-        },
-      });
-    }
+
+    deletingIdRef.current = id;
+    deleteProduct.mutate(id, {
+      onSuccess: () => {
+        toast.success('Xóa sản phẩm thành công');
+        setIsDeleteOpen(false);
+        setProductToDelete(null);
+      },
+      onError: () => {
+        toast.error('Xóa sản phẩm thất bại. Vui lòng thử lại.');
+      },
+      onSettled: () => {
+        deletingIdRef.current = null;
+      },
+    });
   };
 
   const calculateTotalStock = (product: any) => {
@@ -180,25 +207,10 @@ export function AdminProductsPage() {
 
   const products = data?.pages.flatMap((page) => page.products) || [];
   const totalProducts = data?.pages[0]?.total || 0;
-
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 p-8 text-center bg-white border border-slate-200 rounded-xl shadow-sm">
-        <div className="h-12 w-12 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
-          <AlertCircle className="h-6 w-6" />
-        </div>
-        <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-          Không thể tải danh sách sản phẩm
-        </h2>
-        <Button
-          onClick={() => window.location.reload()}
-          className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm font-medium transition-all duration-200 hover:shadow"
-        >
-          Thử lại
-        </Button>
-      </div>
-    );
-  }
+  const totalStockCount = products.reduce(
+    (acc, p) => acc + calculateTotalStock(p),
+    0,
+  );
 
   /* Helper to get selected category name */
   const selectedCategoryName = categories.find(
@@ -253,18 +265,71 @@ export function AdminProductsPage() {
     });
   };
 
+  const renderStockBadge = (totalStock: number) => {
+    if (totalStock === 0) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium tabular-nums bg-rose-50 text-rose-700 ring-1 ring-rose-200">
+          0 sp
+        </span>
+      );
+    }
+    if (totalStock <= 5) {
+      return (
+        <span
+          title="Sắp hết hàng"
+          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium tabular-nums bg-amber-50 text-amber-700 ring-1 ring-amber-200"
+        >
+          {totalStock} sp
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium tabular-nums bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+        {totalStock} sp
+      </span>
+    );
+  };
+
+  const renderStatusBadge = (active: boolean | undefined) => {
+    const isActive = active !== false;
+    return (
+      <span
+        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+          isActive
+            ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+            : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'
+        }`}
+      >
+        {isActive ? 'Đang bán' : 'Tạm ẩn'}
+      </span>
+    );
+  };
+
+  const isFiltered = Boolean(debouncedSearch || search || categoryId);
+
   return (
     <>
       <SEO title="Quản lý sản phẩm - Admin" />
       <div className="space-y-6 md:space-y-8 animate-in fade-in duration-200">
-        {/* Dominant Heading */}
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Quản lý sản phẩm
-          </h1>
-          <p className="text-sm text-slate-500">
-            Theo dõi danh mục, trạng thái tồn kho và thông tin giá bán sản phẩm
-          </p>
+        {/* Dominant Heading with Primary Action Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              Quản lý sản phẩm
+            </h1>
+            <p className="text-sm text-slate-500">
+              Theo dõi danh mục, trạng thái tồn kho và thông tin giá bán sản phẩm
+            </p>
+          </div>
+          <Button
+            asChild
+            className="gap-2 shrink-0 h-10 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200 hover:shadow font-medium min-h-[44px] sm:min-h-0"
+          >
+            <Link to="/admin/products/new">
+              <Plus className="h-4 w-4" />
+              <span>Thêm sản phẩm</span>
+            </Link>
+          </Button>
         </div>
 
         {/* Header & Stats */}
@@ -296,7 +361,7 @@ export function AdminProductsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold tabular-nums text-slate-900">
-                --
+                {categories.length > 0 ? categories.length : '0'}
               </div>
               <p className="text-xs text-slate-400 mt-1">
                 Danh mục đang hoạt động
@@ -314,7 +379,7 @@ export function AdminProductsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold tabular-nums text-slate-900">
-                --
+                {totalStockCount}
               </div>
               <p className="text-xs text-slate-400 mt-1">
                 Tổng số lượng tồn kho
@@ -325,22 +390,35 @@ export function AdminProductsPage() {
 
         {/* Action Toolbar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
-          <div className="flex flex-wrap items-center gap-2 flex-1 max-w-xl">
-            <div className="relative flex-1 min-w-[200px]">
+          <div className="flex flex-wrap items-center gap-2 flex-1">
+            {/* Search Input with Clear Button */}
+            <div className="relative flex-1 min-w-[200px] max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Tìm kiếm sản phẩm..."
-                className="pl-9 h-10 bg-slate-50/60 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-teal-500 transition-colors text-sm rounded-lg"
+                placeholder="Tìm kiếm theo tên sản phẩm, SKU..."
+                className="pl-9 pr-9 h-10 bg-slate-50/60 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-teal-500 transition-colors text-sm rounded-lg"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  aria-label="Xóa tìm kiếm"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
+            {/* Category Filter Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className={`gap-2 h-10 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium transition-colors ${
+                  aria-label="Lọc theo danh mục"
+                  className={`gap-2 h-10 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium transition-colors min-h-[44px] sm:min-h-0 ${
                     categoryId
                       ? 'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 ring-1 ring-teal-200/50'
                       : ''
@@ -356,7 +434,7 @@ export function AdminProductsPage() {
                 align="start"
                 className="w-[300px] max-h-[300px] overflow-y-auto bg-white border-slate-200 shadow-lg rounded-xl p-1.5"
               >
-                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wider text-slate-500 px-2 py-1.5">
+                <DropdownMenuLabel className="text-xs font-semibold text-slate-500 px-2 py-1.5">
                   Lọc theo danh mục
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-slate-100 my-1" />
@@ -379,74 +457,194 @@ export function AdminProductsPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setCategoryId(undefined)}
-                className="h-10 px-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-medium transition-colors border border-transparent hover:border-slate-200"
+                className="h-10 px-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-medium transition-colors border border-transparent hover:border-slate-200 min-h-[44px] sm:min-h-0"
                 title="Xóa bộ lọc"
+                aria-label="Xóa bộ lọc danh mục"
               >
                 Xóa: {selectedCategoryName?.split(' > ').pop()} ✕
               </Button>
             )}
+
+            {/* Sort Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  aria-label="Sắp xếp sản phẩm"
+                  className="gap-2 h-10 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium transition-colors min-h-[44px] sm:min-h-0"
+                >
+                  <ArrowUpDown className="h-4 w-4 text-slate-500" />
+                  <span className="hidden sm:inline">
+                    {sortBy === 'newest'
+                      ? 'Mới nhất'
+                      : sortBy === 'price_asc'
+                        ? 'Giá: Thấp đến cao'
+                        : sortBy === 'price_desc'
+                          ? 'Giá: Cao đến thấp'
+                          : sortBy === 'best_selling'
+                            ? 'Bán chạy nhất'
+                            : 'Đánh giá cao'}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-48 bg-white border-slate-200 shadow-lg rounded-xl p-1.5"
+              >
+                <DropdownMenuLabel className="text-xs font-semibold text-slate-500 px-2 py-1.5">
+                  Sắp xếp theo
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                <DropdownMenuItem
+                  onClick={() => setSortBy('newest')}
+                  className={`cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors ${
+                    sortBy === 'newest' ? 'font-bold text-teal-600' : ''
+                  }`}
+                >
+                  Mới nhất
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setSortBy('price_asc')}
+                  className={`cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors ${
+                    sortBy === 'price_asc' ? 'font-bold text-teal-600' : ''
+                  }`}
+                >
+                  Giá: Thấp đến cao
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setSortBy('price_desc')}
+                  className={`cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors ${
+                    sortBy === 'price_desc' ? 'font-bold text-teal-600' : ''
+                  }`}
+                >
+                  Giá: Cao đến thấp
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setSortBy('best_selling')}
+                  className={`cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors ${
+                    sortBy === 'best_selling' ? 'font-bold text-teal-600' : ''
+                  }`}
+                >
+                  Bán chạy nhất
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setSortBy('rating')}
+                  className={`cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors ${
+                    sortBy === 'rating' ? 'font-bold text-teal-600' : ''
+                  }`}
+                >
+                  Đánh giá cao
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <Button
-            asChild
-            className="gap-2 shrink-0 h-10 rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200 hover:shadow font-medium"
-          >
-            <Link to="/admin/products/new">
-              <Plus className="h-4 w-4" />
-              <span className="inline">Thêm mới</span>
-            </Link>
-          </Button>
         </div>
 
-        {/* Products Table */}
+        {/* Products Table Container */}
         <div className="border border-slate-200 bg-white shadow-sm overflow-hidden rounded-xl">
-          <div className="relative overflow-x-auto">
-            {isLoading ? (
-              <div className="py-20 flex items-center justify-center">
-                <LoadingSpinner />
+          {isError ? (
+            <div className="flex flex-col items-center justify-center min-h-[350px] gap-4 p-8 text-center bg-white">
+              <div className="h-12 w-12 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                <AlertCircle className="h-6 w-6" />
               </div>
-            ) : products.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-                <div className="h-16 w-16 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 mb-4 shadow-sm">
-                  <Package className="h-8 w-8" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">
-                  Chưa có sản phẩm nào
-                </h3>
-                <p className="text-sm text-slate-500 max-w-sm mt-1 mb-6">
-                  Create your first product to get started managing your
-                  catalog.
+              <div className="space-y-1">
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+                  Không thể tải danh sách sản phẩm
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Đã có lỗi xảy ra trong quá trình tải dữ liệu. Vui lòng thử lại.
                 </p>
-                <Button
-                  asChild
-                  className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200 hover:shadow font-medium"
-                >
-                  <Link to="/admin/products/new">Tạo sản phẩm</Link>
-                </Button>
               </div>
-            ) : (
-              <div className="relative">
+              <Button
+                onClick={() => refetch()}
+                disabled={isRefetching}
+                className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm font-medium transition-all duration-200 hover:shadow gap-2 min-h-[44px] sm:min-h-0"
+              >
+                {isRefetching && <Loader2 className="h-4 w-4 animate-spin" />}
+                Thử lại
+              </Button>
+            </div>
+          ) : isLoading ? (
+            <div className="py-20 flex items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          ) : products.length === 0 ? (
+            <div className="p-6">
+              {isFiltered ? (
+                <EmptyState
+                  title="Không tìm thấy sản phẩm phù hợp"
+                  description="Thử thay đổi từ khóa tìm kiếm hoặc bỏ bộ lọc danh mục để tìm sản phẩm khác."
+                  action={
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearch('');
+                        setDebouncedSearch('');
+                        setCategoryId(undefined);
+                      }}
+                      className="rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium min-h-[44px] sm:min-h-0"
+                    >
+                      Xóa bộ lọc
+                    </Button>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  title="Chưa có sản phẩm nào"
+                  description="Tạo sản phẩm đầu tiên để bắt đầu xây dựng danh mục bán hàng của cửa hàng."
+                  action={
+                    <Button
+                      asChild
+                      className="rounded-lg bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 shadow-sm transition-all duration-200 hover:shadow font-medium min-h-[44px] sm:min-h-0"
+                    >
+                      <Link to="/admin/products/new">Tạo sản phẩm</Link>
+                    </Button>
+                  }
+                />
+              )}
+            </div>
+          ) : (
+            <div className="relative">
+              {/* Desktop Table View */}
+              <div className="hidden md:block relative overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
                     <TableRow className="hover:bg-transparent border-b border-slate-200">
-                      <TableHead className="w-[80px] px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="w-[80px] px-4 py-3.5 text-xs font-semibold text-slate-500">
                         Hình ảnh
                       </TableHead>
-                      <TableHead className="min-w-[200px] px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="min-w-[200px] px-4 py-3.5 text-xs font-semibold text-slate-500">
                         Tên sản phẩm
                       </TableHead>
-                      <TableHead className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="px-4 py-3.5 text-xs font-semibold text-slate-500">
                         Danh mục
                       </TableHead>
-                      <TableHead className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Giá bán
+                      <TableHead className="text-right px-4 py-3.5 text-xs font-semibold text-slate-500">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSortBy(
+                              sortBy === 'price_asc'
+                                ? 'price_desc'
+                                : 'price_asc',
+                            )
+                          }
+                          className="inline-flex items-center gap-1 hover:text-slate-900 transition-colors font-semibold"
+                        >
+                          <span>Giá bán</span>
+                          <ArrowUpDown className="h-3 w-3 text-slate-400" />
+                        </button>
                       </TableHead>
-                      <TableHead className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="text-center px-4 py-3.5 text-xs font-semibold text-slate-500">
                         Tồn kho
                       </TableHead>
-                      <TableHead className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="text-center px-4 py-3.5 text-xs font-semibold text-slate-500">
+                        Trạng thái
+                      </TableHead>
+                      <TableHead className="text-center px-4 py-3.5 text-xs font-semibold text-slate-500">
                         Đánh giá
                       </TableHead>
-                      <TableHead className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <TableHead className="text-right px-4 py-3.5 text-xs font-semibold text-slate-500">
                         Thao tác
                       </TableHead>
                     </TableRow>
@@ -461,19 +659,25 @@ export function AdminProductsPage() {
                       return (
                         <TableRow
                           key={product.id}
-                          className="group hover:bg-slate-50/80 transition-colors border-b border-slate-100"
+                          className={`group hover:bg-slate-50/80 transition-colors border-b border-slate-100 ${
+                            isDeleting ? 'opacity-50 pointer-events-none' : ''
+                          }`}
                         >
                           <TableCell className="px-4 py-3">
-                            <div className="relative h-12 w-12 rounded-lg border border-slate-200 overflow-hidden bg-slate-100 shadow-sm shrink-0">
-                              <img
-                                src={
-                                  product.images[0] ||
-                                  'https://placehold.co/100x100?text=No+Image'
-                                }
-                                alt={product.name}
-                                loading="lazy"
-                                className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                              />
+                            <div className="relative h-12 w-12 rounded-lg border border-slate-200 overflow-hidden bg-slate-100 shadow-sm shrink-0 flex items-center justify-center">
+                              {product.images && product.images[0] ? (
+                                <img
+                                  src={product.images[0]}
+                                  alt={product.name}
+                                  loading="lazy"
+                                  className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                                />
+                              ) : (
+                                <Package
+                                  className="h-6 w-6 text-slate-300"
+                                  aria-label="Không có hình ảnh"
+                                />
+                              )}
                             </div>
                           </TableCell>
                           <TableCell className="px-4 py-3">
@@ -485,7 +689,7 @@ export function AdminProductsPage() {
                               >
                                 {product.name}
                               </Link>
-                              <span className="text-xs text-slate-400 mt-0.5 font-mono">
+                              <span className="text-xs text-slate-400 mt-0.5 font-mono tracking-tight tabular-nums">
                                 SKU: {product.variants?.[0]?.sku || 'N/A'}
                               </span>
                             </div>
@@ -502,24 +706,19 @@ export function AdminProductsPage() {
                               <span className="text-slate-400 text-xs">-</span>
                             )}
                           </TableCell>
-                          <TableCell className="px-4 py-3">
+                          <TableCell className="px-4 py-3 text-right">
                             <div className="font-bold tabular-nums text-slate-900 text-sm">
                               {formatCurrency(product.basePrice)}
                             </div>
                           </TableCell>
                           <TableCell className="px-4 py-3 text-center">
-                            <div
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium tabular-nums ${
-                                totalStock > 0
-                                  ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-                                  : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
-                              }`}
-                            >
-                              {totalStock} sp
-                            </div>
-                            <div className="text-[10px] text-slate-400 mt-0.5 font-medium">
+                            {renderStockBadge(totalStock)}
+                            <div className="text-xs text-slate-400 mt-0.5 font-medium">
                               {product.variants?.length || 0} biến thể
                             </div>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-center">
+                            {renderStatusBadge(product.active)}
                           </TableCell>
                           <TableCell className="px-4 py-3 text-center">
                             <div className="flex items-center justify-center gap-1.5">
@@ -533,70 +732,246 @@ export function AdminProductsPage() {
                             </div>
                           </TableCell>
                           <TableCell className="px-4 py-3 text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="w-44 bg-white border-slate-200 shadow-lg rounded-xl p-1.5"
+                            <div className="flex items-center justify-end gap-1">
+                              {isDeleting && (
+                                <Loader2 className="h-4 w-4 animate-spin text-teal-600 mr-1" />
+                              )}
+                              <Button
+                                asChild
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-teal-600 transition-colors"
+                                title="Chỉnh sửa"
+                                aria-label="Chỉnh sửa sản phẩm"
                               >
-                                <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 py-1.5">
-                                  Thao tác
-                                </DropdownMenuLabel>
-                                <DropdownMenuItem asChild>
-                                  <a
-                                    href={`${STORE_URL}/p/${product.slug}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
-                                  >
-                                    <Eye className="mr-2 h-4 w-4 text-slate-400" />{' '}
-                                    Xem chi tiết
-                                  </a>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    to={`/admin/products/${product.id}/edit`}
-                                    className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
-                                  >
-                                    <Pencil className="mr-2 h-4 w-4 text-slate-400" />{' '}
-                                    Chỉnh sửa
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-slate-100 my-1" />
-                                <DropdownMenuItem
-                                  disabled={isDeleting}
-                                  className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-rose-600 focus:text-rose-700 focus:bg-rose-50 hover:bg-rose-50 transition-colors disabled:opacity-50"
-                                  onClick={() =>
-                                    handleDelete(product.id, product.name)
-                                  }
+                                <Link
+                                  to={`/admin/products/${product.id}/edit`}
                                 >
-                                  <Trash2 className="mr-2 h-4 w-4" /> Xóa sản
-                                  phẩm
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                  <Pencil className="h-4 w-4" />
+                                </Link>
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Thao tác sản phẩm"
+                                    className="h-8 w-8 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-44 bg-white border-slate-200 shadow-lg rounded-xl p-1.5"
+                                >
+                                  <DropdownMenuLabel className="text-xs font-semibold text-slate-500 px-2 py-1.5">
+                                    Thao tác
+                                  </DropdownMenuLabel>
+                                  <DropdownMenuItem asChild>
+                                    <a
+                                      href={`${STORE_URL}/p/${product.slug}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
+                                    >
+                                      <Eye className="mr-2 h-4 w-4 text-slate-400" />{' '}
+                                      Xem chi tiết
+                                    </a>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <Link
+                                      to={`/admin/products/${product.id}/edit`}
+                                      className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
+                                    >
+                                      <Pencil className="mr-2 h-4 w-4 text-slate-400" />{' '}
+                                      Chỉnh sửa
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                                  <DropdownMenuItem
+                                    disabled={isDeleting}
+                                    className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-rose-600 focus:text-rose-700 focus:bg-rose-50 hover:bg-rose-50 transition-colors disabled:opacity-50"
+                                    onClick={() =>
+                                      handleDelete(product.id, product.name)
+                                    }
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" /> Xóa sản
+                                    phẩm
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
                     })}
                   </TableBody>
                 </Table>
+              </div>
 
-                {/* Sentinel for Infinite Scroll */}
-                <div
-                  ref={observerTarget}
-                  className="h-14 flex items-center justify-center p-4 border-t border-slate-100"
-                >
+              {/* Mobile Card List View (md:hidden) */}
+              <div className="md:hidden divide-y divide-slate-100">
+                {products.map((product) => {
+                  const totalStock = calculateTotalStock(product);
+                  const isDeleting =
+                    (deleteProduct.isPending &&
+                      deleteProduct.variables === product.id) ||
+                    deletingIdRef.current === product.id;
+                  return (
+                    <div
+                      key={product.id}
+                      className={`p-4 space-y-3 transition-colors ${
+                        isDeleting ? 'opacity-50 pointer-events-none' : ''
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="relative h-14 w-14 rounded-lg border border-slate-200 overflow-hidden bg-slate-100 shadow-sm shrink-0 flex items-center justify-center">
+                          {product.images && product.images[0] ? (
+                            <img
+                              src={product.images[0]}
+                              alt={product.name}
+                              loading="lazy"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Package
+                              className="h-6 w-6 text-slate-300"
+                              aria-label="Không có hình ảnh"
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Link
+                            to={`/admin/products/${product.id}/edit`}
+                            className="font-semibold text-slate-900 hover:text-teal-600 text-sm line-clamp-2"
+                          >
+                            {product.name}
+                          </Link>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-xs text-slate-400 font-mono tracking-tight tabular-nums">
+                              SKU: {product.variants?.[0]?.sku || 'N/A'}
+                            </span>
+                            {product.category && (
+                              <Badge
+                                variant="outline"
+                                className="font-medium text-xs bg-slate-50 text-slate-700 border-slate-200 rounded-md py-0"
+                              >
+                                {product.category.name}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 flex-wrap gap-2">
+                        <div>
+                          <span className="text-slate-500">Giá: </span>
+                          <span className="font-bold tabular-nums text-slate-900 text-sm">
+                            {formatCurrency(product.basePrice)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {renderStatusBadge(product.active)}
+                          {renderStockBadge(totalStock)}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1">
+                        <div className="flex items-center gap-1 text-xs text-slate-500">
+                          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                          <span className="font-semibold text-slate-900 tabular-nums">
+                            {product.rating?.toFixed(1) || '0.0'}
+                          </span>
+                          <span>({product.reviewCount || 0})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {isDeleting && (
+                            <Loader2 className="h-4 w-4 animate-spin text-teal-600 mr-1" />
+                          )}
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="sm"
+                            className="h-11 min-h-[44px] px-3 text-xs gap-1.5 rounded-lg border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                          >
+                            <Link to={`/admin/products/${product.id}/edit`}>
+                              <Pencil className="h-3.5 w-3.5 text-slate-500" />
+                              <span>Sửa</span>
+                            </Link>
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                aria-label="Thao tác sản phẩm"
+                                className="h-11 w-11 min-h-[44px] min-w-[44px] rounded-lg border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-44 bg-white border-slate-200 shadow-lg rounded-xl p-1.5"
+                            >
+                              <DropdownMenuLabel className="text-xs font-semibold text-slate-500 px-2 py-1.5">
+                                Thao tác
+                              </DropdownMenuLabel>
+                              <DropdownMenuItem asChild>
+                                <a
+                                  href={`${STORE_URL}/p/${product.slug}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
+                                >
+                                  <Eye className="mr-2 h-4 w-4 text-slate-400" />{' '}
+                                  Xem chi tiết
+                                </a>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link
+                                  to={`/admin/products/${product.id}/edit`}
+                                  className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
+                                >
+                                  <Pencil className="mr-2 h-4 w-4 text-slate-400" />{' '}
+                                  Chỉnh sửa
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                              <DropdownMenuItem
+                                disabled={isDeleting}
+                                className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-rose-600 focus:text-rose-700 focus:bg-rose-50 hover:bg-rose-50 transition-colors disabled:opacity-50"
+                                onClick={() =>
+                                  handleDelete(product.id, product.name)
+                                }
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Xóa sản
+                                phẩm
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Sentinel for Infinite Scroll & Progress Indicator */}
+              <div
+                ref={observerTarget}
+                className="min-h-14 flex flex-col sm:flex-row items-center justify-between gap-2 p-4 border-t border-slate-100 bg-slate-50/50"
+              >
+                <div className="text-xs text-slate-500 font-medium">
+                  Hiển thị {products.length} / {totalProducts} sản phẩm
+                </div>
+                <div className="flex items-center gap-2">
                   {isFetchingNextPage && (
-                    <Loader2 className="h-5 w-5 animate-spin text-teal-600" />
+                    <div className="flex items-center gap-1.5 text-xs text-teal-600 font-medium">
+                      <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+                      <span>Đang tải thêm...</span>
+                    </div>
                   )}
                   {!hasNextPage && products.length > 0 && (
                     <span className="text-xs text-slate-400 font-medium">
@@ -605,9 +980,67 @@ export function AdminProductsPage() {
                   )}
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+          <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-0 gap-0 overflow-hidden font-sans">
+            <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-200 bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-600 ring-1 ring-rose-200 shrink-0">
+                  <AlertCircle className="h-5 w-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg font-bold text-slate-900">
+                    Xác nhận xóa sản phẩm
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                    Hành động này không thể hoàn tác
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="p-6 text-sm text-slate-600 leading-relaxed">
+              Bạn có chắc chắn muốn xóa sản phẩm{' '}
+              <span className="font-semibold text-slate-900">
+                "{productToDelete?.name}"
+              </span>
+              ? Hành động này không thể hoàn tác.
+            </div>
+
+            <DialogFooter className="px-6 py-4 border-t border-slate-200 bg-slate-50 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setIsDeleteOpen(false);
+                  setProductToDelete(null);
+                }}
+                className="rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium min-h-[44px] sm:min-h-0"
+                disabled={deleteProduct.isPending}
+              >
+                Hủy
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={handleExecuteDelete}
+                disabled={deleteProduct.isPending}
+                className="rounded-lg bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium focus-visible:ring-2 focus-visible:ring-rose-500 gap-1.5 min-h-[44px] sm:min-h-0"
+              >
+                {deleteProduct.isPending && (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                )}
+                Xác nhận xóa
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );
