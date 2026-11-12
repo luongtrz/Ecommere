@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link } from 'react-router-dom';
@@ -6,6 +6,46 @@ import { Link } from 'react-router-dom';
 export interface ChatMarkdownProps {
   content: string;
   size?: 'sm' | 'base';
+}
+
+function isNumericCell(children: React.ReactNode): boolean {
+  if (typeof children === 'number') return true;
+  if (typeof children === 'string') {
+    const trimmed = children.trim();
+    if (!trimmed) return false;
+    return /^[\d\s.,%+₫$€¥/-]+$/.test(trimmed) && /\d/.test(trimmed);
+  }
+  if (Array.isArray(children) && children.length === 1) {
+    return isNumericCell(children[0]);
+  }
+  return false;
+}
+
+interface ChatMarkdownImageProps {
+  src?: string;
+  alt?: string;
+}
+
+function ChatMarkdownImage({ src, alt }: ChatMarkdownImageProps) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!src || hasError) {
+    return (
+      <span className="text-muted-foreground text-xs italic">
+        {alt || 'Hình ảnh không tải được'}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt || ''}
+      className="max-h-36 max-w-xs rounded-lg border border-border object-contain my-2 bg-muted/20"
+      loading="lazy"
+      onError={() => setHasError(true)}
+    />
+  );
 }
 
 export const ChatMarkdown = memo(
@@ -67,7 +107,7 @@ export const ChatMarkdown = memo(
             ),
             table: ({ children }) => (
               <div className="my-2 overflow-x-auto rounded-lg border border-border">
-                <table className="w-full border-collapse text-left text-xs">
+                <table className="w-full border-collapse text-left text-xs tabular-nums">
                   {children}
                 </table>
               </div>
@@ -81,13 +121,22 @@ export const ChatMarkdown = memo(
               </tr>
             ),
             th: ({ children }) => (
-              <th className="border border-border bg-muted px-2.5 py-1.5 font-semibold text-foreground">
+              <th className="border border-border bg-muted px-2.5 py-1.5 font-semibold text-foreground tabular-nums">
                 {children}
               </th>
             ),
-            td: ({ children }) => (
-              <td className="border border-border px-2.5 py-1.5">{children}</td>
-            ),
+            td: ({ children }) => {
+              const numeric = isNumericCell(children);
+              return (
+                <td
+                  className={`border border-border px-2.5 py-1.5 tabular-nums ${
+                    numeric ? 'text-right' : 'text-left'
+                  }`}
+                >
+                  {children}
+                </td>
+              );
+            },
             code: ({ children }) => (
               <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
                 {children}
@@ -98,9 +147,7 @@ export const ChatMarkdown = memo(
                 {children}
               </pre>
             ),
-            img: ({ alt }) => (
-              <span className="text-muted-foreground">{alt}</span>
-            ),
+            img: ({ src, alt }) => <ChatMarkdownImage src={src} alt={alt} />,
             a: ({ href, children }) => {
               if (href && href.startsWith('/') && !href.startsWith('//')) {
                 return (

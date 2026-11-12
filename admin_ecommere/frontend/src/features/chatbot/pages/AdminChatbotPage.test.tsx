@@ -1,5 +1,14 @@
 import React from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+} from 'vitest';
 import {
   render,
   screen,
@@ -134,9 +143,35 @@ function renderWithProviders(
 }
 
 describe('AdminChatbotPage', () => {
+  const originalScrollTo = Element.prototype.scrollTo;
+
+  beforeAll(() => {
+    Element.prototype.scrollTo = vi.fn();
+    // jsdom does not implement matchMedia; stub it for responsive layout checks.
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+  });
+
+  afterAll(() => {
+    if (originalScrollTo) {
+      Element.prototype.scrollTo = originalScrollTo;
+    } else {
+      delete (Element.prototype as { scrollTo?: unknown }).scrollTo;
+    }
+  });
+
   beforeEach(() => {
     localStorage.clear();
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
+    (Element.prototype.scrollTo as unknown as ReturnType<typeof vi.fn>).mockClear();
 
     mockUser = {
       id: 'admin-1',
@@ -256,8 +291,9 @@ describe('AdminChatbotPage', () => {
 
       renderWithProviders(<AdminChatbotPage />);
 
-      expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalledWith({
-        behavior: 'smooth',
+      expect(Element.prototype.scrollTo).toHaveBeenCalledWith({
+        top: expect.any(Number),
+        behavior: 'auto',
       });
     });
   });
@@ -929,17 +965,11 @@ describe('AdminChatbotPage', () => {
       ).toBeInTheDocument();
       expect(screen.getByText('Xóa 10 chai xịt phòng')).toBeInTheDocument();
 
-      // Click "Xác nhận tất cả"
-      const confirmAllBtn = screen.getByRole('button', {
-        name: 'Xác nhận tất cả',
+      // Click "Xác nhận" (single-action confirmation submits immediately)
+      const confirmBtn = screen.getByRole('button', {
+        name: 'Xác nhận',
       });
-      fireEvent.click(confirmAllBtn);
-
-      // Click "Gửi quyết định"
-      const submitBtn = screen.getByRole('button', {
-        name: 'Gửi quyết định',
-      });
-      fireEvent.click(submitBtn);
+      fireEvent.click(confirmBtn);
 
       expect(mockDecide).toHaveBeenCalledWith('ast-confirm-action', [
         { callId: 'call-del-1', approve: true },
@@ -974,7 +1004,7 @@ describe('AdminChatbotPage', () => {
       renderWithProviders(<AdminChatbotPage />);
 
       expect(screen.getByText('Cập nhật giá bán')).toBeInTheDocument();
-      expect(screen.getByText('Đã phản hồi')).toBeInTheDocument();
+      expect(screen.getByText('Đã gửi quyết định')).toBeInTheDocument();
     });
 
     it('renders assistant message with error in destructive alert', () => {
@@ -1077,7 +1107,8 @@ describe('AdminChatbotPage', () => {
 
       renderWithProviders(<AdminChatbotPage />);
 
-      expect(screen.getByText('Trợ lý đang phản hồi…')).toBeInTheDocument();
+      // The streaming indicator is rendered in the message list and in the composer status; either proves it shows.
+      expect(screen.getAllByText('Trợ lý đang phản hồi…')[0]).toBeInTheDocument();
 
       const stopBtn = screen.getByRole('button', { name: /dừng/i });
       fireEvent.click(stopBtn);
@@ -1159,22 +1190,42 @@ describe('AdminChatbotPage', () => {
       expect(mockSend).not.toHaveBeenCalled();
     });
 
-    it('disables input, send button, and suggestion buttons when isStreaming is true', () => {
+    it('handles controls appropriately when isStreaming is true (replaces send with active stop button, disables suggestions)', () => {
       mockIsStreaming = true;
       renderWithProviders(<AdminChatbotPage />);
 
       const textarea = screen.getByRole('textbox', {
         name: 'Nhập yêu cầu',
       });
-      expect(textarea).toBeDisabled();
+      expect(textarea).not.toBeDisabled();
 
-      const sendBtn = screen.getByRole('button', { name: 'Gửi yêu cầu' });
-      expect(sendBtn).toBeDisabled();
+      // The send button is replaced by the active Stop button during streaming
+      expect(
+        screen.queryByRole('button', { name: 'Gửi yêu cầu' }),
+      ).not.toBeInTheDocument();
+      const stopBtn = screen.getByRole('button', { name: 'Dừng' });
+      expect(stopBtn).toBeInTheDocument();
+      expect(stopBtn).not.toBeDisabled();
 
       const suggestionBtn = screen.getByRole('button', {
         name: /doanh thu tháng này/i,
       });
       expect(suggestionBtn).toBeDisabled();
+    });
+
+    it('pressing Enter while isStreaming is true does not send message', () => {
+      mockIsStreaming = true;
+      renderWithProviders(<AdminChatbotPage />);
+
+      const textarea = screen.getByRole('textbox', {
+        name: 'Nhập yêu cầu',
+      });
+      fireEvent.change(textarea, {
+        target: { value: 'Tin nhắn khi đang stream' },
+      });
+      fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
+
+      expect(mockSend).not.toHaveBeenCalled();
     });
 
     it('pressing Enter without Shift sends message', () => {
@@ -1473,6 +1524,160 @@ describe('AdminChatbotPage', () => {
       expect(
         screen.getByText('Xin chào! Tôi có thể giúp gì cho bạn?'),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('Admin UX and Safety Enhancements (A13-2, A13-3, A13-4, A13-5, A13-6, A13-9, A13-12)', () => {
+    it('provides minimum 44px touch targets on mobile for Send and Stop buttons and shortened placeholder (A13-2, A13-3)', () => {
+      renderWithProviders(<AdminChatbotPage />);
+
+      const textarea = screen.getByRole('textbox', { name: 'Nhập yêu cầu' });
+      expect(textarea).toHaveAttribute(
+        'placeholder',
+        'Nhập yêu cầu cho trợ lý…',
+      );
+      expect(textarea).toHaveClass('pr-14', 'sm:pr-12');
+
+      const sendBtn = screen.getByRole('button', { name: 'Gửi yêu cầu' });
+      expect(sendBtn).toHaveClass('h-11', 'w-11', 'sm:h-9', 'sm:w-9');
+    });
+
+    it('renders Stop button with 44px touch target on mobile during streaming (A13-2)', () => {
+      mockIsStreaming = true;
+      renderWithProviders(<AdminChatbotPage />);
+
+      const stopBtn = screen.getByRole('button', { name: 'Dừng' });
+      expect(stopBtn).toHaveClass('h-11', 'w-11', 'sm:h-9', 'sm:w-9');
+    });
+
+    it('applies line-clamp-2 to mobile header subtitle to prevent mid-sentence cutoff (A13-4)', () => {
+      renderWithProviders(<AdminChatbotPage />);
+
+      const subtitle = screen.getByText(
+        'Điều hành cửa hàng bằng hội thoại. Mọi thao tác thay đổi dữ liệu đều cần xác nhận.',
+      );
+      expect(subtitle).toHaveClass('line-clamp-2');
+    });
+
+    it('hides trash button until hover/focus to prevent accidental deletion and clutter (A13-5)', async () => {
+      const thread: AgentThreadSummary = {
+        id: 'th-trash-test',
+        title: 'Cuộc trò chuyện an toàn',
+        app: 'ADMIN',
+        totalTokens: 10,
+        createdAt: '2026-10-22T08:00:00.000Z',
+        updatedAt: '2026-10-22T08:00:00.000Z',
+      };
+      vi.mocked(agentApi.listThreads).mockResolvedValueOnce([thread]);
+
+      renderWithProviders(<AdminChatbotPage />);
+
+      const trashBtn = await screen.findByRole('button', {
+        name: 'Xóa cuộc trò chuyện',
+      });
+      expect(trashBtn).toHaveClass(
+        'opacity-0',
+        'group-hover:opacity-100',
+      );
+    });
+
+    it('renders selected thread timestamp with high-contrast text-teal-900 (A13-6)', async () => {
+      const thread: AgentThreadSummary = {
+        id: 'th-contrast',
+        title: 'Cuộc trò chuyện đang chọn',
+        app: 'ADMIN',
+        totalTokens: 10,
+        createdAt: '2026-10-22T08:00:00.000Z',
+        updatedAt: '2026-10-22T08:30:00.000Z',
+      };
+      useChatStore.setState({ threadId: 'th-contrast' });
+      vi.mocked(agentApi.listThreads).mockResolvedValueOnce([thread]);
+
+      renderWithProviders(<AdminChatbotPage />);
+
+      await screen.findByText('Cuộc trò chuyện đang chọn');
+      const expectedDateText = utils.formatDateTime('2026-10-22T08:30:00.000Z');
+      const timestamp = screen.getByText(expectedDateText);
+      expect(timestamp).toHaveClass('text-teal-900');
+    });
+
+    it('provides a one-click copy button for assistant messages with clipboard write and toast (A13-9)', async () => {
+      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, {
+        clipboard: {
+          writeText: writeTextMock,
+        },
+      });
+
+      useChatStore.setState({
+        ownerId: 'admin-1',
+        messages: [
+          {
+            id: 'ast-msg-copy',
+            role: 'assistant',
+            content: 'Doanh thu hôm nay đạt 12.500.000₫.',
+            tools: [],
+            createdAt: '2026-10-22T08:00:00.000Z',
+          },
+        ],
+      });
+
+      renderWithProviders(<AdminChatbotPage />);
+
+      const copyBtn = screen.getByRole('button', { name: 'Sao chép nội dung' });
+      expect(copyBtn).toBeInTheDocument();
+
+      fireEvent.click(copyBtn);
+
+      await waitFor(() => {
+        expect(writeTextMock).toHaveBeenCalledWith(
+          'Doanh thu hôm nay đạt 12.500.000₫.',
+        );
+      });
+      expect(mockToast.success).toHaveBeenCalledWith('Đã sao chép nội dung');
+      expect(screen.getByText('Đã chép')).toBeInTheDocument();
+    });
+
+    it('collapses and expands desktop thread sidebar with header toggle button (A13-12)', async () => {
+      const thread: AgentThreadSummary = {
+        id: 'th-toggle-test',
+        title: 'Hội thoại thanh bên',
+        app: 'ADMIN',
+        totalTokens: 10,
+        createdAt: '2026-10-22T08:00:00.000Z',
+        updatedAt: '2026-10-22T08:00:00.000Z',
+      };
+      vi.mocked(agentApi.listThreads).mockResolvedValue([thread]);
+
+      renderWithProviders(<AdminChatbotPage />);
+
+      await screen.findByText('Hội thoại thanh bên');
+
+      const toggleBtn = screen.getByRole('button', {
+        name: 'Thu gọn danh sách cuộc trò chuyện',
+      });
+      expect(toggleBtn).toBeInTheDocument();
+      expect(toggleBtn).toHaveAttribute('aria-expanded', 'true');
+
+      // Click to collapse
+      fireEvent.click(toggleBtn);
+      expect(toggleBtn).toHaveAttribute(
+        'aria-label',
+        'Mở rộng danh sách cuộc trò chuyện',
+      );
+      expect(toggleBtn).toHaveAttribute('aria-expanded', 'false');
+      expect(
+        screen.queryByText('Hội thoại thanh bên'),
+      ).not.toBeInTheDocument();
+
+      // Click again to expand
+      fireEvent.click(toggleBtn);
+      expect(toggleBtn).toHaveAttribute(
+        'aria-label',
+        'Thu gọn danh sách cuộc trò chuyện',
+      );
+      expect(toggleBtn).toHaveAttribute('aria-expanded', 'true');
+      await screen.findByText('Hội thoại thanh bên');
     });
   });
 });

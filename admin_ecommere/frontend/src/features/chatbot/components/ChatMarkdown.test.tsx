@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import DefaultChatMarkdown, { ChatMarkdown } from './ChatMarkdown';
 
 describe('ChatMarkdown', () => {
-  const renderWithRouter = (content: string) => {
+  const renderWithRouter = (content: string, size?: 'sm' | 'base') => {
     return render(
       <MemoryRouter>
-        <ChatMarkdown content={content} />
+        <ChatMarkdown content={content} size={size} />
       </MemoryRouter>,
     );
   };
@@ -26,8 +26,7 @@ describe('ChatMarkdown', () => {
       'text-sm',
       'break-words',
       'leading-relaxed',
-      'space-y-2.5',
-      'text-slate-700',
+      'space-y-2',
     );
   });
 
@@ -36,7 +35,7 @@ describe('ChatMarkdown', () => {
     const strong = screen.getByText('chính hãng 100%');
 
     expect(strong.tagName).toBe('STRONG');
-    expect(strong).toHaveClass('font-semibold', 'text-slate-900');
+    expect(strong).toHaveClass('font-semibold', 'text-foreground');
   });
 
   it('renders unordered list with custom styles', () => {
@@ -91,12 +90,11 @@ describe('ChatMarkdown', () => {
       name: 'Tiêu đề cấp 1: Báo cáo doanh thu',
     });
     expect(h1).toHaveClass(
-      'text-base',
+      'text-lg',
       'font-bold',
-      'text-slate-900',
+      'text-foreground',
       'mt-3',
-      'mb-1.5',
-      'tracking-tight',
+      'mb-1',
     );
 
     const h2 = screen.getByRole('heading', {
@@ -104,12 +102,11 @@ describe('ChatMarkdown', () => {
       name: 'Tiêu đề cấp 2: Chi tiết theo tuần',
     });
     expect(h2).toHaveClass(
-      'text-sm',
+      'text-base',
       'font-bold',
-      'text-slate-900',
+      'text-foreground',
       'mt-2.5',
       'mb-1',
-      'tracking-tight',
     );
 
     const h3 = screen.getByRole('heading', {
@@ -117,17 +114,42 @@ describe('ChatMarkdown', () => {
       name: 'Tiêu đề cấp 3: Đơn hàng thành công',
     });
     expect(h3).toHaveClass(
-      'text-xs',
+      'text-sm',
       'font-semibold',
-      'uppercase',
-      'tracking-wider',
-      'text-slate-500',
+      'text-foreground',
       'mt-2',
       'mb-1',
     );
   });
 
-  it('renders table with remark-gfm formatting and responsive container', () => {
+  it('renders headings with size="base" typography classes', () => {
+    const markdown = `
+# Tiêu đề cấp 1 lớn
+## Tiêu đề cấp 2 lớn
+### Tiêu đề cấp 3 lớn
+`;
+    renderWithRouter(markdown, 'base');
+
+    const h1 = screen.getByRole('heading', {
+      level: 1,
+      name: 'Tiêu đề cấp 1 lớn',
+    });
+    expect(h1).toHaveClass('text-xl', 'font-bold', 'text-foreground');
+
+    const h2 = screen.getByRole('heading', {
+      level: 2,
+      name: 'Tiêu đề cấp 2 lớn',
+    });
+    expect(h2).toHaveClass('text-lg', 'font-bold', 'text-foreground');
+
+    const h3 = screen.getByRole('heading', {
+      level: 3,
+      name: 'Tiêu đề cấp 3 lớn',
+    });
+    expect(h3).toHaveClass('text-base', 'font-semibold', 'text-foreground');
+  });
+
+  it('renders table with remark-gfm formatting, tabular numbers and right-aligned numeric cells (A13-11)', () => {
     const markdown = `
 | Tên sản phẩm | Số lượng | Đơn giá |
 | :--- | :--- | :--- |
@@ -147,37 +169,56 @@ describe('ChatMarkdown', () => {
 
     const tableWrapper = table.parentElement;
     expect(tableWrapper).toHaveClass(
-      'my-3',
+      'my-2',
       'overflow-x-auto',
-      'rounded-xl',
+      'rounded-lg',
       'border',
-      'border-slate-200',
-      'bg-white',
-      'shadow-sm',
+      'border-border',
     );
 
     const th = screen.getByRole('columnheader', { name: 'Tên sản phẩm' });
     expect(th).toHaveClass(
-      'sticky',
-      'top-0',
-      'border-b',
-      'border-slate-200',
-      'bg-slate-50',
-      'px-4',
-      'py-3',
+      'border',
+      'border-border',
+      'bg-muted',
+      'px-2.5',
+      'py-1.5',
       'font-semibold',
-      'text-slate-900',
-      'text-xs',
-      'whitespace-nowrap',
+      'text-foreground',
+      'tabular-nums',
     );
 
-    const td = screen.getByRole('cell', { name: 'Xịt phòng bạc hà' });
-    expect(td).toHaveClass(
-      'border-b',
-      'border-slate-100',
-      'px-4',
-      'py-3',
-      'text-slate-700',
+    // Non-numeric text cell is left-aligned
+    const tdText = screen.getByRole('cell', { name: 'Xịt phòng bạc hà' });
+    expect(tdText).toHaveClass(
+      'border',
+      'border-border',
+      'px-2.5',
+      'py-1.5',
+      'tabular-nums',
+      'text-left',
+    );
+
+    // Numeric quantity cell is right-aligned
+    const tdQuantity = screen.getByRole('cell', { name: '15' });
+    expect(tdQuantity).toHaveClass(
+      'border',
+      'border-border',
+      'px-2.5',
+      'py-1.5',
+      'tabular-nums',
+      'text-right',
+    );
+
+    // Currency cell is right-aligned
+    const tdPrice = screen.getByRole('cell', { name: '85.000₫' });
+    expect(tdPrice).toHaveClass(
+      'border',
+      'border-border',
+      'px-2.5',
+      'py-1.5',
+      'tabular-nums',
+      'text-right',
     );
   });
 
@@ -187,16 +228,12 @@ describe('ChatMarkdown', () => {
 
     expect(code.tagName).toBe('CODE');
     expect(code).toHaveClass(
-      'rounded-md',
-      'border',
-      'border-slate-200',
-      'bg-slate-100',
+      'rounded',
+      'bg-muted',
       'px-1.5',
       'py-0.5',
       'font-mono',
       'text-xs',
-      'text-teal-700',
-      'font-medium',
     );
   });
 
@@ -209,35 +246,45 @@ describe('ChatMarkdown', () => {
 
     expect(pre).not.toBeNull();
     expect(pre).toHaveClass(
-      'my-3',
+      'my-2',
       'overflow-x-auto',
-      'rounded-xl',
-      'border',
-      'border-slate-200',
-      'bg-slate-50',
-      'p-3.5',
+      'rounded-md',
+      'bg-muted',
+      'p-3',
       'font-mono',
       'text-xs',
-      'text-slate-800',
-      'shadow-sm',
       '[&>code]:bg-transparent',
       '[&>code]:p-0',
       '[&>code]:rounded-none',
-      '[&>code]:border-0',
-      '[&>code]:text-inherit',
     );
   });
 
-  it('renders image alt text inside a styled span instead of an img tag', () => {
+  it('renders image element with lazy loading and styling, and falls back to alt on error (A13-7)', () => {
     const markdown =
       '![Ảnh minh họa đơn hàng số 1024](https://example.com/order-1024.png)';
     const { container } = renderWithRouter(markdown);
 
-    expect(container.querySelector('img')).toBeNull();
+    const img = container.querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img).toHaveAttribute('src', 'https://example.com/order-1024.png');
+    expect(img).toHaveAttribute('alt', 'Ảnh minh họa đơn hàng số 1024');
+    expect(img).toHaveAttribute('loading', 'lazy');
+    expect(img).toHaveClass(
+      'max-h-36',
+      'max-w-xs',
+      'rounded-lg',
+      'border',
+      'border-border',
+      'object-contain',
+      'my-2',
+    );
 
+    // Trigger error -> should fall back to alt text span
+    fireEvent.error(img!);
+    expect(container.querySelector('img')).toBeNull();
     const altSpan = screen.getByText('Ảnh minh họa đơn hàng số 1024');
     expect(altSpan.tagName).toBe('SPAN');
-    expect(altSpan).toHaveClass('text-slate-400');
+    expect(altSpan).toHaveClass('text-muted-foreground', 'text-xs', 'italic');
   });
 
   describe('links (a component)', () => {
@@ -252,18 +299,10 @@ describe('ChatMarkdown', () => {
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/admin/orders?status=PENDING');
       expect(link).toHaveClass(
-        'font-medium',
-        'text-teal-600',
+        'text-primary',
         'underline',
-        'underline-offset-4',
-        'decoration-teal-600/40',
-        'hover:text-teal-700',
-        'hover:decoration-teal-700',
-        'transition-colors',
-        'focus-visible:outline-none',
-        'focus-visible:ring-2',
-        'focus-visible:ring-teal-500',
-        'rounded-sm',
+        'underline-offset-2',
+        'hover:opacity-80',
       );
       expect(link).not.toHaveAttribute('target');
       expect(link).not.toHaveAttribute('rel');
@@ -281,18 +320,10 @@ describe('ChatMarkdown', () => {
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer nofollow');
       expect(link).toHaveClass(
-        'font-medium',
-        'text-teal-600',
+        'text-primary',
         'underline',
-        'underline-offset-4',
-        'decoration-teal-600/40',
-        'hover:text-teal-700',
-        'hover:decoration-teal-700',
-        'transition-colors',
-        'focus-visible:outline-none',
-        'focus-visible:ring-2',
-        'focus-visible:ring-teal-500',
-        'rounded-sm',
+        'underline-offset-2',
+        'hover:opacity-80',
       );
     });
 

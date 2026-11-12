@@ -70,8 +70,11 @@ describe('ConfirmActionCard', () => {
       screen.getByRole('button', { name: 'Gửi quyết định' }),
     ).toBeDisabled();
 
-    // "Đã phản hồi" should not be rendered when decided is false/undefined
-    expect(screen.queryByText('Đã phản hồi')).not.toBeInTheDocument();
+    // Helper text indicates remaining pending decisions (A13-8)
+    expect(screen.getByText('Còn 3 thao tác chưa chọn')).toBeInTheDocument();
+
+    // "Đã gửi quyết định" should not be rendered when decided is false/undefined
+    expect(screen.queryByText('Đã gửi quyết định')).not.toBeInTheDocument();
   });
 
   it('renders default risk badge when risk is unrecognized or custom', () => {
@@ -242,16 +245,13 @@ describe('ConfirmActionCard', () => {
     const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
     await user.click(confirmBtn);
 
-    const submitBtn = screen.getByRole('button', { name: 'Gửi quyết định' });
-    await user.click(submitBtn);
-
     expect(onSubmitMock).toHaveBeenCalledWith([
       { callId: 'call-write', approve: true },
     ]);
 
     // Submitting state should reset after catch block
     await waitFor(() => {
-      expect(submitBtn).toBeEnabled();
+      expect(confirmBtn).toBeEnabled();
     });
   });
 
@@ -267,15 +267,12 @@ describe('ConfirmActionCard', () => {
     const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
     await user.click(confirmBtn);
 
-    const submitBtn = screen.getByRole('button', { name: 'Gửi quyết định' });
-    await user.click(submitBtn);
-
     expect(onSubmitMock).toHaveBeenCalledWith([
       { callId: 'call-write', approve: true },
     ]);
 
     // Should not throw to caller and reset submitting
-    expect(submitBtn).toBeEnabled();
+    expect(confirmBtn).toBeEnabled();
   });
 
   it('handles synchronous non-promise return from onSubmit', async () => {
@@ -290,9 +287,6 @@ describe('ConfirmActionCard', () => {
     const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
     await user.click(confirmBtn);
 
-    const submitBtn = screen.getByRole('button', { name: 'Gửi quyết định' });
-    await user.click(submitBtn);
-
     expect(onSubmitMock).toHaveBeenCalledTimes(1);
 
     // Re-rendering with decided={true} resets submitting
@@ -303,10 +297,10 @@ describe('ConfirmActionCard', () => {
         onSubmit={onSubmitMock}
       />,
     );
-    expect(screen.getByText('Đã phản hồi')).toBeInTheDocument();
+    expect(screen.getByText('Đã gửi quyết định')).toBeInTheDocument();
   });
 
-  it('renders "Đã phản hồi" and disables all buttons when decided is true', () => {
+  it('renders "Đã gửi quyết định" and disables all buttons when decided is true', () => {
     render(
       <ConfirmActionCard
         calls={mockCalls}
@@ -315,7 +309,7 @@ describe('ConfirmActionCard', () => {
       />,
     );
 
-    expect(screen.getByText('Đã phản hồi')).toBeInTheDocument();
+    expect(screen.getByText('Đã gửi quyết định')).toBeInTheDocument();
 
     const buttons = screen.getAllByRole('button');
     for (const btn of buttons) {
@@ -383,5 +377,61 @@ describe('ConfirmActionCard', () => {
     expect(
       screen.getByRole('group', { name: 'Xác nhận thao tác' }),
     ).toBeInTheDocument();
+  });
+
+  describe('Safety semantics and remaining count indicators (A13-1, A13-8)', () => {
+    it('styles destructive call with destructive variant on confirm and safe secondary on reject (A13-1)', async () => {
+      const user = userEvent.setup();
+      render(<ConfirmActionCard calls={mockCalls} onSubmit={onSubmitMock} />);
+
+      const confirmButtons = screen.getAllByRole('button', { name: 'Xác nhận' });
+      const rejectButtons = screen.getAllByRole('button', { name: 'Từ chối' });
+
+      // Call 2 has risk DESTRUCTIVE
+      await user.click(confirmButtons[2]);
+      // Confirm button for DESTRUCTIVE should have destructive styling
+      expect(confirmButtons[2]).toHaveClass('bg-rose-600');
+
+      // Click reject on call 2 -> should have safe secondary styling, never destructive
+      await user.click(rejectButtons[2]);
+      expect(rejectButtons[2]).toHaveClass('border-slate-200');
+      expect(rejectButtons[2]).not.toHaveClass('bg-rose-600');
+    });
+
+    it('single destructive call renders confirm button with destructive variant (A13-1)', () => {
+      render(
+        <ConfirmActionCard
+          calls={[mockCalls[2]]}
+          onSubmit={onSubmitMock}
+        />,
+      );
+
+      const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
+      expect(confirmBtn).toHaveClass('bg-rose-600');
+
+      const rejectBtn = screen.getByRole('button', { name: 'Từ chối' });
+      expect(rejectBtn).not.toHaveClass('bg-rose-600');
+    });
+
+    it('updates remaining unchosen actions count helper text as choices are made (A13-8)', async () => {
+      const user = userEvent.setup();
+      render(<ConfirmActionCard calls={mockCalls} onSubmit={onSubmitMock} />);
+
+      expect(screen.getByText('Còn 3 thao tác chưa chọn')).toBeInTheDocument();
+
+      const confirmButtons = screen.getAllByRole('button', { name: 'Xác nhận' });
+
+      await user.click(confirmButtons[0]);
+      expect(screen.getByText('Còn 2 thao tác chưa chọn')).toBeInTheDocument();
+
+      await user.click(confirmButtons[1]);
+      expect(screen.getByText('Còn 1 thao tác chưa chọn')).toBeInTheDocument();
+
+      await user.click(confirmButtons[2]);
+      expect(
+        screen.queryByText(/Còn \d+ thao tác chưa chọn/),
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Gửi quyết định' })).toBeEnabled();
+    });
   });
 });

@@ -36,12 +36,12 @@ describe('ToolCallCard', () => {
       expect(svg).toBeInTheDocument();
       expect(svg).toHaveClass(
         'animate-spin',
-        'text-amber-500',
+        'text-muted-foreground',
         'h-3.5',
         'w-3.5',
       );
       expect(svg).not.toHaveClass('text-emerald-600');
-      expect(svg).not.toHaveClass('text-rose-600');
+      expect(svg).not.toHaveClass('text-destructive');
 
       // Content initially collapsed: Radix unmounts children while closed
       const content = container.querySelector<HTMLDivElement>('div.border-t');
@@ -114,7 +114,7 @@ describe('ToolCallCard', () => {
       expect(svg).toBeInTheDocument();
       expect(svg).toHaveClass('text-emerald-600', 'h-3.5', 'w-3.5');
       expect(svg).not.toHaveClass('animate-spin');
-      expect(svg).not.toHaveClass('text-rose-600');
+      expect(svg).not.toHaveClass('text-destructive');
 
       // Click to expand
       await user.click(trigger);
@@ -126,8 +126,7 @@ describe('ToolCallCard', () => {
       expect(screen.queryByText('Đang thực hiện…')).toBeNull();
     });
 
-    it('renders ok status with null content when resultSummary is undefined', async () => {
-      const user = userEvent.setup();
+    it('renders ok status with null content when resultSummary is undefined', () => {
       const step: ChatToolStep = {
         id: 'step-ok-2',
         name: 'ping_service',
@@ -141,20 +140,18 @@ describe('ToolCallCard', () => {
       expect(svg).toBeInTheDocument();
       expect(svg).toHaveClass('text-emerald-600');
 
-      const trigger = screen.getByRole('button', {
-        name: /Kiểm tra kết nối dịch vụ/i,
-      });
-      await user.click(trigger);
+      // Non-interactive card when hasDetails is false (no collapsible trigger button)
+      expect(screen.queryByRole('button')).toBeNull();
+      expect(
+        screen.getByText('Kiểm tra kết nối dịch vụ'),
+      ).toBeInTheDocument();
 
-      // Collapsible content is rendered but empty
       const content = container.querySelector<HTMLDivElement>('div.border-t');
-      expect(content).toBeInTheDocument();
-      expect(content?.textContent).toBe('');
+      expect(content).toBeNull();
       expect(screen.queryByText('Đang thực hiện…')).toBeNull();
     });
 
-    it('renders ok status with null content when resultSummary is explicitly null', async () => {
-      const user = userEvent.setup();
+    it('renders ok status with null content when resultSummary is explicitly null', () => {
       const step = {
         id: 'step-ok-3',
         name: 'null_check',
@@ -165,14 +162,12 @@ describe('ToolCallCard', () => {
 
       const { container } = render(<ToolCallCard step={step} />);
 
-      const trigger = screen.getByRole('button', {
-        name: /Kiểm tra null/i,
-      });
-      await user.click(trigger);
+      // Non-interactive card when hasDetails is false (no collapsible trigger button)
+      expect(screen.queryByRole('button')).toBeNull();
+      expect(screen.getByText('Kiểm tra null')).toBeInTheDocument();
 
       const content = container.querySelector<HTMLDivElement>('div.border-t');
-      expect(content).toBeInTheDocument();
-      expect(content?.textContent).toBe('');
+      expect(content).toBeNull();
     });
   });
 
@@ -197,7 +192,7 @@ describe('ToolCallCard', () => {
       // XCircle icon
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
-      expect(svg).toHaveClass('text-rose-600', 'h-3.5', 'w-3.5');
+      expect(svg).toHaveClass('text-destructive', 'h-3.5', 'w-3.5');
       expect(svg).not.toHaveClass('animate-spin');
       expect(svg).not.toHaveClass('text-emerald-600');
 
@@ -211,8 +206,7 @@ describe('ToolCallCard', () => {
       expect(screen.queryByText('Đang thực hiện…')).toBeNull();
     });
 
-    it('renders error status with null content when resultSummary is undefined', async () => {
-      const user = userEvent.setup();
+    it('renders error status with null content when resultSummary is undefined', () => {
       const step: ChatToolStep = {
         id: 'step-err-2',
         name: 'sync_warehouse',
@@ -224,16 +218,16 @@ describe('ToolCallCard', () => {
 
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
-      expect(svg).toHaveClass('text-rose-600');
+      expect(svg).toHaveClass('text-destructive');
 
-      const trigger = screen.getByRole('button', {
-        name: /Đồng bộ kho thất bại/i,
-      });
-      await user.click(trigger);
+      // Non-interactive card when hasDetails is false (no collapsible trigger button)
+      expect(screen.queryByRole('button')).toBeNull();
+      expect(
+        screen.getByText('Đồng bộ kho thất bại'),
+      ).toBeInTheDocument();
 
       const content = container.querySelector<HTMLDivElement>('div.border-t');
-      expect(content).toBeInTheDocument();
-      expect(content?.textContent).toBe('');
+      expect(content).toBeNull();
     });
   });
 
@@ -293,8 +287,7 @@ describe('ToolCallCard', () => {
       expect(screen.getByText('Nội dung thông báo chờ')).toBeVisible();
     });
 
-    it('renders no icon and null content when status is unknown and resultSummary is undefined', async () => {
-      const user = userEvent.setup();
+    it('renders no icon and null content when status is unknown and resultSummary is undefined', () => {
       const step = {
         id: 'step-unknown-2',
         name: 'unknown_step_2',
@@ -311,14 +304,12 @@ describe('ToolCallCard', () => {
         ),
       ).toBeNull();
 
-      const trigger = screen.getByRole('button', {
-        name: /Trạng thái rỗng/i,
-      });
-      await user.click(trigger);
+      // Non-interactive card when hasDetails is false (no collapsible trigger button)
+      expect(screen.queryByRole('button')).toBeNull();
+      expect(screen.getByText('Trạng thái rỗng')).toBeInTheDocument();
 
       const content = container.querySelector<HTMLDivElement>('div.border-t');
-      expect(content).toBeInTheDocument();
-      expect(content?.textContent).toBe('');
+      expect(content).toBeNull();
     });
   });
 
@@ -341,13 +332,12 @@ describe('ToolCallCard', () => {
         'w-full',
         'rounded-xl',
         'border',
-        'border-slate-200',
-        'bg-slate-50/70',
+        'border-border',
+        'bg-card',
+        'text-card-foreground',
         'text-xs',
         'overflow-hidden',
         'shadow-sm',
-        'transition-all',
-        'hover:border-slate-300',
       );
 
       // Trigger button
@@ -355,43 +345,35 @@ describe('ToolCallCard', () => {
         name: /Kiểm tra kiểu hiển thị/i,
       });
       expect(trigger).toHaveClass(
+        'group',
         'flex',
         'w-full',
         'items-center',
-        'gap-2.5',
-        'px-3.5',
+        'gap-2',
+        'px-3',
         'py-2',
         'text-left',
         'font-medium',
-        'hover:bg-slate-100/80',
+        'hover:bg-muted/50',
         'transition-colors',
-        'outline-none',
-        'focus-visible:ring-2',
-        'focus-visible:ring-teal-500',
+        'focus-visible:outline-none',
+        'focus-visible:ring-1',
+        'focus-visible:ring-ring',
       );
 
       // Summary span
       const summarySpan = screen.getByText('Kiểm tra kiểu hiển thị');
-      expect(summarySpan).toHaveClass(
-        'flex-1',
-        'truncate',
-        'font-medium',
-        'text-slate-800',
-      );
+      expect(summarySpan).toHaveClass('flex-1', 'truncate');
 
       // Collapsible content element
       const content = container.querySelector<HTMLDivElement>('div.border-t');
       expect(content).toBeInTheDocument();
       expect(content).toHaveClass(
         'border-t',
-        'border-slate-200',
-        'bg-white',
-        'px-3.5',
-        'py-2.5',
-        'text-xs',
-        'text-slate-600',
-        'font-mono',
-        'leading-relaxed',
+        'border-border',
+        'px-3',
+        'py-2',
+        'text-muted-foreground',
         'whitespace-pre-wrap',
         'break-words',
       );
