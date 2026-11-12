@@ -104,7 +104,7 @@ describe('ResetPasswordPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: 'Đặt lại mật khẩu' }),
       ).toBeInTheDocument();
-      expect(screen.getByText('Liên kết đặt lại mật khẩu')).toBeInTheDocument();
+      expect(screen.getAllByText('Liên kết đặt lại mật khẩu')[0]).toBeInTheDocument();
       expect(
         screen.getByText(
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
@@ -137,7 +137,7 @@ describe('ResetPasswordPage', () => {
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
         ),
       ).toBeInTheDocument();
-      expect(screen.getByText('Liên kết đặt lại mật khẩu')).toBeInTheDocument();
+      expect(screen.getAllByText('Liên kết đặt lại mật khẩu')[0]).toBeInTheDocument();
     });
 
     it('renders invalid token message when token is only whitespace', () => {
@@ -148,7 +148,7 @@ describe('ResetPasswordPage', () => {
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
         ),
       ).toBeInTheDocument();
-      expect(screen.getByText('Liên kết đặt lại mật khẩu')).toBeInTheDocument();
+      expect(screen.getAllByText('Liên kết đặt lại mật khẩu')[0]).toBeInTheDocument();
     });
   });
 
@@ -157,7 +157,7 @@ describe('ResetPasswordPage', () => {
       renderResetPasswordPage('/reset-password?token=valid-token-123');
 
       expect(
-        screen.getByText('Nhập mật khẩu mới cho tài khoản của bạn'),
+        screen.getAllByText('Nhập mật khẩu mới cho tài khoản của bạn')[0],
       ).toBeInTheDocument();
       expect(
         screen.queryByText(

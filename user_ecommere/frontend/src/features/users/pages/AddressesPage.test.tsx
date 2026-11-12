@@ -277,7 +277,7 @@ describe('AddressesPage', () => {
     // Card for default
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('[data-testid="address-card"]')!;
+      .closest('[data-testid="address-card"]') as HTMLElement;
     expect(card1).toBeInTheDocument();
 
     // Address 2 (Non-default)
@@ -291,7 +291,7 @@ describe('AddressesPage', () => {
     expect(screen.getAllByText('Mặc định')).toHaveLength(1);
 
     // Card for non-default
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
     expect(card2).toBeInTheDocument();
   });
 
@@ -323,7 +323,7 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
     const editButton =
       card2.querySelector('svg.lucide-edit')?.closest('button') ||
       card2.querySelectorAll('button')[1];
@@ -352,7 +352,7 @@ describe('AddressesPage', () => {
     // Open in edit mode
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('[data-testid="address-card"]')!;
+      .closest('[data-testid="address-card"]') as HTMLElement;
     const editButton =
       card1.querySelector('svg.lucide-edit')?.closest('button') ||
       card1.querySelectorAll('button')[0];
@@ -391,7 +391,7 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
     const deleteButton = within(card2).getByRole('button', { name: 'Xóa' });
 
     await user.click(deleteButton);
@@ -421,7 +421,7 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
     const deleteButton = within(card2).getByRole('button', { name: 'Xóa' });
 
     await user.click(deleteButton);
@@ -447,10 +447,10 @@ describe('AddressesPage', () => {
 
     const card1 = screen
       .getByText('Nguyễn Văn Mặc Định')
-      .closest('[data-testid="address-card"]')!;
+      .closest('[data-testid="address-card"]') as HTMLElement;
     const deleteButton1 = within(card1).getByRole('button', { name: 'Xóa' });
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]')!;
+    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
     const deleteButton2 = within(card2).getByRole('button', { name: 'Xóa' });
 
     expect(deleteButton1).toBeDisabled();

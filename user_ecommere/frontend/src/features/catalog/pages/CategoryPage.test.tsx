@@ -10,7 +10,6 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CategoryPage } from './CategoryPage';
 import { useCartStore } from '@/features/cart/store/cartStore';
-import { formatCurrency } from '@/lib/formatters';
 
 // Mocks for data hooks
 const mockUseCategoryBySlug = vi.fn();

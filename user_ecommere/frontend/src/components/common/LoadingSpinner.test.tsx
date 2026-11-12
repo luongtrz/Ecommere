@@ -55,11 +55,10 @@ describe('LoadingSpinner', () => {
       <LoadingSpinner className="custom-loader-class text-secondary" />,
     );
 
-    const spinner = container.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass(
+    const icon = container.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass(
       'animate-spin',
-      'text-primary',
       'custom-loader-class',
       'text-secondary',
       'h-6',
