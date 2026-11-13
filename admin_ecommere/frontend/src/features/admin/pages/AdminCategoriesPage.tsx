@@ -66,15 +66,17 @@ function CategoryTreeNode({
 
   return (
     <div className="space-y-1">
-      <div
+      <button
+        type="button"
         className={cn(
-          'flex items-center gap-2 p-2 rounded-lg transition-all group border text-xs md:text-sm',
+          'w-full text-left flex items-center gap-2 p-2 rounded-lg transition-all group border text-xs md:text-sm',
           isSelected
             ? 'bg-teal-50 border-teal-200 text-teal-900 font-medium shadow-sm'
             : 'border-transparent hover:bg-slate-100/80 hover:border-slate-200 text-slate-800',
         )}
         style={{ paddingLeft: `${Math.max(8, level * 16 + 8)}px` }}
         onClick={() => onSelect(category)}
+        aria-label={`Chọn danh mục ${category.name}`}
       >
         {hasChildren ? (
           <button
@@ -165,7 +167,7 @@ function CategoryTreeNode({
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+      </button>
 
       {expanded && hasChildren && (
         <div className="space-y-1">

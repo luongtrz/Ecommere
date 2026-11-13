@@ -430,7 +430,11 @@ describe('AdminProductsPage', () => {
       });
       const statCard =
         totalProductsHeading.closest<HTMLElement>('.rounded-xl') ??
-        totalProductsHeading.parentElement?.parentElement!;
+        totalProductsHeading.parentElement?.parentElement;
+      expect(statCard).toBeInstanceOf(HTMLElement);
+      if (!(statCard instanceof HTMLElement)) {
+        throw new Error('Không tìm thấy thẻ thống kê');
+      }
       expect(within(statCard).getByText('0')).toBeInTheDocument();
     });
   });
