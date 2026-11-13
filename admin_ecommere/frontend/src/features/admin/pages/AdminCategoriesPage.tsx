@@ -57,11 +57,13 @@ function CategoryTreeNode({
   onDelete,
 }: TreeNodeProps) {
   const [expanded, setExpanded] = useState(true);
-  const hasChildren = Boolean(category.children && category.children.length > 0);
+  const hasChildren = Boolean(
+    category.children && category.children.length > 0,
+  );
   const isSelected = selectedId === category.id;
   const isDeleteDisabled = Boolean(
     hasChildren ||
-      (category.productCount !== undefined && category.productCount > 0),
+    (category.productCount !== undefined && category.productCount > 0),
   );
 
   return (
@@ -806,8 +808,8 @@ export function AdminCategoriesPage() {
                                   variant="outline"
                                   className="bg-teal-50 text-teal-700 border-0 ring-1 ring-teal-200 text-xs font-medium"
                                 >
-                                  Mục cha (
-                                  {selectedCategory.children.length} danh mục con)
+                                  Mục cha ({selectedCategory.children.length}{' '}
+                                  danh mục con)
                                 </Badge>
                               ) : (
                                 <Badge
@@ -826,43 +828,45 @@ export function AdminCategoriesPage() {
                     {/* Footer Action Bar */}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-slate-200">
                       <div>
-                        {selectedCategory && (() => {
-                          const isDetailDeleteDisabled = Boolean(
-                            (selectedCategory.children &&
-                              selectedCategory.children.length > 0) ||
+                        {selectedCategory &&
+                          (() => {
+                            const isDetailDeleteDisabled = Boolean(
+                              (selectedCategory.children &&
+                                selectedCategory.children.length > 0) ||
                               (selectedCategory.productCount !== undefined &&
                                 selectedCategory.productCount > 0),
-                          );
-                          return (
-                            <div className="space-y-1">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setCategoryToDelete(selectedCategory);
-                                  setIsDeleteOpen(true);
-                                }}
-                                disabled={isDetailDeleteDisabled}
-                                className="rounded-lg text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 disabled:opacity-40 disabled:pointer-events-auto h-9"
-                                title={
-                                  isDetailDeleteDisabled
-                                    ? 'Không thể xóa danh mục đang có sản phẩm hoặc danh mục con'
-                                    : 'Xóa danh mục'
-                                }
-                                aria-label="Xóa danh mục"
-                              >
-                                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                                Xóa danh mục
-                              </Button>
-                              {isDetailDeleteDisabled && (
-                                <p className="text-xs text-slate-500">
-                                  Không thể xóa danh mục đang có sản phẩm hoặc danh mục con.
-                                </p>
-                              )}
-                            </div>
-                          );
-                        })()}
+                            );
+                            return (
+                              <div className="space-y-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCategoryToDelete(selectedCategory);
+                                    setIsDeleteOpen(true);
+                                  }}
+                                  disabled={isDetailDeleteDisabled}
+                                  className="rounded-lg text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 disabled:opacity-40 disabled:pointer-events-auto h-9"
+                                  title={
+                                    isDetailDeleteDisabled
+                                      ? 'Không thể xóa danh mục đang có sản phẩm hoặc danh mục con'
+                                      : 'Xóa danh mục'
+                                  }
+                                  aria-label="Xóa danh mục"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                                  Xóa danh mục
+                                </Button>
+                                {isDetailDeleteDisabled && (
+                                  <p className="text-xs text-slate-500">
+                                    Không thể xóa danh mục đang có sản phẩm hoặc
+                                    danh mục con.
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })()}
                       </div>
 
                       <div className="flex items-center gap-2 w-full sm:w-auto justify-end">

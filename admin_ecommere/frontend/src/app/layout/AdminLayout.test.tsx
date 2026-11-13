@@ -275,7 +275,9 @@ describe('AdminLayout', () => {
 
       for (const item of expectedNavigation) {
         expect(within(scope).getAllByText(item.name)[0]).toBeInTheDocument();
-        expect(within(scope).getAllByText(item.description)[0]).toBeInTheDocument();
+        expect(
+          within(scope).getAllByText(item.description)[0],
+        ).toBeInTheDocument();
 
         const links = within(scope).getAllByRole('link', {
           name: new RegExp(`${item.name}.*${item.description}`, 'i'),
@@ -599,7 +601,11 @@ describe('AdminLayout', () => {
         },
       ];
 
-      for (const { path, expectedTitle, expectedBreadcrumb } of routeTitlePairs) {
+      for (const {
+        path,
+        expectedTitle,
+        expectedBreadcrumb,
+      } of routeTitlePairs) {
         cleanup();
         renderAdminLayout(path);
 
@@ -607,7 +613,9 @@ describe('AdminLayout', () => {
           screen.getByRole('heading', { level: 2, name: expectedTitle }),
         ).toBeInTheDocument();
         expect(screen.getByText('Quản trị')).toBeInTheDocument();
-        expect(screen.getAllByText(expectedBreadcrumb).length).toBeGreaterThanOrEqual(1);
+        expect(
+          screen.getAllByText(expectedBreadcrumb).length,
+        ).toBeGreaterThanOrEqual(1);
       }
     });
   });
@@ -621,15 +629,21 @@ describe('AdminLayout', () => {
       expect(screen.getByText('Trang Tổng Quan Dashboard')).toBeInTheDocument();
 
       // Navigate to Chatbot
-      await user.click(within(nav).getAllByRole('link', { name: /^Trợ lý AI/i })[0]);
+      await user.click(
+        within(nav).getAllByRole('link', { name: /^Trợ lý AI/i })[0],
+      );
       expect(screen.getByText('Trang Trợ Lý AI Chatbot')).toBeInTheDocument();
 
       // Navigate to Products
-      await user.click(within(nav).getAllByRole('link', { name: /^Sản phẩm/i })[0]);
+      await user.click(
+        within(nav).getAllByRole('link', { name: /^Sản phẩm/i })[0],
+      );
       expect(screen.getByText('Trang Quản Lý Sản Phẩm')).toBeInTheDocument();
 
       // Navigate to Orders
-      await user.click(within(nav).getAllByRole('link', { name: /^Đơn hàng/i })[0]);
+      await user.click(
+        within(nav).getAllByRole('link', { name: /^Đơn hàng/i })[0],
+      );
       expect(screen.getByText('Trang Quản Lý Đơn Hàng')).toBeInTheDocument();
 
       // Navigate to Coupons
@@ -639,15 +653,21 @@ describe('AdminLayout', () => {
       expect(screen.getByText('Trang Quản Lý Mã Giảm Giá')).toBeInTheDocument();
 
       // Navigate to Inventory
-      await user.click(within(nav).getAllByRole('link', { name: /^Kho hàng/i })[0]);
+      await user.click(
+        within(nav).getAllByRole('link', { name: /^Kho hàng/i })[0],
+      );
       expect(screen.getByText('Trang Quản Lý Kho Hàng')).toBeInTheDocument();
 
       // Navigate to Categories
-      await user.click(within(nav).getAllByRole('link', { name: /^Danh mục/i })[0]);
+      await user.click(
+        within(nav).getAllByRole('link', { name: /^Danh mục/i })[0],
+      );
       expect(screen.getByText('Trang Quản Lý Danh Mục')).toBeInTheDocument();
 
       // Navigate back to Dashboard via Brand link
-      const brandLinks = screen.getAllByRole('link', { name: /Thai Spray Admin/i });
+      const brandLinks = screen.getAllByRole('link', {
+        name: /Thai Spray Admin/i,
+      });
       await user.click(brandLinks[0]);
       expect(screen.getByText('Trang Tổng Quan Dashboard')).toBeInTheDocument();
     });
@@ -673,7 +693,9 @@ describe('AdminLayout', () => {
       const user = userEvent.setup();
       renderAdminLayout('/admin');
 
-      const logoutItems = screen.getAllByRole('menuitem', { name: /Đăng xuất/i });
+      const logoutItems = screen.getAllByRole('menuitem', {
+        name: /Đăng xuất/i,
+      });
       const logoutItem = logoutItems[0];
       expect(logoutItem).toBeInTheDocument();
 
@@ -700,7 +722,9 @@ describe('AdminLayout', () => {
       const user = userEvent.setup();
       renderAdminLayout('/admin');
 
-      const logoutItems = screen.getAllByRole('menuitem', { name: /Đăng xuất/i });
+      const logoutItems = screen.getAllByRole('menuitem', {
+        name: /Đăng xuất/i,
+      });
       const logoutItem = logoutItems[0];
       await user.click(logoutItem);
 

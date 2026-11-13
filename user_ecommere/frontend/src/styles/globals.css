@@ -45,7 +45,13 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      'Be Vietnam Pro',
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -53,7 +59,13 @@
 
   h1,
   h2 {
-    font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      'Be Vietnam Pro',
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
     font-weight: 700;
     letter-spacing: normal;
     line-height: 1.3;
@@ -64,7 +76,13 @@
   h4,
   h5,
   h6 {
-    font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      'Be Vietnam Pro',
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
     font-weight: 600;
     letter-spacing: normal;
   }

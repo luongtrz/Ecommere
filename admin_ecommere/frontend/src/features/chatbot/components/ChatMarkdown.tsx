@@ -182,7 +182,7 @@ export const ChatMarkdown = memo(
   },
   (prevProps, nextProps) =>
     prevProps.content === nextProps.content &&
-    (prevProps.size ?? 'sm') === (nextProps.size ?? 'sm')
+    (prevProps.size ?? 'sm') === (nextProps.size ?? 'sm'),
 );
 
 ChatMarkdown.displayName = 'ChatMarkdown';

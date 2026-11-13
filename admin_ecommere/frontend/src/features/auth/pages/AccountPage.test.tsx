@@ -129,7 +129,9 @@ describe('AccountPage', () => {
       screen.getByRole('heading', { level: 1, name: 'Tài khoản của tôi' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Quản lý thông tin tài khoản và phiên làm việc quản trị'),
+      screen.getByText(
+        'Quản lý thông tin tài khoản và phiên làm việc quản trị',
+      ),
     ).toBeInTheDocument();
 
     // Initials: 'Nguyễn Văn Quản Trị' -> 'NV'

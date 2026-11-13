@@ -9,12 +9,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
-import {
-  Package,
-  Calendar,
-  ArrowRight,
-  ShoppingBag,
-} from 'lucide-react';
+import { Package, Calendar, ArrowRight, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function formatOrderDate(date: string | Date): string {
@@ -53,7 +48,11 @@ const getStatusConfig = (status: string) => {
 
 const TABS = [
   { id: 'ALL', label: 'Tất cả' },
-  { id: 'PROCESSING', label: 'Đang xử lý', statuses: ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'] },
+  {
+    id: 'PROCESSING',
+    label: 'Đang xử lý',
+    statuses: ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'],
+  },
   { id: 'COMPLETED', label: 'Hoàn thành', statuses: ['DELIVERED'] },
   { id: 'CANCELLED', label: 'Đã hủy', statuses: ['CANCELED', 'REFUNDED'] },
 ];
@@ -73,8 +72,15 @@ export function OrdersPage() {
       console.error('Cancel order failed:', error);
       const serverMessage = (error as any)?.response?.data?.message;
       const message =
-        (Array.isArray(serverMessage) ? serverMessage.map((m: any) => (typeof m === 'string' ? m : String(m))).filter(Boolean).join(', ') : null) ||
-        (typeof serverMessage === 'string' && serverMessage.trim() ? serverMessage : null) ||
+        (Array.isArray(serverMessage)
+          ? serverMessage
+              .map((m: any) => (typeof m === 'string' ? m : String(m)))
+              .filter(Boolean)
+              .join(', ')
+          : null) ||
+        (typeof serverMessage === 'string' && serverMessage.trim()
+          ? serverMessage
+          : null) ||
         'Hủy đơn hàng thất bại. Vui lòng thử lại.';
       toast.error(message);
     }
@@ -94,12 +100,13 @@ export function OrdersPage() {
   const totalPages = data?.totalPages ?? Math.ceil(totalOrders / limit);
 
   // Filter orders based on active tab
-  const filteredOrders = activeTab === 'ALL'
-    ? allOrders
-    : allOrders.filter(order => {
-      const tab = TABS.find(t => t.id === activeTab);
-      return tab?.statuses?.includes(order.status);
-    });
+  const filteredOrders =
+    activeTab === 'ALL'
+      ? allOrders
+      : allOrders.filter((order) => {
+          const tab = TABS.find((t) => t.id === activeTab);
+          return tab?.statuses?.includes(order.status);
+        });
 
   return (
     <>
@@ -121,25 +128,48 @@ export function OrdersPage() {
           {totalOrders > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="surface p-4">
-                <div className="text-xs text-muted-foreground font-medium">Tổng đơn</div>
-                <div className="text-xl sm:text-2xl font-semibold text-foreground tabular mt-1">{totalOrders}</div>
-              </div>
-              <div className="surface p-4">
-                <div className="text-xs text-muted-foreground font-medium">Đang xử lý</div>
+                <div className="text-xs text-muted-foreground font-medium">
+                  Tổng đơn
+                </div>
                 <div className="text-xl sm:text-2xl font-semibold text-foreground tabular mt-1">
-                  {allOrders.filter(o => ['PENDING_PAYMENT', 'PAID', 'PACKING', 'SHIPPED'].includes(o.status)).length}
+                  {totalOrders}
                 </div>
               </div>
               <div className="surface p-4">
-                <div className="text-xs text-muted-foreground font-medium">Hoàn thành</div>
+                <div className="text-xs text-muted-foreground font-medium">
+                  Đang xử lý
+                </div>
                 <div className="text-xl sm:text-2xl font-semibold text-foreground tabular mt-1">
-                  {allOrders.filter(o => o.status === 'DELIVERED').length}
+                  {
+                    allOrders.filter((o) =>
+                      [
+                        'PENDING_PAYMENT',
+                        'PAID',
+                        'PACKING',
+                        'SHIPPED',
+                      ].includes(o.status),
+                    ).length
+                  }
                 </div>
               </div>
               <div className="surface p-4">
-                <div className="text-xs text-muted-foreground font-medium">Chi tiêu</div>
+                <div className="text-xs text-muted-foreground font-medium">
+                  Hoàn thành
+                </div>
+                <div className="text-xl sm:text-2xl font-semibold text-foreground tabular mt-1">
+                  {allOrders.filter((o) => o.status === 'DELIVERED').length}
+                </div>
+              </div>
+              <div className="surface p-4">
+                <div className="text-xs text-muted-foreground font-medium">
+                  Chi tiêu
+                </div>
                 <div className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground tabular mt-1 break-words">
-                  {formatCurrency(allOrders.filter(o => o.status !== 'CANCELED').reduce((acc, curr) => acc + curr.total, 0))}
+                  {formatCurrency(
+                    allOrders
+                      .filter((o) => o.status !== 'CANCELED')
+                      .reduce((acc, curr) => acc + curr.total, 0),
+                  )}
                 </div>
               </div>
             </div>
@@ -155,10 +185,10 @@ export function OrdersPage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      "pb-3 text-sm font-medium transition-colors whitespace-nowrap border-b-2 -mb-px min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      'pb-3 text-sm font-medium transition-colors whitespace-nowrap border-b-2 -mb-px min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       isActive
-                        ? "border-primary text-foreground font-semibold"
-                        : "border-transparent text-muted-foreground hover:text-foreground"
+                        ? 'border-primary text-foreground font-semibold'
+                        : 'border-transparent text-muted-foreground hover:text-foreground',
                     )}
                   >
                     {tab.label}
@@ -172,8 +202,15 @@ export function OrdersPage() {
           {filteredOrders.length === 0 ? (
             <div className="surface p-8 sm:p-12">
               <EmptyState
-                icon={<ShoppingBag className="h-10 w-10 text-muted-foreground/60" strokeWidth={1.5} />}
-                title={activeTab === 'ALL' ? 'Chưa có đơn hàng' : 'Không có đơn hàng'}
+                icon={
+                  <ShoppingBag
+                    className="h-10 w-10 text-muted-foreground/60"
+                    strokeWidth={1.5}
+                  />
+                }
+                title={
+                  activeTab === 'ALL' ? 'Chưa có đơn hàng' : 'Không có đơn hàng'
+                }
                 description={
                   activeTab === 'ALL'
                     ? 'Bạn chưa có đơn hàng nào trong mục này.'
@@ -193,7 +230,9 @@ export function OrdersPage() {
               <div className="space-y-4">
                 {filteredOrders.map((order) => {
                   const status = getStatusConfig(order.status);
-                  const canCancel = ['PENDING_PAYMENT', 'PAID'].includes(order.status);
+                  const canCancel = ['PENDING_PAYMENT', 'PAID'].includes(
+                    order.status,
+                  );
 
                   return (
                     <div
@@ -211,16 +250,24 @@ export function OrdersPage() {
                             >
                               #{order.orderNumber}
                             </Link>
-                            <span className="text-border hidden sm:inline" aria-hidden="true">•</span>
+                            <span
+                              className="text-border hidden sm:inline"
+                              aria-hidden="true"
+                            >
+                              •
+                            </span>
                             <div className="hidden sm:flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
                               <Calendar className="h-4 w-4" />
-                              <span className="tabular">{formatOrderDate(order.createdAt)}</span>
+                              <span className="tabular">
+                                {formatOrderDate(order.createdAt)}
+                              </span>
                             </div>
                           </div>
                           <Badge
                             variant={status.variant as any}
                             className={cn(
-                              status.variant === 'success' && 'bg-success text-success-foreground border-transparent'
+                              status.variant === 'success' &&
+                                'bg-success text-success-foreground border-transparent',
                             )}
                           >
                             {status.label}
@@ -231,10 +278,14 @@ export function OrdersPage() {
                         <div className="flex sm:hidden items-center justify-between gap-2 mt-2 pt-1 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1.5">
                             <Calendar className="h-3.5 w-3.5" />
-                            <span className="tabular">{formatOrderDate(order.createdAt)}</span>
+                            <span className="tabular">
+                              {formatOrderDate(order.createdAt)}
+                            </span>
                           </div>
                           <div className="text-right">
-                            <span className="text-xs text-muted-foreground mr-1">Tổng tiền:</span>
+                            <span className="text-xs text-muted-foreground mr-1">
+                              Tổng tiền:
+                            </span>
                             <span className="text-sm font-semibold text-foreground tabular">
                               {formatCurrency(order.total)}
                             </span>
@@ -247,8 +298,12 @@ export function OrdersPage() {
                         {/* Thumbnails row */}
                         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-1">
                           {order.items.map((item: any, idx: number) => {
-                            const slug = item.slug || item.productSlug || item.variant?.product?.slug;
-                            const name = item.productName || item.name || 'Sản phẩm';
+                            const slug =
+                              item.slug ||
+                              item.productSlug ||
+                              item.variant?.product?.slug;
+                            const name =
+                              item.productName || item.name || 'Sản phẩm';
                             const thumbContent = (
                               <div
                                 className="w-10 h-10 rounded-md bg-secondary overflow-hidden flex-shrink-0 border border-border flex items-center justify-center"
@@ -280,7 +335,8 @@ export function OrdersPage() {
                           })}
                           <span className="text-sm text-muted-foreground pl-1 line-clamp-2 break-words max-w-[200px] sm:max-w-[280px]">
                             {order.items.length === 1
-                              ? (order.items[0]?.productName || order.items[0]?.name)
+                              ? order.items[0]?.productName ||
+                                order.items[0]?.name
                               : `${order.items[0]?.productName || order.items[0]?.name} (+${order.items.length - 1})`}
                           </span>
                         </div>
@@ -289,7 +345,9 @@ export function OrdersPage() {
                         <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-border">
                           {/* Desktop total */}
                           <div className="hidden sm:block text-right">
-                            <span className="text-xs text-muted-foreground block">Tổng tiền</span>
+                            <span className="text-xs text-muted-foreground block">
+                              Tổng tiền
+                            </span>
                             <span className="text-base font-semibold text-foreground tabular">
                               {formatCurrency(order.total)}
                             </span>
@@ -316,7 +374,9 @@ export function OrdersPage() {
                                       onClick={() => handleCancel(order.id)}
                                       disabled={cancelOrder.isPending}
                                     >
-                                      {cancelOrder.isPending ? '...' : 'Xác nhận'}
+                                      {cancelOrder.isPending
+                                        ? '...'
+                                        : 'Xác nhận'}
                                     </Button>
                                   </div>
                                 ) : (

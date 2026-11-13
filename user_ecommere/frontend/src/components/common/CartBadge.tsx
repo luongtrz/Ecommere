@@ -9,7 +9,9 @@ export function CartBadge() {
   return (
     <div
       className="relative flex h-9 w-9 items-center justify-center"
-      aria-label={itemCount > 0 ? `Giỏ hàng, ${itemCount} sản phẩm` : 'Giỏ hàng'}
+      aria-label={
+        itemCount > 0 ? `Giỏ hàng, ${itemCount} sản phẩm` : 'Giỏ hàng'
+      }
     >
       <ShoppingCart className="h-5 w-5" aria-hidden="true" />
       {itemCount > 0 ? (

@@ -142,9 +142,7 @@ describe('ToolCallCard', () => {
 
       // Non-interactive card when hasDetails is false (no collapsible trigger button)
       expect(screen.queryByRole('button')).toBeNull();
-      expect(
-        screen.getByText('Kiểm tra kết nối dịch vụ'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Kiểm tra kết nối dịch vụ')).toBeInTheDocument();
 
       const content = container.querySelector<HTMLDivElement>('div.border-t');
       expect(content).toBeNull();
@@ -222,9 +220,7 @@ describe('ToolCallCard', () => {
 
       // Non-interactive card when hasDetails is false (no collapsible trigger button)
       expect(screen.queryByRole('button')).toBeNull();
-      expect(
-        screen.getByText('Đồng bộ kho thất bại'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Đồng bộ kho thất bại')).toBeInTheDocument();
 
       const content = container.querySelector<HTMLDivElement>('div.border-t');
       expect(content).toBeNull();

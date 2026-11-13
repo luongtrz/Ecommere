@@ -26,9 +26,13 @@ export function ChatbotPage() {
   const [draft, setDraft] = useState('');
   const [liveStatus, setLiveStatus] = useState('');
 
-  const { isStreaming, send, decide, cancel, newThread, retry } = useChatAgent();
+  const { isStreaming, send, decide, cancel, newThread, retry } =
+    useChatAgent();
   const { messages } = useChatOwnerSync(newThread);
-  const { scrollRef, isAtBottom, scrollToBottom } = useStickToBottom([messages, isStreaming]);
+  const { scrollRef, isAtBottom, scrollToBottom } = useStickToBottom([
+    messages,
+    isStreaming,
+  ]);
 
   const prevStreamingRef = useRef(isStreaming);
 
@@ -61,7 +65,9 @@ export function ChatbotPage() {
       return;
     }
     if (prompt.length > CHAT_MAX_MESSAGE_LENGTH) {
-      toast.error(`Tin nhắn không được vượt quá ${CHAT_MAX_MESSAGE_LENGTH} ký tự.`);
+      toast.error(
+        `Tin nhắn không được vượt quá ${CHAT_MAX_MESSAGE_LENGTH} ký tự.`,
+      );
       return;
     }
     setDraft('');
@@ -133,7 +139,13 @@ export function ChatbotPage() {
           {liveStatus}
         </div>
 
-        <div className={cn("mx-auto w-full max-w-3xl px-4 py-6 space-y-6", messages.length === 0 && "flex-1 min-h-full flex flex-col justify-center")}>
+        <div
+          className={cn(
+            'mx-auto w-full max-w-3xl px-4 py-6 space-y-6',
+            messages.length === 0 &&
+              'flex-1 min-h-full flex flex-col justify-center',
+          )}
+        >
           {/* 3. Empty state */}
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 sm:py-12 space-y-6 text-center animate-fade-in motion-reduce:animate-none">
@@ -160,7 +172,9 @@ export function ChatbotPage() {
                     onClick={() => void send(suggestion)}
                     className="rounded-lg border border-border bg-card p-4 text-sm text-card-foreground text-left leading-snug transition-colors duration-200 motion-reduce:transition-none hover:border-foreground/30 hover:bg-secondary/40 active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-11"
                   >
-                    <span className="font-medium text-foreground">{suggestion}</span>
+                    <span className="font-medium text-foreground">
+                      {suggestion}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -170,8 +184,11 @@ export function ChatbotPage() {
             <>
               {messages.map((message, index) => {
                 const isLast = index === messages.length - 1;
-                const hasError = Boolean(message.error && message.error.trim().length > 0);
-                const onRetry = isLast && hasError ? () => void retry() : undefined;
+                const hasError = Boolean(
+                  message.error && message.error.trim().length > 0,
+                );
+                const onRetry =
+                  isLast && hasError ? () => void retry() : undefined;
 
                 return (
                   <ChatMessageItem
@@ -221,7 +238,8 @@ export function ChatbotPage() {
             variant="page"
           />
           <p className="text-xs text-muted-foreground text-center pb-2 select-none leading-normal">
-            Trợ lý AI có thể nhầm lẫn. Vui lòng kiểm tra thông tin sản phẩm trước khi đặt hàng.
+            Trợ lý AI có thể nhầm lẫn. Vui lòng kiểm tra thông tin sản phẩm
+            trước khi đặt hàng.
           </p>
         </div>
       </div>

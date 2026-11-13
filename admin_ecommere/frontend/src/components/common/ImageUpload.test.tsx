@@ -1,5 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, createEvent, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  createEvent,
+  waitFor,
+} from '@testing-library/react';
 import { ImageUpload } from './ImageUpload';
 import apiClient from '@/lib/api';
 
@@ -41,7 +47,9 @@ describe('ImageUpload', () => {
     expect(screen.getByText('0/5 ảnh')).toBeInTheDocument();
     expect(screen.getByText('Chưa có ảnh nào')).toBeInTheDocument();
     expect(
-      screen.getByText('Nhấp hoặc kéo thả ảnh vào đây để tải lên (tối đa 5 ảnh)'),
+      screen.getByText(
+        'Nhấp hoặc kéo thả ảnh vào đây để tải lên (tối đa 5 ảnh)',
+      ),
     ).toBeInTheDocument();
 
     const uploadButton = screen.getByRole('button', { name: 'Chọn ảnh' });
@@ -67,7 +75,9 @@ describe('ImageUpload', () => {
 
     expect(screen.getByText('0/3 ảnh')).toBeInTheDocument();
     expect(
-      screen.getByText('Nhấp hoặc kéo thả ảnh vào đây để tải lên (tối đa 3 ảnh)'),
+      screen.getByText(
+        'Nhấp hoặc kéo thả ảnh vào đây để tải lên (tối đa 3 ảnh)',
+      ),
     ).toBeInTheDocument();
   });
 

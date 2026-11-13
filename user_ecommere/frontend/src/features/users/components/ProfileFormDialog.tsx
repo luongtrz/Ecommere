@@ -19,7 +19,10 @@ interface ProfileFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps) {
+export function ProfileFormDialog({
+  open,
+  onOpenChange,
+}: ProfileFormDialogProps) {
   const { user, refreshUser } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -38,7 +41,8 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
   }, [open, user]);
 
   const updateProfile = useMutation({
-    mutationFn: (data: { name?: string; phone?: string }) => usersApi.updateProfile(data),
+    mutationFn: (data: { name?: string; phone?: string }) =>
+      usersApi.updateProfile(data),
     onSuccess: async () => {
       await refreshUser();
       toast.success('Cập nhật thông tin thành công');
@@ -66,7 +70,10 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
         <form onSubmit={handleSubmit} className="space-y-5 pt-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-sm font-medium text-foreground">
+              <Label
+                htmlFor="name"
+                className="text-sm font-medium text-foreground"
+              >
                 Họ và tên *
               </Label>
               <Input
@@ -74,13 +81,18 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
                 required
                 className="h-11 text-base sm:text-sm"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Nguyễn Văn A"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-sm font-medium text-foreground">
+              <Label
+                htmlFor="phone"
+                className="text-sm font-medium text-foreground"
+              >
                 Số điện thoại
               </Label>
               <Input
@@ -88,7 +100,9 @@ export function ProfileFormDialog({ open, onOpenChange }: ProfileFormDialogProps
                 type="tel"
                 className="h-11 text-base sm:text-sm"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 placeholder="0912345678"
               />
             </div>

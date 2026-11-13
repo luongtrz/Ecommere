@@ -829,10 +829,16 @@ describe('AdminProductFormPage', () => {
       mockParams = {};
       renderPage();
 
-      const volumeInput = screen.getByLabelText(/dung tích/i) as HTMLInputElement;
+      const volumeInput = screen.getByLabelText(
+        /dung tích/i,
+      ) as HTMLInputElement;
       const stockInput = screen.getByLabelText(/tồn kho/i) as HTMLInputElement;
-      const priceInput = screen.getByLabelText(/giá niêm yết/i) as HTMLInputElement;
-      const salePriceInput = screen.getByLabelText(/giá sale/i) as HTMLInputElement;
+      const priceInput = screen.getByLabelText(
+        /giá niêm yết/i,
+      ) as HTMLInputElement;
+      const salePriceInput = screen.getByLabelText(
+        /giá sale/i,
+      ) as HTMLInputElement;
 
       const selectVolumeSpy = vi.spyOn(volumeInput, 'select');
       const selectStockSpy = vi.spyOn(stockInput, 'select');
@@ -881,7 +887,9 @@ describe('AdminProductFormPage', () => {
         name: 'Tiếp tục chỉnh sửa',
       });
       fireEvent.click(continueEditingBtn);
-      expect(screen.queryByText('Xác nhận hủy thay đổi')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Xác nhận hủy thay đổi'),
+      ).not.toBeInTheDocument();
     });
 
     it('does not show leave confirmation dialog when clicking back link on pristine form', () => {
@@ -893,7 +901,9 @@ describe('AdminProductFormPage', () => {
       });
       fireEvent.click(backLink);
 
-      expect(screen.queryByText('Xác nhận hủy thay đổi')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Xác nhận hủy thay đổi'),
+      ).not.toBeInTheDocument();
     });
 
     it('triggers onChange at line 1014 for category search input and filters categories in dropdown', async () => {
@@ -904,7 +914,9 @@ describe('AdminProductFormPage', () => {
         expect(screen.getByRole('combobox')).toHaveTextContent('Chọn danh mục');
       });
 
-      const categorySearchInput = screen.getByPlaceholderText('Tìm kiếm danh mục...');
+      const categorySearchInput = screen.getByPlaceholderText(
+        'Tìm kiếm danh mục...',
+      );
       expect(categorySearchInput).toBeInTheDocument();
 
       fireEvent.click(categorySearchInput);

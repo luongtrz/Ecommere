@@ -250,9 +250,7 @@ describe('Dialog components', () => {
       );
 
       const title = screen.getByTestId('dialog-title-default');
-      expect(title).toHaveClass(
-        'text-lg font-semibold leading-none',
-      );
+      expect(title).toHaveClass('text-lg font-semibold leading-none');
     });
 
     it('renders DialogDescription with ref, default and custom classes', () => {

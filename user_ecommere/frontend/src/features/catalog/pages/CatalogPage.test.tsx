@@ -504,7 +504,9 @@ describe('CatalogPage', () => {
           (_, el) => el?.textContent?.trim() === '5 kết quả tìm thấy',
         ),
       ).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Tìm trong danh mục này...')).toHaveValue('');
+      expect(
+        screen.getByPlaceholderText('Tìm trong danh mục này...'),
+      ).toHaveValue('');
       expect(screen.getByText('Ẩn bộ lọc')).toBeInTheDocument();
       expect(screen.getByTestId('mock-filter-sidebar')).toBeInTheDocument();
 
@@ -538,7 +540,9 @@ describe('CatalogPage', () => {
 
       renderCatalogPage('/catalog');
 
-      expect(screen.getByRole('status', { name: 'Đang tải sản phẩm' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('status', { name: 'Đang tải sản phẩm' }),
+      ).toBeInTheDocument();
       expect(
         screen.queryByText('Không tìm thấy sản phẩm'),
       ).not.toBeInTheDocument();
@@ -903,8 +907,12 @@ describe('CatalogPage', () => {
       expect(screen.getByTestId('mock-sheet-title')).toHaveTextContent(
         'Bộ lọc',
       );
-      expect(screen.getByRole('button', { name: 'Xem kết quả' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Xóa bộ lọc' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Xem kết quả' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Xóa bộ lọc' }),
+      ).toBeInTheDocument();
 
       // Click Xem ket qua closes the sheet
       fireEvent.click(screen.getByRole('button', { name: 'Xem kết quả' }));

@@ -27,7 +27,7 @@ function checkCloudinaryBranch(url: URL, cloudName: unknown): boolean {
   }
   const escapedCloudName = escapeRegExp(cloudName);
   const cloudinaryRegex = new RegExp(
-    `^/${escapedCloudName}/image/upload/v\\d+/[A-Za-z0-9._~%\\/-]+$`
+    `^/${escapedCloudName}/image/upload/v\\d+/[A-Za-z0-9._~%\\/-]+$`,
   );
   return cloudinaryRegex.test(url.pathname);
 }
@@ -58,7 +58,7 @@ function checkOriginBranch(url: URL, origin: unknown): boolean {
  */
 export function getAllowedChatImageUrl(
   rawSrc: unknown,
-  options?: ChatImagePolicyOptions
+  options?: ChatImagePolicyOptions,
 ): string | null {
   try {
     if (typeof rawSrc !== 'string') {

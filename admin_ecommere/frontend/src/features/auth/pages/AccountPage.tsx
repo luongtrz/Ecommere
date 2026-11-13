@@ -296,7 +296,8 @@ export function AccountPage() {
                 Xác nhận đăng xuất
               </DialogTitle>
               <DialogDescription className="text-sm text-slate-600">
-                Bạn có chắc chắn muốn đăng xuất khỏi phiên làm việc quản trị hiện tại không?
+                Bạn có chắc chắn muốn đăng xuất khỏi phiên làm việc quản trị
+                hiện tại không?
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-4">

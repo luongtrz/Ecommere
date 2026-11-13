@@ -90,9 +90,16 @@ export function OrderDetailPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center p-4 bg-background">
         <div className="surface max-w-md w-full p-8 text-center">
-          <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-4" strokeWidth={1.5} />
-          <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">Không tìm thấy đơn hàng</h2>
-          <p className="text-muted-foreground text-sm mb-6">Đơn hàng bạn tìm kiếm có thể không tồn tại hoặc đã bị xóa.</p>
+          <AlertCircle
+            className="h-10 w-10 text-muted-foreground mx-auto mb-4"
+            strokeWidth={1.5}
+          />
+          <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
+            Không tìm thấy đơn hàng
+          </h2>
+          <p className="text-muted-foreground text-sm mb-6">
+            Đơn hàng bạn tìm kiếm có thể không tồn tại hoặc đã bị xóa.
+          </p>
           <Button className="w-full min-h-[44px]" asChild>
             <Link to="/orders">Xem tất cả đơn hàng</Link>
           </Button>
@@ -106,13 +113,19 @@ export function OrderDetailPage() {
   const isDelivered = order.status === 'DELIVERED';
 
   const stepKeys = ['PENDING_PAYMENT', 'PACKING', 'SHIPPED', 'DELIVERED'];
-  const currentStepIndex = stepKeys.indexOf(order.status) === -1
-    ? (order.status === 'PAID' ? 0 : (isCancelled ? -1 : 0))
-    : stepKeys.indexOf(order.status);
+  const currentStepIndex =
+    stepKeys.indexOf(order.status) === -1
+      ? order.status === 'PAID'
+        ? 0
+        : isCancelled
+          ? -1
+          : 0
+      : stepKeys.indexOf(order.status);
 
-  const paymentMethodLabel = order.paymentMethod === 'COD'
-    ? 'Thanh toán khi nhận hàng (COD)'
-    : order.paymentMethod;
+  const paymentMethodLabel =
+    order.paymentMethod === 'COD'
+      ? 'Thanh toán khi nhận hàng (COD)'
+      : order.paymentMethod;
 
   return (
     <>
@@ -122,7 +135,12 @@ export function OrderDetailPage() {
         <div className="container max-w-6xl py-8 md:py-12">
           {/* Back link */}
           <div className="mb-6">
-            <Button variant="ghost" size="sm" asChild className="min-h-[44px] -ml-2 px-3 py-2 inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="min-h-[44px] -ml-2 px-3 py-2 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+            >
               <Link to="/orders" className="inline-flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
                 <span>Quay lại danh sách đơn hàng</span>
@@ -145,7 +163,8 @@ export function OrderDetailPage() {
                 <Badge
                   variant={statusConfig.variant as any}
                   className={cn(
-                    statusConfig.variant === 'success' && 'bg-success text-success-foreground border-transparent'
+                    statusConfig.variant === 'success' &&
+                      'bg-success text-success-foreground border-transparent',
                   )}
                 >
                   {statusConfig.label}
@@ -169,25 +188,35 @@ export function OrderDetailPage() {
                   </h2>
                   <div className="relative pl-6 space-y-4 before:absolute before:left-[5.5px] before:top-2 before:bottom-2 before:w-px before:bg-border">
                     {TIMELINE_STEPS.map((step, index) => {
-                      const isDone = isDelivered ? true : index < currentStepIndex;
-                      const isCurrent = !isDelivered && index === currentStepIndex;
+                      const isDone = isDelivered
+                        ? true
+                        : index < currentStepIndex;
+                      const isCurrent =
+                        !isDelivered && index === currentStepIndex;
                       const isUpcoming = index > currentStepIndex;
 
                       return (
-                        <div key={step.status} className="relative flex items-start gap-4">
+                        <div
+                          key={step.status}
+                          className="relative flex items-start gap-4"
+                        >
                           <div
                             className={cn(
-                              "absolute -left-6 top-1 h-3 w-3 rounded-full transition-colors z-10",
-                              isDone && "bg-success",
-                              isCurrent && "bg-primary ring-4 ring-primary/20",
-                              isUpcoming && "border border-border bg-card"
+                              'absolute -left-6 top-1 h-3 w-3 rounded-full transition-colors z-10',
+                              isDone && 'bg-success',
+                              isCurrent && 'bg-primary ring-4 ring-primary/20',
+                              isUpcoming && 'border border-border bg-card',
                             )}
                           />
                           <div className="flex-1 min-w-0">
                             <p
                               className={cn(
-                                "text-sm font-medium leading-none",
-                                isCurrent ? "text-foreground font-semibold" : isDone ? "text-foreground" : "text-muted-foreground"
+                                'text-sm font-medium leading-none',
+                                isCurrent
+                                  ? 'text-foreground font-semibold'
+                                  : isDone
+                                    ? 'text-foreground'
+                                    : 'text-muted-foreground',
                               )}
                             >
                               {step.label}
@@ -198,7 +227,9 @@ export function OrderDetailPage() {
                               </p>
                             )}
                             {isCurrent && (
-                              <p className="text-xs font-medium text-primary mt-0.5">Hiện tại</p>
+                              <p className="text-xs font-medium text-primary mt-0.5">
+                                Hiện tại
+                              </p>
                             )}
                           </div>
                         </div>
@@ -211,7 +242,9 @@ export function OrderDetailPage() {
                   <div className="flex items-center gap-3 text-destructive">
                     <XCircle className="h-5 w-5 flex-shrink-0" />
                     <p className="text-sm font-medium">
-                      {order.status === 'CANCELED' ? 'Đơn hàng đã bị hủy' : 'Đơn hàng đã được hoàn tiền'}
+                      {order.status === 'CANCELED'
+                        ? 'Đơn hàng đã bị hủy'
+                        : 'Đơn hàng đã được hoàn tiền'}
                     </p>
                   </div>
                 </div>
@@ -226,7 +259,10 @@ export function OrderDetailPage() {
                 </div>
                 <div className="divide-y divide-border">
                   {order.items.map((item: any, index: number) => {
-                    const slug = item.slug || item.productSlug || item.variant?.product?.slug;
+                    const slug =
+                      item.slug ||
+                      item.productSlug ||
+                      item.variant?.product?.slug;
                     const name = item.productName || item.name || 'Sản phẩm';
 
                     const imageEl = (
@@ -244,9 +280,15 @@ export function OrderDetailPage() {
                     );
 
                     return (
-                      <div key={index} className="p-4 md:p-5 flex items-center gap-4">
+                      <div
+                        key={index}
+                        className="p-4 md:p-5 flex items-center gap-4"
+                      >
                         {slug ? (
-                          <Link to={`/p/${slug}`} className="transition-opacity hover:opacity-80">
+                          <Link
+                            to={`/p/${slug}`}
+                            className="transition-opacity hover:opacity-80"
+                          >
                             {imageEl}
                           </Link>
                         ) : (
@@ -293,19 +335,27 @@ export function OrderDetailPage() {
                 </h2>
                 {order.shippingAddress ? (
                   <div className="text-sm space-y-1">
-                    <div className="font-medium text-foreground">{order.shippingAddress.fullName}</div>
-                    <div className="text-muted-foreground tabular">{order.shippingAddress.phone}</div>
+                    <div className="font-medium text-foreground">
+                      {order.shippingAddress.fullName}
+                    </div>
+                    <div className="text-muted-foreground tabular">
+                      {order.shippingAddress.phone}
+                    </div>
                     <div className="text-muted-foreground leading-relaxed text-sm pt-1">
                       {[
                         order.shippingAddress.address,
                         order.shippingAddress.ward,
                         order.shippingAddress.district,
-                        order.shippingAddress.province
-                      ].filter(Boolean).join(', ')}
+                        order.shippingAddress.province,
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Không có thông tin địa chỉ</p>
+                  <p className="text-sm text-muted-foreground">
+                    Không có thông tin địa chỉ
+                  </p>
                 )}
               </div>
 
@@ -317,14 +367,26 @@ export function OrderDetailPage() {
                 </h2>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Phương thức</span>
-                  <span className="font-medium text-foreground">{paymentMethodLabel}</span>
+                  <span className="font-medium text-foreground">
+                    {paymentMethodLabel}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm pt-2 border-t border-border">
                   <span className="text-muted-foreground">Trạng thái</span>
                   <Badge
-                    variant={['PAID', 'DELIVERED'].includes(order.status) ? 'secondary' : (isCancelled ? 'destructive' : 'outline')}
+                    variant={
+                      ['PAID', 'DELIVERED'].includes(order.status)
+                        ? 'secondary'
+                        : isCancelled
+                          ? 'destructive'
+                          : 'outline'
+                    }
                   >
-                    {['PAID', 'DELIVERED'].includes(order.status) ? 'Đã thanh toán' : (isCancelled ? 'Đã hủy' : 'Chưa thanh toán')}
+                    {['PAID', 'DELIVERED'].includes(order.status)
+                      ? 'Đã thanh toán'
+                      : isCancelled
+                        ? 'Đã hủy'
+                        : 'Chưa thanh toán'}
                   </Badge>
                 </div>
               </div>
@@ -343,16 +405,22 @@ export function OrderDetailPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Phí vận chuyển:</span>
+                    <span className="text-muted-foreground">
+                      Phí vận chuyển:
+                    </span>
                     <span className="tabular font-medium text-foreground">
-                      {order.shippingFee === 0 ? 'Miễn phí' : formatCurrency(order.shippingFee)}
+                      {order.shippingFee === 0
+                        ? 'Miễn phí'
+                        : formatCurrency(order.shippingFee)}
                     </span>
                   </div>
                 </div>
 
                 {/* Hairline before total */}
                 <div className="pt-3 border-t border-border flex justify-between items-baseline">
-                  <span className="text-base font-semibold text-foreground">Tổng cộng:</span>
+                  <span className="text-base font-semibold text-foreground">
+                    Tổng cộng:
+                  </span>
                   <span className="text-xl font-semibold text-foreground tabular">
                     {formatCurrency(order.total)}
                   </span>
@@ -374,8 +442,13 @@ export function OrderDetailPage() {
 
                 {showCancelConfirm && (
                   <div className="pt-2 p-3 bg-secondary/50 rounded-md border border-border space-y-3">
-                    <p className="text-sm font-medium text-foreground">Bạn chắc chắn muốn hủy đơn hàng này?</p>
-                    <p className="text-sm text-muted-foreground">Hành động này không thể hoàn tác. Sản phẩm sẽ được hoàn lại kho.</p>
+                    <p className="text-sm font-medium text-foreground">
+                      Bạn chắc chắn muốn hủy đơn hàng này?
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Hành động này không thể hoàn tác. Sản phẩm sẽ được hoàn
+                      lại kho.
+                    </p>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -401,9 +474,19 @@ export function OrderDetailPage() {
 
                 {/* Support */}
                 <div className="pt-3 border-t border-border text-center">
-                  <p className="text-sm text-muted-foreground mb-2">Gặp vấn đề với đơn hàng này?</p>
-                  <Button variant="outline" size="sm" className="w-full text-sm font-medium text-foreground min-h-[44px]" asChild>
-                    <Link to="/support" className="inline-flex items-center justify-center gap-2">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Gặp vấn đề với đơn hàng này?
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-sm font-medium text-foreground min-h-[44px]"
+                    asChild
+                  >
+                    <Link
+                      to="/support"
+                      className="inline-flex items-center justify-center gap-2"
+                    >
                       <MessageSquare className="h-4 w-4" />
                       <span>Gửi yêu cầu hỗ trợ</span>
                     </Link>

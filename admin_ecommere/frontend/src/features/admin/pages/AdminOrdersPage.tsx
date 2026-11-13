@@ -350,9 +350,7 @@ export function AdminOrdersPage() {
                 ? formatCurrency(dashboardStats.revenue.monthlyRevenue)
                 : '--'}
             </CardTitle>
-            <p className="text-xs text-slate-400 mt-1">
-              Ghi nhận trong tháng
-            </p>
+            <p className="text-xs text-slate-400 mt-1">Ghi nhận trong tháng</p>
           </CardContent>
         </Card>
       </div>
@@ -744,10 +742,7 @@ export function AdminOrdersPage() {
                     {order.items && order.items.length > 0 && (
                       <div className="space-y-2">
                         {order.items.slice(0, 2).map((item: any, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-2.5"
-                          >
+                          <div key={idx} className="flex items-center gap-2.5">
                             <div className="relative w-9 h-9 rounded-lg border border-slate-200 overflow-hidden shrink-0 bg-slate-50">
                               {item.variant?.product?.images?.[0] ? (
                                 <img

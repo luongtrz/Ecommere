@@ -13,37 +13,14 @@ describe('Rating', () => {
     expect(svgs).toHaveLength(5);
 
     // 3 full stars
-    expect(svgs[0]).toHaveClass(
-      'h-4',
-      'w-4',
-      'fill-accent',
-      'text-accent',
-    );
-    expect(svgs[1]).toHaveClass(
-      'h-4',
-      'w-4',
-      'fill-accent',
-      'text-accent',
-    );
-    expect(svgs[2]).toHaveClass(
-      'h-4',
-      'w-4',
-      'fill-accent',
-      'text-accent',
-    );
+    expect(svgs[0]).toHaveClass('h-4', 'w-4', 'fill-accent', 'text-accent');
+    expect(svgs[1]).toHaveClass('h-4', 'w-4', 'fill-accent', 'text-accent');
+    expect(svgs[2]).toHaveClass('h-4', 'w-4', 'fill-accent', 'text-accent');
 
     // 2 empty stars
-    expect(svgs[3]).toHaveClass(
-      'h-4',
-      'w-4',
-      'text-muted-foreground/30',
-    );
+    expect(svgs[3]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/30');
     expect(svgs[3]).not.toHaveClass('fill-accent');
-    expect(svgs[4]).toHaveClass(
-      'h-4',
-      'w-4',
-      'text-muted-foreground/30',
-    );
+    expect(svgs[4]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/30');
     expect(svgs[4]).not.toHaveClass('fill-accent');
 
     // showValue is false by default

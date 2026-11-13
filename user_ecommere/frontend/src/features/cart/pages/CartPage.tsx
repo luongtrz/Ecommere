@@ -6,12 +6,23 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/common/EmptyState';
 import { formatCurrency } from '@/lib/formatters';
 import { getImageUrl } from '@/lib/utils';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, CreditCard, Truck, Shield } from 'lucide-react';
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingBag,
+  ArrowLeft,
+  CreditCard,
+  Truck,
+  Shield,
+} from 'lucide-react';
 
 export function CartPage() {
   useRefreshCartPrices();
-  const { items, updateQuantity, removeItem, totalPrice, totalItems } = useCart();
-  const totalQuantity = totalItems ?? items.reduce((sum, item) => sum + item.quantity, 0);
+  const { items, updateQuantity, removeItem, totalPrice, totalItems } =
+    useCart();
+  const totalQuantity =
+    totalItems ?? items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <>
@@ -21,8 +32,16 @@ export function CartPage() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
-              <Button variant="ghost" size="sm" asChild className="p-0 h-auto hover:bg-transparent min-h-11 inline-flex items-center">
-                <Link to="/catalog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-11">
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="p-0 h-auto hover:bg-transparent min-h-11 inline-flex items-center"
+              >
+                <Link
+                  to="/catalog"
+                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-11"
+                >
                   <ArrowLeft className="h-4 w-4" />
                   Tiếp tục mua sắm
                 </Link>
@@ -41,7 +60,10 @@ export function CartPage() {
               </div>
               {totalQuantity > 0 && (
                 <span className="text-sm font-medium tabular text-muted-foreground">
-                  Tổng cộng: <span className="text-foreground font-semibold text-base">{formatCurrency(totalPrice)}</span>
+                  Tổng cộng:{' '}
+                  <span className="text-foreground font-semibold text-base">
+                    {formatCurrency(totalPrice)}
+                  </span>
                 </span>
               )}
             </div>
@@ -50,7 +72,9 @@ export function CartPage() {
           {items.length === 0 ? (
             <div className="py-12 max-w-md mx-auto px-4">
               <EmptyState
-                icon={<ShoppingBag className="h-16 w-16 text-muted-foreground" />}
+                icon={
+                  <ShoppingBag className="h-16 w-16 text-muted-foreground" />
+                }
                 title="Giỏ hàng của bạn đang trống"
                 description="Hãy khám phá các sản phẩm xịt thơm và gia dụng của chúng tôi."
                 action={
@@ -84,7 +108,12 @@ export function CartPage() {
                         </p>
                         {(item.scent || item.volumeMl) && (
                           <p className="text-sm text-muted-foreground mt-1">
-                            {[item.scent, item.volumeMl ? `${item.volumeMl}ml` : null].filter(Boolean).join(' · ')}
+                            {[
+                              item.scent,
+                              item.volumeMl ? `${item.volumeMl}ml` : null,
+                            ]
+                              .filter(Boolean)
+                              .join(' · ')}
                           </p>
                         )}
                         <p className="text-sm text-muted-foreground tabular mt-1 sm:hidden">
@@ -98,7 +127,9 @@ export function CartPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity - 1)
+                            }
                             disabled={item.quantity <= 1}
                             className="h-11 w-11 min-h-11 min-w-11 text-muted-foreground hover:text-foreground"
                             aria-label="Giảm số lượng"
@@ -111,8 +142,13 @@ export function CartPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity + 1)
+                            }
+                            disabled={
+                              typeof item.stock === 'number' &&
+                              item.quantity >= item.stock
+                            }
                             className="h-11 w-11 min-h-11 min-w-11 text-muted-foreground hover:text-foreground"
                             aria-label="Tăng số lượng"
                           >
@@ -157,28 +193,39 @@ export function CartPage() {
 
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Tạm tính ({totalQuantity} sản phẩm):</span>
-                      <span className="font-medium tabular text-foreground">{formatCurrency(totalPrice)}</span>
+                      <span className="text-muted-foreground">
+                        Tạm tính ({totalQuantity} sản phẩm):
+                      </span>
+                      <span className="font-medium tabular text-foreground">
+                        {formatCurrency(totalPrice)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground flex items-center gap-1.5">
                         <Truck className="h-4 w-4" />
                         Phí vận chuyển:
                       </span>
-                      <span className="text-muted-foreground font-medium">Tính ở bước thanh toán</span>
+                      <span className="text-muted-foreground font-medium">
+                        Tính ở bước thanh toán
+                      </span>
                     </div>
                   </div>
 
                   <div className="border-t border-border pt-4">
                     <div className="flex justify-between items-baseline mb-6">
-                      <span className="text-base font-semibold text-foreground">Tổng cộng:</span>
+                      <span className="text-base font-semibold text-foreground">
+                        Tổng cộng:
+                      </span>
                       <span className="text-xl font-semibold tabular text-primary">
                         {formatCurrency(totalPrice)}
                       </span>
                     </div>
 
                     <Button asChild size="lg" className="w-full min-h-11">
-                      <Link to="/checkout" className="flex items-center justify-center gap-2">
+                      <Link
+                        to="/checkout"
+                        className="flex items-center justify-center gap-2"
+                      >
                         <CreditCard className="h-4 w-4" />
                         Tiến hành thanh toán
                       </Link>
@@ -209,13 +256,18 @@ export function CartPage() {
           <div className="fixed bottom-16 left-0 right-0 p-3 lg:hidden bg-card/95 backdrop-blur-sm border-t border-border z-30 shadow-lg">
             <div className="container flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm text-muted-foreground">Tổng cộng ({totalQuantity} sản phẩm):</p>
+                <p className="text-sm text-muted-foreground">
+                  Tổng cộng ({totalQuantity} sản phẩm):
+                </p>
                 <p className="text-base font-semibold tabular text-primary">
                   {formatCurrency(totalPrice)}
                 </p>
               </div>
               <Button asChild size="lg" className="min-h-11 shrink-0">
-                <Link to="/checkout" className="flex items-center justify-center gap-2">
+                <Link
+                  to="/checkout"
+                  className="flex items-center justify-center gap-2"
+                >
                   <CreditCard className="h-4 w-4" />
                   Tiến hành thanh toán
                 </Link>

@@ -19,7 +19,11 @@ interface AddressFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDialogProps) {
+export function AddressFormDialog({
+  address,
+  open,
+  onOpenChange,
+}: AddressFormDialogProps) {
   const isEdit = !!address;
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
@@ -93,7 +97,10 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
         <form onSubmit={handleSubmit} className="space-y-5 pt-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
+              <Label
+                htmlFor="fullName"
+                className="text-sm font-medium text-foreground"
+              >
                 Họ và tên <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -101,13 +108,18 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 text-base sm:text-sm"
                 value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
                 placeholder="Nguyễn Văn A"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-sm font-medium text-foreground">
+              <Label
+                htmlFor="phone"
+                className="text-sm font-medium text-foreground"
+              >
                 Số điện thoại <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -116,13 +128,18 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 type="tel"
                 className="h-11 text-base sm:text-sm"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 placeholder="0912345678"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="province" className="text-sm font-medium text-foreground">
+              <Label
+                htmlFor="province"
+                className="text-sm font-medium text-foreground"
+              >
                 Tỉnh/Thành phố <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -130,13 +147,18 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 text-base sm:text-sm"
                 value={formData.province}
-                onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, province: e.target.value })
+                }
                 placeholder="Hồ Chí Minh"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="district" className="text-sm font-medium text-foreground">
+              <Label
+                htmlFor="district"
+                className="text-sm font-medium text-foreground"
+              >
                 Quận/Huyện <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -144,13 +166,18 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 text-base sm:text-sm"
                 value={formData.district}
-                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, district: e.target.value })
+                }
                 placeholder="Quận 1"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="ward" className="text-sm font-medium text-foreground">
+              <Label
+                htmlFor="ward"
+                className="text-sm font-medium text-foreground"
+              >
                 Phường/Xã <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -158,13 +185,18 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 text-base sm:text-sm"
                 value={formData.ward}
-                onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, ward: e.target.value })
+                }
                 placeholder="Bến Nghé"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="line1" className="text-sm font-medium text-foreground">
+              <Label
+                htmlFor="line1"
+                className="text-sm font-medium text-foreground"
+              >
                 Địa chỉ chi tiết <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -172,7 +204,9 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 required
                 className="h-11 text-base sm:text-sm"
                 value={formData.line1}
-                onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, line1: e.target.value })
+                }
                 placeholder="Số nhà, tên đường..."
               />
             </div>
@@ -186,7 +220,10 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
                 setFormData({ ...formData, isDefault: checked as boolean })
               }
             />
-            <Label htmlFor="isDefault" className="cursor-pointer text-sm font-normal text-foreground">
+            <Label
+              htmlFor="isDefault"
+              className="cursor-pointer text-sm font-normal text-foreground"
+            >
               Đặt làm địa chỉ mặc định
             </Label>
           </div>

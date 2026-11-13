@@ -280,7 +280,9 @@ describe('CartPage', () => {
     const itemCard = screen
       .getByText(mockItem1.name)
       .closest('[data-testid="cart-item"]') as HTMLElement;
-    const minusBtn = (itemCard.querySelector('button[aria-label="Giảm số lượng"]') ||
+    const minusBtn = (itemCard.querySelector(
+      'button[aria-label="Giảm số lượng"]',
+    ) ||
       itemCard.querySelector('svg.lucide-minus')?.closest('button') ||
       itemCard.querySelectorAll('button')[0]) as HTMLButtonElement;
 
@@ -307,7 +309,9 @@ describe('CartPage', () => {
     const itemCard = screen
       .getByText(mockItem2.name)
       .closest('[data-testid="cart-item"]') as HTMLElement;
-    const minusBtn = (itemCard.querySelector('button[aria-label="Giảm số lượng"]') ||
+    const minusBtn = (itemCard.querySelector(
+      'button[aria-label="Giảm số lượng"]',
+    ) ||
       itemCard.querySelector('svg.lucide-minus')?.closest('button') ||
       itemCard.querySelectorAll('button')[0]) as HTMLButtonElement;
 
@@ -327,7 +331,9 @@ describe('CartPage', () => {
     const itemCard = screen
       .getByText(mockItem1.name)
       .closest('[data-testid="cart-item"]') as HTMLElement;
-    const plusBtn = (itemCard.querySelector('button[aria-label="Tăng số lượng"]') ||
+    const plusBtn = (itemCard.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
       itemCard.querySelector('svg.lucide-plus')?.closest('button') ||
       itemCard.querySelectorAll('button')[1]) as HTMLButtonElement;
 
@@ -354,7 +360,9 @@ describe('CartPage', () => {
     const itemCard = screen
       .getByText(mockItem2.name)
       .closest('[data-testid="cart-item"]') as HTMLElement;
-    const plusBtn = (itemCard.querySelector('button[aria-label="Tăng số lượng"]') ||
+    const plusBtn = (itemCard.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
       itemCard.querySelector('svg.lucide-plus')?.closest('button') ||
       itemCard.querySelectorAll('button')[1]) as HTMLButtonElement;
 
@@ -374,7 +382,9 @@ describe('CartPage', () => {
     const itemCard = screen
       .getByText(mockItem3.name)
       .closest('[data-testid="cart-item"]') as HTMLElement;
-    const plusBtn = (itemCard.querySelector('button[aria-label="Tăng số lượng"]') ||
+    const plusBtn = (itemCard.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
       itemCard.querySelector('svg.lucide-plus')?.closest('button') ||
       itemCard.querySelectorAll('button')[1]) as HTMLButtonElement;
 
@@ -400,7 +410,9 @@ describe('CartPage', () => {
     const itemCard = screen
       .getByText(mockItem1.name)
       .closest('[data-testid="cart-item"]') as HTMLElement;
-    const trashBtn = (itemCard.querySelector('button[aria-label="Xóa sản phẩm"]') ||
+    const trashBtn = (itemCard.querySelector(
+      'button[aria-label="Xóa sản phẩm"]',
+    ) ||
       itemCard.querySelector('svg.lucide-trash-2')?.closest('button') ||
       itemCard.querySelectorAll('button')[2]) as HTMLButtonElement;
 

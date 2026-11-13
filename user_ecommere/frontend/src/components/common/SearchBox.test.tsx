@@ -92,7 +92,9 @@ describe('SearchBox', () => {
       fireEvent.change(input, { target: { value: 'diệt gián' } });
       fireEvent.click(submitBtn);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/search?q=di%E1%BB%87t%20gi%C3%A1n');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/search?q=di%E1%BB%87t%20gi%C3%A1n',
+      );
     });
 
     it('closes suggestions when clicking outside the container', () => {

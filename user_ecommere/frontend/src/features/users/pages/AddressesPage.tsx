@@ -12,7 +12,11 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { MapPin, Plus, Edit, Trash2, ChevronRight } from 'lucide-react';
-import { useAddresses, useDeleteAddress, useUpdateAddress } from '../hooks/useAddresses';
+import {
+  useAddresses,
+  useDeleteAddress,
+  useUpdateAddress,
+} from '../hooks/useAddresses';
 import { AddressFormDialog } from '../components/AddressFormDialog';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { Address } from '../api/users.api';
@@ -98,12 +102,18 @@ export function AddressesPage() {
       <SEO title="Quản lý địa chỉ" />
       <div className="container py-8 md:py-12 max-w-5xl">
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted-foreground">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-4 text-sm text-muted-foreground"
+        >
           <Link to="/" className="hover:text-foreground transition-colors">
             Trang chủ
           </Link>
           <span className="mx-2 text-muted-foreground/60">/</span>
-          <Link to="/account" className="hover:text-foreground transition-colors">
+          <Link
+            to="/account"
+            className="hover:text-foreground transition-colors"
+          >
             Tài khoản
           </Link>
           <span className="mx-2 text-muted-foreground/60">/</span>
@@ -123,8 +133,13 @@ export function AddressesPage() {
                   <p className="font-semibold text-base leading-snug text-foreground truncate">
                     {user.name}
                   </p>
-                  <Badge variant="secondary" className="rounded-sm text-xs mt-1 font-normal">
-                    {user.role === 'ADMIN' ? 'Quản trị viên' : 'Khách hàng thân thiết'}
+                  <Badge
+                    variant="secondary"
+                    className="rounded-sm text-xs mt-1 font-normal"
+                  >
+                    {user.role === 'ADMIN'
+                      ? 'Quản trị viên'
+                      : 'Khách hàng thân thiết'}
                   </Badge>
                 </div>
               </div>
@@ -135,7 +150,10 @@ export function AddressesPage() {
               <h3 className="text-sm font-semibold text-muted-foreground mb-3">
                 Danh mục
               </h3>
-              <nav aria-label="Menu tài khoản" className="flex flex-col space-y-2">
+              <nav
+                aria-label="Menu tài khoản"
+                className="flex flex-col space-y-2"
+              >
                 {navItems.map((item) => (
                   <button
                     key={item.label}
@@ -186,7 +204,8 @@ export function AddressesPage() {
                   Chưa có địa chỉ nào
                 </h2>
                 <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto leading-relaxed">
-                  Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại Thai Spray Shop
+                  Hãy thêm địa chỉ giao hàng để thuận tiện hơn khi mua sắm tại
+                  Thai Spray Shop
                 </p>
                 <Button onClick={handleAdd} className="min-h-11 px-5">
                   <Plus className="h-4 w-4 mr-2" />
@@ -209,17 +228,23 @@ export function AddressesPage() {
                               {address.fullName}
                             </h3>
                             {address.isDefault && (
-                              <Badge variant="secondary" className="rounded-sm text-xs font-normal">
+                              <Badge
+                                variant="secondary"
+                                className="rounded-sm text-xs font-normal"
+                              >
                                 Mặc định
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-foreground tabular">{address.phone}</p>
+                          <p className="text-sm text-foreground tabular">
+                            {address.phone}
+                          </p>
                         </div>
                       </div>
 
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {address.line1}, {address.ward}, {address.district}, {address.province}
+                        {address.line1}, {address.ward}, {address.district},{' '}
+                        {address.province}
                       </p>
                     </div>
 
@@ -250,7 +275,11 @@ export function AddressesPage() {
                         className="min-h-11 sm:min-h-9 px-3 text-sm text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50"
                         onClick={() => handleDeleteClick(address)}
                         disabled={address.isDefault || deleteAddress.isPending}
-                        title={address.isDefault ? 'Không thể xóa địa chỉ mặc định' : undefined}
+                        title={
+                          address.isDefault
+                            ? 'Không thể xóa địa chỉ mặc định'
+                            : undefined
+                        }
                       >
                         <Trash2 className="h-4 w-4 mr-1.5" />
                         Xóa
@@ -277,7 +306,8 @@ export function AddressesPage() {
                 Xóa địa chỉ?
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground mt-2">
-                Bạn có chắc chắn muốn xóa địa chỉ này khỏi sổ địa chỉ không? Hành động này không thể hoàn tác.
+                Bạn có chắc chắn muốn xóa địa chỉ này khỏi sổ địa chỉ không?
+                Hành động này không thể hoàn tác.
               </DialogDescription>
             </DialogHeader>
 
@@ -287,7 +317,8 @@ export function AddressesPage() {
                   {addressToDelete.fullName} - {addressToDelete.phone}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {addressToDelete.line1}, {addressToDelete.ward}, {addressToDelete.district}, {addressToDelete.province}
+                  {addressToDelete.line1}, {addressToDelete.ward},{' '}
+                  {addressToDelete.district}, {addressToDelete.province}
                 </p>
               </div>
             )}

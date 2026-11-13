@@ -9,7 +9,10 @@ export interface ChatSourceCardProps {
   variant?: 'widget' | 'page';
 }
 
-export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardProps) {
+export function ChatSourceCard({
+  source,
+  variant = 'widget',
+}: ChatSourceCardProps) {
   const item = source as ChatSource & {
     imageUrl?: string | null;
     minPrice?: number | null;
@@ -24,7 +27,9 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
 
   const showThumbnail = Boolean(rawImageUrl) && !imageError;
   const hasPrice =
-    typeof item.minPrice === 'number' && Number.isFinite(item.minPrice) && item.minPrice > 0;
+    typeof item.minPrice === 'number' &&
+    Number.isFinite(item.minPrice) &&
+    item.minPrice > 0;
 
   return (
     <a
@@ -34,14 +39,14 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
         'hover:border-foreground/30 hover:bg-secondary/40',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         'w-full min-h-[44px]',
-        variant === 'page' ? 'gap-3.5 p-3 sm:p-4' : 'gap-2.5 p-2.5'
+        variant === 'page' ? 'gap-3.5 p-3 sm:p-4' : 'gap-2.5 p-2.5',
       )}
     >
       {/* Thumbnail */}
       <div
         className={cn(
           'relative shrink-0 overflow-hidden rounded-md border border-border bg-secondary flex items-center justify-center',
-          variant === 'page' ? 'h-20 w-20' : 'h-14 w-14'
+          variant === 'page' ? 'h-20 w-20' : 'h-14 w-14',
         )}
       >
         {showThumbnail ? (
@@ -57,7 +62,9 @@ export function ChatSourceCard({ source, variant = 'widget' }: ChatSourceCardPro
             className="flex h-full w-full items-center justify-center bg-secondary text-muted-foreground"
             aria-hidden="true"
           >
-            <ShoppingBag className={variant === 'page' ? 'h-8 w-8' : 'h-6 w-6'} />
+            <ShoppingBag
+              className={variant === 'page' ? 'h-8 w-8' : 'h-6 w-6'}
+            />
           </div>
         )}
       </div>

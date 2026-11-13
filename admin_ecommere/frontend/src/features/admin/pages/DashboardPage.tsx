@@ -268,12 +268,14 @@ export function DashboardPage() {
                 Tổng quan vận hành
               </div>
               <h2 className="mt-2.5 max-w-3xl text-xl font-bold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl leading-snug">
-                {stats.orders.pendingOrders > 0 || stats.products.lowStockProducts > 0
+                {stats.orders.pendingOrders > 0 ||
+                stats.products.lowStockProducts > 0
                   ? `Hôm nay có ${stats.orders.pendingOrders.toLocaleString('vi-VN')} đơn hàng chờ xử lý và ${stats.products.lowStockProducts.toLocaleString('vi-VN')} sản phẩm sắp hết hàng.`
                   : 'Hôm nay hệ thống vận hành ổn định, không có đơn chờ xử lý.'}
               </h2>
               <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-600">
-                Theo dõi trạng thái đơn hàng, doanh thu và cảnh báo tồn kho để xử lý kịp thời trong ngày.
+                Theo dõi trạng thái đơn hàng, doanh thu và cảnh báo tồn kho để
+                xử lý kịp thời trong ngày.
               </p>
               <div className="mt-5 flex flex-col sm:flex-row flex-wrap gap-3">
                 <Button
@@ -332,11 +334,7 @@ export function DashboardPage() {
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4 xl:col-span-1">
             {statCards.map((card) => (
-              <Link
-                key={card.title}
-                to={card.to}
-                className="block group"
-              >
+              <Link key={card.title} to={card.to} className="block group">
                 <Card className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:border-teal-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
                   <CardHeader className="flex flex-row items-start justify-between space-y-0 p-4 pb-2">
                     <div className="space-y-1 min-w-0 pr-2">
@@ -610,7 +608,8 @@ export function DashboardPage() {
                           {product.name}
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500 tabular-nums">
-                          Đã bán {product.soldQuantity.toLocaleString('vi-VN')} sản phẩm
+                          Đã bán {product.soldQuantity.toLocaleString('vi-VN')}{' '}
+                          sản phẩm
                         </p>
                       </div>
                     </div>
@@ -677,7 +676,9 @@ export function DashboardPage() {
                   Khách hàng mới trong tháng
                 </p>
                 <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
-                  {stats.customers.newCustomersThisMonth.toLocaleString('vi-VN')}
+                  {stats.customers.newCustomersThisMonth.toLocaleString(
+                    'vi-VN',
+                  )}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   Số lượng khách hàng mới đăng ký trong tháng.

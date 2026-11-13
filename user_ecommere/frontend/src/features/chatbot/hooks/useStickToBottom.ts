@@ -1,4 +1,10 @@
-import { useRef, useState, useEffect, useCallback, type RefObject } from 'react';
+import {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  type RefObject,
+} from 'react';
 
 const BOTTOM_THRESHOLD_PX = 80;
 
@@ -10,7 +16,7 @@ const BOTTOM_THRESHOLD_PX = 80;
  * If the user has scrolled up, it preserves their scroll position.
  */
 export function useStickToBottom<T extends HTMLElement = HTMLDivElement>(
-  deps: ReadonlyArray<unknown>
+  deps: ReadonlyArray<unknown>,
 ): {
   scrollRef: RefObject<T>;
   isAtBottom: boolean;
@@ -26,7 +32,10 @@ export function useStickToBottom<T extends HTMLElement = HTMLDivElement>(
   useEffect(() => {
     return () => {
       if (activeElementRef.current && listenerRef.current) {
-        activeElementRef.current.removeEventListener('scroll', listenerRef.current);
+        activeElementRef.current.removeEventListener(
+          'scroll',
+          listenerRef.current,
+        );
         listenerRef.current = null;
         activeElementRef.current = null;
       }
@@ -46,7 +55,10 @@ export function useStickToBottom<T extends HTMLElement = HTMLDivElement>(
 
     // Detach listener from previously attached element if any
     if (activeElementRef.current && listenerRef.current) {
-      activeElementRef.current.removeEventListener('scroll', listenerRef.current);
+      activeElementRef.current.removeEventListener(
+        'scroll',
+        listenerRef.current,
+      );
       listenerRef.current = null;
     }
 

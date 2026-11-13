@@ -549,7 +549,9 @@ describe('AdminProductsPage', () => {
       const searchInput = screen.getByPlaceholderText(
         'Tìm kiếm theo tên sản phẩm, SKU...',
       );
-      fireEvent.change(searchInput, { target: { value: 'từ khóa không tồn tại' } });
+      fireEvent.change(searchInput, {
+        target: { value: 'từ khóa không tồn tại' },
+      });
 
       expect(
         screen.getByText('Không tìm thấy sản phẩm phù hợp'),
@@ -596,11 +598,16 @@ describe('AdminProductsPage', () => {
       const prod1Links = screen.getAllByRole('link', {
         name: 'Chai xịt khử mùi sả chanh',
       });
-      expect(prod1Links[0]).toHaveAttribute('href', '/admin/products/prod-1/edit');
+      expect(prod1Links[0]).toHaveAttribute(
+        'href',
+        '/admin/products/prod-1/edit',
+      );
       const img1 = screen.getAllByAltText('Chai xịt khử mùi sả chanh')[0];
       expect(img1).toHaveAttribute('src', 'https://example.com/img1.jpg');
       expect(screen.getAllByText('SKU: SKU-SC-100').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Hương sả tự nhiên').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Hương sả tự nhiên').length).toBeGreaterThan(
+        0,
+      );
       const expectedPrice = formatCurrency(150000).replace(/\s+/g, ' ');
       expect(
         screen.getAllByText((content) => {
@@ -637,7 +644,10 @@ describe('AdminProductsPage', () => {
       const prod2Links = screen.getAllByRole('link', {
         name: 'Chai xịt không mùi không hình',
       });
-      expect(prod2Links[0]).toHaveAttribute('href', '/admin/products/prod-2/edit');
+      expect(prod2Links[0]).toHaveAttribute(
+        'href',
+        '/admin/products/prod-2/edit',
+      );
 
       // Fallback package placeholder rendered instead of external placehold.co
       const noImagePlaceholders = screen.getAllByLabelText('Không có hình ảnh');
@@ -670,7 +680,9 @@ describe('AdminProductsPage', () => {
       expect(
         screen.getAllByText('Sản phẩm không có mảng variants').length,
       ).toBeGreaterThan(0);
-      expect(screen.getAllByText('Nước hoa phòng ngủ').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Nước hoa phòng ngủ').length).toBeGreaterThan(
+        0,
+      );
       expect(screen.getAllByText('5.0').length).toBeGreaterThan(0);
       expect(screen.getAllByText('(1)').length).toBeGreaterThan(0);
     });

@@ -18,7 +18,8 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
   const filteredItems = items.filter((item, index) => {
     if (index === 0) {
       const isHomeHref = item.href === '/';
-      const isHomeLabel = item.label?.trim().normalize('NFC').toLowerCase() === 'trang chủ';
+      const isHomeLabel =
+        item.label?.trim().normalize('NFC').toLowerCase() === 'trang chủ';
       if (isHomeHref || isHomeLabel) {
         return false;
       }
@@ -42,8 +43,14 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
         <Home className="h-4 w-4" />
       </Link>
       {filteredItems.map((item, index) => (
-        <div key={item.href ?? `${index}-${item.label}`} className="flex items-center gap-1 shrink-0">
-          <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0" aria-hidden="true" />
+        <div
+          key={item.href ?? `${index}-${item.label}`}
+          className="flex items-center gap-1 shrink-0"
+        >
+          <ChevronRight
+            className="h-4 w-4 text-muted-foreground/50 shrink-0"
+            aria-hidden="true"
+          />
           {item.href ? (
             <Link
               to={item.href}

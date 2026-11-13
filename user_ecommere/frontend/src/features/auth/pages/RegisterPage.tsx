@@ -2,7 +2,13 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { RegisterForm } from '../components/RegisterForm';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
-import { Gift, ShieldCheck, Truck, CheckCircle2, ArrowLeft } from 'lucide-react';
+import {
+  Gift,
+  ShieldCheck,
+  Truck,
+  CheckCircle2,
+  ArrowLeft,
+} from 'lucide-react';
 
 export function RegisterPage() {
   const { register, isRegisterLoading } = useAuth();
@@ -38,14 +44,18 @@ export function RegisterPage() {
             </h2>
 
             <p className="text-sm text-primary-foreground/80 leading-relaxed">
-              Trở thành thành viên để nhận ngay ưu đãi độc quyền, tích lũy điểm thưởng khi mua chai xịt đuổi chuột ARS, diệt gián kiến, tẩy rửa Magiclean và nước giặt xả Hygiene.
+              Trở thành thành viên để nhận ngay ưu đãi độc quyền, tích lũy điểm
+              thưởng khi mua chai xịt đuổi chuột ARS, diệt gián kiến, tẩy rửa
+              Magiclean và nước giặt xả Hygiene.
             </p>
 
             <div className="pt-4 grid grid-cols-2 gap-4 border-t border-primary-foreground/15 text-xs">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <ShieldCheck className="h-4 w-4 text-primary-foreground" />
-                  <p className="font-semibold text-primary-foreground">100% Nội Địa Thái</p>
+                  <p className="font-semibold text-primary-foreground">
+                    100% Nội Địa Thái
+                  </p>
                 </div>
                 <p className="text-primary-foreground/70">Bảo mật 100%</p>
               </div>
@@ -53,9 +63,13 @@ export function RegisterPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Truck className="h-4 w-4 text-primary-foreground" />
-                  <p className="font-semibold text-primary-foreground">Giao Hỏa Tốc COD</p>
+                  <p className="font-semibold text-primary-foreground">
+                    Giao Hỏa Tốc COD
+                  </p>
                 </div>
-                <p className="text-primary-foreground/70">Tích điểm không giới hạn</p>
+                <p className="text-primary-foreground/70">
+                  Tích điểm không giới hạn
+                </p>
               </div>
             </div>
           </div>
@@ -104,8 +118,12 @@ export function RegisterPage() {
                 <Gift className="h-4 w-4" />
               </div>
               <div className="text-xs">
-                <p className="font-semibold text-foreground">Tặng Voucher 20.000đ</p>
-                <p className="text-muted-foreground">Áp dụng cho đơn hàng đầu tiên của bạn</p>
+                <p className="font-semibold text-foreground">
+                  Tặng Voucher 20.000đ
+                </p>
+                <p className="text-muted-foreground">
+                  Áp dụng cho đơn hàng đầu tiên của bạn
+                </p>
               </div>
             </div>
 
@@ -116,7 +134,10 @@ export function RegisterPage() {
                   🎉 Bạn được giới thiệu bởi bạn bè
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Mã giới thiệu: <span className="font-mono font-semibold text-foreground">{referralCode}</span>
+                  Mã giới thiệu:{' '}
+                  <span className="font-mono font-semibold text-foreground">
+                    {referralCode}
+                  </span>
                 </p>
               </div>
             )}

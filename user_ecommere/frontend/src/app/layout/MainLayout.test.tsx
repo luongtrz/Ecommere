@@ -67,7 +67,13 @@ describe('MainLayout', () => {
     const { container } = renderMainLayout('/');
 
     const rootDiv = container.firstElementChild;
-    expect(rootDiv).toHaveClass('flex', 'min-h-screen', 'flex-col', 'pb-16', 'md:pb-0');
+    expect(rootDiv).toHaveClass(
+      'flex',
+      'min-h-screen',
+      'flex-col',
+      'pb-16',
+      'md:pb-0',
+    );
 
     expect(screen.getByTestId('mock-header')).toBeInTheDocument();
     expect(screen.getByTestId('mock-footer')).toBeInTheDocument();

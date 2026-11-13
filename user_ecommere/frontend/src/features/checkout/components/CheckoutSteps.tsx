@@ -11,9 +11,15 @@ const STEPS = [
   { id: 3, label: 'Xác nhận' },
 ];
 
-export function CheckoutSteps({ currentStep, onStepClick }: CheckoutStepsProps) {
+export function CheckoutSteps({
+  currentStep,
+  onStepClick,
+}: CheckoutStepsProps) {
   return (
-    <nav aria-label="Tiến trình thanh toán" className="w-full max-w-xl mx-auto px-2">
+    <nav
+      aria-label="Tiến trình thanh toán"
+      className="w-full max-w-xl mx-auto px-2"
+    >
       <ol className="flex items-center justify-between relative">
         {STEPS.map((step, index) => {
           const isCompleted = currentStep > step.id;

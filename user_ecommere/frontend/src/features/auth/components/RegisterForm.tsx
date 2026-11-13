@@ -4,7 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { User, Phone, Mail, Lock, Eye, EyeOff, Tag } from 'lucide-react';
 
 export interface RegisterFormProps {
@@ -13,7 +20,11 @@ export interface RegisterFormProps {
   defaultReferralCode?: string;
 }
 
-export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: RegisterFormProps) {
+export function RegisterForm({
+  onSubmit,
+  isLoading,
+  defaultReferralCode,
+}: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -89,7 +100,10 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           render={({ field }) => (
             <FormItem className="space-y-1.5">
               <FormLabel className="text-sm font-medium text-foreground">
-                Email <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
+                Email{' '}
+                <span className="font-normal text-muted-foreground">
+                  (không bắt buộc)
+                </span>
               </FormLabel>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
@@ -135,7 +149,11 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
                   className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                   aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
               <FormMessage className="text-sm text-destructive" />
@@ -167,9 +185,15 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  aria-label={
+                    showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                  }
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
               <FormMessage className="text-sm text-destructive" />
@@ -183,7 +207,10 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           render={({ field }) => (
             <FormItem className="space-y-1.5">
               <FormLabel className="text-sm font-medium text-foreground">
-                Mã giới thiệu <span className="font-normal text-muted-foreground">(nếu có)</span>
+                Mã giới thiệu{' '}
+                <span className="font-normal text-muted-foreground">
+                  (nếu có)
+                </span>
               </FormLabel>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">

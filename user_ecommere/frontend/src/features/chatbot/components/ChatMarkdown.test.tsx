@@ -23,11 +23,7 @@ describe('ChatMarkdown', () => {
     const root = container.firstElementChild;
 
     expect(root).toBeInTheDocument();
-    expect(root).toHaveClass(
-      'text-sm',
-      'break-words',
-      'space-y-2',
-    );
+    expect(root).toHaveClass('text-sm', 'break-words', 'space-y-2');
   });
 
   it('renders paragraphs with correct styling', () => {
@@ -86,13 +82,31 @@ describe('ChatMarkdown', () => {
     renderChatMarkdown(markdown);
 
     const h1 = screen.getByRole('heading', { level: 1, name: 'Tiêu đề 1' });
-    expect(h1).toHaveClass('text-lg', 'font-bold', 'text-foreground', 'mt-3', 'mb-1');
+    expect(h1).toHaveClass(
+      'text-lg',
+      'font-bold',
+      'text-foreground',
+      'mt-3',
+      'mb-1',
+    );
 
     const h2 = screen.getByRole('heading', { level: 2, name: 'Tiêu đề 2' });
-    expect(h2).toHaveClass('text-base', 'font-bold', 'text-foreground', 'mt-2.5', 'mb-1');
+    expect(h2).toHaveClass(
+      'text-base',
+      'font-bold',
+      'text-foreground',
+      'mt-2.5',
+      'mb-1',
+    );
 
     const h3 = screen.getByRole('heading', { level: 3, name: 'Tiêu đề 3' });
-    expect(h3).toHaveClass('text-sm', 'font-semibold', 'text-foreground', 'mt-2', 'mb-1');
+    expect(h3).toHaveClass(
+      'text-sm',
+      'font-semibold',
+      'text-foreground',
+      'mt-2',
+      'mb-1',
+    );
   });
 
   it('renders h1, h2, and h3 headings with size="base" typography classes', () => {
@@ -151,10 +165,7 @@ describe('ChatMarkdown', () => {
 
     const tdElements = container.querySelectorAll('td');
     expect(tdElements.length).toBeGreaterThanOrEqual(6);
-    expect(tdElements[0]).toHaveClass(
-      'px-2.5',
-      'py-1.5',
-    );
+    expect(tdElements[0]).toHaveClass('px-2.5', 'py-1.5');
     expect(tdElements[0]).toHaveTextContent('Áo sơ mi');
   });
 
@@ -212,7 +223,10 @@ describe('ChatMarkdown', () => {
   });
 
   it('renders img element when image url is on the origin allowlist', () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+    const origin =
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'http://localhost:3000';
     const markdown = `![Ảnh xịt phòng](${origin}/images/spray.png)`;
     const { container } = renderChatMarkdown(markdown);
 
@@ -220,7 +234,12 @@ describe('ChatMarkdown', () => {
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', `${origin}/images/spray.png`);
     expect(img).toHaveAttribute('alt', 'Ảnh xịt phòng');
-    expect(img).toHaveClass('rounded-xl', 'border', 'border-border', 'object-cover');
+    expect(img).toHaveClass(
+      'rounded-xl',
+      'border',
+      'border-border',
+      'object-cover',
+    );
   });
 
   describe('links (a component)', () => {

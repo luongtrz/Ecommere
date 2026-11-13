@@ -25,7 +25,12 @@ describe('PageSkeleton', () => {
 
     const grid = screen.getByTestId('page-skeleton-grid');
     expect(grid).toBeInTheDocument();
-    expect(grid).toHaveClass('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-4');
+    expect(grid).toHaveClass(
+      'grid',
+      'grid-cols-1',
+      'sm:grid-cols-2',
+      'lg:grid-cols-4',
+    );
 
     const cards = screen.getAllByTestId('page-skeleton-card');
     expect(cards).toHaveLength(4);
@@ -39,6 +44,10 @@ describe('PageSkeleton', () => {
     render(<PageSkeleton className="custom-skeleton-wrapper min-h-screen" />);
 
     const container = screen.getByRole('status');
-    expect(container).toHaveClass('custom-skeleton-wrapper', 'min-h-screen', 'container');
+    expect(container).toHaveClass(
+      'custom-skeleton-wrapper',
+      'min-h-screen',
+      'container',
+    );
   });
 });

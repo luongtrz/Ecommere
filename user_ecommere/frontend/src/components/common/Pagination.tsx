@@ -9,7 +9,12 @@ export interface PaginationProps {
   className?: string;
 }
 
-export function Pagination({ currentPage, totalPages, onPageChange, className }: PaginationProps) {
+export function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className,
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const showPages = 5;
@@ -27,7 +32,10 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
   }
 
   return (
-    <nav className={cn('flex items-center justify-center gap-2', className)} aria-label="Phân trang">
+    <nav
+      className={cn('flex items-center justify-center gap-2', className)}
+      aria-label="Phân trang"
+    >
       <Button
         variant="outline"
         size="icon"
@@ -56,7 +64,14 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
             >
               1
             </Button>
-            {startPage > 2 && <span className="px-1 text-xs text-muted-foreground select-none" aria-hidden="true">...</span>}
+            {startPage > 2 && (
+              <span
+                className="px-1 text-xs text-muted-foreground select-none"
+                aria-hidden="true"
+              >
+                ...
+              </span>
+            )}
           </>
         )}
 
@@ -75,7 +90,14 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
 
         {endPage < totalPages && (
           <>
-            {endPage < totalPages - 1 && <span className="px-1 text-xs text-muted-foreground select-none" aria-hidden="true">...</span>}
+            {endPage < totalPages - 1 && (
+              <span
+                className="px-1 text-xs text-muted-foreground select-none"
+                aria-hidden="true"
+              >
+                ...
+              </span>
+            )}
             <Button
               variant="outline"
               size="icon"

@@ -171,7 +171,9 @@ describe('AdminChatbotPage', () => {
   beforeEach(() => {
     localStorage.clear();
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
-    (Element.prototype.scrollTo as unknown as ReturnType<typeof vi.fn>).mockClear();
+    (
+      Element.prototype.scrollTo as unknown as ReturnType<typeof vi.fn>
+    ).mockClear();
 
     mockUser = {
       id: 'admin-1',
@@ -1108,7 +1110,9 @@ describe('AdminChatbotPage', () => {
       renderWithProviders(<AdminChatbotPage />);
 
       // The streaming indicator is rendered in the message list and in the composer status; either proves it shows.
-      expect(screen.getAllByText('Trợ lý đang phản hồi…')[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Trợ lý đang phản hồi…')[0],
+      ).toBeInTheDocument();
 
       const stopBtn = screen.getByRole('button', { name: /dừng/i });
       fireEvent.click(stopBtn);
@@ -1575,10 +1579,7 @@ describe('AdminChatbotPage', () => {
       const trashBtn = await screen.findByRole('button', {
         name: 'Xóa cuộc trò chuyện',
       });
-      expect(trashBtn).toHaveClass(
-        'opacity-0',
-        'group-hover:opacity-100',
-      );
+      expect(trashBtn).toHaveClass('opacity-0', 'group-hover:opacity-100');
     });
 
     it('renders selected thread timestamp with high-contrast text-teal-900 (A13-6)', async () => {
@@ -1666,9 +1667,7 @@ describe('AdminChatbotPage', () => {
         'Mở rộng danh sách cuộc trò chuyện',
       );
       expect(toggleBtn).toHaveAttribute('aria-expanded', 'false');
-      expect(
-        screen.queryByText('Hội thoại thanh bên'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Hội thoại thanh bên')).not.toBeInTheDocument();
 
       // Click again to expand
       fireEvent.click(toggleBtn);

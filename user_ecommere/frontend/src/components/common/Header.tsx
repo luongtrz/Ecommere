@@ -58,7 +58,10 @@ export function Header() {
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="flex h-full w-[86vw] max-w-sm flex-col overflow-y-auto border-r border-border bg-card p-6">
+                <SheetContent
+                  side="left"
+                  className="flex h-full w-[86vw] max-w-sm flex-col overflow-y-auto border-r border-border bg-card p-6"
+                >
                   <div className="mt-6 flex flex-1 flex-col gap-6">
                     <Link to="/" className="flex flex-col">
                       <span className="text-xl font-bold text-foreground">
@@ -160,7 +163,9 @@ export function Header() {
 
                     <div className="mt-auto border-t border-border pt-4 text-sm text-muted-foreground">
                       <p>Hàng chính hãng Thái Lan</p>
-                      <p className="mt-1">Giao nhanh nội thành • Đổi trả 7 ngày</p>
+                      <p className="mt-1">
+                        Giao nhanh nội thành • Đổi trả 7 ngày
+                      </p>
                     </div>
                   </div>
                 </SheetContent>
@@ -209,7 +214,10 @@ export function Header() {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex min-h-11 items-center gap-2 rounded-md px-2 hover:bg-muted">
+                    <Button
+                      variant="ghost"
+                      className="flex min-h-11 items-center gap-2 rounded-md px-2 hover:bg-muted"
+                    >
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-foreground">
                         <User className="h-4 w-4" />
                       </div>
@@ -217,18 +225,32 @@ export function Header() {
                         <p className="max-w-[140px] truncate text-sm font-medium text-foreground">
                           {user.name || 'Tài khoản'}
                         </p>
-                        <p className="max-w-[140px] truncate text-xs text-muted-foreground">{user.email}</p>
+                        <p className="max-w-[140px] truncate text-xs text-muted-foreground">
+                          {user.email}
+                        </p>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 rounded-md border border-border bg-popover p-1 shadow-md">
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 rounded-md border border-border bg-popover p-1 shadow-md"
+                  >
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium"
+                    >
                       <Link to="/account">Tài khoản</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium"
+                    >
                       <Link to="/orders">Đơn hàng</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium"
+                    >
                       <Link to="/referral">Mời bạn bè</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-border" />

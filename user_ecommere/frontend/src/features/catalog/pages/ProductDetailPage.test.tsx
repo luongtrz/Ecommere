@@ -687,13 +687,19 @@ describe('ProductDetailPage', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Shows clear out of stock signals
-    expect(screen.getByText('Hết hàng', { selector: 'span.text-destructive' })).toBeInTheDocument();
+    expect(
+      screen.getByText('Hết hàng', { selector: 'span.text-destructive' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('(Có sẵn 0 sản phẩm)')).toBeInTheDocument();
 
     // Quantity stepper buttons are disabled
     const quantitySection = screen.getByText('Số lượng mua:').closest('div');
-    const minusBtn = quantitySection?.querySelectorAll('button')[0] as HTMLButtonElement;
-    const plusBtn = quantitySection?.querySelectorAll('button')[1] as HTMLButtonElement;
+    const minusBtn = quantitySection?.querySelectorAll(
+      'button',
+    )[0] as HTMLButtonElement;
+    const plusBtn = quantitySection?.querySelectorAll(
+      'button',
+    )[1] as HTMLButtonElement;
     expect(minusBtn).toBeDisabled();
     expect(plusBtn).toBeDisabled();
   });
@@ -731,7 +737,9 @@ describe('ProductDetailPage', () => {
     renderComponent();
 
     // First in-stock variant (var-stock-2) should be selected by default
-    const inStockBtn = screen.getByRole('button', { name: /Bản Vừa Còn Hàng/i });
+    const inStockBtn = screen.getByRole('button', {
+      name: /Bản Vừa Còn Hàng/i,
+    });
     expect(inStockBtn).toHaveClass('border-primary');
 
     // The out-of-stock variant should be disabled

@@ -318,7 +318,8 @@ export function AdminProductsPage() {
               Quản lý sản phẩm
             </h1>
             <p className="text-sm text-slate-500">
-              Theo dõi danh mục, trạng thái tồn kho và thông tin giá bán sản phẩm
+              Theo dõi danh mục, trạng thái tồn kho và thông tin giá bán sản
+              phẩm
             </p>
           </div>
           <Button
@@ -552,7 +553,8 @@ export function AdminProductsPage() {
                   Không thể tải danh sách sản phẩm
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Đã có lỗi xảy ra trong quá trình tải dữ liệu. Vui lòng thử lại.
+                  Đã có lỗi xảy ra trong quá trình tải dữ liệu. Vui lòng thử
+                  lại.
                 </p>
               </div>
               <Button
@@ -744,9 +746,7 @@ export function AdminProductsPage() {
                                 title="Chỉnh sửa"
                                 aria-label="Chỉnh sửa sản phẩm"
                               >
-                                <Link
-                                  to={`/admin/products/${product.id}/edit`}
-                                >
+                                <Link to={`/admin/products/${product.id}/edit`}>
                                   <Pencil className="h-4 w-4" />
                                 </Link>
                               </Button>
@@ -946,8 +946,7 @@ export function AdminProductsPage() {
                                   handleDelete(product.id, product.name)
                                 }
                               >
-                                <Trash2 className="mr-2 h-4 w-4" /> Xóa sản
-                                phẩm
+                                <Trash2 className="mr-2 h-4 w-4" /> Xóa sản phẩm
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

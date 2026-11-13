@@ -746,10 +746,7 @@ export function AdminInventoryPage() {
                           : 30);
                     const percentage = Math.min(
                       100,
-                      Math.max(
-                        0,
-                        Math.round((item.stock / maxCapacity) * 100),
-                      ),
+                      Math.max(0, Math.round((item.stock / maxCapacity) * 100)),
                     );
 
                     return (

@@ -46,7 +46,11 @@ describe('Footer', () => {
 
     expect(screen.getByText('TS')).toBeInTheDocument();
     expect(
-      screen.getByText((_, element) => element?.tagName === 'SPAN' && element?.textContent?.replace(/\s+/g, ' ').trim() === 'Thai Spray'),
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === 'SPAN' &&
+          element?.textContent?.replace(/\s+/g, ' ').trim() === 'Thai Spray',
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText('Hàng Thái Chính Hãng')).toBeInTheDocument();
     expect(

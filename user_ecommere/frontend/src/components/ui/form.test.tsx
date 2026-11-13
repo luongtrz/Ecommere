@@ -228,7 +228,10 @@ describe('Form components and useFormField', () => {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-muted-foreground" data-testid="override-label">
+                <FormLabel
+                  className="text-muted-foreground"
+                  data-testid="override-label"
+                >
                   Số điện thoại
                 </FormLabel>
                 <FormControl>

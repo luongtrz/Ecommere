@@ -9,14 +9,22 @@ export function MobileNav() {
   const { totalItems, openCart } = useCart();
   const { user } = useAuth();
 
-  if (location.pathname === '/checkout' || location.pathname.startsWith('/checkout')) {
+  if (
+    location.pathname === '/checkout' ||
+    location.pathname.startsWith('/checkout')
+  ) {
     return null;
   }
 
   const navItems = [
     { label: 'Trang chủ', icon: Home, href: '/' },
     { label: 'Sản phẩm', icon: LayoutGrid, href: '/catalog' },
-    { label: 'Giỏ hàng', icon: ShoppingCart, action: openCart, badge: totalItems },
+    {
+      label: 'Giỏ hàng',
+      icon: ShoppingCart,
+      action: openCart,
+      badge: totalItems,
+    },
     { label: 'Tài khoản', icon: User, href: user ? '/account' : '/login' },
   ];
 

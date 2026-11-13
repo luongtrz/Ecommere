@@ -9,7 +9,9 @@ import type { ChatMessage } from '../types';
 
 // Mock SEO
 vi.mock('@/lib/seo', () => ({
-  SEO: ({ title }: { title: string }) => <div data-testid="seo-title">{title}</div>,
+  SEO: ({ title }: { title: string }) => (
+    <div data-testid="seo-title">{title}</div>
+  ),
 }));
 
 // Mock toast hook
@@ -27,7 +29,10 @@ vi.mock('@/hooks/useToast', () => ({
 // Mock navigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  const actual =
+    await vi.importActual<typeof import('react-router-dom')>(
+      'react-router-dom',
+    );
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -84,7 +89,7 @@ function renderPage() {
       <MemoryRouter>
         <ChatbotPage />
       </MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
 }
 
@@ -107,11 +112,16 @@ describe('ChatbotPage', () => {
     expect(backButton).toBeInTheDocument();
     expect(backButton).toHaveClass('min-h-11', 'min-w-11');
 
-    const heading = screen.getByRole('heading', { level: 1, name: 'Chuyên gia Mùi hương' });
+    const heading = screen.getByRole('heading', {
+      level: 1,
+      name: 'Chuyên gia Mùi hương',
+    });
     expect(heading).toBeInTheDocument();
     expect(heading).toHaveClass('font-sans', 'text-sm', 'font-semibold');
 
-    const newThreadButton = screen.getByRole('button', { name: 'Cuộc trò chuyện mới' });
+    const newThreadButton = screen.getByRole('button', {
+      name: 'Cuộc trò chuyện mới',
+    });
     expect(newThreadButton).toBeInTheDocument();
     expect(newThreadButton).toHaveClass('min-h-11', 'min-w-11');
   });
@@ -129,7 +139,9 @@ describe('ChatbotPage', () => {
   it('clicking "Cuộc trò chuyện mới" calls newThread', () => {
     renderPage();
 
-    const newThreadButton = screen.getByRole('button', { name: 'Cuộc trò chuyện mới' });
+    const newThreadButton = screen.getByRole('button', {
+      name: 'Cuộc trò chuyện mới',
+    });
     fireEvent.click(newThreadButton);
 
     expect(mockNewThread).toHaveBeenCalledTimes(1);
@@ -139,9 +151,14 @@ describe('ChatbotPage', () => {
     renderPage();
 
     expect(screen.getByText('Tôi có thể giúp gì cho bạn?')).toBeInTheDocument();
-    const suggestions = screen.getAllByRole('button').filter((b) =>
-      b.className.includes('min-h-11') && b !== screen.getByRole('button', { name: 'Quay lại' }) && b !== screen.getByRole('button', { name: 'Cuộc trò chuyện mới' })
-    );
+    const suggestions = screen
+      .getAllByRole('button')
+      .filter(
+        (b) =>
+          b.className.includes('min-h-11') &&
+          b !== screen.getByRole('button', { name: 'Quay lại' }) &&
+          b !== screen.getByRole('button', { name: 'Cuộc trò chuyện mới' }),
+      );
     expect(suggestions.length).toBeGreaterThanOrEqual(1);
 
     fireEvent.click(suggestions[0]);
@@ -169,14 +186,20 @@ describe('ChatbotPage', () => {
     renderPage();
 
     expect(screen.getByText('Tìm xịt phòng tinh dầu cam')).toBeInTheDocument();
-    expect(screen.getByText('Dưới đây là một số loại xịt phòng tinh dầu cam phù hợp.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Dưới đây là một số loại xịt phòng tinh dầu cam phù hợp.',
+      ),
+    ).toBeInTheDocument();
   });
 
   it('renders AI safety disclaimer at the bottom', () => {
     renderPage();
 
     expect(
-      screen.getByText('Trợ lý AI có thể nhầm lẫn. Vui lòng kiểm tra thông tin sản phẩm trước khi đặt hàng.')
+      screen.getByText(
+        'Trợ lý AI có thể nhầm lẫn. Vui lòng kiểm tra thông tin sản phẩm trước khi đặt hàng.',
+      ),
     ).toBeInTheDocument();
   });
 });

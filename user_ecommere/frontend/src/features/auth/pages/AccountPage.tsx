@@ -28,7 +28,7 @@ export function AccountPage() {
     return name
       .split(' ')
       .filter(Boolean)
-      .map(word => word.charAt(0))
+      .map((word) => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -46,7 +46,10 @@ export function AccountPage() {
       <SEO title="Tài khoản" />
       <div className="container py-8 md:py-12 max-w-5xl">
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted-foreground">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-4 text-sm text-muted-foreground"
+        >
           <Link to="/" className="hover:text-foreground transition-colors">
             Trang chủ
           </Link>
@@ -76,8 +79,13 @@ export function AccountPage() {
                 <h2 className="font-semibold text-base leading-snug text-foreground truncate">
                   {user.name}
                 </h2>
-                <Badge variant="secondary" className="rounded-sm text-xs mt-1 font-normal">
-                  {user.role === 'ADMIN' ? 'Quản trị viên' : 'Khách hàng thân thiết'}
+                <Badge
+                  variant="secondary"
+                  className="rounded-sm text-xs mt-1 font-normal"
+                >
+                  {user.role === 'ADMIN'
+                    ? 'Quản trị viên'
+                    : 'Khách hàng thân thiết'}
                 </Badge>
               </div>
             </div>
@@ -87,7 +95,10 @@ export function AccountPage() {
               <h3 className="text-sm font-semibold text-muted-foreground mb-3">
                 Danh mục
               </h3>
-              <nav aria-label="Menu tài khoản" className="flex flex-col space-y-2">
+              <nav
+                aria-label="Menu tài khoản"
+                className="flex flex-col space-y-2"
+              >
                 {navItems.map((item) => (
                   <button
                     key={item.label}
@@ -155,13 +166,17 @@ export function AccountPage() {
                   </dd>
                 </div>
                 <div className="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4 items-center">
-                  <dt className="text-sm text-muted-foreground">Số điện thoại</dt>
+                  <dt className="text-sm text-muted-foreground">
+                    Số điện thoại
+                  </dt>
                   <dd className="text-sm font-medium text-foreground sm:col-span-2">
                     {user.phone || 'Chưa cập nhật'}
                   </dd>
                 </div>
                 <div className="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4 items-center">
-                  <dt className="text-sm text-muted-foreground">Ngày tham gia</dt>
+                  <dt className="text-sm text-muted-foreground">
+                    Ngày tham gia
+                  </dt>
                   <dd className="text-sm font-medium text-foreground sm:col-span-2">
                     {user.createdAt ? formatDate(user.createdAt) : 'Không rõ'}
                   </dd>
@@ -183,12 +198,20 @@ export function AccountPage() {
               </h2>
               <div className="grid grid-cols-2 divide-x divide-border border border-border rounded-lg">
                 <div className="p-4 text-center">
-                  <div className="text-2xl font-semibold text-foreground tabular">0</div>
-                  <div className="text-xs text-muted-foreground mt-1">Đơn hàng</div>
+                  <div className="text-2xl font-semibold text-foreground tabular">
+                    0
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Đơn hàng
+                  </div>
                 </div>
                 <div className="p-4 text-center">
-                  <div className="text-2xl font-semibold text-foreground tabular">0</div>
-                  <div className="text-xs text-muted-foreground mt-1">Đánh giá</div>
+                  <div className="text-2xl font-semibold text-foreground tabular">
+                    0
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Đánh giá
+                  </div>
                 </div>
               </div>
             </div>

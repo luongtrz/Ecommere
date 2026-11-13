@@ -360,7 +360,8 @@ export function AdminProductFormPage() {
             Không tìm thấy sản phẩm
           </h1>
           <p className="text-sm text-slate-500 mb-6">
-            Sản phẩm có thể đã bị xóa hoặc đường dẫn không đúng. Vui lòng kiểm tra lại liên kết hoặc quay lại danh sách sản phẩm.
+            Sản phẩm có thể đã bị xóa hoặc đường dẫn không đúng. Vui lòng kiểm
+            tra lại liên kết hoặc quay lại danh sách sản phẩm.
           </p>
           <Button
             asChild
@@ -374,10 +375,7 @@ export function AdminProductFormPage() {
   }
 
   const totalStock = isEditMode
-    ? (product?.variants || []).reduce(
-        (sum, v) => sum + (v.stock || 0),
-        0,
-      )
+    ? (product?.variants || []).reduce((sum, v) => sum + (v.stock || 0), 0)
     : (watch('variants') || []).reduce(
         (sum, v) => sum + (Number(v?.stock) || 0),
         0,
@@ -519,7 +517,8 @@ export function AdminProductFormPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs font-semibold text-slate-700">
-                            Tên sản phẩm <span className="text-rose-600">*</span>
+                            Tên sản phẩm{' '}
+                            <span className="text-rose-600">*</span>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -651,7 +650,8 @@ export function AdminProductFormPage() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {product?.variants && product.variants.length > 0 ? (
+                            {product?.variants &&
+                            product.variants.length > 0 ? (
                               product.variants.map((v, idx) => (
                                 <TableRow key={v.id || idx}>
                                   <TableCell className="font-semibold text-slate-900 text-xs whitespace-nowrap">
@@ -751,7 +751,8 @@ export function AdminProductFormPage() {
                                 htmlFor={`variants.${index}.scent`}
                                 className="text-xs font-semibold text-slate-700"
                               >
-                                Mùi hương <span className="text-rose-600">*</span>
+                                Mùi hương{' '}
+                                <span className="text-rose-600">*</span>
                               </Label>
                               <Input
                                 id={`variants.${index}.scent`}
@@ -771,7 +772,8 @@ export function AdminProductFormPage() {
                                 htmlFor={`variants.${index}.volumeMl`}
                                 className="text-xs font-semibold text-slate-700"
                               >
-                                Dung tích (ml) <span className="text-rose-600">*</span>
+                                Dung tích (ml){' '}
+                                <span className="text-rose-600">*</span>
                               </Label>
                               <div className="relative">
                                 <Input
@@ -835,7 +837,8 @@ export function AdminProductFormPage() {
                                 htmlFor={`variants.${index}.price`}
                                 className="text-xs font-semibold text-slate-700"
                               >
-                                Giá niêm yết <span className="text-rose-600">*</span>
+                                Giá niêm yết{' '}
+                                <span className="text-rose-600">*</span>
                               </Label>
                               <div className="relative">
                                 <Input
@@ -1021,109 +1024,112 @@ export function AdminProductFormPage() {
                                   </div>
                                 </div>
                                 <div className="space-y-1 max-h-[220px] overflow-y-auto">
-                                  {categorySearch.trim() ? (
-                                    categories
-                                      .filter((cat) =>
-                                        cat.displayName
-                                          .toLowerCase()
-                                          .includes(
-                                            categorySearch
-                                              .toLowerCase()
-                                              .trim(),
-                                          ),
-                                      )
-                                      .map((cat) => (
-                                        <DropdownMenuItem
-                                          key={cat.id}
-                                          onClick={() => {
-                                            setValue('categoryId', cat.id, {
-                                              shouldValidate: true,
-                                              shouldDirty: true,
-                                            });
-                                          }}
-                                          className="cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
-                                        >
-                                          <span
-                                            className={
-                                              watch('categoryId') === cat.id
-                                                ? 'font-bold text-teal-600'
-                                                : ''
-                                            }
+                                  {categorySearch.trim()
+                                    ? categories
+                                        .filter((cat) =>
+                                          cat.displayName
+                                            .toLowerCase()
+                                            .includes(
+                                              categorySearch
+                                                .toLowerCase()
+                                                .trim(),
+                                            ),
+                                        )
+                                        .map((cat) => (
+                                          <DropdownMenuItem
+                                            key={cat.id}
+                                            onClick={() => {
+                                              setValue('categoryId', cat.id, {
+                                                shouldValidate: true,
+                                                shouldDirty: true,
+                                              });
+                                            }}
+                                            className="cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
                                           >
-                                            {cat.displayName}
-                                          </span>
-                                        </DropdownMenuItem>
-                                      ))
-                                  ) : (
-                                    categoryTree.map((parent) => {
-                                      const hasChildren =
-                                        parent.children &&
-                                        parent.children.length > 0;
-                                      if (hasChildren) {
-                                        return (
-                                          <div
-                                            key={parent.id}
-                                            className="space-y-0.5"
-                                          >
-                                            <div className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 select-none">
-                                              {parent.name}
-                                            </div>
-                                            {parent.children.map(
-                                              (child: any) => (
-                                                <DropdownMenuItem
-                                                  key={child.id}
-                                                  onClick={() => {
-                                                    setValue(
-                                                      'categoryId',
-                                                      child.id,
-                                                      {
-                                                        shouldValidate: true,
-                                                        shouldDirty: true,
-                                                      },
-                                                    );
-                                                  }}
-                                                  className="cursor-pointer rounded-lg px-2.5 py-2 pl-4 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
-                                                >
-                                                  <span
-                                                    className={
-                                                      watch('categoryId') ===
-                                                      child.id
-                                                        ? 'font-bold text-teal-600'
-                                                        : ''
-                                                    }
+                                            <span
+                                              className={
+                                                watch('categoryId') === cat.id
+                                                  ? 'font-bold text-teal-600'
+                                                  : ''
+                                              }
+                                            >
+                                              {cat.displayName}
+                                            </span>
+                                          </DropdownMenuItem>
+                                        ))
+                                    : categoryTree.map((parent) => {
+                                        const hasChildren =
+                                          parent.children &&
+                                          parent.children.length > 0;
+                                        if (hasChildren) {
+                                          return (
+                                            <div
+                                              key={parent.id}
+                                              className="space-y-0.5"
+                                            >
+                                              <div className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 select-none">
+                                                {parent.name}
+                                              </div>
+                                              {parent.children.map(
+                                                (child: any) => (
+                                                  <DropdownMenuItem
+                                                    key={child.id}
+                                                    onClick={() => {
+                                                      setValue(
+                                                        'categoryId',
+                                                        child.id,
+                                                        {
+                                                          shouldValidate: true,
+                                                          shouldDirty: true,
+                                                        },
+                                                      );
+                                                    }}
+                                                    className="cursor-pointer rounded-lg px-2.5 py-2 pl-4 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
                                                   >
-                                                    {child.name}
-                                                  </span>
-                                                </DropdownMenuItem>
-                                              ),
-                                            )}
-                                          </div>
-                                        );
-                                      }
-                                      return (
-                                        <DropdownMenuItem
-                                          key={parent.id}
-                                          onClick={() => {
-                                            setValue('categoryId', parent.id, {
-                                              shouldValidate: true,
-                                              shouldDirty: true,
-                                            });
-                                          }}
-                                          className="cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
-                                        >
-                                          <span
-                                            className={
-                                              watch('categoryId') === parent.id
-                                                ? 'font-bold text-teal-600'
-                                                : ''
-                                            }
+                                                    <span
+                                                      className={
+                                                        watch('categoryId') ===
+                                                        child.id
+                                                          ? 'font-bold text-teal-600'
+                                                          : ''
+                                                      }
+                                                    >
+                                                      {child.name}
+                                                    </span>
+                                                  </DropdownMenuItem>
+                                                ),
+                                              )}
+                                            </div>
+                                          );
+                                        }
+                                        return (
+                                          <DropdownMenuItem
+                                            key={parent.id}
+                                            onClick={() => {
+                                              setValue(
+                                                'categoryId',
+                                                parent.id,
+                                                {
+                                                  shouldValidate: true,
+                                                  shouldDirty: true,
+                                                },
+                                              );
+                                            }}
+                                            className="cursor-pointer rounded-lg px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 focus:bg-teal-50 focus:text-teal-700 transition-colors"
                                           >
-                                            {parent.name}
-                                          </span>
-                                        </DropdownMenuItem>
-                                      );
-                                    })
-                                  )}
+                                            <span
+                                              className={
+                                                watch('categoryId') ===
+                                                parent.id
+                                                  ? 'font-bold text-teal-600'
+                                                  : ''
+                                              }
+                                            >
+                                              {parent.name}
+                                            </span>
+                                          </DropdownMenuItem>
+                                        );
+                                      })}
                                 </div>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -1171,13 +1177,15 @@ export function AdminProductFormPage() {
                             </span>
                           </div>
                           <p className="text-xs text-slate-500 mt-1">
-                            Giá tham chiếu hiển thị trên danh mục trước khi khách chọn biến thể
+                            Giá tham chiếu hiển thị trên danh mục trước khi
+                            khách chọn biến thể
                           </p>
-                          {typeof field.value === 'number' && field.value > 0 && (
-                            <p className="text-xs text-teal-700 font-medium">
-                              Xem trước: {formatCurrency(field.value)}
-                            </p>
-                          )}
+                          {typeof field.value === 'number' &&
+                            field.value > 0 && (
+                              <p className="text-xs text-teal-700 font-medium">
+                                Xem trước: {formatCurrency(field.value)}
+                              </p>
+                            )}
                           <FormMessage className="text-xs font-medium text-rose-600" />
                         </FormItem>
                       )}
@@ -1203,7 +1211,8 @@ export function AdminProductFormPage() {
                           </span>
                         </div>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          Sản phẩm tắt sẽ không xuất hiện trong cửa hàng trực tuyến.
+                          Sản phẩm tắt sẽ không xuất hiện trong cửa hàng trực
+                          tuyến.
                         </p>
                       </div>
                       <Switch
@@ -1271,7 +1280,8 @@ export function AdminProductFormPage() {
           <DialogHeader>
             <DialogTitle>Xác nhận hủy thay đổi</DialogTitle>
             <DialogDescription>
-              Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi? Mọi thông tin vừa nhập sẽ bị mất.
+              Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi? Mọi thông tin
+              vừa nhập sẽ bị mất.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-row justify-end gap-2 pt-4">
@@ -1306,7 +1316,8 @@ export function AdminProductFormPage() {
             <DialogTitle>Xóa biến thể</DialogTitle>
             <DialogDescription>
               Bạn có chắc muốn xóa biến thể{' '}
-              {variantToDelete !== null ? variantToDelete + 1 : ''}? Mọi thông tin đã nhập sẽ bị mất.
+              {variantToDelete !== null ? variantToDelete + 1 : ''}? Mọi thông
+              tin đã nhập sẽ bị mất.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-row justify-end gap-2 pt-4">
@@ -1342,7 +1353,8 @@ export function AdminProductFormPage() {
           <DialogHeader>
             <DialogTitle>Xóa sản phẩm</DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn xóa sản phẩm &quot;{product?.name}&quot;? Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa sản phẩm &quot;{product?.name}&quot;?
+              Hành động này không thể hoàn tác.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-row justify-end gap-2 pt-4">

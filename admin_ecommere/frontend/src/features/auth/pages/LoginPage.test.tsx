@@ -141,9 +141,7 @@ describe('LoginPage', () => {
     expect(
       screen.getByText('Cổng Đăng Nhập Quản Trị Viên'),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText(/Role: ADMIN/i),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Role: ADMIN/i)).not.toBeInTheDocument();
 
     expect(
       screen.getByRole('heading', { level: 2, name: 'Đăng Nhập Quản Trị' }),

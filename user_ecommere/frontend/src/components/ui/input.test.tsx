@@ -81,12 +81,7 @@ describe('Input', () => {
     );
     const input = screen.getByTestId('custom-input');
 
-    expect(input).toHaveClass(
-      'custom-input-class',
-      'bg-muted',
-      'flex',
-      'h-11',
-    );
+    expect(input).toHaveClass('custom-input-class', 'bg-muted', 'flex', 'h-11');
   });
 
   it('renders aria-invalid error styling when invalid', () => {

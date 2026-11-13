@@ -187,12 +187,7 @@ describe('ScrollBar', () => {
     );
 
     const bar = screen.getByTestId('scrollbar-custom');
-    expect(bar).toHaveClass(
-      'custom-bar-class',
-      'bg-muted',
-      'h-2',
-      'flex-col',
-    );
+    expect(bar).toHaveClass('custom-bar-class', 'bg-muted', 'h-2', 'flex-col');
   });
 
   it('forwards ref to the scrollbar element', () => {

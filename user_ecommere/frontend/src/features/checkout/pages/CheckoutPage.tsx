@@ -45,7 +45,9 @@ export function CheckoutPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const checkoutKeyRef = useRef<{ key: string; fingerprint: string } | null>(null);
+  const checkoutKeyRef = useRef<{ key: string; fingerprint: string } | null>(
+    null,
+  );
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,14 +56,20 @@ export function CheckoutPage() {
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
 
   // Default selections
-  const [shippingMethod, setShippingMethod] = useState<string>(SHIPPING_METHODS[0].id);
-  const [paymentMethod, setPaymentMethod] = useState<string>(PAYMENT_METHODS[0].id);
+  const [shippingMethod, setShippingMethod] = useState<string>(
+    SHIPPING_METHODS[0].id,
+  );
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    PAYMENT_METHODS[0].id,
+  );
 
   // Mobile collapsed summary
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
 
   // Server-confirmed preview state
-  const [serverShippingFee, setServerShippingFee] = useState<number | null>(null);
+  const [serverShippingFee, setServerShippingFee] = useState<number | null>(
+    null,
+  );
   const [serverTotal, setServerTotal] = useState<number | null>(null);
   const [serverDiscount, setServerDiscount] = useState<number>(0);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
@@ -71,13 +79,18 @@ export function CheckoutPage() {
   // Auto-select default address
   useEffect(() => {
     if (addresses && addresses.length > 0 && !selectedAddressId) {
-      const defaultAddress = addresses.find((addr) => addr.isDefault) || addresses[0];
+      const defaultAddress =
+        addresses.find((addr) => addr.isDefault) || addresses[0];
       setSelectedAddressId(defaultAddress.id);
     }
   }, [addresses, selectedAddressId]);
 
-  const selectedAddress = addresses?.find((addr) => addr.id === selectedAddressId);
-  const selectedShipping = SHIPPING_METHODS.find((m) => m.id === shippingMethod);
+  const selectedAddress = addresses?.find(
+    (addr) => addr.id === selectedAddressId,
+  );
+  const selectedShipping = SHIPPING_METHODS.find(
+    (m) => m.id === shippingMethod,
+  );
   const shippingFee = serverShippingFee;
   const finalTotal = serverTotal;
 
@@ -120,14 +133,16 @@ export function CheckoutPage() {
         if (isCancelled) return;
 
         const resData = response.data?.data ?? response.data;
-        const fee = typeof resData?.shippingFee === 'number' ? resData.shippingFee : 0;
-        const discount = typeof resData?.discount === 'number' ? resData.discount : 0;
+        const fee =
+          typeof resData?.shippingFee === 'number' ? resData.shippingFee : 0;
+        const discount =
+          typeof resData?.discount === 'number' ? resData.discount : 0;
         const total =
           typeof resData?.total === 'number'
             ? resData.total
             : typeof resData?.subtotal === 'number'
-            ? resData.subtotal - discount + fee
-            : totalPrice + fee;
+              ? resData.subtotal - discount + fee
+              : totalPrice + fee;
 
         setServerShippingFee(fee);
         setServerDiscount(discount);
@@ -233,7 +248,10 @@ export function CheckoutPage() {
     });
 
     let key: string;
-    if (!checkoutKeyRef.current || checkoutKeyRef.current.fingerprint !== fingerprint) {
+    if (
+      !checkoutKeyRef.current ||
+      checkoutKeyRef.current.fingerprint !== fingerprint
+    ) {
       key = generateCheckoutKey();
       checkoutKeyRef.current = { key, fingerprint };
     } else {
@@ -401,7 +419,8 @@ export function CheckoutPage() {
                         </div>
                         <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                           <span>
-                            Số lượng: <span className="tabular">{item.quantity}</span>
+                            Số lượng:{' '}
+                            <span className="tabular">{item.quantity}</span>
                           </span>
                           <span className="font-medium text-foreground tabular">
                             {formatCurrency(item.price * item.quantity)}
@@ -502,7 +521,10 @@ export function CheckoutPage() {
                         <p className="text-sm text-muted-foreground mb-4">
                           Bạn chưa có địa chỉ nào
                         </p>
-                        <Button onClick={() => setIsAddressDialogOpen(true)} className="min-h-11 px-5">
+                        <Button
+                          onClick={() => setIsAddressDialogOpen(true)}
+                          className="min-h-11 px-5"
+                        >
                           Thêm địa chỉ ngay
                         </Button>
                       </div>
@@ -635,7 +657,10 @@ export function CheckoutPage() {
                                   Đã chọn
                                 </div>
                               ) : (
-                                <div className="text-xs invisible mt-0.5" aria-hidden="true">
+                                <div
+                                  className="text-xs invisible mt-0.5"
+                                  aria-hidden="true"
+                                >
                                   &nbsp;
                                 </div>
                               )}
@@ -675,7 +700,10 @@ export function CheckoutPage() {
                             tabIndex={!isCOD ? -1 : undefined}
                             aria-disabled={!isCOD}
                             onKeyDown={(e) => {
-                              if (isCOD && (e.key === ' ' || e.key === 'Enter')) {
+                              if (
+                                isCOD &&
+                                (e.key === ' ' || e.key === 'Enter')
+                              ) {
                                 e.preventDefault();
                                 setPaymentMethod(method.id);
                               }
@@ -686,8 +714,8 @@ export function CheckoutPage() {
                                 isSelected
                                   ? 'border-primary bg-secondary cursor-pointer focus-within:ring-2 focus-within:ring-ring focus:outline-none'
                                   : isCOD
-                                  ? 'border-border hover:border-foreground/30 bg-card cursor-pointer focus-within:ring-2 focus-within:ring-ring focus:outline-none'
-                                  : 'border-border/60 bg-muted/40 opacity-60 cursor-not-allowed'
+                                    ? 'border-border hover:border-foreground/30 bg-card cursor-pointer focus-within:ring-2 focus-within:ring-ring focus:outline-none'
+                                    : 'border-border/60 bg-muted/40 opacity-60 cursor-not-allowed'
                               }
                             `}
                           >
@@ -738,7 +766,8 @@ export function CheckoutPage() {
                       Sẵn sàng đặt hàng!
                     </h2>
                     <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                      Vui lòng kiểm tra lại thông tin đơn hàng lần cuối trước khi xác nhận.
+                      Vui lòng kiểm tra lại thông tin đơn hàng lần cuối trước
+                      khi xác nhận.
                     </p>
                   </div>
 
@@ -770,7 +799,8 @@ export function CheckoutPage() {
                         </div>
                         <div className="text-sm text-foreground/80 leading-relaxed">
                           {selectedAddress?.line1}, {selectedAddress?.ward},{' '}
-                          {selectedAddress?.district}, {selectedAddress?.province}
+                          {selectedAddress?.district},{' '}
+                          {selectedAddress?.province}
                         </div>
                       </div>
                     </section>
@@ -816,7 +846,13 @@ export function CheckoutPage() {
                             ) : (
                               <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
                             )}
-                            <span>{PAYMENT_METHODS.find((p) => p.id === paymentMethod)?.name}</span>
+                            <span>
+                              {
+                                PAYMENT_METHODS.find(
+                                  (p) => p.id === paymentMethod,
+                                )?.name
+                              }
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -860,8 +896,8 @@ export function CheckoutPage() {
                       {isSubmitting
                         ? 'Đang xử lý...'
                         : isPreviewLoading
-                        ? 'Đang tính phí...'
-                        : 'Xác nhận đặt hàng'}
+                          ? 'Đang tính phí...'
+                          : 'Xác nhận đặt hàng'}
                     </span>
                   )}
                 </Button>
@@ -903,7 +939,8 @@ export function CheckoutPage() {
                         </div>
                         <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                           <span>
-                            Số lượng: <span className="tabular">{item.quantity}</span>
+                            Số lượng:{' '}
+                            <span className="tabular">{item.quantity}</span>
                           </span>
                           <span className="font-medium text-foreground tabular">
                             {formatCurrency(item.price * item.quantity)}
@@ -992,8 +1029,8 @@ export function CheckoutPage() {
                       {isSubmitting
                         ? 'Đang xử lý...'
                         : isPreviewLoading
-                        ? 'Đang tính phí...'
-                        : 'Xác nhận đặt hàng'}
+                          ? 'Đang tính phí...'
+                          : 'Xác nhận đặt hàng'}
                     </span>
                   )}
                 </Button>
@@ -1006,7 +1043,9 @@ export function CheckoutPage() {
         <div className="lg:hidden fixed bottom-0 inset-x-0 bg-card border-t border-border p-4 z-40 shadow-lg pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between gap-3 max-w-xl mx-auto">
             <div className="flex flex-col min-w-0">
-              <span className="text-xs text-muted-foreground">Tổng thanh toán</span>
+              <span className="text-xs text-muted-foreground">
+                Tổng thanh toán
+              </span>
               <span className="text-base sm:text-lg font-bold tabular text-foreground whitespace-nowrap">
                 {isPreviewLoading ? (
                   <span className="inline-flex items-center gap-1 text-sm font-normal text-muted-foreground">
@@ -1056,8 +1095,8 @@ export function CheckoutPage() {
                     {isSubmitting
                       ? 'Đang xử lý...'
                       : isPreviewLoading
-                      ? 'Đang tính phí...'
-                      : 'Xác nhận đặt hàng'}
+                        ? 'Đang tính phí...'
+                        : 'Xác nhận đặt hàng'}
                   </span>
                 )}
               </Button>

@@ -9,14 +9,34 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { Breadcrumb } from '@/components/common/Breadcrumb';
 import { Pagination } from '@/components/common/Pagination';
 import { FilterSidebar } from '../components/FilterSidebar';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, SlidersHorizontal, Package, Grid3X3, List, ShoppingBag, X } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Search,
+  SlidersHorizontal,
+  Package,
+  Grid3X3,
+  List,
+  ShoppingBag,
+  X,
+} from 'lucide-react';
 import { PRODUCT_SORT_OPTIONS } from '@/lib/constants';
 import { formatCurrency } from '@/lib/formatters';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -26,12 +46,19 @@ export function SearchPage() {
   const query = searchParams.get('q') || '';
   const sortBy = searchParams.get('sort') || 'newest';
   const viewMode = searchParams.get('view') || 'grid';
-  const category = searchParams.get('category') || searchParams.get('categorySlug') || undefined;
+  const category =
+    searchParams.get('category') ||
+    searchParams.get('categorySlug') ||
+    undefined;
   const pageParam = parseInt(searchParams.get('page') || '1', 10);
   const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
-  const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
-  const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
+  const minPrice = searchParams.get('minPrice')
+    ? Number(searchParams.get('minPrice'))
+    : undefined;
+  const maxPrice = searchParams.get('maxPrice')
+    ? Number(searchParams.get('maxPrice'))
+    : undefined;
   const scent = searchParams.get('scent') || undefined;
   const volumeMl = searchParams.get('volumeMl') || undefined;
   const brand = searchParams.get('brand') || undefined;
@@ -55,7 +82,7 @@ export function SearchPage() {
   const { data, isLoading, isPlaceholderData } = useProductSearch(
     query,
     searchFilters,
-    page
+    page,
   );
   const { addItem } = useCart();
 
@@ -85,8 +112,8 @@ export function SearchPage() {
     allProducts.length > 0
       ? allProducts
       : page === 1 && data && !isPlaceholderData
-      ? data.products
-      : (data?.products || []);
+        ? data.products
+        : data?.products || [];
 
   const handlePageChange = (newPage: number) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -108,35 +135,41 @@ export function SearchPage() {
     setSearchParams(nextParams);
   };
 
-  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
-    const nextParams = new URLSearchParams(searchParams);
-    if (!('page' in updates)) {
-      nextParams.set('page', '1');
-    }
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === undefined || value === '') {
-        nextParams.delete(key);
-      } else {
-        nextParams.set(key, value);
+  const updateParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      const nextParams = new URLSearchParams(searchParams);
+      if (!('page' in updates)) {
+        nextParams.set('page', '1');
       }
-    });
-    setSearchParams(nextParams);
-  }, [searchParams, setSearchParams]);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === undefined || value === '') {
+          nextParams.delete(key);
+        } else {
+          nextParams.set(key, value);
+        }
+      });
+      setSearchParams(nextParams);
+    },
+    [searchParams, setSearchParams],
+  );
 
-  const handleFilterChange = useCallback((filters: Record<string, string | undefined>) => {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set('page', '1');
-    Object.entries(filters).forEach(([key, value]) => {
-      const paramKey = key === 'categorySlug' ? 'category' : key;
-      if (value === undefined || value === '') {
-        nextParams.delete(paramKey);
-        if (key === 'categorySlug') nextParams.delete('categorySlug');
-      } else {
-        nextParams.set(paramKey, value);
-      }
-    });
-    setSearchParams(nextParams);
-  }, [searchParams, setSearchParams]);
+  const handleFilterChange = useCallback(
+    (filters: Record<string, string | undefined>) => {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.set('page', '1');
+      Object.entries(filters).forEach(([key, value]) => {
+        const paramKey = key === 'categorySlug' ? 'category' : key;
+        if (value === undefined || value === '') {
+          nextParams.delete(paramKey);
+          if (key === 'categorySlug') nextParams.delete('categorySlug');
+        } else {
+          nextParams.set(paramKey, value);
+        }
+      });
+      setSearchParams(nextParams);
+    },
+    [searchParams, setSearchParams],
+  );
 
   const handleFilterClick = () => {
     setShowFilters((prev) => !prev);
@@ -177,7 +210,8 @@ export function SearchPage() {
 
   // Active filter chips (matching CategoryPage / CatalogPage pattern)
   const activeChips = useMemo(() => {
-    const chips: Array<{ id: string; label: string; onRemove: () => void }> = [];
+    const chips: Array<{ id: string; label: string; onRemove: () => void }> =
+      [];
 
     if (category) {
       chips.push({
@@ -199,51 +233,91 @@ export function SearchPage() {
       chips.push({
         id: 'price',
         label: priceLabel,
-        onRemove: () => handleFilterChange({ minPrice: undefined, maxPrice: undefined }),
+        onRemove: () =>
+          handleFilterChange({ minPrice: undefined, maxPrice: undefined }),
       });
     }
 
     if (scent) {
-      scent.split(',').map((s) => s.trim()).filter(Boolean).forEach((s) => {
-        chips.push({
-          id: `scent-${s}`,
-          label: s,
-          onRemove: () => {
-            const next = scent.split(',').map((x) => x.trim()).filter((x) => x && x !== s);
-            updateParams({ scent: next.length > 0 ? next.join(',') : undefined, page: '1' });
-          },
+      scent
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .forEach((s) => {
+          chips.push({
+            id: `scent-${s}`,
+            label: s,
+            onRemove: () => {
+              const next = scent
+                .split(',')
+                .map((x) => x.trim())
+                .filter((x) => x && x !== s);
+              updateParams({
+                scent: next.length > 0 ? next.join(',') : undefined,
+                page: '1',
+              });
+            },
+          });
         });
-      });
     }
 
     if (volumeMl) {
-      volumeMl.split(',').map((v) => v.trim()).filter(Boolean).forEach((v) => {
-        chips.push({
-          id: `volume-${v}`,
-          label: `${v}ml`,
-          onRemove: () => {
-            const next = volumeMl.split(',').map((x) => x.trim()).filter((x) => x && x !== v);
-            updateParams({ volumeMl: next.length > 0 ? next.join(',') : undefined, page: '1' });
-          },
+      volumeMl
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean)
+        .forEach((v) => {
+          chips.push({
+            id: `volume-${v}`,
+            label: `${v}ml`,
+            onRemove: () => {
+              const next = volumeMl
+                .split(',')
+                .map((x) => x.trim())
+                .filter((x) => x && x !== v);
+              updateParams({
+                volumeMl: next.length > 0 ? next.join(',') : undefined,
+                page: '1',
+              });
+            },
+          });
         });
-      });
     }
 
     if (brand) {
-      brand.split(',').map((b) => b.trim()).filter(Boolean).forEach((b) => {
-        chips.push({
-          id: `brand-${b}`,
-          label: b,
-          onRemove: () => {
-            const next = brand.split(',').map((x) => x.trim()).filter((x) => x && x !== b);
-            updateParams({ brand: next.length > 0 ? next.join(',') : undefined, page: '1' });
-          },
+      brand
+        .split(',')
+        .map((b) => b.trim())
+        .filter(Boolean)
+        .forEach((b) => {
+          chips.push({
+            id: `brand-${b}`,
+            label: b,
+            onRemove: () => {
+              const next = brand
+                .split(',')
+                .map((x) => x.trim())
+                .filter((x) => x && x !== b);
+              updateParams({
+                brand: next.length > 0 ? next.join(',') : undefined,
+                page: '1',
+              });
+            },
+          });
         });
-      });
     }
 
     return chips;
-  }, [category, minPrice, maxPrice, scent, volumeMl, brand, handleFilterChange, updateParams]);
+  }, [
+    category,
+    minPrice,
+    maxPrice,
+    scent,
+    volumeMl,
+    brand,
+    handleFilterChange,
+    updateParams,
+  ]);
 
   const isInitialLoading =
     (isLoading || isPlaceholderData) && productsToShow.length === 0 && !!query;
@@ -327,13 +401,16 @@ export function SearchPage() {
                             <span>Bộ lọc</span>
                           </Button>
                         </SheetTrigger>
-                        <SheetContent side="left" className="w-80 overflow-y-auto bg-card border-r border-border p-6">
+                        <SheetContent
+                          side="left"
+                          className="w-80 overflow-y-auto bg-card border-r border-border p-6"
+                        >
                           <SheetHeader className="mb-4">
-                            <SheetTitle className="text-foreground text-xl sm:text-2xl font-semibold leading-snug">Bộ lọc</SheetTitle>
+                            <SheetTitle className="text-foreground text-xl sm:text-2xl font-semibold leading-snug">
+                              Bộ lọc
+                            </SheetTitle>
                           </SheetHeader>
-                          <div>
-                            {filterContent}
-                          </div>
+                          <div>{filterContent}</div>
                         </SheetContent>
                       </Sheet>
                     </div>
@@ -357,7 +434,11 @@ export function SearchPage() {
                         </SelectTrigger>
                         <SelectContent className="bg-popover rounded-md shadow-md border-border">
                           {PRODUCT_SORT_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value} className="text-sm">
+                            <SelectItem
+                              key={option.value}
+                              value={option.value}
+                              className="text-sm"
+                            >
                               {option.label}
                             </SelectItem>
                           ))}
@@ -400,7 +481,9 @@ export function SearchPage() {
           ) : data && data.total === 0 ? (
             <div className="py-8">
               <EmptyState
-                icon={<Search className="h-12 w-12 text-muted-foreground stroke-1" />}
+                icon={
+                  <Search className="h-12 w-12 text-muted-foreground stroke-1" />
+                }
                 title="Không tìm thấy sản phẩm"
                 description={`Không có sản phẩm nào khớp với từ khóa "${query}". Hãy thử tìm kiếm với từ khóa khác.`}
                 action={
@@ -415,7 +498,9 @@ export function SearchPage() {
 
               {/* Search Suggestions */}
               <div className="mt-12 max-w-2xl mx-auto text-center">
-                <h3 className="text-sm font-semibold text-foreground mb-4">Gợi ý tìm kiếm:</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-4">
+                  Gợi ý tìm kiếm:
+                </h3>
                 <div className="flex flex-wrap items-center justify-center gap-2.5">
                   {[
                     'Nước hoa chanh',
@@ -444,19 +529,24 @@ export function SearchPage() {
               {showFilters && (
                 <aside className="hidden lg:block">
                   <div className="lg:sticky lg:top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                    <div className="surface p-5">
-                      {filterContent}
-                    </div>
+                    <div className="surface p-5">{filterContent}</div>
                   </div>
                 </aside>
               )}
 
               {/* Products Column */}
-              <div className={showFilters ? 'min-w-0' : 'min-w-0 lg:col-span-2'}>
+              <div
+                className={showFilters ? 'min-w-0' : 'min-w-0 lg:col-span-2'}
+              >
                 {/* Active filter chips */}
                 {activeChips.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 mb-6" aria-label="Bộ lọc đang áp dụng">
-                    <span className="text-xs text-muted-foreground">Bộ lọc:</span>
+                  <div
+                    className="flex flex-wrap items-center gap-2 mb-6"
+                    aria-label="Bộ lọc đang áp dụng"
+                  >
+                    <span className="text-xs text-muted-foreground">
+                      Bộ lọc:
+                    </span>
                     {activeChips.map((chip) => (
                       <span
                         key={chip.id}
@@ -504,10 +594,16 @@ export function SearchPage() {
                         rating={product.rating}
                         reviewCount={product.reviewCount}
                         variants={product.variants}
-                        onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                        onAddToCart={() =>
+                          product.variants[0] &&
+                          handleAddToCart(product, product.variants[0])
+                        }
                       />
                     ) : (
-                      <Card key={product.id} className="p-4 md:p-5 border border-border bg-card rounded-lg hover:border-foreground/30 transition-colors shadow-none">
+                      <Card
+                        key={product.id}
+                        className="p-4 md:p-5 border border-border bg-card rounded-lg hover:border-foreground/30 transition-colors shadow-none"
+                      >
                         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                           <div className="w-24 h-24 sm:w-32 sm:h-32 bg-secondary rounded-lg overflow-hidden shrink-0 mx-auto sm:mx-0">
                             <img
@@ -523,15 +619,25 @@ export function SearchPage() {
                               </h3>
                               <div className="flex flex-wrap items-center gap-2 mb-2 text-xs text-muted-foreground">
                                 <div className="flex items-center gap-1 text-foreground">
-                                  <span className="text-accent text-sm" aria-hidden="true">&#9733;</span>
+                                  <span
+                                    className="text-accent text-sm"
+                                    aria-hidden="true"
+                                  >
+                                    &#9733;
+                                  </span>
                                   <span className="font-medium tabular">
                                     {product.rating?.toFixed(1) || '0.0'}
                                   </span>
                                 </div>
                                 <span>·</span>
-                                <span className="tabular">({product.reviewCount || 0} đánh giá)</span>
+                                <span className="tabular">
+                                  ({product.reviewCount || 0} đánh giá)
+                                </span>
                                 <span>·</span>
-                                <Badge variant="outline" className="text-xs rounded-sm font-normal">
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs rounded-sm font-normal"
+                                >
                                   {product.variants?.length || 0} biến thể
                                 </Badge>
                               </div>
@@ -541,16 +647,26 @@ export function SearchPage() {
                                 </p>
                               )}
                               <div className="flex flex-wrap gap-1.5 mb-3">
-                                {product.variants?.slice(0, 3).map((variant: any, index: number) => (
-                                  <Badge key={index} variant="secondary" className="text-xs rounded-sm font-normal">
-                                    {variant.scent} - {variant.volumeMl}ml
-                                  </Badge>
-                                ))}
-                                {product.variants && product.variants.length > 3 && (
-                                  <Badge variant="outline" className="text-xs rounded-sm font-normal">
-                                    +{product.variants.length - 3} nữa
-                                  </Badge>
-                                )}
+                                {product.variants
+                                  ?.slice(0, 3)
+                                  .map((variant: any, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="secondary"
+                                      className="text-xs rounded-sm font-normal"
+                                    >
+                                      {variant.scent} - {variant.volumeMl}ml
+                                    </Badge>
+                                  ))}
+                                {product.variants &&
+                                  product.variants.length > 3 && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs rounded-sm font-normal"
+                                    >
+                                      +{product.variants.length - 3} nữa
+                                    </Badge>
+                                  )}
                               </div>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border">
@@ -560,7 +676,10 @@ export function SearchPage() {
                               <Button
                                 size="sm"
                                 className="h-11 sm:h-9 rounded-md text-sm transition-colors"
-                                onClick={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                                onClick={() =>
+                                  product.variants[0] &&
+                                  handleAddToCart(product, product.variants[0])
+                                }
                               >
                                 <ShoppingBag className="h-4 w-4 mr-2" />
                                 Thêm vào giỏ
@@ -569,7 +688,7 @@ export function SearchPage() {
                           </div>
                         </div>
                       </Card>
-                    )
+                    ),
                   )}
                 </div>
 

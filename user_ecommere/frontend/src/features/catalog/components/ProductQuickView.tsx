@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useProductDetail } from '../hooks/useProductDetail';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -16,7 +21,11 @@ interface ProductQuickViewProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewProps) {
+export function ProductQuickView({
+  slug,
+  open,
+  onOpenChange,
+}: ProductQuickViewProps) {
   const { data: product, isLoading } = useProductDetail(slug);
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
@@ -25,7 +34,9 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  const selectedVariant = product?.variants.find(v => v.id === selectedVariantId) || product?.variants[0];
+  const selectedVariant =
+    product?.variants.find((v) => v.id === selectedVariantId) ||
+    product?.variants[0];
   const isWishlisted = product ? isInWishlist(product.id) : false;
 
   const handleAddToCart = () => {
@@ -58,7 +69,9 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
 
   const finalPrice = selectedVariant?.salePrice ?? selectedVariant?.price ?? 0;
   const originalPrice = selectedVariant?.price ?? 0;
-  const hasDiscount = selectedVariant?.salePrice != null && selectedVariant.salePrice < originalPrice;
+  const hasDiscount =
+    selectedVariant?.salePrice != null &&
+    selectedVariant.salePrice < originalPrice;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -67,7 +80,9 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
           <div className="flex min-h-[360px] flex-1 items-center justify-center p-12">
             <VisuallyHidden.Root>
               <DialogTitle>Xem nhanh sản phẩm</DialogTitle>
-              <DialogDescription>Xem nhanh thông tin sản phẩm</DialogDescription>
+              <DialogDescription>
+                Xem nhanh thông tin sản phẩm
+              </DialogDescription>
             </VisuallyHidden.Root>
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
@@ -98,7 +113,7 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                         'h-14 w-14 shrink-0 overflow-hidden rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                         selectedImage === idx
                           ? 'border-primary ring-1 ring-primary'
-                          : 'border-border hover:border-foreground/30'
+                          : 'border-border hover:border-foreground/30',
                       )}
                     >
                       <img
@@ -153,9 +168,15 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                     <span className="mb-2 block text-xs font-medium text-muted-foreground">
                       Phiên bản:
                     </span>
-                    <div className="flex flex-wrap gap-2" role="group" aria-label="Chọn phiên bản">
+                    <div
+                      className="flex flex-wrap gap-2"
+                      role="group"
+                      aria-label="Chọn phiên bản"
+                    >
                       {product.variants.map((v) => {
-                        const isSelected = (selectedVariantId || product.variants[0]?.id) === v.id;
+                        const isSelected =
+                          (selectedVariantId || product.variants[0]?.id) ===
+                          v.id;
                         const isOutOfStock = v.stock === 0;
                         return (
                           <button
@@ -172,12 +193,19 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                               isSelected
                                 ? 'border-primary bg-primary text-primary-foreground font-semibold shadow-sm'
                                 : 'border-border bg-card text-foreground hover:border-foreground/30 hover:bg-secondary/40',
-                              isOutOfStock && 'cursor-not-allowed opacity-50 line-through text-muted-foreground'
+                              isOutOfStock &&
+                                'cursor-not-allowed opacity-50 line-through text-muted-foreground',
                             )}
                           >
-                            {isSelected && <Check className="mr-1.5 h-4 w-4 shrink-0" />}
+                            {isSelected && (
+                              <Check className="mr-1.5 h-4 w-4 shrink-0" />
+                            )}
                             <span>{v.scent}</span> - <span>{v.volumeMl}ml</span>
-                            {isOutOfStock && <span className="ml-1 text-xs opacity-80">(Hết hàng)</span>}
+                            {isOutOfStock && (
+                              <span className="ml-1 text-xs opacity-80">
+                                (Hết hàng)
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -186,10 +214,17 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                 )}
 
                 <div>
-                  <span id="quantity-label" className="mb-2 block text-xs font-medium text-muted-foreground">
+                  <span
+                    id="quantity-label"
+                    className="mb-2 block text-xs font-medium text-muted-foreground"
+                  >
                     Số lượng:
                   </span>
-                  <div className="flex items-center gap-2" role="group" aria-labelledby="quantity-label">
+                  <div
+                    className="flex items-center gap-2"
+                    role="group"
+                    aria-labelledby="quantity-label"
+                  >
                     <button
                       type="button"
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -207,7 +242,12 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                       onChange={(e) => {
                         const parsed = parseInt(e.target.value, 10);
                         if (!Number.isNaN(parsed)) {
-                          setQuantity(Math.max(1, Math.min(selectedVariant?.stock || 99, parsed)));
+                          setQuantity(
+                            Math.max(
+                              1,
+                              Math.min(selectedVariant?.stock || 99, parsed),
+                            ),
+                          );
                         }
                       }}
                       aria-label="Số lượng"
@@ -215,7 +255,11 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                     />
                     <button
                       type="button"
-                      onClick={() => setQuantity((q) => Math.min(selectedVariant?.stock || 99, q + 1))}
+                      onClick={() =>
+                        setQuantity((q) =>
+                          Math.min(selectedVariant?.stock || 99, q + 1),
+                        )
+                      }
                       disabled={quantity >= (selectedVariant?.stock || 99)}
                       aria-label="Tăng số lượng"
                       className="flex h-11 w-11 items-center justify-center rounded-md border border-border bg-card text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-40"
@@ -235,22 +279,38 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                     className="h-11 flex-1 text-sm font-semibold"
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    {selectedVariant?.stock === 0 ? 'Tạm hết hàng' : 'Thêm vào giỏ'}
+                    {selectedVariant?.stock === 0
+                      ? 'Tạm hết hàng'
+                      : 'Thêm vào giỏ'}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleToggleWishlist}
-                    aria-label={isWishlisted ? 'Xóa khỏi danh sách yêu thích' : 'Thêm vào danh sách yêu thích'}
+                    aria-label={
+                      isWishlisted
+                        ? 'Xóa khỏi danh sách yêu thích'
+                        : 'Thêm vào danh sách yêu thích'
+                    }
                     className={cn(
                       'h-11 w-11 shrink-0 border-border bg-card p-0 text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                      isWishlisted && 'border-destructive/30 text-destructive hover:text-destructive'
+                      isWishlisted &&
+                        'border-destructive/30 text-destructive hover:text-destructive',
                     )}
                   >
-                    <Heart className={cn('h-5 w-5 transition-colors', isWishlisted && 'fill-destructive text-destructive')} />
+                    <Heart
+                      className={cn(
+                        'h-5 w-5 transition-colors',
+                        isWishlisted && 'fill-destructive text-destructive',
+                      )}
+                    />
                   </Button>
                 </div>
-                <Button variant="outline" asChild className="h-11 w-full text-sm font-semibold">
+                <Button
+                  variant="outline"
+                  asChild
+                  className="h-11 w-full text-sm font-semibold"
+                >
                   <Link to={`/p/${slug}`} onClick={() => onOpenChange(false)}>
                     Xem chi tiết sản phẩm
                   </Link>

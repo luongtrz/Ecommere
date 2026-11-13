@@ -1030,7 +1030,8 @@ describe('CategoryPage', () => {
         screen.getByText((_, el) => el?.textContent?.trim() === '85 đánh giá'),
       ).toBeInTheDocument();
       expect(
-        screen.getAllByText((_, el) => el?.textContent?.trim() === '0 đánh giá').length,
+        screen.getAllByText((_, el) => el?.textContent?.trim() === '0 đánh giá')
+          .length,
       ).toBeGreaterThanOrEqual(1);
 
       expect(screen.getByText('Lavender')).toBeInTheDocument();

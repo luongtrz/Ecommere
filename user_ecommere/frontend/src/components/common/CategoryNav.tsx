@@ -27,7 +27,8 @@ export function CategoryNav() {
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
       setShowLeftArrow(scrollLeft > 0);
       setShowRightArrow(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
     }
@@ -143,7 +144,9 @@ export function CategoryNav() {
           </li>
 
           {rootCategories.map((category) => {
-            const active = isActive(`/c/${category.slug}`) || activeCategory?.id === category.id;
+            const active =
+              isActive(`/c/${category.slug}`) ||
+              activeCategory?.id === category.id;
             return (
               <li key={category.id} className="shrink-0">
                 <Link

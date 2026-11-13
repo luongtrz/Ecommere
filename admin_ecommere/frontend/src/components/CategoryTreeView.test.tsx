@@ -373,7 +373,11 @@ describe('CategoryTreeView', () => {
         screen.getByRole('heading', { name: 'Thêm danh mục mới' }),
       ).toBeInTheDocument();
 
-      fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Đóng' }));
+      fireEvent.click(
+        within(screen.getByRole('dialog')).getByRole('button', {
+          name: 'Đóng',
+        }),
+      );
       await waitFor(() => {
         expect(
           screen.queryByRole('heading', { name: 'Thêm danh mục mới' }),

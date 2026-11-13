@@ -102,9 +102,7 @@ describe('ToolCallCard', () => {
       const { container } = render(<ToolCallCard step={step} />);
 
       expect(screen.getByText('Xóa toàn bộ giỏ hàng')).toBeInTheDocument();
-      expect(
-        container.querySelector('svg.text-success'),
-      ).toBeInTheDocument();
+      expect(container.querySelector('svg.text-success')).toBeInTheDocument();
 
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
       expect(screen.queryByText('Đang thực hiện…')).not.toBeInTheDocument();
@@ -150,7 +148,9 @@ describe('ToolCallCard', () => {
       expect(
         screen.getByText('Hủy đơn hàng không thành công'),
       ).toBeInTheDocument();
-      expect(container.querySelector('svg.text-destructive')).toBeInTheDocument();
+      expect(
+        container.querySelector('svg.text-destructive'),
+      ).toBeInTheDocument();
 
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
       expect(screen.queryByText('Đang thực hiện…')).not.toBeInTheDocument();

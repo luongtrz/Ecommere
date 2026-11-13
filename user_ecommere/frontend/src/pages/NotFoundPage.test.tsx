@@ -49,7 +49,9 @@ describe('NotFoundPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Rất tiếc, trang không tồn tại')).toBeInTheDocument();
+    expect(
+      screen.getByText('Rất tiếc, trang không tồn tại'),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { level: 1, name: 'Không tìm thấy trang' }),
     ).toBeInTheDocument();

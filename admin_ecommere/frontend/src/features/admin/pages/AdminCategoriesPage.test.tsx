@@ -210,7 +210,9 @@ describe('AdminCategoriesPage', () => {
 
     expect(screen.getAllByText('Xịt côn trùng ARS')[0]).toBeInTheDocument();
 
-    expect(screen.getAllByText('Danh mục chưa phân loại')[0]).toBeInTheDocument();
+    expect(
+      screen.getAllByText('Danh mục chưa phân loại')[0],
+    ).toBeInTheDocument();
     expect(screen.getAllByText('0 SP').length).toBeGreaterThanOrEqual(2);
   });
 
@@ -891,7 +893,9 @@ describe('AdminCategoriesPage', () => {
     const row = getCategoryRow('Xịt côn trùng ARS');
     fireEvent.click(row);
 
-    expect(await screen.findByText('Không có danh mục con')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Không có danh mục con'),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/Mục lá/i)).not.toBeInTheDocument();
   });
 });

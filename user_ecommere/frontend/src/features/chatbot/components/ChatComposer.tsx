@@ -44,7 +44,8 @@ export function ChatComposer({
     textarea.style.height = 'auto';
     const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
     textarea.style.height = `${nextHeight}px`;
-    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+    textarea.style.overflowY =
+      textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
   }, [value, maxHeight]);
 
   // Handle autoFocus if requested
@@ -94,7 +95,7 @@ export function ChatComposer({
           rows={1}
           className={cn(
             'min-h-[40px] resize-none border-0 bg-transparent px-3 py-2 text-sm text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-0 focus:outline-none w-full leading-relaxed',
-            isPage ? 'max-h-[160px]' : 'max-h-[120px]'
+            isPage ? 'max-h-[160px]' : 'max-h-[120px]',
           )}
         />
         <Button
@@ -107,7 +108,9 @@ export function ChatComposer({
           className={cn(
             'rounded-full shrink-0 transition-colors duration-200 motion-reduce:transition-none bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center disabled:opacity-50 active:scale-95 motion-reduce:active:scale-100',
             'min-h-11 min-w-11 h-11 w-11',
-            isPage ? 'sm:h-10 sm:w-10 sm:min-h-0 sm:min-w-0' : 'sm:h-9 sm:w-9 sm:min-h-0 sm:min-w-0'
+            isPage
+              ? 'sm:h-10 sm:w-10 sm:min-h-0 sm:min-w-0'
+              : 'sm:h-9 sm:w-9 sm:min-h-0 sm:min-w-0',
           )}
         >
           {isStreaming ? (
@@ -115,7 +118,9 @@ export function ChatComposer({
           ) : (
             <SendHorizonal className="h-4 w-4" />
           )}
-          <span className="sr-only">{isStreaming ? 'Dừng' : 'Gửi tin nhắn'}</span>
+          <span className="sr-only">
+            {isStreaming ? 'Dừng' : 'Gửi tin nhắn'}
+          </span>
         </Button>
       </div>
 
@@ -123,17 +128,24 @@ export function ChatComposer({
       <div
         className={cn(
           'items-center justify-between gap-2 px-2 text-xs text-muted-foreground mt-1.5',
-          showCounter ? 'flex' : 'hidden sm:flex'
+          showCounter ? 'flex' : 'hidden sm:flex',
         )}
       >
-        <span className={cn('hidden sm:inline', !showCounter && 'w-full text-center')}>
+        <span
+          className={cn(
+            'hidden sm:inline',
+            !showCounter && 'w-full text-center',
+          )}
+        >
           Enter để gửi · Shift+Enter để xuống dòng
         </span>
         {showCounter ? (
           <span
             className={cn(
               'text-xs tabular-nums ml-auto',
-              value.length >= limit ? 'text-destructive font-semibold' : 'text-muted-foreground'
+              value.length >= limit
+                ? 'text-destructive font-semibold'
+                : 'text-muted-foreground',
             )}
             aria-live="polite"
           >

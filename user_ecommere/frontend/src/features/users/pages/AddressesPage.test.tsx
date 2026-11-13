@@ -291,7 +291,9 @@ describe('AddressesPage', () => {
     expect(screen.getAllByText('Mặc định')).toHaveLength(1);
 
     // Card for non-default
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
+    const card2 = screen
+      .getByText('Trần Thị Thường')
+      .closest('[data-testid="address-card"]') as HTMLElement;
     expect(card2).toBeInTheDocument();
   });
 
@@ -305,7 +307,9 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const setDefaultBtn = screen.getByRole('button', { name: 'Đặt làm mặc định' });
+    const setDefaultBtn = screen.getByRole('button', {
+      name: 'Đặt làm mặc định',
+    });
     await user.click(setDefaultBtn);
 
     expect(mockUpdateAddressMutateAsync).toHaveBeenCalledWith({
@@ -323,7 +327,9 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
+    const card2 = screen
+      .getByText('Trần Thị Thường')
+      .closest('[data-testid="address-card"]') as HTMLElement;
     const editButton =
       card2.querySelector('svg.lucide-edit')?.closest('button') ||
       card2.querySelectorAll('button')[1];
@@ -391,7 +397,9 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
+    const card2 = screen
+      .getByText('Trần Thị Thường')
+      .closest('[data-testid="address-card"]') as HTMLElement;
     const deleteButton = within(card2).getByRole('button', { name: 'Xóa' });
 
     await user.click(deleteButton);
@@ -403,7 +411,9 @@ describe('AddressesPage', () => {
       ),
     ).toBeInTheDocument();
 
-    const confirmDeleteBtn = screen.getByRole('button', { name: 'Xóa địa chỉ' });
+    const confirmDeleteBtn = screen.getByRole('button', {
+      name: 'Xóa địa chỉ',
+    });
     await user.click(confirmDeleteBtn);
 
     expect(mockDeleteAddressMutateAsync).toHaveBeenCalledWith(
@@ -421,7 +431,9 @@ describe('AddressesPage', () => {
 
     renderAddressesPage();
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
+    const card2 = screen
+      .getByText('Trần Thị Thường')
+      .closest('[data-testid="address-card"]') as HTMLElement;
     const deleteButton = within(card2).getByRole('button', { name: 'Xóa' });
 
     await user.click(deleteButton);
@@ -450,7 +462,9 @@ describe('AddressesPage', () => {
       .closest('[data-testid="address-card"]') as HTMLElement;
     const deleteButton1 = within(card1).getByRole('button', { name: 'Xóa' });
 
-    const card2 = screen.getByText('Trần Thị Thường').closest('[data-testid="address-card"]') as HTMLElement;
+    const card2 = screen
+      .getByText('Trần Thị Thường')
+      .closest('[data-testid="address-card"]') as HTMLElement;
     const deleteButton2 = within(card2).getByRole('button', { name: 'Xóa' });
 
     expect(deleteButton1).toBeDisabled();

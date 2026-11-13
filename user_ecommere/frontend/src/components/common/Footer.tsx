@@ -1,11 +1,25 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, ShieldCheck, Truck, RefreshCw, CheckCircle2 } from 'lucide-react';
+import {
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  Truck,
+  RefreshCw,
+  CheckCircle2,
+} from 'lucide-react';
 
 const shoppingLinks = [
   { to: '/catalog', label: 'Tất cả sản phẩm' },
   { to: '/catalog?sort=best_selling', label: 'Sản phẩm bán chạy' },
-  { to: '/catalog?category=diet-con-trung', label: 'Xịt diệt côn trùng Thái Lan' },
-  { to: '/catalog?category=tay-rua-nha-bep', label: 'Tẩy rửa & Vệ sinh nhà cửa' },
+  {
+    to: '/catalog?category=diet-con-trung',
+    label: 'Xịt diệt côn trùng Thái Lan',
+  },
+  {
+    to: '/catalog?category=tay-rua-nha-bep',
+    label: 'Tẩy rửa & Vệ sinh nhà cửa',
+  },
   { to: '/catalog?category=thom-phong', label: 'Xịt thơm & Khử mùi phòng' },
 ];
 
@@ -26,32 +40,48 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <ShieldCheck className="h-5 w-5 shrink-0 text-primary-foreground/80" />
               <div>
-                <h4 className="font-medium text-sm text-primary-foreground">100% Chính Hãng</h4>
-                <p className="text-xs text-primary-foreground/80 mt-0.5">Cam kết hàng Thái Lan nội địa</p>
+                <h4 className="font-medium text-sm text-primary-foreground">
+                  100% Chính Hãng
+                </h4>
+                <p className="text-xs text-primary-foreground/80 mt-0.5">
+                  Cam kết hàng Thái Lan nội địa
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <Truck className="h-5 w-5 shrink-0 text-primary-foreground/80" />
               <div>
-                <h4 className="font-medium text-sm text-primary-foreground">Giao Hàng Toàn Quốc</h4>
-                <p className="text-xs text-primary-foreground/80 mt-0.5">Đóng gói chống sốc an toàn</p>
+                <h4 className="font-medium text-sm text-primary-foreground">
+                  Giao Hàng Toàn Quốc
+                </h4>
+                <p className="text-xs text-primary-foreground/80 mt-0.5">
+                  Đóng gói chống sốc an toàn
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <RefreshCw className="h-5 w-5 shrink-0 text-primary-foreground/80" />
               <div>
-                <h4 className="font-medium text-sm text-primary-foreground">Đổi Trả 7 Ngày</h4>
-                <p className="text-xs text-primary-foreground/80 mt-0.5">Miễn phí nếu vỡ hoặc lỗi tem</p>
+                <h4 className="font-medium text-sm text-primary-foreground">
+                  Đổi Trả 7 Ngày
+                </h4>
+                <p className="text-xs text-primary-foreground/80 mt-0.5">
+                  Miễn phí nếu vỡ hoặc lỗi tem
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 shrink-0 text-primary-foreground/80" />
               <div>
-                <h4 className="font-medium text-sm text-primary-foreground">Kiểm Tra Hàng</h4>
-                <p className="text-xs text-primary-foreground/80 mt-0.5">Đồng kiểm trước khi thanh toán</p>
+                <h4 className="font-medium text-sm text-primary-foreground">
+                  Kiểm Tra Hàng
+                </h4>
+                <p className="text-xs text-primary-foreground/80 mt-0.5">
+                  Đồng kiểm trước khi thanh toán
+                </p>
               </div>
             </div>
           </div>
@@ -71,11 +101,15 @@ export function Footer() {
                 <span className="text-xl font-bold text-primary-foreground block">
                   Thai <span className="text-accent">Spray</span>
                 </span>
-                <span className="text-xs text-primary-foreground/80 font-medium">Hàng Thái Chính Hãng</span>
+                <span className="text-xs text-primary-foreground/80 font-medium">
+                  Hàng Thái Chính Hãng
+                </span>
               </div>
             </div>
             <p className="text-sm leading-relaxed text-primary-foreground/80">
-              Chuyên phân phối sỉ &amp; lẻ các dòng chai xịt gia dụng, xịt côn trùng, tẩy rửa sinh học và tinh dầu thơm phòng nhập khẩu trực tiếp từ Thái Lan.
+              Chuyên phân phối sỉ &amp; lẻ các dòng chai xịt gia dụng, xịt côn
+              trùng, tẩy rửa sinh học và tinh dầu thơm phòng nhập khẩu trực tiếp
+              từ Thái Lan.
             </p>
             <div className="pt-2 flex flex-wrap gap-2">
               <span className="inline-flex items-center rounded-sm border border-primary-foreground/20 px-2.5 py-1 text-xs text-primary-foreground/80">
@@ -140,7 +174,9 @@ export function Footer() {
                   >
                     0987.654.321
                   </a>
-                  <span className="text-xs text-primary-foreground/80">Hỗ trợ tư vấn Zalo / Hotline (8h - 22h)</span>
+                  <span className="text-xs text-primary-foreground/80">
+                    Hỗ trợ tư vấn Zalo / Hotline (8h - 22h)
+                  </span>
                 </div>
               </li>
               <li className="flex items-center gap-3">
@@ -155,7 +191,8 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="mt-2.5 h-5 w-5 shrink-0 text-primary-foreground/80" />
                 <span className="min-h-11 py-2.5 flex items-center text-primary-foreground/80">
-                  Kho tổng: 128 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh (Giao toàn quốc)
+                  Kho tổng: 128 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh (Giao toàn
+                  quốc)
                 </span>
               </li>
             </ul>
@@ -166,7 +203,10 @@ export function Footer() {
       {/* Bottom Copyright */}
       <div className="border-t border-primary-foreground/15">
         <div className="container mx-auto px-4 py-4 flex flex-col gap-2 text-xs text-primary-foreground/80 sm:flex-row sm:items-center sm:justify-between">
-          <p className="tabular">&copy; {new Date().getFullYear()} Thai Spray Việt Nam - Chuyên Hàng Gia Dụng &amp; Chai Xịt Thái Lan Cao Cấp.</p>
+          <p className="tabular">
+            &copy; {new Date().getFullYear()} Thai Spray Việt Nam - Chuyên Hàng
+            Gia Dụng &amp; Chai Xịt Thái Lan Cao Cấp.
+          </p>
           <div className="flex items-center gap-6">
             <Link
               to="/policy/privacy"

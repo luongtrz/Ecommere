@@ -418,7 +418,9 @@ describe('AdminOrderDetailPage', () => {
       expect(
         screen.getAllByText('Phân loại: Bạc hà mát lạnh - 100ml').length,
       ).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText('SKU: SKU-001').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('SKU: SKU-001').length).toBeGreaterThanOrEqual(
+        1,
+      );
       expect(
         screen.getAllByText(matchText(formatCurrency(250000))).length,
       ).toBeGreaterThanOrEqual(1);
@@ -434,7 +436,10 @@ describe('AdminOrderDetailPage', () => {
       const emailLink = screen.getByRole('link', {
         name: 'nguyenvana@example.com',
       });
-      expect(emailLink).toHaveAttribute('href', 'mailto:nguyenvana@example.com');
+      expect(emailLink).toHaveAttribute(
+        'href',
+        'mailto:nguyenvana@example.com',
+      );
       expect(screen.getByText('SĐT:')).toBeInTheDocument();
       expect(screen.getAllByText('Nguyễn Văn A')).toHaveLength(2);
 
@@ -855,22 +860,25 @@ describe('AdminOrderDetailPage', () => {
       ['COMPLETED', 'Đã thanh toán'],
       ['FAILED', 'Thất bại'],
       ['REFUNDED', 'Đã hoàn tiền'],
-    ])('maps payment status %s to Vietnamese label %s', (status, expectedLabel) => {
-      mockUseAdminOrder.mockReturnValue({
-        data: {
-          ...mockSampleOrder,
-          paymentStatus: status as any,
-        },
-        isLoading: false,
-        refetch: mockRefetch,
-      });
+    ])(
+      'maps payment status %s to Vietnamese label %s',
+      (status, expectedLabel) => {
+        mockUseAdminOrder.mockReturnValue({
+          data: {
+            ...mockSampleOrder,
+            paymentStatus: status as any,
+          },
+          isLoading: false,
+          refetch: mockRefetch,
+        });
 
-      renderWithProviders();
+        renderWithProviders();
 
-      expect(
-        screen.getAllByText(expectedLabel).length,
-      ).toBeGreaterThanOrEqual(1);
-    });
+        expect(
+          screen.getAllByText(expectedLabel).length,
+        ).toBeGreaterThanOrEqual(1);
+      },
+    );
   });
 
   describe('Actions: Print and Copy to Clipboard', () => {
@@ -905,7 +913,9 @@ describe('AdminOrderDetailPage', () => {
 
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('ORD-123');
       await waitFor(() => {
-        expect(mockToast.success).toHaveBeenCalledWith('Đã sao chép mã đơn hàng');
+        expect(mockToast.success).toHaveBeenCalledWith(
+          'Đã sao chép mã đơn hàng',
+        );
       });
     });
 
@@ -1087,7 +1097,9 @@ describe('AdminOrderDetailPage', () => {
       renderWithProviders();
 
       expect(screen.queryByRole('img')).not.toBeInTheDocument();
-      expect(screen.getAllByText('Chai xịt mini').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('Chai xịt mini').length,
+      ).toBeGreaterThanOrEqual(1);
       expect(
         screen.getAllByText('Phân loại: Không mùi - 50ml').length,
       ).toBeGreaterThanOrEqual(1);

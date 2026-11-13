@@ -506,9 +506,10 @@ describe('SearchPage', () => {
         { sortBy: 'newest' },
         1,
       );
-      expect(
-        screen.getByRole('link', { name: 'Sản phẩm' }),
-      ).toHaveAttribute('href', '/catalog');
+      expect(screen.getByRole('link', { name: 'Sản phẩm' })).toHaveAttribute(
+        'href',
+        '/catalog',
+      );
       expect(screen.getByPlaceholderText('Tìm kiếm sản phẩm...')).toHaveValue(
         '',
       );
@@ -540,7 +541,10 @@ describe('SearchPage', () => {
         'Tìm kiếm: rose',
       );
       expect(
-        screen.getByRole('heading', { level: 1, name: /Kết quả tìm kiếm cho "rose"/i }),
+        screen.getByRole('heading', {
+          level: 1,
+          name: /Kết quả tìm kiếm cho "rose"/i,
+        }),
       ).toBeInTheDocument();
       expect(
         screen.getByText((_, el) => el?.textContent?.trim() === '2 sản phẩm'),
@@ -588,9 +592,7 @@ describe('SearchPage', () => {
 
     it('clears input and resets parameters on clicking header "Xóa tìm kiếm"', () => {
       renderPage(['/search?q=rose&sort=price_desc']);
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Xóa tìm kiếm' }),
-      );
+      fireEvent.click(screen.getByRole('button', { name: 'Xóa tìm kiếm' }));
       expect(screen.getByPlaceholderText('Tìm kiếm sản phẩm...')).toHaveValue(
         '',
       );
@@ -699,7 +701,9 @@ describe('SearchPage', () => {
       mockUseProductSearch.mockReturnValue(loadingResult);
       const { container } = renderPage(['/search?q=rose']);
       expect(container.querySelector('.animate-spin')).toBeInTheDocument();
-      expect(screen.queryByRole('heading', { level: 2, name: 'Kết quả tìm kiếm' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('heading', { level: 2, name: 'Kết quả tìm kiếm' }),
+      ).not.toBeInTheDocument();
     });
 
     it('renders LoadingSpinner when isPlaceholderData is true with active query and empty products', () => {
@@ -848,7 +852,10 @@ describe('SearchPage', () => {
     it('renders products and adds to cart with salePrice', () => {
       renderPage(['/search?q=rose&view=grid']);
       expect(
-        screen.getByRole('heading', { level: 1, name: /Kết quả tìm kiếm cho "rose"/i }),
+        screen.getByRole('heading', {
+          level: 1,
+          name: /Kết quả tìm kiếm cho "rose"/i,
+        }),
       ).toBeInTheDocument();
       expect(
         screen.getByText((_, el) => el?.textContent?.trim() === '2 sản phẩm'),
@@ -890,7 +897,9 @@ describe('SearchPage', () => {
 
     it('switches view mode between grid and list', () => {
       renderPage(['/search?q=rose&view=grid']);
-      const listBtn = screen.getByRole('button', { name: 'Xem dạng danh sách' });
+      const listBtn = screen.getByRole('button', {
+        name: 'Xem dạng danh sách',
+      });
       const gridBtn = screen.getByRole('button', { name: 'Xem dạng lưới' });
 
       fireEvent.click(listBtn);
@@ -1028,7 +1037,9 @@ describe('SearchPage', () => {
 
       renderPage(['/search?q=perfume']);
       expect(screen.getByTestId('pagination-mock')).toBeInTheDocument();
-      expect(screen.getByTestId('pagination-info')).toHaveTextContent('Page 1 of 2');
+      expect(screen.getByTestId('pagination-info')).toHaveTextContent(
+        'Page 1 of 2',
+      );
 
       fireEvent.click(screen.getByTestId('pagination-page-2-btn'));
       expect(screen.getByTestId('loc')).toHaveTextContent('page=2');
@@ -1055,9 +1066,7 @@ describe('SearchPage', () => {
       });
 
       renderPage(['/search?q=rose']);
-      fireEvent.click(
-        screen.getByTestId('pagination-page-2-btn'),
-      );
+      fireEvent.click(screen.getByTestId('pagination-page-2-btn'));
       expect(queriedPage).toBe(2);
 
       fireEvent.change(screen.getByTestId('sort-select'), {
@@ -1074,9 +1083,7 @@ describe('SearchPage', () => {
       });
 
       renderPage(['/search?q=rose']);
-      fireEvent.click(
-        screen.getByTestId('pagination-page-2-btn'),
-      );
+      fireEvent.click(screen.getByTestId('pagination-page-2-btn'));
       expect(queriedPage).toBe(2);
 
       fireEvent.change(screen.getByPlaceholderText('Tìm kiếm sản phẩm...'), {
@@ -1093,9 +1100,7 @@ describe('SearchPage', () => {
       });
 
       renderPage(['/search?q=rose'], true);
-      fireEvent.click(
-        screen.getByTestId('pagination-page-2-btn'),
-      );
+      fireEvent.click(screen.getByTestId('pagination-page-2-btn'));
       expect(queriedPage).toBe(2);
 
       fireEvent.click(screen.getByTestId('set-category'));

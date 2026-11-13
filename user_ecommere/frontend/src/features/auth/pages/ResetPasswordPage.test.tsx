@@ -104,7 +104,9 @@ describe('ResetPasswordPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: 'Đặt lại mật khẩu' }),
       ).toBeInTheDocument();
-      expect(screen.getAllByText('Liên kết đặt lại mật khẩu')[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Liên kết đặt lại mật khẩu')[0],
+      ).toBeInTheDocument();
       expect(
         screen.getByText(
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
@@ -137,7 +139,9 @@ describe('ResetPasswordPage', () => {
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
         ),
       ).toBeInTheDocument();
-      expect(screen.getAllByText('Liên kết đặt lại mật khẩu')[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Liên kết đặt lại mật khẩu')[0],
+      ).toBeInTheDocument();
     });
 
     it('renders invalid token message when token is only whitespace', () => {
@@ -148,7 +152,9 @@ describe('ResetPasswordPage', () => {
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
         ),
       ).toBeInTheDocument();
-      expect(screen.getAllByText('Liên kết đặt lại mật khẩu')[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Liên kết đặt lại mật khẩu')[0],
+      ).toBeInTheDocument();
     });
   });
 
@@ -196,22 +202,32 @@ describe('ResetPasswordPage', () => {
       const newPasswordInput = screen.getByLabelText('Mật khẩu mới');
       expect(newPasswordInput).toHaveAttribute('type', 'password');
 
-      const toggleNewButton = screen.getByRole('button', { name: 'Hiện mật khẩu' });
+      const toggleNewButton = screen.getByRole('button', {
+        name: 'Hiện mật khẩu',
+      });
       await user.click(toggleNewButton);
       expect(newPasswordInput).toHaveAttribute('type', 'text');
 
-      const toggleHideNewButton = screen.getByRole('button', { name: 'Ẩn mật khẩu' });
+      const toggleHideNewButton = screen.getByRole('button', {
+        name: 'Ẩn mật khẩu',
+      });
       await user.click(toggleHideNewButton);
       expect(newPasswordInput).toHaveAttribute('type', 'password');
 
-      const confirmPasswordInput = screen.getByLabelText('Xác nhận mật khẩu mới');
+      const confirmPasswordInput = screen.getByLabelText(
+        'Xác nhận mật khẩu mới',
+      );
       expect(confirmPasswordInput).toHaveAttribute('type', 'password');
 
-      const toggleConfirmButton = screen.getByRole('button', { name: 'Hiện mật khẩu xác nhận' });
+      const toggleConfirmButton = screen.getByRole('button', {
+        name: 'Hiện mật khẩu xác nhận',
+      });
       await user.click(toggleConfirmButton);
       expect(confirmPasswordInput).toHaveAttribute('type', 'text');
 
-      const toggleHideConfirmButton = screen.getByRole('button', { name: 'Ẩn mật khẩu xác nhận' });
+      const toggleHideConfirmButton = screen.getByRole('button', {
+        name: 'Ẩn mật khẩu xác nhận',
+      });
       await user.click(toggleHideConfirmButton);
       expect(confirmPasswordInput).toHaveAttribute('type', 'password');
     });

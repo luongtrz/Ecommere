@@ -72,7 +72,12 @@ describe('Breadcrumb', () => {
     // 2 SVGs: Home icon and 1 ChevronRight icon
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(2);
-    expect(svgs[1]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/50', 'shrink-0');
+    expect(svgs[1]).toHaveClass(
+      'h-4',
+      'w-4',
+      'text-muted-foreground/50',
+      'shrink-0',
+    );
   });
 
   it('renders breadcrumb item without href as a non-clickable span with font-medium class', () => {
@@ -121,14 +126,33 @@ describe('Breadcrumb', () => {
     const terminalItem = within(container).getByText('iPhone 15 Pro Max 256GB');
     expect(terminalItem.tagName).toBe('SPAN');
     expect(terminalItem).toHaveAttribute('aria-current', 'page');
-    expect(terminalItem).toHaveClass('font-medium', 'text-foreground', 'truncate');
+    expect(terminalItem).toHaveClass(
+      'font-medium',
+      'text-foreground',
+      'truncate',
+    );
 
     // SVGs: 1 Home + 3 ChevronRight separators
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(4);
-    expect(svgs[1]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/50', 'shrink-0');
-    expect(svgs[2]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/50', 'shrink-0');
-    expect(svgs[3]).toHaveClass('h-4', 'w-4', 'text-muted-foreground/50', 'shrink-0');
+    expect(svgs[1]).toHaveClass(
+      'h-4',
+      'w-4',
+      'text-muted-foreground/50',
+      'shrink-0',
+    );
+    expect(svgs[2]).toHaveClass(
+      'h-4',
+      'w-4',
+      'text-muted-foreground/50',
+      'shrink-0',
+    );
+    expect(svgs[3]).toHaveClass(
+      'h-4',
+      'w-4',
+      'text-muted-foreground/50',
+      'shrink-0',
+    );
   });
 
   it('applies custom className to the nav element', () => {
@@ -142,11 +166,7 @@ describe('Breadcrumb', () => {
     const nav = within(container).getByRole('navigation', {
       name: 'Breadcrumb',
     });
-    expect(nav).toHaveClass(
-      'custom-breadcrumb-container',
-      'px-4',
-      'py-2',
-    );
+    expect(nav).toHaveClass('custom-breadcrumb-container', 'px-4', 'py-2');
   });
 
   it('skips leading duplicate "Trang chủ" or "/" link so Home is not duplicated', () => {
@@ -155,7 +175,9 @@ describe('Breadcrumb', () => {
       { label: 'Sản phẩm', href: '/catalog' },
       { label: 'Xịt phòng Lavender' },
     ];
-    const { container } = renderBreadcrumb(<Breadcrumb items={itemsWithHref} />);
+    const { container } = renderBreadcrumb(
+      <Breadcrumb items={itemsWithHref} />,
+    );
 
     const links = within(container).getAllByRole('link');
     expect(links).toHaveLength(2); // Only Home icon link + 'Sản phẩm'

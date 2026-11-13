@@ -5,11 +5,17 @@ import { CheckoutSteps } from './CheckoutSteps';
 
 describe('CheckoutSteps', () => {
   const getStepElements = (container: HTMLElement) => {
-    const listItems = Array.from(container.querySelectorAll('ol > li')) as HTMLElement[];
+    const listItems = Array.from(
+      container.querySelectorAll('ol > li'),
+    ) as HTMLElement[];
     return listItems.map((el) => {
       const circle = el.querySelector('.rounded-full') as HTMLElement;
-      const label = el.querySelector('span.text-xs, span.sm\\:text-sm') as HTMLElement;
-      const connector = el.querySelector('[data-testid="step-connector"]') as HTMLElement | null;
+      const label = el.querySelector(
+        'span.text-xs, span.sm\\:text-sm',
+      ) as HTMLElement;
+      const connector = el.querySelector(
+        '[data-testid="step-connector"]',
+      ) as HTMLElement | null;
       const button = el.querySelector('button') as HTMLButtonElement | null;
       return { container: el, circle, label, connector, button };
     });

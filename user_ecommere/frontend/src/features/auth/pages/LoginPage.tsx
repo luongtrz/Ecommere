@@ -4,7 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
 import { Link } from 'react-router-dom';
@@ -67,24 +74,34 @@ export function LoginPage() {
             </h2>
 
             <p className="text-sm text-primary-foreground/80 leading-relaxed">
-              Đăng nhập để nhận ngay ưu đãi thành viên, tích lũy điểm thưởng khi mua chai xịt đuổi chuột ARS, diệt gián kiến, tẩy rửa Magiclean và nước giặt xả Hygiene.
+              Đăng nhập để nhận ngay ưu đãi thành viên, tích lũy điểm thưởng khi
+              mua chai xịt đuổi chuột ARS, diệt gián kiến, tẩy rửa Magiclean và
+              nước giặt xả Hygiene.
             </p>
 
             <div className="pt-4 grid grid-cols-2 gap-4 border-t border-primary-foreground/15 text-xs">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <ShieldCheck className="h-4 w-4 text-primary-foreground" />
-                  <p className="font-semibold text-primary-foreground">100% Nội Địa Thái</p>
+                  <p className="font-semibold text-primary-foreground">
+                    100% Nội Địa Thái
+                  </p>
                 </div>
-                <p className="text-primary-foreground/70">Đền 200% nếu hàng giả</p>
+                <p className="text-primary-foreground/70">
+                  Đền 200% nếu hàng giả
+                </p>
               </div>
 
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Truck className="h-4 w-4 text-primary-foreground" />
-                  <p className="font-semibold text-primary-foreground">Giao Hỏa Tốc COD</p>
+                  <p className="font-semibold text-primary-foreground">
+                    Giao Hỏa Tốc COD
+                  </p>
                 </div>
-                <p className="text-primary-foreground/70">Kiểm tra hàng trước khi trả</p>
+                <p className="text-primary-foreground/70">
+                  Kiểm tra hàng trước khi trả
+                </p>
               </div>
             </div>
           </div>
@@ -129,7 +146,10 @@ export function LoginPage() {
 
             {/* Login Form */}
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-5"
+              >
                 <FormField
                   control={form.control}
                   name="phone"
@@ -187,9 +207,15 @@ export function LoginPage() {
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                          aria-label={
+                            showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                          }
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                       <FormMessage className="text-sm text-destructive" />

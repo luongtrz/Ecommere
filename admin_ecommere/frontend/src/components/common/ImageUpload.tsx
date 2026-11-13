@@ -82,7 +82,9 @@ export function ImageUpload({
       toast.success(`Đã tải lên ${uploadedUrls.length} ảnh thành công!`);
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast.error(`Tải ảnh lên thất bại: ${error?.message || 'Lỗi không xác định'}`);
+      toast.error(
+        `Tải ảnh lên thất bại: ${error?.message || 'Lỗi không xác định'}`,
+      );
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -210,7 +212,9 @@ export function ImageUpload({
           } rounded-xl p-8 text-center cursor-pointer transition-colors`}
         >
           <ImageIcon className="h-10 w-10 mx-auto text-slate-400 mb-2 pointer-events-none" />
-          <p className="text-sm font-medium text-slate-900 pointer-events-none">Chưa có ảnh nào</p>
+          <p className="text-sm font-medium text-slate-900 pointer-events-none">
+            Chưa có ảnh nào
+          </p>
           <p className="text-xs text-slate-500 mt-1 pointer-events-none">
             Nhấp hoặc kéo thả ảnh vào đây để tải lên (tối đa {maxImages} ảnh)
           </p>

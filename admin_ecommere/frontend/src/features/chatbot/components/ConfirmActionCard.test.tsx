@@ -384,7 +384,9 @@ describe('ConfirmActionCard', () => {
       const user = userEvent.setup();
       render(<ConfirmActionCard calls={mockCalls} onSubmit={onSubmitMock} />);
 
-      const confirmButtons = screen.getAllByRole('button', { name: 'Xác nhận' });
+      const confirmButtons = screen.getAllByRole('button', {
+        name: 'Xác nhận',
+      });
       const rejectButtons = screen.getAllByRole('button', { name: 'Từ chối' });
 
       // Call 2 has risk DESTRUCTIVE
@@ -400,10 +402,7 @@ describe('ConfirmActionCard', () => {
 
     it('single destructive call renders confirm button with destructive variant (A13-1)', () => {
       render(
-        <ConfirmActionCard
-          calls={[mockCalls[2]]}
-          onSubmit={onSubmitMock}
-        />,
+        <ConfirmActionCard calls={[mockCalls[2]]} onSubmit={onSubmitMock} />,
       );
 
       const confirmBtn = screen.getByRole('button', { name: 'Xác nhận' });
@@ -419,7 +418,9 @@ describe('ConfirmActionCard', () => {
 
       expect(screen.getByText('Còn 3 thao tác chưa chọn')).toBeInTheDocument();
 
-      const confirmButtons = screen.getAllByRole('button', { name: 'Xác nhận' });
+      const confirmButtons = screen.getAllByRole('button', {
+        name: 'Xác nhận',
+      });
 
       await user.click(confirmButtons[0]);
       expect(screen.getByText('Còn 2 thao tác chưa chọn')).toBeInTheDocument();
@@ -431,7 +432,9 @@ describe('ConfirmActionCard', () => {
       expect(
         screen.queryByText(/Còn \d+ thao tác chưa chọn/),
       ).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Gửi quyết định' })).toBeEnabled();
+      expect(
+        screen.getByRole('button', { name: 'Gửi quyết định' }),
+      ).toBeEnabled();
     });
   });
 });

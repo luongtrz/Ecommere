@@ -266,7 +266,9 @@ describe('OrdersPage', () => {
       expect(
         screen.getByText('Bạn chưa có đơn hàng nào trong mục này.'),
       ).toBeInTheDocument();
-      const exploreBtn = screen.getByRole('link', { name: 'Khám phá sản phẩm' });
+      const exploreBtn = screen.getByRole('link', {
+        name: 'Khám phá sản phẩm',
+      });
       expect(exploreBtn).toBeInTheDocument();
       expect(exploreBtn).toHaveAttribute('href', '/catalog');
     });
@@ -480,17 +482,13 @@ describe('OrdersPage', () => {
       expect(
         screen.getByTitle('Chai xịt khử mùi cao cấp (x2)'),
       ).toBeInTheDocument();
-      expect(
-        screen.getByText('Chai xịt khử mùi cao cấp'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Chai xịt khử mùi cao cấp')).toBeInTheDocument();
 
       // Order 2 item has no image and empty productName (falls back to item.name)
       expect(
         screen.queryByAltText('Chai xịt dự phòng'),
       ).not.toBeInTheDocument();
-      expect(
-        screen.getByTitle('Chai xịt dự phòng (x1)'),
-      ).toBeInTheDocument();
+      expect(screen.getByTitle('Chai xịt dự phòng (x1)')).toBeInTheDocument();
       expect(screen.getByText('Chai xịt dự phòng')).toBeInTheDocument();
 
       // Currency and dates matched cleanly across non-breaking spaces

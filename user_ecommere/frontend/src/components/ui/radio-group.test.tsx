@@ -135,12 +135,7 @@ describe('RadioGroupItem', () => {
     // The checked item contains the inner dot indicator
     const dot = checkedItem.querySelector('.bg-primary');
     expect(dot).toBeInTheDocument();
-    expect(dot).toHaveClass(
-      'h-2.5',
-      'w-2.5',
-      'rounded-full',
-      'bg-primary',
-    );
+    expect(dot).toHaveClass('h-2.5', 'w-2.5', 'rounded-full', 'bg-primary');
 
     // The unchecked item does not contain the inner dot indicator
     expect(uncheckedItem.querySelector('.bg-primary')).toBeNull();

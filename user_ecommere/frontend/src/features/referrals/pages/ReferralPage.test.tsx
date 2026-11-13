@@ -291,9 +291,17 @@ describe('ReferralPage', () => {
       );
 
       // Breadcrumb
-      expect(screen.getByRole('navigation', { name: /breadcrumb/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /Trang chủ/i })).toHaveAttribute('href', '/');
-      expect(screen.getByRole('link', { name: /Tài khoản/i })).toHaveAttribute('href', '/account');
+      expect(
+        screen.getByRole('navigation', { name: /breadcrumb/i }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Trang chủ/i })).toHaveAttribute(
+        'href',
+        '/',
+      );
+      expect(screen.getByRole('link', { name: /Tài khoản/i })).toHaveAttribute(
+        'href',
+        '/account',
+      );
       expect(screen.getByText('Mời bạn bè')).toBeInTheDocument();
 
       // Header

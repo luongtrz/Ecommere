@@ -45,10 +45,7 @@ describe('Alert UI components', () => {
       );
       const alert = screen.getByTestId('alert-variant-default');
 
-      expect(alert).toHaveClass(
-        'bg-card',
-        'text-foreground',
-      );
+      expect(alert).toHaveClass('bg-card', 'text-foreground');
     });
 
     it('renders with destructive variant', () => {
@@ -122,11 +119,7 @@ describe('Alert UI components', () => {
 
       expect(title).toBeInTheDocument();
       expect(title.tagName).toBe('H5');
-      expect(title).toHaveClass(
-        'mb-1',
-        'font-medium',
-        'leading-tight',
-      );
+      expect(title).toHaveClass('mb-1', 'font-medium', 'leading-tight');
       expect(title).toHaveTextContent('Tiêu đề cảnh báo');
     });
 

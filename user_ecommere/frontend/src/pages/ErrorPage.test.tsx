@@ -76,7 +76,9 @@ describe('ErrorPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Rất tiếc, đã có sự cố xảy ra')).toBeInTheDocument();
+    expect(
+      screen.getByText('Rất tiếc, đã có sự cố xảy ra'),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { level: 1, name: 'Không thể tải trang' }),
     ).toBeInTheDocument();

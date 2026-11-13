@@ -188,7 +188,9 @@ describe('RequireAdmin', () => {
     );
 
     expect(screen.getByTestId('current-path')).toHaveTextContent('/login');
-    expect(screen.getByTestId('current-search')).toHaveTextContent('?error=forbidden');
+    expect(screen.getByTestId('current-search')).toHaveTextContent(
+      '?error=forbidden',
+    );
     expect(screen.getByTestId('current-state')).toHaveTextContent(
       'Tài khoản không có quyền truy cập trang quản trị.',
     );
@@ -219,7 +221,9 @@ describe('RequireAdmin', () => {
     );
 
     expect(screen.getByTestId('current-path')).toHaveTextContent('/login');
-    expect(screen.getByTestId('current-search')).toHaveTextContent('?error=forbidden');
+    expect(screen.getByTestId('current-search')).toHaveTextContent(
+      '?error=forbidden',
+    );
     expect(screen.getByTestId('current-state')).toHaveTextContent(
       'Tài khoản không có quyền truy cập trang quản trị.',
     );
@@ -407,7 +411,9 @@ describe('RequireAdmin', () => {
     expect(container.querySelector('.animate-spin')).not.toBeInTheDocument();
     expect(screen.getByText('Trang đăng nhập')).toBeInTheDocument();
     expect(screen.getByTestId('current-path')).toHaveTextContent('/login');
-    expect(screen.getByTestId('current-search')).toHaveTextContent('?error=forbidden');
+    expect(screen.getByTestId('current-search')).toHaveTextContent(
+      '?error=forbidden',
+    );
   });
 
   it('transitions from authenticated admin to login redirect when user logs out', () => {

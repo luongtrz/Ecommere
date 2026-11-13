@@ -11,7 +11,7 @@ export interface ChatMessageItemProps {
   message: ChatMessage;
   onDecide: (
     messageId: string,
-    decisions: Array<{ callId: string; approve: boolean }>
+    decisions: Array<{ callId: string; approve: boolean }>,
   ) => void | Promise<void>;
   onRetry?: () => void;
   variant?: 'widget' | 'page';
@@ -31,7 +31,7 @@ export function ChatMessageItem({
         <div
           className={cn(
             'rounded-lg rounded-tr-sm bg-primary px-4 py-3 text-sm text-primary-foreground whitespace-pre-wrap break-words',
-            variant === 'page' ? 'max-w-[75%]' : 'max-w-[85%]'
+            variant === 'page' ? 'max-w-[75%]' : 'max-w-[85%]',
           )}
         >
           {message.content}
@@ -41,12 +41,14 @@ export function ChatMessageItem({
   }
 
   // Assistant message: returns null if it has no content, tools, confirm, sources and error
-  const hasContent = Boolean(message.content && message.content.trim().length > 0);
+  const hasContent = Boolean(
+    message.content && message.content.trim().length > 0,
+  );
   const hasTools = Boolean(message.tools && message.tools.length > 0);
   const hasConfirm = Boolean(
     message.confirm &&
     message.confirm.calls &&
-    message.confirm.calls.length > 0
+    message.confirm.calls.length > 0,
   );
   const hasSources = Boolean(message.sources && message.sources.length > 0);
   const hasError = Boolean(message.error && message.error.trim().length > 0);
@@ -69,7 +71,9 @@ export function ChatMessageItem({
       <div
         className={cn(
           'flex-1 min-w-0',
-          variant === 'page' ? 'max-w-[85%] space-y-3' : 'max-w-[92%] space-y-2.5'
+          variant === 'page'
+            ? 'max-w-[85%] space-y-3'
+            : 'max-w-[92%] space-y-2.5',
         )}
       >
         {/* 1. Tool call cards */}
@@ -82,8 +86,8 @@ export function ChatMessageItem({
         )}
 
         {/* 2. Markdown answer */}
-        {hasContent && (
-          variant === 'widget' ? (
+        {hasContent &&
+          (variant === 'widget' ? (
             <div className="w-full rounded-lg rounded-tl-sm border border-border bg-card px-4 py-3 text-sm text-card-foreground">
               <ChatMarkdown content={message.content} size="sm" />
             </div>
@@ -91,8 +95,7 @@ export function ChatMessageItem({
             <div className="w-full text-foreground leading-relaxed">
               <ChatMarkdown content={message.content} size="base" />
             </div>
-          )
-        )}
+          ))}
 
         {/* 3. Confirm action card */}
         {hasConfirm && message.confirm && (
@@ -109,7 +112,10 @@ export function ChatMessageItem({
         {hasSources && message.sources && (
           <div className="w-full space-y-2 pt-1">
             <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-              <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+              <ShoppingBag
+                className="h-3.5 w-3.5 text-muted-foreground"
+                aria-hidden="true"
+              />
               <span>Sản phẩm gợi ý</span>
             </p>
             <div
@@ -120,7 +126,11 @@ export function ChatMessageItem({
               }
             >
               {message.sources.map((source) => (
-                <ChatSourceCard key={source.id} source={source} variant={variant} />
+                <ChatSourceCard
+                  key={source.id}
+                  source={source}
+                  variant={variant}
+                />
               ))}
             </div>
           </div>

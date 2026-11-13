@@ -137,7 +137,9 @@ describe('CartDrawer', () => {
     expect(
       screen.getByText(matchText(formatCurrency(250000))),
     ).toBeInTheDocument();
-    expect(screen.getByText(/để được miễn phí vận chuyển/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/để được miễn phí vận chuyển/i),
+    ).toBeInTheDocument();
     expect(screen.getByText('0%')).toBeInTheDocument();
 
     // Empty state
@@ -188,7 +190,9 @@ describe('CartDrawer', () => {
     expect(
       screen.getByText(matchText(formatCurrency(freeshipRemaining))),
     ).toBeInTheDocument();
-    expect(screen.getByText(/để được miễn phí vận chuyển/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/để được miễn phí vận chuyển/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(`${freeshipProgress}%`)).toBeInTheDocument();
     expect(
       screen.queryByText('🎉 Bạn đã được miễn phí vận chuyển!'),
@@ -283,7 +287,9 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem1.name)
       .closest('div.py-4') as HTMLElement;
-    const minusBtn = (drawerItem.querySelector('button[aria-label="Giảm số lượng"]') ||
+    const minusBtn = (drawerItem.querySelector(
+      'button[aria-label="Giảm số lượng"]',
+    ) ||
       drawerItem.querySelector('svg.lucide-minus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[0]) as HTMLButtonElement;
 
@@ -312,7 +318,9 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem2.name)
       .closest('div.py-4') as HTMLElement;
-    const minusBtn = (drawerItem.querySelector('button[aria-label="Giảm số lượng"]') ||
+    const minusBtn = (drawerItem.querySelector(
+      'button[aria-label="Giảm số lượng"]',
+    ) ||
       drawerItem.querySelector('svg.lucide-minus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[0]) as HTMLButtonElement;
 
@@ -334,7 +342,9 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem1.name)
       .closest('div.py-4') as HTMLElement;
-    const plusBtn = (drawerItem.querySelector('button[aria-label="Tăng số lượng"]') ||
+    const plusBtn = (drawerItem.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
       drawerItem.querySelector('svg.lucide-plus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[1]) as HTMLButtonElement;
 
@@ -363,7 +373,9 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem2.name)
       .closest('div.py-4') as HTMLElement;
-    const plusBtn = (drawerItem.querySelector('button[aria-label="Tăng số lượng"]') ||
+    const plusBtn = (drawerItem.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
       drawerItem.querySelector('svg.lucide-plus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[1]) as HTMLButtonElement;
 
@@ -385,7 +397,9 @@ describe('CartDrawer', () => {
     const drawerItem = screen
       .getByText(mockItem3.name)
       .closest('div.py-4') as HTMLElement;
-    const plusBtn = (drawerItem.querySelector('button[aria-label="Tăng số lượng"]') ||
+    const plusBtn = (drawerItem.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
       drawerItem.querySelector('svg.lucide-plus')?.closest('button') ||
       drawerItem.querySelectorAll('button')[1]) as HTMLButtonElement;
 

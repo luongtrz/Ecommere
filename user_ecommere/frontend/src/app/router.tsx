@@ -1,31 +1,113 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, matchRoutes, type RouteObject } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  matchRoutes,
+  type RouteObject,
+} from 'react-router-dom';
 import { MainLayout } from './layout/MainLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { RequireAuth } from './guards/RequireAuth';
 import { PageSkeleton } from '@/components/common/PageSkeleton';
 
 // Lazy load all pages
-const HomePage = lazy(() => import('@/features/catalog/pages/HomePage').then(m => ({ default: m.HomePage })));
-const CatalogPage = lazy(() => import('@/features/catalog/pages/CatalogPage').then(m => ({ default: m.CatalogPage })));
-const CategoryPage = lazy(() => import('@/features/catalog/pages/CategoryPage').then(m => ({ default: m.CategoryPage })));
-const ProductDetailPage = lazy(() => import('@/features/catalog/pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
-const SearchPage = lazy(() => import('@/features/catalog/pages/SearchPage').then(m => ({ default: m.SearchPage })));
-const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import('@/features/auth/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
-const ForgotPasswordPage = lazy(() => import('@/features/auth/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
-const ResetPasswordPage = lazy(() => import('@/features/auth/pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
-const AccountPage = lazy(() => import('@/features/auth/pages/AccountPage').then(m => ({ default: m.AccountPage })));
-const AddressesPage = lazy(() => import('@/features/users/pages/AddressesPage').then(m => ({ default: m.AddressesPage })));
-const CartPage = lazy(() => import('@/features/cart/pages/CartPage').then(m => ({ default: m.CartPage })));
-const WishlistPage = lazy(() => import('@/features/catalog/pages/WishlistPage').then(m => ({ default: m.WishlistPage })));
-const CheckoutPage = lazy(() => import('@/features/checkout/pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
-const OrdersPage = lazy(() => import('@/features/orders/pages/OrdersPage').then(m => ({ default: m.OrdersPage })));
-const OrderDetailPage = lazy(() => import('@/features/orders/pages/OrderDetailPage').then(m => ({ default: m.OrderDetailPage })));
-const ReferralPage = lazy(() => import('@/features/referrals/pages/ReferralPage').then(m => ({ default: m.ReferralPage })));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
-const ErrorPage = lazy(() => import('@/pages/ErrorPage').then(m => ({ default: m.ErrorPage })));
-const ChatbotPage = lazy(() => import('@/features/chatbot/pages/ChatbotPage').then(m => ({ default: m.ChatbotPage })));
+const HomePage = lazy(() =>
+  import('@/features/catalog/pages/HomePage').then((m) => ({
+    default: m.HomePage,
+  })),
+);
+const CatalogPage = lazy(() =>
+  import('@/features/catalog/pages/CatalogPage').then((m) => ({
+    default: m.CatalogPage,
+  })),
+);
+const CategoryPage = lazy(() =>
+  import('@/features/catalog/pages/CategoryPage').then((m) => ({
+    default: m.CategoryPage,
+  })),
+);
+const ProductDetailPage = lazy(() =>
+  import('@/features/catalog/pages/ProductDetailPage').then((m) => ({
+    default: m.ProductDetailPage,
+  })),
+);
+const SearchPage = lazy(() =>
+  import('@/features/catalog/pages/SearchPage').then((m) => ({
+    default: m.SearchPage,
+  })),
+);
+const LoginPage = lazy(() =>
+  import('@/features/auth/pages/LoginPage').then((m) => ({
+    default: m.LoginPage,
+  })),
+);
+const RegisterPage = lazy(() =>
+  import('@/features/auth/pages/RegisterPage').then((m) => ({
+    default: m.RegisterPage,
+  })),
+);
+const ForgotPasswordPage = lazy(() =>
+  import('@/features/auth/pages/ForgotPasswordPage').then((m) => ({
+    default: m.ForgotPasswordPage,
+  })),
+);
+const ResetPasswordPage = lazy(() =>
+  import('@/features/auth/pages/ResetPasswordPage').then((m) => ({
+    default: m.ResetPasswordPage,
+  })),
+);
+const AccountPage = lazy(() =>
+  import('@/features/auth/pages/AccountPage').then((m) => ({
+    default: m.AccountPage,
+  })),
+);
+const AddressesPage = lazy(() =>
+  import('@/features/users/pages/AddressesPage').then((m) => ({
+    default: m.AddressesPage,
+  })),
+);
+const CartPage = lazy(() =>
+  import('@/features/cart/pages/CartPage').then((m) => ({
+    default: m.CartPage,
+  })),
+);
+const WishlistPage = lazy(() =>
+  import('@/features/catalog/pages/WishlistPage').then((m) => ({
+    default: m.WishlistPage,
+  })),
+);
+const CheckoutPage = lazy(() =>
+  import('@/features/checkout/pages/CheckoutPage').then((m) => ({
+    default: m.CheckoutPage,
+  })),
+);
+const OrdersPage = lazy(() =>
+  import('@/features/orders/pages/OrdersPage').then((m) => ({
+    default: m.OrdersPage,
+  })),
+);
+const OrderDetailPage = lazy(() =>
+  import('@/features/orders/pages/OrderDetailPage').then((m) => ({
+    default: m.OrderDetailPage,
+  })),
+);
+const ReferralPage = lazy(() =>
+  import('@/features/referrals/pages/ReferralPage').then((m) => ({
+    default: m.ReferralPage,
+  })),
+);
+const NotFoundPage = lazy(() =>
+  import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
+);
+const ErrorPage = lazy(() =>
+  import('@/pages/ErrorPage').then((m) => ({ default: m.ErrorPage })),
+);
+const ChatbotPage = lazy(() =>
+  import('@/features/chatbot/pages/ChatbotPage').then((m) => ({
+    default: m.ChatbotPage,
+  })),
+);
 
 export const protectedRoutes: RouteObject[] = [
   { path: 'account', element: <AccountPage /> },
@@ -71,9 +153,19 @@ export function AppRouter() {
           <Route path="chat" element={<ChatbotPage />} />
 
           {/* Protected User Routes */}
-          <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
-            {protectedRoutes.map(route => (
-              <Route key={route.path} path={route.path} element={route.element} />
+          <Route
+            element={
+              <RequireAuth>
+                <MainLayout />
+              </RequireAuth>
+            }
+          >
+            {protectedRoutes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={route.element}
+              />
             ))}
           </Route>
 

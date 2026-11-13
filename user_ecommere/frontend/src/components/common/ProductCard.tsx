@@ -17,7 +17,11 @@ interface ProductCardProps {
   salePrice?: number;
   rating?: number;
   reviewCount?: number;
-  variants?: Array<{ stock: number; price?: number; salePrice?: number | null }>;
+  variants?: Array<{
+    stock: number;
+    price?: number;
+    salePrice?: number | null;
+  }>;
   onAddToCart?: () => void;
 }
 
@@ -34,18 +38,30 @@ export const ProductCard = memo(function ProductCard({
   onAddToCart,
 }: ProductCardProps) {
   const selectedVariant = variants?.[0];
-  const hasVariantPrice = selectedVariant && typeof selectedVariant.price === 'number';
+  const hasVariantPrice =
+    selectedVariant && typeof selectedVariant.price === 'number';
   const effectivePrice = hasVariantPrice ? selectedVariant.price! : price;
   const effectiveSalePrice = hasVariantPrice
     ? (selectedVariant.salePrice ?? undefined)
     : salePrice;
 
-  const hasDiscount = effectiveSalePrice != null && effectiveSalePrice < effectivePrice;
-  const finalPrice = hasDiscount && effectiveSalePrice != null ? effectiveSalePrice : effectivePrice;
-  const discountPercent = hasDiscount && effectiveSalePrice != null
-    ? Math.max(1, Math.round(((effectivePrice - effectiveSalePrice) / effectivePrice) * 100))
-    : 0;
-  const isOutOfStock = variants !== undefined && (!selectedVariant || selectedVariant.stock === 0);
+  const hasDiscount =
+    effectiveSalePrice != null && effectiveSalePrice < effectivePrice;
+  const finalPrice =
+    hasDiscount && effectiveSalePrice != null
+      ? effectiveSalePrice
+      : effectivePrice;
+  const discountPercent =
+    hasDiscount && effectiveSalePrice != null
+      ? Math.max(
+          1,
+          Math.round(
+            ((effectivePrice - effectiveSalePrice) / effectivePrice) * 100,
+          ),
+        )
+      : 0;
+  const isOutOfStock =
+    variants !== undefined && (!selectedVariant || selectedVariant.stock === 0);
 
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { toggleItem, isInWishlist } = useWishlist();
@@ -84,7 +100,7 @@ export const ProductCard = memo(function ProductCard({
               decoding="async"
               className={cn(
                 'h-full w-full object-cover transition-transform duration-300 motion-reduce:transform-none group-hover:scale-[1.03]',
-                isOutOfStock && 'opacity-75'
+                isOutOfStock && 'opacity-75',
               )}
             />
           </Link>
@@ -108,15 +124,26 @@ export const ProductCard = memo(function ProductCard({
             type="button"
             onClick={(event) => {
               event.preventDefault();
-              toggleItem({ productId: id, name, slug, image: images[0], price: finalPrice });
+              toggleItem({
+                productId: id,
+                name,
+                slug,
+                image: images[0],
+                price: finalPrice,
+              });
             }}
             className={cn(
               'absolute right-2.5 top-2.5 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              isWishlisted && 'text-destructive hover:text-destructive'
+              isWishlisted && 'text-destructive hover:text-destructive',
             )}
             aria-label="Thêm vào yêu thích"
           >
-            <Heart className={cn('h-5 w-5 transition-colors', isWishlisted && 'fill-destructive text-destructive')} />
+            <Heart
+              className={cn(
+                'h-5 w-5 transition-colors',
+                isWishlisted && 'fill-destructive text-destructive',
+              )}
+            />
           </button>
 
           {/* Quick-view Trigger (hover-capable devices only, hidden on touch screens) */}
@@ -147,7 +174,9 @@ export const ProductCard = memo(function ProductCard({
             {reviewCount > 0 ? (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Star className="h-4 w-4 fill-accent text-accent" />
-                <span className="font-medium tabular text-foreground">{rating.toFixed(1)}</span>
+                <span className="font-medium tabular text-foreground">
+                  {rating.toFixed(1)}
+                </span>
                 <span>·</span>
                 <span className="tabular">{reviewCount} đánh giá</span>
               </div>
@@ -188,7 +217,11 @@ export const ProductCard = memo(function ProductCard({
       </div>
 
       {isQuickViewOpen ? (
-        <ProductQuickView slug={slug} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+        <ProductQuickView
+          slug={slug}
+          open={isQuickViewOpen}
+          onOpenChange={setIsQuickViewOpen}
+        />
       ) : null}
     </>
   );

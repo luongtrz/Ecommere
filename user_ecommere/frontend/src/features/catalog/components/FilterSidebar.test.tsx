@@ -691,7 +691,9 @@ describe('FilterSidebar', () => {
       expect(citrusCheckbox).toHaveAttribute('data-state', 'unchecked');
 
       expect(getFilterOptionSpan('Gỗ')).toHaveClass('font-semibold');
-      expect(getFilterOptionSpan('Cam chanh')).toHaveClass('text-muted-foreground');
+      expect(getFilterOptionSpan('Cam chanh')).toHaveClass(
+        'text-muted-foreground',
+      );
     });
 
     it('toggles scent selection on and off', () => {

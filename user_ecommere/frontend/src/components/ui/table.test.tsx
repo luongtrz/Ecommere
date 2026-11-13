@@ -212,7 +212,12 @@ describe('Table UI components', () => {
       );
       const footer = screen.getByTestId('footer-custom-class');
 
-      expect(footer).toHaveClass('custom-footer', 'border-t', 'border-border', 'bg-muted/30');
+      expect(footer).toHaveClass(
+        'custom-footer',
+        'border-t',
+        'border-border',
+        'bg-muted/30',
+      );
     });
 
     it('forwards ref to HTMLTableSectionElement', () => {

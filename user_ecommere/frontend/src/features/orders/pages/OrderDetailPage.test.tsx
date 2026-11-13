@@ -396,8 +396,12 @@ describe('OrderDetailPage', () => {
       expect(screen.getByText('Hiện tại')).toBeInTheDocument();
       expect(screen.getByText('Đặt hàng')).toHaveClass('text-foreground');
       expect(screen.getByText('Đóng gói')).toHaveClass('text-muted-foreground');
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-muted-foreground');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Vận chuyển')).toHaveClass(
+        'text-muted-foreground',
+      );
+      expect(screen.getByText('Giao hàng')).toHaveClass(
+        'text-muted-foreground',
+      );
     });
 
     it('renders order items list correctly', () => {
@@ -535,8 +539,12 @@ describe('OrderDetailPage', () => {
       // Timeline step 1 (Đóng gói) is current
       expect(screen.getByText('Đóng gói')).toHaveClass('text-foreground');
       expect(screen.getByText('Đặt hàng')).toHaveClass('text-foreground');
-      expect(screen.getByText('Vận chuyển')).toHaveClass('text-muted-foreground');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Vận chuyển')).toHaveClass(
+        'text-muted-foreground',
+      );
+      expect(screen.getByText('Giao hàng')).toHaveClass(
+        'text-muted-foreground',
+      );
 
       // Payment badge is Chưa thanh toán
       expect(screen.getByText('Chưa thanh toán')).toBeInTheDocument();
@@ -566,7 +574,9 @@ describe('OrderDetailPage', () => {
       expect(screen.getByText('Vận chuyển')).toHaveClass('text-foreground');
       expect(screen.getByText('Đóng gói')).toHaveClass('text-foreground');
       expect(screen.getByText('Đặt hàng')).toHaveClass('text-foreground');
-      expect(screen.getByText('Giao hàng')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Giao hàng')).toHaveClass(
+        'text-muted-foreground',
+      );
 
       expect(screen.getByText('Chưa thanh toán')).toBeInTheDocument();
       expect(

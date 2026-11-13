@@ -111,7 +111,7 @@ export function ConfirmActionCard({
     safeCalls.every((call) => typeof choices[call.id] === 'boolean');
 
   const remainingCount = safeCalls.filter(
-    (call) => typeof choices[call.id] !== 'boolean'
+    (call) => typeof choices[call.id] !== 'boolean',
   ).length;
 
   const handleSubmit = async () => {
@@ -166,7 +166,11 @@ export function ConfirmActionCard({
             <div className="flex flex-wrap items-center justify-end gap-2">
               <Button
                 type="button"
-                variant={safeCalls[0].risk === 'DESTRUCTIVE' ? 'destructive' : 'default'}
+                variant={
+                  safeCalls[0].risk === 'DESTRUCTIVE'
+                    ? 'destructive'
+                    : 'default'
+                }
                 size="sm"
                 disabled={isBusy}
                 onClick={() => handleSingleSubmit(true)}
@@ -209,8 +213,8 @@ export function ConfirmActionCard({
                   choices[call.id] === true
                     ? 'border-primary/40 bg-primary/5'
                     : choices[call.id] === false
-                    ? 'border-muted-foreground/30 bg-muted/40'
-                    : 'border-border/60 bg-muted/20'
+                      ? 'border-muted-foreground/30 bg-muted/40'
+                      : 'border-border/60 bg-muted/20'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 min-w-0">
@@ -242,7 +246,9 @@ export function ConfirmActionCard({
                   </Button>
                   <Button
                     type="button"
-                    variant={choices[call.id] === false ? 'secondary' : 'outline'}
+                    variant={
+                      choices[call.id] === false ? 'secondary' : 'outline'
+                    }
                     size="sm"
                     aria-pressed={choices[call.id] === false}
                     disabled={isBusy}
@@ -283,7 +289,8 @@ export function ConfirmActionCard({
                   <span>Đã gửi quyết định</span>
                 </div>
               ) : (
-                !allChosen && remainingCount > 0 && (
+                !allChosen &&
+                remainingCount > 0 && (
                   <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
                     Còn {remainingCount} thao tác chưa chọn
                   </span>
@@ -293,7 +300,7 @@ export function ConfirmActionCard({
                 type="button"
                 variant={
                   safeCalls.some(
-                    (c) => c.risk === 'DESTRUCTIVE' && choices[c.id] === true
+                    (c) => c.risk === 'DESTRUCTIVE' && choices[c.id] === true,
                   )
                     ? 'destructive'
                     : 'default'

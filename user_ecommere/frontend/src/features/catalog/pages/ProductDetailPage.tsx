@@ -52,7 +52,8 @@ export function ProductDetailPage() {
     product?.variants.find((v) => v.stock > 0) ||
     product?.variants[0];
   const isWishlisted = product ? isInWishlist(product.id) : false;
-  const isSelectedVariantOutOfStock = !selectedVariant || selectedVariant.stock === 0;
+  const isSelectedVariantOutOfStock =
+    !selectedVariant || selectedVariant.stock === 0;
 
   const handleAddToCart = () => {
     if (!product || !selectedVariant || selectedVariant.stock === 0) return;
@@ -133,7 +134,8 @@ export function ProductDetailPage() {
   const finalPrice = selectedVariant?.salePrice ?? selectedVariant?.price ?? 0;
   const originalPrice = selectedVariant?.price ?? 0;
   const hasDiscount =
-    selectedVariant?.salePrice != null && selectedVariant.salePrice < originalPrice;
+    selectedVariant?.salePrice != null &&
+    selectedVariant.salePrice < originalPrice;
   const discountSavings = originalPrice - finalPrice;
 
   return (
@@ -162,7 +164,10 @@ export function ProductDetailPage() {
             <Breadcrumb
               items={[
                 { label: 'Sản phẩm', href: '/catalog' },
-                { label: product.category?.name || 'Danh mục', href: `/c/${product.category?.slug}` },
+                {
+                  label: product.category?.name || 'Danh mục',
+                  href: `/c/${product.category?.slug}`,
+                },
                 { label: product.name },
               ]}
               className="text-xs sm:text-sm"
@@ -185,7 +190,10 @@ export function ProductDetailPage() {
                 {/* Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
                   {hasDiscount && (
-                    <Badge variant="destructive" className="rounded-sm font-semibold text-xs">
+                    <Badge
+                      variant="destructive"
+                      className="rounded-sm font-semibold text-xs"
+                    >
                       {formatDiscount(originalPrice, finalPrice)}
                     </Badge>
                   )}
@@ -258,7 +266,12 @@ export function ProductDetailPage() {
                       ({product.reviewCount || 38} đánh giá)
                     </span>
                   </div>
-                  <span className="hidden sm:inline text-border" aria-hidden="true">|</span>
+                  <span
+                    className="hidden sm:inline text-border"
+                    aria-hidden="true"
+                  >
+                    |
+                  </span>
                   <span className="text-xs text-muted-foreground font-medium">
                     🔥 Đã bán hơn 1.200 chai
                   </span>
@@ -276,7 +289,10 @@ export function ProductDetailPage() {
                       </span>
                     )}
                     {hasDiscount && (
-                      <Badge variant="success" className="rounded-sm text-xs font-medium tabular">
+                      <Badge
+                        variant="success"
+                        className="rounded-sm text-xs font-medium tabular"
+                      >
                         Tiết kiệm {formatCurrency(discountSavings)}
                       </Badge>
                     )}
@@ -285,12 +301,16 @@ export function ProductDetailPage() {
                   {isSelectedVariantOutOfStock ? (
                     <div className="flex items-start gap-2 text-sm text-muted-foreground pt-1">
                       <span className="inline-block h-2 w-2 rounded-full bg-destructive shrink-0 mt-1.5" />
-                      <span className="font-medium text-destructive">Hết hàng</span>
+                      <span className="font-medium text-destructive">
+                        Hết hàng
+                      </span>
                     </div>
                   ) : (
                     <div className="flex items-start gap-2 text-sm text-muted-foreground pt-1">
                       <span className="inline-block h-2 w-2 rounded-full bg-success shrink-0 mt-1.5" />
-                      <span className="font-medium text-foreground">Còn hàng trong kho</span>
+                      <span className="font-medium text-foreground">
+                        Còn hàng trong kho
+                      </span>
                       <span>•</span>
                       <span>Đồng kiểm tra hàng trước khi thanh toán COD</span>
                     </div>
@@ -327,8 +347,8 @@ export function ProductDetailPage() {
                                   ? 'border-dashed border-border bg-muted/40 text-muted-foreground opacity-60 cursor-not-allowed'
                                   : 'border-border text-muted-foreground line-through opacity-50 cursor-not-allowed'
                                 : isSelected
-                                ? 'border-primary bg-secondary text-foreground'
-                                : 'border-border bg-card text-foreground hover:border-foreground/30'
+                                  ? 'border-primary bg-secondary text-foreground'
+                                  : 'border-border bg-card text-foreground hover:border-foreground/30'
                             }`}
                           >
                             {isSelected && !isOutOfStock && (
@@ -361,7 +381,9 @@ export function ProductDetailPage() {
                         <button
                           type="button"
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          disabled={quantity <= 1 || isSelectedVariantOutOfStock}
+                          disabled={
+                            quantity <= 1 || isSelectedVariantOutOfStock
+                          }
                           aria-label="Giảm số lượng"
                           className="h-11 w-11 flex items-center justify-center text-foreground hover:bg-muted transition-colors rounded-l-md disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
@@ -374,7 +396,10 @@ export function ProductDetailPage() {
                           type="button"
                           onClick={() =>
                             setQuantity(
-                              Math.min(selectedVariant?.stock ?? 0, quantity + 1)
+                              Math.min(
+                                selectedVariant?.stock ?? 0,
+                                quantity + 1,
+                              ),
                             )
                           }
                           disabled={
@@ -405,7 +430,9 @@ export function ProductDetailPage() {
                       disabled={isSelectedVariantOutOfStock}
                     >
                       <ShoppingCart className="mr-2 h-4 w-4" />
-                      {isSelectedVariantOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                      {isSelectedVariantOutOfStock
+                        ? 'Hết hàng'
+                        : 'Thêm vào giỏ'}
                     </Button>
 
                     <Button
@@ -413,11 +440,15 @@ export function ProductDetailPage() {
                       size="icon"
                       className="h-11 w-11 shrink-0"
                       onClick={handleToggleWishlist}
-                      aria-label={isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích'}
+                      aria-label={
+                        isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích'
+                      }
                     >
                       <Heart
                         className={`h-5 w-5 ${
-                          isWishlisted ? 'fill-destructive text-destructive' : 'text-foreground'
+                          isWishlisted
+                            ? 'fill-destructive text-destructive'
+                            : 'text-foreground'
                         }`}
                       />
                     </Button>
@@ -440,25 +471,37 @@ export function ProductDetailPage() {
                     <div className="flex items-start gap-3 py-3 first:pt-0">
                       <ShieldCheck className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-foreground font-medium">Cam kết chính hãng</strong>: Nhập khẩu trực tiếp từ Thái Lan.
+                        <strong className="text-foreground font-medium">
+                          Cam kết chính hãng
+                        </strong>
+                        : Nhập khẩu trực tiếp từ Thái Lan.
                       </span>
                     </div>
                     <div className="flex items-start gap-3 py-3">
                       <RefreshCw className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-foreground font-medium">Đổi trả 7 ngày</strong>: Miễn phí nếu sản phẩm vỡ hoặc lỗi tem.
+                        <strong className="text-foreground font-medium">
+                          Đổi trả 7 ngày
+                        </strong>
+                        : Miễn phí nếu sản phẩm vỡ hoặc lỗi tem.
                       </span>
                     </div>
                     <div className="flex items-start gap-3 py-3">
                       <CheckCircle2 className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-foreground font-medium">Đồng kiểm tra hàng</strong>: Kiểm tra trước khi trả tiền COD.
+                        <strong className="text-foreground font-medium">
+                          Đồng kiểm tra hàng
+                        </strong>
+                        : Kiểm tra trước khi trả tiền COD.
                       </span>
                     </div>
                     <div className="flex items-start gap-3 py-3 last:pb-0">
                       <Truck className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-foreground font-medium">Giao nhanh toàn quốc</strong>: Freeship đơn từ 250.000đ.
+                        <strong className="text-foreground font-medium">
+                          Giao nhanh toàn quốc
+                        </strong>
+                        : Freeship đơn từ 250.000đ.
                       </span>
                     </div>
                   </div>
@@ -489,22 +532,34 @@ export function ProductDetailPage() {
 
               <TabsContent value="description" className="mt-8">
                 <div className="surface p-6 md:p-8 space-y-6">
-                  <h2 className="text-xl sm:text-2xl font-semibold leading-snug text-foreground">Chi tiết sản phẩm</h2>
+                  <h2 className="text-xl sm:text-2xl font-semibold leading-snug text-foreground">
+                    Chi tiết sản phẩm
+                  </h2>
                   <div className="text-foreground/90 whitespace-pre-line leading-relaxed text-sm max-w-[65ch]">
                     {product.description}
                   </div>
                   <div className="pt-4 border-t border-border divide-y divide-border text-sm max-w-xl">
                     <div className="py-2.5 first:pt-0 grid grid-cols-[140px_1fr] sm:grid-cols-[160px_1fr] gap-4 items-center">
                       <span className="text-muted-foreground">Xuất xứ:</span>
-                      <span className="font-medium text-foreground">Thái Lan (Thailand)</span>
+                      <span className="font-medium text-foreground">
+                        Thái Lan (Thailand)
+                      </span>
                     </div>
                     <div className="py-2.5 grid grid-cols-[140px_1fr] sm:grid-cols-[160px_1fr] gap-4 items-center">
-                      <span className="text-muted-foreground">Thương hiệu:</span>
-                      <span className="font-medium text-foreground">Nội địa Thái</span>
+                      <span className="text-muted-foreground">
+                        Thương hiệu:
+                      </span>
+                      <span className="font-medium text-foreground">
+                        Nội địa Thái
+                      </span>
                     </div>
                     <div className="py-2.5 last:pb-0 grid grid-cols-[140px_1fr] sm:grid-cols-[160px_1fr] gap-4 items-center">
-                      <span className="text-muted-foreground">Hạn sử dụng:</span>
-                      <span className="font-medium text-foreground">3 năm kể từ ngày sản xuất</span>
+                      <span className="text-muted-foreground">
+                        Hạn sử dụng:
+                      </span>
+                      <span className="font-medium text-foreground">
+                        3 năm kể từ ngày sản xuất
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -523,7 +578,9 @@ export function ProductDetailPage() {
                           Cách sử dụng hiệu quả:
                         </strong>
                         <span className="text-muted-foreground">
-                          Lắc đều trước khi xịt. Xịt trực tiếp vào khu vực cần xử lý (góc tường, gầm tủ, đường đi của côn trùng, bề mặt cần làm sạch) ở khoảng cách 20 - 30cm.
+                          Lắc đều trước khi xịt. Xịt trực tiếp vào khu vực cần
+                          xử lý (góc tường, gầm tủ, đường đi của côn trùng, bề
+                          mặt cần làm sạch) ở khoảng cách 20 - 30cm.
                         </span>
                       </div>
                     </div>
@@ -535,7 +592,9 @@ export function ProductDetailPage() {
                           Lưu ý an toàn:
                         </strong>
                         <span className="text-muted-foreground">
-                          Để xa tầm tay trẻ em và thú cưng. Tránh xịt trực tiếp vào mắt, mũi hoặc thực phẩm. Rửa sạch tay với nước và xà phòng sau khi sử dụng.
+                          Để xa tầm tay trẻ em và thú cưng. Tránh xịt trực tiếp
+                          vào mắt, mũi hoặc thực phẩm. Rửa sạch tay với nước và
+                          xà phòng sau khi sử dụng.
                         </span>
                       </div>
                     </div>
@@ -547,7 +606,9 @@ export function ProductDetailPage() {
                           Bảo quản:
                         </strong>
                         <span className="text-muted-foreground">
-                          Nơi khô ráo thoáng mát, tránh ánh nắng trực tiếp và nguồn nhiệt cao trên 50°C. Đậy nắp kín sau mỗi lần sử dụng.
+                          Nơi khô ráo thoáng mát, tránh ánh nắng trực tiếp và
+                          nguồn nhiệt cao trên 50°C. Đậy nắp kín sau mỗi lần sử
+                          dụng.
                         </span>
                       </div>
                     </div>

@@ -241,7 +241,9 @@ describe('AccountPage', () => {
 
     expect(mockLogout).not.toHaveBeenCalled();
     expect(
-      screen.queryByText('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?'),
+      screen.queryByText(
+        'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?',
+      ),
     ).not.toBeInTheDocument();
   });
 

@@ -572,9 +572,7 @@ describe('HomePage', () => {
       expect(
         screen.queryByTestId('product-card-curated-prod-1'),
       ).not.toBeInTheDocument();
-      expect(
-        container.querySelectorAll('.animate-pulse').length,
-      ).toBe(0);
+      expect(container.querySelectorAll('.animate-pulse').length).toBe(0);
     });
   });
 
@@ -632,7 +630,14 @@ describe('HomePage', () => {
             slug: id,
             basePrice: 100000,
             images: [`/images/${id}.jpg`],
-            variants: [{ id: `var-${id}`, price: 100000, scent: 'Hương thơm', volumeMl: 50 }],
+            variants: [
+              {
+                id: `var-${id}`,
+                price: 100000,
+                scent: 'Hương thơm',
+                volumeMl: 50,
+              },
+            ],
           },
         ],
       });
@@ -806,9 +811,7 @@ describe('HomePage', () => {
 
       const { container } = renderHomePage();
 
-      const skeletonBlocks = container.querySelectorAll(
-        '.animate-pulse',
-      );
+      const skeletonBlocks = container.querySelectorAll('.animate-pulse');
       expect(skeletonBlocks.length).toBeGreaterThanOrEqual(4);
     });
 

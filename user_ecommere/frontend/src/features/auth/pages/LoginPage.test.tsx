@@ -111,7 +111,9 @@ describe('LoginPage', () => {
     expect(backHomeLink).toHaveAttribute('href', '/');
 
     // Form Header
-    expect(screen.getByRole('heading', { level: 1, name: /Đăng nhập tài khoản/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /Đăng nhập tài khoản/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByText('Chào mừng bạn quay lại với Thai Spray Shop'),
     ).toBeInTheDocument();
@@ -135,7 +137,9 @@ describe('LoginPage', () => {
     expect(forgotPasswordLink).toHaveAttribute('href', '/forgot-password');
 
     // Submit Button
-    const submitButton = screen.getByRole('button', { name: /Đăng nhập ngay/i });
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
     expect(submitButton).toBeInTheDocument();
     expect(submitButton).toBeEnabled();
 
@@ -168,7 +172,9 @@ describe('LoginPage', () => {
   it('displays validation error messages when submitting an empty form', async () => {
     renderComponent();
 
-    const submitButton = screen.getByRole('button', { name: /Đăng nhập ngay/i });
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
     fireEvent.click(submitButton);
 
     expect(
@@ -185,7 +191,9 @@ describe('LoginPage', () => {
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByLabelText('Mật khẩu');
-    const submitButton = screen.getByRole('button', { name: /Đăng nhập ngay/i });
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
 
     fireEvent.change(phoneInput, { target: { value: '12345' } });
     fireEvent.change(passwordInput, { target: { value: 'validPassword123' } });
@@ -202,7 +210,9 @@ describe('LoginPage', () => {
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByLabelText('Mật khẩu');
-    const submitButton = screen.getByRole('button', { name: /Đăng nhập ngay/i });
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
 
     fireEvent.change(phoneInput, { target: { value: '0912345678' } });
     fireEvent.change(passwordInput, { target: { value: '12345' } });
@@ -219,7 +229,9 @@ describe('LoginPage', () => {
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByLabelText('Mật khẩu');
-    const submitButton = screen.getByRole('button', { name: /Đăng nhập ngay/i });
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
 
     fireEvent.change(phoneInput, { target: { value: '0912345678' } });
     fireEvent.change(passwordInput, { target: { value: 'a'.repeat(51) } });
@@ -236,7 +248,9 @@ describe('LoginPage', () => {
 
     const phoneInput = screen.getByPlaceholderText('0912 345 678');
     const passwordInput = screen.getByLabelText('Mật khẩu');
-    const submitButton = screen.getByRole('button', { name: /Đăng nhập ngay/i });
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
 
     fireEvent.change(phoneInput, { target: { value: '0912345678' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });

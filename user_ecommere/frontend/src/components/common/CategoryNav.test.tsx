@@ -138,7 +138,9 @@ describe('CategoryNav', () => {
     expect(cat1Link).toHaveAttribute('href', '/c/xit-thom-phong');
     expect(cat1Link).toHaveClass('h-11');
 
-    const cat2Link = screen.getByRole('link', { name: 'Đuổi chuột & Côn trùng' });
+    const cat2Link = screen.getByRole('link', {
+      name: 'Đuổi chuột & Côn trùng',
+    });
     expect(cat2Link).toHaveAttribute('href', '/c/duoi-chuot-con-trung');
     expect(cat2Link).toHaveClass('h-11');
 

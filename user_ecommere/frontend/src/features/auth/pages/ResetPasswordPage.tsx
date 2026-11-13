@@ -6,7 +6,14 @@ import { Eye, EyeOff, Lock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { useAuth } from '../hooks/useAuth';
 import { SEO } from '@/lib/seo';
 import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/validators';
@@ -14,7 +21,8 @@ import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/validators';
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const { resetPassword, isResetPasswordLoading, resetPasswordError } = useAuth();
+  const { resetPassword, isResetPasswordLoading, resetPasswordError } =
+    useAuth();
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -101,7 +109,8 @@ export function ResetPasswordPage() {
               <div className="space-y-5">
                 <Alert variant="destructive" className="text-sm">
                   <AlertDescription>
-                    Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.
+                    Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác
+                    thực.
                   </AlertDescription>
                 </Alert>
 
@@ -141,13 +150,17 @@ export function ResetPasswordPage() {
                     <AlertDescription>
                       {Array.isArray(resetPasswordError.response?.data?.message)
                         ? resetPasswordError.response?.data?.message.join(', ')
-                        : (resetPasswordError.response?.data?.message || 'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.')}
+                        : resetPasswordError.response?.data?.message ||
+                          'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra lại.'}
                     </AlertDescription>
                   </Alert>
                 )}
 
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+                  <form
+                    onSubmit={form.handleSubmit(handleSubmit)}
+                    className="space-y-5"
+                  >
                     <FormField
                       control={form.control}
                       name="newPassword"
@@ -169,15 +182,26 @@ export function ResetPasswordPage() {
                             </FormControl>
                             <button
                               type="button"
-                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              onClick={() =>
+                                setShowNewPassword(!showNewPassword)
+                              }
                               className="absolute inset-y-0 right-0 w-11 h-11 min-h-11 min-w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                              aria-label={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                              aria-label={
+                                showNewPassword
+                                  ? 'Ẩn mật khẩu'
+                                  : 'Hiện mật khẩu'
+                              }
                             >
-                              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              {showNewPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
                             </button>
                           </div>
                           <p className="text-xs text-muted-foreground leading-normal">
-                            Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).
+                            Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký
+                            tự đặc biệt (@$!%*?&).
                           </p>
                           <FormMessage className="text-sm text-destructive" />
                         </FormItem>
@@ -205,11 +229,21 @@ export function ResetPasswordPage() {
                             </FormControl>
                             <button
                               type="button"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                              }
                               className="absolute inset-y-0 right-0 w-11 h-11 min-h-11 min-w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                              aria-label={showConfirmPassword ? 'Ẩn mật khẩu xác nhận' : 'Hiện mật khẩu xác nhận'}
+                              aria-label={
+                                showConfirmPassword
+                                  ? 'Ẩn mật khẩu xác nhận'
+                                  : 'Hiện mật khẩu xác nhận'
+                              }
                             >
-                              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              {showConfirmPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
                             </button>
                           </div>
                           <FormMessage className="text-sm text-destructive" />

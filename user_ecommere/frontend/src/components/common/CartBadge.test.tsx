@@ -78,12 +78,7 @@ describe('CartBadge', () => {
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent('1');
     expect(badge?.textContent).toBe('1');
-    expect(badge).toHaveClass(
-      'absolute',
-      '-right-1',
-      '-top-1',
-      'rounded-full',
-    );
+    expect(badge).toHaveClass('absolute', '-right-1', '-top-1', 'rounded-full');
   });
 
   it('renders badge with correct total quantity when cart has multiple items', () => {

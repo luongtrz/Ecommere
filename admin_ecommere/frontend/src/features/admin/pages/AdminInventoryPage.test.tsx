@@ -214,7 +214,9 @@ describe('AdminInventoryPage', () => {
   });
 
   it('submits stock adjustment successfully, calls mutationFn and triggers onSuccess', async () => {
-    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { success: true } });
+    vi.mocked(apiClient.post).mockResolvedValueOnce({
+      data: { success: true },
+    });
     renderWithProviders(<AdminInventoryPage />);
 
     // Open adjust dialog
@@ -266,7 +268,9 @@ describe('AdminInventoryPage', () => {
   });
 
   it('submits stock adjustment with ADJUST type and default note on success', async () => {
-    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { success: true } });
+    vi.mocked(apiClient.post).mockResolvedValueOnce({
+      data: { success: true },
+    });
     renderWithProviders(<AdminInventoryPage />);
 
     const adjustButtons = screen.getAllByRole('button', {
@@ -339,7 +343,9 @@ describe('AdminInventoryPage', () => {
   });
 
   it('submits stock adjustment with OUT type and exercises OUT type selector at line 1280', async () => {
-    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { success: true } });
+    vi.mocked(apiClient.post).mockResolvedValueOnce({
+      data: { success: true },
+    });
     renderWithProviders(<AdminInventoryPage />);
 
     const adjustButtons = screen.getAllByRole('button', {

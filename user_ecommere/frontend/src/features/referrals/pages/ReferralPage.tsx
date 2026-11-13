@@ -7,7 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Share2, Users, Ticket, History, Check } from 'lucide-react';
-import { useReferralInfo, useMyReferrals, useReferralCoupons } from '../hooks/useReferral';
+import {
+  useReferralInfo,
+  useMyReferrals,
+  useReferralCoupons,
+} from '../hooks/useReferral';
 import { formatCurrency } from '@/lib/formatters';
 
 export function ReferralPage() {
@@ -59,7 +63,10 @@ export function ReferralPage() {
     await copyToClipboard(code);
     setCopiedCouponCode(code);
     toast.success('Đã sao chép mã giảm giá');
-    setTimeout(() => setCopiedCouponCode((curr) => (curr === code ? null : curr)), 2000);
+    setTimeout(
+      () => setCopiedCouponCode((curr) => (curr === code ? null : curr)),
+      2000,
+    );
   };
 
   const handleShare = async () => {
@@ -95,7 +102,12 @@ export function ReferralPage() {
       <SEO title="Mời bạn bè - Thai Spray" />
       <div className="container py-8 md:py-12 max-w-5xl space-y-8">
         {/* Breadcrumb */}
-        <Breadcrumb items={[{ label: 'Tài khoản', href: '/account' }, { label: 'Mời bạn bè' }]} />
+        <Breadcrumb
+          items={[
+            { label: 'Tài khoản', href: '/account' },
+            { label: 'Mời bạn bè' },
+          ]}
+        />
 
         {/* Header */}
         <div className="pb-6 border-b border-border">
@@ -198,19 +210,30 @@ export function ReferralPage() {
             <div className="text-2xl md:text-3xl font-semibold text-foreground tabular">
               {info?.totalCouponsEarned || 0}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Mã giảm giá đã nhận</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Mã giảm giá đã nhận
+            </p>
           </div>
         </section>
 
         {/* Tabs: Coupons & Referral History */}
         <section>
-          <Tabs defaultValue="coupons" className="border border-border rounded-lg bg-card overflow-hidden">
+          <Tabs
+            defaultValue="coupons"
+            className="border border-border rounded-lg bg-card overflow-hidden"
+          >
             <TabsList className="w-full justify-start border-b border-border bg-muted/20 px-2 sm:px-4">
-              <TabsTrigger value="coupons" className="min-h-11 text-xs sm:text-sm">
+              <TabsTrigger
+                value="coupons"
+                className="min-h-11 text-xs sm:text-sm"
+              >
                 <Ticket className="h-4 w-4 mr-2" />
                 Mã giảm giá
               </TabsTrigger>
-              <TabsTrigger value="referrals" className="min-h-11 text-xs sm:text-sm">
+              <TabsTrigger
+                value="referrals"
+                className="min-h-11 text-xs sm:text-sm"
+              >
                 <History className="h-4 w-4 mr-2" />
                 Lịch sử mời
               </TabsTrigger>
@@ -220,7 +243,10 @@ export function ReferralPage() {
               {couponsLoading ? (
                 <div className="p-4 space-y-3">
                   {[1, 2].map((i) => (
-                    <div key={i} className="h-16 bg-muted rounded animate-pulse" />
+                    <div
+                      key={i}
+                      className="h-16 bg-muted rounded animate-pulse"
+                    />
                   ))}
                 </div>
               ) : !coupons || coupons.length === 0 ? (
@@ -229,15 +255,23 @@ export function ReferralPage() {
                   <p className="text-muted-foreground text-sm max-w-sm mb-4">
                     Chưa có mã giảm giá nào. Hãy mời bạn bè để nhận mã giảm giá!
                   </p>
-                  <Button variant="outline" size="sm" asChild className="min-h-11">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    className="min-h-11"
+                  >
                     <Link to="/catalog">Khám phá sản phẩm</Link>
                   </Button>
                 </div>
               ) : (
                 <div className="divide-y divide-border">
                   {coupons.map((coupon) => {
-                    const isExpired = coupon.validUntil && new Date(coupon.validUntil) < new Date();
-                    const isUsed = coupon.usedCount >= (coupon.maxUses || Infinity);
+                    const isExpired =
+                      coupon.validUntil &&
+                      new Date(coupon.validUntil) < new Date();
+                    const isUsed =
+                      coupon.usedCount >= (coupon.maxUses || Infinity);
                     return (
                       <div
                         key={coupon.code}
@@ -250,7 +284,9 @@ export function ReferralPage() {
                             <Ticket className="h-4 w-4" />
                           </div>
                           <div>
-                            <p className="font-semibold text-sm text-foreground tabular">{coupon.code}</p>
+                            <p className="font-semibold text-sm text-foreground tabular">
+                              {coupon.code}
+                            </p>
                             <p className="text-xs text-foreground font-medium mt-0.5">
                               {coupon.type === 'PERCENT'
                                 ? `Giảm ${coupon.value}%`
@@ -259,18 +295,27 @@ export function ReferralPage() {
                                   : 'Miễn phí vận chuyển'}
                             </p>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              {coupon.maxDiscount ? `Tối đa ${formatCurrency(coupon.maxDiscount)}` : ''}
-                              {coupon.validUntil && ` • HSD: ${new Date(coupon.validUntil).toLocaleDateString('vi-VN')}`}
+                              {coupon.maxDiscount
+                                ? `Tối đa ${formatCurrency(coupon.maxDiscount)}`
+                                : ''}
+                              {coupon.validUntil &&
+                                ` • HSD: ${new Date(coupon.validUntil).toLocaleDateString('vi-VN')}`}
                             </p>
                           </div>
                         </div>
                         <div className="self-end sm:self-center shrink-0">
                           {isExpired ? (
-                            <Badge variant="secondary" className="rounded-sm text-xs">
+                            <Badge
+                              variant="secondary"
+                              className="rounded-sm text-xs"
+                            >
                               Hết hạn
                             </Badge>
                           ) : isUsed ? (
-                            <Badge variant="secondary" className="rounded-sm text-xs">
+                            <Badge
+                              variant="secondary"
+                              className="rounded-sm text-xs"
+                            >
                               Đã dùng
                             </Badge>
                           ) : (
@@ -280,7 +325,9 @@ export function ReferralPage() {
                               className="min-h-11 text-xs"
                               onClick={() => handleCopyCoupon(coupon.code)}
                             >
-                              {copiedCouponCode === coupon.code ? 'Đã sao chép' : 'Sao chép'}
+                              {copiedCouponCode === coupon.code
+                                ? 'Đã sao chép'
+                                : 'Sao chép'}
                             </Button>
                           )}
                         </div>
@@ -295,7 +342,10 @@ export function ReferralPage() {
               {referralsLoading ? (
                 <div className="p-4 space-y-3">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-12 bg-muted rounded animate-pulse" />
+                    <div
+                      key={i}
+                      className="h-12 bg-muted rounded animate-pulse"
+                    />
                   ))}
                 </div>
               ) : !referrals || referrals.data.length === 0 ? (
@@ -338,15 +388,23 @@ export function ReferralPage() {
                         </div>
                         <div className="flex items-center justify-between pt-2 border-t border-border/40 md:border-0 md:pt-0 md:contents">
                           <div className="md:col-span-3 md:text-right text-xs text-muted-foreground tabular">
-                            {new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                            {new Date(item.createdAt).toLocaleDateString(
+                              'vi-VN',
+                            )}
                           </div>
                           <div className="md:col-span-3 md:text-right">
                             {item.couponCode ? (
-                              <Badge variant="outline" className="rounded-sm text-xs border-success text-success font-medium">
+                              <Badge
+                                variant="outline"
+                                className="rounded-sm text-xs border-success text-success font-medium"
+                              >
                                 Đã nhận mã giảm giá
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="rounded-sm text-xs text-muted-foreground font-medium">
+                              <Badge
+                                variant="outline"
+                                className="rounded-sm text-xs text-muted-foreground font-medium"
+                              >
                                 Đang chờ
                               </Badge>
                             )}

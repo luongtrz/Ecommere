@@ -397,9 +397,7 @@ describe('DashboardPage', () => {
       screen.getByText(`${mockStatsPositive.orders.shippingOrders} đơn`),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Tổng số đơn hàng đang được giao tới khách hàng.',
-      ),
+      screen.getByText('Tổng số đơn hàng đang được giao tới khách hàng.'),
     ).toBeInTheDocument();
 
     // 4 Key Stat Cards
@@ -572,8 +570,12 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument();
 
     // Verify operational navigation links
-    const rhythmSection = (screen.getByText('Nhịp vận hành hôm nay').closest<HTMLElement>('.rounded-xl') ||
-      screen.getByText('Nhịp vận hành hôm nay').closest<HTMLElement>('section'))!;
+    const rhythmSection = (screen
+      .getByText('Nhịp vận hành hôm nay')
+      .closest<HTMLElement>('.rounded-xl') ||
+      screen
+        .getByText('Nhịp vận hành hôm nay')
+        .closest<HTMLElement>('section'))!;
 
     const pendingOrdersLink = within(rhythmSection).getByRole('link', {
       name: /Đơn đang chờ xử lý/i,
@@ -608,7 +610,9 @@ describe('DashboardPage', () => {
 
     // Operational greeting for zero pending / low stock
     expect(
-      screen.getByText('Hôm nay hệ thống vận hành ổn định, không có đơn chờ xử lý.'),
+      screen.getByText(
+        'Hôm nay hệ thống vận hành ổn định, không có đơn chờ xử lý.',
+      ),
     ).toBeInTheDocument();
 
     // Negative trend indicators rendered with Math.abs and percentage

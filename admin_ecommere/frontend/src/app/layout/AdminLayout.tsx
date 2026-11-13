@@ -118,19 +118,28 @@ function getRouteMeta(pathname: string): RouteMeta {
       breadcrumbs: ['Quản trị', 'Sản phẩm', 'Chỉnh sửa'],
     };
   }
-  if (pathname === '/admin/products' || pathname.startsWith('/admin/products/')) {
+  if (
+    pathname === '/admin/products' ||
+    pathname.startsWith('/admin/products/')
+  ) {
     return {
       title: 'Quản lý sản phẩm',
       breadcrumbs: ['Quản trị', 'Sản phẩm'],
     };
   }
-  if (pathname === '/admin/categories' || pathname.startsWith('/admin/categories/')) {
+  if (
+    pathname === '/admin/categories' ||
+    pathname.startsWith('/admin/categories/')
+  ) {
     return {
       title: 'Quản lý danh mục',
       breadcrumbs: ['Quản trị', 'Danh mục'],
     };
   }
-  if (/^\/admin\/orders\/[^/]+/.test(pathname) && pathname !== '/admin/orders') {
+  if (
+    /^\/admin\/orders\/[^/]+/.test(pathname) &&
+    pathname !== '/admin/orders'
+  ) {
     return {
       title: 'Chi tiết đơn hàng',
       breadcrumbs: ['Quản trị', 'Đơn hàng', 'Chi tiết'],
@@ -148,7 +157,10 @@ function getRouteMeta(pathname: string): RouteMeta {
       breadcrumbs: ['Quản trị', 'Mã giảm giá & Referral'],
     };
   }
-  if (pathname === '/admin/inventory' || pathname.startsWith('/admin/inventory/')) {
+  if (
+    pathname === '/admin/inventory' ||
+    pathname.startsWith('/admin/inventory/')
+  ) {
     return {
       title: 'Quản lý kho hàng',
       breadcrumbs: ['Quản trị', 'Kho hàng'],
@@ -380,7 +392,10 @@ export function AdminLayout() {
               <Menu className="h-5 w-5" />
             </Button>
             <div>
-              <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+              <nav
+                aria-label="Breadcrumb"
+                className="flex items-center gap-1.5 text-xs font-medium text-slate-500"
+              >
                 {routeMeta.breadcrumbs.map((crumb, idx) => (
                   <span key={crumb} className="flex items-center gap-1.5">
                     {idx > 0 && <span className="text-slate-400">/</span>}
@@ -455,7 +470,9 @@ export function AdminLayout() {
             fallback={
               <div className="flex h-64 flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="h-7 w-7 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
-                <p className="text-xs font-medium text-slate-500">Đang tải trang...</p>
+                <p className="text-xs font-medium text-slate-500">
+                  Đang tải trang...
+                </p>
               </div>
             }
           >
@@ -469,7 +486,8 @@ export function AdminLayout() {
           <DialogHeader>
             <DialogTitle>Xác nhận đăng xuất</DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn đăng xuất khỏi phiên làm việc quản trị? Các thay đổi chưa lưu có thể bị mất.
+              Bạn có chắc chắn muốn đăng xuất khỏi phiên làm việc quản trị? Các
+              thay đổi chưa lưu có thể bị mất.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-0">

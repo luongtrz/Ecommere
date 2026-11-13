@@ -152,7 +152,8 @@ export function LoginPage() {
           {/* Bottom Security Footer */}
           <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-200">
             <span>
-              &copy; {new Date().getFullYear()} Thai Spray Việt Nam • Nền tảng Quản trị
+              &copy; {new Date().getFullYear()} Thai Spray Việt Nam • Nền tảng
+              Quản trị
             </span>
             <span className="flex items-center gap-1.5 font-medium text-slate-700">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
@@ -271,7 +272,9 @@ export function LoginPage() {
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                              aria-label={
+                                showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                              }
                               className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded-r-lg"
                             >
                               {showPassword ? (
@@ -359,10 +362,13 @@ export function LoginPage() {
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-600 pt-2 space-y-2">
               <span className="block">
-                Hệ thống quản trị Thai Spray không hỗ trợ tự cấp lại mật khẩu trực tuyến nhằm bảo vệ an toàn dữ liệu nội bộ.
+                Hệ thống quản trị Thai Spray không hỗ trợ tự cấp lại mật khẩu
+                trực tuyến nhằm bảo vệ an toàn dữ liệu nội bộ.
               </span>
               <span className="block">
-                Vui lòng liên hệ trực tiếp <strong>Quản trị viên cấp cao</strong> hoặc bộ phận Kỹ thuật nội bộ để xác minh danh tính và được cấp lại mật khẩu truy cập.
+                Vui lòng liên hệ trực tiếp{' '}
+                <strong>Quản trị viên cấp cao</strong> hoặc bộ phận Kỹ thuật nội
+                bộ để xác minh danh tính và được cấp lại mật khẩu truy cập.
               </span>
             </DialogDescription>
           </DialogHeader>

@@ -651,12 +651,13 @@ describe('AdminOrdersPage', () => {
     expect(
       screen.getAllByText('+1 sản phẩm khác').length,
     ).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('Nguyễn Văn A').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Nguyễn Văn A').length).toBeGreaterThanOrEqual(
+      1,
+    );
     expect(screen.getAllByText('0912345678').length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getAllByText(
-        '123 Lê Lợi, Phường Bến Nghé, Quận 1, TP Hồ Chí Minh',
-      ).length,
+      screen.getAllByText('123 Lê Lợi, Phường Bến Nghé, Quận 1, TP Hồ Chí Minh')
+        .length,
     ).toBeGreaterThanOrEqual(1);
 
     const row1 = screen.getAllByText('ORD-001')[0].closest('tr')!;
@@ -1080,7 +1081,9 @@ describe('AdminOrdersPage', () => {
     expect(screen.getByText('Xác nhận hủy đơn hàng')).toBeInTheDocument();
 
     // Scope to the dialog; its built-in X (first in DOM order) is the close control under test.
-    const closeBtn = within(screen.getByRole('dialog')).getAllByRole('button', { name: 'Đóng' })[0];
+    const closeBtn = within(screen.getByRole('dialog')).getAllByRole('button', {
+      name: 'Đóng',
+    })[0];
     fireEvent.click(closeBtn);
 
     expect(mockMutate).not.toHaveBeenCalled();

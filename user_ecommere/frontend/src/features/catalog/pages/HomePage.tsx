@@ -24,7 +24,11 @@ const HIGHLIGHTS = [
 const BENEFITS = [
   { icon: Truck, title: 'Giao nhanh', desc: 'Nội thành linh hoạt trong ngày' },
   { icon: Shield, title: 'Chính hãng', desc: 'Danh mục được chọn lọc kỹ' },
-  { icon: RefreshCw, title: 'Đổi trả rõ ràng', desc: 'Hỗ trợ trong 7 ngày đầu' },
+  {
+    icon: RefreshCw,
+    title: 'Đổi trả rõ ràng',
+    desc: 'Hỗ trợ trong 7 ngày đầu',
+  },
 ];
 
 const FEATURED_CATEGORY_LIMIT = 4;
@@ -33,7 +37,10 @@ function HomeSectionSkeleton() {
   return (
     <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x md:grid md:grid-cols-3 xl:grid-cols-4 md:gap-x-6 md:gap-y-8 md:overflow-visible md:pb-0">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="w-64 shrink-0 space-y-3 md:w-auto md:shrink">
+        <div
+          key={index}
+          className="w-64 shrink-0 space-y-3 md:w-auto md:shrink"
+        >
           <div className="aspect-[4/5] w-full animate-pulse rounded-lg bg-muted" />
           <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
           <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
@@ -54,7 +61,11 @@ interface CategoryProductSectionProps {
   onAddToCart: (product: any, variant: any) => void;
 }
 
-function CategoryProductSection({ category, index, onAddToCart }: CategoryProductSectionProps) {
+function CategoryProductSection({
+  category,
+  index,
+  onAddToCart,
+}: CategoryProductSectionProps) {
   const [isVisible, setIsVisible] = useState(index < 2);
   const sectionRef = useRef<HTMLElement | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -98,7 +109,11 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
   };
 
   // Do not render empty category sections (no ghost chrome/headers without products)
-  if (isVisible && !isLoading && (!productsData || productsData.products.length === 0)) {
+  if (
+    isVisible &&
+    !isLoading &&
+    (!productsData || productsData.products.length === 0)
+  ) {
     return null;
   }
 
@@ -106,7 +121,9 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
     <section ref={sectionRef} className="section-y border-t border-border">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow text-muted-foreground mb-2 text-balance">Danh mục nổi bật</p>
+          <p className="eyebrow text-muted-foreground mb-2 text-balance">
+            Danh mục nổi bật
+          </p>
           <h2 className="section-title text-balance">{category.name}</h2>
           {category.description && category.description.trim() !== '' ? (
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -158,13 +175,19 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                 rating={product.rating}
                 reviewCount={product.reviewCount}
                 variants={product.variants}
-                onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                onAddToCart={() =>
+                  product.variants[0] &&
+                  onAddToCart(product, product.variants[0])
+                }
               />
             ))}
           </div>
 
           <div className="md:hidden">
-            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+            <div
+              ref={scrollRef}
+              className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory"
+            >
               {productsData.products.map((product) => (
                 <div key={product.id} className="w-64 shrink-0 snap-start">
                   <ProductCard
@@ -176,7 +199,10 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     variants={product.variants}
-                    onAddToCart={() => product.variants[0] && onAddToCart(product, product.variants[0])}
+                    onAddToCart={() =>
+                      product.variants[0] &&
+                      onAddToCart(product, product.variants[0])
+                    }
                   />
                 </div>
               ))}
@@ -191,12 +217,15 @@ function CategoryProductSection({ category, index, onAddToCart }: CategoryProduc
 export function HomePage() {
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { addItem } = useCart();
-  const { data: curatedProducts, isLoading: isLoadingCuratedProducts } = useProducts({
-    sortBy: 'best_selling',
-    limit: 4,
-  });
+  const { data: curatedProducts, isLoading: isLoadingCuratedProducts } =
+    useProducts({
+      sortBy: 'best_selling',
+      limit: 4,
+    });
 
-  const rootCategories = (categories?.filter((category) => !category.parentId) || []).slice(0, FEATURED_CATEGORY_LIMIT);
+  const rootCategories = (
+    categories?.filter((category) => !category.parentId) || []
+  ).slice(0, FEATURED_CATEGORY_LIMIT);
 
   const handleAddToCart = (product: any, variant: any) => {
     addItem({
@@ -225,8 +254,10 @@ export function HomePage() {
                 Chọn mùi hương khiến không gian của bạn trông có gu hơn.
               </h1>
               <p className="mt-4 max-w-prose text-sm sm:text-base leading-relaxed text-muted-foreground">
-                Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết, gọn và không gắt. Bạn có thể bắt đầu từ
-                mùi bán chạy, hỏi chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay trên catalog.
+                Thai Spray tập trung vào những lựa chọn mùi sạch, tinh khiết,
+                gọn và không gắt. Bạn có thể bắt đầu từ mùi bán chạy, hỏi
+                chatbot theo không gian sử dụng hoặc lọc theo ngân sách ngay
+                trên catalog.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button asChild size="lg" className="min-h-11">
@@ -235,8 +266,15 @@ export function HomePage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="min-h-11">
-                  <Link to="/catalog?sort=best_selling">Xem nhóm bán chạy nhất</Link>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="min-h-11"
+                >
+                  <Link to="/catalog?sort=best_selling">
+                    Xem nhóm bán chạy nhất
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -254,11 +292,18 @@ export function HomePage() {
         <section className="border-t border-border py-6 md:py-8">
           <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-3 md:divide-y-0 md:divide-x md:divide-border">
             {BENEFITS.map((item) => (
-              <div key={item.title} className="flex items-start gap-3.5 py-4 first:pt-0 last:pb-0 md:py-0 md:px-6 md:first:pl-0 md:last:pr-0">
+              <div
+                key={item.title}
+                className="flex items-start gap-3.5 py-4 first:pt-0 last:pb-0 md:py-0 md:px-6 md:first:pl-0 md:last:pr-0"
+              >
                 <item.icon className="h-5 w-5 shrink-0 text-primary mt-0.5" />
                 <div>
-                  <p className="text-base font-semibold text-foreground">{item.title}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{item.desc}</p>
+                  <p className="text-base font-semibold text-foreground">
+                    {item.title}
+                  </p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {item.desc}
+                  </p>
                 </div>
               </div>
             ))}
@@ -268,20 +313,33 @@ export function HomePage() {
         <section className="border-t border-border py-8 md:py-12">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
-              <p className="eyebrow text-muted-foreground mb-4 text-balance">Điểm mạnh của shop</p>
+              <p className="eyebrow text-muted-foreground mb-4 text-balance">
+                Điểm mạnh của shop
+              </p>
               <div className="grid grid-cols-2 divide-x divide-border">
                 {HIGHLIGHTS.map((item) => (
                   <div key={item.label} className="px-4 first:pl-0 last:pr-0">
-                    <p className="text-2xl md:text-3xl font-bold text-primary tabular">{item.value}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.label}</p>
+                    <p className="text-2xl md:text-3xl font-bold text-primary tabular">
+                      {item.value}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {item.label}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
             <div className="border-t border-border pt-6 lg:border-t-0 lg:border-l lg:border-border lg:pl-8 lg:pt-0">
-              <p className="eyebrow text-muted-foreground mb-4 text-balance">Gợi ý bắt đầu nhanh</p>
+              <p className="eyebrow text-muted-foreground mb-4 text-balance">
+                Gợi ý bắt đầu nhanh
+              </p>
               <div className="flex flex-wrap gap-2.5">
-                {['Xịt phòng khách', 'Tinh dầu thơm', 'Quà tặng', 'Mùi sạch cho xe'].map((item) => (
+                {[
+                  'Xịt phòng khách',
+                  'Tinh dầu thơm',
+                  'Quà tặng',
+                  'Mùi sạch cho xe',
+                ].map((item) => (
                   <Link
                     key={item}
                     to={`/search?q=${encodeURIComponent(item)}`}
@@ -291,7 +349,9 @@ export function HomePage() {
                   </Link>
                 ))}
               </div>
-              <p className="text-sm text-muted-foreground mt-3">Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.</p>
+              <p className="text-sm text-muted-foreground mt-3">
+                Nhấp vào từ khóa để tìm kiếm nhanh sản phẩm phù hợp.
+              </p>
             </div>
           </div>
         </section>
@@ -299,10 +359,18 @@ export function HomePage() {
         <section className="section-y border-t border-border">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="eyebrow text-muted-foreground mb-2 text-balance">Biên tập bởi Thai Spray</p>
-              <h2 className="section-title text-balance">Những lựa chọn đang được hỏi nhiều</h2>
+              <p className="eyebrow text-muted-foreground mb-2 text-balance">
+                Biên tập bởi Thai Spray
+              </p>
+              <h2 className="section-title text-balance">
+                Những lựa chọn đang được hỏi nhiều
+              </h2>
             </div>
-            <Button asChild variant="ghost" className="justify-start px-0 min-h-11 text-muted-foreground hover:bg-transparent hover:text-foreground">
+            <Button
+              asChild
+              variant="ghost"
+              className="justify-start px-0 min-h-11 text-muted-foreground hover:bg-transparent hover:text-foreground"
+            >
               <Link to="/catalog?sort=best_selling">
                 Xem thêm trong catalog
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -315,7 +383,10 @@ export function HomePage() {
           ) : (
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory md:grid md:grid-cols-3 xl:grid-cols-4 md:gap-x-6 md:gap-y-8 md:overflow-visible md:pb-0">
               {curatedProducts?.products.map((product) => (
-                <div key={product.id} className="w-64 shrink-0 snap-start md:w-auto md:shrink md:snap-align-none">
+                <div
+                  key={product.id}
+                  className="w-64 shrink-0 snap-start md:w-auto md:shrink md:snap-align-none"
+                >
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -325,7 +396,10 @@ export function HomePage() {
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     variants={product.variants}
-                    onAddToCart={() => product.variants[0] && handleAddToCart(product, product.variants[0])}
+                    onAddToCart={() =>
+                      product.variants[0] &&
+                      handleAddToCart(product, product.variants[0])
+                    }
                   />
                 </div>
               ))}

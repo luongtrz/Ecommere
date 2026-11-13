@@ -1,7 +1,13 @@
 import { Link } from 'react-router-dom';
 import { SEO } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
-import { Search, Home, ArrowLeft, ShoppingBag, MessageCircle } from 'lucide-react';
+import {
+  Search,
+  Home,
+  ArrowLeft,
+  ShoppingBag,
+  MessageCircle,
+} from 'lucide-react';
 
 export function NotFoundPage() {
   return (
@@ -13,17 +19,23 @@ export function NotFoundPage() {
           <div className="text-7xl md:text-9xl font-bold text-primary/15 select-none mb-2 tabular">
             404
           </div>
-          <p className="eyebrow text-muted-foreground mb-3">Rất tiếc, trang không tồn tại</p>
+          <p className="eyebrow text-muted-foreground mb-3">
+            Rất tiếc, trang không tồn tại
+          </p>
           <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-balance text-foreground mb-3">
             Không tìm thấy trang
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
-            Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có thể đường dẫn không chính xác hoặc trang đã bị xóa.
+            Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm. Có
+            thể đường dẫn không chính xác hoặc trang đã bị xóa.
           </p>
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center mb-10">
-            <Button className="h-11 min-h-11 w-full sm:w-auto px-6 text-sm font-medium" asChild>
+            <Button
+              className="h-11 min-h-11 w-full sm:w-auto px-6 text-sm font-medium"
+              asChild
+            >
               <Link to="/" className="flex items-center justify-center gap-2">
                 <Home className="h-4 w-4" />
                 Về trang chủ
@@ -52,8 +64,12 @@ export function NotFoundPage() {
               >
                 <ShoppingBag className="h-5 w-5 text-primary shrink-0" />
                 <div>
-                  <div className="font-semibold text-sm text-foreground">Sản phẩm</div>
-                  <div className="text-xs text-muted-foreground">Xem toàn bộ sản phẩm</div>
+                  <div className="font-semibold text-sm text-foreground">
+                    Sản phẩm
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Xem toàn bộ sản phẩm
+                  </div>
                 </div>
               </Link>
 
@@ -63,8 +79,12 @@ export function NotFoundPage() {
               >
                 <Search className="h-5 w-5 text-primary shrink-0" />
                 <div>
-                  <div className="font-semibold text-sm text-foreground">Danh mục</div>
-                  <div className="text-xs text-muted-foreground">Tìm theo danh mục</div>
+                  <div className="font-semibold text-sm text-foreground">
+                    Danh mục
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Tìm theo danh mục
+                  </div>
                 </div>
               </Link>
 
@@ -74,8 +94,12 @@ export function NotFoundPage() {
               >
                 <MessageCircle className="h-5 w-5 text-primary shrink-0" />
                 <div>
-                  <div className="font-semibold text-sm text-foreground">Hỗ trợ</div>
-                  <div className="text-xs text-muted-foreground">Liên hệ hỗ trợ</div>
+                  <div className="font-semibold text-sm text-foreground">
+                    Hỗ trợ
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Liên hệ hỗ trợ
+                  </div>
                 </div>
               </Link>
             </div>
@@ -84,8 +108,8 @@ export function NotFoundPage() {
           {/* Tip Element */}
           <div className="mt-8 text-center">
             <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">💡 Mẹo:</span>{' '}
-              Kiểm tra lại đường dẫn URL hoặc sử dụng{' '}
+              <span className="font-medium text-foreground">💡 Mẹo:</span> Kiểm
+              tra lại đường dẫn URL hoặc sử dụng{' '}
               <Link
                 to="/search"
                 className="underline font-medium text-foreground hover:text-primary transition-colors"

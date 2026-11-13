@@ -135,7 +135,9 @@ const PAYMENT_STATUS_MAP: Record<
 export function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const toast = useToast();
-  const [statusToConfirm, setStatusToConfirm] = useState<OrderStatus | null>(null);
+  const [statusToConfirm, setStatusToConfirm] = useState<OrderStatus | null>(
+    null,
+  );
 
   // Fetch single order by ID
   const { data: rawOrder, isLoading, refetch } = useAdminOrder(id || '');
@@ -651,7 +653,8 @@ export function AdminOrderDetailPage() {
               <CardContent className="p-4 md:p-6 space-y-4 text-sm">
                 <div className="space-y-2 bg-slate-50 p-3.5 rounded-lg border border-slate-200/60 text-xs">
                   <p className="font-semibold text-slate-900 text-sm">
-                    {order.shippingAddress?.fullName || 'Chưa có tên người nhận'}
+                    {order.shippingAddress?.fullName ||
+                      'Chưa có tên người nhận'}
                   </p>
                   {order.shippingAddress?.phone ? (
                     <div className="flex items-center gap-2">

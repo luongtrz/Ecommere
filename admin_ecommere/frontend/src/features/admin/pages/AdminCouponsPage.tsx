@@ -120,17 +120,24 @@ export function AdminCouponsPage() {
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<
+    'ALL' | 'ACTIVE' | 'INACTIVE'
+  >('ALL');
 
   // Create coupon dialog state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newCouponCode, setNewCouponCode] = useState('');
-  const [newCouponType, setNewCouponType] = useState<'PERCENT' | 'FIXED' | 'FREESHIP'>('PERCENT');
+  const [newCouponType, setNewCouponType] = useState<
+    'PERCENT' | 'FIXED' | 'FREESHIP'
+  >('PERCENT');
   const [newCouponValue, setNewCouponValue] = useState<number>(10);
   const [newCouponMinOrder, setNewCouponMinOrder] = useState<number>(0);
-  const [newCouponMaxDiscount, setNewCouponMaxDiscount] = useState<number | null>(null);
+  const [newCouponMaxDiscount, setNewCouponMaxDiscount] = useState<
+    number | null
+  >(null);
   const [newCouponMaxUses, setNewCouponMaxUses] = useState<number>(100);
-  const [newCouponValidUntil, setNewCouponValidUntil] = useState<string>('2027-12-31');
+  const [newCouponValidUntil, setNewCouponValidUntil] =
+    useState<string>('2027-12-31');
 
   const { data: config, isLoading: configLoading } = useQuery({
     queryKey: ['admin-referral-config'],
@@ -235,9 +242,7 @@ export function AdminCouponsPage() {
     setCoupons((prev) =>
       prev.map((c) => (c.id === id ? { ...c, active: checked } : c)),
     );
-    toast.success(
-      checked ? `Đã kích hoạt mã ${code}` : `Đã tắt mã ${code}`,
-    );
+    toast.success(checked ? `Đã kích hoạt mã ${code}` : `Đã tắt mã ${code}`);
   };
 
   const resetCreateForm = () => {
@@ -868,7 +873,9 @@ export function AdminCouponsPage() {
                       </div>
                       <div className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
                         <Switch
-                          checked={(getFieldValue('active') as boolean) || false}
+                          checked={
+                            (getFieldValue('active') as boolean) || false
+                          }
                           onCheckedChange={(checked) =>
                             setConfigForm((prev) => ({
                               ...prev,

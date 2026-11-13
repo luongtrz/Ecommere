@@ -6,7 +6,10 @@ export interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function LoadingSpinner({ className, size = 'md' }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+  className,
+  size = 'md',
+}: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-6 w-6',
@@ -21,7 +24,11 @@ export function LoadingSpinner({ className, size = 'md' }: LoadingSpinnerProps) 
     >
       <Loader2
         aria-hidden="true"
-        className={cn('animate-spin text-primary', sizeClasses[size], className)}
+        className={cn(
+          'animate-spin text-primary',
+          sizeClasses[size],
+          className,
+        )}
       />
       <span className="sr-only">Đang tải</span>
     </div>

@@ -744,7 +744,9 @@ describe('CheckoutPage', () => {
       });
       renderCheckoutPage();
 
-      const continueBtn = screen.getAllByRole('button', { name: /Tiếp tục/i })[0];
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       expect(continueBtn).toBeDisabled();
       fireEvent.click(continueBtn);
 
@@ -772,7 +774,9 @@ describe('CheckoutPage', () => {
       // Clear the preview failure toast call before testing step validation
       vi.mocked(toast.error).mockClear();
 
-      const continueBtn = screen.getAllByRole('button', { name: /Tiếp tục/i })[0];
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       expect(continueBtn).toBeDisabled();
       fireEvent.click(continueBtn);
 
@@ -794,13 +798,13 @@ describe('CheckoutPage', () => {
       });
 
       // Proceed to Step 2
-      const continueBtn = screen.getAllByRole('button', { name: /Tiếp tục/i })[0];
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       await user.click(continueBtn);
 
       // Verify Step 2 rendered
-      expect(
-        screen.getByText('Phương thức thanh toán'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
       expect(
         screen.getByText('Thanh toán khi nhận hàng (COD)'),
       ).toBeInTheDocument();
@@ -860,9 +864,7 @@ describe('CheckoutPage', () => {
 
       // Step 1 -> Step 2
       await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
-      expect(
-        screen.getByText('Phương thức thanh toán'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
 
       // Step 2 -> Step 3
       await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
@@ -896,9 +898,7 @@ describe('CheckoutPage', () => {
       // Back button on Step 3 returns to Step 2
       const backBtn = screen.getAllByRole('button', { name: /^Quay lại$/i })[0];
       await user.click(backBtn);
-      expect(
-        screen.getByText('Phương thức thanh toán'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
     });
 
     it('allows jumping back to Step 1 or Step 2 via "Thay đổi" buttons in Step 3', async () => {
@@ -917,7 +917,9 @@ describe('CheckoutPage', () => {
       expect(screen.getByText('Sẵn sàng đặt hàng!')).toBeInTheDocument();
 
       // Click "Thay đổi" on Address section -> jumps to Step 1
-      const editAddressBtns = screen.getAllByRole('button', { name: 'Thay đổi' });
+      const editAddressBtns = screen.getAllByRole('button', {
+        name: 'Thay đổi',
+      });
       await user.click(editAddressBtns[0]);
       expect(screen.getByText('Địa chỉ giao hàng')).toBeInTheDocument();
 
@@ -926,7 +928,9 @@ describe('CheckoutPage', () => {
       await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
       // Click "Thay đổi" on Payment & Shipping section -> jumps to Step 2
-      const editPaymentBtns = screen.getAllByRole('button', { name: 'Thay đổi' });
+      const editPaymentBtns = screen.getAllByRole('button', {
+        name: 'Thay đổi',
+      });
       await user.click(editPaymentBtns[1]);
       expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
     });
@@ -977,7 +981,9 @@ describe('CheckoutPage', () => {
       });
 
       // Step 1 -> Step 2
-      const continueBtn = screen.getAllByRole('button', { name: /Tiếp tục/i })[0];
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       fireEvent.click(continueBtn);
 
       // Step 2 -> Step 3
@@ -1082,11 +1088,18 @@ describe('CheckoutPage', () => {
       fireEvent.click(submitBtn);
 
       // While in flight: text should be "Đang xử lý..."
-      expect(screen.getAllByText('Đang xử lý...').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('Đang xử lý...').length,
+      ).toBeGreaterThanOrEqual(1);
 
       // Resolve checkout
       await act(async () => {
         resolveCheckout({ data: { success: true } });
+      });
+
+      // Let the post-order timer (1s) fire inside this test so it cannot leak into the next one.
+      await waitFor(() => expect(mockClearCart).toHaveBeenCalledTimes(1), {
+        timeout: 3000,
       });
     });
 
@@ -1354,8 +1367,12 @@ describe('CheckoutPage', () => {
       expect(secondKey).toBe(firstKey);
 
       // Now navigate back to Step 1 and change shipping method to EXPRESS
-      fireEvent.click(screen.getAllByRole('button', { name: /^Quay lại$/i })[0]);
-      fireEvent.click(screen.getAllByRole('button', { name: /^Quay lại$/i })[0]);
+      fireEvent.click(
+        screen.getAllByRole('button', { name: /^Quay lại$/i })[0],
+      );
+      fireEvent.click(
+        screen.getAllByRole('button', { name: /^Quay lại$/i })[0],
+      );
 
       const expressShippingCard = screen
         .getByText('Giao hàng nhanh')
@@ -1397,7 +1414,9 @@ describe('CheckoutPage', () => {
       });
       renderCheckoutPage();
 
-      const continueBtn = screen.getAllByRole('button', { name: /Tiếp tục/i })[0];
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       fireEvent.click(continueBtn);
 
       const checkoutCalls = vi
@@ -1426,7 +1445,8 @@ describe('CheckoutPage', () => {
       // Check item 1
       expect(screen.getByText(mockItem1.name)).toBeInTheDocument();
       expect(
-        screen.getAllByText(matchText(`Số lượng: ${mockItem1.quantity}`)).length,
+        screen.getAllByText(matchText(`Số lượng: ${mockItem1.quantity}`))
+          .length,
       ).toBeGreaterThanOrEqual(1);
       expect(
         screen.getAllByText(
@@ -1437,7 +1457,8 @@ describe('CheckoutPage', () => {
       // Check item 2
       expect(screen.getByText(mockItem2.name)).toBeInTheDocument();
       expect(
-        screen.getAllByText(matchText(`Số lượng: ${mockItem2.quantity}`)).length,
+        screen.getAllByText(matchText(`Số lượng: ${mockItem2.quantity}`))
+          .length,
       ).toBeGreaterThanOrEqual(1);
       expect(
         screen.getAllByText(
@@ -1477,7 +1498,9 @@ describe('CheckoutPage', () => {
       expect(loadingElements.length).toBeGreaterThanOrEqual(1);
 
       // Next button should be disabled during preview loading
-      const continueBtn = screen.getAllByRole('button', { name: /Tiếp tục/i })[0];
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       expect(continueBtn).toBeDisabled();
     });
   });

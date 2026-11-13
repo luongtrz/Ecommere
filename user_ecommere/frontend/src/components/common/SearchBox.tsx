@@ -41,7 +41,10 @@ export function SearchBox() {
     setRecentSearches(readRecentSearches());
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsFocused(false);
       }
     };
@@ -51,7 +54,10 @@ export function SearchBox() {
   }, []);
 
   const saveRecentSearch = (searchTerm: string) => {
-    const nextRecent = [searchTerm, ...recentSearches.filter((item) => item !== searchTerm)].slice(0, 5);
+    const nextRecent = [
+      searchTerm,
+      ...recentSearches.filter((item) => item !== searchTerm),
+    ].slice(0, 5);
     setRecentSearches(nextRecent);
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(nextRecent));
   };
@@ -136,12 +142,16 @@ export function SearchBox() {
                   >
                     <Search className="h-4 w-4 shrink-0 text-primary" />
                     <span className="min-w-0 flex-1 break-words">
-                      Tìm kiếm cho <strong className="font-semibold text-primary">“{deferredQuery}”</strong>
+                      Tìm kiếm cho{' '}
+                      <strong className="font-semibold text-primary">
+                        “{deferredQuery}”
+                      </strong>
                     </span>
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </button>
                   <p className="px-3 text-sm leading-relaxed text-muted-foreground">
-                    Mẹo: Nhập tên sản phẩm, công dụng (đuổi chuột, diệt gián, tẩy bồn cầu) để xem nhanh.
+                    Mẹo: Nhập tên sản phẩm, công dụng (đuổi chuột, diệt gián,
+                    tẩy bồn cầu) để xem nhanh.
                   </p>
                 </div>
               ) : (
@@ -168,7 +178,9 @@ export function SearchBox() {
                             }}
                             className="group flex min-h-11 cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
-                            <span className="min-w-0 flex-1 truncate">{term}</span>
+                            <span className="min-w-0 flex-1 truncate">
+                              {term}
+                            </span>
                             <button
                               type="button"
                               onClick={(event) => removeRecent(event, term)}
@@ -227,7 +239,9 @@ export function SearchBox() {
                       <p className="truncate text-xs font-semibold text-foreground group-hover:text-primary">
                         {product.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">Chính hãng Thái Lan</p>
+                      <p className="text-xs text-muted-foreground">
+                        Chính hãng Thái Lan
+                      </p>
                     </div>
                     <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
                   </button>
