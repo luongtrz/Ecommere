@@ -219,7 +219,6 @@ export function ChatbotPage() {
             onStop={cancel}
             isStreaming={isStreaming}
             variant="page"
-            autoFocus
           />
           <p className="text-xs text-muted-foreground text-center pb-2 select-none leading-normal">
             Trợ lý AI có thể nhầm lẫn. Vui lòng kiểm tra thông tin sản phẩm trước khi đặt hàng.
