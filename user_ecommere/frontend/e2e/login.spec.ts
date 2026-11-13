@@ -7,8 +7,8 @@ const password = process.env.E2E_USER_PASSWORD ?? '';
 test('customer can log in with phone and password', async ({ page }) => {
   await page.goto('/login');
 
-  await page.getByPlaceholder('0912345678').fill(phone);
-  await page.getByPlaceholder('••••••••').fill(password);
+  await page.getByPlaceholder('0912 345 678').fill(phone);
+  await page.getByLabel('Mật khẩu', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Đăng Nhập Ngay' }).click();
 
   await expect(page).not.toHaveURL(/\/login/);
