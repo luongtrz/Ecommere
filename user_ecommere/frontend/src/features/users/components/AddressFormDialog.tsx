@@ -65,16 +65,20 @@ export function AddressFormDialog({ address, open, onOpenChange }: AddressFormDi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isEdit) {
-      await updateAddress.mutateAsync({
-        id: address.id,
-        data: formData,
-      });
-    } else {
-      await createAddress.mutateAsync(formData);
-    }
+    try {
+      if (isEdit) {
+        await updateAddress.mutateAsync({
+          id: address.id,
+          data: formData,
+        });
+      } else {
+        await createAddress.mutateAsync(formData);
+      }
 
-    onOpenChange(false);
+      onOpenChange(false);
+    } catch {
+      // Giữ dialog mở khi xảy ra lỗi để người dùng có thể thử lại; onError của mutation đã thông báo
+    }
   };
 
   return (
