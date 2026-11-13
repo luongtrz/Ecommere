@@ -150,9 +150,9 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
               <div className="mb-6 space-y-4">
                 {product.variants && product.variants.length > 0 && (
                   <div>
-                    <label className="mb-2 block text-xs font-medium text-muted-foreground">
+                    <span className="mb-2 block text-xs font-medium text-muted-foreground">
                       Phiên bản:
-                    </label>
+                    </span>
                     <div className="flex flex-wrap gap-2" role="group" aria-label="Chọn phiên bản">
                       {product.variants.map((v) => {
                         const isSelected = (selectedVariantId || product.variants[0]?.id) === v.id;
@@ -186,9 +186,9 @@ export function ProductQuickView({ slug, open, onOpenChange }: ProductQuickViewP
                 )}
 
                 <div>
-                  <label id="quantity-label" className="mb-2 block text-xs font-medium text-muted-foreground">
+                  <span id="quantity-label" className="mb-2 block text-xs font-medium text-muted-foreground">
                     Số lượng:
-                  </label>
+                  </span>
                   <div className="flex items-center gap-2" role="group" aria-labelledby="quantity-label">
                     <button
                       type="button"
