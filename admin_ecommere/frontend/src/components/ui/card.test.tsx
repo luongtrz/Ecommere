@@ -88,6 +88,31 @@ describe('Card UI components', () => {
       await user.click(card);
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
+
+    it('propagates compact prop to child header, content, and footer via context', () => {
+      render(
+        <Card compact data-testid="card-compact-context">
+          <CardHeader data-testid="child-header">Tiêu đề</CardHeader>
+          <CardContent data-testid="child-content">Nội dung</CardContent>
+          <CardFooter data-testid="child-footer">Chân thẻ</CardFooter>
+        </Card>,
+      );
+      expect(screen.getByTestId('child-header')).toHaveClass(
+        'p-4',
+        'md:p-5',
+        'pb-2',
+      );
+      expect(screen.getByTestId('child-content')).toHaveClass(
+        'p-4',
+        'md:p-5',
+        'pt-0',
+      );
+      expect(screen.getByTestId('child-footer')).toHaveClass(
+        'p-4',
+        'md:p-5',
+        'pt-0',
+      );
+    });
   });
 
   describe('CardHeader', () => {
@@ -141,6 +166,17 @@ describe('Card UI components', () => {
       expect(header).toHaveAttribute('id', 'header-unique-id');
       expect(header).toHaveAttribute('tabIndex', '0');
     });
+
+    it('renders compact header padding when compact is true', () => {
+      render(
+        <CardHeader compact data-testid="header-compact">
+          Đầu thẻ gọn
+        </CardHeader>,
+      );
+      const header = screen.getByTestId('header-compact');
+      expect(header).toHaveClass('p-4', 'md:p-5', 'pb-2');
+      expect(header).not.toHaveClass('p-6');
+    });
   });
 
   describe('CardTitle', () => {
@@ -153,11 +189,12 @@ describe('Card UI components', () => {
       expect(title).toBeInTheDocument();
       expect(title.tagName).toBe('H3');
       expect(title).toHaveClass(
-        'text-xl',
+        'text-lg',
         'font-semibold',
-        'leading-none',
+        'leading-snug',
         'tracking-tight',
       );
+      expect(title).not.toHaveClass('leading-none');
       expect(title).toHaveTextContent('Tiêu đề thống kê');
     });
 
@@ -266,6 +303,16 @@ describe('Card UI components', () => {
       expect(ref.current).toBeInstanceOf(HTMLDivElement);
       expect(ref.current).toBe(screen.getByTestId('content-ref'));
     });
+
+    it('renders compact content padding when compact is true', () => {
+      render(
+        <CardContent compact data-testid="content-compact">
+          Nội dung thẻ gọn
+        </CardContent>,
+      );
+      const content = screen.getByTestId('content-compact');
+      expect(content).toHaveClass('p-4', 'md:p-5', 'pt-0');
+    });
   });
 
   describe('CardFooter', () => {
@@ -306,6 +353,16 @@ describe('Card UI components', () => {
 
       expect(ref.current).toBeInstanceOf(HTMLDivElement);
       expect(ref.current).toBe(screen.getByTestId('footer-ref'));
+    });
+
+    it('renders compact footer padding when compact is true', () => {
+      render(
+        <CardFooter compact data-testid="footer-compact">
+          Chân thẻ gọn
+        </CardFooter>,
+      );
+      const footer = screen.getByTestId('footer-compact');
+      expect(footer).toHaveClass('p-4', 'md:p-5', 'pt-0');
     });
   });
 

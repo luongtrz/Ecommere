@@ -116,7 +116,7 @@ describe('CategoryNav', () => {
     const { container } = renderCategoryNav();
 
     const skeletons = container.querySelectorAll('.animate-pulse');
-    expect(skeletons.length).toBe(6);
+    expect(skeletons.length).toBe(5);
     expect(screen.queryByText('Tất cả')).not.toBeInTheDocument();
   });
 
@@ -131,14 +131,18 @@ describe('CategoryNav', () => {
     // "Tất cả" link
     const allLink = screen.getByRole('link', { name: 'Tất cả' });
     expect(allLink).toHaveAttribute('href', '/catalog');
+    expect(allLink).toHaveClass('h-11');
 
     // Root categories are rendered
-    expect(
-      screen.getByRole('link', { name: 'Xịt thơm phòng' }),
-    ).toHaveAttribute('href', '/c/xit-thom-phong');
-    expect(
-      screen.getByRole('link', { name: 'Đuổi chuột & Côn trùng' }),
-    ).toHaveAttribute('href', '/c/duoi-chuot-con-trung');
+    const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
+    expect(cat1Link).toHaveAttribute('href', '/c/xit-thom-phong');
+    expect(cat1Link).toHaveClass('h-11');
+
+    const cat2Link = screen.getByRole('link', {
+      name: 'Đuổi chuột & Côn trùng',
+    });
+    expect(cat2Link).toHaveAttribute('href', '/c/duoi-chuot-con-trung');
+    expect(cat2Link).toHaveClass('h-11');
 
     // Subcategories should not be in the root navigation bar
     const listItems = screen.getAllByRole('listitem');
@@ -170,12 +174,10 @@ describe('CategoryNav', () => {
     renderCategoryNav('/catalog');
 
     const allLink = screen.getByRole('link', { name: 'Tất cả' });
-    expect(allLink.className).toContain(
-      'text-teal-700 bg-teal-50 font-semibold',
-    );
+    expect(allLink.className).toContain('text-foreground font-semibold');
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
-    expect(cat1Link.className).toContain('text-slate-600 hover:text-teal-700');
+    expect(cat1Link.className).toContain('text-muted-foreground');
   });
 
   it('applies active styling to category link when matching category route', () => {
@@ -187,12 +189,10 @@ describe('CategoryNav', () => {
     renderCategoryNav('/c/xit-thom-phong');
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
-    expect(cat1Link.className).toContain(
-      'text-teal-700 bg-teal-50 font-semibold',
-    );
+    expect(cat1Link.className).toContain('text-foreground font-semibold');
 
     const allLink = screen.getByRole('link', { name: 'Tất cả' });
-    expect(allLink.className).toContain('text-slate-600 hover:text-teal-700');
+    expect(allLink.className).toContain('text-muted-foreground');
   });
 
   it('applies active styling when location starts with category path', () => {
@@ -204,9 +204,7 @@ describe('CategoryNav', () => {
     renderCategoryNav('/c/xit-thom-phong/detail');
 
     const cat1Link = screen.getByRole('link', { name: 'Xịt thơm phòng' });
-    expect(cat1Link.className).toContain(
-      'text-teal-700 bg-teal-50 font-semibold',
-    );
+    expect(cat1Link.className).toContain('text-foreground font-semibold');
   });
 
   it('shows subcategories dropdown on mouse hover and allows viewing all', () => {
@@ -253,7 +251,7 @@ describe('CategoryNav', () => {
     expect(screen.queryByText('Xem tất cả')).not.toBeInTheDocument();
   });
 
-  it('shows "Chưa có danh mục con" when active category has no subcategories', () => {
+  it('does not show dropdown when active category has no subcategories', () => {
     vi.mocked(useCategories).mockReturnValue({
       data: mockCategoriesData,
       isLoading: false,
@@ -266,7 +264,7 @@ describe('CategoryNav', () => {
     });
     fireEvent.mouseEnter(cat2Link);
 
-    expect(screen.getByText('Chưa có danh mục con')).toBeInTheDocument();
+    expect(screen.queryByText('Chưa có danh mục con')).not.toBeInTheDocument();
     expect(screen.queryByText('Xem tất cả')).not.toBeInTheDocument();
   });
 

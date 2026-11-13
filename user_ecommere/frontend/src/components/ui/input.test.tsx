@@ -13,15 +13,16 @@ describe('Input', () => {
     expect(input.tagName).toBe('INPUT');
     expect(input).toHaveClass(
       'flex',
-      'h-10',
+      'h-11',
       'w-full',
-      'rounded-lg',
+      'rounded-md',
       'border',
-      'border-slate-200',
-      'bg-white',
+      'border-input',
+      'bg-card',
       'px-3',
       'py-2',
-      'text-sm',
+      'text-base',
+      'md:text-sm',
     );
   });
 
@@ -74,18 +75,19 @@ describe('Input', () => {
   it('merges custom className with default classes', () => {
     render(
       <Input
-        className="custom-input-class bg-slate-100"
+        className="custom-input-class bg-muted"
         data-testid="custom-input"
       />,
     );
     const input = screen.getByTestId('custom-input');
 
-    expect(input).toHaveClass(
-      'custom-input-class',
-      'bg-slate-100',
-      'flex',
-      'h-10',
-    );
+    expect(input).toHaveClass('custom-input-class', 'bg-muted', 'flex', 'h-11');
+  });
+
+  it('renders aria-invalid error styling when invalid', () => {
+    render(<Input aria-invalid="true" placeholder="Lỗi" />);
+    const input = screen.getByPlaceholderText('Lỗi');
+    expect(input).toHaveClass('aria-[invalid=true]:border-destructive');
   });
 
   it('handles user typing interaction', async () => {

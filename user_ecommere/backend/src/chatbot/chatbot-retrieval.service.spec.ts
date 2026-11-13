@@ -272,6 +272,8 @@ describe('ChatbotRetrievalService', () => {
             name: 'Xịt Thơm Phòng Lavender',
             slug: 'xit-thom-phong-lavender',
             score: expect.any(Number),
+            imageUrl: null,
+            minPrice: 99000,
           },
         ]);
         expect(result.sources[0].score).toBeGreaterThan(0);

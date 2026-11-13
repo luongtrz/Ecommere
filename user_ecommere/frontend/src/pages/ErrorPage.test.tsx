@@ -77,11 +77,17 @@ describe('ErrorPage', () => {
     );
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Oops! Đã có lỗi xảy ra' }),
+      screen.getByText('Rất tiếc, đã có sự cố xảy ra'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Không thể tải trang' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Xin lỗi, chúng tôi đang gặp sự cố kỹ thuật.'),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.',
+        'Đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.',
       ),
     ).toBeInTheDocument();
   });
@@ -94,11 +100,11 @@ describe('ErrorPage', () => {
     );
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Oops! Đã có lỗi xảy ra' }),
+      screen.getByRole('heading', { level: 1, name: 'Không thể tải trang' }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.',
+        'Đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.',
       ),
     ).toBeInTheDocument();
   });
@@ -118,7 +124,7 @@ describe('ErrorPage', () => {
     expect(retryButton).toBeInTheDocument();
   });
 
-  it('renders help section with contact support link', () => {
+  it('renders help section with contact support link pointing to existing /chat route', () => {
     render(
       <MemoryRouter>
         <ErrorPage />
@@ -134,39 +140,7 @@ describe('ErrorPage', () => {
 
     const supportLink = screen.getByRole('link', { name: 'Liên hệ hỗ trợ' });
     expect(supportLink).toBeInTheDocument();
-    expect(supportLink).toHaveAttribute('href', '/support');
-  });
-
-  it('renders additional help grid with three cards', () => {
-    render(
-      <MemoryRouter>
-        <ErrorPage />
-      </MemoryRouter>,
-    );
-
-    // Card 1: Về trang chủ
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Về trang chủ' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Quay lại trang chủ để tiếp tục mua sắm'),
-    ).toBeInTheDocument();
-
-    // Card 2: Tải lại trang
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Tải lại trang' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Thử tải lại trang để khắc phục lỗi'),
-    ).toBeInTheDocument();
-
-    // Card 3: Liên hệ hỗ trợ
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Liên hệ hỗ trợ' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Nhận trợ giúp từ đội ngũ của chúng tôi'),
-    ).toBeInTheDocument();
+    expect(supportLink).toHaveAttribute('href', '/chat');
   });
 
   it('calls window.location.reload when clicking "Thử lại" button with userEvent', async () => {
@@ -220,15 +194,15 @@ describe('ErrorPage', () => {
     });
   });
 
-  it('navigates to "/support" when clicking "Liên hệ hỗ trợ" link button', async () => {
+  it('navigates to "/chat" when clicking "Liên hệ hỗ trợ" link button', async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={['/error']}>
         <Routes>
           <Route path="/error" element={<ErrorPage />} />
           <Route
-            path="/support"
-            element={<div data-testid="support-target">Trang hỗ trợ</div>}
+            path="/chat"
+            element={<div data-testid="chat-target">Trang trợ lý ảo</div>}
           />
         </Routes>
       </MemoryRouter>,
@@ -238,7 +212,7 @@ describe('ErrorPage', () => {
     await user.click(supportLink);
 
     await waitFor(() => {
-      expect(screen.getByTestId('support-target')).toBeInTheDocument();
+      expect(screen.getByTestId('chat-target')).toBeInTheDocument();
     });
   });
 });

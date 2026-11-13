@@ -64,7 +64,9 @@ export function ConfirmActionCard({
 
   const isBusy = isDecided || submitting;
 
-  const submitDecisions = async (decisions: Array<{ callId: string; approve: boolean }>) => {
+  const submitDecisions = async (
+    decisions: Array<{ callId: string; approve: boolean }>,
+  ) => {
     if (isBusy || submittingRef.current) return;
     submittingRef.current = true;
     setSubmitting(true);
@@ -127,7 +129,7 @@ export function ConfirmActionCard({
           <span
             className={cn(
               'font-medium flex-1 break-words whitespace-pre-line',
-              isDecided ? 'text-muted-foreground' : 'text-foreground'
+              isDecided ? 'text-muted-foreground' : 'text-foreground',
             )}
           >
             {call.summary}
@@ -137,7 +139,7 @@ export function ConfirmActionCard({
 
         {isDecided ? (
           <div className="flex items-center gap-1.5 pt-2 border-t border-border text-xs font-medium text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
             <span>Đã gửi quyết định</span>
           </div>
         ) : (
@@ -153,7 +155,10 @@ export function ConfirmActionCard({
               variant="default"
               size="sm"
               disabled={isBusy}
-              onClick={() => submitDecisions([{ callId: call.id, approve: true }])}
+              onClick={() =>
+                submitDecisions([{ callId: call.id, approve: true }])
+              }
+              className="min-h-11 sm:min-h-9"
             >
               Xác nhận
             </Button>
@@ -162,7 +167,10 @@ export function ConfirmActionCard({
               variant="outline"
               size="sm"
               disabled={isBusy}
-              onClick={() => submitDecisions([{ callId: call.id, approve: false }])}
+              onClick={() =>
+                submitDecisions([{ callId: call.id, approve: false }])
+              }
+              className="min-h-11 sm:min-h-9"
             >
               Từ chối
             </Button>
@@ -188,7 +196,7 @@ export function ConfirmActionCard({
               <span
                 className={cn(
                   'font-medium flex-1 break-words whitespace-pre-line',
-                  isDecided ? 'text-muted-foreground' : 'text-foreground'
+                  isDecided ? 'text-muted-foreground' : 'text-foreground',
                 )}
               >
                 {call.summary}
@@ -204,16 +212,20 @@ export function ConfirmActionCard({
                   aria-pressed={choices[call.id] === true}
                   disabled={isBusy}
                   onClick={() => handleChoice(call.id, true)}
+                  className="min-h-11 sm:min-h-9"
                 >
                   Xác nhận
                 </Button>
                 <Button
                   type="button"
-                  variant={choices[call.id] === false ? 'destructive' : 'outline'}
+                  variant={
+                    choices[call.id] === false ? 'destructive' : 'outline'
+                  }
                   size="sm"
                   aria-pressed={choices[call.id] === false}
                   disabled={isBusy}
                   onClick={() => handleChoice(call.id, false)}
+                  className="min-h-11 sm:min-h-9"
                 >
                   Từ chối
                 </Button>
@@ -225,7 +237,7 @@ export function ConfirmActionCard({
 
       {isDecided ? (
         <div className="flex items-center gap-1.5 pt-2 border-t border-border text-xs font-medium text-muted-foreground">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+          <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
           <span>Đã gửi quyết định</span>
         </div>
       ) : (
@@ -237,6 +249,7 @@ export function ConfirmActionCard({
               size="sm"
               disabled={isBusy}
               onClick={() => handleBulk(true)}
+              className="min-h-11 sm:min-h-9"
             >
               Xác nhận tất cả
             </Button>
@@ -246,6 +259,7 @@ export function ConfirmActionCard({
               size="sm"
               disabled={isBusy}
               onClick={() => handleBulk(false)}
+              className="min-h-11 sm:min-h-9"
             >
               Từ chối tất cả
             </Button>
@@ -257,6 +271,7 @@ export function ConfirmActionCard({
               size="sm"
               disabled={isBusy || !allChosen}
               onClick={handleSubmit}
+              className="min-h-11 sm:min-h-9"
             >
               {submitting ? (
                 <>

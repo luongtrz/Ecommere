@@ -19,16 +19,17 @@ export function ImageUpload({
   maxImages = 5,
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const processFiles = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
 
     const validFiles: File[] = [];
-    for (const file of Array.from(files)) {
+    for (const file of fileArray) {
       if (file.size > MAX_FILE_SIZE) {
         toast.error('Ảnh vượt quá 5MB');
         continue;
@@ -50,7 +51,7 @@ export function ImageUpload({
     const remainingSlots = maxImages - images.length;
     if (validFiles.length > remainingSlots) {
       toast.warning(
-        `Chỉ có thể upload tối đa ${maxImages} ảnh. Còn ${remainingSlots} slot trống.`,
+        `Chỉ có thể tải lên tối đa ${maxImages} ảnh. Còn ${remainingSlots} vị trí trống.`,
       );
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -78,10 +79,12 @@ export function ImageUpload({
 
       const uploadedUrls = response.data.data.map((file: any) => file.url);
       onChange([...images, ...uploadedUrls]);
-      toast.success(`Đã upload ${uploadedUrls.length} ảnh thành công!`);
+      toast.success(`Đã tải lên ${uploadedUrls.length} ảnh thành công!`);
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast.error(`Upload thất bại: ${error?.message || 'Lỗi không xác định'}`);
+      toast.error(
+        `Tải ảnh lên thất bại: ${error?.message || 'Lỗi không xác định'}`,
+      );
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -90,13 +93,19 @@ export function ImageUpload({
     }
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await processFiles(files);
+  };
+
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
     onChange(newImages);
     toast.info('Đã xóa ảnh khỏi danh sách');
   };
 
-  // Drag and drop handlers
+  // Drag and drop handlers for reordering images
   const handleDragStart = (index: number) => {
     setDraggedIndex(index);
   };
@@ -121,6 +130,40 @@ export function ImageUpload({
     setDraggedIndex(null);
   };
 
+  // Drag and drop handlers for OS file upload
+  const handleDropzoneDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggedIndex !== null) return;
+    if (isUploading || images.length >= maxImages) return;
+
+    e.dataTransfer.dropEffect = 'copy';
+    setIsDragActive(true);
+  };
+
+  const handleDropzoneDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget.contains(e.relatedTarget as Node)) {
+      return;
+    }
+    setIsDragActive(false);
+  };
+
+  const handleDropzoneDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+
+    if (draggedIndex !== null) return;
+    if (isUploading || images.length >= maxImages) return;
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      await processFiles(files);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -129,10 +172,10 @@ export function ImageUpload({
           variant="outline"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading || images.length >= maxImages}
-          className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg"
+          className="h-11 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg"
         >
           <Upload className="mr-2 h-4 w-4 text-teal-600" />
-          {isUploading ? 'Đang upload...' : 'Chọn ảnh'}
+          {isUploading ? 'Đang tải lên...' : 'Chọn ảnh'}
         </Button>
         <span className="text-xs text-slate-500 tabular-nums font-mono">
           {images.length}/{maxImages} ảnh
@@ -159,12 +202,21 @@ export function ImageUpload({
               if (!isUploading) fileInputRef.current?.click();
             }
           }}
-          className="border-2 border-dashed border-slate-200 hover:border-teal-500 bg-slate-50/60 hover:bg-teal-50/30 rounded-xl p-8 text-center cursor-pointer transition-colors"
+          onDragOver={handleDropzoneDragOver}
+          onDragLeave={handleDropzoneDragLeave}
+          onDrop={handleDropzoneDrop}
+          className={`border-2 border-dashed ${
+            isDragActive
+              ? 'border-teal-500 bg-teal-50/50'
+              : 'border-slate-200 hover:border-teal-500 bg-slate-50/60 hover:bg-teal-50/30'
+          } rounded-xl p-8 text-center cursor-pointer transition-colors`}
         >
-          <ImageIcon className="h-10 w-10 mx-auto text-slate-400 mb-2" />
-          <p className="text-sm font-medium text-slate-900">Chưa có ảnh nào</p>
-          <p className="text-xs text-slate-400 mt-1">
-            Click "Chọn ảnh" để upload (tối đa {maxImages} ảnh)
+          <ImageIcon className="h-10 w-10 mx-auto text-slate-400 mb-2 pointer-events-none" />
+          <p className="text-sm font-medium text-slate-900 pointer-events-none">
+            Chưa có ảnh nào
+          </p>
+          <p className="text-xs text-slate-500 mt-1 pointer-events-none">
+            Nhấp hoặc kéo thả ảnh vào đây để tải lên (tối đa {maxImages} ảnh)
           </p>
         </div>
       ) : (
@@ -190,7 +242,7 @@ export function ImageUpload({
 
                 <img
                   src={url}
-                  alt={`Product ${index + 1}`}
+                  alt={`Ảnh sản phẩm ${index + 1}`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
                 />
 
@@ -198,7 +250,7 @@ export function ImageUpload({
                 <Button
                   type="button"
                   size="icon"
-                  className="absolute top-2 right-2 h-7 w-7 rounded-md bg-rose-600 hover:bg-rose-700 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  className="absolute top-2 right-2 h-7 w-7 rounded-md bg-rose-600 hover:bg-rose-700 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 transition-opacity z-10"
                   onClick={() => removeImage(index)}
                   aria-label={`Xóa ảnh ${index + 1}`}
                 >
@@ -207,7 +259,7 @@ export function ImageUpload({
 
                 {/* Primary image badge */}
                 {index === 0 && (
-                  <div className="absolute bottom-2 left-2 bg-teal-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow-sm">
+                  <div className="absolute bottom-2 left-2 bg-teal-600 text-white text-xs font-semibold px-2 py-0.5 rounded shadow-sm">
                     Ảnh chính
                   </div>
                 )}
@@ -226,9 +278,16 @@ export function ImageUpload({
                   if (!isUploading) fileInputRef.current?.click();
                 }
               }}
-              className="border border-dashed border-slate-200 hover:border-teal-500 bg-slate-50/60 hover:bg-teal-50/30 rounded-xl p-3 text-center cursor-pointer transition-colors"
+              onDragOver={handleDropzoneDragOver}
+              onDragLeave={handleDropzoneDragLeave}
+              onDrop={handleDropzoneDrop}
+              className={`border border-dashed ${
+                isDragActive
+                  ? 'border-teal-500 bg-teal-50/50'
+                  : 'border-slate-200 hover:border-teal-500 bg-slate-50/60 hover:bg-teal-50/30'
+              } rounded-xl p-3 text-center cursor-pointer transition-colors min-h-11 flex items-center justify-center`}
             >
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 pointer-events-none">
                 Nhấn để thêm ảnh khác ({images.length}/{maxImages})
               </p>
             </div>
@@ -236,13 +295,15 @@ export function ImageUpload({
         </div>
       )}
 
-      <p className="text-xs text-slate-400 flex items-center gap-1.5">
-        <GripVertical className="h-3.5 w-3.5 inline shrink-0 text-slate-400" />
-        <span>
-          Kéo thả ảnh để sắp xếp lại thứ tự. Ảnh đầu tiên sẽ là ảnh chính của
-          sản phẩm.
-        </span>
-      </p>
+      {images.length >= 2 && (
+        <p className="text-xs text-slate-400 flex items-center gap-1.5">
+          <GripVertical className="h-3.5 w-3.5 inline shrink-0 text-slate-400" />
+          <span>
+            Kéo thả ảnh để sắp xếp lại thứ tự. Ảnh đầu tiên sẽ là ảnh chính của
+            sản phẩm.
+          </span>
+        </p>
+      )}
     </div>
   );
 }

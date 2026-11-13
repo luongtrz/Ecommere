@@ -1,26 +1,31 @@
-// Simple toast hook
-// For production, consider using a library like sonner or react-hot-toast
+import { toast as sonner } from 'sonner';
 
-type ToastType = 'success' | 'error' | 'warning' | 'info';
+export interface ToastActions {
+  toast: (message: string) => void;
+  success: (message: string) => void;
+  error: (message: string) => void;
+  warning: (message: string) => void;
+  info: (message: string) => void;
+}
 
-export function useToast() {
-  const showToast = (type: ToastType, message: string) => {
-    // For now, using console.log
-    // In production, this would trigger a toast UI component
-    const prefix = type.toUpperCase();
-    console.log(`[${prefix}] ${message}`);
+const toastActions: ToastActions = {
+  toast: (message: string) => {
+    sonner.info(message);
+  },
+  success: (message: string) => {
+    sonner.success(message);
+  },
+  error: (message: string) => {
+    sonner.error(message);
+  },
+  warning: (message: string) => {
+    sonner.warning(message);
+  },
+  info: (message: string) => {
+    sonner.info(message);
+  },
+};
 
-    // You can also use alert for critical errors
-    if (type === 'error') {
-      alert(message);
-    }
-  };
-
-  return {
-    toast: (message: string) => showToast('info', message),
-    success: (message: string) => showToast('success', message),
-    error: (message: string) => showToast('error', message),
-    warning: (message: string) => showToast('warning', message),
-    info: (message: string) => showToast('info', message),
-  };
+export function useToast(): ToastActions {
+  return toastActions;
 }

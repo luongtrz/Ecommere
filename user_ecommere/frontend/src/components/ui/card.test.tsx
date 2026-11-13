@@ -35,11 +35,10 @@ describe('Card UI components', () => {
       expect(card).toBeInTheDocument();
       expect(card.tagName).toBe('DIV');
       expect(card).toHaveClass(
-        'rounded-xl',
+        'rounded-lg',
         'border',
-        'bg-white',
-        'text-slate-900',
-        'shadow-sm',
+        'bg-card',
+        'text-card-foreground',
       );
       expect(card).toHaveTextContent('Card Content');
     });
@@ -50,7 +49,7 @@ describe('Card UI components', () => {
       );
       const card = screen.getByTestId('card-custom-class');
 
-      expect(card).toHaveClass('custom-card-class', 'rounded-xl', 'border');
+      expect(card).toHaveClass('custom-card-class', 'rounded-lg', 'border');
     });
 
     it('forwards ref to HTMLDivElement', () => {
@@ -125,12 +124,13 @@ describe('Card UI components', () => {
       const title = screen.getByTestId('title-default');
 
       expect(title).toBeInTheDocument();
+      expect(title).toBeInstanceOf(HTMLHeadingElement);
       expect(title.tagName).toBe('H3');
       expect(title).toHaveClass(
-        'text-xl',
+        'font-sans',
         'font-semibold',
+        'text-lg',
         'leading-tight',
-        'tracking-tight',
       );
       expect(title).toHaveTextContent('Tiêu đề thẻ');
     });
@@ -175,7 +175,7 @@ describe('Card UI components', () => {
 
       expect(desc).toBeInTheDocument();
       expect(desc.tagName).toBe('P');
-      expect(desc).toHaveClass('text-sm', 'text-slate-500');
+      expect(desc).toHaveClass('text-sm', 'text-muted-foreground');
       expect(desc).toHaveTextContent('Mô tả chi tiết nội dung');
     });
 
@@ -193,7 +193,7 @@ describe('Card UI components', () => {
       expect(desc).toHaveClass(
         'custom-desc-class',
         'text-sm',
-        'text-slate-500',
+        'text-muted-foreground',
       );
     });
 

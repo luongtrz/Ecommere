@@ -64,7 +64,7 @@ describe('Toast components', () => {
 
     const root = screen.getByTestId('toast-root');
     expect(root).toBeInTheDocument();
-    expect(root).toHaveClass('border border-slate-200 bg-white text-slate-900');
+    expect(root).toHaveClass('border-border', 'bg-card', 'text-foreground');
 
     const viewport = screen.getByTestId('toast-viewport');
     expect(viewport).toBeInTheDocument();
@@ -87,7 +87,11 @@ describe('Toast components', () => {
 
     const root = screen.getByTestId('toast-destructive');
     expect(root).toHaveClass(
-      'destructive group border-rose-200 bg-rose-50 text-rose-900',
+      'destructive',
+      'group',
+      'border-destructive/40',
+      'bg-card',
+      'text-destructive',
     );
     expect(screen.getByText('Đã xảy ra lỗi')).toBeInTheDocument();
     expect(screen.getByText('Vui lòng thử lại sau')).toBeInTheDocument();
@@ -104,7 +108,7 @@ describe('Toast components', () => {
     );
 
     const root = screen.getByTestId('toast-default');
-    expect(root).toHaveClass('border border-slate-200 bg-white text-slate-900');
+    expect(root).toHaveClass('border-border', 'bg-card', 'text-foreground');
   });
 
   it('merges custom className and forwards ref on Toast', () => {
@@ -154,7 +158,7 @@ describe('Toast components', () => {
       const action = screen.getByTestId('toast-action');
       expect(action).toHaveClass('custom-action');
       expect(action).toHaveClass(
-        'inline-flex h-8 shrink-0 items-center justify-center rounded-lg border',
+        'inline-flex h-8 shrink-0 items-center justify-center rounded-md border',
       );
       expect(ref.current).toBe(action);
 
@@ -182,7 +186,7 @@ describe('Toast components', () => {
       const action = screen.getByTestId('toast-action-disabled');
       expect(action).toBeDisabled();
       expect(action).toHaveClass(
-        'inline-flex h-8 shrink-0 items-center justify-center rounded-lg border',
+        'inline-flex h-8 shrink-0 items-center justify-center rounded-md border',
       );
     });
   });
@@ -209,7 +213,7 @@ describe('Toast components', () => {
       const closeBtn = screen.getByTestId('toast-close');
       expect(closeBtn).toHaveAttribute('toast-close', '');
       expect(closeBtn).toHaveClass('custom-close');
-      expect(closeBtn).toHaveClass('absolute right-2 top-2 rounded-lg p-1');
+      expect(closeBtn).toHaveClass('h-11', 'w-11');
       expect(ref.current).toBe(closeBtn);
 
       fireEvent.click(closeBtn);
@@ -229,7 +233,7 @@ describe('Toast components', () => {
 
       const closeBtn = screen.getByTestId('toast-close-default');
       expect(closeBtn).toHaveAttribute('toast-close', '');
-      expect(closeBtn).toHaveClass('absolute right-2 top-2 rounded-lg p-1');
+      expect(closeBtn).toHaveClass('h-11', 'w-11');
     });
   });
 
@@ -321,7 +325,7 @@ describe('Toast components', () => {
       );
 
       const desc = screen.getByTestId('toast-desc-custom');
-      expect(desc).toHaveClass('text-sm text-slate-500 custom-desc');
+      expect(desc).toHaveClass('text-sm text-muted-foreground custom-desc');
       expect(ref.current).toBe(desc);
     });
 
@@ -338,7 +342,7 @@ describe('Toast components', () => {
       );
 
       const desc = screen.getByTestId('toast-desc-default');
-      expect(desc).toHaveClass('text-sm text-slate-500');
+      expect(desc).toHaveClass('text-sm text-muted-foreground');
     });
   });
 });

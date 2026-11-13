@@ -1,5 +1,5 @@
 import { describe, expect, it, afterEach } from 'vitest';
-import { render, cleanup } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import { LoadingSpinner } from './LoadingSpinner';
 
 describe('LoadingSpinner', () => {
@@ -7,24 +7,20 @@ describe('LoadingSpinner', () => {
     cleanup();
   });
 
-  it('renders with default props (size md and without additional className)', () => {
+  it('renders with default props (size md, role="status", aria-label="Đang tải")', () => {
     const { container } = render(<LoadingSpinner />);
 
-    const wrapper = container.firstElementChild;
-    expect(wrapper).toBeInTheDocument();
-    expect(wrapper).toHaveClass('flex', 'items-center', 'justify-center');
+    const statusWrapper = screen.getByRole('status', { name: 'Đang tải' });
+    expect(statusWrapper).toBeInTheDocument();
+    expect(statusWrapper).toHaveClass('flex', 'items-center', 'justify-center');
+    expect(statusWrapper).toHaveAttribute('aria-label', 'Đang tải');
 
     const spinner = container.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass(
-      'rounded-full',
-      'border-teal-100',
-      'border-t-teal-600',
-      'animate-spin',
-      'h-8',
-      'w-8',
-      'border-[2.5px]',
-    );
+    expect(spinner).toHaveClass('animate-spin', 'text-primary', 'h-6', 'w-6');
+
+    const srText = screen.getByText('Đang tải');
+    expect(srText).toHaveClass('sr-only');
   });
 
   it('renders with small size (sm)', () => {
@@ -32,16 +28,8 @@ describe('LoadingSpinner', () => {
 
     const spinner = container.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass(
-      'rounded-full',
-      'border-teal-100',
-      'border-t-teal-600',
-      'animate-spin',
-      'h-5',
-      'w-5',
-      'border-2',
-    );
-    expect(spinner).not.toHaveClass('h-8', 'w-8', 'h-12', 'w-12');
+    expect(spinner).toHaveClass('animate-spin', 'text-primary', 'h-4', 'w-4');
+    expect(spinner).not.toHaveClass('h-6', 'w-6', 'h-8', 'w-8');
   });
 
   it('renders with medium size explicitly (md)', () => {
@@ -49,16 +37,8 @@ describe('LoadingSpinner', () => {
 
     const spinner = container.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass(
-      'rounded-full',
-      'border-teal-100',
-      'border-t-teal-600',
-      'animate-spin',
-      'h-8',
-      'w-8',
-      'border-[2.5px]',
-    );
-    expect(spinner).not.toHaveClass('h-5', 'w-5', 'h-12', 'w-12');
+    expect(spinner).toHaveClass('animate-spin', 'text-primary', 'h-6', 'w-6');
+    expect(spinner).not.toHaveClass('h-4', 'w-4', 'h-8', 'w-8');
   });
 
   it('renders with large size (lg)', () => {
@@ -66,16 +46,8 @@ describe('LoadingSpinner', () => {
 
     const spinner = container.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass(
-      'rounded-full',
-      'border-teal-100',
-      'border-t-teal-600',
-      'animate-spin',
-      'h-12',
-      'w-12',
-      'border-[3px]',
-    );
-    expect(spinner).not.toHaveClass('h-5', 'w-5', 'h-8', 'w-8');
+    expect(spinner).toHaveClass('animate-spin', 'text-primary', 'h-8', 'w-8');
+    expect(spinner).not.toHaveClass('h-4', 'w-4', 'h-6', 'w-6');
   });
 
   it('merges custom className with default classes', () => {
@@ -83,18 +55,14 @@ describe('LoadingSpinner', () => {
       <LoadingSpinner className="custom-loader-class text-secondary" />,
     );
 
-    const spinner = container.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass(
-      'rounded-full',
-      'border-teal-100',
-      'border-t-teal-600',
+    const icon = container.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass(
       'animate-spin',
       'custom-loader-class',
       'text-secondary',
-      'h-8',
-      'w-8',
-      'border-[2.5px]',
+      'h-6',
+      'w-6',
     );
   });
 
@@ -106,13 +74,10 @@ describe('LoadingSpinner', () => {
     const spinner = container.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
     expect(spinner).toHaveClass(
-      'rounded-full',
-      'border-teal-100',
-      'border-t-teal-600',
       'animate-spin',
-      'h-5',
-      'w-5',
-      'border-2',
+      'text-primary',
+      'h-4',
+      'w-4',
       'opacity-75',
     );
   });

@@ -7,14 +7,17 @@ import { SEO } from '@/lib/seo';
 import type { ForgotPasswordInput } from '@/lib/validators';
 
 export function ForgotPasswordPage() {
-  const { forgotPassword, isForgotPasswordLoading, forgotPasswordError } = useAuth();
+  const { forgotPassword, isForgotPasswordLoading, forgotPasswordError } =
+    useAuth();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = (data: ForgotPasswordInput) => {
     setSuccessMessage(null);
     forgotPassword(data.email, {
       onSuccess: () => {
-        setSuccessMessage('Nếu email tồn tại, liên kết đặt lại mật khẩu sẽ được gửi');
+        setSuccessMessage(
+          'Nếu email tồn tại, liên kết đặt lại mật khẩu sẽ được gửi',
+        );
       },
     });
   };
@@ -29,17 +32,17 @@ export function ForgotPasswordPage() {
           <div>
             <Link
               to="/"
-              className="font-serif text-2xl tracking-tight text-primary-foreground hover:opacity-90 transition-opacity"
+              className="text-2xl font-bold text-primary-foreground hover:opacity-90 transition-opacity"
             >
               Thai Spray
             </Link>
-            <p className="mt-1 text-xs text-primary-foreground/70 uppercase tracking-wider">
-              Hàng Thái Lan Chính Hãng
+            <p className="mt-1 text-xs text-primary-foreground/70">
+              Hàng Thái Lan chính hãng
             </p>
           </div>
 
           <div className="max-w-md space-y-4">
-            <h2 className="font-serif text-3xl xl:text-4xl leading-tight text-primary-foreground">
+            <h2 className="text-2xl sm:text-3xl font-bold leading-snug text-primary-foreground">
               Quên mật khẩu
             </h2>
             <p className="text-sm text-primary-foreground/80 leading-relaxed">
@@ -57,12 +60,12 @@ export function ForgotPasswordPage() {
           <div className="w-full max-w-sm space-y-6">
             {/* Mobile Brand */}
             <div className="lg:hidden flex items-center justify-between">
-              <Link to="/" className="font-serif text-xl tracking-tight text-foreground">
+              <Link to="/" className="text-xl font-bold text-foreground">
                 Thai Spray
               </Link>
               <Link
                 to="/login"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors min-h-11 flex items-center"
               >
                 Đăng nhập →
               </Link>
@@ -70,7 +73,7 @@ export function ForgotPasswordPage() {
 
             {/* Header */}
             <div className="space-y-1.5">
-              <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-balance text-foreground">
                 Quên mật khẩu
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -90,13 +93,17 @@ export function ForgotPasswordPage() {
                 <AlertDescription>
                   {Array.isArray(forgotPasswordError.response?.data?.message)
                     ? forgotPasswordError.response?.data?.message.join(', ')
-                    : (forgotPasswordError.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.')}
+                    : forgotPasswordError.response?.data?.message ||
+                      'Đã có lỗi xảy ra. Vui lòng thử lại sau.'}
                 </AlertDescription>
               </Alert>
             )}
 
             {/* Forgot Password Form */}
-            <ForgotPasswordForm onSubmit={handleSubmit} isLoading={isForgotPasswordLoading} />
+            <ForgotPasswordForm
+              onSubmit={handleSubmit}
+              isLoading={isForgotPasswordLoading}
+            />
 
             {/* Divider & Back Link */}
             <div className="pt-2">
@@ -114,7 +121,7 @@ export function ForgotPasswordPage() {
               <div className="text-center mt-4">
                 <Link
                   to="/login"
-                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  className="inline-flex items-center justify-center min-h-11 px-4 text-sm font-medium text-primary underline-offset-4 hover:underline"
                 >
                   Quay lại đăng nhập
                 </Link>

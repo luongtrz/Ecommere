@@ -12,12 +12,12 @@ const badgeVariants = cva(
         secondary:
           'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200',
         destructive:
-          'border-rose-200 bg-rose-50 text-rose-700 ring-1 ring-rose-200 hover:bg-rose-100',
+          'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
         outline: 'border-slate-200 text-slate-700 hover:bg-slate-50',
         success:
-          'border-emerald-200 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100',
+          'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
         warning:
-          'border-amber-200 bg-amber-50 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100',
+          'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100',
       },
     },
     defaultVariants: {

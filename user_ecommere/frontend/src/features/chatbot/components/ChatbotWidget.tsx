@@ -1,12 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Bot,
-  Plus,
-  X,
-  Maximize2,
-  ChevronDown,
-} from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Bot, Plus, X, Maximize2, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -35,10 +29,15 @@ const WELCOME_CHAT_MESSAGE: ChatMessage = {
 
 export function ChatbotWidget() {
   const { open, setOpen } = useChatStore();
-  const { isStreaming, send, decide, cancel, newThread, retry } = useChatAgent();
-  const { messages } = useChatOwnerSync(newThread);
+  const { isStreaming, send, decide, cancel, newThread, retry } =
+    useChatAgent();
+  const { messages, isOwnerMatch } = useChatOwnerSync(newThread);
   const toast = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHiddenMobile =
+    location.pathname.startsWith('/cart') ||
+    location.pathname.startsWith('/checkout');
 
   const [draft, setDraft] = useState('');
   const [srAnnouncement, setSrAnnouncement] = useState('');
@@ -47,12 +46,12 @@ export function ChatbotWidget() {
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
   const wasOpenRef = useRef(open);
 
-  const { scrollRef, isAtBottom, scrollToBottom } = useStickToBottom<HTMLDivElement>([
-    messages,
-    isStreaming,
-  ]);
+  const { scrollRef, isAtBottom, scrollToBottom } =
+    useStickToBottom<HTMLDivElement>([messages, isStreaming]);
 
-  const showTyping = shouldShowTypingIndicator(messages, isStreaming);
+  // Only show the typing indicator for the conversation this session owns.
+  const showTyping =
+    isOwnerMatch && shouldShowTypingIndicator(messages, isStreaming);
 
   // Screen reader polite announcements for streaming state
   useEffect(() => {
@@ -125,7 +124,9 @@ export function ChatbotWidget() {
       return;
     }
     if (prompt.length > CHAT_MAX_MESSAGE_LENGTH) {
-      toast.error(`Tin nhắn không được vượt quá ${CHAT_MAX_MESSAGE_LENGTH} ký tự.`);
+      toast.error(
+        `Tin nhắn không được vượt quá ${CHAT_MAX_MESSAGE_LENGTH} ký tự.`,
+      );
       return;
     }
     setDraft('');
@@ -150,39 +151,41 @@ export function ChatbotWidget() {
           role="dialog"
           aria-label="Trò chuyện với chuyên gia mùi hương"
           className={cn(
-            'fixed inset-0 z-[60] flex flex-col h-[100dvh] pt-[env(safe-area-inset-top,0px)] md:pt-0 bg-card overflow-hidden',
-            'md:inset-auto md:bottom-6 md:right-6 md:w-[420px] md:h-[min(680px,calc(100dvh-3rem))] md:rounded-lg md:border md:border-border md:shadow-md',
-            'animate-in fade-in-0 zoom-in-95 duration-200 motion-reduce:animate-none'
+            'fixed inset-0 z-40 flex flex-col h-[100dvh] pt-[env(safe-area-inset-top,0px)] md:pt-0 bg-card overflow-hidden',
+            'md:inset-auto md:bottom-6 md:right-6 md:w-[420px] md:h-[min(680px,calc(100dvh-8rem))] md:rounded-lg md:border md:border-border md:shadow-md',
+            'animate-in fade-in-0 zoom-in-95 duration-200 motion-reduce:animate-none',
           )}
         >
           {/* Header */}
-          <div className="flex items-center justify-between gap-3 bg-primary px-4 py-3 sm:px-5 sm:py-3.5 text-primary-foreground shrink-0">
-            <div className="flex items-center gap-3 min-w-0">
+          <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-background px-3 sm:px-4 text-foreground shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary-foreground/10"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"
                 aria-hidden="true"
               >
-                <Bot className="h-5 w-5" />
+                <Bot className="h-4 w-4" />
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold leading-tight truncate">
+              <div className="min-w-0 flex-1 text-left">
+                <p className="text-sm font-semibold font-sans leading-tight text-foreground truncate">
                   Chuyên gia Mùi hương
                 </p>
-                <p className="text-xs text-primary-foreground/80 mt-0.5 truncate">
-                  Tư vấn mùi thơm cho nhà ở & xe hơi
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                  Tư vấn mùi thơm cho nhà ở &amp; xe hơi
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-md hidden md:inline-flex disabled:opacity-50"
+                className="min-h-11 min-w-11 h-11 w-11 sm:h-9 sm:w-9 sm:min-h-0 sm:min-w-0 text-foreground hover:bg-secondary hover:text-foreground rounded-md hidden md:inline-flex disabled:opacity-50"
                 disabled={isStreaming}
                 onClick={handleExpand}
-                title={isStreaming ? 'Không thể mở rộng khi đang trả lời' : 'Mở rộng'}
+                title={
+                  isStreaming ? 'Không thể mở rộng khi đang trả lời' : 'Mở rộng'
+                }
                 aria-label="Mở rộng"
               >
                 <Maximize2 className="h-4 w-4" />
@@ -192,7 +195,7 @@ export function ChatbotWidget() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-md"
+                className="min-h-11 min-w-11 h-11 w-11 sm:h-9 sm:w-9 sm:min-h-0 sm:min-w-0 text-foreground hover:bg-secondary hover:text-foreground rounded-md"
                 onClick={() => newThread()}
                 title="Cuộc trò chuyện mới"
                 aria-label="Cuộc trò chuyện mới"
@@ -204,16 +207,16 @@ export function ChatbotWidget() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground rounded-md"
+                className="min-h-11 min-w-11 h-11 w-11 sm:h-9 sm:w-9 sm:min-h-0 sm:min-w-0 text-foreground hover:bg-secondary hover:text-foreground rounded-md"
                 onClick={() => setOpen(false)}
-                title="Đóng"
-                aria-label="Đóng"
+                title="Đóng cửa sổ trò chuyện"
+                aria-label="Đóng cửa sổ trò chuyện"
               >
                 <X className="h-4 w-4" />
-                <span className="sr-only">Đóng</span>
+                <span className="sr-only">Đóng cửa sổ trò chuyện</span>
               </Button>
             </div>
-          </div>
+          </header>
 
           {/* Chat scrollable log region + scroll-to-bottom pill */}
           <div className="relative flex-1 min-h-0 flex flex-col">
@@ -239,7 +242,9 @@ export function ChatbotWidget() {
                     message={message}
                     variant="widget"
                     onDecide={decide}
-                    onRetry={isLast && message.error ? () => void retry() : undefined}
+                    onRetry={
+                      isLast && message.error ? () => void retry() : undefined
+                    }
                   />
                 );
               })}
@@ -247,7 +252,7 @@ export function ChatbotWidget() {
               {/* Quick suggestion chips (only while there are no messages) */}
               {messages.length === 0 && (
                 <div className="space-y-2 pt-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <p className="text-xs font-semibold text-muted-foreground">
                     Gợi ý nhanh
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -261,7 +266,7 @@ export function ChatbotWidget() {
                             void send(suggestion);
                           }
                         }}
-                        className="min-h-[36px] rounded-full border border-border bg-card px-4 py-1.5 text-left text-sm font-medium text-foreground transition-colors duration-200 motion-reduce:transition-none hover:bg-secondary hover:text-foreground hover:border-foreground/30 active:scale-95 motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none flex items-center"
+                        className="min-h-11 rounded-full border border-border bg-card px-4 py-2.5 text-left text-sm font-medium text-foreground transition-colors duration-200 motion-reduce:transition-none hover:bg-secondary hover:text-foreground hover:border-foreground/30 active:scale-95 motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none flex items-center"
                       >
                         {suggestion}
                       </button>
@@ -280,7 +285,7 @@ export function ChatbotWidget() {
                 type="button"
                 onClick={() => scrollToBottom('smooth')}
                 aria-label="Cuộn xuống"
-                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex min-h-[36px] items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground shadow-md transition-colors duration-200 motion-reduce:transition-none hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95 motion-reduce:active:scale-100"
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex min-h-11 sm:min-h-[36px] items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground shadow-md transition-colors duration-200 motion-reduce:transition-none hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95 motion-reduce:active:scale-100"
               >
                 <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Cuộn xuống</span>
@@ -299,6 +304,10 @@ export function ChatbotWidget() {
               maxLength={CHAT_MAX_MESSAGE_LENGTH}
               variant="widget"
             />
+            <p className="text-xs text-muted-foreground text-center pb-2 select-none leading-normal">
+              Trợ lý AI có thể nhầm lẫn. Vui lòng kiểm tra thông tin sản phẩm
+              trước khi đặt hàng.
+            </p>
           </div>
         </div>
       ) : null}
@@ -310,17 +319,18 @@ export function ChatbotWidget() {
           aria-label="Mở khung trò chuyện"
           onClick={() => setOpen(true)}
           className={cn(
-            'fixed bottom-24 right-4 z-[60] md:bottom-6 md:right-6',
-            'h-14 w-14 md:w-auto md:px-5 rounded-full',
+            'fixed z-30 transition-colors duration-200 motion-reduce:transition-none',
+            // Desktop: icon-only 48px circle in the right margin, outside the content column, so it does not cover purchase buttons.
+            'bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] right-3 md:bottom-6 md:right-6',
+            'h-12 w-12 rounded-full',
             'bg-primary text-primary-foreground shadow-md hover:bg-primary/90',
-            'transition-colors duration-200 motion-reduce:transition-none',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-            'flex items-center justify-center gap-2.5 active:scale-95 motion-reduce:active:scale-100'
+            'flex items-center justify-center gap-2 active:scale-95 motion-reduce:active:scale-100',
+            isHiddenMobile && 'hidden md:flex',
           )}
         >
           <Bot className="h-6 w-6 shrink-0" />
-          <span className="hidden md:inline text-sm font-semibold">Tư vấn</span>
-          <span className="sr-only md:hidden">Mở khung trò chuyện</span>
+          <span className="sr-only">Mở khung trò chuyện</span>
         </Button>
       ) : null}
     </>

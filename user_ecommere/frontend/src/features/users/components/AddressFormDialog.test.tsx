@@ -501,6 +501,7 @@ describe('AddressFormDialog', () => {
     });
 
     expect(handleOpenChange).not.toHaveBeenCalled();
+    expect(handleOpenChange).not.toHaveBeenCalledWith(false);
   });
 
   it('does not call onOpenChange when updateAddress.mutateAsync rejects', async () => {
@@ -523,6 +524,7 @@ describe('AddressFormDialog', () => {
     });
 
     expect(handleOpenChange).not.toHaveBeenCalled();
+    expect(handleOpenChange).not.toHaveBeenCalledWith(false);
   });
 
   it('calls onOpenChange(false) when cancel button is clicked without submitting', async () => {
@@ -553,7 +555,7 @@ describe('AddressFormDialog', () => {
       onOpenChange: handleOpenChange,
     });
 
-    const closeButton = screen.getByRole('button', { name: 'Close' });
+    const closeButton = screen.getByRole('button', { name: 'Đóng' });
     await user.click(closeButton);
 
     expect(handleOpenChange).toHaveBeenCalledWith(false);

@@ -340,7 +340,7 @@ describe('ProductDetailPage', () => {
         name: `Về danh mục ${mockProduct.category.name}`,
       }),
     ).toHaveAttribute('href', `/c/${mockProduct.category.slug}`);
-    expect(screen.getByText('Trang chủ')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Trang chủ' })).toBeInTheDocument();
     expect(screen.getByText('Sản phẩm')).toBeInTheDocument();
     expect(
       screen.getAllByText(mockProduct.category.name).length,
@@ -357,13 +357,9 @@ describe('ProductDetailPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Chính Hãng Thái Lan')).toBeInTheDocument();
 
-    // Trust Micro-Row
-    expect(screen.getByText('100% Nội Địa')).toBeInTheDocument();
-    expect(screen.getByText('Mã vạch chuẩn Thái')).toBeInTheDocument();
-    expect(screen.getByText('Chống Vỡ 3 Lớp')).toBeInTheDocument();
-    expect(screen.getByText('Đóng gói an toàn')).toBeInTheDocument();
-    expect(screen.getByText('Giao Toàn Quốc')).toBeInTheDocument();
-    expect(screen.getByText('Freeship từ 250k')).toBeInTheDocument();
+    // Redundant micro-row under gallery removed (consolidated in policy list below buttons)
+    expect(screen.queryByText('100% Nội Địa')).not.toBeInTheDocument();
+    expect(screen.queryByText('Chống Vỡ 3 Lớp')).not.toBeInTheDocument();
 
     // Title, rating, sold text
     expect(
@@ -373,7 +369,7 @@ describe('ProductDetailPage', () => {
     expect(
       screen.getByText(`(${mockProduct.reviewCount} đánh giá)`),
     ).toBeInTheDocument();
-    expect(screen.getByText('Đã bán hơn 1.200 chai')).toBeInTheDocument();
+    expect(screen.getByText(/🔥\s*Đã bán hơn 1\.200 chai/)).toBeInTheDocument();
 
     // Pricing box
     expect(screen.getAllByText(/120[.,]000/)[0]).toBeInTheDocument();
@@ -404,24 +400,24 @@ describe('ProductDetailPage', () => {
     ).toBeInTheDocument();
 
     const secondThumb = screen.getByRole('button', {
-      name: `${mockProduct.name} 2`,
+      name: 'Xem ảnh 2',
     });
     fireEvent.click(secondThumb);
 
     expect(
       screen.getByText(`2 / ${mockProduct.images.length}`),
     ).toBeInTheDocument();
-    expect(secondThumb).toHaveClass('border-teal-600');
+    expect(secondThumb).toHaveClass('border-primary');
 
     const thirdThumb = screen.getByRole('button', {
-      name: `${mockProduct.name} 3`,
+      name: 'Xem ảnh 3',
     });
     fireEvent.click(thirdThumb);
 
     expect(
       screen.getByText(`3 / ${mockProduct.images.length}`),
     ).toBeInTheDocument();
-    expect(thirdThumb).toHaveClass('border-teal-600');
+    expect(thirdThumb).toHaveClass('border-primary');
   });
 
   it('handles variant selection, pricing changes, and disabled out-of-stock variants', () => {
@@ -434,7 +430,7 @@ describe('ProductDetailPage', () => {
 
     // Default variant is var-1 (Hoa Oải Hương, 300ml, 120000)
     const var1Btn = screen.getByRole('button', { name: /Hoa Oải Hương/i });
-    expect(var1Btn).toHaveClass('border-teal-600');
+    expect(var1Btn).toHaveClass('border-primary');
     expect(screen.getByText('(300ml)')).toBeInTheDocument();
     expect(screen.getByText('(Có sẵn 20 sản phẩm)')).toBeInTheDocument();
 
@@ -448,7 +444,7 @@ describe('ProductDetailPage', () => {
     const var2Btn = screen.getByRole('button', { name: /Chanh Sả/i });
     fireEvent.click(var2Btn);
 
-    expect(var2Btn).toHaveClass('border-teal-600');
+    expect(var2Btn).toHaveClass('border-primary');
     expect(screen.getAllByText(/180[.,]000/)[0]).toBeInTheDocument();
     expect(screen.queryByText(/Tiết kiệm/i)).not.toBeInTheDocument();
     expect(screen.getByText('(Có sẵn 5 sản phẩm)')).toBeInTheDocument();
@@ -457,7 +453,7 @@ describe('ProductDetailPage', () => {
     const var4Btn = screen.getByRole('button', { name: /Không mùi/i });
     fireEvent.click(var4Btn);
 
-    expect(var4Btn).toHaveClass('border-teal-600');
+    expect(var4Btn).toHaveClass('border-primary');
     expect(screen.getAllByText(/90[.,]000/)[0]).toBeInTheDocument();
     // volumeMl is 0, so (0ml) shouldn't be rendered
     expect(screen.queryByText('(0ml)')).not.toBeInTheDocument();
@@ -537,7 +533,7 @@ describe('ProductDetailPage', () => {
     fireEvent.click(plusBtn); // quantity = 2
 
     const addToCartBtn = screen.getAllByRole('button', {
-      name: /Thêm Vào Giỏ Hàng/i,
+      name: /Thêm vào giỏ/i,
     })[0];
     fireEvent.click(addToCartBtn);
 
@@ -571,7 +567,7 @@ describe('ProductDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Chanh Sả/i }));
 
     const addToCartBtn = screen.getAllByRole('button', {
-      name: /Thêm Vào Giỏ Hàng/i,
+      name: /Thêm vào giỏ/i,
     })[0];
     fireEvent.click(addToCartBtn);
 
@@ -596,7 +592,7 @@ describe('ProductDetailPage', () => {
 
     renderComponent();
 
-    const buyNowBtn = screen.getAllByRole('button', { name: /Mua Ngay/i })[0];
+    const buyNowBtn = screen.getAllByRole('button', { name: /Mua ngay/i })[0];
     fireEvent.click(buyNowBtn);
 
     expect(mockAddItem).toHaveBeenCalledTimes(1);
@@ -625,7 +621,9 @@ describe('ProductDetailPage', () => {
     const wishlistBtn = screen.getByRole('button', {
       name: 'Lưu vào yêu thích',
     });
-    expect(wishlistBtn).toHaveClass('bg-white');
+    const heartIcon = wishlistBtn.querySelector('svg');
+    expect(heartIcon).toHaveClass('text-foreground');
+    expect(heartIcon).not.toHaveClass('fill-destructive');
 
     fireEvent.click(wishlistBtn);
 
@@ -645,12 +643,13 @@ describe('ProductDetailPage', () => {
     const wishlistedBtn = screen.getByRole('button', {
       name: 'Bỏ khỏi yêu thích',
     });
-    expect(wishlistedBtn).toHaveClass('bg-rose-50');
+    const wishlistedHeart = wishlistedBtn.querySelector('svg');
+    expect(wishlistedHeart).toHaveClass('fill-destructive');
     fireEvent.click(wishlistedBtn);
     expect(mockToggleItem).toHaveBeenCalledTimes(2);
   });
 
-  it('handles out of stock selected variant: disables action buttons with Tạm Hết Hàng label', () => {
+  it('handles out of stock selected variant: disables action buttons with Hết hàng label', () => {
     const productOOS = {
       ...mockProduct,
       variants: [
@@ -674,11 +673,11 @@ describe('ProductDetailPage', () => {
     renderComponent();
 
     const addToCartBtn = screen.getAllByRole('button', {
-      name: /Tạm Hết Hàng/i,
+      name: /Hết hàng/i,
     })[0];
     expect(addToCartBtn).toBeDisabled();
 
-    const buyNowBtn = screen.getAllByRole('button', { name: /Mua Ngay/i })[0];
+    const buyNowBtn = screen.getAllByRole('button', { name: /Mua ngay/i })[0];
     expect(buyNowBtn).toBeDisabled();
 
     // Clicking disabled button should not trigger actions
@@ -686,6 +685,70 @@ describe('ProductDetailPage', () => {
     expect(mockAddItem).not.toHaveBeenCalled();
     fireEvent.click(buyNowBtn);
     expect(mockNavigate).not.toHaveBeenCalled();
+
+    // Shows clear out of stock signals
+    expect(
+      screen.getByText('Hết hàng', { selector: 'span.text-destructive' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('(Có sẵn 0 sản phẩm)')).toBeInTheDocument();
+
+    // Quantity stepper buttons are disabled
+    const quantitySection = screen.getByText('Số lượng mua:').closest('div');
+    const minusBtn = quantitySection?.querySelectorAll(
+      'button',
+    )[0] as HTMLButtonElement;
+    const plusBtn = quantitySection?.querySelectorAll(
+      'button',
+    )[1] as HTMLButtonElement;
+    expect(minusBtn).toBeDisabled();
+    expect(plusBtn).toBeDisabled();
+  });
+
+  it('defaults selected variant to the first in-stock variant when the first variant is out of stock', () => {
+    const productWithFirstOOS = {
+      ...mockProduct,
+      variants: [
+        {
+          id: 'var-oos-1',
+          scent: 'Bản Nhỏ Hết Hàng',
+          volumeMl: 100,
+          price: 80000,
+          salePrice: null,
+          stock: 0,
+          sku: 'OOS-100',
+        },
+        {
+          id: 'var-stock-2',
+          scent: 'Bản Vừa Còn Hàng',
+          volumeMl: 250,
+          price: 140000,
+          salePrice: null,
+          stock: 12,
+          sku: 'STK-250',
+        },
+      ],
+    };
+
+    mockUseProductDetail.mockReturnValue({
+      data: productWithFirstOOS,
+      isLoading: false,
+    });
+
+    renderComponent();
+
+    // First in-stock variant (var-stock-2) should be selected by default
+    const inStockBtn = screen.getByRole('button', {
+      name: /Bản Vừa Còn Hàng/i,
+    });
+    expect(inStockBtn).toHaveClass('border-primary');
+
+    // The out-of-stock variant should be disabled
+    const oosBtn = screen.getByRole('button', { name: /Bản Nhỏ Hết Hàng/i });
+    expect(oosBtn).toBeDisabled();
+
+    // Stock should show available count from the selected in-stock variant
+    expect(screen.getByText('(Có sẵn 12 sản phẩm)')).toBeInTheDocument();
+    expect(screen.getByText('Còn hàng trong kho')).toBeInTheDocument();
   });
 
   it('switches between description tab and usage guide tab', () => {
@@ -699,7 +762,7 @@ describe('ProductDetailPage', () => {
     // Description tab is active by default
     expect(screen.getByText('Chi tiết sản phẩm')).toBeInTheDocument();
     expect(
-      screen.getByText(/Hương thơm tự nhiên từ Thái Lan/i),
+      screen.getAllByText(/Hương thơm tự nhiên từ Thái Lan/i)[0],
     ).toBeInTheDocument();
     expect(screen.getByText('Xuất xứ:')).toBeInTheDocument();
     expect(screen.getByText('Thương hiệu:')).toBeInTheDocument();
@@ -745,7 +808,7 @@ describe('ProductDetailPage', () => {
 
     // Single image means thumbnails grid (images.length > 1) is not rendered
     expect(
-      screen.queryByRole('button', { name: `${productMinimal.name} 2` }),
+      screen.queryByRole('button', { name: 'Xem ảnh 2' }),
     ).not.toBeInTheDocument();
     expect(screen.getByText('1 / 1')).toBeInTheDocument();
   });
@@ -770,10 +833,10 @@ describe('ProductDetailPage', () => {
 
     // Buttons are disabled
     const addToCartBtn = screen.getAllByRole('button', {
-      name: /Thêm Vào Giỏ Hàng/i,
+      name: /Hết hàng/i,
     })[0];
     expect(addToCartBtn).toBeDisabled();
-    const buyNowBtn = screen.getAllByRole('button', { name: /Mua Ngay/i })[0];
+    const buyNowBtn = screen.getAllByRole('button', { name: /Mua ngay/i })[0];
     expect(buyNowBtn).toBeDisabled();
 
     // Stock fallback shows (Có sẵn 0 sản phẩm)
@@ -821,7 +884,7 @@ describe('ProductDetailPage', () => {
     // 1. Change variant to var-2 (Chanh Sả)
     const var2Btn = screen.getByRole('button', { name: /Chanh Sả/i });
     fireEvent.click(var2Btn);
-    expect(var2Btn).toHaveClass('border-teal-600');
+    expect(var2Btn).toHaveClass('border-primary');
 
     // 2. Change quantity to 3
     const quantitySection = screen.getByText('Số lượng mua:').closest('div');
@@ -836,7 +899,7 @@ describe('ProductDetailPage', () => {
 
     // 3. Change image to 2nd thumbnail
     const secondThumb = screen.getByRole('button', {
-      name: `${mockProduct.name} 2`,
+      name: 'Xem ảnh 2',
     });
     fireEvent.click(secondThumb);
     expect(
@@ -857,6 +920,6 @@ describe('ProductDetailPage', () => {
     ).toBeInTheDocument();
     // Variant should be reset to default (first variant: Hoa Oải Hương)
     const var1Btn = screen.getByRole('button', { name: /Hoa Oải Hương/i });
-    expect(var1Btn).toHaveClass('border-teal-600');
+    expect(var1Btn).toHaveClass('border-primary');
   });
 });

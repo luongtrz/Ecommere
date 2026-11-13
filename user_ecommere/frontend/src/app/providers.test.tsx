@@ -23,15 +23,22 @@ vi.mock('@/components/ui/toaster', () => ({
 }));
 
 vi.mock('sonner', () => ({
-  Toaster: vi.fn((props: { position?: string; richColors?: boolean }) => (
-    <div
-      data-testid="sonner-toaster"
-      data-position={props.position}
-      data-rich-colors={String(props.richColors)}
-    >
-      Sonner Toaster
-    </div>
-  )),
+  Toaster: vi.fn(
+    (props: {
+      position?: string;
+      richColors?: boolean;
+      closeButton?: boolean;
+    }) => (
+      <div
+        data-testid="sonner-toaster"
+        data-position={props.position}
+        data-rich-colors={String(props.richColors)}
+        data-close-button={String(props.closeButton)}
+      >
+        Sonner Toaster
+      </div>
+    ),
+  ),
 }));
 
 vi.mock('@/features/auth/components/SessionRestoreWrapper', () => ({
@@ -150,7 +157,7 @@ describe('AppProviders', () => {
     expect(screen.getByText('Radix Toaster')).toBeInTheDocument();
   });
 
-  it('renders SonnerToaster with position="top-right" and richColors set to true', () => {
+  it('renders SonnerToaster with position="top-center", closeButton and richColors set to true', () => {
     render(
       <AppProviders>
         <div>Nội dung</div>
@@ -159,8 +166,9 @@ describe('AppProviders', () => {
 
     const sonner = screen.getByTestId('sonner-toaster');
     expect(sonner).toBeInTheDocument();
-    expect(sonner).toHaveAttribute('data-position', 'top-right');
+    expect(sonner).toHaveAttribute('data-position', 'top-center');
     expect(sonner).toHaveAttribute('data-rich-colors', 'true');
+    expect(sonner).toHaveAttribute('data-close-button', 'true');
   });
 
   it('lazy loads and renders ReactQueryDevtools with initialIsOpen={false} in DEV mode', async () => {

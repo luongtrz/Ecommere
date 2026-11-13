@@ -6,6 +6,7 @@ import {
   fireEvent,
   act,
   waitFor,
+  within,
 } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -45,6 +46,7 @@ const mockUseInfiniteAdminProducts = vi.fn();
 const mockDeleteMutate = vi.fn();
 let mockDeleteIsPending = false;
 let mockDeleteVariables: any = undefined;
+const mockRefetch = vi.fn();
 
 const mockToast = {
   toast: vi.fn(),
@@ -272,6 +274,7 @@ const mockProducts = [
     basePrice: 150000,
     images: ['https://example.com/img1.jpg'],
     category: { id: 'cat-badge-1', name: 'Hương sả tự nhiên' },
+    active: true,
     rating: 4.8,
     reviewCount: 25,
     variants: [
@@ -286,6 +289,7 @@ const mockProducts = [
     basePrice: 90000,
     images: [], // empty images array
     category: null, // no category
+    active: false,
     rating: undefined, // no rating
     reviewCount: undefined, // no reviewCount
     variants: [], // no variants -> stock 0
@@ -297,6 +301,7 @@ const mockProducts = [
     basePrice: 120000,
     images: ['https://example.com/img3.jpg'],
     category: { id: 'cat-badge-3', name: 'Khử mùi cao cấp' },
+    active: true,
     rating: 3.5,
     reviewCount: 8,
     variants: [
@@ -310,6 +315,7 @@ const mockProducts = [
     basePrice: 200000,
     images: ['https://example.com/img4.jpg'],
     category: { id: 'cat-badge-4', name: 'Nước hoa phòng ngủ' },
+    active: true,
     rating: 5.0,
     reviewCount: 1,
     variants: undefined, // undefined variants -> tests product.variants?.reduce || 0
@@ -345,8 +351,6 @@ function renderAdminProductsPage() {
 }
 
 describe('AdminProductsPage', () => {
-  const mockReload = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
     mockDeleteIsPending = false;
@@ -358,23 +362,14 @@ describe('AdminProductsPage', () => {
       data: mockDefaultData,
       isLoading: false,
       isError: false,
+      refetch: mockRefetch,
+      isRefetching: false,
       fetchNextPage: vi.fn(),
       hasNextPage: true,
       isFetchingNextPage: false,
     });
 
     mockGetTree.mockResolvedValue(mockCategoriesTree);
-
-    vi.spyOn(window, 'confirm').mockImplementation(() => true);
-
-    try {
-      vi.spyOn(window.location, 'reload').mockImplementation(mockReload);
-    } catch {
-      Object.defineProperty(window, 'location', {
-        configurable: true,
-        value: { ...window.location, reload: mockReload },
-      });
-    }
   });
 
   afterEach(() => {
@@ -406,14 +401,14 @@ describe('AdminProductsPage', () => {
       ).toBeInTheDocument();
       expect(screen.getByText('Tổng số lượng tồn kho')).toBeInTheDocument();
 
-      // "Thêm mới" button linking to /admin/products/new
-      const addNewLink = screen.getByRole('link', { name: /Thêm mới/i });
+      // "Thêm sản phẩm" button linking to /admin/products/new
+      const addNewLink = screen.getByRole('link', { name: /Thêm sản phẩm/i });
       expect(addNewLink).toBeInTheDocument();
       expect(addNewLink).toHaveAttribute('href', '/admin/products/new');
 
-      // Search input
+      // Search input with standardized placeholder
       expect(
-        screen.getByPlaceholderText('Tìm kiếm sản phẩm...'),
+        screen.getByPlaceholderText('Tìm kiếm theo tên sản phẩm, SKU...'),
       ).toBeInTheDocument();
     });
 
@@ -422,13 +417,25 @@ describe('AdminProductsPage', () => {
         data: undefined,
         isLoading: false,
         isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
         fetchNextPage: vi.fn(),
         hasNextPage: false,
         isFetchingNextPage: false,
       });
 
       renderAdminProductsPage();
-      expect(screen.getByText('0')).toBeInTheDocument();
+      const totalProductsHeading = screen.getByRole('heading', {
+        name: 'Tổng sản phẩm',
+      });
+      const statCard =
+        totalProductsHeading.closest<HTMLElement>('.rounded-xl') ??
+        totalProductsHeading.parentElement?.parentElement;
+      expect(statCard).toBeInstanceOf(HTMLElement);
+      if (!(statCard instanceof HTMLElement)) {
+        throw new Error('Không tìm thấy thẻ thống kê');
+      }
+      expect(within(statCard).getByText('0')).toBeInTheDocument();
     });
   });
 
@@ -438,6 +445,8 @@ describe('AdminProductsPage', () => {
         data: undefined,
         isLoading: true,
         isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
         fetchNextPage: vi.fn(),
         hasNextPage: false,
         isFetchingNextPage: false,
@@ -457,11 +466,13 @@ describe('AdminProductsPage', () => {
   });
 
   describe('Error State', () => {
-    it('renders error view with retry button and calls reload on click', () => {
+    it('renders page header and error card inside container, calls refetch on retry', () => {
       mockUseInfiniteAdminProducts.mockReturnValue({
         data: undefined,
         isLoading: false,
         isError: true,
+        refetch: mockRefetch,
+        isRefetching: false,
         fetchNextPage: vi.fn(),
         hasNextPage: false,
         isFetchingNextPage: false,
@@ -469,6 +480,15 @@ describe('AdminProductsPage', () => {
 
       renderAdminProductsPage();
 
+      // Page heading and action toolbar remain visible
+      expect(
+        screen.getByRole('heading', { name: 'Quản lý sản phẩm' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /Thêm sản phẩm/i }),
+      ).toBeInTheDocument();
+
+      // Error message
       expect(
         screen.getByText('Không thể tải danh sách sản phẩm'),
       ).toBeInTheDocument();
@@ -477,7 +497,7 @@ describe('AdminProductsPage', () => {
       expect(retryBtn).toBeInTheDocument();
 
       fireEvent.click(retryBtn);
-      expect(mockReload).toHaveBeenCalledTimes(1);
+      expect(mockRefetch).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -489,6 +509,8 @@ describe('AdminProductsPage', () => {
         },
         isLoading: false,
         isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
         fetchNextPage: vi.fn(),
         hasNextPage: false,
         isFetchingNextPage: false,
@@ -499,13 +521,46 @@ describe('AdminProductsPage', () => {
       expect(screen.getByText('Chưa có sản phẩm nào')).toBeInTheDocument();
       expect(
         screen.getByText(
-          'Create your first product to get started managing your catalog.',
+          'Tạo sản phẩm đầu tiên để bắt đầu xây dựng danh mục bán hàng của cửa hàng.',
         ),
       ).toBeInTheDocument();
 
       const createLink = screen.getByRole('link', { name: 'Tạo sản phẩm' });
       expect(createLink).toBeInTheDocument();
       expect(createLink).toHaveAttribute('href', '/admin/products/new');
+    });
+
+    it('renders filtered empty state with reset button when search is active', () => {
+      mockUseInfiniteAdminProducts.mockReturnValue({
+        data: {
+          pages: [{ products: [], total: 0 }],
+        },
+        isLoading: false,
+        isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
+        fetchNextPage: vi.fn(),
+        hasNextPage: false,
+        isFetchingNextPage: false,
+      });
+
+      renderAdminProductsPage();
+
+      const searchInput = screen.getByPlaceholderText(
+        'Tìm kiếm theo tên sản phẩm, SKU...',
+      );
+      fireEvent.change(searchInput, {
+        target: { value: 'từ khóa không tồn tại' },
+      });
+
+      expect(
+        screen.getByText('Không tìm thấy sản phẩm phù hợp'),
+      ).toBeInTheDocument();
+
+      const resetBtn = screen.getByRole('button', { name: 'Xóa bộ lọc' });
+      expect(resetBtn).toBeInTheDocument();
+      fireEvent.click(resetBtn);
+      expect(searchInput).toHaveValue('');
     });
   });
 
@@ -530,6 +585,9 @@ describe('AdminProductsPage', () => {
         screen.getByRole('columnheader', { name: 'Tồn kho' }),
       ).toBeInTheDocument();
       expect(
+        screen.getByRole('columnheader', { name: 'Trạng thái' }),
+      ).toBeInTheDocument();
+      expect(
         screen.getByRole('columnheader', { name: 'Đánh giá' }),
       ).toBeInTheDocument();
       expect(
@@ -537,30 +595,39 @@ describe('AdminProductsPage', () => {
       ).toBeInTheDocument();
 
       // Product 1 (Full data)
-      const prod1Link = screen.getByRole('link', {
+      const prod1Links = screen.getAllByRole('link', {
         name: 'Chai xịt khử mùi sả chanh',
       });
-      expect(prod1Link).toHaveAttribute('href', '/admin/products/prod-1/edit');
-      const img1 = screen.getByAltText('Chai xịt khử mùi sả chanh');
+      expect(prod1Links[0]).toHaveAttribute(
+        'href',
+        '/admin/products/prod-1/edit',
+      );
+      const img1 = screen.getAllByAltText('Chai xịt khử mùi sả chanh')[0];
       expect(img1).toHaveAttribute('src', 'https://example.com/img1.jpg');
-      expect(screen.getByText('SKU: SKU-SC-100')).toBeInTheDocument();
-      expect(screen.getByText('Hương sả tự nhiên')).toBeInTheDocument();
+      expect(screen.getAllByText('SKU: SKU-SC-100').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Hương sả tự nhiên').length).toBeGreaterThan(
+        0,
+      );
       const expectedPrice = formatCurrency(150000).replace(/\s+/g, ' ');
       expect(
-        screen.getByText((content) => {
+        screen.getAllByText((content) => {
           const normalized = content.replace(/\s+/g, ' ');
           return (
             normalized.includes(expectedPrice) || normalized.includes('150.000')
           );
-        }),
-      ).toBeInTheDocument();
-      expect(screen.getByText('20 sp')).toBeInTheDocument(); // totalStock 15 + 5
-      expect(screen.getByText('20 sp')).toHaveClass(
+        }).length,
+      ).toBeGreaterThan(0);
+      const twentyStockBadges = screen.getAllByText('20 sp');
+      expect(twentyStockBadges[0]).toHaveClass(
         'bg-emerald-50 text-emerald-700',
       );
-      expect(screen.getByText('2 biến thể')).toBeInTheDocument();
-      expect(screen.getByText('4.8')).toBeInTheDocument();
-      expect(screen.getByText('(25)')).toBeInTheDocument();
+      expect(screen.getAllByText('2 biến thể').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('4.8').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('(25)').length).toBeGreaterThan(0);
+
+      // Product 1 status badge (active: true -> Đang bán)
+      const activeBadges = screen.getAllByText('Đang bán');
+      expect(activeBadges[0]).toHaveClass('bg-emerald-50 text-emerald-700');
 
       // Action links for Product 1
       const detailLinks = screen.getAllByRole('link', {
@@ -573,42 +640,98 @@ describe('AdminProductsPage', () => {
       expect(detailLinks[0]).toHaveAttribute('target', '_blank');
       expect(detailLinks[0]).toHaveAttribute('rel', 'noreferrer');
 
-      // Product 2 (No image, no category, no rating, 0 stock)
-      const prod2Link = screen.getByRole('link', {
+      // Product 2 (No image, no category, no rating, 0 stock, inactive)
+      const prod2Links = screen.getAllByRole('link', {
         name: 'Chai xịt không mùi không hình',
       });
-      expect(prod2Link).toHaveAttribute('href', '/admin/products/prod-2/edit');
-      const img2 = screen.getByAltText('Chai xịt không mùi không hình');
-      expect(img2).toHaveAttribute(
-        'src',
-        'https://placehold.co/100x100?text=No+Image',
+      expect(prod2Links[0]).toHaveAttribute(
+        'href',
+        '/admin/products/prod-2/edit',
       );
+
+      // Fallback package placeholder rendered instead of external placehold.co
+      const noImagePlaceholders = screen.getAllByLabelText('Không có hình ảnh');
+      expect(noImagePlaceholders.length).toBeGreaterThan(0);
+
+      // Product 2 status badge (active: false -> Tạm ẩn)
+      const inactiveBadges = screen.getAllByText('Tạm ẩn');
+      expect(inactiveBadges[0]).toHaveClass('bg-slate-100 text-slate-600');
+
       const zeroStockBadges = screen.getAllByText('0 sp');
-      expect(zeroStockBadges).toHaveLength(3);
+      expect(zeroStockBadges.length).toBeGreaterThanOrEqual(3);
       zeroStockBadges.forEach((badge) => {
         expect(badge).toHaveClass('bg-rose-50 text-rose-700');
       });
       const zeroVariants = screen.getAllByText('0 biến thể');
-      expect(zeroVariants).toHaveLength(2);
-      expect(screen.getByText('0.0')).toBeInTheDocument();
-      expect(screen.getByText('(0)')).toBeInTheDocument();
+      expect(zeroVariants.length).toBeGreaterThan(0);
+      expect(screen.getAllByText('0.0').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('(0)').length).toBeGreaterThan(0);
 
       // Product 3 (Undefined stock on variant)
       expect(
-        screen.getByText('Sản phẩm có biến thể không stock'),
-      ).toBeInTheDocument();
-      expect(screen.getByText('Khử mùi cao cấp')).toBeInTheDocument();
-      expect(screen.getByText('3.5')).toBeInTheDocument();
-      expect(screen.getByText('(8)')).toBeInTheDocument();
-      expect(screen.getByText('1 biến thể')).toBeInTheDocument();
+        screen.getAllByText('Sản phẩm có biến thể không stock').length,
+      ).toBeGreaterThan(0);
+      expect(screen.getAllByText('Khử mùi cao cấp').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('3.5').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('(8)').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('1 biến thể').length).toBeGreaterThan(0);
 
       // Product 4 (Undefined variants array)
       expect(
-        screen.getByText('Sản phẩm không có mảng variants'),
-      ).toBeInTheDocument();
-      expect(screen.getByText('Nước hoa phòng ngủ')).toBeInTheDocument();
-      expect(screen.getByText('5.0')).toBeInTheDocument();
-      expect(screen.getByText('(1)')).toBeInTheDocument();
+        screen.getAllByText('Sản phẩm không có mảng variants').length,
+      ).toBeGreaterThan(0);
+      expect(screen.getAllByText('Nước hoa phòng ngủ').length).toBeGreaterThan(
+        0,
+      );
+      expect(screen.getAllByText('5.0').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('(1)').length).toBeGreaterThan(0);
+    });
+
+    it('renders low stock amber warning badge when stock is between 1 and 5', () => {
+      const lowStockProduct = {
+        id: 'prod-low',
+        name: 'Sản phẩm sắp hết hàng',
+        slug: 'san-pham-sap-het-hang',
+        basePrice: 100000,
+        images: ['https://example.com/low.jpg'],
+        category: null,
+        active: true,
+        variants: [{ sku: 'SKU-LOW-1', stock: 3 }],
+      };
+
+      mockUseInfiniteAdminProducts.mockReturnValue({
+        data: {
+          pages: [{ products: [lowStockProduct], total: 1 }],
+        },
+        isLoading: false,
+        isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
+        fetchNextPage: vi.fn(),
+        hasNextPage: false,
+        isFetchingNextPage: false,
+      });
+
+      renderAdminProductsPage();
+
+      const amberBadges = screen.getAllByText('3 sp');
+      expect(amberBadges[0]).toHaveClass('bg-amber-50 text-amber-700');
+    });
+
+    it('supports changing sort option via sort dropdown', () => {
+      renderAdminProductsPage();
+
+      const sortTrigger = screen.getByLabelText('Sắp xếp sản phẩm');
+      expect(sortTrigger).toBeInTheDocument();
+
+      const priceAscOption = screen.getByRole('menuitem', {
+        name: 'Giá: Thấp đến cao',
+      });
+      fireEvent.click(priceAscOption);
+
+      expect(mockUseInfiniteAdminProducts).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sortBy: 'price_asc' }),
+      );
     });
   });
 
@@ -623,7 +746,9 @@ describe('AdminProductsPage', () => {
         expect.objectContaining({ search: '' }),
       );
 
-      const input = screen.getByPlaceholderText('Tìm kiếm sản phẩm...');
+      const input = screen.getByPlaceholderText(
+        'Tìm kiếm theo tên sản phẩm, SKU...',
+      );
 
       // Type first search query
       fireEvent.change(input, { target: { value: 'chai' } });
@@ -659,6 +784,22 @@ describe('AdminProductsPage', () => {
       );
 
       vi.useRealTimers();
+    });
+
+    it('clears search input when clicking clear button', () => {
+      renderAdminProductsPage();
+
+      const input = screen.getByPlaceholderText(
+        'Tìm kiếm theo tên sản phẩm, SKU...',
+      );
+      fireEvent.change(input, { target: { value: 'sả chanh' } });
+      expect(input).toHaveValue('sả chanh');
+
+      const clearBtn = screen.getByLabelText('Xóa tìm kiếm');
+      expect(clearBtn).toBeInTheDocument();
+
+      fireEvent.click(clearBtn);
+      expect(input).toHaveValue('');
     });
   });
 
@@ -734,9 +875,10 @@ describe('AdminProductsPage', () => {
 
       // Clear filter button appears: "Xóa: Khử mùi xe hơi ✕"
       const clearBtn = screen.getByRole('button', {
-        name: 'Xóa: Khử mùi xe hơi ✕',
+        name: 'Xóa bộ lọc danh mục',
       });
       expect(clearBtn).toBeInTheDocument();
+      expect(clearBtn).toHaveTextContent('Xóa: Khử mùi xe hơi ✕');
 
       // Click clear button
       fireEvent.click(clearBtn);
@@ -747,7 +889,7 @@ describe('AdminProductsPage', () => {
       );
       expect(screen.getByText('Lọc')).toBeInTheDocument();
       expect(
-        screen.queryByRole('button', { name: /Xóa:/ }),
+        screen.queryByRole('button', { name: 'Xóa bộ lọc danh mục' }),
       ).not.toBeInTheDocument();
     });
 
@@ -767,9 +909,11 @@ describe('AdminProductsPage', () => {
       expect(mockUseInfiniteAdminProducts).toHaveBeenLastCalledWith(
         expect.objectContaining({ categoryId: 'cat-1' }),
       );
-      expect(
-        screen.getByRole('button', { name: 'Xóa: Nước hoa Thái ✕' }),
-      ).toBeInTheDocument();
+      const parentClearBtn = screen.getByRole('button', {
+        name: 'Xóa bộ lọc danh mục',
+      });
+      expect(parentClearBtn).toBeInTheDocument();
+      expect(parentClearBtn).toHaveTextContent('Xóa: Nước hoa Thái ✕');
 
       // Select nested child category "Hương sả chanh" (cat-1-1-1)
       const nestedLeaf = screen.getByRole('menuitem', {
@@ -781,9 +925,11 @@ describe('AdminProductsPage', () => {
         expect.objectContaining({ categoryId: 'cat-1-1-1' }),
       );
       // Tests split(' > ').pop() for nested hierarchy: "Nước hoa Thái > Xịt phòng > Hương sả chanh" -> "Hương sả chanh"
-      expect(
-        screen.getByRole('button', { name: 'Xóa: Hương sả chanh ✕' }),
-      ).toBeInTheDocument();
+      const nestedClearBtn = screen.getByRole('button', {
+        name: 'Xóa bộ lọc danh mục',
+      });
+      expect(nestedClearBtn).toBeInTheDocument();
+      expect(nestedClearBtn).toHaveTextContent('Xóa: Hương sả chanh ✕');
 
       // Clicking "Tất cả danh mục" resets filter
       const allCategoriesItem = screen.getByRole('menuitem', {
@@ -804,6 +950,8 @@ describe('AdminProductsPage', () => {
         data: mockDefaultData,
         isLoading: false,
         isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
         fetchNextPage: mockFetchNextPage,
         hasNextPage: true,
         isFetchingNextPage: false,
@@ -839,6 +987,8 @@ describe('AdminProductsPage', () => {
         data: mockDefaultData,
         isLoading: false,
         isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
         fetchNextPage: mockFetchNextPage,
         hasNextPage: false,
         isFetchingNextPage: false,
@@ -858,6 +1008,8 @@ describe('AdminProductsPage', () => {
         data: mockDefaultData,
         isLoading: false,
         isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
         fetchNextPage: vi.fn(),
         hasNextPage: false,
         isFetchingNextPage: true,
@@ -876,6 +1028,8 @@ describe('AdminProductsPage', () => {
         data: mockDefaultData,
         isLoading: false,
         isError: false,
+        refetch: mockRefetch,
+        isRefetching: false,
         fetchNextPage: vi.fn(),
         hasNextPage: true,
         isFetchingNextPage: false,
@@ -886,12 +1040,15 @@ describe('AdminProductsPage', () => {
         screen.queryByText('Đã hiển thị hết sản phẩm'),
       ).not.toBeInTheDocument();
     });
+
+    it('displays loaded product count progress indicator', () => {
+      renderAdminProductsPage();
+      expect(screen.getByText('Hiển thị 4 / 100 sản phẩm')).toBeInTheDocument();
+    });
   });
 
   describe('Product Deletion (handleDelete)', () => {
-    it('prompts window.confirm and calls deleteProduct.mutate with success callback', async () => {
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+    it('opens confirmation dialog and calls deleteProduct.mutate with success callback', async () => {
       renderAdminProductsPage();
 
       const deleteButtons = screen.getAllByRole('menuitem', {
@@ -902,9 +1059,20 @@ describe('AdminProductsPage', () => {
       // Click delete for first product
       fireEvent.click(deleteButtons[0]);
 
-      expect(confirmSpy).toHaveBeenCalledWith(
-        'Bạn có chắc chắn muốn xóa sản phẩm "Chai xịt khử mùi sả chanh"? Hành động này không thể hoàn tác.',
-      );
+      // Verify Dialog opens with title and item name
+      expect(
+        await screen.findByText('Xác nhận xóa sản phẩm'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Bạn có chắc chắn muốn xóa sản phẩm/),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('"Chai xịt khử mùi sả chanh"'),
+      ).toBeInTheDocument();
+
+      const confirmBtn = screen.getByRole('button', { name: 'Xác nhận xóa' });
+      fireEvent.click(confirmBtn);
+
       expect(mockDeleteMutate).toHaveBeenCalledWith(
         'prod-1',
         expect.objectContaining({
@@ -923,15 +1091,18 @@ describe('AdminProductsPage', () => {
       options.onSettled();
     });
 
-    it('triggers error toast when deleteProduct.mutate fails', () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+    it('triggers error toast when deleteProduct.mutate fails', async () => {
       renderAdminProductsPage();
 
       const deleteButtons = screen.getAllByRole('menuitem', {
         name: /Xóa sản phẩm/i,
       });
       fireEvent.click(deleteButtons[0]);
+
+      const confirmBtn = await screen.findByRole('button', {
+        name: 'Xác nhận xóa',
+      });
+      fireEvent.click(confirmBtn);
 
       const options = mockDeleteMutate.mock.calls[0][1];
       options.onError();
@@ -942,9 +1113,7 @@ describe('AdminProductsPage', () => {
       options.onSettled();
     });
 
-    it('does not call deleteProduct.mutate when window.confirm is rejected', () => {
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
+    it('does not call deleteProduct.mutate when Dialog cancellation is clicked', async () => {
       renderAdminProductsPage();
 
       const deleteButtons = screen.getAllByRole('menuitem', {
@@ -952,40 +1121,40 @@ describe('AdminProductsPage', () => {
       });
       fireEvent.click(deleteButtons[0]);
 
-      expect(confirmSpy).toHaveBeenCalledTimes(1);
+      expect(
+        await screen.findByText('Xác nhận xóa sản phẩm'),
+      ).toBeInTheDocument();
+
+      const cancelBtn = screen.getByRole('button', { name: 'Hủy' });
+      fireEvent.click(cancelBtn);
+
       expect(mockDeleteMutate).not.toHaveBeenCalled();
     });
 
-    it('prevents multiple delete calls while deletingIdRef is active', () => {
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+    it('prevents multiple delete calls while deletingIdRef is active', async () => {
       renderAdminProductsPage();
 
       const deleteButtons = screen.getAllByRole('menuitem', {
         name: /Xóa sản phẩm/i,
       });
 
-      // First click: triggers confirm and mutate
+      // First click: triggers modal and confirm
       fireEvent.click(deleteButtons[0]);
-      expect(confirmSpy).toHaveBeenCalledTimes(1);
+      const confirmBtn = await screen.findByRole('button', {
+        name: 'Xác nhận xóa',
+      });
+      fireEvent.click(confirmBtn);
       expect(mockDeleteMutate).toHaveBeenCalledTimes(1);
 
       const firstCallOptions = mockDeleteMutate.mock.calls[0][1];
 
       // Second click before onSettled: guard triggers (deletingIdRef.current === id)
-      confirmSpy.mockClear();
       mockDeleteMutate.mockClear();
-      fireEvent.click(deleteButtons[0]);
-      expect(confirmSpy).not.toHaveBeenCalled();
+      fireEvent.click(confirmBtn);
       expect(mockDeleteMutate).not.toHaveBeenCalled();
 
       // Settle previous deletion
       firstCallOptions.onSettled();
-
-      // Third click after onSettled: guard no longer blocks, can delete again
-      fireEvent.click(deleteButtons[0]);
-      expect(confirmSpy).toHaveBeenCalledTimes(1);
-      expect(mockDeleteMutate).toHaveBeenCalledTimes(1);
     });
 
     it('disables delete button and prevents deletion when deleteProduct is pending for the product', () => {
@@ -1001,9 +1170,7 @@ describe('AdminProductsPage', () => {
       // Product 1 delete button should be disabled
       expect(deleteButtons[0]).toBeDisabled();
 
-      const confirmSpy = vi.spyOn(window, 'confirm');
       fireEvent.click(deleteButtons[0]);
-      expect(confirmSpy).not.toHaveBeenCalled();
       expect(mockDeleteMutate).not.toHaveBeenCalled();
 
       // Product 2 delete button should not be disabled

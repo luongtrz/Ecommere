@@ -69,12 +69,13 @@ describe('RadioGroupItem', () => {
     expect(item).toBeInTheDocument();
     expect(item).toHaveClass(
       'aspect-square',
-      'h-4.5',
-      'w-4.5',
+      'h-5',
+      'w-5',
       'rounded-full',
       'border',
-      'border-slate-300',
-      'text-teal-600',
+      'border-input',
+      'bg-card',
+      'text-primary',
     );
   });
 
@@ -94,8 +95,8 @@ describe('RadioGroupItem', () => {
       'custom-item-class',
       'm-2',
       'aspect-square',
-      'h-4.5',
-      'w-4.5',
+      'h-5',
+      'w-5',
     );
   });
 
@@ -117,7 +118,7 @@ describe('RadioGroupItem', () => {
     );
   });
 
-  it('renders the Circle indicator icon only when checked', () => {
+  it('renders the filled dot indicator only when checked', () => {
     render(
       <RadioGroup defaultValue="cod">
         <RadioGroupItem value="cod" data-testid="item-checked" />
@@ -131,18 +132,13 @@ describe('RadioGroupItem', () => {
     expect(checkedItem).toHaveAttribute('aria-checked', 'true');
     expect(uncheckedItem).toHaveAttribute('aria-checked', 'false');
 
-    // The checked item contains the SVG circle indicator
-    const checkedSvg = checkedItem.querySelector('svg');
-    expect(checkedSvg).toBeInTheDocument();
-    expect(checkedSvg).toHaveClass(
-      'h-2.5',
-      'w-2.5',
-      'fill-teal-600',
-      'text-teal-600',
-    );
+    // The checked item contains the inner dot indicator
+    const dot = checkedItem.querySelector('.bg-primary');
+    expect(dot).toBeInTheDocument();
+    expect(dot).toHaveClass('h-2.5', 'w-2.5', 'rounded-full', 'bg-primary');
 
-    // The unchecked item does not contain the SVG circle indicator
-    expect(uncheckedItem.querySelector('svg')).toBeNull();
+    // The unchecked item does not contain the inner dot indicator
+    expect(uncheckedItem.querySelector('.bg-primary')).toBeNull();
   });
 
   it('calls onValueChange with the exact value when an unchecked item is clicked', async () => {

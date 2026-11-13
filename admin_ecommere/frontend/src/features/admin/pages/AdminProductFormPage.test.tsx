@@ -63,6 +63,7 @@ vi.mock('@/components/common/LoadingSpinner', () => ({
 const mockUseAdminProduct = vi.fn();
 const mockCreateMutateAsync = vi.fn();
 const mockUpdateMutateAsync = vi.fn();
+const mockDeleteMutateAsync = vi.fn();
 
 vi.mock('../hooks/useAdminProducts', () => ({
   useAdminProduct: (id: string | null) => mockUseAdminProduct(id),
@@ -73,7 +74,8 @@ vi.mock('../hooks/useAdminProducts', () => ({
     mutateAsync: mockUpdateMutateAsync,
   }),
   useDeleteProduct: () => ({
-    mutateAsync: vi.fn(),
+    mutateAsync: mockDeleteMutateAsync,
+    isPending: false,
   }),
 }));
 
@@ -86,7 +88,8 @@ vi.mock('@/features/admin/hooks/useAdminProducts', () => ({
     mutateAsync: mockUpdateMutateAsync,
   }),
   useDeleteProduct: () => ({
-    mutateAsync: vi.fn(),
+    mutateAsync: mockDeleteMutateAsync,
+    isPending: false,
   }),
 }));
 
@@ -227,6 +230,7 @@ const mockCategoriesTree = [
 
 const sampleProduct = {
   id: 'prod-100',
+  slug: 'nuoc-hoa-hong-rosa',
   name: 'Nước hoa hồng Rosa',
   description: 'Nước hoa hồng chiết xuất từ hoa hồng Pháp thơm ngát quyến rũ',
   categoryId: 'cat-leaf-1',
@@ -305,6 +309,7 @@ beforeEach(() => {
   });
   mockCreateMutateAsync.mockResolvedValue({});
   mockUpdateMutateAsync.mockResolvedValue({});
+  mockDeleteMutateAsync.mockResolvedValue({});
   mockGetTree.mockResolvedValue(mockCategoriesTree);
 });
 
@@ -377,7 +382,9 @@ describe('AdminProductFormPage', () => {
       ).toBeInTheDocument();
 
       // Check header back link
-      const backLink = screen.getByRole('link');
+      const backLink = screen.getByRole('link', {
+        name: /quay lại danh sách sản phẩm/i,
+      });
       expect(backLink).toHaveAttribute('href', '/admin/products');
 
       // Check initial inputs
@@ -391,14 +398,17 @@ describe('AdminProductFormPage', () => {
       const activeSwitch = screen.getByLabelText('Hiển thị sản phẩm');
       expect(activeSwitch).toHaveAttribute('data-state', 'checked');
 
+      // Status badge in header
+      expect(screen.getByText('Đang bán')).toBeInTheDocument();
+
       // Check single default variant
       expect(screen.getByText('Biến thể 1')).toBeInTheDocument();
-      expect(screen.getByLabelText('Mùi hương')).toHaveValue('');
-      expect(screen.getByLabelText('Dung tích (ml)')).toHaveValue(50);
-      expect(screen.getByLabelText('Tồn kho')).toHaveValue(0);
-      expect(screen.getByLabelText('Giá niêm yết')).toHaveValue(0);
-      expect(screen.getByLabelText('Giá sale')).toHaveValue(null);
-      expect(screen.getByLabelText('Barcode')).toHaveValue('');
+      expect(screen.getByLabelText(/mùi hương/i)).toHaveValue('');
+      expect(screen.getByLabelText(/dung tích/i)).toHaveValue(50);
+      expect(screen.getByLabelText(/tồn kho/i)).toHaveValue(0);
+      expect(screen.getByLabelText(/giá niêm yết/i)).toHaveValue(0);
+      expect(screen.getByLabelText(/giá sale/i)).toHaveValue(null);
+      expect(screen.getByLabelText(/barcode/i)).toHaveValue('');
 
       // In create mode with 1 variant, delete button should not be displayed
       expect(
@@ -502,14 +512,21 @@ describe('AdminProductFormPage', () => {
       expect(deleteBtn2).toBeInTheDocument();
 
       // Fill scent for variant 1 and 2 to distinguish
-      const scentInputs = screen.getAllByLabelText('Mùi hương');
+      const scentInputs = screen.getAllByLabelText(/mùi hương/i);
       fireEvent.change(scentInputs[0], { target: { value: 'Hương Gỗ' } });
       fireEvent.change(scentInputs[1], { target: { value: 'Hương Biển' } });
 
       // Remove variant 2
       fireEvent.click(deleteBtn2);
+
+      // Confirm deletion in dialog
+      const confirmDeleteBtn = screen.getByRole('button', {
+        name: 'Xác nhận xóa',
+      });
+      fireEvent.click(confirmDeleteBtn);
+
       expect(screen.queryByText('Biến thể 2')).not.toBeInTheDocument();
-      expect(screen.getByLabelText('Mùi hương')).toHaveValue('Hương Gỗ');
+      expect(screen.getByLabelText(/mùi hương/i)).toHaveValue('Hương Gỗ');
 
       // Now only 1 variant left, delete button disappears
       expect(
@@ -544,12 +561,30 @@ describe('AdminProductFormPage', () => {
       expect(screen.getByTestId('image-count')).toHaveTextContent('0');
     });
 
-    it('navigates back when clicking Cancel button', () => {
+    it('navigates back when clicking Cancel button without changes', () => {
       renderPage();
 
       const cancelBtn = screen.getAllByRole('button', { name: 'Hủy' })[0];
       fireEvent.click(cancelBtn);
 
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/products');
+    });
+
+    it('prompts confirmation dialog when canceling with unsaved changes', () => {
+      renderPage();
+
+      fireEvent.change(screen.getByPlaceholderText('Nhập tên sản phẩm'), {
+        target: { value: 'Sản phẩm chưa lưu' },
+      });
+
+      const cancelBtn = screen.getAllByRole('button', { name: 'Hủy' })[0];
+      fireEvent.click(cancelBtn);
+
+      expect(screen.getByText('Xác nhận hủy thay đổi')).toBeInTheDocument();
+      expect(mockNavigate).not.toHaveBeenCalled();
+
+      const confirmLeaveBtn = screen.getByRole('button', { name: 'Rời đi' });
+      fireEvent.click(confirmLeaveBtn);
       expect(mockNavigate).toHaveBeenCalledWith('/admin/products');
     });
   });
@@ -605,13 +640,13 @@ describe('AdminProductFormPage', () => {
       renderPage();
 
       // Set volumeMl to 0, price to -1, stock to -1
-      fireEvent.change(screen.getByLabelText('Dung tích (ml)'), {
+      fireEvent.change(screen.getByLabelText(/dung tích/i), {
         target: { value: '0' },
       });
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '-10' },
       });
-      fireEvent.change(screen.getByLabelText('Tồn kho'), {
+      fireEvent.change(screen.getByLabelText(/tồn kho/i), {
         target: { value: '-5' },
       });
 
@@ -629,10 +664,10 @@ describe('AdminProductFormPage', () => {
       expect(screen.getByText('Tồn kho không được âm')).toBeInTheDocument();
 
       // Test negative salePrice
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '100000' },
       });
-      fireEvent.change(screen.getByLabelText('Giá sale'), {
+      fireEvent.change(screen.getByLabelText(/giá sale/i), {
         target: { value: '-20' },
       });
       fireEvent.click(saveBtn);
@@ -642,7 +677,7 @@ describe('AdminProductFormPage', () => {
       ).toBeInTheDocument();
 
       // Test salePrice greater than price
-      fireEvent.change(screen.getByLabelText('Giá sale'), {
+      fireEvent.change(screen.getByLabelText(/giá sale/i), {
         target: { value: '120000' },
       });
       fireEvent.click(saveBtn);
@@ -682,22 +717,22 @@ describe('AdminProductFormPage', () => {
       fireEvent.click(screen.getByTestId('add-image-btn'));
 
       // Fill variant
-      fireEvent.change(screen.getByLabelText('Mùi hương'), {
+      fireEvent.change(screen.getByLabelText(/mùi hương/i), {
         target: { value: 'Chanh Sả' },
       });
-      fireEvent.change(screen.getByLabelText('Dung tích (ml)'), {
+      fireEvent.change(screen.getByLabelText(/dung tích/i), {
         target: { value: '100' },
       });
-      fireEvent.change(screen.getByLabelText('Tồn kho'), {
+      fireEvent.change(screen.getByLabelText(/tồn kho/i), {
         target: { value: '45' },
       });
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '150000' },
       });
-      fireEvent.change(screen.getByLabelText('Giá sale'), {
+      fireEvent.change(screen.getByLabelText(/giá sale/i), {
         target: { value: '120000' },
       });
-      fireEvent.change(screen.getByLabelText('Barcode'), {
+      fireEvent.change(screen.getByLabelText(/barcode/i), {
         target: { value: '8930001234567' },
       });
 
@@ -757,18 +792,18 @@ describe('AdminProductFormPage', () => {
       });
       fireEvent.click(screen.getByTestId('add-image-btn'));
 
-      fireEvent.change(screen.getByLabelText('Mùi hương'), {
+      fireEvent.change(screen.getByLabelText(/mùi hương/i), {
         target: { value: 'Bạc hà' },
       });
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '80000' },
       });
-      fireEvent.change(screen.getByLabelText('Tồn kho'), {
+      fireEvent.change(screen.getByLabelText(/tồn kho/i), {
         target: { value: '10' },
       });
 
       // Enter a value then clear it to empty string
-      const salePriceInput = screen.getByLabelText('Giá sale');
+      const salePriceInput = screen.getByLabelText(/giá sale/i);
       fireEvent.change(salePriceInput, { target: { value: '70000' } });
       fireEvent.change(salePriceInput, { target: { value: '' } });
 
@@ -789,10 +824,118 @@ describe('AdminProductFormPage', () => {
         );
       });
     });
+
+    it('triggers onFocus handlers on variant numerical inputs (volume, stock, price, salePrice) at lines 783, 815, 847, 882', () => {
+      mockParams = {};
+      renderPage();
+
+      const volumeInput = screen.getByLabelText(
+        /dung tích/i,
+      ) as HTMLInputElement;
+      const stockInput = screen.getByLabelText(/tồn kho/i) as HTMLInputElement;
+      const priceInput = screen.getByLabelText(
+        /giá niêm yết/i,
+      ) as HTMLInputElement;
+      const salePriceInput = screen.getByLabelText(
+        /giá sale/i,
+      ) as HTMLInputElement;
+
+      const selectVolumeSpy = vi.spyOn(volumeInput, 'select');
+      const selectStockSpy = vi.spyOn(stockInput, 'select');
+      const selectPriceSpy = vi.spyOn(priceInput, 'select');
+      const selectSalePriceSpy = vi.spyOn(salePriceInput, 'select');
+
+      fireEvent.focus(volumeInput);
+      expect(selectVolumeSpy).toHaveBeenCalledTimes(1);
+
+      fireEvent.focus(stockInput);
+      expect(selectStockSpy).toHaveBeenCalledTimes(1);
+
+      fireEvent.focus(priceInput);
+      expect(selectPriceSpy).toHaveBeenCalledTimes(1);
+
+      fireEvent.focus(salePriceInput);
+      expect(selectSalePriceSpy).toHaveBeenCalledTimes(1);
+
+      expect(volumeInput).toBeInTheDocument();
+      expect(stockInput).toBeInTheDocument();
+      expect(priceInput).toBeInTheDocument();
+      expect(salePriceInput).toBeInTheDocument();
+    });
+
+    it('triggers back link click handler at line 408 and shows leave confirmation dialog when form is dirty', () => {
+      mockParams = {};
+      renderPage();
+
+      const nameInput = screen.getByPlaceholderText('Nhập tên sản phẩm');
+      fireEvent.change(nameInput, { target: { value: 'Sản phẩm mới sửa' } });
+
+      const backLink = screen.getByRole('link', {
+        name: /quay lại danh sách sản phẩm/i,
+      });
+      fireEvent.click(backLink);
+
+      expect(screen.getByText('Xác nhận hủy thay đổi')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi? Mọi thông tin vừa nhập sẽ bị mất.',
+        ),
+      ).toBeInTheDocument();
+      expect(nameInput).toBeInTheDocument();
+
+      const continueEditingBtn = screen.getByRole('button', {
+        name: 'Tiếp tục chỉnh sửa',
+      });
+      fireEvent.click(continueEditingBtn);
+      expect(
+        screen.queryByText('Xác nhận hủy thay đổi'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not show leave confirmation dialog when clicking back link on pristine form', () => {
+      mockParams = {};
+      renderPage();
+
+      const backLink = screen.getByRole('link', {
+        name: /quay lại danh sách sản phẩm/i,
+      });
+      fireEvent.click(backLink);
+
+      expect(
+        screen.queryByText('Xác nhận hủy thay đổi'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('triggers onChange at line 1014 for category search input and filters categories in dropdown', async () => {
+      mockParams = {};
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByRole('combobox')).toHaveTextContent('Chọn danh mục');
+      });
+
+      const categorySearchInput = screen.getByPlaceholderText(
+        'Tìm kiếm danh mục...',
+      );
+      expect(categorySearchInput).toBeInTheDocument();
+
+      fireEvent.click(categorySearchInput);
+      fireEvent.keyDown(categorySearchInput, { key: 'Escape' });
+
+      fireEvent.change(categorySearchInput, { target: { value: 'Nam' } });
+
+      expect(categorySearchInput).toHaveValue('Nam');
+      expect(
+        screen.getByRole('menuitem', { name: 'Nước hoa > Nước hoa Nam' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('menuitem', { name: 'Nước hoa > Nước hoa Nữ' }),
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe('Edit Mode - Data Loading and Pre-filling', () => {
-    it('pre-fills form fields with existing product data and disables variant editing', async () => {
+    it('pre-fills form fields with existing product data and renders read-only variant table', async () => {
       mockParams = { id: 'prod-100' };
       mockUseAdminProduct.mockReturnValue({
         data: sampleProduct,
@@ -811,6 +954,11 @@ describe('AdminProductFormPage', () => {
         }),
       ).toBeInTheDocument();
       expect(
+        screen.getByText(
+          'Cập nhật thông tin chi tiết, giá cơ bản và hình ảnh sản phẩm',
+        ),
+      ).toBeInTheDocument();
+      expect(
         screen.getByText('Các biến thể hiện có được hiển thị để đối chiếu.'),
       ).toBeInTheDocument();
 
@@ -818,6 +966,23 @@ describe('AdminProductFormPage', () => {
       expect(
         screen.queryByRole('button', { name: /thêm biến thể/i }),
       ).not.toBeInTheDocument();
+
+      // Direct link to inventory page should be present
+      const inventoryLink = screen.getByRole('link', {
+        name: /quản lý tồn kho tại trang kho hàng/i,
+      });
+      expect(inventoryLink).toBeInTheDocument();
+      expect(inventoryLink).toHaveAttribute('href', '/admin/inventory');
+
+      // Live storefront preview link
+      const previewLink = screen.getByRole('link', {
+        name: /xem trên web/i,
+      });
+      expect(previewLink).toBeInTheDocument();
+      expect(previewLink).toHaveAttribute(
+        'href',
+        'http://localhost:5173/products/nuoc-hoa-hong-rosa',
+      );
 
       // Pre-filled values
       expect(screen.getByPlaceholderText('Nhập tên sản phẩm')).toHaveValue(
@@ -836,43 +1001,21 @@ describe('AdminProductFormPage', () => {
         );
       });
 
-      // Both variants populated
+      // Both variants populated in read-only summary table
       expect(screen.getByText('Biến thể 1')).toBeInTheDocument();
       expect(screen.getByText('Biến thể 2')).toBeInTheDocument();
+      expect(screen.getByText('Hoa hồng Pháp')).toBeInTheDocument();
+      expect(screen.getByText('Hoa hồng Bulgaria')).toBeInTheDocument();
+      expect(screen.getByText('50 ml')).toBeInTheDocument();
+      expect(screen.getByText('100 ml')).toBeInTheDocument();
+      expect(screen.getByText('100')).toBeInTheDocument();
+      expect(screen.getByText('50')).toBeInTheDocument();
+      expect(screen.getByText('8931234567890')).toBeInTheDocument();
 
-      const scents = screen.getAllByLabelText('Mùi hương');
-      expect(scents[0]).toHaveValue('Hoa hồng Pháp');
-      expect(scents[1]).toHaveValue('Hoa hồng Bulgaria');
+      // Total stock badge
+      expect(screen.getByText(/tổng tồn kho:/i)).toHaveTextContent('150');
 
-      // All variant fields should be disabled in edit mode
-      expect(scents[0]).toBeDisabled();
-      expect(scents[1]).toBeDisabled();
-
-      const volumes = screen.getAllByLabelText('Dung tích (ml)');
-      expect(volumes[0]).toBeDisabled();
-      expect(volumes[1]).toBeDisabled();
-
-      const stocks = screen.getAllByLabelText('Tồn kho');
-      expect(stocks[0]).toBeDisabled();
-      expect(stocks[1]).toBeDisabled();
-
-      const prices = screen.getAllByLabelText('Giá niêm yết');
-      expect(prices[0]).toBeDisabled();
-      expect(prices[1]).toBeDisabled();
-
-      const salePrices = screen.getAllByLabelText('Giá sale');
-      expect(salePrices[0]).toHaveValue(200000);
-      expect(salePrices[0]).toBeDisabled();
-      expect(salePrices[1]).toHaveValue(null);
-      expect(salePrices[1]).toBeDisabled();
-
-      const barcodes = screen.getAllByLabelText('Barcode');
-      expect(barcodes[0]).toHaveValue('8931234567890');
-      expect(barcodes[0]).toBeDisabled();
-      expect(barcodes[1]).toHaveValue('');
-      expect(barcodes[1]).toBeDisabled();
-
-      // No delete buttons in edit mode even with multiple variants
+      // No variant delete buttons in edit mode
       expect(
         screen.queryByRole('button', { name: /xóa biến thể/i }),
       ).not.toBeInTheDocument();
@@ -902,7 +1045,6 @@ describe('AdminProductFormPage', () => {
         'Chỉnh sửa sản phẩm - ',
       );
       expect(screen.getByTestId('image-count')).toHaveTextContent('0');
-      expect(screen.getByLabelText('Barcode')).toHaveValue('');
     });
 
     it('handles product with categoryId not found in loaded categories list', async () => {
@@ -948,6 +1090,37 @@ describe('AdminProductFormPage', () => {
       expect(
         await screen.findByText('Sản phẩm phải có ít nhất một biến thể'),
       ).toBeInTheDocument();
+    });
+
+    it('allows deleting an existing product with confirmation dialog in edit mode', async () => {
+      mockParams = { id: 'prod-100' };
+      mockUseAdminProduct.mockReturnValue({
+        data: sampleProduct,
+        isLoading: false,
+      });
+
+      renderPage();
+
+      const deleteBtn = screen.getByRole('button', { name: /xóa sản phẩm/i });
+      fireEvent.click(deleteBtn);
+
+      expect(
+        screen.getByText(/Bạn có chắc chắn muốn xóa sản phẩm/i),
+      ).toBeInTheDocument();
+
+      const confirmDeleteBtn = screen.getByRole('button', {
+        name: 'Xác nhận xóa',
+      });
+      fireEvent.click(confirmDeleteBtn);
+
+      await waitFor(() => {
+        expect(mockDeleteMutateAsync).toHaveBeenCalledWith('prod-100');
+      });
+
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Đã xóa sản phẩm thành công!',
+      );
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/products');
     });
 
     it('successfully updates an existing product (omitting variants) and navigates', async () => {
@@ -1032,13 +1205,13 @@ describe('AdminProductFormPage', () => {
         target: { value: '200000' },
       });
       fireEvent.click(screen.getByTestId('add-image-btn'));
-      fireEvent.change(screen.getByLabelText('Mùi hương'), {
+      fireEvent.change(screen.getByLabelText(/mùi hương/i), {
         target: { value: 'Trầm hương' },
       });
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '200000' },
       });
-      fireEvent.change(screen.getByLabelText('Tồn kho'), {
+      fireEvent.change(screen.getByLabelText(/tồn kho/i), {
         target: { value: '10' },
       });
 
@@ -1092,13 +1265,13 @@ describe('AdminProductFormPage', () => {
         target: { value: '200000' },
       });
       fireEvent.click(screen.getByTestId('add-image-btn'));
-      fireEvent.change(screen.getByLabelText('Mùi hương'), {
+      fireEvent.change(screen.getByLabelText(/mùi hương/i), {
         target: { value: 'Trầm hương' },
       });
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '200000' },
       });
-      fireEvent.change(screen.getByLabelText('Tồn kho'), {
+      fireEvent.change(screen.getByLabelText(/tồn kho/i), {
         target: { value: '10' },
       });
 
@@ -1139,13 +1312,13 @@ describe('AdminProductFormPage', () => {
         target: { value: '200000' },
       });
       fireEvent.click(screen.getByTestId('add-image-btn'));
-      fireEvent.change(screen.getByLabelText('Mùi hương'), {
+      fireEvent.change(screen.getByLabelText(/mùi hương/i), {
         target: { value: 'Trầm hương' },
       });
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '200000' },
       });
-      fireEvent.change(screen.getByLabelText('Tồn kho'), {
+      fireEvent.change(screen.getByLabelText(/tồn kho/i), {
         target: { value: '10' },
       });
 
@@ -1182,13 +1355,13 @@ describe('AdminProductFormPage', () => {
         target: { value: '200000' },
       });
       fireEvent.click(screen.getByTestId('add-image-btn'));
-      fireEvent.change(screen.getByLabelText('Mùi hương'), {
+      fireEvent.change(screen.getByLabelText(/mùi hương/i), {
         target: { value: 'Trầm hương' },
       });
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '200000' },
       });
-      fireEvent.change(screen.getByLabelText('Tồn kho'), {
+      fireEvent.change(screen.getByLabelText(/tồn kho/i), {
         target: { value: '10' },
       });
 
@@ -1223,13 +1396,13 @@ describe('AdminProductFormPage', () => {
         target: { value: '200000' },
       });
       fireEvent.click(screen.getByTestId('add-image-btn'));
-      fireEvent.change(screen.getByLabelText('Mùi hương'), {
+      fireEvent.change(screen.getByLabelText(/mùi hương/i), {
         target: { value: 'Trầm hương' },
       });
-      fireEvent.change(screen.getByLabelText('Giá niêm yết'), {
+      fireEvent.change(screen.getByLabelText(/giá niêm yết/i), {
         target: { value: '200000' },
       });
-      fireEvent.change(screen.getByLabelText('Tồn kho'), {
+      fireEvent.change(screen.getByLabelText(/tồn kho/i), {
         target: { value: '10' },
       });
 

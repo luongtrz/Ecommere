@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, expect, it, vi, beforeEach, beforeAll } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AdminOrderDetailPage } from './AdminOrderDetailPage';
@@ -74,9 +74,11 @@ const {
   mockToast,
   mockUseAdminOrder,
   mockMutateAsync,
+  mockRefetch,
   mockUseUpdateOrderStatus,
 } = vi.hoisted(() => {
   const mockMutateAsync = vi.fn();
+  const mockRefetch = vi.fn();
   const mockUpdateStatus = {
     mutateAsync: mockMutateAsync,
     mutate: vi.fn(),
@@ -95,6 +97,7 @@ const {
     },
     mockUseAdminOrder: vi.fn(),
     mockMutateAsync,
+    mockRefetch,
     mockUseUpdateOrderStatus: vi.fn(() => mockUpdateStatus),
   };
 });
@@ -108,9 +111,14 @@ vi.mock('@/lib/seo', () => ({
   ),
 }));
 
-// Mock useToast hook
+// Mock useToast hook and underlying sonner toast
 vi.mock('@/hooks/useToast', () => ({
   useToast: () => mockToast,
+}));
+
+vi.mock('sonner', () => ({
+  toast: mockToast,
+  default: mockToast,
 }));
 
 // Mock data hooks from useAdminOrders
@@ -238,6 +246,8 @@ const mockSampleOrder = {
   shippingFee: 30000,
   discount: 50000,
   total: 480000,
+  couponCode: null,
+  notes: null,
   createdAt: '2025-01-01T10:00:00.000Z',
   updatedAt: '2025-01-01T12:30:00.000Z',
   addressJson: JSON.stringify({
@@ -276,6 +286,13 @@ describe('AdminOrderDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockMutateAsync.mockResolvedValue({});
+    mockRefetch.mockResolvedValue({});
+    window.print = vi.fn();
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+    });
   });
 
   describe('Loading and Not Found States', () => {
@@ -283,6 +300,7 @@ describe('AdminOrderDetailPage', () => {
       mockUseAdminOrder.mockReturnValue({
         data: undefined,
         isLoading: true,
+        refetch: mockRefetch,
       });
 
       const { container } = renderWithProviders();
@@ -294,17 +312,25 @@ describe('AdminOrderDetailPage', () => {
       expect(screen.queryByText('#ORD-123')).not.toBeInTheDocument();
     });
 
-    it('renders not found state when order does not exist', () => {
+    it('renders not found state when order does not exist with icon, diagnostic info and retry button', () => {
       mockUseAdminOrder.mockReturnValue({
         data: null,
         isLoading: false,
+        refetch: mockRefetch,
       });
 
-      renderWithProviders();
+      renderWithProviders(['/admin/orders/ord-999'], '/admin/orders/:id');
 
       expect(
         screen.getByRole('heading', { name: 'Không tìm thấy đơn hàng' }),
       ).toBeInTheDocument();
+      expect(screen.getByText('Mã tra cứu: #ord-999')).toBeInTheDocument();
+
+      const retryBtn = screen.getByRole('button', { name: 'Thử lại' });
+      expect(retryBtn).toBeInTheDocument();
+      fireEvent.click(retryBtn);
+      expect(mockRefetch).toHaveBeenCalledTimes(1);
+
       const backLink = screen.getByRole('link', {
         name: 'Quay lại danh sách',
       });
@@ -316,6 +342,7 @@ describe('AdminOrderDetailPage', () => {
       mockUseAdminOrder.mockReturnValue({
         data: null,
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -332,6 +359,7 @@ describe('AdminOrderDetailPage', () => {
       mockUseAdminOrder.mockReturnValue({
         data: null,
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders(['/admin/orders'], '/admin/orders');
@@ -345,6 +373,7 @@ describe('AdminOrderDetailPage', () => {
       mockUseAdminOrder.mockReturnValue({
         data: mockSampleOrder,
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -369,52 +398,74 @@ describe('AdminOrderDetailPage', () => {
         screen.getByTestId('select-item-PENDING_PAYMENT'),
       ).toHaveTextContent('Chờ thanh toán');
 
+      // Print button in header
+      expect(
+        screen.getByRole('button', { name: /In đơn hàng/ }),
+      ).toBeInTheDocument();
+
       // Products card
       expect(screen.getByText('Sản phẩm (1)')).toBeInTheDocument();
-      const img = screen.getByRole('img');
-      expect(img).toHaveAttribute(
+      const imgs = screen.getAllByRole('img');
+      expect(imgs.length).toBeGreaterThanOrEqual(1);
+      expect(imgs[0]).toHaveAttribute(
         'src',
         'https://example.com/product-image.jpg',
       );
-      expect(img).toHaveAttribute('alt', 'Chai xịt thơm phòng Thái Lan');
+      expect(imgs[0]).toHaveAttribute('alt', 'Chai xịt thơm phòng Thái Lan');
       expect(
-        screen.getByText('Chai xịt thơm phòng Thái Lan'),
-      ).toBeInTheDocument();
+        screen.getAllByText('Chai xịt thơm phòng Thái Lan').length,
+      ).toBeGreaterThanOrEqual(1);
       expect(
-        screen.getByText('Phân loại: Bạc hà mát lạnh - 100ml'),
-      ).toBeInTheDocument();
-      expect(screen.getByText('SKU: SKU-001')).toBeInTheDocument();
+        screen.getAllByText('Phân loại: Bạc hà mát lạnh - 100ml').length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('SKU: SKU-001').length).toBeGreaterThanOrEqual(
+        1,
+      );
       expect(
-        screen.getByText(matchText(formatCurrency(250000))),
-      ).toBeInTheDocument();
-      expect(screen.getByText('2')).toBeInTheDocument();
+        screen.getAllByText(matchText(formatCurrency(250000))).length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(1);
       expect(
         screen.getAllByText(matchText(formatCurrency(500000))).length,
       ).toBeGreaterThanOrEqual(1);
 
-      // Customer card
+      // Customer card (dedicated card)
       expect(screen.getByText('Khách hàng')).toBeInTheDocument();
       expect(screen.getByText('Tên:')).toBeInTheDocument();
       expect(screen.getByText('Email:')).toBeInTheDocument();
-      expect(screen.getByText('nguyenvana@example.com')).toBeInTheDocument();
+      const emailLink = screen.getByRole('link', {
+        name: 'nguyenvana@example.com',
+      });
+      expect(emailLink).toHaveAttribute(
+        'href',
+        'mailto:nguyenvana@example.com',
+      );
       expect(screen.getByText('SĐT:')).toBeInTheDocument();
       expect(screen.getAllByText('Nguyễn Văn A')).toHaveLength(2);
-      expect(screen.getAllByText('0987654321')).toHaveLength(2);
 
-      // Shipping address card
+      // Shipping address card (dedicated card)
       expect(screen.getByText('Giao hàng')).toBeInTheDocument();
       expect(
         screen.getByText(
           /123 Đường Lê Lợi[\s\S]*Tầng 4, Tòa nhà Bitexco[\s\S]*Phường Bến Nghé/,
         ),
       ).toBeInTheDocument();
+      const phoneLinks = screen.getAllByRole('link', { name: '0987654321' });
+      expect(phoneLinks.length).toBeGreaterThanOrEqual(1);
+      expect(phoneLinks[0]).toHaveAttribute('href', 'tel:0987654321');
 
-      // Payment card
+      // Notes section in shipping card
+      expect(screen.getByText('Ghi chú đơn hàng')).toBeInTheDocument();
+      expect(screen.getByText('Không có ghi chú')).toBeInTheDocument();
+
+      // Payment card (dedicated card)
       expect(screen.getByText('Thanh toán')).toBeInTheDocument();
       expect(screen.getByText('Phương thức')).toBeInTheDocument();
       expect(screen.getByText('COD')).toBeInTheDocument();
       expect(screen.getByText('Trạng thái')).toBeInTheDocument();
-      expect(screen.getByText('PENDING')).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Chờ thanh toán').length,
+      ).toBeGreaterThanOrEqual(2);
       expect(screen.getByText('Tạm tính')).toBeInTheDocument();
       expect(
         screen.getByText(matchText(formatCurrency(30000))),
@@ -428,8 +479,8 @@ describe('AdminOrderDetailPage', () => {
         screen.getByText(matchText(formatCurrency(480000))),
       ).toBeInTheDocument();
 
-      // Timeline card
-      expect(screen.getByText('Timeline')).toBeInTheDocument();
+      // Timeline / Order history card
+      expect(screen.getByText('Lịch sử đơn hàng')).toBeInTheDocument();
       expect(screen.getByText('Đơn hàng được tạo')).toBeInTheDocument();
       expect(
         screen.getByText(formatDateTime(mockSampleOrder.createdAt)),
@@ -447,6 +498,7 @@ describe('AdminOrderDetailPage', () => {
       mockUseAdminOrder.mockReturnValue({
         data: mockSampleOrder,
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -463,10 +515,11 @@ describe('AdminOrderDetailPage', () => {
   });
 
   describe('Status Transitions and Status Update Interactions', () => {
-    it('updates status and triggers toast.promise with correct loading, success, and error messages', async () => {
+    it('updates status directly for non-terminal status and triggers toast.promise', async () => {
       mockUseAdminOrder.mockReturnValue({
         data: mockSampleOrder,
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -519,6 +572,7 @@ describe('AdminOrderDetailPage', () => {
       mockUseAdminOrder.mockReturnValue({
         data: mockSampleOrder,
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -534,10 +588,11 @@ describe('AdminOrderDetailPage', () => {
       expect(mockToast.promise).not.toHaveBeenCalled();
     });
 
-    it('updates status to CANCELED and exercises success message for CANCELED', () => {
+    it('opens confirmation dialog when selecting terminal state CANCELED and updates only on confirmation', () => {
       mockUseAdminOrder.mockReturnValue({
         data: mockSampleOrder,
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -545,7 +600,28 @@ describe('AdminOrderDetailPage', () => {
       const cancelItem = screen.getByTestId('select-item-CANCELED');
       expect(cancelItem).toHaveTextContent('Đã hủy');
 
+      // Click CANCELED option
       fireEvent.click(cancelItem);
+
+      // Mutation must not execute immediately
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+
+      // Confirmation dialog should be displayed
+      expect(
+        screen.getByText('Xác nhận chuyển trạng thái đơn hàng'),
+      ).toBeInTheDocument();
+
+      // Operator can cancel dialog
+      const cancelBtn = screen.getByRole('button', { name: 'Hủy bỏ' });
+      fireEvent.click(cancelBtn);
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+
+      // Selecting again and clicking confirm executes mutation
+      fireEvent.click(cancelItem);
+      const confirmBtn = screen.getByRole('button', {
+        name: 'Xác nhận thay đổi',
+      });
+      fireEvent.click(confirmBtn);
 
       expect(mockMutateAsync).toHaveBeenCalledWith({
         orderId: 'ord-123',
@@ -567,6 +643,7 @@ describe('AdminOrderDetailPage', () => {
           status: 'PAID',
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -583,13 +660,14 @@ describe('AdminOrderDetailPage', () => {
       );
     });
 
-    it('renders PACKING status and provides SHIPPED and CANCELED transitions', () => {
+    it('renders PACKING status and provides SHIPPED and CANCELED transitions with aligned wording', () => {
       mockUseAdminOrder.mockReturnValue({
         data: {
           ...mockSampleOrder,
           status: 'PACKING',
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -599,49 +677,69 @@ describe('AdminOrderDetailPage', () => {
       ).toBeGreaterThanOrEqual(1);
       expect(screen.getByTestId('select-item-PACKING')).toBeDisabled();
       expect(screen.getByTestId('select-item-SHIPPED')).toHaveTextContent(
-        'Đã giao vận',
+        'Đang giao hàng',
       );
       expect(screen.getByTestId('select-item-CANCELED')).toHaveTextContent(
         'Đã hủy',
       );
     });
 
-    it('renders SHIPPED status and provides DELIVERED transition', () => {
+    it('renders SHIPPED status and provides DELIVERED transition with aligned wording', () => {
       mockUseAdminOrder.mockReturnValue({
         data: {
           ...mockSampleOrder,
           status: 'SHIPPED',
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
 
-      expect(screen.getAllByText('Đã giao vận').length).toBeGreaterThanOrEqual(
-        1,
-      );
+      expect(
+        screen.getAllByText('Đang giao hàng').length,
+      ).toBeGreaterThanOrEqual(1);
       expect(screen.getByTestId('select-item-SHIPPED')).toBeDisabled();
       expect(screen.getByTestId('select-item-DELIVERED')).toHaveTextContent(
-        'Đã giao',
+        'Giao thành công',
       );
     });
 
-    it('renders DELIVERED status and provides REFUNDED transition', () => {
+    it('renders DELIVERED status and requires confirmation dialog before transitioning to REFUNDED', () => {
       mockUseAdminOrder.mockReturnValue({
         data: {
           ...mockSampleOrder,
           status: 'DELIVERED',
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
 
-      expect(screen.getAllByText('Đã giao').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('Giao thành công').length,
+      ).toBeGreaterThanOrEqual(1);
       expect(screen.getByTestId('select-item-DELIVERED')).toBeDisabled();
-      expect(screen.getByTestId('select-item-REFUNDED')).toHaveTextContent(
-        'Đã hoàn tiền',
-      );
+
+      const refundedItem = screen.getByTestId('select-item-REFUNDED');
+      expect(refundedItem).toHaveTextContent('Đã hoàn tiền');
+
+      fireEvent.click(refundedItem);
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(
+        screen.getByText('Xác nhận chuyển trạng thái đơn hàng'),
+      ).toBeInTheDocument();
+
+      const confirmBtn = screen.getByRole('button', {
+        name: 'Xác nhận thay đổi',
+      });
+      fireEvent.click(confirmBtn);
+
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        orderId: 'ord-123',
+        status: 'REFUNDED',
+      });
     });
 
     it('renders CANCELED status and does not render select dropdown', () => {
@@ -651,6 +749,7 @@ describe('AdminOrderDetailPage', () => {
           status: 'CANCELED',
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -666,6 +765,7 @@ describe('AdminOrderDetailPage', () => {
           status: 'REFUNDED',
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -683,6 +783,7 @@ describe('AdminOrderDetailPage', () => {
           status: 'UNKNOWN_STATUS' as unknown as OrderStatus,
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -691,15 +792,166 @@ describe('AdminOrderDetailPage', () => {
     });
   });
 
-  describe('Branches and Edge Cases', () => {
-    it('does not render "Cập nhật gần nhất" in timeline when updatedAt equals createdAt', () => {
+  describe('Snapshots, Coupon, Notes and Payment Map', () => {
+    it('prioritizes item historical snapshots over catalog relations', () => {
       mockUseAdminOrder.mockReturnValue({
         data: {
           ...mockSampleOrder,
-          createdAt: '2025-01-01T10:00:00.000Z',
-          updatedAt: '2025-01-01T10:00:00.000Z',
+          items: [
+            {
+              unitPrice: 300000,
+              quantity: 1,
+              lineTotal: 300000,
+              nameSnapshot: 'Xịt phòng cao cấp snapshot',
+              scentSnapshot: 'Oải hương Pháp',
+              volumeSnapshot: 250,
+              variant: {
+                sku: 'SKU-SNAP-888',
+                scent: 'Catalog Scent Old',
+                volumeMl: 100,
+                product: {
+                  name: 'Catalog Product Old',
+                  images: ['https://example.com/item.jpg'],
+                },
+              },
+            },
+          ],
         },
         isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderWithProviders();
+
+      expect(
+        screen.getAllByText('Xịt phòng cao cấp snapshot').length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(screen.queryByText('Catalog Product Old')).not.toBeInTheDocument();
+      expect(
+        screen.getAllByText('Phân loại: Oải hương Pháp - 250ml').length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(screen.queryByText('Catalog Scent Old')).not.toBeInTheDocument();
+      expect(
+        screen.getAllByText('SKU: SKU-SNAP-888').length,
+      ).toBeGreaterThanOrEqual(1);
+    });
+
+    it('renders coupon code badge and order notes correctly', () => {
+      mockUseAdminOrder.mockReturnValue({
+        data: {
+          ...mockSampleOrder,
+          couponCode: 'GIAM10PT',
+          notes: 'Gọi trước khi giao hàng 15 phút',
+        },
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderWithProviders();
+
+      expect(screen.getByText('GIAM10PT')).toBeInTheDocument();
+      expect(
+        screen.getByText('Gọi trước khi giao hàng 15 phút'),
+      ).toBeInTheDocument();
+    });
+
+    it.each([
+      ['PENDING', 'Chờ thanh toán'],
+      ['COMPLETED', 'Đã thanh toán'],
+      ['FAILED', 'Thất bại'],
+      ['REFUNDED', 'Đã hoàn tiền'],
+    ])(
+      'maps payment status %s to Vietnamese label %s',
+      (status, expectedLabel) => {
+        mockUseAdminOrder.mockReturnValue({
+          data: {
+            ...mockSampleOrder,
+            paymentStatus: status as any,
+          },
+          isLoading: false,
+          refetch: mockRefetch,
+        });
+
+        renderWithProviders();
+
+        expect(
+          screen.getAllByText(expectedLabel).length,
+        ).toBeGreaterThanOrEqual(1);
+      },
+    );
+  });
+
+  describe('Actions: Print and Copy to Clipboard', () => {
+    it('invokes window.print when "In đơn hàng" button is clicked', () => {
+      mockUseAdminOrder.mockReturnValue({
+        data: mockSampleOrder,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderWithProviders();
+
+      const printButton = screen.getByRole('button', { name: /In đơn hàng/ });
+      fireEvent.click(printButton);
+
+      expect(window.print).toHaveBeenCalledTimes(1);
+    });
+
+    it('copies order code to clipboard and triggers toast notification', async () => {
+      mockUseAdminOrder.mockReturnValue({
+        data: mockSampleOrder,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderWithProviders();
+
+      const copyBtn = screen.getByRole('button', {
+        name: 'Sao chép mã đơn hàng',
+      });
+      fireEvent.click(copyBtn);
+
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('ORD-123');
+      await waitFor(() => {
+        expect(mockToast.success).toHaveBeenCalledWith(
+          'Đã sao chép mã đơn hàng',
+        );
+      });
+    });
+
+    it('copies shipping address to clipboard and triggers toast notification', async () => {
+      mockUseAdminOrder.mockReturnValue({
+        data: mockSampleOrder,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderWithProviders();
+
+      const copyAddressBtn = screen.getByRole('button', {
+        name: 'Sao chép địa chỉ',
+      });
+      fireEvent.click(copyAddressBtn);
+
+      expect(navigator.clipboard.writeText).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockToast.success).toHaveBeenCalledWith(
+          'Đã sao chép địa chỉ giao hàng',
+        );
+      });
+    });
+  });
+
+  describe('Branches and Edge Cases', () => {
+    it('does not render "Cập nhật gần nhất" in timeline when updatedAt equals createdAt by timestamp', () => {
+      mockUseAdminOrder.mockReturnValue({
+        data: {
+          ...mockSampleOrder,
+          createdAt: new Date('2025-01-01T10:00:00.000Z'),
+          updatedAt: new Date('2025-01-01T10:00:00.000Z'),
+        },
+        isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -708,7 +960,7 @@ describe('AdminOrderDetailPage', () => {
       expect(screen.queryByText('Cập nhật gần nhất')).not.toBeInTheDocument();
     });
 
-    it('renders shipping address correctly when line2 is omitted', () => {
+    it('renders shipping address cleanly when line2 is omitted without dangling commas', () => {
       mockUseAdminOrder.mockReturnValue({
         data: {
           ...mockSampleOrder,
@@ -722,6 +974,7 @@ describe('AdminOrderDetailPage', () => {
           }),
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -743,11 +996,13 @@ describe('AdminOrderDetailPage', () => {
           addressJson: null,
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
 
       expect(screen.getByText('Giao hàng')).toBeInTheDocument();
+      expect(screen.getByText('Chưa có thông tin địa chỉ')).toBeInTheDocument();
     });
 
     it('renders "N/A" for customer details when user object is undefined or null', () => {
@@ -757,6 +1012,7 @@ describe('AdminOrderDetailPage', () => {
           user: null,
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -776,6 +1032,7 @@ describe('AdminOrderDetailPage', () => {
           },
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -791,6 +1048,7 @@ describe('AdminOrderDetailPage', () => {
           items: [],
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -804,6 +1062,7 @@ describe('AdminOrderDetailPage', () => {
           items: undefined,
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -832,15 +1091,18 @@ describe('AdminOrderDetailPage', () => {
           ],
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
 
       expect(screen.queryByRole('img')).not.toBeInTheDocument();
-      expect(screen.getByText('Chai xịt mini')).toBeInTheDocument();
       expect(
-        screen.getByText('Phân loại: Không mùi - 50ml'),
-      ).toBeInTheDocument();
+        screen.getAllByText('Chai xịt mini').length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('Phân loại: Không mùi - 50ml').length,
+      ).toBeGreaterThanOrEqual(1);
     });
 
     it('handles item with missing variant and product properties safely', () => {
@@ -857,6 +1119,7 @@ describe('AdminOrderDetailPage', () => {
           ],
         },
         isLoading: false,
+        refetch: mockRefetch,
       });
 
       renderWithProviders();
@@ -865,7 +1128,8 @@ describe('AdminOrderDetailPage', () => {
       expect(
         screen.getAllByText(matchText(formatCurrency(150000))).length,
       ).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('SKU: N/A').length).toBeGreaterThanOrEqual(1);
     });
   });
 });

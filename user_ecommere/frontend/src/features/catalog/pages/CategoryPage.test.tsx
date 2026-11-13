@@ -10,7 +10,6 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CategoryPage } from './CategoryPage';
 import { useCartStore } from '@/features/cart/store/cartStore';
-import { formatCurrency } from '@/lib/formatters';
 
 // Mocks for data hooks
 const mockUseCategoryBySlug = vi.fn();
@@ -451,7 +450,7 @@ describe('CategoryPage', () => {
   });
 
   describe('Loading and Error States', () => {
-    it('renders loading spinner when category is loading', () => {
+    it('renders loading skeleton when category is loading', () => {
       mockUseCategoryBySlug.mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -459,7 +458,9 @@ describe('CategoryPage', () => {
 
       renderCategoryPage();
 
-      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+      expect(
+        screen.getByRole('status', { name: 'Đang tải danh mục' }),
+      ).toBeInTheDocument();
       expect(screen.queryByText('Xịt thơm phòng')).not.toBeInTheDocument();
     });
 
@@ -488,7 +489,7 @@ describe('CategoryPage', () => {
       expect(screen.getByText('Danh mục không tồn tại')).toBeInTheDocument();
     });
 
-    it('renders loading spinner in products area when products are loading', () => {
+    it('renders loading skeleton in products area when products are loading', () => {
       mockUseProducts.mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -499,8 +500,12 @@ describe('CategoryPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: 'Xịt thơm phòng' }),
       ).toBeInTheDocument();
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
-      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('status', { name: 'Đang tải sản phẩm' }),
+      ).toBeInTheDocument();
     });
 
     it('renders empty state with clear filters button when products list is empty', () => {
@@ -560,8 +565,12 @@ describe('CategoryPage', () => {
 
       renderCategoryPage();
 
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('status', { name: 'Đang tải sản phẩm' }),
+      ).not.toBeInTheDocument();
       expect(
         screen.queryByText('Không tìm thấy sản phẩm'),
       ).not.toBeInTheDocument();
@@ -610,7 +619,9 @@ describe('CategoryPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: 'Xịt thơm phòng' }),
       ).toBeInTheDocument();
-      expect(screen.getByText('7 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '7 sản phẩm'),
+      ).toBeInTheDocument();
     });
 
     it('renders 0 sản phẩm when products total is 0', () => {
@@ -621,7 +632,9 @@ describe('CategoryPage', () => {
 
       renderCategoryPage();
 
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
     });
 
     it('renders 0 sản phẩm when products total is undefined', () => {
@@ -636,7 +649,9 @@ describe('CategoryPage', () => {
 
       renderCategoryPage();
 
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -861,6 +876,12 @@ describe('CategoryPage', () => {
       expect(searchInput).toHaveValue('matched');
       expect(getLocationSearch()).toBe('?q=matched');
     });
+
+    it('hides in-category search on mobile to prevent stacked inputs', () => {
+      renderCategoryPage('/category/xit-thom-phong');
+      const searchInput = screen.getByPlaceholderText('Tìm kiếm...');
+      expect(searchInput.parentElement).toHaveClass('hidden', 'sm:block');
+    });
   });
 
   describe('Sorting and Sort Options', () => {
@@ -925,8 +946,8 @@ describe('CategoryPage', () => {
       const listBtn = container
         .querySelector('svg.lucide-list')
         ?.closest('button');
-      expect(gridBtn).toHaveClass('bg-white');
-      expect(listBtn).toHaveClass('text-slate-500');
+      expect(gridBtn).toHaveClass('bg-card');
+      expect(listBtn).toHaveClass('text-muted-foreground');
 
       expect(screen.getByTestId('product-card-prod-1')).toBeInTheDocument();
       expect(screen.getByTestId('product-card-prod-2')).toBeInTheDocument();
@@ -1002,21 +1023,22 @@ describe('CategoryPage', () => {
       expect(screen.getByText('4.5')).toBeInTheDocument();
       expect(screen.getByText('0.0')).toBeInTheDocument();
 
-      expect(screen.getByText('120 đánh giá')).toBeInTheDocument();
-      expect(screen.getByText('85 đánh giá')).toBeInTheDocument();
-      expect(screen.getAllByText('0 đánh giá').length).toBeGreaterThanOrEqual(
-        1,
-      );
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '120 đánh giá'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '85 đánh giá'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByText((_, el) => el?.textContent?.trim() === '0 đánh giá')
+          .length,
+      ).toBeGreaterThanOrEqual(1);
 
       expect(screen.getByText('Lavender')).toBeInTheDocument();
       expect(screen.getByText('Sả chanh')).toBeInTheDocument();
 
-      expect(
-        screen.getByText(formatCurrency(150000).replace(/\u00a0/g, ' ')),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(formatCurrency(180000).replace(/\u00a0/g, ' ')),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/150\.000/)).toBeInTheDocument();
+      expect(screen.getByText(/180\.000/)).toBeInTheDocument();
     });
 
     it('limits scent badges to maximum 3 variants in list view', () => {
@@ -1290,7 +1312,9 @@ describe('CategoryPage', () => {
     it('renders mobile filter sheet and allows filter changes', () => {
       const { container } = renderCategoryPage();
 
-      const mobileTrigger = container.querySelector('button.lg\\:hidden');
+      const mobileTrigger =
+        container.querySelector('button.lg\\:hidden') ||
+        screen.getByRole('button', { name: /Lọc/i });
       expect(mobileTrigger).toBeInTheDocument();
       fireEvent.click(mobileTrigger!);
 
@@ -1307,6 +1331,29 @@ describe('CategoryPage', () => {
       const params = new URLSearchParams(getLocationSearch());
       expect(params.get('brand')).toBe('Brand A');
       expect(params.get('minPrice')).toBe('100000');
+    });
+  });
+
+  describe('Active Filter Chips', () => {
+    it('renders active chips for search query, price, scent, volume, brand and allows removal', () => {
+      renderCategoryPage(
+        '/category/xit-thom-phong?q=rose&minPrice=50000&maxPrice=150000&scent=Lavender&volumeMl=100&brand=ThaiBrand',
+      );
+
+      expect(screen.getByText('Tìm kiếm: "rose"')).toBeInTheDocument();
+      expect(screen.getByText('Lavender')).toBeInTheDocument();
+      expect(screen.getByText('100ml')).toBeInTheDocument();
+      expect(screen.getByText('ThaiBrand')).toBeInTheDocument();
+
+      const removeScentBtn = screen.getByRole('button', {
+        name: 'Xóa bộ lọc Lavender',
+      });
+      fireEvent.click(removeScentBtn);
+      expect(getLocationSearch()).not.toContain('scent=');
+
+      const clearAllBtn = screen.getByRole('button', { name: 'Xóa tất cả' });
+      fireEvent.click(clearAllBtn);
+      expect(getLocationSearch()).toBe('');
     });
   });
 

@@ -1,4 +1,10 @@
-import { useRef, useState, useEffect, useCallback, type RefObject } from 'react';
+import {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  type RefObject,
+} from 'react';
 
 const BOTTOM_THRESHOLD_PX = 80;
 
@@ -10,7 +16,7 @@ const BOTTOM_THRESHOLD_PX = 80;
  * If the user has scrolled up, it preserves their scroll position.
  */
 export function useStickToBottom<T extends HTMLElement = HTMLDivElement>(
-  deps: ReadonlyArray<unknown>
+  deps: ReadonlyArray<unknown>,
 ): {
   scrollRef: RefObject<T>;
   isAtBottom: boolean;
@@ -26,7 +32,10 @@ export function useStickToBottom<T extends HTMLElement = HTMLDivElement>(
   useEffect(() => {
     return () => {
       if (activeElementRef.current && listenerRef.current) {
-        activeElementRef.current.removeEventListener('scroll', listenerRef.current);
+        activeElementRef.current.removeEventListener(
+          'scroll',
+          listenerRef.current,
+        );
         listenerRef.current = null;
         activeElementRef.current = null;
       }
@@ -36,6 +45,9 @@ export function useStickToBottom<T extends HTMLElement = HTMLDivElement>(
   // Detect when the container element changes (e.g. mounts or unmounts later).
   // Runs after each render but attaches/detaches ONLY when the container element actually changes.
   // Never recompute isAtBottom here unless a brand new element was attached.
+  // No dependency list on purpose: the scroll container mounts only when the widget opens,
+  // so this effect must run after every render. The guard below makes that a no-op otherwise.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const element = scrollRef.current;
@@ -43,7 +55,10 @@ export function useStickToBottom<T extends HTMLElement = HTMLDivElement>(
 
     // Detach listener from previously attached element if any
     if (activeElementRef.current && listenerRef.current) {
-      activeElementRef.current.removeEventListener('scroll', listenerRef.current);
+      activeElementRef.current.removeEventListener(
+        'scroll',
+        listenerRef.current,
+      );
       listenerRef.current = null;
     }
 
@@ -54,8 +69,10 @@ export function useStickToBottom<T extends HTMLElement = HTMLDivElement>(
       const { scrollTop, scrollHeight, clientHeight } = element;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
       const atBottom = distanceFromBottom <= BOTTOM_THRESHOLD_PX;
-      isAtBottomRef.current = atBottom;
-      setIsAtBottom(atBottom);
+      if (isAtBottomRef.current !== atBottom) {
+        isAtBottomRef.current = atBottom;
+        setIsAtBottom(atBottom);
+      }
     };
 
     listenerRef.current = handleScroll;

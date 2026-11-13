@@ -316,7 +316,10 @@ export function useChatAgent(): {
   }, [cancel]);
 
   const runTurn = useCallback(
-    async (trimmedPrompt: string, assistantMessageId: string): Promise<void> => {
+    async (
+      trimmedPrompt: string,
+      assistantMessageId: string,
+    ): Promise<void> => {
       const rawCartItems = useCartStore.getState().items;
       const cart = rawCartItems.slice(0, 100).map((item) => {
         const rawQty =
@@ -439,7 +442,7 @@ export function useChatAgent(): {
 
       await runTurn(trimmedPrompt, assistantMessageId);
     },
-    [runTurn]
+    [runTurn],
   );
 
   const retry = useCallback(async (): Promise<void> => {

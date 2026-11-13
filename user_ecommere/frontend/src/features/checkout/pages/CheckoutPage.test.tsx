@@ -107,6 +107,7 @@ vi.mock('@/features/users/components/AddressFormDialog', () => ({
         </button>
       </div>
     ) : null,
+  AddressFormDialogComponent: () => null,
 }));
 
 // Mock cart hook
@@ -277,6 +278,37 @@ describe('CheckoutPage', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/cart', { replace: true });
       expect(container.firstChild).toBeNull();
     });
+
+    it('does not redirect to /cart when cart becomes empty after order is placed (isOrdered guard)', async () => {
+      vi.useFakeTimers();
+      renderCheckoutPage();
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      // Proceed to Step 3 and submit order
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+
+      const submitBtn = screen.getAllByRole('button', {
+        name: /Xác nhận đặt hàng/i,
+      })[0];
+
+      await act(async () => {
+        fireEvent.click(submitBtn);
+      });
+
+      // Advance timers to trigger post-order navigate and clearCart
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      expect(mockNavigate).toHaveBeenCalledWith('/orders');
+      expect(mockNavigate).not.toHaveBeenCalledWith('/cart', expect.anything());
+
+      vi.useRealTimers();
+    });
   });
 
   describe('Address Management & Auto Selection', () => {
@@ -374,11 +406,11 @@ describe('CheckoutPage', () => {
 
       const secondAddressCard = screen
         .getByText('Trần Thị B')
-        .closest('div[role="button"]')!;
+        .closest('label')!;
       await user.click(secondAddressCard);
 
-      // Verify that secondAddressCard has border-teal-600 style class indicating selection
-      expect(secondAddressCard).toHaveClass('border-teal-600');
+      // Verify that secondAddressCard has border-primary style class indicating selection
+      expect(secondAddressCard).toHaveClass('border-primary');
     });
 
     it('allows selecting address via keyboard Enter and Space, ignoring other keys', () => {
@@ -386,22 +418,22 @@ describe('CheckoutPage', () => {
 
       const firstAddressCard = screen
         .getByText('Nguyễn Văn A')
-        .closest('div[role="button"]')!;
+        .closest('label')!;
       const secondAddressCard = screen
         .getByText('Trần Thị B')
-        .closest('div[role="button"]')!;
+        .closest('label')!;
 
       // Press Enter on second address
       fireEvent.keyDown(secondAddressCard, { key: 'Enter' });
-      expect(secondAddressCard).toHaveClass('border-teal-600');
+      expect(secondAddressCard).toHaveClass('border-primary');
 
       // Press Space on first address
       fireEvent.keyDown(firstAddressCard, { key: ' ' });
-      expect(firstAddressCard).toHaveClass('border-teal-600');
+      expect(firstAddressCard).toHaveClass('border-primary');
 
       // Press Escape or ArrowDown - should not switch selection
       fireEvent.keyDown(secondAddressCard, { key: 'Escape' });
-      expect(firstAddressCard).toHaveClass('border-teal-600');
+      expect(firstAddressCard).toHaveClass('border-primary');
     });
   });
 
@@ -425,11 +457,11 @@ describe('CheckoutPage', () => {
 
       const expressShippingCard = screen
         .getByText('Giao hàng nhanh')
-        .closest('div[role="button"]')!;
+        .closest('label')!;
 
       await user.click(expressShippingCard);
 
-      expect(expressShippingCard).toHaveClass('border-teal-600');
+      expect(expressShippingCard).toHaveClass('border-primary');
     });
 
     it('allows selecting shipping method via keyboard Enter and Space, ignoring other keys', () => {
@@ -437,22 +469,22 @@ describe('CheckoutPage', () => {
 
       const standardShippingCard = screen
         .getByText('Giao hàng tiêu chuẩn')
-        .closest('div[role="button"]')!;
+        .closest('label')!;
       const expressShippingCard = screen
         .getByText('Giao hàng nhanh')
-        .closest('div[role="button"]')!;
+        .closest('label')!;
 
       // Select express with Enter
       fireEvent.keyDown(expressShippingCard, { key: 'Enter' });
-      expect(expressShippingCard).toHaveClass('border-teal-600');
+      expect(expressShippingCard).toHaveClass('border-primary');
 
       // Select standard with Space
       fireEvent.keyDown(standardShippingCard, { key: ' ' });
-      expect(standardShippingCard).toHaveClass('border-teal-600');
+      expect(standardShippingCard).toHaveClass('border-primary');
 
       // Press other key like ArrowDown - does not trigger change
       fireEvent.keyDown(expressShippingCard, { key: 'ArrowDown' });
-      expect(standardShippingCard).toHaveClass('border-teal-600');
+      expect(standardShippingCard).toHaveClass('border-primary');
     });
   });
 
@@ -504,14 +536,14 @@ describe('CheckoutPage', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(matchText(formatCurrency(45000))),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(formatCurrency(45000))).length,
+        ).toBeGreaterThanOrEqual(1);
         expect(
-          screen.getByText(matchText(`-${formatCurrency(15000)}`)),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(`-${formatCurrency(15000)}`)).length,
+        ).toBeGreaterThanOrEqual(1);
         expect(
-          screen.getByText(matchText(formatCurrency(270000))),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(formatCurrency(270000))).length,
+        ).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -529,12 +561,12 @@ describe('CheckoutPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Miễn phí')).toBeInTheDocument();
         expect(
-          screen.getByText(matchText(`-${formatCurrency(20000)}`)),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(`-${formatCurrency(20000)}`)).length,
+        ).toBeGreaterThanOrEqual(1);
         // total = subtotal (240000) - discount (20000) + fee (0) = 220000
         expect(
-          screen.getByText(matchText(formatCurrency(220000))),
-        ).toBeInTheDocument();
+          screen.getAllByText(matchText(formatCurrency(220000))).length,
+        ).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -712,7 +744,9 @@ describe('CheckoutPage', () => {
       });
       renderCheckoutPage();
 
-      const continueBtn = screen.getByRole('button', { name: /Tiếp tục/i });
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       expect(continueBtn).toBeDisabled();
       fireEvent.click(continueBtn);
 
@@ -740,7 +774,9 @@ describe('CheckoutPage', () => {
       // Clear the preview failure toast call before testing step validation
       vi.mocked(toast.error).mockClear();
 
-      const continueBtn = screen.getByRole('button', { name: /Tiếp tục/i });
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       expect(continueBtn).toBeDisabled();
       fireEvent.click(continueBtn);
 
@@ -757,18 +793,18 @@ describe('CheckoutPage', () => {
       // Wait for preview confirmation
       await waitFor(() => {
         expect(
-          screen.getByRole('button', { name: /Tiếp tục/i }),
+          screen.getAllByRole('button', { name: /Tiếp tục/i })[0],
         ).not.toBeDisabled();
       });
 
       // Proceed to Step 2
-      const continueBtn = screen.getByRole('button', { name: /Tiếp tục/i });
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       await user.click(continueBtn);
 
       // Verify Step 2 rendered
-      expect(
-        screen.getByText('Chọn phương thức thanh toán'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
       expect(
         screen.getByText('Thanh toán khi nhận hàng (COD)'),
       ).toBeInTheDocument();
@@ -782,35 +818,35 @@ describe('CheckoutPage', () => {
 
       const bankTransferCard = screen
         .getByText('Chuyển khoản ngân hàng')
-        .closest('div[role="button"]')!;
+        .closest('label')!;
       expect(bankTransferCard).toHaveAttribute('aria-disabled', 'true');
       expect(bankTransferCard).toHaveAttribute('tabIndex', '-1');
 
       // Clicking non-COD method should not select it
       await user.click(bankTransferCard);
-      expect(bankTransferCard).not.toHaveClass('border-teal-600');
+      expect(bankTransferCard).not.toHaveClass('border-primary');
 
       // Keydown on non-COD method should not select it
       fireEvent.keyDown(bankTransferCard, { key: 'Enter' });
-      expect(bankTransferCard).not.toHaveClass('border-teal-600');
+      expect(bankTransferCard).not.toHaveClass('border-primary');
 
       // COD card should be active and selectable via click and keyboard
       const codCard = screen
         .getByText('Thanh toán khi nhận hàng (COD)')
-        .closest('div[role="button"]')!;
-      expect(codCard).toHaveClass('border-teal-600');
+        .closest('label')!;
+      expect(codCard).toHaveClass('border-primary');
 
       fireEvent.keyDown(codCard, { key: ' ' });
-      expect(codCard).toHaveClass('border-teal-600');
+      expect(codCard).toHaveClass('border-primary');
 
       fireEvent.keyDown(codCard, { key: 'Enter' });
-      expect(codCard).toHaveClass('border-teal-600');
+      expect(codCard).toHaveClass('border-primary');
 
       fireEvent.keyDown(codCard, { key: 'ArrowRight' });
-      expect(codCard).toHaveClass('border-teal-600');
+      expect(codCard).toHaveClass('border-primary');
 
       // Click "Quay lại" to go back to Step 1
-      const backBtn = screen.getByRole('button', { name: 'Quay lại' });
+      const backBtn = screen.getAllByRole('button', { name: /^Quay lại$/i })[0];
       await user.click(backBtn);
 
       expect(screen.getByText('Địa chỉ giao hàng')).toBeInTheDocument();
@@ -822,18 +858,16 @@ describe('CheckoutPage', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('button', { name: /Tiếp tục/i }),
+          screen.getAllByRole('button', { name: /Tiếp tục/i })[0],
         ).not.toBeDisabled();
       });
 
       // Step 1 -> Step 2
-      await user.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-      expect(
-        screen.getByText('Chọn phương thức thanh toán'),
-      ).toBeInTheDocument();
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
 
       // Step 2 -> Step 3
-      await user.click(screen.getByRole('button', { name: /Tiếp tục/i }));
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
       // Verify Step 3 content
       expect(screen.getByText('Sẵn sàng đặt hàng!')).toBeInTheDocument();
@@ -858,20 +892,86 @@ describe('CheckoutPage', () => {
 
       // Submit button text on Step 3
       expect(
-        screen.getByRole('button', { name: 'Xác nhận đặt hàng' }),
+        screen.getAllByRole('button', { name: /Xác nhận đặt hàng/i })[0],
       ).toBeInTheDocument();
 
       // Back button on Step 3 returns to Step 2
-      const backBtn = screen.getByRole('button', { name: 'Quay lại' });
+      const backBtn = screen.getAllByRole('button', { name: /^Quay lại$/i })[0];
       await user.click(backBtn);
-      expect(
-        screen.getByText('Chọn phương thức thanh toán'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
+    });
+
+    it('allows jumping back to Step 1 or Step 2 via "Thay đổi" buttons in Step 3', async () => {
+      const user = userEvent.setup();
+      renderCheckoutPage();
+
+      await waitFor(() => {
+        expect(
+          screen.getAllByRole('button', { name: /Tiếp tục/i })[0],
+        ).not.toBeDisabled();
+      });
+
+      // Advance to Step 3
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      expect(screen.getByText('Sẵn sàng đặt hàng!')).toBeInTheDocument();
+
+      // Click "Thay đổi" on Address section -> jumps to Step 1
+      const editAddressBtns = screen.getAllByRole('button', {
+        name: 'Thay đổi',
+      });
+      await user.click(editAddressBtns[0]);
+      expect(screen.getByText('Địa chỉ giao hàng')).toBeInTheDocument();
+
+      // Advance back to Step 3
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+
+      // Click "Thay đổi" on Payment & Shipping section -> jumps to Step 2
+      const editPaymentBtns = screen.getAllByRole('button', {
+        name: 'Thay đổi',
+      });
+      await user.click(editPaymentBtns[1]);
+      expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
+    });
+
+    it('allows jumping back to Step 1 or Step 2 via Stepper step buttons', async () => {
+      const user = userEvent.setup();
+      renderCheckoutPage();
+
+      await waitFor(() => {
+        expect(
+          screen.getAllByRole('button', { name: /Tiếp tục/i })[0],
+        ).not.toBeDisabled();
+      });
+
+      // Advance to Step 3
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      expect(screen.getByText('Sẵn sàng đặt hàng!')).toBeInTheDocument();
+
+      // Click step 1 in Stepper -> jumps to Step 1
+      const step1Btn = screen.getByRole('button', {
+        name: 'Quay lại bước 1: Vận chuyển',
+      });
+      await user.click(step1Btn);
+      expect(screen.getByText('Địa chỉ giao hàng')).toBeInTheDocument();
+
+      // Advance back to Step 3
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      await user.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+
+      // Click step 2 in Stepper -> jumps to Step 2
+      const step2Btn = screen.getByRole('button', {
+        name: 'Quay lại bước 2: Thanh toán',
+      });
+      await user.click(step2Btn);
+      expect(screen.getByText('Phương thức thanh toán')).toBeInTheDocument();
     });
   });
 
   describe('Order Submission (handleSubmit)', () => {
-    it('successfully places an order, fires confetti, invalidates orders query, and redirects to /orders after 1s timer', async () => {
+    it('successfully places an order, fires confetti, shows success toast, and redirects to /orders after 1s timer', async () => {
       vi.useFakeTimers();
       const { invalidateQueriesSpy } = renderCheckoutPage();
 
@@ -881,15 +981,17 @@ describe('CheckoutPage', () => {
       });
 
       // Step 1 -> Step 2
-      const continueBtn = screen.getByRole('button', { name: /Tiếp tục/i });
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       fireEvent.click(continueBtn);
 
       // Step 2 -> Step 3
-      fireEvent.click(continueBtn);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
-      const submitBtn = screen.getByRole('button', {
-        name: 'Xác nhận đặt hàng',
-      });
+      const submitBtn = screen.getAllByRole('button', {
+        name: /Xác nhận đặt hàng/i,
+      })[0];
       expect(submitBtn).toBeInTheDocument();
 
       await act(async () => {
@@ -927,6 +1029,11 @@ describe('CheckoutPage', () => {
         spread: 70,
         origin: { y: 0.6 },
       });
+
+      // Verify success toast
+      expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
+        'Đặt hàng thành công! Cảm ơn bạn đã mua sắm.',
+      );
 
       // Before timer ticks: clearCart and navigate not called
       expect(mockClearCart).not.toHaveBeenCalled();
@@ -972,20 +1079,27 @@ describe('CheckoutPage', () => {
       });
 
       // Advance to Step 3
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
-      const submitBtn = screen.getByRole('button', {
-        name: 'Xác nhận đặt hàng',
-      });
+      const submitBtn = screen.getAllByRole('button', {
+        name: /Xác nhận đặt hàng/i,
+      })[0];
       fireEvent.click(submitBtn);
 
       // While in flight: text should be "Đang xử lý..."
-      expect(screen.getByText('Đang xử lý...')).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Đang xử lý...').length,
+      ).toBeGreaterThanOrEqual(1);
 
       // Resolve checkout
       await act(async () => {
         resolveCheckout({ data: { success: true } });
+      });
+
+      // Let the post-order timer (1s) fire inside this test so it cannot leak into the next one.
+      await waitFor(() => expect(mockClearCart).toHaveBeenCalledTimes(1), {
+        timeout: 3000,
       });
     });
 
@@ -1002,12 +1116,12 @@ describe('CheckoutPage', () => {
       });
 
       // Step 1 -> Step 2 -> Step 3
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
-      const submitBtn = screen.getByRole('button', {
-        name: 'Xác nhận đặt hàng',
-      });
+      const submitBtn = screen.getAllByRole('button', {
+        name: /Xác nhận đặt hàng/i,
+      })[0];
 
       await act(async () => {
         fireEvent.click(submitBtn);
@@ -1060,12 +1174,12 @@ describe('CheckoutPage', () => {
       });
 
       // Go to Step 3
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
-      const submitBtn = screen.getByRole('button', {
-        name: 'Xác nhận đặt hàng',
-      });
+      const submitBtn = screen.getAllByRole('button', {
+        name: /Xác nhận đặt hàng/i,
+      })[0];
       await act(async () => {
         fireEvent.click(submitBtn);
       });
@@ -1114,12 +1228,12 @@ describe('CheckoutPage', () => {
       });
 
       // Go to Step 3
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
       await act(async () => {
         fireEvent.click(
-          screen.getByRole('button', { name: 'Xác nhận đặt hàng' }),
+          screen.getAllByRole('button', { name: /Xác nhận đặt hàng/i })[0],
         );
       });
 
@@ -1166,12 +1280,12 @@ describe('CheckoutPage', () => {
       });
 
       // Go to Step 3
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
       await act(async () => {
         fireEvent.click(
-          screen.getByRole('button', { name: 'Xác nhận đặt hàng' }),
+          screen.getAllByRole('button', { name: /Xác nhận đặt hàng/i })[0],
         );
       });
 
@@ -1220,12 +1334,12 @@ describe('CheckoutPage', () => {
       });
 
       // Go to Step 3
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
-      const submitBtn = screen.getByRole('button', {
-        name: 'Xác nhận đặt hàng',
-      });
+      const submitBtn = screen.getAllByRole('button', {
+        name: /Xác nhận đặt hàng/i,
+      })[0];
 
       // First submit attempt
       await act(async () => {
@@ -1253,12 +1367,16 @@ describe('CheckoutPage', () => {
       expect(secondKey).toBe(firstKey);
 
       // Now navigate back to Step 1 and change shipping method to EXPRESS
-      fireEvent.click(screen.getByRole('button', { name: 'Quay lại' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Quay lại' }));
+      fireEvent.click(
+        screen.getAllByRole('button', { name: /^Quay lại$/i })[0],
+      );
+      fireEvent.click(
+        screen.getAllByRole('button', { name: /^Quay lại$/i })[0],
+      );
 
       const expressShippingCard = screen
         .getByText('Giao hàng nhanh')
-        .closest('div[role="button"]')!;
+        .closest('label')!;
       fireEvent.click(expressShippingCard);
 
       // Wait for updated preview
@@ -1267,13 +1385,13 @@ describe('CheckoutPage', () => {
       });
 
       // Navigate forward to Step 3 again
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-      fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /Tiếp tục/i })[0]);
 
       // Third submit attempt with modified fingerprint
       await act(async () => {
         fireEvent.click(
-          screen.getByRole('button', { name: 'Xác nhận đặt hàng' }),
+          screen.getAllByRole('button', { name: /Xác nhận đặt hàng/i })[0],
         );
       });
 
@@ -1296,7 +1414,9 @@ describe('CheckoutPage', () => {
       });
       renderCheckoutPage();
 
-      const continueBtn = screen.getByRole('button', { name: /Tiếp tục/i });
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       fireEvent.click(continueBtn);
 
       const checkoutCalls = vi
@@ -1324,7 +1444,10 @@ describe('CheckoutPage', () => {
 
       // Check item 1
       expect(screen.getByText(mockItem1.name)).toBeInTheDocument();
-      expect(screen.getByText(`Sl: ${mockItem1.quantity}`)).toBeInTheDocument();
+      expect(
+        screen.getAllByText(matchText(`Số lượng: ${mockItem1.quantity}`))
+          .length,
+      ).toBeGreaterThanOrEqual(1);
       expect(
         screen.getAllByText(
           matchText(formatCurrency(mockItem1.price * mockItem1.quantity)),
@@ -1333,12 +1456,15 @@ describe('CheckoutPage', () => {
 
       // Check item 2
       expect(screen.getByText(mockItem2.name)).toBeInTheDocument();
-      expect(screen.getByText(`Sl: ${mockItem2.quantity}`)).toBeInTheDocument();
       expect(
-        screen.getByText(
+        screen.getAllByText(matchText(`Số lượng: ${mockItem2.quantity}`))
+          .length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText(
           matchText(formatCurrency(mockItem2.price * mockItem2.quantity)),
-        ),
-      ).toBeInTheDocument();
+        ).length,
+      ).toBeGreaterThanOrEqual(1);
 
       // Subtotal
       expect(
@@ -1372,7 +1498,9 @@ describe('CheckoutPage', () => {
       expect(loadingElements.length).toBeGreaterThanOrEqual(1);
 
       // Next button should be disabled during preview loading
-      const continueBtn = screen.getByRole('button', { name: /Tiếp tục/i });
+      const continueBtn = screen.getAllByRole('button', {
+        name: /Tiếp tục/i,
+      })[0];
       expect(continueBtn).toBeDisabled();
     });
   });

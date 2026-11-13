@@ -4,9 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Link } from 'react-router-dom';
-import { Phone, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Phone, Lock, Eye, EyeOff } from 'lucide-react';
 
 export interface LoginFormProps {
   onSubmit: (data: LoginInput) => void;
@@ -32,22 +39,22 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
           name="phone"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Số điện thoại
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                    <Phone className="h-4 w-4" />
-                  </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                </div>
+                <FormControl>
                   <Input
                     type="tel"
                     placeholder="0912 345 678"
                     className="pl-10 h-11 rounded-md border-input bg-background text-sm"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-sm text-destructive" />
             </FormItem>
           )}
@@ -59,7 +66,7 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
           render={({ field }) => (
             <FormItem className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <FormLabel className="text-sm font-medium text-foreground">
                   Mật khẩu
                 </FormLabel>
                 <Link
@@ -69,27 +76,31 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
                   Quên mật khẩu?
                 </Link>
               </div>
-              <FormControl>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                    <Lock className="h-4 w-4" />
-                  </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <Lock className="h-4 w-4" />
+                </div>
+                <FormControl>
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Nhập mật khẩu của bạn"
-                    className="pl-10 pr-10 h-11 rounded-md border-input bg-background text-sm"
+                    className="pl-10 pr-11 h-11 rounded-md border-input bg-background text-sm"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               <FormMessage className="text-sm text-destructive" />
             </FormItem>
           )}
@@ -101,12 +112,12 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
           disabled={isLoading}
         >
           {isLoading ? (
-            'Đang xử lý đăng nhập...'
-          ) : (
             <span className="flex items-center justify-center gap-2">
-              Đăng Nhập Ngay
-              <ArrowRight className="h-4 w-4" />
+              <span className="h-4 w-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+              Đang xử lý đăng nhập...
             </span>
+          ) : (
+            'Đăng nhập ngay'
           )}
         </Button>
       </form>

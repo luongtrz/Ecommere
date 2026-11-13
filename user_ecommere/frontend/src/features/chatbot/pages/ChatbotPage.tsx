@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Minimize2, Plus, Bot, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Plus, Bot, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/lib/seo';
 import { useToast } from '@/hooks/useToast';
+import { cn } from '@/lib/utils';
 import { useChatAgent } from '../hooks/useChatAgent';
 import { useChatOwnerSync } from '../hooks/useChatOwnerSync';
 import { useStickToBottom } from '../hooks/useStickToBottom';
@@ -25,9 +26,13 @@ export function ChatbotPage() {
   const [draft, setDraft] = useState('');
   const [liveStatus, setLiveStatus] = useState('');
 
-  const { isStreaming, send, decide, cancel, newThread, retry } = useChatAgent();
+  const { isStreaming, send, decide, cancel, newThread, retry } =
+    useChatAgent();
   const { messages } = useChatOwnerSync(newThread);
-  const { scrollRef, isAtBottom, scrollToBottom } = useStickToBottom([messages, isStreaming]);
+  const { scrollRef, isAtBottom, scrollToBottom } = useStickToBottom([
+    messages,
+    isStreaming,
+  ]);
 
   const prevStreamingRef = useRef(isStreaming);
 
@@ -60,7 +65,9 @@ export function ChatbotPage() {
       return;
     }
     if (prompt.length > CHAT_MAX_MESSAGE_LENGTH) {
-      toast.error(`Tin nhắn không được vượt quá ${CHAT_MAX_MESSAGE_LENGTH} ký tự.`);
+      toast.error(
+        `Tin nhắn không được vượt quá ${CHAT_MAX_MESSAGE_LENGTH} ký tự.`,
+      );
       return;
     }
     setDraft('');
@@ -74,17 +81,17 @@ export function ChatbotPage() {
       {/* 1. Top bar (~56px, border-b, solid background, safe-area top padding) */}
       <header className="shrink-0 border-b border-border bg-background z-10 pt-[env(safe-area-inset-top)]">
         <div className="flex h-14 items-center justify-between px-3 sm:px-4 max-w-5xl mx-auto w-full">
-          {/* Left: Thu nhỏ */}
+          {/* Left: Quay lại */}
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={handleMinimize}
-            aria-label="Thu nhỏ về khung chat"
-            className="h-9 min-h-[36px] w-9 sm:w-auto px-0 sm:px-3 text-sm font-medium gap-1.5 text-foreground hover:bg-secondary hover:text-foreground active:scale-95 transition-colors duration-200 motion-reduce:transition-none"
+            aria-label="Quay lại"
+            className="min-h-11 min-w-11 h-11 w-11 sm:w-auto px-0 sm:px-3 text-sm font-medium gap-1.5 text-foreground hover:bg-secondary hover:text-foreground active:scale-95 transition-colors duration-200 motion-reduce:transition-none"
           >
-            <Minimize2 className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="hidden sm:inline">Thu nhỏ</span>
+            <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="hidden sm:inline">Quay lại</span>
           </Button>
 
           {/* Center: Title block */}
@@ -96,7 +103,7 @@ export function ChatbotPage() {
               <Bot className="h-4 w-4" />
             </div>
             <div className="min-w-0 text-left">
-              <h1 className="text-sm font-semibold leading-tight text-foreground truncate">
+              <h1 className="text-sm font-semibold font-sans leading-tight text-foreground truncate">
                 Chuyên gia Mùi hương
               </h1>
               <p className="text-xs text-muted-foreground hidden sm:block truncate">
@@ -112,7 +119,7 @@ export function ChatbotPage() {
             size="sm"
             onClick={newThread}
             aria-label="Cuộc trò chuyện mới"
-            className="h-9 min-h-[36px] w-9 sm:w-auto px-0 sm:px-3 text-sm font-medium gap-1.5 text-foreground hover:bg-secondary hover:text-foreground active:scale-95 transition-colors duration-200 motion-reduce:transition-none"
+            className="min-h-11 min-w-11 h-11 w-11 sm:w-auto px-0 sm:px-3 text-sm font-medium gap-1.5 text-foreground hover:bg-secondary hover:text-foreground active:scale-95 transition-colors duration-200 motion-reduce:transition-none"
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">Cuộc trò chuyện mới</span>
@@ -125,14 +132,20 @@ export function ChatbotPage() {
         ref={scrollRef}
         role="log"
         aria-label="Lịch sử cuộc trò chuyện"
-        className="flex-1 overflow-y-auto overscroll-contain"
+        className="flex-1 overflow-y-auto overscroll-contain flex flex-col"
       >
         {/* Screen-reader live region */}
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {liveStatus}
         </div>
 
-        <div className="mx-auto w-full max-w-3xl px-4 py-6 space-y-6">
+        <div
+          className={cn(
+            'mx-auto w-full max-w-3xl px-4 py-6 space-y-6',
+            messages.length === 0 &&
+              'flex-1 min-h-full flex flex-col justify-center',
+          )}
+        >
           {/* 3. Empty state */}
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 sm:py-12 space-y-6 text-center animate-fade-in motion-reduce:animate-none">
@@ -143,7 +156,7 @@ export function ChatbotPage() {
                 <Bot className="h-8 w-8" />
               </div>
               <div className="space-y-2 max-w-lg">
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground font-serif">
+                <h2 className="text-xl sm:text-2xl font-semibold leading-snug text-foreground">
                   Tôi có thể giúp gì cho bạn?
                 </h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -157,9 +170,11 @@ export function ChatbotPage() {
                     type="button"
                     disabled={isStreaming}
                     onClick={() => void send(suggestion)}
-                    className="rounded-lg border border-border bg-card p-4 text-sm text-card-foreground text-left leading-snug transition-colors duration-200 motion-reduce:transition-none hover:border-foreground/30 hover:bg-secondary/40 active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[44px]"
+                    className="rounded-lg border border-border bg-card p-4 text-sm text-card-foreground text-left leading-snug transition-colors duration-200 motion-reduce:transition-none hover:border-foreground/30 hover:bg-secondary/40 active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-11"
                   >
-                    <span className="font-medium text-foreground">{suggestion}</span>
+                    <span className="font-medium text-foreground">
+                      {suggestion}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -169,8 +184,11 @@ export function ChatbotPage() {
             <>
               {messages.map((message, index) => {
                 const isLast = index === messages.length - 1;
-                const hasError = Boolean(message.error && message.error.trim().length > 0);
-                const onRetry = isLast && hasError ? () => void retry() : undefined;
+                const hasError = Boolean(
+                  message.error && message.error.trim().length > 0,
+                );
+                const onRetry =
+                  isLast && hasError ? () => void retry() : undefined;
 
                 return (
                   <ChatMessageItem
@@ -201,7 +219,7 @@ export function ChatbotPage() {
               size="sm"
               variant="secondary"
               onClick={() => scrollToBottom('smooth')}
-              className="rounded-full shadow-md border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary flex items-center gap-1.5 transition-colors duration-200 motion-reduce:transition-none active:scale-95 min-h-[36px]"
+              className="rounded-full shadow-md border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary flex items-center gap-1.5 transition-colors duration-200 motion-reduce:transition-none active:scale-95 min-h-11 sm:min-h-[36px]"
               aria-label="Cuộn xuống tin nhắn mới nhất"
             >
               <ChevronDown className="h-4 w-4" aria-hidden="true" />
@@ -218,10 +236,10 @@ export function ChatbotPage() {
             onStop={cancel}
             isStreaming={isStreaming}
             variant="page"
-            autoFocus
           />
           <p className="text-xs text-muted-foreground text-center pb-2 select-none leading-normal">
-            Trợ lý AI có thể nhầm lẫn. Vui lòng kiểm tra thông tin sản phẩm trước khi đặt hàng.
+            Trợ lý AI có thể nhầm lẫn. Vui lòng kiểm tra thông tin sản phẩm
+            trước khi đặt hàng.
           </p>
         </div>
       </div>

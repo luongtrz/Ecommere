@@ -16,13 +16,10 @@ describe('EmptyState', () => {
     });
     expect(heading).toBeInTheDocument();
     expect(heading).toHaveClass(
-      'font-sans',
-      'text-xl',
-      'md:text-2xl',
-      'font-bold',
-      'text-slate-900',
+      'text-lg',
+      'font-semibold',
+      'text-foreground',
       'mb-2',
-      'tracking-tight',
     );
 
     // Default icon
@@ -77,11 +74,10 @@ describe('EmptyState', () => {
     expect(desc.tagName).toBe('P');
     expect(desc).toHaveClass(
       'text-sm',
-      'text-slate-600',
+      'text-muted-foreground',
       'mb-6',
       'max-w-sm',
       'leading-relaxed',
-      'font-sans',
     );
   });
 
@@ -178,5 +174,29 @@ describe('EmptyState', () => {
     fireEvent.click(button);
     expect(handleAction).toHaveBeenCalledTimes(1);
     expect(container.firstChild).toHaveClass('full-props-class');
+  });
+
+  it('renders icon inside a 64px circular bg-secondary container', () => {
+    const { container } = render(<EmptyState title="Trống" />);
+    const iconContainer = container.querySelector('.rounded-full.bg-secondary');
+    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer).toHaveClass(
+      'h-16',
+      'w-16',
+      'bg-secondary',
+      'rounded-full',
+    );
+  });
+
+  it('renders h2 heading when titleLevel is h2', () => {
+    const { container } = render(
+      <EmptyState title="Tiêu đề h2" titleLevel="h2" />,
+    );
+    expect(
+      within(container).getByRole('heading', {
+        level: 2,
+        name: 'Tiêu đề h2',
+      }),
+    ).toBeInTheDocument();
   });
 });

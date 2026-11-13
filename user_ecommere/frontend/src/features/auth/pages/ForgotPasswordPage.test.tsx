@@ -66,12 +66,12 @@ describe('ForgotPasswordPage', () => {
   it('renders all static UI elements correctly', () => {
     renderPage();
 
-    expect(screen.getAllByText('TS')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Thai Spray')[0]).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { level: 1, name: 'Quên mật khẩu' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Nhập email để nhận liên kết đặt lại mật khẩu'),
+      screen.getAllByText('Nhập email để nhận liên kết đặt lại mật khẩu')[0],
     ).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(

@@ -48,6 +48,14 @@ function renderMainLayout(initialRoute = '/') {
               </div>
             }
           />
+          <Route
+            path="/checkout"
+            element={
+              <div>
+                <span>Thanh toán</span>
+              </div>
+            }
+          />
         </Route>
       </Routes>
     </MemoryRouter>,
@@ -59,7 +67,13 @@ describe('MainLayout', () => {
     const { container } = renderMainLayout('/');
 
     const rootDiv = container.firstElementChild;
-    expect(rootDiv).toHaveClass('flex', 'min-h-screen', 'flex-col');
+    expect(rootDiv).toHaveClass(
+      'flex',
+      'min-h-screen',
+      'flex-col',
+      'pb-16',
+      'md:pb-0',
+    );
 
     expect(screen.getByTestId('mock-header')).toBeInTheDocument();
     expect(screen.getByTestId('mock-footer')).toBeInTheDocument();
@@ -67,7 +81,7 @@ describe('MainLayout', () => {
     expect(screen.getByTestId('mock-chatbot')).toBeInTheDocument();
 
     const mainElement = screen.getByRole('main');
-    expect(mainElement).toHaveClass('flex-1', 'pb-24', 'md:pb-12', 'lg:pb-16');
+    expect(mainElement).toHaveClass('flex-1');
     expect(screen.getByText('Nội dung trang chủ')).toBeInTheDocument();
     expect(mainElement).toContainElement(
       screen.getByText('Nội dung trang chủ'),
@@ -95,5 +109,14 @@ describe('MainLayout', () => {
     await user.click(screen.getByRole('link', { name: 'Quay về trang chủ' }));
 
     expect(screen.getByText('Nội dung trang chủ')).toBeInTheDocument();
+  });
+
+  it('does not render MobileNav or ChatbotWidget and does not apply pb-16 on /checkout', () => {
+    const { container } = renderMainLayout('/checkout');
+    const rootDiv = container.firstElementChild;
+    expect(rootDiv).not.toHaveClass('pb-16');
+    expect(screen.queryByTestId('mock-mobile-nav')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mock-chatbot')).not.toBeInTheDocument();
+    expect(screen.getByText('Thanh toán')).toBeInTheDocument();
   });
 });

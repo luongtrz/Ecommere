@@ -93,8 +93,9 @@ describe('Dialog components', () => {
       </Dialog>,
     );
 
-    const closeBtn = screen.getByRole('button', { name: 'Close' });
+    const closeBtn = screen.getByRole('button', { name: 'Đóng' });
     expect(closeBtn).toBeInTheDocument();
+    expect(closeBtn).toHaveClass('h-10', 'w-10', 'p-2.5', 'rounded-lg');
     fireEvent.click(closeBtn);
     expect(handleOpenChange).toHaveBeenCalledWith(false);
   });
@@ -116,7 +117,7 @@ describe('Dialog components', () => {
     const content = screen.getByTestId('dialog-custom');
     expect(content).toHaveClass('custom-dialog-class');
     expect(content).toHaveClass(
-      'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg',
+      'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg rounded-xl max-h-[calc(100dvh-2rem)] overflow-y-auto',
     );
     expect(ref.current).toBe(content);
   });

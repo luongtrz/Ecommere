@@ -20,7 +20,7 @@ export const CHAT_WELCOME_MESSAGE =
  */
 export function shouldShowTypingIndicator(
   messages: ChatMessage[],
-  isStreaming: boolean
+  isStreaming: boolean,
 ): boolean {
   if (!isStreaming) {
     return false;
@@ -36,14 +36,22 @@ export function shouldShowTypingIndicator(
   }
 
   const hasNonWhitespaceContent = Boolean(
-    lastMessage.content && lastMessage.content.trim().length > 0
+    lastMessage.content && lastMessage.content.trim().length > 0,
   );
   const hasTools = Boolean(lastMessage.tools && lastMessage.tools.length > 0);
   const hasConfirm = Boolean(lastMessage.confirm);
-  const hasSources = Boolean(lastMessage.sources && lastMessage.sources.length > 0);
+  const hasSources = Boolean(
+    lastMessage.sources && lastMessage.sources.length > 0,
+  );
   const hasError = Boolean(lastMessage.error);
 
-  if (hasNonWhitespaceContent || hasTools || hasConfirm || hasSources || hasError) {
+  if (
+    hasNonWhitespaceContent ||
+    hasTools ||
+    hasConfirm ||
+    hasSources ||
+    hasError
+  ) {
     return false;
   }
 

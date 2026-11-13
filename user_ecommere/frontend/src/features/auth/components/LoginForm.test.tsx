@@ -256,7 +256,7 @@ describe('LoginForm', () => {
     });
     expect(loadingButton).toBeInTheDocument();
     expect(loadingButton).toBeDisabled();
-    expect(screen.queryByText('Đăng Nhập Ngay')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Đăng nhập ngay/i)).not.toBeInTheDocument();
   });
 
   it('enables submit button when isLoading is false', () => {

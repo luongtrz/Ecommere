@@ -14,20 +14,20 @@ describe('Button component', () => {
     const button = screen.getByRole('button', { name: 'Bấm vào đây' });
     expect(button).toBeInTheDocument();
     expect(button.tagName.toLowerCase()).toBe('button');
-    expect(button).toHaveClass('bg-teal-600');
-    expect(button).toHaveClass('text-white');
-    expect(button).toHaveClass('h-10');
-    expect(button).toHaveClass('px-4');
-    expect(button).toHaveClass('py-2');
+    expect(button).toHaveClass('bg-primary');
+    expect(button).toHaveClass('text-primary-foreground');
+    expect(button).toHaveClass('font-semibold');
+    expect(button).toHaveClass('h-11');
+    expect(button).toHaveClass('px-5');
   });
 
   it('renders with all variant options correctly', () => {
     const variants = [
-      { variant: 'default', expectedClass: 'bg-teal-600' },
-      { variant: 'destructive', expectedClass: 'bg-rose-600' },
-      { variant: 'outline', expectedClass: 'border-slate-200' },
-      { variant: 'secondary', expectedClass: 'text-slate-900' },
-      { variant: 'ghost', expectedClass: 'hover:bg-slate-100' },
+      { variant: 'default', expectedClass: 'bg-primary' },
+      { variant: 'destructive', expectedClass: 'bg-destructive' },
+      { variant: 'outline', expectedClass: 'border-input' },
+      { variant: 'secondary', expectedClass: 'bg-secondary' },
+      { variant: 'ghost', expectedClass: 'hover:bg-secondary' },
       { variant: 'link', expectedClass: 'underline-offset-4' },
     ] as const;
 
@@ -43,10 +43,10 @@ describe('Button component', () => {
 
   it('renders with all size options correctly', () => {
     const sizes = [
-      { size: 'default', expectedClass: 'h-10 px-4 py-2' },
-      { size: 'sm', expectedClass: 'h-9 rounded-lg px-3' },
-      { size: 'lg', expectedClass: 'h-11 rounded-lg px-8' },
-      { size: 'icon', expectedClass: 'h-10 w-10' },
+      { size: 'default', expectedClass: 'h-11 px-5' },
+      { size: 'sm', expectedClass: 'h-9 px-3 max-md:h-11' },
+      { size: 'lg', expectedClass: 'h-12 px-7 text-base' },
+      { size: 'icon', expectedClass: 'h-10 w-10 max-md:h-11 max-md:w-11' },
     ] as const;
 
     for (const { size, expectedClass } of sizes) {
@@ -68,7 +68,7 @@ describe('Button component', () => {
     const button = screen.getByRole('button', { name: 'Tùy chỉnh' });
     expect(button).toHaveClass('custom-test-class');
     expect(button).toHaveClass('shadow-lg');
-    expect(button).toHaveClass('bg-teal-600');
+    expect(button).toHaveClass('bg-primary');
   });
 
   it('handles user click event', async () => {
@@ -118,7 +118,7 @@ describe('Button component', () => {
     expect(link).toBeInTheDocument();
     expect(link.tagName.toLowerCase()).toBe('a');
     expect(link).toHaveAttribute('href', '/trang-chu');
-    expect(link).toHaveClass('bg-teal-600');
+    expect(link).toHaveClass('bg-primary');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(container.querySelector('button')).toBeNull();
   });
@@ -147,8 +147,8 @@ describe('Button component', () => {
 describe('buttonVariants function', () => {
   it('returns default classes when invoked with no arguments', () => {
     const classes = buttonVariants();
-    expect(classes).toContain('bg-teal-600');
-    expect(classes).toContain('h-10 px-4 py-2');
+    expect(classes).toContain('bg-primary');
+    expect(classes).toContain('h-11 px-5');
   });
 
   it('returns correct classes for specified variant, size, and className', () => {
@@ -157,8 +157,8 @@ describe('buttonVariants function', () => {
       size: 'sm',
       className: 'extra-class',
     });
-    expect(classes).toContain('bg-rose-600');
-    expect(classes).toContain('h-9');
+    expect(classes).toContain('bg-destructive');
+    expect(classes).toContain('h-9 px-3 max-md:h-11');
     expect(classes).toContain('extra-class');
   });
 });

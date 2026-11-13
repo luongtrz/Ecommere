@@ -1,5 +1,13 @@
 import React from 'react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterAll,
+} from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -53,6 +61,7 @@ vi.mock('../hooks/useChatAgent', () => ({
     send: mockSend,
     decide: mockDecide,
     newThread: mockNewThread,
+    cancel: vi.fn(),
   }),
 }));
 
@@ -95,12 +104,38 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 describe('ChatbotWidget', () => {
+  const originalScrollTo = Element.prototype.scrollTo;
+
+  beforeAll(() => {
+    Element.prototype.scrollTo = vi.fn();
+    // jsdom does not implement matchMedia; the widget reads it for responsive layout.
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+  });
+
+  afterAll(() => {
+    if (originalScrollTo) {
+      Element.prototype.scrollTo = originalScrollTo;
+    } else {
+      delete (Element.prototype as { scrollTo?: unknown }).scrollTo;
+    }
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockUser = null;
     mockIsStreaming = false;
 
-    // Mock scrollIntoView to prevent jsdom errors and verify invocation
+    // Mock scrollTo and scrollIntoView to prevent jsdom errors and verify invocation
+    Element.prototype.scrollTo = vi.fn();
     Element.prototype.scrollIntoView = vi.fn();
 
     // Mock localStorage to prevent unmocked browser storage access
@@ -156,7 +191,8 @@ describe('ChatbotWidget', () => {
         name: 'Mở khung trò chuyện',
       });
       expect(toggleButton).toBeInTheDocument();
-      expect(screen.getByText('Tư vấn')).toBeInTheDocument();
+      // The launcher is icon-only on every breakpoint (desktop no longer shows a text label).
+      expect(screen.queryByText('Tư vấn')).not.toBeInTheDocument();
 
       // Chat window content is not present
       expect(
@@ -273,12 +309,13 @@ describe('ChatbotWidget', () => {
       expect(toggleButton).toHaveFocus();
     });
 
-    it('scrolls chat container into view on mount when open', () => {
+    it('scrolls chat container on mount when open', () => {
+      const scrollToSpy = vi
+        .spyOn(Element.prototype, 'scrollTo')
+        .mockImplementation(() => {});
       renderWithProviders(<ChatbotWidget />);
-      expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({
-        behavior: 'smooth',
-        block: 'end',
-      });
+      expect(scrollToSpy).toHaveBeenCalled();
+      scrollToSpy.mockRestore();
     });
   });
 
@@ -476,8 +513,7 @@ describe('ChatbotWidget', () => {
       renderWithProviders(<ChatbotWidget />);
       const userMsg = screen.getByText('Xin chào bot');
       expect(userMsg).toBeInTheDocument();
-      // User message container has teal background
-      expect(userMsg.parentElement).toHaveClass('bg-teal-600');
+      expect(userMsg).toHaveClass('bg-primary', 'text-primary-foreground');
     });
 
     it('returns null and does not render empty assistant message without tools, confirm, sources, or error', () => {
@@ -596,23 +632,18 @@ describe('ChatbotWidget', () => {
       ).toBeInTheDocument();
       expect(screen.getByText('Thay đổi dữ liệu')).toBeInTheDocument();
 
-      // Bulk approve and submit
-      const approveAllBtn = screen.getByRole('button', {
-        name: 'Xác nhận tất cả',
+      // Single action confirmation: click 'Xác nhận' directly
+      const confirmBtn = screen.getByRole('button', {
+        name: 'Xác nhận',
       });
-      await user.click(approveAllBtn);
-
-      const submitBtn = screen.getByRole('button', {
-        name: 'Gửi quyết định',
-      });
-      await user.click(submitBtn);
+      await user.click(confirmBtn);
 
       expect(mockDecide).toHaveBeenCalledWith('a-confirm', [
         { callId: 'call-123', approve: true },
       ]);
     });
 
-    it('renders suggested sources as product cards via ChatbotSourceItem', () => {
+    it('renders suggested sources as product cards via ChatSourceCard', () => {
       useChatStore.setState({
         open: true,
         messages: [
@@ -635,11 +666,10 @@ describe('ChatbotWidget', () => {
 
       renderWithProviders(<ChatbotWidget />);
 
-      expect(screen.getByText('Sản phẩm được đề xuất:')).toBeInTheDocument();
+      expect(screen.getByText('Sản phẩm gợi ý')).toBeInTheDocument();
       expect(
         screen.getByText('Nước Xịt Phòng Sả Chanh 100ml'),
       ).toBeInTheDocument();
-      expect(screen.getByText('TS')).toBeInTheDocument();
       expect(screen.getByText('Xem chi tiết')).toBeInTheDocument();
 
       const sourceLink = screen.getByRole('link');
@@ -647,8 +677,8 @@ describe('ChatbotWidget', () => {
         'href',
         '/p/nuoc-xit-phong-sa-chanh-100ml',
       );
-      expect(sourceLink).toHaveAttribute('target', '_blank');
-      expect(sourceLink).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(sourceLink).not.toHaveAttribute('target');
+      expect(sourceLink).not.toHaveAttribute('rel');
     });
 
     it('renders error alert when message contains error', () => {
@@ -720,7 +750,7 @@ describe('ChatbotWidget', () => {
 
       renderWithProviders(<ChatbotWidget />);
 
-      expect(screen.getByText('Đang trả lời...')).toBeInTheDocument();
+      expect(screen.getByText('Đang trả lời…')).toBeInTheDocument();
     });
 
     it('does not display streaming indicator when isStreaming is false', () => {
@@ -729,7 +759,7 @@ describe('ChatbotWidget', () => {
 
       renderWithProviders(<ChatbotWidget />);
 
-      expect(screen.queryByText('Đang trả lời...')).not.toBeInTheDocument();
+      expect(screen.queryByText('Đang trả lời…')).not.toBeInTheDocument();
     });
 
     it('does not display streaming indicator when ownerId does not match user session', () => {
@@ -739,7 +769,7 @@ describe('ChatbotWidget', () => {
 
       renderWithProviders(<ChatbotWidget />);
 
-      expect(screen.queryByText('Đang trả lời...')).not.toBeInTheDocument();
+      expect(screen.queryByText('Đang trả lời…')).not.toBeInTheDocument();
     });
   });
 
@@ -762,7 +792,7 @@ describe('ChatbotWidget', () => {
       expect(sendButton).toBeDisabled();
 
       expect(
-        screen.getByText('Nhấn Enter để gửi · Shift+Enter để xuống dòng'),
+        screen.getByText('Enter để gửi · Shift+Enter để xuống dòng'),
       ).toBeInTheDocument();
     });
 
@@ -797,7 +827,7 @@ describe('ChatbotWidget', () => {
       expect(textarea.value).toBe('');
     });
 
-    it('shows loading spinner inside send button and disables it when isStreaming is true', () => {
+    it('shows stop button when isStreaming is true and clicking it does not submit', () => {
       mockIsStreaming = true;
       renderWithProviders(<ChatbotWidget />);
 
@@ -806,11 +836,11 @@ describe('ChatbotWidget', () => {
         target: { value: 'Câu hỏi trong lúc stream' },
       });
 
-      const sendButton = screen.getByRole('button', { name: 'Gửi tin nhắn' });
-      expect(sendButton).toBeDisabled();
+      const stopButton = screen.getByRole('button', { name: 'Dừng' });
+      expect(stopButton).toBeInTheDocument();
 
       // Submit attempt while streaming should do nothing
-      fireEvent.click(sendButton);
+      fireEvent.click(stopButton);
       expect(mockSend).not.toHaveBeenCalled();
     });
 

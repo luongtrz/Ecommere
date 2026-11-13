@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -129,7 +129,9 @@ describe('AccountPage', () => {
       screen.getByRole('heading', { level: 1, name: 'Tài khoản của tôi' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Quản lý thông tin cá nhân và hoạt động mua sắm'),
+      screen.getByText(
+        'Quản lý thông tin tài khoản và phiên làm việc quản trị',
+      ),
     ).toBeInTheDocument();
 
     // Initials: 'Nguyễn Văn Quản Trị' -> 'NV'
@@ -161,14 +163,16 @@ describe('AccountPage', () => {
 
     // Quick actions card
     expect(screen.getByText('Hoạt động nhanh')).toBeInTheDocument();
-    expect(screen.getByText('Đơn hàng của tôi')).toBeInTheDocument();
-    expect(screen.getByText('Xem lịch sử mua hàng')).toBeInTheDocument();
-    expect(screen.getByText('Danh sách yêu thích')).toBeInTheDocument();
-    expect(screen.getByText('Sản phẩm đã lưu')).toBeInTheDocument();
+    expect(screen.getByText('Quản lý đơn hàng')).toBeInTheDocument();
+    expect(
+      screen.getByText('Xem và xử lý đơn hàng của shop'),
+    ).toBeInTheDocument();
+
+    // Security section
     expect(
       screen.getByRole('heading', { name: 'Bảo mật tài khoản' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Đổi mật khẩu')).toBeInTheDocument();
+    expect(screen.getByText('Mật khẩu đăng nhập')).toBeInTheDocument();
 
     // Account actions card
     expect(screen.getByText('Hành động tài khoản')).toBeInTheDocument();
@@ -199,7 +203,7 @@ describe('AccountPage', () => {
     ).toBeInTheDocument();
 
     // CUSTOMER role badge
-    const badge = screen.getByText('Khách hàng');
+    const badge = screen.getByText('Nhân viên vận hành');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveClass('bg-slate-50', 'text-slate-700');
   });
@@ -238,14 +242,15 @@ describe('AccountPage', () => {
 
     renderAccountPage();
 
-    const ordersBtn = screen.getByRole('button', { name: /Đơn hàng của tôi/i });
+    const ordersBtn = screen.getByRole('button', {
+      name: /Quản lý đơn hàng/i,
+    });
     await user.click(ordersBtn);
 
     expect(mockNavigate).toHaveBeenCalledWith('/admin/orders');
   });
 
-  it('does not trigger navigation when clicking quick actions without path ("Danh sách yêu thích", "Bảo mật tài khoản")', async () => {
-    const user = userEvent.setup();
+  it('does not trigger navigation when clicking quick actions without path ("Danh sách yêu thích", "Bảo mật tài khoản")', () => {
     mockUseAuth.mockReturnValue({
       user: adminUser,
       logout: mockLogout,
@@ -253,15 +258,10 @@ describe('AccountPage', () => {
 
     renderAccountPage();
 
-    const wishlistBtn = screen.getByRole('button', {
+    const wishlistBtn = screen.queryByRole('button', {
       name: /Danh sách yêu thích/i,
     });
-    await user.click(wishlistBtn);
-
-    const securityBtn = screen.getByRole('button', {
-      name: /Bảo mật tài khoản/i,
-    });
-    await user.click(securityBtn);
+    expect(wishlistBtn).not.toBeInTheDocument();
 
     expect(mockNavigate).not.toHaveBeenCalled();
   });
@@ -277,6 +277,14 @@ describe('AccountPage', () => {
 
     const logoutBtn = screen.getByRole('button', { name: /Đăng xuất/i });
     await user.click(logoutBtn);
+
+    expect(screen.getByText('Xác nhận đăng xuất')).toBeInTheDocument();
+
+    const dialog = screen.getByRole('dialog');
+    const confirmBtn = within(dialog).getByRole('button', {
+      name: /Đăng xuất/i,
+    });
+    await user.click(confirmBtn);
 
     expect(mockLogout).toHaveBeenCalledTimes(1);
   });

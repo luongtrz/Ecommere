@@ -194,10 +194,9 @@ describe('Table UI components', () => {
       expect(footer.tagName).toBe('TFOOT');
       expect(footer).toHaveClass(
         'border-t',
-        'border-slate-200',
-        'bg-slate-50',
+        'border-border',
+        'bg-muted/30',
         'font-medium',
-        'text-slate-700',
         '[&>tr]:last:border-b-0',
       );
     });
@@ -213,7 +212,12 @@ describe('Table UI components', () => {
       );
       const footer = screen.getByTestId('footer-custom-class');
 
-      expect(footer).toHaveClass('custom-footer', 'border-t', 'bg-slate-50');
+      expect(footer).toHaveClass(
+        'custom-footer',
+        'border-t',
+        'border-border',
+        'bg-muted/30',
+      );
     });
 
     it('forwards ref to HTMLTableSectionElement', () => {
@@ -246,11 +250,10 @@ describe('Table UI components', () => {
       expect(row.tagName).toBe('TR');
       expect(row).toHaveClass(
         'border-b',
-        'border-slate-200',
+        'border-border',
         'transition-colors',
-        'duration-150',
-        'hover:bg-slate-50/80',
-        'data-[state=selected]:bg-teal-50',
+        'hover:bg-secondary/60',
+        'data-[state=selected]:bg-secondary',
       );
     });
 
@@ -330,10 +333,8 @@ describe('Table UI components', () => {
         'text-left',
         'align-middle',
         'text-xs',
-        'font-semibold',
-        'uppercase',
-        'tracking-wider',
-        'text-slate-500',
+        'font-medium',
+        'text-muted-foreground',
         '[&:has([role=checkbox])]:pr-0',
       );
       expect(head).toHaveTextContent('Header title');
@@ -402,7 +403,6 @@ describe('Table UI components', () => {
         'py-3',
         'align-middle',
         'text-sm',
-        'text-slate-700',
         '[&:has([role=checkbox])]:pr-0',
       );
       expect(cell).toHaveTextContent('Cell text');
@@ -462,7 +462,7 @@ describe('Table UI components', () => {
 
       expect(caption).toBeInTheDocument();
       expect(caption.tagName).toBe('CAPTION');
-      expect(caption).toHaveClass('mt-4', 'text-sm', 'text-slate-500');
+      expect(caption).toHaveClass('mt-4', 'text-sm', 'text-muted-foreground');
       expect(caption).toHaveTextContent('A list of recent invoices');
     });
 

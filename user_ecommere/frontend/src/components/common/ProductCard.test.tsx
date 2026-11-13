@@ -72,17 +72,10 @@ describe('ProductCard', () => {
     cleanup();
   });
 
-  it('renders default product card info, fragrance badge, and curated badge without discount', () => {
+  it('renders default product card info without discount badge', () => {
     renderProductCard();
 
     expect(screen.getByText('Xịt Thơm Phòng Cao Cấp')).toBeInTheDocument();
-    expect(screen.getByText('Được chọn lọc')).toBeInTheDocument();
-    expect(screen.getByText('Mùi hương nổi bật')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Phù hợp cho nhịp sống hằng ngày và không gian gọn gàng.',
-      ),
-    ).toBeInTheDocument();
     expect(screen.getByText(/150\.000/)).toBeInTheDocument();
     expect(screen.queryByText(/Giảm/)).not.toBeInTheDocument();
   });
@@ -110,7 +103,6 @@ describe('ProductCard', () => {
     expect(screen.getByText('Giảm 25%')).toBeInTheDocument();
     expect(screen.getByText(/150\.000/)).toBeInTheDocument();
     expect(screen.getByText(/200\.000/)).toBeInTheDocument();
-    expect(screen.queryByText('Được chọn lọc')).not.toBeInTheDocument();
   });
 
   it('renders minimum 1% discount badge when discount calculation rounds to 0', () => {
@@ -119,10 +111,9 @@ describe('ProductCard', () => {
     expect(screen.getByText('Giảm 1%')).toBeInTheDocument();
   });
 
-  it('renders "Được chọn lọc" badge when salePrice is equal to or greater than price', () => {
+  it('does not render discount badge when salePrice is equal to or greater than price', () => {
     renderProductCard({ price: 150000, salePrice: 150000 });
 
-    expect(screen.getByText('Được chọn lọc')).toBeInTheDocument();
     expect(screen.getByText(/150\.000/)).toBeInTheDocument();
     expect(screen.queryByText(/Giảm/)).not.toBeInTheDocument();
   });
@@ -132,11 +123,31 @@ describe('ProductCard', () => {
 
     expect(screen.getByText('4.8')).toBeInTheDocument();
     expect(screen.getByText('32 đánh giá')).toBeInTheDocument();
-    expect(
-      screen.queryByText(
-        'Phù hợp cho nhịp sống hằng ngày và không gian gọn gàng.',
-      ),
-    ).not.toBeInTheDocument();
+  });
+
+  describe('variant pricing and discount logic', () => {
+    it('derives salePrice and discount badge from variants[0] when variant price is provided', () => {
+      renderProductCard({
+        price: 200000,
+        variants: [{ stock: 10, price: 180000, salePrice: 153000 }],
+      });
+
+      expect(screen.getByText('Giảm 15%')).toBeInTheDocument();
+      expect(screen.getByText(/153\.000/)).toBeInTheDocument();
+      expect(screen.getByText(/180\.000/)).toBeInTheDocument();
+    });
+
+    it('falls back to card price and salePrice props when variants[0] has no price', () => {
+      renderProductCard({
+        price: 200000,
+        salePrice: 160000,
+        variants: [{ stock: 5 }],
+      });
+
+      expect(screen.getByText('Giảm 20%')).toBeInTheDocument();
+      expect(screen.getByText(/160\.000/)).toBeInTheDocument();
+      expect(screen.getByText(/200\.000/)).toBeInTheDocument();
+    });
   });
 
   describe('wishlist button', () => {
@@ -152,8 +163,8 @@ describe('ProductCard', () => {
       ) as HTMLButtonElement;
       const heartIcon = container.querySelector('svg.lucide-heart');
 
-      expect(wishlistButton).toHaveClass('text-slate-400');
-      expect(heartIcon).not.toHaveClass('fill-rose-600');
+      expect(wishlistButton).toHaveClass('text-muted-foreground');
+      expect(heartIcon).not.toHaveClass('fill-destructive');
 
       const clickEvent = new MouseEvent('click', {
         bubbles: true,
@@ -184,8 +195,8 @@ describe('ProductCard', () => {
       ) as HTMLButtonElement;
       const heartIcon = container.querySelector('svg.lucide-heart');
 
-      expect(wishlistButton).toHaveClass('text-rose-600');
-      expect(heartIcon).toHaveClass('fill-rose-600');
+      expect(wishlistButton).toHaveClass('text-destructive');
+      expect(heartIcon).toHaveClass('fill-destructive');
 
       fireEvent.click(wishlistButton);
 
@@ -229,7 +240,7 @@ describe('ProductCard', () => {
       expect(onAddToCart).toHaveBeenCalledTimes(1);
     });
 
-    it('disables add to cart button when selectedVariant has 0 stock', () => {
+    it('disables add to cart button and displays "Hết hàng" when selectedVariant has 0 stock', () => {
       const onAddToCart = vi.fn();
       renderProductCard({
         variants: [{ stock: 0 }],
@@ -237,7 +248,7 @@ describe('ProductCard', () => {
       });
 
       const addToCartButton = screen.getByRole('button', {
-        name: /thêm vào giỏ/i,
+        name: /hết hàng/i,
       });
       expect(addToCartButton).toBeDisabled();
 
@@ -245,11 +256,11 @@ describe('ProductCard', () => {
       expect(onAddToCart).not.toHaveBeenCalled();
     });
 
-    it('disables add to cart button when variants array is empty', () => {
+    it('disables add to cart button and displays "Hết hàng" when variants array is empty', () => {
       renderProductCard({ variants: [] });
 
       const addToCartButton = screen.getByRole('button', {
-        name: /thêm vào giỏ/i,
+        name: /hết hàng/i,
       });
       expect(addToCartButton).toBeDisabled();
     });

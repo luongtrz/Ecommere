@@ -1,5 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from '@tanstack/react-query';
 import {
   Bot,
   Send,
@@ -12,6 +16,10 @@ import {
   Sparkles,
   Square,
   ChevronDown,
+  Copy,
+  Check,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 
 import { useChatAgent } from '../hooks/useChatAgent';
@@ -73,7 +81,10 @@ function formatMessageTime(dateStr?: string | null): string {
   try {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   } catch {
     return '';
   }
@@ -119,12 +130,16 @@ function ThreadListContent({
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-8 gap-2">
             <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Đang tải danh sách…</span>
+            <span className="text-xs text-muted-foreground">
+              Đang tải danh sách…
+            </span>
           </div>
         ) : threads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center px-3">
             <MessageSquare className="h-8 w-8 text-muted-foreground/30 mb-2" />
-            <p className="text-xs text-muted-foreground">Chưa có cuộc trò chuyện nào</p>
+            <p className="text-xs text-muted-foreground">
+              Chưa có cuộc trò chuyện nào
+            </p>
           </div>
         ) : (
           <>
@@ -146,7 +161,7 @@ function ThreadListContent({
                       'flex-1 min-w-0 rounded-xl px-3 py-2.5 text-xs text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       isSelected
                         ? 'bg-primary/10 text-primary font-medium border border-primary/20 shadow-sm'
-                        : 'hover:bg-muted/60 text-foreground/80 hover:text-foreground border border-transparent'
+                        : 'hover:bg-muted/60 text-foreground/80 hover:text-foreground border border-transparent',
                     )}
                   >
                     <p className="truncate font-medium leading-snug">{title}</p>
@@ -154,7 +169,9 @@ function ThreadListContent({
                       <p
                         className={cn(
                           'mt-1 text-xs truncate',
-                          isSelected ? 'text-primary/70' : 'text-muted-foreground'
+                          isSelected
+                            ? 'text-teal-900 dark:text-teal-200 font-medium'
+                            : 'text-muted-foreground',
                         )}
                       >
                         {dateText}
@@ -165,7 +182,7 @@ function ThreadListContent({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                    className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100"
                     onClick={() => onDeleteClick(thread)}
                     aria-label="Xóa cuộc trò chuyện"
                   >
@@ -202,12 +219,39 @@ export function AdminChatbotPage() {
   const [input, setInput] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
-  const [threadToDelete, setThreadToDelete] = useState<AgentThreadSummary | null>(null);
+  const [threadToDelete, setThreadToDelete] =
+    useState<AgentThreadSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [threadError, setThreadError] = useState<string | null>(null);
   const [threadLimit, setThreadLimit] = useState(DEFAULT_THREAD_LIMIT);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [srAnnouncement, setSrAnnouncement] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyMessage = async (msgId: string, content: string) => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(content);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopiedId(msgId);
+      toast.success('Đã sao chép nội dung');
+      setTimeout(() => {
+        setCopiedId((curr) => (curr === msgId ? null : curr));
+      }, 2000);
+    } catch {
+      toast.error('Không thể sao chép');
+    }
+  };
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
@@ -241,7 +285,10 @@ export function AdminChatbotPage() {
 
   const currentAdminId = user ? user.id : null;
   const isOwnerMatch = user !== undefined && ownerId === currentAdminId;
-  const visibleMessages = isOwnerMatch ? messages : [];
+  const visibleMessages = useMemo(
+    () => (isOwnerMatch ? messages : []),
+    [isOwnerMatch, messages],
+  );
 
   const {
     data: threads = [],
@@ -253,9 +300,12 @@ export function AdminChatbotPage() {
     placeholderData: keepPreviousData,
   });
 
-  const hasMoreThreads = threads.length >= threadLimit && threadLimit < MAX_THREAD_LIMIT;
+  const hasMoreThreads =
+    threads.length >= threadLimit && threadLimit < MAX_THREAD_LIMIT;
   const handleLoadMoreThreads = () => {
-    setThreadLimit((limit) => Math.min(limit + THREAD_LIMIT_STEP, MAX_THREAD_LIMIT));
+    setThreadLimit((limit) =>
+      Math.min(limit + THREAD_LIMIT_STEP, MAX_THREAD_LIMIT),
+    );
   };
 
   // Announce streaming status transitions to screen readers without reading every token
@@ -289,7 +339,8 @@ export function AdminChatbotPage() {
     const el = scrollRef.current;
     if (!el) return;
     const threshold = 80;
-    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
+    const atBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
     setIsAtBottom(atBottom);
     isAtBottomRef.current = atBottom;
   };
@@ -355,7 +406,9 @@ export function AdminChatbotPage() {
           };
         }
 
-        const hasContent = Boolean(msg.content && msg.content.trim().length > 0);
+        const hasContent = Boolean(
+          msg.content && msg.content.trim().length > 0,
+        );
 
         // An assistant message with no text and no card must not show as an empty chat bubble.
         if (msg.role === 'assistant' && !hasContent && !confirm) {
@@ -378,8 +431,8 @@ export function AdminChatbotPage() {
         return;
       }
       const status =
-        (err as { response?: { status?: number }; status?: number })?.response?.status ??
-        (err as { status?: number })?.status;
+        (err as { response?: { status?: number }; status?: number })?.response
+          ?.status ?? (err as { status?: number })?.status;
 
       if (status === 404) {
         toast.error('Cuộc trò chuyện không còn khả dụng.');
@@ -403,7 +456,9 @@ export function AdminChatbotPage() {
       if (threadToDelete.id === threadId) {
         startNewConversation();
       }
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'chatbot', 'threads'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['admin', 'chatbot', 'threads'],
+      });
       toast.success('Đã xóa cuộc trò chuyện thành công');
     } catch {
       toast.error('Xóa cuộc trò chuyện thất bại. Vui lòng thử lại.');
@@ -428,7 +483,9 @@ export function AdminChatbotPage() {
     try {
       await send(trimmed);
     } finally {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'chatbot', 'threads'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'chatbot', 'threads'],
+      });
     }
   };
 
@@ -438,9 +495,13 @@ export function AdminChatbotPage() {
     if (!lastMsg || lastMsg.role !== 'assistant') {
       return true;
     }
-    const hasContent = Boolean(lastMsg.content && lastMsg.content.trim().length > 0);
+    const hasContent = Boolean(
+      lastMsg.content && lastMsg.content.trim().length > 0,
+    );
     const hasTools = Boolean(lastMsg.tools && lastMsg.tools.length > 0);
-    const hasConfirm = Boolean(lastMsg.confirm?.calls && lastMsg.confirm.calls.length > 0);
+    const hasConfirm = Boolean(
+      lastMsg.confirm?.calls && lastMsg.confirm.calls.length > 0,
+    );
     return !hasContent && !hasTools && !hasConfirm;
   })();
 
@@ -454,24 +515,67 @@ export function AdminChatbotPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary shrink-0" />
-              <h1 className="text-lg font-bold text-foreground truncate">Trợ lý quản trị</h1>
+              <h1 className="text-lg font-bold text-foreground truncate">
+                Trợ lý quản trị
+              </h1>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              Điều hành cửa hàng bằng hội thoại. Mọi thao tác thay đổi dữ liệu đều cần xác nhận.
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 sm:line-clamp-none">
+              Điều hành cửa hàng bằng hội thoại. Mọi thao tác thay đổi dữ liệu
+              đều cần xác nhận.
             </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Desktop collapse/expand sidebar toggle (A13-12) */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden md:inline-flex items-center gap-1.5 h-9 text-xs"
+              onClick={() => setIsSidebarOpen((prev) => !prev)}
+              aria-label={
+                isSidebarOpen
+                  ? 'Thu gọn danh sách cuộc trò chuyện'
+                  : 'Mở rộng danh sách cuộc trò chuyện'
+              }
+              aria-expanded={isSidebarOpen}
+              title={
+                isSidebarOpen
+                  ? 'Thu gọn danh sách cuộc trò chuyện'
+                  : 'Mở rộng danh sách cuộc trò chuyện'
+              }
+            >
+              {isSidebarOpen ? (
+                <>
+                  <PanelLeftClose className="h-4 w-4" />
+                  <span>Thu gọn</span>
+                </>
+              ) : (
+                <>
+                  <PanelLeftOpen className="h-4 w-4" />
+                  <span>Lịch sử</span>
+                </>
+              )}
+            </Button>
+
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden gap-1.5 h-9 text-xs">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="md:hidden gap-1.5 h-9 text-xs"
+                >
                   <History className="h-3.5 w-3.5" />
                   <span>Lịch sử</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[85vw] max-w-xs p-0 flex flex-col h-full">
+              <SheetContent
+                side="left"
+                className="w-[85vw] max-w-xs p-0 flex flex-col h-full"
+              >
                 <SheetHeader className="p-4 border-b border-border/60 text-left">
-                  <SheetTitle className="text-base font-semibold">Lịch sử trò chuyện</SheetTitle>
+                  <SheetTitle className="text-base font-semibold">
+                    Lịch sử trò chuyện
+                  </SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 min-h-0 flex flex-col">
                   <ThreadListContent
@@ -501,20 +605,22 @@ export function AdminChatbotPage() {
 
         {/* Two-column layout */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
-          {/* Left column: Desktop thread list */}
-          <aside className="hidden md:flex w-72 lg:w-80 flex-col border-r border-border/60 bg-muted/20 shrink-0 min-h-0">
-            <ThreadListContent
-              threads={threads}
-              currentThreadId={threadId}
-              onSelectThread={handleSelectThread}
-              onNewThread={startNewConversation}
-              onDeleteClick={(thread) => setThreadToDelete(thread)}
-              isLoading={isThreadsLoading}
-              hasMore={hasMoreThreads}
-              onLoadMore={handleLoadMoreThreads}
-              isLoadingMore={isThreadsFetching}
-            />
-          </aside>
+          {/* Left column: Desktop thread list (collapsible per A13-12) */}
+          {isSidebarOpen && (
+            <aside className="hidden md:flex w-72 lg:w-80 flex-col border-r border-border/60 bg-muted/20 shrink-0 min-h-0">
+              <ThreadListContent
+                threads={threads}
+                currentThreadId={threadId}
+                onSelectThread={handleSelectThread}
+                onNewThread={startNewConversation}
+                onDeleteClick={(thread) => setThreadToDelete(thread)}
+                isLoading={isThreadsLoading}
+                hasMore={hasMoreThreads}
+                onLoadMore={handleLoadMoreThreads}
+                isLoadingMore={isThreadsFetching}
+              />
+            </aside>
+          )}
 
           {/* Right column: Conversation */}
           <section className="flex flex-1 flex-col min-w-0 min-h-0 bg-background/50">
@@ -526,7 +632,9 @@ export function AdminChatbotPage() {
             {isLoadingTranscript ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6">
                 <Loader2 className="h-6 w-6 animate-spin motion-reduce:animate-none text-primary" />
-                <p className="text-xs text-muted-foreground">Đang tải cuộc trò chuyện…</p>
+                <p className="text-xs text-muted-foreground">
+                  Đang tải cuộc trò chuyện…
+                </p>
               </div>
             ) : visibleMessages.length === 0 ? (
               /* Empty state */
@@ -538,7 +646,8 @@ export function AdminChatbotPage() {
                   Xin chào! Tôi có thể giúp gì cho bạn?
                 </h2>
                 <p className="text-xs text-muted-foreground mb-6">
-                  Chọn một trong các gợi ý bên dưới hoặc nhập yêu cầu quản trị cửa hàng của bạn.
+                  Chọn một trong các gợi ý bên dưới hoặc nhập yêu cầu quản trị
+                  cửa hàng của bạn.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
@@ -570,7 +679,11 @@ export function AdminChatbotPage() {
                 >
                   <div className="max-w-4xl mx-auto w-full space-y-4">
                     {threadError && (
-                      <Alert variant="destructive" role="alert" className="mb-4">
+                      <Alert
+                        variant="destructive"
+                        role="alert"
+                        className="mb-4"
+                      >
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription className="flex items-center justify-between">
                           <span>{threadError}</span>
@@ -590,7 +703,10 @@ export function AdminChatbotPage() {
                       if (message.role === 'user') {
                         const timeText = formatMessageTime(message.createdAt);
                         return (
-                          <div key={message.id} className="flex flex-col items-end">
+                          <div
+                            key={message.id}
+                            className="flex flex-col items-end"
+                          >
                             <div className="max-w-[85%] rounded-2xl bg-primary px-4 py-2.5 text-primary-foreground text-sm shadow-sm whitespace-pre-wrap break-words">
                               {message.content}
                             </div>
@@ -603,23 +719,34 @@ export function AdminChatbotPage() {
                         );
                       }
 
-                      const hasTools = Boolean(message.tools && message.tools.length > 0);
+                      const hasTools = Boolean(
+                        message.tools && message.tools.length > 0,
+                      );
                       const hasContent = Boolean(
-                        message.content && message.content.trim().length > 0
+                        message.content && message.content.trim().length > 0,
                       );
                       const hasConfirm = Boolean(
-                        message.confirm?.calls && message.confirm.calls.length > 0
+                        message.confirm?.calls &&
+                        message.confirm.calls.length > 0,
                       );
                       const hasError = Boolean(message.error);
 
-                      if (!hasTools && !hasContent && !hasConfirm && !hasError) {
+                      if (
+                        !hasTools &&
+                        !hasContent &&
+                        !hasConfirm &&
+                        !hasError
+                      ) {
                         return null;
                       }
 
                       const timeText = formatMessageTime(message.createdAt);
 
                       return (
-                        <div key={message.id} className="flex items-start gap-2.5 justify-start">
+                        <div
+                          key={message.id}
+                          className="flex items-start gap-2.5 justify-start"
+                        >
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 shadow-sm mt-0.5">
                             <Bot className="h-4 w-4" />
                           </div>
@@ -634,27 +761,70 @@ export function AdminChatbotPage() {
                                 </div>
                               )}
 
-                              {/* Text with ChatMarkdown */}
+                              {/* Text with ChatMarkdown and Copy button (A13-9) */}
                               {hasContent ? (
-                                <ChatMarkdown content={message.content} />
+                                <div className="space-y-2">
+                                  <ChatMarkdown content={message.content} />
+                                  <div className="flex justify-end pt-1">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1.5 rounded-lg"
+                                      onClick={() =>
+                                        handleCopyMessage(
+                                          message.id,
+                                          message.content,
+                                        )
+                                      }
+                                      aria-label="Sao chép nội dung"
+                                    >
+                                      {copiedId === message.id ? (
+                                        <>
+                                          <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-500" />
+                                          <span className="text-xs text-emerald-600 dark:text-emerald-500 font-medium">
+                                            Đã chép
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Copy className="h-3.5 w-3.5" />
+                                          <span className="text-xs">
+                                            Sao chép
+                                          </span>
+                                        </>
+                                      )}
+                                    </Button>
+                                  </div>
+                                </div>
                               ) : null}
 
                               {/* Confirm block */}
                               {hasConfirm && (
-                                <div className={hasContent ? 'mt-2' : undefined}>
+                                <div
+                                  className={hasContent ? 'mt-2' : undefined}
+                                >
                                   <ConfirmActionCard
                                     calls={message.confirm!.calls}
                                     decided={message.confirm!.decided}
-                                    onSubmit={(decisions) => decide(message.id, decisions)}
+                                    onSubmit={(decisions) =>
+                                      decide(message.id, decisions)
+                                    }
                                   />
                                 </div>
                               )}
 
                               {/* Error in a visible alert with role="alert" */}
                               {hasError && (
-                                <Alert variant="destructive" role="alert" className="mt-2">
+                                <Alert
+                                  variant="destructive"
+                                  role="alert"
+                                  className="mt-2"
+                                >
                                   <AlertCircle className="h-4 w-4" />
-                                  <AlertDescription>{message.error}</AlertDescription>
+                                  <AlertDescription>
+                                    {message.error}
+                                  </AlertDescription>
                                 </Alert>
                               )}
                             </div>
@@ -724,9 +894,9 @@ export function AdminChatbotPage() {
                         }
                       }
                     }}
-                    placeholder="Nhập yêu cầu cho trợ lý… (Shift + Enter để xuống dòng)"
+                    placeholder="Nhập yêu cầu cho trợ lý…"
                     aria-label="Nhập yêu cầu"
-                    className="min-h-[52px] max-h-32 overflow-y-auto resize-none rounded-xl bg-background border-border/80 focus-visible:ring-primary text-sm p-3 pr-12 shadow-sm"
+                    className="min-h-[52px] max-h-32 overflow-y-auto resize-none rounded-xl bg-background border-border/80 focus-visible:ring-primary text-sm p-3 pr-14 sm:pr-12 shadow-sm"
                     rows={1}
                   />
                   {isStreaming ? (
@@ -734,10 +904,10 @@ export function AdminChatbotPage() {
                       type="button"
                       size="icon"
                       onClick={cancel}
-                      className="absolute right-2 bottom-2 h-9 w-9 rounded-lg shrink-0 shadow-sm"
+                      className="absolute right-1.5 bottom-1.5 sm:right-2 sm:bottom-2 h-11 w-11 sm:h-9 sm:w-9 rounded-lg shrink-0 shadow-sm"
                       aria-label="Dừng"
                     >
-                      <Square className="h-3.5 w-3.5 fill-current" />
+                      <Square className="h-4 w-4 sm:h-3.5 sm:w-3.5 fill-current" />
                     </Button>
                   ) : (
                     <Button
@@ -745,7 +915,7 @@ export function AdminChatbotPage() {
                       size="icon"
                       disabled={!input.trim()}
                       onClick={() => handleSend(input)}
-                      className="absolute right-2 bottom-2 h-9 w-9 rounded-lg shrink-0 shadow-sm"
+                      className="absolute right-1.5 bottom-1.5 sm:right-2 sm:bottom-2 h-11 w-11 sm:h-9 sm:w-9 rounded-lg shrink-0 shadow-sm"
                       aria-label="Gửi yêu cầu"
                     >
                       <Send className="h-4 w-4" />
@@ -759,7 +929,10 @@ export function AdminChatbotPage() {
       </div>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={!!threadToDelete} onOpenChange={(open) => !open && setThreadToDelete(null)}>
+      <Dialog
+        open={!!threadToDelete}
+        onOpenChange={(open) => !open && setThreadToDelete(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Xóa cuộc trò chuyện</DialogTitle>

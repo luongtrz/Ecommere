@@ -92,10 +92,20 @@ describe('WishlistPage', () => {
       ).toBeInTheDocument();
 
       const exploreLink = screen.getByRole('link', {
-        name: 'Khám phá sản phẩm ngay',
+        name: 'Khám phá sản phẩm',
       });
       expect(exploreLink).toBeInTheDocument();
       expect(exploreLink).toHaveAttribute('href', '/catalog');
+    });
+
+    it('renders a return link to the catalog', () => {
+      renderWishlistPage();
+
+      const backLink = screen.getByRole('link', {
+        name: /tiếp tục mua sắm/i,
+      });
+      expect(backLink).toBeInTheDocument();
+      expect(backLink).toHaveAttribute('href', '/catalog');
     });
 
     it('does not render any product cards when empty', () => {
@@ -209,6 +219,19 @@ describe('WishlistPage', () => {
       await user.click(removeButtons[0]);
 
       expect(mockRemoveItem).toHaveBeenCalledWith(mockItem1.productId);
+    });
+
+    it('renders remove button with 44px touch target dimensions and aria-label', () => {
+      const { container } = renderWishlistPage();
+
+      const removeButtons = container.querySelectorAll(
+        'button.absolute.top-2\\.5.right-2\\.5',
+      );
+      expect(removeButtons[0]).toHaveClass('h-11', 'w-11');
+      expect(removeButtons[0]).toHaveAttribute(
+        'aria-label',
+        'Xóa khỏi danh sách yêu thích',
+      );
     });
   });
 

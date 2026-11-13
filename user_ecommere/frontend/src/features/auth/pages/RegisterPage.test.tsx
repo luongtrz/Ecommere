@@ -95,20 +95,22 @@ describe('RegisterPage', () => {
     );
 
     // Branding header
-    expect(screen.getAllByText('TS')[0]).toBeInTheDocument();
-    expect(screen.getByText('Thai')).toBeInTheDocument();
-    expect(screen.getByText('Spray')).toBeInTheDocument();
+    expect(screen.getAllByText(/Thai/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Spray/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('Chính Hãng Thái Lan')[0]).toBeInTheDocument();
 
     const homeLink = screen.getAllByRole('link', {
-      name: /TS Thai Spray Chính Hãng Thái Lan/i,
+      name: /Thai Spray/i,
     })[0];
     expect(homeLink).toHaveAttribute('href', '/');
+
+    const backHomeLink = screen.getByRole('link', { name: /Về trang chủ/i });
+    expect(backHomeLink).toHaveAttribute('href', '/');
 
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: 'Tạo Tài Khoản Khách Hàng',
+        name: /Tạo tài khoản khách hàng/i,
       }),
     ).toBeInTheDocument();
     expect(
@@ -118,15 +120,15 @@ describe('RegisterPage', () => {
     ).toBeInTheDocument();
 
     // Gift Voucher Banner
-    expect(screen.getAllByText('Tặng Voucher 20.000đ')[0]).toBeInTheDocument();
+    expect(screen.getByText('Tặng Voucher 20.000đ')).toBeInTheDocument();
     expect(
-      screen.getAllByText('Áp dụng cho đơn hàng đầu tiên của bạn')[0],
+      screen.getByText('Áp dụng cho đơn hàng đầu tiên của bạn'),
     ).toBeInTheDocument();
 
     // Divider & Login link
-    expect(screen.getByText('Đã có tài khoản?')).toBeInTheDocument();
+    expect(screen.getByText(/Đã có tài khoản\?/i)).toBeInTheDocument();
     const loginLink = screen.getByRole('link', {
-      name: /Đăng nhập tài khoản ngay/i,
+      name: /Đăng nhập ngay/i,
     });
     expect(loginLink).toHaveAttribute('href', '/login');
 
@@ -142,7 +144,7 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register');
 
       expect(
-        screen.queryByText('Bạn được giới thiệu bởi bạn bè'),
+        screen.queryByText(/Bạn được giới thiệu bởi bạn bè/),
       ).not.toBeInTheDocument();
       expect(screen.getByPlaceholderText('VD: BANBE2026')).toHaveValue('');
     });
@@ -151,16 +153,16 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register?ref=');
 
       expect(
-        screen.queryByText('Bạn được giới thiệu bởi bạn bè'),
+        screen.queryByText(/Bạn được giới thiệu bởi bạn bè/),
       ).not.toBeInTheDocument();
       expect(screen.getByPlaceholderText('VD: BANBE2026')).toHaveValue('');
     });
 
-    it('displays referral banner and pre-populates referral code when ref is provided', () => {
+    it('displays referral banner and pre-populates referral code when ref is present', () => {
       renderRegisterPage('/register?ref=FRIEND888');
 
       expect(
-        screen.getAllByText('Bạn được giới thiệu bởi bạn bè')[0],
+        screen.getByText(/Bạn được giới thiệu bởi bạn bè/),
       ).toBeInTheDocument();
       expect(screen.getAllByText('Mã giới thiệu:')[0]).toBeInTheDocument();
       expect(screen.getAllByText('FRIEND888')[0]).toBeInTheDocument();
@@ -178,7 +180,7 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register?ref=REFERRAL123');
 
       await user.type(
-        screen.getByPlaceholderText('Nguyễn Văn A'),
+        screen.getByPlaceholderText('VD: Nguyễn Văn A'),
         'Nguyễn Văn A',
       );
       await user.type(
@@ -199,7 +201,7 @@ describe('RegisterPage', () => {
       );
 
       const submitButton = screen.getByRole('button', {
-        name: /Hoàn Tất Đăng Ký/i,
+        name: /Hoàn tất đăng ký/i,
       });
       await user.click(submitButton);
 
@@ -220,7 +222,7 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register');
 
       await user.type(
-        screen.getByPlaceholderText('Nguyễn Văn A'),
+        screen.getByPlaceholderText('VD: Nguyễn Văn A'),
         'Lê Thị Hoa',
       );
       await user.type(
@@ -237,7 +239,7 @@ describe('RegisterPage', () => {
       );
 
       const submitButton = screen.getByRole('button', {
-        name: /Hoàn Tất Đăng Ký/i,
+        name: /Hoàn tất đăng ký/i,
       });
       await user.click(submitButton);
 
@@ -258,11 +260,11 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register');
 
       const submitButton = screen.getByRole('button', {
-        name: 'Đang tạo tài khoản...',
+        name: /Đang tạo tài khoản\.\.\./i,
       });
       expect(submitButton).toBeInTheDocument();
       expect(submitButton).toBeDisabled();
-      expect(screen.queryByText('Hoàn Tất Đăng Ký')).not.toBeInTheDocument();
+      expect(screen.queryByText(/Hoàn tất đăng ký/i)).not.toBeInTheDocument();
     });
 
     it('enables submit button when isRegisterLoading is false', () => {
@@ -270,7 +272,7 @@ describe('RegisterPage', () => {
       renderRegisterPage('/register');
 
       const submitButton = screen.getByRole('button', {
-        name: /Hoàn Tất Đăng Ký/i,
+        name: /Hoàn tất đăng ký/i,
       });
       expect(submitButton).toBeInTheDocument();
       expect(submitButton).not.toBeDisabled();

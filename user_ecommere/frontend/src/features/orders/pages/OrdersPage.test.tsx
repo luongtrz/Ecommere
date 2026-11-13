@@ -3,9 +3,8 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { OrdersPage } from './OrdersPage';
+import { OrdersPage, formatOrderDate } from './OrdersPage';
 import { formatCurrency } from '@/lib/formatters';
-import { formatDateTime } from '@/lib/utils';
 
 // Helper to match text across elements even when broken by multiple nodes or non-breaking spaces
 function matchText(expectedText: string) {
@@ -265,9 +264,11 @@ describe('OrdersPage', () => {
         screen.getByRole('heading', { level: 3, name: 'Chưa có đơn hàng' }),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('Hãy đặt hàng ngay hôm nay!'),
+        screen.getByText('Bạn chưa có đơn hàng nào trong mục này.'),
       ).toBeInTheDocument();
-      const exploreBtn = screen.getByRole('link', { name: 'Khám phá ngay' });
+      const exploreBtn = screen.getByRole('link', {
+        name: 'Khám phá sản phẩm',
+      });
       expect(exploreBtn).toBeInTheDocument();
       expect(exploreBtn).toHaveAttribute('href', '/catalog');
     });
@@ -357,13 +358,13 @@ describe('OrdersPage', () => {
       const allTab = screen.getByRole('button', { name: 'Tất cả' });
       const processingTab = screen.getByRole('button', { name: 'Đang xử lý' });
 
-      expect(allTab).toHaveClass('bg-white');
-      expect(processingTab).not.toHaveClass('bg-white');
+      expect(allTab).toHaveClass('border-primary');
+      expect(processingTab).not.toHaveClass('border-primary');
 
       fireEvent.click(processingTab);
 
-      expect(processingTab).toHaveClass('bg-white');
-      expect(allTab).not.toHaveClass('bg-white');
+      expect(processingTab).toHaveClass('border-primary');
+      expect(allTab).not.toHaveClass('border-primary');
     });
   });
 
@@ -432,9 +433,9 @@ describe('OrdersPage', () => {
       expect(
         screen.getByText('Không tìm thấy đơn hàng trong mục này.'),
       ).toBeInTheDocument();
-      // "Khám phá ngay" button should NOT be rendered when activeTab !== 'ALL'
+      // "Khám phá sản phẩm" button should NOT be rendered when activeTab !== 'ALL'
       expect(
-        screen.queryByRole('link', { name: 'Khám phá ngay' }),
+        screen.queryByRole('link', { name: 'Khám phá sản phẩm' }),
       ).not.toBeInTheDocument();
     });
   });
@@ -475,26 +476,31 @@ describe('OrdersPage', () => {
       renderOrdersPage();
 
       // Order 1 item has image and productName
-      const imageItem = screen.getByAltText('Chai xịt A');
+      const imageItem = screen.getByAltText('Chai xịt khử mùi cao cấp');
       expect(imageItem).toBeInTheDocument();
       expect(imageItem).toHaveAttribute('src', 'https://example.com/img1.jpg');
-      expect(screen.getByTitle('Chai xịt khử mùi cao cấp')).toBeInTheDocument();
-      expect(screen.getByText('x2')).toBeInTheDocument();
+      expect(
+        screen.getByTitle('Chai xịt khử mùi cao cấp (x2)'),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Chai xịt khử mùi cao cấp')).toBeInTheDocument();
 
       // Order 2 item has no image and empty productName (falls back to item.name)
       expect(
         screen.queryByAltText('Chai xịt dự phòng'),
       ).not.toBeInTheDocument();
-      expect(screen.getByTitle('Chai xịt dự phòng')).toBeInTheDocument();
-      expect(screen.getByText('x1')).toBeInTheDocument();
+      expect(screen.getByTitle('Chai xịt dự phòng (x1)')).toBeInTheDocument();
+      expect(screen.getByText('Chai xịt dự phòng')).toBeInTheDocument();
 
       // Currency and dates matched cleanly across non-breaking spaces
       expect(
-        screen.getByText(matchText(formatCurrency(sampleOrders[0].total))),
-      ).toBeInTheDocument();
+        screen.getAllByText(matchText(formatCurrency(sampleOrders[0].total)))
+          .length,
+      ).toBeGreaterThanOrEqual(1);
       expect(
-        screen.getByText(matchText(formatDateTime(sampleOrders[0].createdAt))),
-      ).toBeInTheDocument();
+        screen.getAllByText(
+          matchText(formatOrderDate(sampleOrders[0].createdAt)),
+        ).length,
+      ).toBeGreaterThanOrEqual(1);
 
       // Detail links
       const detailLinks = screen.getAllByRole('link', { name: /Chi tiết/i });

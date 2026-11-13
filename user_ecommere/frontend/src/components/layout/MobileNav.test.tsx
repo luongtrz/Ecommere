@@ -84,7 +84,7 @@ describe('MobileNav', () => {
     renderMobileNav();
 
     expect(screen.getByRole('link', { name: 'Trang chủ' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Khám phá' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sản phẩm' })).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /giỏ hàng/i }),
     ).toBeInTheDocument();
@@ -135,30 +135,20 @@ describe('MobileNav', () => {
     renderMobileNav('/');
 
     const homeLink = screen.getByRole('link', { name: 'Trang chủ' });
-    const catalogLink = screen.getByRole('link', { name: 'Khám phá' });
+    const catalogLink = screen.getByRole('link', { name: 'Sản phẩm' });
 
-    expect(homeLink).toHaveClass('text-teal-600');
-    expect(homeLink.querySelector('svg')).toHaveClass('scale-110');
-    expect(homeLink.querySelector('span')).toHaveClass('font-bold');
-
-    expect(catalogLink).toHaveClass('text-slate-500');
-    expect(catalogLink.querySelector('svg')).not.toHaveClass('scale-110');
-    expect(catalogLink.querySelector('span')).not.toHaveClass('font-bold');
+    expect(homeLink).toHaveClass('text-primary');
+    expect(catalogLink).toHaveClass('text-muted-foreground');
   });
 
   it('applies active styles to the catalog item when route is /catalog', () => {
     renderMobileNav('/catalog');
 
     const homeLink = screen.getByRole('link', { name: 'Trang chủ' });
-    const catalogLink = screen.getByRole('link', { name: 'Khám phá' });
+    const catalogLink = screen.getByRole('link', { name: 'Sản phẩm' });
 
-    expect(catalogLink).toHaveClass('text-teal-600');
-    expect(catalogLink.querySelector('svg')).toHaveClass('scale-110');
-    expect(catalogLink.querySelector('span')).toHaveClass('font-bold');
-
-    expect(homeLink).toHaveClass('text-slate-500');
-    expect(homeLink.querySelector('svg')).not.toHaveClass('scale-110');
-    expect(homeLink.querySelector('span')).not.toHaveClass('font-bold');
+    expect(catalogLink).toHaveClass('text-primary');
+    expect(homeLink).toHaveClass('text-muted-foreground');
   });
 
   it('applies active styles to the account item when route matches /account for logged in user', () => {
@@ -191,18 +181,14 @@ describe('MobileNav', () => {
     renderMobileNav('/account');
 
     const accountLink = screen.getByRole('link', { name: 'Tài khoản' });
-    expect(accountLink).toHaveClass('text-teal-600');
-    expect(accountLink.querySelector('svg')).toHaveClass('scale-110');
-    expect(accountLink.querySelector('span')).toHaveClass('font-bold');
+    expect(accountLink).toHaveClass('text-primary');
   });
 
   it('applies active styles to the account item when route matches /login for guest user', () => {
     renderMobileNav('/login');
 
     const accountLink = screen.getByRole('link', { name: 'Tài khoản' });
-    expect(accountLink).toHaveClass('text-teal-600');
-    expect(accountLink.querySelector('svg')).toHaveClass('scale-110');
-    expect(accountLink.querySelector('span')).toHaveClass('font-bold');
+    expect(accountLink).toHaveClass('text-primary');
   });
 
   it('calls openCart when clicking the "Giỏ hàng" button', async () => {
@@ -307,7 +293,7 @@ describe('MobileNav', () => {
     renderMobileNav();
 
     expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('5')).toHaveClass('bg-rose-600');
+    expect(screen.getByText('5')).toHaveClass('bg-primary');
   });
 
   it('renders exact badge number when totalItems is 99', () => {
@@ -350,5 +336,10 @@ describe('MobileNav', () => {
     renderMobileNav();
 
     expect(screen.getByText('99+')).toBeInTheDocument();
+  });
+
+  it('does not render on /checkout route', () => {
+    const { container } = renderMobileNav('/checkout');
+    expect(container.querySelector('nav')).not.toBeInTheDocument();
   });
 });

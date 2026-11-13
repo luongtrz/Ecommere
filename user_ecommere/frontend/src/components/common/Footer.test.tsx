@@ -45,7 +45,13 @@ describe('Footer', () => {
     renderFooter();
 
     expect(screen.getByText('TS')).toBeInTheDocument();
-    expect(screen.getByText('Thai Spray')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === 'SPAN' &&
+          element?.textContent?.replace(/\s+/g, ' ').trim() === 'Thai Spray',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText('Hàng Thái Chính Hãng')).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -110,15 +116,23 @@ describe('Footer', () => {
     });
   });
 
-  it('renders contact details including hotline, email, and address', () => {
+  it('renders contact details including hotline, email, and address as clickable links', () => {
     renderFooter();
 
     expect(screen.getByText('Thông Tin Liên Hệ')).toBeInTheDocument();
     expect(screen.getByText('0987.654.321')).toBeInTheDocument();
+    const phoneLink = screen.getByRole('link', { name: '0987.654.321' });
+    expect(phoneLink).toBeInTheDocument();
+    expect(phoneLink).toHaveAttribute('href', 'tel:0987654321');
+
     expect(
       screen.getByText('Hỗ trợ tư vấn Zalo / Hotline (8h - 22h)'),
     ).toBeInTheDocument();
-    expect(screen.getByText('cskh@thaispray.shop')).toBeInTheDocument();
+
+    const emailLink = screen.getByRole('link', { name: 'cskh@thaispray.shop' });
+    expect(emailLink).toBeInTheDocument();
+    expect(emailLink).toHaveAttribute('href', 'mailto:cskh@thaispray.shop');
+
     expect(
       screen.getByText(
         'Kho tổng: 128 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh (Giao toàn quốc)',
@@ -126,7 +140,7 @@ describe('Footer', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders bottom copyright year, policy links, and operating status', () => {
+  it('renders bottom copyright year and policy links without operating status', () => {
     renderFooter();
 
     const currentYear = new Date().getFullYear();
@@ -143,6 +157,8 @@ describe('Footer', () => {
     expect(termsLink).toBeInTheDocument();
     expect(termsLink).toHaveAttribute('href', '/policy/terms');
 
-    expect(screen.getByText('Hệ thống hoạt động ổn định')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Hệ thống hoạt động ổn định'),
+    ).not.toBeInTheDocument();
   });
 });

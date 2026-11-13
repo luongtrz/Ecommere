@@ -78,6 +78,77 @@ vi.mock('@/components/common/ProductCard', () => ({
   ),
 }));
 
+vi.mock('../components/FilterSidebar', () => ({
+  FilterSidebar: ({
+    currentFilters,
+    onFilterChange,
+    hideCategoryFilter,
+  }: any) => (
+    <div
+      data-testid="filter-sidebar"
+      data-hide-category={String(hideCategoryFilter)}
+    >
+      <span data-testid="sidebar-filters">
+        {JSON.stringify(currentFilters)}
+      </span>
+      <button
+        data-testid="filter-change-btn"
+        onClick={() => onFilterChange({ brand: 'Brand A', minPrice: '100000' })}
+      >
+        Change Filters
+      </button>
+      <button
+        data-testid="filter-clear-keys-btn"
+        onClick={() => onFilterChange({ brand: undefined, scent: '' })}
+      >
+        Clear Keys
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock('@/components/ui/sheet', () => ({
+  Sheet: ({ children }: any) => <div data-testid="mock-sheet">{children}</div>,
+  SheetTrigger: ({ children }: any) => (
+    <div data-testid="mock-sheet-trigger">{children}</div>
+  ),
+  SheetContent: ({ children, className }: any) => (
+    <div className={className} data-testid="mock-sheet-content">
+      {children}
+    </div>
+  ),
+  SheetHeader: ({ children }: any) => (
+    <div data-testid="mock-sheet-header">{children}</div>
+  ),
+  SheetTitle: ({ children, className }: any) => (
+    <h2 className={className} data-testid="mock-sheet-title">
+      {children}
+    </h2>
+  ),
+}));
+
+vi.mock('@/components/common/Pagination', () => ({
+  Pagination: ({ currentPage, totalPages, onPageChange }: any) => (
+    <div data-testid="pagination-mock">
+      <span data-testid="pagination-info">
+        Page {currentPage} of {totalPages}
+      </span>
+      <button
+        data-testid="pagination-page-2-btn"
+        onClick={() => onPageChange(2)}
+      >
+        Go to Page 2
+      </button>
+      <button
+        data-testid="pagination-next-btn"
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        Trang sau
+      </button>
+    </div>
+  ),
+}));
+
 const SelectContext = React.createContext<{
   value?: string;
   onValueChange?: (v: string) => void;
@@ -435,15 +506,16 @@ describe('SearchPage', () => {
         { sortBy: 'newest' },
         1,
       );
-      expect(
-        screen.getByRole('link', { name: /Quay lại danh sách/i }),
-      ).toHaveAttribute('href', '/catalog');
+      expect(screen.getByRole('link', { name: 'Sản phẩm' })).toHaveAttribute(
+        'href',
+        '/catalog',
+      );
       expect(screen.getByPlaceholderText('Tìm kiếm sản phẩm...')).toHaveValue(
         '',
       );
       expect(screen.getByTestId('sort-select')).toHaveValue('newest');
       expect(
-        screen.getByRole('button', { name: /Bộ lọc/i }),
+        screen.getAllByRole('button', { name: /Bộ lọc/i })[0],
       ).toBeInTheDocument();
       expect(
         screen.queryByRole('button', { name: 'Xóa tìm kiếm' }),
@@ -468,11 +540,18 @@ describe('SearchPage', () => {
         'data-title',
         'Tìm kiếm: rose',
       );
-      expect(screen.getByText('Tìm kiếm cho:')).toBeInTheDocument();
-      expect(screen.getByText('"rose"')).toBeInTheDocument();
-      expect(screen.getByText('2 kết quả')).toBeInTheDocument();
       expect(
-        screen.getAllByRole('button', { name: 'Xóa tìm kiếm' })[1],
+        screen.getByRole('heading', {
+          level: 1,
+          name: /Kết quả tìm kiếm cho "rose"/i,
+        }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '2 sản phẩm'),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Danh mục: cat1')).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Xóa tìm kiếm' }),
       ).toBeInTheDocument();
     });
 
@@ -513,22 +592,25 @@ describe('SearchPage', () => {
 
     it('clears input and resets parameters on clicking header "Xóa tìm kiếm"', () => {
       renderPage(['/search?q=rose&sort=price_desc']);
-      fireEvent.click(
-        screen.getAllByRole('button', { name: 'Xóa tìm kiếm' })[1],
-      );
+      fireEvent.click(screen.getByRole('button', { name: 'Xóa tìm kiếm' }));
       expect(screen.getByPlaceholderText('Tìm kiếm sản phẩm...')).toHaveValue(
         '',
       );
-      expect(screen.getByTestId('loc').textContent).toBe('');
+      expect(screen.getByTestId('loc')).not.toHaveTextContent('q=');
+      expect(screen.getByTestId('loc')).toHaveTextContent('sort=price_desc');
     });
 
-    it('alerts user when clicking "Bộ lọc"', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      renderPage(['/search']);
-      fireEvent.click(screen.getByRole('button', { name: /Bộ lọc/i }));
-      expect(alertSpy).toHaveBeenCalledWith(
-        'Tính năng bộ lọc đang được phát triển. Hiện tại bạn có thể sử dụng tìm kiếm và sắp xếp.',
-      );
+    it('toggles filter sidebar when clicking desktop "Bộ lọc"', () => {
+      const { container } = renderPage(['/search?q=rose']);
+      expect(container.querySelector('aside')).toBeInTheDocument();
+      expect(screen.getAllByTestId('filter-sidebar')).toHaveLength(2);
+      const filterBtns = screen.getAllByRole('button', { name: /Bộ lọc/i });
+      const desktopFilterBtn =
+        filterBtns.find((b) => b.className.includes('hidden lg:flex')) ||
+        filterBtns[0];
+      fireEvent.click(desktopFilterBtn);
+      expect(container.querySelector('aside')).not.toBeInTheDocument();
+      expect(screen.getAllByTestId('filter-sidebar')).toHaveLength(1);
     });
 
     it('cycles through sort options', () => {
@@ -619,11 +701,13 @@ describe('SearchPage', () => {
       mockUseProductSearch.mockReturnValue(loadingResult);
       const { container } = renderPage(['/search?q=rose']);
       expect(container.querySelector('.animate-spin')).toBeInTheDocument();
-      expect(screen.queryByText('Kết quả tìm kiếm')).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('heading', { level: 2, name: 'Kết quả tìm kiếm' }),
+      ).not.toBeInTheDocument();
     });
 
     it('renders LoadingSpinner when isPlaceholderData is true with active query and empty products', () => {
-      mockUseProductSearch.mockReturnValue(placeholderResult);
+      mockUseProductSearch.mockReturnValue(emptyTotal0Placeholder);
       const { container } = renderPage(['/search?q=rose']);
       expect(container.querySelector('.animate-spin')).toBeInTheDocument();
     });
@@ -647,12 +731,12 @@ describe('SearchPage', () => {
       expect(screen.getByTestId('product-card-p1')).toBeInTheDocument();
     });
 
-    it('controls visibility of header "xem tất cả sản phẩm" link under various loading conditions', () => {
+    it('controls visibility of EmptyState "Xem tất cả sản phẩm" CTA under various loading conditions', () => {
       // Condition 1: isLoading true -> link hidden
       mockUseProductSearch.mockReturnValue(emptyTotal0Loading);
       const { unmount } = renderPage(['/search?q=rose']);
       expect(
-        screen.queryByRole('link', { name: 'xem tất cả sản phẩm' }),
+        screen.queryByRole('link', { name: 'Xem tất cả sản phẩm' }),
       ).not.toBeInTheDocument();
       unmount();
 
@@ -660,7 +744,7 @@ describe('SearchPage', () => {
       mockUseProductSearch.mockReturnValue(emptyTotal0Placeholder);
       const { unmount: unmount2 } = renderPage(['/search?q=rose']);
       expect(
-        screen.queryByRole('link', { name: 'xem tất cả sản phẩm' }),
+        screen.queryByRole('link', { name: 'Xem tất cả sản phẩm' }),
       ).not.toBeInTheDocument();
       unmount2();
 
@@ -668,7 +752,7 @@ describe('SearchPage', () => {
       mockUseProductSearch.mockReturnValue(backgroundResult);
       const { unmount: unmount3 } = renderPage(['/search?q=rose']);
       expect(
-        screen.queryByRole('link', { name: 'xem tất cả sản phẩm' }),
+        screen.queryByRole('link', { name: 'Xem tất cả sản phẩm' }),
       ).not.toBeInTheDocument();
       unmount3();
 
@@ -676,14 +760,16 @@ describe('SearchPage', () => {
       mockUseProductSearch.mockReturnValue(emptyWithTotal0);
       renderPage(['/search?q=rose']);
       expect(
-        screen.getByRole('link', { name: 'xem tất cả sản phẩm' }),
+        screen.getByRole('link', { name: 'Xem tất cả sản phẩm' }),
       ).toBeInTheDocument();
     });
 
-    it('shows 0 kết quả when query is present and data is undefined', () => {
+    it('shows 0 sản phẩm when query is present and data is undefined', () => {
       mockUseProductSearch.mockReturnValue(undefinedDataResult);
       renderPage(['/search?q=rose']);
-      expect(screen.getByText('0 kết quả')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -717,7 +803,7 @@ describe('SearchPage', () => {
       ).toHaveAttribute('href', '/catalog');
     });
 
-    it('renders EmptyState when query is empty and total is 0, and clears params on button click', () => {
+    it('renders EmptyState when query is empty and total is 0', () => {
       renderPage(['/search']);
       expect(screen.getByText('Không tìm thấy sản phẩm')).toBeInTheDocument();
       expect(
@@ -728,17 +814,14 @@ describe('SearchPage', () => {
       expect(
         screen.getByRole('link', { name: 'Xem tất cả sản phẩm' }),
       ).toHaveAttribute('href', '/catalog');
-
-      const clearBtn = screen.getByRole('button', { name: 'Xóa tìm kiếm' });
-      fireEvent.click(clearBtn);
-      expect(screen.getByTestId('loc').textContent).toBe('');
     });
 
-    it('renders search suggestions and updates input on suggestion click', () => {
+    it('renders search suggestions with min 44px touch targets and updates input on suggestion click', () => {
       renderPage(['/search?q=khong_tim_thay']);
       expect(screen.getByText('Gợi ý tìm kiếm:')).toBeInTheDocument();
       const suggestions = [
         'Nước hoa chanh',
+        'Nước hoa bạc hà',
         'Nước hoa dâu',
         'Nước hoa cam',
         'Nước hoa vanilla',
@@ -746,22 +829,37 @@ describe('SearchPage', () => {
         'Nước hoa trà xanh',
       ];
       for (const item of suggestions) {
-        expect(screen.getByRole('button', { name: item })).toBeInTheDocument();
+        const btn = screen.getByRole('button', { name: item });
+        expect(btn).toBeInTheDocument();
+        expect(btn).toHaveClass('min-h-11');
       }
-      const bacHa = screen.getAllByRole('button', { name: 'Nước hoa bạc hà' });
-      expect(bacHa).toHaveLength(2);
 
       const input = screen.getByPlaceholderText('Tìm kiếm sản phẩm...');
       fireEvent.click(screen.getByRole('button', { name: 'Nước hoa chanh' }));
       expect(input).toHaveValue('Nước hoa chanh');
+    });
+
+    it('hides sort, filter, and view toggles when total is 0', () => {
+      renderPage(['/search?q=khong_tim_thay']);
+      expect(screen.queryByTestId('sort-select')).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Xem dạng danh sách' }),
+      ).not.toBeInTheDocument();
     });
   });
 
   describe('Grid View Actions & Formatting', () => {
     it('renders products and adds to cart with salePrice', () => {
       renderPage(['/search?q=rose&view=grid']);
-      expect(screen.getByText('Kết quả tìm kiếm')).toBeInTheDocument();
-      expect(screen.getByText('2 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', {
+          level: 1,
+          name: /Kết quả tìm kiếm cho "rose"/i,
+        }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '2 sản phẩm'),
+      ).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('add-to-cart-grid-p1'));
       expect(mockAddItem).toHaveBeenCalledWith({
@@ -799,12 +897,10 @@ describe('SearchPage', () => {
 
     it('switches view mode between grid and list', () => {
       renderPage(['/search?q=rose&view=grid']);
-      const header = screen
-        .getByRole('heading', { level: 2, name: 'Kết quả tìm kiếm' })
-        .closest('div')!.parentElement!;
-      const buttons = header.querySelectorAll('button');
-      const gridBtn = buttons[0];
-      const listBtn = buttons[1];
+      const listBtn = screen.getByRole('button', {
+        name: 'Xem dạng danh sách',
+      });
+      const gridBtn = screen.getByRole('button', { name: 'Xem dạng lưới' });
 
       fireEvent.click(listBtn);
       expect(screen.getByTestId('loc')).toHaveTextContent('view=list');
@@ -904,158 +1000,57 @@ describe('SearchPage', () => {
     });
   });
 
-  describe('Pagination & Load More Flow', () => {
-    // Predefined stable results for pagination tests
-    const page1Multi = createStableResult([p1, p2NoVar], 4, 1, 2, 2, true);
-    const page2Multi = createStableResult(
-      [p2NoVar, p4Regular],
-      4,
-      2,
-      2,
-      2,
-      false,
-    );
+  describe('Active Filter Chips', () => {
+    it('renders active filter chips for category, price, scent, volumeMl, brand and handles removals', () => {
+      renderPage([
+        '/search?q=rose&category=xit-thom&minPrice=50000&maxPrice=150000&scent=Hoa%20H%E1%BB%93ng&volumeMl=100&brand=ThaiBrand',
+      ]);
 
-    const page1Single = createStableResult([p1], 2, 1, 1, 2, true);
-    const page2New = createStableResult([p3MultiVar], 2, 2, 1, 2, false);
-    const page2Dup = createStableResult([p1], 2, 2, 1, 2, false);
+      expect(screen.getByText('Danh mục: xit-thom')).toBeInTheDocument();
+      expect(screen.getByText('Hoa Hồng')).toBeInTheDocument();
+      expect(screen.getByText('100ml')).toBeInTheDocument();
+      expect(screen.getByText('ThaiBrand')).toBeInTheDocument();
 
-    const page1Stale = createStableResult([p1], 4, 1, 2, 2, true);
-    const page2StaleResp = createStableResult([p4Regular], 4, 1, 2, 2, true);
-
-    it('advances page and merges deduplicated products on clicking "Xem thêm sản phẩm"', () => {
-      mockUseProductSearch.mockImplementation((_q, _f, page) =>
-        page === 2 ? page2Multi : page1Multi,
-      );
-
-      renderPage(['/search?q=perfume']);
-      expect(screen.getByText('Hiển thị 2 / 4 sản phẩm')).toBeInTheDocument();
-
-      const loadMoreBtn = screen.getByRole('button', {
-        name: 'Xem thêm sản phẩm',
+      // Remove scent chip
+      const removeScentBtn = screen.getByRole('button', {
+        name: 'Xóa bộ lọc Hoa Hồng',
       });
-      fireEvent.click(loadMoreBtn);
+      fireEvent.click(removeScentBtn);
+      expect(screen.getByTestId('loc')).not.toHaveTextContent('scent=');
 
-      expect(screen.getByTestId('product-card-p1')).toBeInTheDocument();
-      expect(screen.getByTestId('product-card-p2')).toBeInTheDocument();
-      expect(screen.getByTestId('product-card-p4')).toBeInTheDocument();
+      // Clear all filters
+      const clearAllBtn = screen.getByRole('button', { name: 'Xóa tất cả' });
+      fireEvent.click(clearAllBtn);
+      const loc = screen.getByTestId('loc');
+      expect(loc).not.toHaveTextContent('category=');
+      expect(loc).not.toHaveTextContent('minPrice=');
+      expect(loc).not.toHaveTextContent('maxPrice=');
+      expect(loc).not.toHaveTextContent('brand=');
+      expect(loc).not.toHaveTextContent('volumeMl=');
     });
+  });
 
-    it('appends products when all second page items are new', () => {
-      mockUseProductSearch.mockImplementation((_q, _f, page) =>
-        page === 2 ? page2New : page1Single,
-      );
+  describe('Pagination Flow', () => {
+    it('renders Pagination component when totalPages > 1', () => {
+      const pageMulti = createStableResult([p1, p2NoVar], 4, 1, 2, 2, true);
+      mockUseProductSearch.mockReturnValue(pageMulti);
 
       renderPage(['/search?q=perfume']);
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Xem thêm sản phẩm' }),
+      expect(screen.getByTestId('pagination-mock')).toBeInTheDocument();
+      expect(screen.getByTestId('pagination-info')).toHaveTextContent(
+        'Page 1 of 2',
       );
-      expect(screen.getByTestId('product-card-p1')).toBeInTheDocument();
-      expect(screen.getByTestId('product-card-p3')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('pagination-page-2-btn'));
+      expect(screen.getByTestId('loc')).toHaveTextContent('page=2');
     });
 
-    it('avoids duplicating items when all second page items already exist', () => {
-      mockUseProductSearch.mockImplementation((_q, _f, page) =>
-        page === 2 ? page2Dup : page1Single,
-      );
+    it('does not render Pagination when totalPages is 1', () => {
+      const singlePage = createStableResult([p1], 1, 1, 10, 1, false);
+      mockUseProductSearch.mockReturnValue(singlePage);
 
       renderPage(['/search?q=perfume']);
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Xem thêm sản phẩm' }),
-      );
-      expect(screen.getAllByTestId('product-card-p1')).toHaveLength(1);
-    });
-
-    it('disables "Xem thêm sản phẩm" when isFetching is true', () => {
-      const fetchingResult = createStableResult(
-        [p1],
-        5,
-        1,
-        1,
-        5,
-        true,
-        false,
-        true,
-      );
-      mockUseProductSearch.mockReturnValue(fetchingResult);
-
-      renderPage(['/search?q=rose']);
-      const loadMoreBtn = screen.getByRole('button', {
-        name: 'Xem thêm sản phẩm',
-      });
-      expect(loadMoreBtn).toBeDisabled();
-      fireEvent.click(loadMoreBtn);
-      expect(mockUseProductSearch).not.toHaveBeenCalledWith(
-        'rose',
-        expect.anything(),
-        2,
-      );
-    });
-
-    it('falls back to evaluating page < totalPages when hasNextPage is undefined', () => {
-      const undefinedNext = createStableResult([p1], 10, 1, 1, 10, undefined);
-      mockUseProductSearch.mockReturnValue(undefinedNext);
-
-      renderPage(['/search?q=rose']);
-      expect(
-        screen.getByRole('button', { name: 'Xem thêm sản phẩm' }),
-      ).toBeInTheDocument();
-    });
-
-    it('hides load more button under various terminal conditions', () => {
-      // Condition 1: page >= totalPages with undefined hasNextPage
-      const terminalPage = createStableResult([p1], 1, 1, 10, 1, undefined);
-      mockUseProductSearch.mockReturnValue(terminalPage);
-      const { unmount } = renderPage(['/search?q=rose']);
-      expect(
-        screen.queryByRole('button', { name: 'Xem thêm sản phẩm' }),
-      ).not.toBeInTheDocument();
-      unmount();
-
-      // Condition 2: hasNextPage explicitly false
-      const falseNext = createStableResult([p1], 10, 1, 1, 10, false);
-      mockUseProductSearch.mockReturnValue(falseNext);
-      const { unmount: unmount2 } = renderPage(['/search?q=rose']);
-      expect(
-        screen.queryByRole('button', { name: 'Xem thêm sản phẩm' }),
-      ).not.toBeInTheDocument();
-      unmount2();
-
-      // Condition 3: hasNextPage is true but products count reached total
-      const reachedTotal = createStableResult([p1, p2NoVar], 2, 1, 2, 1, true);
-      mockUseProductSearch.mockReturnValue(reachedTotal);
-      const { unmount: unmount3 } = renderPage(['/search?q=rose']);
-      expect(
-        screen.queryByRole('button', { name: 'Xem thêm sản phẩm' }),
-      ).not.toBeInTheDocument();
-      unmount3();
-
-      // Condition 4: hasNextPage undefined, page < totalPages, but products count reached total
-      const reachedTotalUndef = createStableResult(
-        [p1, p2NoVar],
-        2,
-        1,
-        2,
-        2,
-        undefined,
-      );
-      mockUseProductSearch.mockReturnValue(reachedTotalUndef);
-      renderPage(['/search?q=rose']);
-      expect(
-        screen.queryByRole('button', { name: 'Xem thêm sản phẩm' }),
-      ).not.toBeInTheDocument();
-    });
-
-    it('ignores stale page response when data.page does not match requested page', () => {
-      mockUseProductSearch.mockImplementation((_q, _f, page) =>
-        page === 2 ? page2StaleResp : page1Stale,
-      );
-
-      renderPage(['/search?q=perfume']);
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Xem thêm sản phẩm' }),
-      );
-      expect(screen.queryByTestId('product-card-p4')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('pagination-mock')).not.toBeInTheDocument();
     });
   });
 
@@ -1071,9 +1066,7 @@ describe('SearchPage', () => {
       });
 
       renderPage(['/search?q=rose']);
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Xem thêm sản phẩm' }),
-      );
+      fireEvent.click(screen.getByTestId('pagination-page-2-btn'));
       expect(queriedPage).toBe(2);
 
       fireEvent.change(screen.getByTestId('sort-select'), {
@@ -1090,9 +1083,7 @@ describe('SearchPage', () => {
       });
 
       renderPage(['/search?q=rose']);
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Xem thêm sản phẩm' }),
-      );
+      fireEvent.click(screen.getByTestId('pagination-page-2-btn'));
       expect(queriedPage).toBe(2);
 
       fireEvent.change(screen.getByPlaceholderText('Tìm kiếm sản phẩm...'), {
@@ -1109,9 +1100,7 @@ describe('SearchPage', () => {
       });
 
       renderPage(['/search?q=rose'], true);
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Xem thêm sản phẩm' }),
-      );
+      fireEvent.click(screen.getByTestId('pagination-page-2-btn'));
       expect(queriedPage).toBe(2);
 
       fireEvent.click(screen.getByTestId('set-category'));
@@ -1122,7 +1111,9 @@ describe('SearchPage', () => {
       mockUseProductSearch.mockReturnValue(undefinedDataResult);
 
       renderPage(['/search']);
-      expect(screen.getByText('0 sản phẩm')).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => el?.textContent?.trim() === '0 sản phẩm'),
+      ).toBeInTheDocument();
     });
   });
 });

@@ -69,7 +69,6 @@ describe('LoginPage', () => {
     );
 
     // Left Column Brand Bar
-    expect(screen.getAllByText('TS').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Thai/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Spray/i).length).toBeGreaterThanOrEqual(1);
     expect(
@@ -107,26 +106,26 @@ describe('LoginPage', () => {
   it('renders right column form card headers, inputs, and links', () => {
     renderComponent();
 
-    // Mobile Brand Links
-    const mobileHomeLink = screen.getByRole('link', { name: /Trang chủ →/i });
-    expect(mobileHomeLink).toHaveAttribute('href', '/');
+    // Navigation and Brand Links
+    const backHomeLink = screen.getByRole('link', { name: /Về trang chủ/i });
+    expect(backHomeLink).toHaveAttribute('href', '/');
 
     // Form Header
-    expect(screen.getByText('Đăng Nhập Tài Khoản')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /Đăng nhập tài khoản/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByText('Chào mừng bạn quay lại với Thai Spray Shop'),
     ).toBeInTheDocument();
 
     // Form Labels and Inputs
     expect(screen.getByText('Số điện thoại')).toBeInTheDocument();
-    const phoneInput = screen.getByPlaceholderText('0912345678');
+    const phoneInput = screen.getByPlaceholderText('0912 345 678');
     expect(phoneInput).toBeInTheDocument();
     expect(phoneInput).toHaveValue('');
 
     expect(screen.getByText('Mật khẩu')).toBeInTheDocument();
-    const passwordInput = screen.getByPlaceholderText(
-      '••••••••',
-    ) as HTMLInputElement;
+    const passwordInput = screen.getByLabelText('Mật khẩu') as HTMLInputElement;
     expect(passwordInput).toBeInTheDocument();
     expect(passwordInput.type).toBe('password');
     expect(passwordInput).toHaveValue('');
@@ -138,7 +137,9 @@ describe('LoginPage', () => {
     expect(forgotPasswordLink).toHaveAttribute('href', '/forgot-password');
 
     // Submit Button
-    const submitButton = screen.getByRole('button', { name: 'Đăng Nhập Ngay' });
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
     expect(submitButton).toBeInTheDocument();
     expect(submitButton).toBeEnabled();
 
@@ -153,12 +154,10 @@ describe('LoginPage', () => {
   it('toggles password visibility between password and text types when eye toggle button is clicked', () => {
     renderComponent();
 
-    const passwordInput = screen.getByPlaceholderText(
-      '••••••••',
-    ) as HTMLInputElement;
+    const passwordInput = screen.getByLabelText('Mật khẩu') as HTMLInputElement;
     expect(passwordInput.type).toBe('password');
 
-    const toggleButton = passwordInput.parentElement!.querySelector('button')!;
+    const toggleButton = screen.getByRole('button', { name: /Hiện mật khẩu/i });
     expect(toggleButton).toBeTruthy();
 
     // Click to show password
@@ -173,7 +172,9 @@ describe('LoginPage', () => {
   it('displays validation error messages when submitting an empty form', async () => {
     renderComponent();
 
-    const submitButton = screen.getByRole('button', { name: 'Đăng Nhập Ngay' });
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
     fireEvent.click(submitButton);
 
     expect(
@@ -188,9 +189,11 @@ describe('LoginPage', () => {
   it('displays validation error when phone number format is invalid', async () => {
     renderComponent();
 
-    const phoneInput = screen.getByPlaceholderText('0912345678');
-    const passwordInput = screen.getByPlaceholderText('••••••••');
-    const submitButton = screen.getByRole('button', { name: 'Đăng Nhập Ngay' });
+    const phoneInput = screen.getByPlaceholderText('0912 345 678');
+    const passwordInput = screen.getByLabelText('Mật khẩu');
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
 
     fireEvent.change(phoneInput, { target: { value: '12345' } });
     fireEvent.change(passwordInput, { target: { value: 'validPassword123' } });
@@ -205,9 +208,11 @@ describe('LoginPage', () => {
   it('displays validation error when password is less than 6 characters', async () => {
     renderComponent();
 
-    const phoneInput = screen.getByPlaceholderText('0912345678');
-    const passwordInput = screen.getByPlaceholderText('••••••••');
-    const submitButton = screen.getByRole('button', { name: 'Đăng Nhập Ngay' });
+    const phoneInput = screen.getByPlaceholderText('0912 345 678');
+    const passwordInput = screen.getByLabelText('Mật khẩu');
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
 
     fireEvent.change(phoneInput, { target: { value: '0912345678' } });
     fireEvent.change(passwordInput, { target: { value: '12345' } });
@@ -222,9 +227,11 @@ describe('LoginPage', () => {
   it('displays validation error when password exceeds 50 characters', async () => {
     renderComponent();
 
-    const phoneInput = screen.getByPlaceholderText('0912345678');
-    const passwordInput = screen.getByPlaceholderText('••••••••');
-    const submitButton = screen.getByRole('button', { name: 'Đăng Nhập Ngay' });
+    const phoneInput = screen.getByPlaceholderText('0912 345 678');
+    const passwordInput = screen.getByLabelText('Mật khẩu');
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
 
     fireEvent.change(phoneInput, { target: { value: '0912345678' } });
     fireEvent.change(passwordInput, { target: { value: 'a'.repeat(51) } });
@@ -239,9 +246,11 @@ describe('LoginPage', () => {
   it('calls login function with credentials when form input values are valid', async () => {
     renderComponent();
 
-    const phoneInput = screen.getByPlaceholderText('0912345678');
-    const passwordInput = screen.getByPlaceholderText('••••••••');
-    const submitButton = screen.getByRole('button', { name: 'Đăng Nhập Ngay' });
+    const phoneInput = screen.getByPlaceholderText('0912 345 678');
+    const passwordInput = screen.getByLabelText('Mật khẩu');
+    const submitButton = screen.getByRole('button', {
+      name: /Đăng nhập ngay/i,
+    });
 
     fireEvent.change(phoneInput, { target: { value: '0912345678' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
@@ -260,8 +269,8 @@ describe('LoginPage', () => {
     const user = userEvent.setup();
     renderComponent();
 
-    const phoneInput = screen.getByPlaceholderText('0912345678');
-    const passwordInput = screen.getByPlaceholderText('••••••••');
+    const phoneInput = screen.getByPlaceholderText('0912 345 678');
+    const passwordInput = screen.getByLabelText('Mật khẩu');
 
     await user.type(phoneInput, '0987654321');
     await user.type(passwordInput, 'mypassword123');
@@ -279,6 +288,6 @@ describe('LoginPage', () => {
     });
     expect(submitButton).toBeInTheDocument();
     expect(submitButton).toBeDisabled();
-    expect(screen.queryByText('Đăng Nhập Ngay')).not.toBeInTheDocument();
+    expect(screen.queryByText('Đăng nhập ngay')).not.toBeInTheDocument();
   });
 });

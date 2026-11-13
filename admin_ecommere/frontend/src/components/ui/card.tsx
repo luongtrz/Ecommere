@@ -1,31 +1,53 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      'rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm transition-all duration-200',
-      className,
-    )}
-    {...props}
-  />
-));
+interface CardContextValue {
+  compact?: boolean;
+}
+
+const CardContext = React.createContext<CardContextValue>({ compact: false });
+
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  compact?: boolean;
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, compact = false, ...props }, ref) => (
+    <CardContext.Provider value={{ compact }}>
+      <div
+        ref={ref}
+        className={cn(
+          'rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm transition-all duration-200',
+          className,
+        )}
+        {...props}
+      />
+    </CardContext.Provider>
+  ),
+);
 Card.displayName = 'Card';
 
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('flex flex-col space-y-1.5 p-6', className)}
-    {...props}
-  />
-));
+export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  compact?: boolean;
+}
+
+const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
+  ({ className, compact: compactProp, ...props }, ref) => {
+    const { compact: contextCompact } = React.useContext(CardContext);
+    const isCompact = compactProp ?? contextCompact;
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'flex flex-col space-y-1.5',
+          isCompact ? 'p-4 md:p-5 pb-2' : 'p-6',
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 CardHeader.displayName = 'CardHeader';
 
 const CardTitle = React.forwardRef<
@@ -35,7 +57,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      'text-xl font-semibold leading-none tracking-tight text-slate-900',
+      'text-lg font-semibold leading-snug tracking-tight text-slate-900',
       className,
     )}
     {...props}
@@ -53,24 +75,46 @@ const CardDescription = React.forwardRef<
 ));
 CardDescription.displayName = 'CardDescription';
 
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
-));
+export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  compact?: boolean;
+}
+
+const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
+  ({ className, compact: compactProp, ...props }, ref) => {
+    const { compact: contextCompact } = React.useContext(CardContext);
+    const isCompact = compactProp ?? contextCompact;
+    return (
+      <div
+        ref={ref}
+        className={cn(isCompact ? 'p-4 md:p-5 pt-0' : 'p-6 pt-0', className)}
+        {...props}
+      />
+    );
+  },
+);
 CardContent.displayName = 'CardContent';
 
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('flex items-center p-6 pt-0', className)}
-    {...props}
-  />
-));
+export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  compact?: boolean;
+}
+
+const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
+  ({ className, compact: compactProp, ...props }, ref) => {
+    const { compact: contextCompact } = React.useContext(CardContext);
+    const isCompact = compactProp ?? contextCompact;
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'flex items-center',
+          isCompact ? 'p-4 md:p-5 pt-0' : 'p-6 pt-0',
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 CardFooter.displayName = 'CardFooter';
 
 export {

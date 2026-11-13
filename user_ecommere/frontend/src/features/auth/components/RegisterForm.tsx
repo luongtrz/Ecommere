@@ -4,8 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { User, Phone, Mail, Lock, Eye, EyeOff, Tag, ArrowRight } from 'lucide-react';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { User, Phone, Mail, Lock, Eye, EyeOff, Tag } from 'lucide-react';
 
 export interface RegisterFormProps {
   onSubmit: (data: RegisterInput) => void;
@@ -13,7 +20,11 @@ export interface RegisterFormProps {
   defaultReferralCode?: string;
 }
 
-export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: RegisterFormProps) {
+export function RegisterForm({
+  onSubmit,
+  isLoading,
+  defaultReferralCode,
+}: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -37,21 +48,21 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="name"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Họ và tên
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                    <User className="h-4 w-4" />
-                  </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <User className="h-4 w-4" />
+                </div>
+                <FormControl>
                   <Input
-                    placeholder="Nguyễn Văn A"
+                    placeholder="VD: Nguyễn Văn A"
                     className="pl-10 h-11 rounded-md border-input bg-background text-sm"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-sm text-destructive" />
             </FormItem>
           )}
@@ -62,22 +73,22 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="phone"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Số điện thoại
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                    <Phone className="h-4 w-4" />
-                  </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                </div>
+                <FormControl>
                   <Input
                     type="tel"
                     placeholder="0912 345 678"
                     className="pl-10 h-11 rounded-md border-input bg-background text-sm"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-sm text-destructive" />
             </FormItem>
           )}
@@ -88,117 +99,131 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           name="email"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Email <span className="font-normal normal-case">(không bắt buộc)</span>
+              <FormLabel className="text-sm font-medium text-foreground">
+                Email{' '}
+                <span className="font-normal text-muted-foreground">
+                  (không bắt buộc)
+                </span>
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                  </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                </div>
+                <FormControl>
                   <Input
                     type="email"
                     placeholder="email@example.com"
                     className="pl-10 h-11 rounded-md border-input bg-background text-sm"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-sm text-destructive" />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem className="space-y-1.5">
-                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Mật khẩu
-                </FormLabel>
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-sm font-medium text-foreground">
+                Mật khẩu
+              </FormLabel>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <Lock className="h-4 w-4" />
+                </div>
                 <FormControl>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                      <Lock className="h-4 w-4" />
-                    </div>
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Ít nhất 6 ký tự"
-                      className="pl-10 pr-9 h-11 rounded-md border-input bg-background text-sm"
-                      {...field}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Ít nhất 6 ký tự"
+                    className="pl-10 pr-11 h-11 rounded-md border-input bg-background text-sm"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage className="text-sm text-destructive" />
-              </FormItem>
-            )}
-          />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              <FormMessage className="text-sm text-destructive" />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem className="space-y-1.5">
-                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Xác nhận
-                </FormLabel>
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-sm font-medium text-foreground">
+                Xác nhận mật khẩu
+              </FormLabel>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <Lock className="h-4 w-4" />
+                </div>
                 <FormControl>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                      <Lock className="h-4 w-4" />
-                    </div>
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Nhập lại mật khẩu"
-                      className="pl-10 pr-9 h-11 rounded-md border-input bg-background text-sm"
-                      {...field}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Nhập lại mật khẩu"
+                    className="pl-10 pr-11 h-11 rounded-md border-input bg-background text-sm"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage className="text-sm text-destructive" />
-              </FormItem>
-            )}
-          />
-        </div>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={
+                    showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              <FormMessage className="text-sm text-destructive" />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
           name="referralCode"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Mã giới thiệu <span className="font-normal normal-case">(nếu có)</span>
+              <FormLabel className="text-sm font-medium text-foreground">
+                Mã giới thiệu{' '}
+                <span className="font-normal text-muted-foreground">
+                  (nếu có)
+                </span>
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                    <Tag className="h-4 w-4" />
-                  </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                  <Tag className="h-4 w-4" />
+                </div>
+                <FormControl>
                   <Input
                     placeholder="VD: BANBE2026"
                     className="pl-10 h-11 rounded-md border-input bg-background text-sm uppercase"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-sm text-destructive" />
             </FormItem>
           )}
@@ -210,12 +235,12 @@ export function RegisterForm({ onSubmit, isLoading, defaultReferralCode }: Regis
           disabled={isLoading}
         >
           {isLoading ? (
-            'Đang tạo tài khoản...'
-          ) : (
             <span className="flex items-center justify-center gap-2">
-              Hoàn Tất Đăng Ký
-              <ArrowRight className="h-4 w-4" />
+              <span className="h-4 w-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+              Đang tạo tài khoản...
             </span>
+          ) : (
+            'Hoàn tất đăng ký'
           )}
         </Button>
       </form>

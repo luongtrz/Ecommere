@@ -22,7 +22,13 @@ export function RequireAdmin({ children }: RequireAdminProps) {
   }
 
   if (user.role !== 'ADMIN') {
-    return <Navigate to="/login" replace />;
+    return (
+      <Navigate
+        to="/login?error=forbidden"
+        state={{ error: 'Tài khoản không có quyền truy cập trang quản trị.' }}
+        replace
+      />
+    );
   }
 
   return <>{children}</>;

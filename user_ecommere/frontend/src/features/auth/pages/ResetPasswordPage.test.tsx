@@ -104,7 +104,9 @@ describe('ResetPasswordPage', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: 'Đặt lại mật khẩu' }),
       ).toBeInTheDocument();
-      expect(screen.getByText('Liên kết đặt lại mật khẩu')).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Liên kết đặt lại mật khẩu')[0],
+      ).toBeInTheDocument();
       expect(
         screen.getByText(
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
@@ -137,7 +139,9 @@ describe('ResetPasswordPage', () => {
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
         ),
       ).toBeInTheDocument();
-      expect(screen.getByText('Liên kết đặt lại mật khẩu')).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Liên kết đặt lại mật khẩu')[0],
+      ).toBeInTheDocument();
     });
 
     it('renders invalid token message when token is only whitespace', () => {
@@ -148,7 +152,9 @@ describe('ResetPasswordPage', () => {
           'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu mã xác thực.',
         ),
       ).toBeInTheDocument();
-      expect(screen.getByText('Liên kết đặt lại mật khẩu')).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Liên kết đặt lại mật khẩu')[0],
+      ).toBeInTheDocument();
     });
   });
 
@@ -157,7 +163,7 @@ describe('ResetPasswordPage', () => {
       renderResetPasswordPage('/reset-password?token=valid-token-123');
 
       expect(
-        screen.getByText('Nhập mật khẩu mới cho tài khoản của bạn'),
+        screen.getAllByText('Nhập mật khẩu mới cho tài khoản của bạn')[0],
       ).toBeInTheDocument();
       expect(
         screen.queryByText(
@@ -177,6 +183,53 @@ describe('ResetPasswordPage', () => {
       expect(
         screen.getByRole('link', { name: 'Quay lại đăng nhập' }),
       ).toHaveAttribute('href', '/login');
+    });
+
+    it('renders password requirement helper text', () => {
+      renderResetPasswordPage('/reset-password?token=valid-token-123');
+
+      expect(
+        screen.getByText(
+          'Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it('toggles password visibility when clicking eye button', async () => {
+      const user = userEvent.setup();
+      renderResetPasswordPage('/reset-password?token=valid-token-123');
+
+      const newPasswordInput = screen.getByLabelText('Mật khẩu mới');
+      expect(newPasswordInput).toHaveAttribute('type', 'password');
+
+      const toggleNewButton = screen.getByRole('button', {
+        name: 'Hiện mật khẩu',
+      });
+      await user.click(toggleNewButton);
+      expect(newPasswordInput).toHaveAttribute('type', 'text');
+
+      const toggleHideNewButton = screen.getByRole('button', {
+        name: 'Ẩn mật khẩu',
+      });
+      await user.click(toggleHideNewButton);
+      expect(newPasswordInput).toHaveAttribute('type', 'password');
+
+      const confirmPasswordInput = screen.getByLabelText(
+        'Xác nhận mật khẩu mới',
+      );
+      expect(confirmPasswordInput).toHaveAttribute('type', 'password');
+
+      const toggleConfirmButton = screen.getByRole('button', {
+        name: 'Hiện mật khẩu xác nhận',
+      });
+      await user.click(toggleConfirmButton);
+      expect(confirmPasswordInput).toHaveAttribute('type', 'text');
+
+      const toggleHideConfirmButton = screen.getByRole('button', {
+        name: 'Ẩn mật khẩu xác nhận',
+      });
+      await user.click(toggleHideConfirmButton);
+      expect(confirmPasswordInput).toHaveAttribute('type', 'password');
     });
 
     it('submits form with valid matching passwords and trims whitespace from token', async () => {

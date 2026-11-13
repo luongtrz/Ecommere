@@ -169,6 +169,7 @@ const defaultCategories = [
     id: 'cat-1',
     name: 'Tinh Dầu Tự Nhiên',
     slug: 'tinh-dau-tu-nhien',
+    description: 'Hương thơm tự nhiên từ thực vật.',
   },
   {
     id: 'cat-2',
@@ -347,7 +348,6 @@ describe('HomePage', () => {
       expect(mainHeading).toHaveTextContent(
         'Chọn mùi hương khiến không gian của bạn trông có gu hơn.',
       );
-      expect(screen.getByText('trông có gu hơn')).toHaveClass('text-teal-600');
 
       expect(
         screen.getByText(
@@ -373,23 +373,11 @@ describe('HomePage', () => {
       );
     });
 
-    it('renders Hero product image and scent badges', () => {
+    it('renders Hero product image', () => {
       renderHomePage();
 
       const heroImg = screen.getByAltText('Thai Spray Luxury Fragrance');
       expect(heroImg).toHaveAttribute('src', '/hero-fragrance.png');
-
-      expect(screen.getByText('Premium Scent Collection')).toBeInTheDocument();
-      expect(
-        screen.getByText('Mùi hương tinh tế cho nhịp sống hiện đại'),
-      ).toBeInTheDocument();
-      expect(screen.getByText('Khuyên dùng')).toBeInTheDocument();
-      expect(screen.getByText('Woody & Fresh')).toBeInTheDocument();
-
-      expect(screen.getByText('Olfactory Notes')).toBeInTheDocument();
-      expect(screen.getByText('Gỗ thông rừng')).toBeInTheDocument();
-      expect(screen.getByText('Xô thơm quýt')).toBeInTheDocument();
-      expect(screen.getByText('Bạc hà lạnh')).toBeInTheDocument();
     });
   });
 
@@ -404,9 +392,6 @@ describe('HomePage', () => {
 
       expect(screen.getByText('89%')).toBeInTheDocument();
       expect(screen.getByText('Khách quay lại mua')).toBeInTheDocument();
-
-      expect(screen.getByText('1:1')).toBeInTheDocument();
-      expect(screen.getByText('Tư vấn theo không gian')).toBeInTheDocument();
     });
   });
 
@@ -429,12 +414,12 @@ describe('HomePage', () => {
         `/search?q=${encodeURIComponent('Xịt phòng khách')}`,
       );
 
-      const bodyMistLink = screen.getByRole('link', {
-        name: 'Body mist nhẹ',
+      const essentialOilLink = screen.getByRole('link', {
+        name: 'Tinh dầu thơm',
       });
-      expect(bodyMistLink).toHaveAttribute(
+      expect(essentialOilLink).toHaveAttribute(
         'href',
-        `/search?q=${encodeURIComponent('Body mist nhẹ')}`,
+        `/search?q=${encodeURIComponent('Tinh dầu thơm')}`,
       );
 
       const giftLink = screen.getByRole('link', {
@@ -502,15 +487,15 @@ describe('HomePage', () => {
 
       const { container } = renderHomePage();
 
-      const pulses = container.querySelectorAll('.h-\\[360px\\].animate-pulse');
+      const pulses = container.querySelectorAll('.animate-pulse');
       expect(pulses.length).toBeGreaterThanOrEqual(4);
       expect(
         screen.queryByTestId('product-card-curated-prod-1'),
       ).not.toBeInTheDocument();
     });
 
-    it('renders curated product cards with animation delays', () => {
-      const { container } = renderHomePage();
+    it('renders curated product cards', () => {
+      renderHomePage();
 
       expect(
         screen.getByTestId('product-card-curated-prod-1'),
@@ -518,11 +503,6 @@ describe('HomePage', () => {
       expect(
         screen.getByTestId('product-card-curated-prod-2'),
       ).toBeInTheDocument();
-
-      const animatedWrappers = container.querySelectorAll('.animate-fade-in');
-      expect(animatedWrappers.length).toBeGreaterThanOrEqual(2);
-      expect(animatedWrappers[0]).toHaveStyle({ animationDelay: '0ms' });
-      expect(animatedWrappers[1]).toHaveStyle({ animationDelay: '80ms' });
     });
 
     it('adds curated product to cart with salePrice when available', () => {
@@ -592,9 +572,7 @@ describe('HomePage', () => {
       expect(
         screen.queryByTestId('product-card-curated-prod-1'),
       ).not.toBeInTheDocument();
-      expect(
-        container.querySelectorAll('.h-\\[360px\\].animate-pulse').length,
-      ).toBe(0);
+      expect(container.querySelectorAll('.animate-pulse').length).toBe(0);
     });
   });
 
@@ -644,6 +622,34 @@ describe('HomePage', () => {
         { id: 'cat-root-5', name: 'Root Category 5', slug: 'root-5' },
       ];
 
+      const createMockCategoryProduct = (id: string, name: string) => ({
+        products: [
+          {
+            id,
+            name,
+            slug: id,
+            basePrice: 100000,
+            images: [`/images/${id}.jpg`],
+            variants: [
+              {
+                id: `var-${id}`,
+                price: 100000,
+                scent: 'Hương thơm',
+                volumeMl: 50,
+              },
+            ],
+          },
+        ],
+      });
+
+      mockCategoryProductsData = {
+        'root-1': createMockCategoryProduct('p-root-1', 'Product Root 1'),
+        'root-2': createMockCategoryProduct('p-root-2', 'Product Root 2'),
+        'root-3': createMockCategoryProduct('p-root-3', 'Product Root 3'),
+        'root-4': createMockCategoryProduct('p-root-4', 'Product Root 4'),
+        'root-5': createMockCategoryProduct('p-root-5', 'Product Root 5'),
+      };
+
       renderHomePage();
 
       expect(screen.getByText('Root Category 1')).toBeInTheDocument();
@@ -670,10 +676,52 @@ describe('HomePage', () => {
       expect(categoryLinks[0]).toHaveAttribute('href', '/c/tinh-dau-tu-nhien');
       expect(categoryLinks[1]).toHaveAttribute('href', '/c/xit-thom-phong');
 
-      const categoryDescriptions = screen.getAllByText(
-        'Những lựa chọn được khách chọn nhiều khi cần mùi thơm gọn, dễ dùng và phù hợp sinh hoạt mỗi ngày.',
-      );
-      expect(categoryDescriptions.length).toBe(2);
+      // Asserts the category API description
+      expect(
+        screen.getByText('Hương thơm tự nhiên từ thực vật.'),
+      ).toBeInTheDocument();
+
+      // Old invented description copy is not rendered
+      expect(
+        screen.queryByText(
+          'Hương thơm tự nhiên, thư giãn và lưu hương dịu nhẹ cho mọi không gian.',
+        ),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          'Mùi thơm tươi mát, khử mùi gọn gàng cho phòng khách và phòng ngủ.',
+        ),
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders no description when category API description is missing or empty', () => {
+      mockCategoriesData = [
+        {
+          id: 'cat-1',
+          name: 'Tinh Dầu Tự Nhiên',
+          slug: 'tinh-dau-tu-nhien',
+          description: '',
+        },
+        {
+          id: 'cat-2',
+          name: 'Xịt Thơm Phòng',
+          slug: 'xit-thom-phong',
+        },
+      ];
+
+      renderHomePage();
+
+      expect(screen.getByText('Tinh Dầu Tự Nhiên')).toBeInTheDocument();
+      expect(screen.getByText('Xịt Thơm Phòng')).toBeInTheDocument();
+
+      expect(
+        screen.queryByText('Hương thơm tự nhiên từ thực vật.'),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          'Những lựa chọn được khách chọn nhiều khi cần mùi thơm gọn, dễ dùng và phù hợp sinh hoạt mỗi ngày.',
+        ),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -763,9 +811,7 @@ describe('HomePage', () => {
 
       const { container } = renderHomePage();
 
-      const skeletonBlocks = container.querySelectorAll(
-        '.h-\\[360px\\].animate-pulse',
-      );
+      const skeletonBlocks = container.querySelectorAll('.animate-pulse');
       expect(skeletonBlocks.length).toBeGreaterThanOrEqual(4);
     });
 
@@ -780,6 +826,9 @@ describe('HomePage', () => {
       ).not.toBeInTheDocument();
       expect(
         screen.queryByTestId('product-card-cat-prod-2'),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('heading', { name: 'Tinh Dầu Tự Nhiên' }),
       ).not.toBeInTheDocument();
     });
 

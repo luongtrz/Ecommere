@@ -88,7 +88,7 @@ describe('Dialog components', () => {
       </Dialog>,
     );
 
-    const closeBtn = screen.getByRole('button', { name: 'Close' });
+    const closeBtn = screen.getByRole('button', { name: /close|đóng/i });
     expect(closeBtn).toBeInTheDocument();
     fireEvent.click(closeBtn);
     expect(handleOpenChange).toHaveBeenCalledWith(false);
@@ -111,7 +111,7 @@ describe('Dialog components', () => {
     const content = screen.getByTestId('dialog-custom');
     expect(content).toHaveClass('custom-dialog-class');
     expect(content).toHaveClass(
-      'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg',
+      'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg',
     );
     expect(ref.current).toBe(content);
   });
@@ -133,7 +133,7 @@ describe('Dialog components', () => {
 
       const overlay = screen.getByTestId('dialog-overlay');
       expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-slate-900/50');
+      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-foreground/40');
       expect(overlay).toHaveClass('custom-dialog-overlay');
       expect(ref.current).toBe(overlay);
     });
@@ -149,7 +149,7 @@ describe('Dialog components', () => {
 
       const overlay = screen.getByTestId('dialog-overlay-default');
       expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-slate-900/50');
+      expect(overlay).toHaveClass('fixed inset-0 z-50 bg-foreground/40');
     });
   });
 
@@ -233,7 +233,7 @@ describe('Dialog components', () => {
       const title = screen.getByTestId('dialog-title');
       expect(title).toBeInTheDocument();
       expect(title).toHaveClass(
-        'text-lg font-semibold leading-none tracking-tight title-extra',
+        'text-lg font-semibold leading-none title-extra',
       );
       expect(ref.current).toBe(title);
     });
@@ -250,9 +250,7 @@ describe('Dialog components', () => {
       );
 
       const title = screen.getByTestId('dialog-title-default');
-      expect(title).toHaveClass(
-        'text-lg font-semibold leading-none tracking-tight',
-      );
+      expect(title).toHaveClass('text-lg font-semibold leading-none');
     });
 
     it('renders DialogDescription with ref, default and custom classes', () => {
@@ -274,7 +272,7 @@ describe('Dialog components', () => {
 
       const desc = screen.getByTestId('dialog-desc');
       expect(desc).toBeInTheDocument();
-      expect(desc).toHaveClass('text-sm text-slate-500 desc-extra');
+      expect(desc).toHaveClass('text-sm text-muted-foreground desc-extra');
       expect(ref.current).toBe(desc);
     });
 
@@ -291,7 +289,7 @@ describe('Dialog components', () => {
       );
 
       const desc = screen.getByTestId('dialog-desc-default');
-      expect(desc).toHaveClass('text-sm text-slate-500');
+      expect(desc).toHaveClass('text-sm text-muted-foreground');
     });
   });
 });

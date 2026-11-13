@@ -27,7 +27,7 @@ function checkCloudinaryBranch(url: URL, cloudName: unknown): boolean {
   }
   const escapedCloudName = escapeRegExp(cloudName);
   const cloudinaryRegex = new RegExp(
-    `^/${escapedCloudName}/image/upload/v\\d+/[A-Za-z0-9._~%\\/-]+$`
+    `^/${escapedCloudName}/image/upload/v\\d+/[A-Za-z0-9._~%\\/-]+$`,
   );
   return cloudinaryRegex.test(url.pathname);
 }
@@ -58,7 +58,7 @@ function checkOriginBranch(url: URL, origin: unknown): boolean {
  */
 export function getAllowedChatImageUrl(
   rawSrc: unknown,
-  options?: ChatImagePolicyOptions
+  options?: ChatImagePolicyOptions,
 ): string | null {
   try {
     if (typeof rawSrc !== 'string') {
@@ -71,8 +71,14 @@ export function getAllowedChatImageUrl(
     }
 
     // Must contain no whitespace or control characters
-    if (/[\s\x00-\x1f\x7f-\x9f]/.test(trimmed)) {
+    if (/\s/.test(trimmed)) {
       return null;
+    }
+    for (let i = 0; i < trimmed.length; i++) {
+      const code = trimmed.charCodeAt(i);
+      if (code < 32 || (code >= 127 && code <= 159)) {
+        return null;
+      }
     }
 
     // Reject any path traversal attempts as defence in depth

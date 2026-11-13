@@ -22,7 +22,7 @@ export function AppProviders({ children }: AppProvidersProps) {
     <QueryClientProvider client={queryClient}>
       <SessionRestoreWrapper>{children}</SessionRestoreWrapper>
       <Toaster />
-      <SonnerToaster position="top-right" richColors />
+      <SonnerToaster position="top-center" richColors closeButton />
       <Suspense fallback={null}>
         <ReactQueryDevtools initialIsOpen={false} />
       </Suspense>

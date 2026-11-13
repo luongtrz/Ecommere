@@ -55,6 +55,31 @@ describe('Badge Component', () => {
 
     const badge = screen.getByText('Đã hủy');
     expect(badge).toHaveClass('border-rose-200', 'bg-rose-50', 'text-rose-700');
+    expect(badge).not.toHaveClass('ring-1', 'ring-rose-200');
+  });
+
+  it('renders with variant="success"', () => {
+    render(<Badge variant="success">Hoàn tất</Badge>);
+
+    const badge = screen.getByText('Hoàn tất');
+    expect(badge).toHaveClass(
+      'border-emerald-200',
+      'bg-emerald-50',
+      'text-emerald-700',
+    );
+    expect(badge).not.toHaveClass('ring-1', 'ring-emerald-200');
+  });
+
+  it('renders with variant="warning"', () => {
+    render(<Badge variant="warning">Chờ thanh toán</Badge>);
+
+    const badge = screen.getByText('Chờ thanh toán');
+    expect(badge).toHaveClass(
+      'border-amber-200',
+      'bg-amber-50',
+      'text-amber-700',
+    );
+    expect(badge).not.toHaveClass('ring-1', 'ring-amber-200');
   });
 
   it('renders with variant="outline"', () => {
@@ -140,10 +165,28 @@ describe('badgeVariants helper function', () => {
     expect(classes).toContain('text-slate-700');
   });
 
-  it('returns destructive variant classes', () => {
+  it('returns destructive variant classes without redundant ring', () => {
     const classes = badgeVariants({ variant: 'destructive' });
     expect(classes).toContain('bg-rose-50');
     expect(classes).toContain('text-rose-700');
+    expect(classes).toContain('border-rose-200');
+    expect(classes).not.toContain('ring-1');
+  });
+
+  it('returns success variant classes without redundant ring', () => {
+    const classes = badgeVariants({ variant: 'success' });
+    expect(classes).toContain('bg-emerald-50');
+    expect(classes).toContain('text-emerald-700');
+    expect(classes).toContain('border-emerald-200');
+    expect(classes).not.toContain('ring-1');
+  });
+
+  it('returns warning variant classes without redundant ring', () => {
+    const classes = badgeVariants({ variant: 'warning' });
+    expect(classes).toContain('bg-amber-50');
+    expect(classes).toContain('text-amber-700');
+    expect(classes).toContain('border-amber-200');
+    expect(classes).not.toContain('ring-1');
   });
 
   it('returns outline variant classes', () => {

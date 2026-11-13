@@ -12,12 +12,7 @@ describe('Separator', () => {
     expect(separator).toBeInTheDocument();
     expect(separator).toHaveAttribute('data-orientation', 'horizontal');
     expect(separator).toHaveAttribute('role', 'none');
-    expect(separator).toHaveClass(
-      'shrink-0',
-      'bg-slate-200',
-      'h-[1px]',
-      'w-full',
-    );
+    expect(separator).toHaveClass('shrink-0', 'bg-border', 'h-px', 'w-full');
   });
 
   it('renders with explicit horizontal orientation', () => {
@@ -28,7 +23,7 @@ describe('Separator', () => {
 
     expect(separator).toBeInTheDocument();
     expect(separator).toHaveAttribute('data-orientation', 'horizontal');
-    expect(separator).toHaveClass('h-[1px]', 'w-full');
+    expect(separator).toHaveClass('h-px', 'w-full');
   });
 
   it('renders with vertical orientation', () => {
@@ -39,13 +34,8 @@ describe('Separator', () => {
 
     expect(separator).toBeInTheDocument();
     expect(separator).toHaveAttribute('data-orientation', 'vertical');
-    expect(separator).toHaveClass(
-      'shrink-0',
-      'bg-slate-200',
-      'h-full',
-      'w-[1px]',
-    );
-    expect(separator).not.toHaveClass('h-[1px]', 'w-full');
+    expect(separator).toHaveClass('shrink-0', 'bg-border', 'h-full', 'w-px');
+    expect(separator).not.toHaveClass('h-px', 'w-full');
   });
 
   it('renders non-decorative horizontal separator with role="separator"', () => {
@@ -71,7 +61,7 @@ describe('Separator', () => {
     expect(separator).toBeInTheDocument();
     expect(separator).toHaveAttribute('data-orientation', 'vertical');
     expect(separator).toHaveAttribute('aria-orientation', 'vertical');
-    expect(separator).toHaveClass('h-full', 'w-[1px]');
+    expect(separator).toHaveClass('h-full', 'w-px');
   });
 
   it('merges custom className with default classes', () => {
@@ -84,7 +74,7 @@ describe('Separator', () => {
       'custom-sep',
       'my-4',
       'shrink-0',
-      'bg-slate-200',
+      'bg-border',
     );
   });
 

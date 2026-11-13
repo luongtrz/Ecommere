@@ -221,13 +221,13 @@ describe('AdminCouponsPage', () => {
       const seoElement = screen.getByTestId('seo-title');
       expect(seoElement).toHaveAttribute(
         'data-title',
-        'Quản lý mã giảm giá và Referral - Admin',
+        'Quản lý mã giảm giá và Giới thiệu khách hàng - Admin',
       );
 
       expect(
         screen.getByRole('heading', {
           level: 1,
-          name: 'Quản lý mã giảm giá và Referral',
+          name: 'Quản lý mã giảm giá và Giới thiệu khách hàng',
         }),
       ).toBeInTheDocument();
     });
@@ -237,8 +237,10 @@ describe('AdminCouponsPage', () => {
       renderComponent();
 
       const couponsTab = screen.getByRole('tab', { name: 'Mã giảm giá' });
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
-      const listTab = screen.getByRole('tab', { name: 'Danh sách Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
+      const listTab = screen.getByRole('tab', { name: 'Lịch sử giới thiệu' });
 
       expect(couponsTab).toBeInTheDocument();
       expect(configTab).toBeInTheDocument();
@@ -256,7 +258,9 @@ describe('AdminCouponsPage', () => {
       expect(addBtn).toBeInTheDocument();
       await user.click(addBtn);
 
-      expect(screen.getByText('CHAOBANMOI')).toBeInTheDocument();
+      expect(screen.getAllByText('CHAOBANMOI').length).toBeGreaterThanOrEqual(
+        1,
+      );
     });
   });
 
@@ -265,13 +269,15 @@ describe('AdminCouponsPage', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
       expect(
         await screen.findByText('Cấu hình chương trình giới thiệu'),
       ).toBeInTheDocument();
 
-      const listTab = screen.getByRole('tab', { name: 'Danh sách Referral' });
+      const listTab = screen.getByRole('tab', { name: 'Lịch sử giới thiệu' });
       await user.click(listTab);
       expect(
         await screen.findByText('Danh sách giới thiệu'),
@@ -279,7 +285,282 @@ describe('AdminCouponsPage', () => {
 
       const couponsTab = screen.getByRole('tab', { name: 'Mã giảm giá' });
       await user.click(couponsTab);
-      expect(screen.getByText('CHAOBANMOI')).toBeInTheDocument();
+      expect(screen.getAllByText('CHAOBANMOI').length).toBeGreaterThanOrEqual(
+        1,
+      );
+    });
+  });
+
+  describe('Coupons Management Functionality', () => {
+    it('filters coupons by search keyword', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const searchInput = screen.getByPlaceholderText(
+        'Tìm theo mã giảm giá...',
+      );
+      expect(searchInput).toBeInTheDocument();
+
+      await user.type(searchInput, 'FREESHIP');
+      expect(screen.getAllByText('FREESHIPMAX').length).toBeGreaterThanOrEqual(
+        1,
+      );
+      expect(screen.queryByText('CHAOBANMOI')).not.toBeInTheDocument();
+      expect(screen.queryByText('GIAM50K')).not.toBeInTheDocument();
+
+      const clearBtn = screen.getByLabelText('Xóa tìm kiếm');
+      await user.click(clearBtn);
+      expect(screen.getAllByText('CHAOBANMOI').length).toBeGreaterThanOrEqual(
+        1,
+      );
+    });
+
+    it('filters coupons by active and inactive status', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const activeFilterBtn = screen.getByRole('button', { name: 'Đang bật' });
+      const inactiveFilterBtn = screen.getByRole('button', { name: 'Đã tắt' });
+      const allFilterBtn = screen.getByRole('button', { name: 'Tất cả' });
+
+      // Click "Đã tắt"
+      await user.click(inactiveFilterBtn);
+      expect(screen.getAllByText('GIAM50K').length).toBeGreaterThanOrEqual(1);
+      expect(screen.queryByText('CHAOBANMOI')).not.toBeInTheDocument();
+
+      // Click "Đang bật"
+      await user.click(activeFilterBtn);
+      expect(screen.getAllByText('CHAOBANMOI').length).toBeGreaterThanOrEqual(
+        1,
+      );
+      expect(screen.queryByText('GIAM50K')).not.toBeInTheDocument();
+
+      // Click "Tất cả"
+      await user.click(allFilterBtn);
+      expect(screen.getAllByText('CHAOBANMOI').length).toBeGreaterThanOrEqual(
+        1,
+      );
+      expect(screen.getAllByText('GIAM50K').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('renders empty state when search finds no matches and allows reset', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const searchInput = screen.getByPlaceholderText(
+        'Tìm theo mã giảm giá...',
+      );
+      await user.type(searchInput, 'KHONG_TON_TAI');
+
+      expect(
+        screen.getByText('Không tìm thấy mã giảm giá nào'),
+      ).toBeInTheDocument();
+
+      const resetBtn = screen.getByRole('button', { name: 'Đặt lại bộ lọc' });
+      await user.click(resetBtn);
+
+      expect(screen.getAllByText('CHAOBANMOI').length).toBeGreaterThanOrEqual(
+        1,
+      );
+    });
+
+    it('displays expired warning badge for expired coupons', () => {
+      renderComponent();
+
+      // GIAM50K validUntil is 2026-10-31 which is past current date
+      const expiredBadges = screen.getAllByText('Hết hạn');
+      expect(expiredBadges.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('toggles coupon active status and shows toast notification', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      // The table row and the mobile card both render this switch; the test drives the table one.
+      const toggleSwitch = screen.getAllByLabelText(
+        'Trạng thái mã CHAOBANMOI',
+      )[0];
+      expect(toggleSwitch).toBeInTheDocument();
+
+      await user.click(toggleSwitch);
+      expect(mockToast.success).toHaveBeenCalledWith('Đã tắt mã CHAOBANMOI');
+
+      await user.click(toggleSwitch);
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Đã kích hoạt mã CHAOBANMOI',
+      );
+    });
+
+    it('opens create dialog, fills in fields, and successfully adds a new coupon', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const addBtn = screen.getByRole('button', { name: 'Thêm mã' });
+      await user.click(addBtn);
+
+      expect(screen.getByText('Thêm mã giảm giá mới')).toBeInTheDocument();
+
+      const codeInput = screen.getByLabelText(/Mã giảm giá \*/);
+      fireEvent.change(codeInput, { target: { value: 'SIEUDEAL' } });
+
+      const valueInput = screen.getByLabelText(/Phần trăm giảm/);
+      fireEvent.change(valueInput, { target: { value: '30' } });
+
+      const submitBtn = screen.getByRole('button', { name: 'Tạo mã' });
+      await user.click(submitBtn);
+
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Thêm mã giảm giá thành công!',
+      );
+      expect(screen.getAllByText('SIEUDEAL').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('validates duplicate coupon code when creating', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const addBtn = screen.getByRole('button', { name: 'Thêm mã' });
+      await user.click(addBtn);
+
+      const codeInput = screen.getByLabelText(/Mã giảm giá \*/);
+      fireEvent.change(codeInput, { target: { value: 'CHAOBANMOI' } });
+
+      const submitBtn = screen.getByRole('button', { name: 'Tạo mã' });
+      await user.click(submitBtn);
+
+      expect(mockToast.error).toHaveBeenCalledWith(
+        'Mã giảm giá này đã tồn tại',
+      );
+    });
+
+    it('toggles coupon active status via desktop table switch at line 757 and shows toast', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const switches = screen.getAllByLabelText('Trạng thái mã CHAOBANMOI');
+      expect(switches.length).toBeGreaterThanOrEqual(2);
+      // Index 1 is the desktop table switch exercising onCheckedChange at line 757
+      const desktopSwitch = switches[1];
+
+      await user.click(desktopSwitch);
+      expect(mockToast.success).toHaveBeenCalledWith('Đã tắt mã CHAOBANMOI');
+
+      await user.click(desktopSwitch);
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Đã kích hoạt mã CHAOBANMOI',
+      );
+    });
+
+    it('toggles inactive coupon to active via desktop table switch at line 757', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const switches = screen.getAllByLabelText('Trạng thái mã GIAM50K');
+      const desktopSwitch = switches[switches.length - 1];
+
+      await user.click(desktopSwitch);
+      expect(mockToast.success).toHaveBeenCalledWith('Đã kích hoạt mã GIAM50K');
+    });
+
+    it('updates min order and max discount inputs at lines 1382 and 1401 when creating coupon', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const addBtn = screen.getByRole('button', { name: 'Thêm mã' });
+      await user.click(addBtn);
+
+      const minOrderInput = screen.getByLabelText('Đơn hàng tối thiểu (VND)');
+      const maxDiscountInput = screen.getByLabelText('Giảm tối đa (VND)');
+
+      // Exercise onChange at line 1382
+      fireEvent.change(minOrderInput, { target: { value: '250000' } });
+      expect(minOrderInput).toHaveValue(250000);
+
+      // Exercise onChange at line 1401 with numeric value
+      fireEvent.change(maxDiscountInput, { target: { value: '50000' } });
+      expect(maxDiscountInput).toHaveValue(50000);
+
+      // Exercise onChange at line 1401 with empty string to trigger null branch
+      fireEvent.change(maxDiscountInput, { target: { value: '' } });
+      expect(maxDiscountInput).toHaveValue(null);
+
+      // Re-set value
+      fireEvent.change(maxDiscountInput, { target: { value: '75000' } });
+      expect(maxDiscountInput).toHaveValue(75000);
+
+      const maxUsesInput = screen.getByLabelText('Số lượt dùng tối đa');
+      fireEvent.change(maxUsesInput, { target: { value: '50' } });
+      expect(maxUsesInput).toHaveValue(50);
+
+      const validUntilInput = screen.getByLabelText('Hạn sử dụng');
+      fireEvent.change(validUntilInput, { target: { value: '2026-12-31' } });
+      expect(validUntilInput).toHaveValue('2026-12-31');
+
+      const codeInput = screen.getByLabelText(/Mã giảm giá \*/);
+      fireEvent.change(codeInput, { target: { value: 'SUPERDEAL' } });
+
+      const valueInput = screen.getByLabelText(/Phần trăm giảm/);
+      fireEvent.change(valueInput, { target: { value: '25' } });
+
+      const submitBtn = screen.getByRole('button', { name: 'Tạo mã' });
+      await user.click(submitBtn);
+
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Thêm mã giảm giá thành công!',
+      );
+      expect(screen.getAllByText('SUPERDEAL').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('closes create coupon dialog when clicking Hủy button at line 1455', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const addBtn = screen.getByRole('button', { name: 'Thêm mã' });
+      await user.click(addBtn);
+
+      expect(
+        screen.getByRole('heading', { name: 'Thêm mã giảm giá mới' }),
+      ).toBeInTheDocument();
+
+      const cancelBtn = screen.getByRole('button', { name: 'Hủy' });
+      await user.click(cancelBtn);
+
+      expect(
+        screen.queryByRole('heading', { name: 'Thêm mã giảm giá mới' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('updates search query and filter at header to reactively update the coupon list', () => {
+      renderComponent();
+
+      const searchInput = screen.getByPlaceholderText(
+        'Tìm theo mã giảm giá...',
+      );
+      fireEvent.change(searchInput, { target: { value: 'FREESHIP' } });
+
+      expect(screen.getAllByText('FREESHIPMAX').length).toBeGreaterThanOrEqual(
+        1,
+      );
+      expect(screen.queryByText('GIAM50K')).not.toBeInTheDocument();
+
+      const activeFilterBtn = screen.getByRole('button', { name: 'Đang bật' });
+      fireEvent.click(activeFilterBtn);
+      expect(screen.getAllByText('FREESHIPMAX').length).toBeGreaterThanOrEqual(
+        1,
+      );
+
+      const inactiveFilterBtn = screen.getByRole('button', { name: 'Đã tắt' });
+      fireEvent.click(inactiveFilterBtn);
+      expect(screen.queryByText('FREESHIPMAX')).not.toBeInTheDocument();
+
+      const allFilterBtn = screen.getByRole('button', { name: 'Tất cả' });
+      fireEvent.click(allFilterBtn);
+
+      const clearSearchBtn = screen.getByRole('button', {
+        name: 'Xóa tìm kiếm',
+      });
+      fireEvent.click(clearSearchBtn);
+      expect(searchInput).toHaveValue('');
     });
   });
 
@@ -290,7 +571,9 @@ describe('AdminCouponsPage', () => {
 
       const { container } = renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
@@ -303,7 +586,9 @@ describe('AdminCouponsPage', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -314,7 +599,7 @@ describe('AdminCouponsPage', () => {
       expect(screen.getByText('42')).toBeInTheDocument();
       expect(screen.getByText('Tổng lượt giới thiệu')).toBeInTheDocument();
       expect(screen.getByText('15')).toBeInTheDocument();
-      expect(screen.getByText('Coupon đã tạo')).toBeInTheDocument();
+      expect(screen.getByText('Mã giảm giá đã tạo')).toBeInTheDocument();
       expect(screen.getByText('Bật')).toBeInTheDocument();
       expect(screen.getByText('Trạng thái')).toBeInTheDocument();
 
@@ -351,7 +636,9 @@ describe('AdminCouponsPage', () => {
 
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -380,7 +667,9 @@ describe('AdminCouponsPage', () => {
 
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -397,7 +686,9 @@ describe('AdminCouponsPage', () => {
       const { queryClient } = renderComponent();
       const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -405,7 +696,9 @@ describe('AdminCouponsPage', () => {
       ).toBeInTheDocument();
 
       // 1. Toggle Switch
-      const activeSwitch = screen.getByRole('switch');
+      const activeSwitch = screen.getByRole('switch', {
+        name: 'Kích hoạt chương trình giới thiệu',
+      });
       expect(activeSwitch).toHaveAttribute('data-state', 'checked');
       await user.click(activeSwitch);
       expect(activeSwitch).toHaveAttribute('data-state', 'unchecked');
@@ -471,7 +764,7 @@ describe('AdminCouponsPage', () => {
           queryKey: ['admin-referral-stats'],
         });
         expect(mockToast.success).toHaveBeenCalledWith(
-          'Cập nhật cấu hình referral thành công!',
+          'Cập nhật cấu hình giới thiệu thành công!',
         );
       });
     });
@@ -488,7 +781,9 @@ describe('AdminCouponsPage', () => {
 
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -525,7 +820,9 @@ describe('AdminCouponsPage', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -555,7 +852,9 @@ describe('AdminCouponsPage', () => {
 
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -585,7 +884,9 @@ describe('AdminCouponsPage', () => {
 
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -613,7 +914,9 @@ describe('AdminCouponsPage', () => {
 
       renderComponent();
 
-      const configTab = screen.getByRole('tab', { name: 'Cấu hình Referral' });
+      const configTab = screen.getByRole('tab', {
+        name: 'Cấu hình giới thiệu',
+      });
       await user.click(configTab);
 
       expect(
@@ -645,7 +948,7 @@ describe('AdminCouponsPage', () => {
 
       const { container } = renderComponent();
 
-      const listTab = screen.getByRole('tab', { name: 'Danh sách Referral' });
+      const listTab = screen.getByRole('tab', { name: 'Lịch sử giới thiệu' });
       await user.click(listTab);
 
       expect(screen.getByText('Danh sách giới thiệu')).toBeInTheDocument();
@@ -659,7 +962,7 @@ describe('AdminCouponsPage', () => {
 
       renderComponent();
 
-      const listTab = screen.getByRole('tab', { name: 'Danh sách Referral' });
+      const listTab = screen.getByRole('tab', { name: 'Lịch sử giới thiệu' });
       await user.click(listTab);
 
       expect(
@@ -678,7 +981,7 @@ describe('AdminCouponsPage', () => {
 
       renderComponent();
 
-      const listTab = screen.getByRole('tab', { name: 'Danh sách Referral' });
+      const listTab = screen.getByRole('tab', { name: 'Lịch sử giới thiệu' });
       await user.click(listTab);
 
       expect(
@@ -690,7 +993,7 @@ describe('AdminCouponsPage', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const listTab = screen.getByRole('tab', { name: 'Danh sách Referral' });
+      const listTab = screen.getByRole('tab', { name: 'Lịch sử giới thiệu' });
       await user.click(listTab);
 
       expect(
@@ -700,8 +1003,8 @@ describe('AdminCouponsPage', () => {
       // Headers
       expect(screen.getByText('Người giới thiệu')).toBeInTheDocument();
       expect(screen.getByText('Người được mời')).toBeInTheDocument();
-      expect(screen.getByText('Coupon Referrer')).toBeInTheDocument();
-      expect(screen.getByText('Coupon Referee')).toBeInTheDocument();
+      expect(screen.getByText('Mã người giới thiệu')).toBeInTheDocument();
+      expect(screen.getByText('Mã người được mời')).toBeInTheDocument();
       expect(screen.getByText('Ngày')).toBeInTheDocument();
 
       // First item
@@ -713,6 +1016,7 @@ describe('AdminCouponsPage', () => {
       expect(screen.getByText('COUPON_NEW_456')).toBeInTheDocument();
       const date1 = new Date('2026-03-15T10:00:00Z').toLocaleDateString(
         'vi-VN',
+        { day: '2-digit', month: '2-digit', year: 'numeric' },
       );
       expect(screen.getByText(date1)).toBeInTheDocument();
 
@@ -724,6 +1028,7 @@ describe('AdminCouponsPage', () => {
       expect(dashes.length).toBeGreaterThanOrEqual(2);
       const date2 = new Date('2026-03-16T12:00:00Z').toLocaleDateString(
         'vi-VN',
+        { day: '2-digit', month: '2-digit', year: 'numeric' },
       );
       expect(screen.getByText(date2)).toBeInTheDocument();
     });

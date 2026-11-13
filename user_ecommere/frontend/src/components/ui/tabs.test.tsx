@@ -95,18 +95,18 @@ describe('Tabs components', () => {
     const list = screen.getByRole('tablist');
     expect(list).toHaveClass('custom-list-class');
     expect(list).toHaveClass('inline-flex');
-    expect(list).toHaveClass('h-10');
-    expect(list).toHaveClass('bg-slate-100');
+    expect(list).toHaveClass('border-b');
+    expect(list).toHaveClass('border-border');
 
     const trigger = screen.getByRole('tab', { name: 'Tab Một' });
     expect(trigger).toHaveClass('custom-trigger-class');
     expect(trigger).toHaveClass('whitespace-nowrap');
-    expect(trigger).toHaveClass('px-3');
+    expect(trigger).toHaveClass('px-4');
 
     const content = screen.getByRole('tabpanel');
     expect(content).toHaveClass('custom-content-class');
-    expect(content).toHaveClass('mt-3');
-    expect(content).toHaveClass('ring-offset-white');
+    expect(content).toHaveClass('mt-4');
+    expect(content).toHaveClass('ring-offset-background');
   });
 
   it('does not switch tabs or call onValueChange when trigger is disabled', async () => {
@@ -157,7 +157,7 @@ describe('Tabs components', () => {
     const forcedPanel = screen.getByTestId('forced-panel');
     expect(forcedPanel).toBeInTheDocument();
     expect(forcedPanel).toHaveAttribute('data-state', 'inactive');
-    expect(forcedPanel).toHaveClass('mt-3');
+    expect(forcedPanel).toHaveClass('mt-4');
   });
 
   it('forwards refs correctly to DOM elements', () => {

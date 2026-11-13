@@ -124,7 +124,7 @@ describe('CartPage', () => {
     expect(mockUseRefreshCartPrices).toHaveBeenCalledTimes(1);
   });
 
-  it('renders empty state correctly when cart is empty', () => {
+  it('renders empty state correctly with page header when cart is empty', () => {
     mockUseCart.mockReturnValue({
       items: [],
       updateQuantity: mockUpdateQuantity,
@@ -134,10 +134,18 @@ describe('CartPage', () => {
 
     renderWithProviders(<CartPage />);
 
+    // Header checks
+    expect(screen.getByText('Giỏ hàng của bạn')).toBeInTheDocument();
+    expect(screen.getByText('Tiếp tục mua sắm')).toBeInTheDocument();
+    expect(
+      screen.getByText('Chưa có sản phẩm nào trong giỏ hàng'),
+    ).toBeInTheDocument();
+
+    // Empty state container checks
     expect(screen.getByText('Giỏ hàng của bạn đang trống')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Hãy khám phá bộ sưu tập nước hoa xịt thơm của chúng tôi',
+        'Hãy khám phá các sản phẩm xịt thơm và gia dụng của chúng tôi.',
       ),
     ).toBeInTheDocument();
 
@@ -147,13 +155,13 @@ describe('CartPage', () => {
     expect(startShoppingLink).toBeInTheDocument();
     expect(startShoppingLink).toHaveAttribute('href', '/catalog');
 
-    // Order summary and items should not exist
+    // Order summary should not exist
     expect(screen.queryByText('Tổng đơn hàng')).not.toBeInTheDocument();
-    expect(screen.queryByText('Giỏ hàng của bạn')).not.toBeInTheDocument();
   });
 
   it('renders cart items, header, and order summary when items exist', () => {
     const items = [mockItem1, mockItem2, mockItem3];
+    const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0); // 2 + 1 + 3 = 6
     const totalPrice =
       mockItem1.price * mockItem1.quantity +
       mockItem2.price * mockItem2.quantity +
@@ -175,13 +183,15 @@ describe('CartPage', () => {
     expect(topContinueLinks[0]).toHaveAttribute('href', '/catalog');
     expect(screen.getByText('Giỏ hàng của bạn')).toBeInTheDocument();
     expect(
-      screen.getByText(`${items.length} sản phẩm trong giỏ hàng`),
+      screen.getByText(`${totalQuantity} sản phẩm trong giỏ hàng`),
     ).toBeInTheDocument();
 
     // Items checks
     expect(screen.getByText(mockItem1.name)).toBeInTheDocument();
-    expect(screen.getByText(mockItem1.scent)).toBeInTheDocument();
-    expect(screen.getByText(`${mockItem1.volumeMl}ml`)).toBeInTheDocument();
+    expect(screen.getByText(matchText(mockItem1.scent))).toBeInTheDocument();
+    expect(
+      screen.getByText(matchText(`${mockItem1.volumeMl}ml`)),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         matchText(`Đơn giá: ${formatCurrency(mockItem1.price)}`),
@@ -189,8 +199,10 @@ describe('CartPage', () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText(mockItem2.name)).toBeInTheDocument();
-    expect(screen.getByText(mockItem2.scent)).toBeInTheDocument();
-    expect(screen.getByText(`${mockItem2.volumeMl}ml`)).toBeInTheDocument();
+    expect(screen.getByText(matchText(mockItem2.scent))).toBeInTheDocument();
+    expect(
+      screen.getByText(matchText(`${mockItem2.volumeMl}ml`)),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         matchText(`Đơn giá: ${formatCurrency(mockItem2.price)}`),
@@ -198,8 +210,10 @@ describe('CartPage', () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText(mockItem3.name)).toBeInTheDocument();
-    expect(screen.getByText(mockItem3.scent)).toBeInTheDocument();
-    expect(screen.getByText(`${mockItem3.volumeMl}ml`)).toBeInTheDocument();
+    expect(screen.getByText(matchText(mockItem3.scent))).toBeInTheDocument();
+    expect(
+      screen.getByText(matchText(`${mockItem3.volumeMl}ml`)),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         matchText(`Đơn giá: ${formatCurrency(mockItem3.price)}`),
@@ -209,21 +223,22 @@ describe('CartPage', () => {
     // Order Summary checks
     expect(screen.getByText('Tổng đơn hàng')).toBeInTheDocument();
     expect(
-      screen.getByText(`Tạm tính (${items.length} sản phẩm):`),
+      screen.getByText(`Tạm tính (${totalQuantity} sản phẩm):`),
     ).toBeInTheDocument();
     expect(screen.getByText('Phí vận chuyển:')).toBeInTheDocument();
-    expect(screen.getByText('Miễn phí')).toBeInTheDocument();
-    expect(screen.getByText('Tổng cộng:')).toBeInTheDocument();
+    expect(screen.getByText('Tính ở bước thanh toán')).toBeInTheDocument();
+    expect(screen.getAllByText('Tổng cộng:').length).toBeGreaterThanOrEqual(1);
 
-    const checkoutLink = screen.getByRole('link', {
+    const checkoutLinks = screen.getAllByRole('link', {
       name: /Tiến hành thanh toán/i,
     });
-    expect(checkoutLink).toHaveAttribute('href', '/checkout');
+    expect(checkoutLinks.length).toBeGreaterThanOrEqual(1);
+    expect(checkoutLinks[0]).toHaveAttribute('href', '/checkout');
 
     expect(screen.getByText('Thanh toán an toàn')).toBeInTheDocument();
     expect(screen.getByText('Giao hàng tận nơi')).toBeInTheDocument();
 
-    // Total price appears in header badge, subtotal, and total
+    // Total price appears in header, subtotal, total, and mobile sticky bar
     const formattedTotals = screen.getAllByText(
       matchText(formatCurrency(totalPrice)),
     );
@@ -241,8 +256,12 @@ describe('CartPage', () => {
 
     renderWithProviders(<CartPage />);
 
-    const card1 = screen.getByText(mockItem1.name).closest('div.bg-white');
-    const card2 = screen.getByText(mockItem2.name).closest('div.bg-white');
+    const card1 = screen
+      .getByText(mockItem1.name)
+      .closest('[data-testid="cart-item"]');
+    const card2 = screen
+      .getByText(mockItem2.name)
+      .closest('[data-testid="cart-item"]');
 
     expect(card1).toHaveStyle({ animationDelay: '0ms' });
     expect(card2).toHaveStyle({ animationDelay: '80ms' });
@@ -260,11 +279,12 @@ describe('CartPage', () => {
 
     const itemCard = screen
       .getByText(mockItem1.name)
-      .closest('div.bg-white') as HTMLElement;
-    const minusBtn = (itemCard
-      .querySelector('svg.lucide-minus')
-      ?.closest('button') ||
-      itemCard.querySelectorAll('button')[1]) as HTMLButtonElement;
+      .closest('[data-testid="cart-item"]') as HTMLElement;
+    const minusBtn = (itemCard.querySelector(
+      'button[aria-label="Giảm số lượng"]',
+    ) ||
+      itemCard.querySelector('svg.lucide-minus')?.closest('button') ||
+      itemCard.querySelectorAll('button')[0]) as HTMLButtonElement;
 
     expect(minusBtn).not.toBeDisabled();
     fireEvent.click(minusBtn);
@@ -288,11 +308,12 @@ describe('CartPage', () => {
 
     const itemCard = screen
       .getByText(mockItem2.name)
-      .closest('div.bg-white') as HTMLElement;
-    const minusBtn = (itemCard
-      .querySelector('svg.lucide-minus')
-      ?.closest('button') ||
-      itemCard.querySelectorAll('button')[1]) as HTMLButtonElement;
+      .closest('[data-testid="cart-item"]') as HTMLElement;
+    const minusBtn = (itemCard.querySelector(
+      'button[aria-label="Giảm số lượng"]',
+    ) ||
+      itemCard.querySelector('svg.lucide-minus')?.closest('button') ||
+      itemCard.querySelectorAll('button')[0]) as HTMLButtonElement;
 
     expect(minusBtn).toBeDisabled();
   });
@@ -309,11 +330,12 @@ describe('CartPage', () => {
 
     const itemCard = screen
       .getByText(mockItem1.name)
-      .closest('div.bg-white') as HTMLElement;
-    const plusBtn = (itemCard
-      .querySelector('svg.lucide-plus')
-      ?.closest('button') ||
-      itemCard.querySelectorAll('button')[2]) as HTMLButtonElement;
+      .closest('[data-testid="cart-item"]') as HTMLElement;
+    const plusBtn = (itemCard.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
+      itemCard.querySelector('svg.lucide-plus')?.closest('button') ||
+      itemCard.querySelectorAll('button')[1]) as HTMLButtonElement;
 
     expect(plusBtn).not.toBeDisabled();
     fireEvent.click(plusBtn);
@@ -337,11 +359,12 @@ describe('CartPage', () => {
 
     const itemCard = screen
       .getByText(mockItem2.name)
-      .closest('div.bg-white') as HTMLElement;
-    const plusBtn = (itemCard
-      .querySelector('svg.lucide-plus')
-      ?.closest('button') ||
-      itemCard.querySelectorAll('button')[2]) as HTMLButtonElement;
+      .closest('[data-testid="cart-item"]') as HTMLElement;
+    const plusBtn = (itemCard.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
+      itemCard.querySelector('svg.lucide-plus')?.closest('button') ||
+      itemCard.querySelectorAll('button')[1]) as HTMLButtonElement;
 
     expect(plusBtn).toBeDisabled();
   });
@@ -358,11 +381,12 @@ describe('CartPage', () => {
 
     const itemCard = screen
       .getByText(mockItem3.name)
-      .closest('div.bg-white') as HTMLElement;
-    const plusBtn = (itemCard
-      .querySelector('svg.lucide-plus')
-      ?.closest('button') ||
-      itemCard.querySelectorAll('button')[2]) as HTMLButtonElement;
+      .closest('[data-testid="cart-item"]') as HTMLElement;
+    const plusBtn = (itemCard.querySelector(
+      'button[aria-label="Tăng số lượng"]',
+    ) ||
+      itemCard.querySelector('svg.lucide-plus')?.closest('button') ||
+      itemCard.querySelectorAll('button')[1]) as HTMLButtonElement;
 
     expect(plusBtn).not.toBeDisabled();
     fireEvent.click(plusBtn);
@@ -385,11 +409,12 @@ describe('CartPage', () => {
 
     const itemCard = screen
       .getByText(mockItem1.name)
-      .closest('div.bg-white') as HTMLElement;
-    const trashBtn = (itemCard
-      .querySelector('svg.lucide-trash-2')
-      ?.closest('button') ||
-      itemCard.querySelectorAll('button')[0]) as HTMLButtonElement;
+      .closest('[data-testid="cart-item"]') as HTMLElement;
+    const trashBtn = (itemCard.querySelector(
+      'button[aria-label="Xóa sản phẩm"]',
+    ) ||
+      itemCard.querySelector('svg.lucide-trash-2')?.closest('button') ||
+      itemCard.querySelectorAll('button')[2]) as HTMLButtonElement;
 
     fireEvent.click(trashBtn);
 
@@ -398,7 +423,7 @@ describe('CartPage', () => {
   });
 
   it('reflects state changes when cart items change or become empty', () => {
-    // Initial render with 2 items
+    // Initial render with 2 items (mockItem1 qty: 2, mockItem2 qty: 1 => total: 3)
     mockUseCart.mockReturnValue({
       items: [mockItem1, mockItem2],
       updateQuantity: mockUpdateQuantity,
@@ -408,11 +433,11 @@ describe('CartPage', () => {
 
     const { rerender } = renderWithProviders(<CartPage />);
 
-    expect(screen.getByText('2 sản phẩm trong giỏ hàng')).toBeInTheDocument();
+    expect(screen.getByText('3 sản phẩm trong giỏ hàng')).toBeInTheDocument();
     expect(screen.getByText(mockItem1.name)).toBeInTheDocument();
     expect(screen.getByText(mockItem2.name)).toBeInTheDocument();
 
-    // State change: item 1 removed, now 1 item
+    // State change: item 1 removed, now 1 item (mockItem2 qty: 1 => total: 1)
     mockUseCart.mockReturnValue({
       items: [mockItem2],
       updateQuantity: mockUpdateQuantity,
@@ -449,6 +474,7 @@ describe('CartPage', () => {
     );
 
     expect(screen.getByText('Giỏ hàng của bạn đang trống')).toBeInTheDocument();
+    expect(screen.getByText('Giỏ hàng của bạn')).toBeInTheDocument();
     expect(screen.queryByText(mockItem2.name)).not.toBeInTheDocument();
   });
 });
