@@ -406,6 +406,128 @@ describe('AdminCouponsPage', () => {
 
       expect(mockToast.error).toHaveBeenCalledWith('Mã giảm giá này đã tồn tại');
     });
+
+    it('toggles coupon active status via desktop table switch at line 757 and shows toast', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const switches = screen.getAllByLabelText('Trạng thái mã CHAOBANMOI');
+      expect(switches.length).toBeGreaterThanOrEqual(2);
+      // Index 1 is the desktop table switch exercising onCheckedChange at line 757
+      const desktopSwitch = switches[1];
+
+      await user.click(desktopSwitch);
+      expect(mockToast.success).toHaveBeenCalledWith('Đã tắt mã CHAOBANMOI');
+
+      await user.click(desktopSwitch);
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Đã kích hoạt mã CHAOBANMOI',
+      );
+    });
+
+    it('toggles inactive coupon to active via desktop table switch at line 757', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const switches = screen.getAllByLabelText('Trạng thái mã GIAM50K');
+      const desktopSwitch = switches[switches.length - 1];
+
+      await user.click(desktopSwitch);
+      expect(mockToast.success).toHaveBeenCalledWith('Đã kích hoạt mã GIAM50K');
+    });
+
+    it('updates min order and max discount inputs at lines 1382 and 1401 when creating coupon', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const addBtn = screen.getByRole('button', { name: 'Thêm mã' });
+      await user.click(addBtn);
+
+      const minOrderInput = screen.getByLabelText('Đơn hàng tối thiểu (VND)');
+      const maxDiscountInput = screen.getByLabelText('Giảm tối đa (VND)');
+
+      // Exercise onChange at line 1382
+      fireEvent.change(minOrderInput, { target: { value: '250000' } });
+      expect(minOrderInput).toHaveValue(250000);
+
+      // Exercise onChange at line 1401 with numeric value
+      fireEvent.change(maxDiscountInput, { target: { value: '50000' } });
+      expect(maxDiscountInput).toHaveValue(50000);
+
+      // Exercise onChange at line 1401 with empty string to trigger null branch
+      fireEvent.change(maxDiscountInput, { target: { value: '' } });
+      expect(maxDiscountInput).toHaveValue(null);
+
+      // Re-set value
+      fireEvent.change(maxDiscountInput, { target: { value: '75000' } });
+      expect(maxDiscountInput).toHaveValue(75000);
+
+      const maxUsesInput = screen.getByLabelText('Số lượt dùng tối đa');
+      fireEvent.change(maxUsesInput, { target: { value: '50' } });
+      expect(maxUsesInput).toHaveValue(50);
+
+      const validUntilInput = screen.getByLabelText('Hạn sử dụng');
+      fireEvent.change(validUntilInput, { target: { value: '2026-12-31' } });
+      expect(validUntilInput).toHaveValue('2026-12-31');
+
+      const codeInput = screen.getByLabelText(/Mã giảm giá \*/);
+      fireEvent.change(codeInput, { target: { value: 'SUPERDEAL' } });
+
+      const valueInput = screen.getByLabelText(/Phần trăm giảm/);
+      fireEvent.change(valueInput, { target: { value: '25' } });
+
+      const submitBtn = screen.getByRole('button', { name: 'Tạo mã' });
+      await user.click(submitBtn);
+
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Thêm mã giảm giá thành công!',
+      );
+      expect(screen.getAllByText('SUPERDEAL').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('closes create coupon dialog when clicking Hủy button at line 1455', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const addBtn = screen.getByRole('button', { name: 'Thêm mã' });
+      await user.click(addBtn);
+
+      expect(
+        screen.getByRole('heading', { name: 'Thêm mã giảm giá mới' }),
+      ).toBeInTheDocument();
+
+      const cancelBtn = screen.getByRole('button', { name: 'Hủy' });
+      await user.click(cancelBtn);
+
+      expect(
+        screen.queryByRole('heading', { name: 'Thêm mã giảm giá mới' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('updates search query and filter at header to reactively update the coupon list', () => {
+      renderComponent();
+
+      const searchInput = screen.getByPlaceholderText('Tìm theo mã giảm giá...');
+      fireEvent.change(searchInput, { target: { value: 'FREESHIP' } });
+
+      expect(screen.getAllByText('FREESHIPMAX').length).toBeGreaterThanOrEqual(1);
+      expect(screen.queryByText('GIAM50K')).not.toBeInTheDocument();
+
+      const activeFilterBtn = screen.getByRole('button', { name: 'Đang bật' });
+      fireEvent.click(activeFilterBtn);
+      expect(screen.getAllByText('FREESHIPMAX').length).toBeGreaterThanOrEqual(1);
+
+      const inactiveFilterBtn = screen.getByRole('button', { name: 'Đã tắt' });
+      fireEvent.click(inactiveFilterBtn);
+      expect(screen.queryByText('FREESHIPMAX')).not.toBeInTheDocument();
+
+      const allFilterBtn = screen.getByRole('button', { name: 'Tất cả' });
+      fireEvent.click(allFilterBtn);
+
+      const clearSearchBtn = screen.getByRole('button', { name: 'Xóa tìm kiếm' });
+      fireEvent.click(clearSearchBtn);
+      expect(searchInput).toHaveValue('');
+    });
   });
 
   describe('Referral Config Tab', () => {

@@ -824,6 +824,102 @@ describe('AdminProductFormPage', () => {
         );
       });
     });
+
+    it('triggers onFocus handlers on variant numerical inputs (volume, stock, price, salePrice) at lines 783, 815, 847, 882', () => {
+      mockParams = {};
+      renderPage();
+
+      const volumeInput = screen.getByLabelText(/dung tích/i) as HTMLInputElement;
+      const stockInput = screen.getByLabelText(/tồn kho/i) as HTMLInputElement;
+      const priceInput = screen.getByLabelText(/giá niêm yết/i) as HTMLInputElement;
+      const salePriceInput = screen.getByLabelText(/giá sale/i) as HTMLInputElement;
+
+      const selectVolumeSpy = vi.spyOn(volumeInput, 'select');
+      const selectStockSpy = vi.spyOn(stockInput, 'select');
+      const selectPriceSpy = vi.spyOn(priceInput, 'select');
+      const selectSalePriceSpy = vi.spyOn(salePriceInput, 'select');
+
+      fireEvent.focus(volumeInput);
+      expect(selectVolumeSpy).toHaveBeenCalledTimes(1);
+
+      fireEvent.focus(stockInput);
+      expect(selectStockSpy).toHaveBeenCalledTimes(1);
+
+      fireEvent.focus(priceInput);
+      expect(selectPriceSpy).toHaveBeenCalledTimes(1);
+
+      fireEvent.focus(salePriceInput);
+      expect(selectSalePriceSpy).toHaveBeenCalledTimes(1);
+
+      expect(volumeInput).toBeInTheDocument();
+      expect(stockInput).toBeInTheDocument();
+      expect(priceInput).toBeInTheDocument();
+      expect(salePriceInput).toBeInTheDocument();
+    });
+
+    it('triggers back link click handler at line 408 and shows leave confirmation dialog when form is dirty', () => {
+      mockParams = {};
+      renderPage();
+
+      const nameInput = screen.getByPlaceholderText('Nhập tên sản phẩm');
+      fireEvent.change(nameInput, { target: { value: 'Sản phẩm mới sửa' } });
+
+      const backLink = screen.getByRole('link', {
+        name: /quay lại danh sách sản phẩm/i,
+      });
+      fireEvent.click(backLink);
+
+      expect(screen.getByText('Xác nhận hủy thay đổi')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi? Mọi thông tin vừa nhập sẽ bị mất.',
+        ),
+      ).toBeInTheDocument();
+      expect(nameInput).toBeInTheDocument();
+
+      const continueEditingBtn = screen.getByRole('button', {
+        name: 'Tiếp tục chỉnh sửa',
+      });
+      fireEvent.click(continueEditingBtn);
+      expect(screen.queryByText('Xác nhận hủy thay đổi')).not.toBeInTheDocument();
+    });
+
+    it('does not show leave confirmation dialog when clicking back link on pristine form', () => {
+      mockParams = {};
+      renderPage();
+
+      const backLink = screen.getByRole('link', {
+        name: /quay lại danh sách sản phẩm/i,
+      });
+      fireEvent.click(backLink);
+
+      expect(screen.queryByText('Xác nhận hủy thay đổi')).not.toBeInTheDocument();
+    });
+
+    it('triggers onChange at line 1014 for category search input and filters categories in dropdown', async () => {
+      mockParams = {};
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByRole('combobox')).toHaveTextContent('Chọn danh mục');
+      });
+
+      const categorySearchInput = screen.getByPlaceholderText('Tìm kiếm danh mục...');
+      expect(categorySearchInput).toBeInTheDocument();
+
+      fireEvent.click(categorySearchInput);
+      fireEvent.keyDown(categorySearchInput, { key: 'Escape' });
+
+      fireEvent.change(categorySearchInput, { target: { value: 'Nam' } });
+
+      expect(categorySearchInput).toHaveValue('Nam');
+      expect(
+        screen.getByRole('menuitem', { name: 'Nước hoa > Nước hoa Nam' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('menuitem', { name: 'Nước hoa > Nước hoa Nữ' }),
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe('Edit Mode - Data Loading and Pre-filling', () => {
