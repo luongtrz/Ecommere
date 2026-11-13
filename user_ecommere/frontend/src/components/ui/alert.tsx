@@ -26,9 +26,31 @@ const Alert = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEleme
 Alert.displayName = 'Alert';
 
 const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h5 ref={ref} className={cn('mb-1 font-medium leading-tight', className)} {...props} />
-  )
+  ({ className, children, ...props }, ref) => {
+    const hasContent =
+      children !== undefined &&
+      children !== null &&
+      children !== false &&
+      (typeof children !== 'string' || children.trim().length > 0);
+
+    if (!hasContent) {
+      return (
+        <div
+          ref={ref as unknown as React.Ref<HTMLDivElement>}
+          className={cn('mb-1 font-medium leading-tight', className)}
+          {...props}
+        >
+          {children}
+        </div>
+      );
+    }
+
+    return (
+      <h5 ref={ref} className={cn('mb-1 font-medium leading-tight', className)} {...props}>
+        {children}
+      </h5>
+    );
+  }
 );
 AlertTitle.displayName = 'AlertTitle';
 

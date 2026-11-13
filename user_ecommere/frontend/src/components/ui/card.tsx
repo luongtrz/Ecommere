@@ -20,9 +20,31 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 CardHeader.displayName = 'CardHeader';
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn('font-sans font-semibold text-lg leading-tight', className)} {...props} />
-  )
+  ({ className, children, ...props }, ref) => {
+    const hasContent =
+      children !== undefined &&
+      children !== null &&
+      children !== false &&
+      (typeof children !== 'string' || children.trim().length > 0);
+
+    if (!hasContent) {
+      return (
+        <div
+          ref={ref as unknown as React.Ref<HTMLDivElement>}
+          className={cn('font-sans font-semibold text-lg leading-tight', className)}
+          {...props}
+        >
+          {children}
+        </div>
+      );
+    }
+
+    return (
+      <h3 ref={ref} className={cn('font-sans font-semibold text-lg leading-tight', className)} {...props}>
+        {children}
+      </h3>
+    );
+  }
 );
 CardTitle.displayName = 'CardTitle';
 
