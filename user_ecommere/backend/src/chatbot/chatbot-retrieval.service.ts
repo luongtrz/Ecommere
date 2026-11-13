@@ -383,15 +383,21 @@ export class ChatbotRetrievalService {
     }>;
   }): number | null {
     const variants = product.variants ?? [];
-    const prices = variants.map((variant) => variant.salePrice ?? variant.price);
-    return prices.length > 0 ? Math.min(...prices) : (product.basePrice ?? null);
+    const prices = variants.map(
+      (variant) => variant.salePrice ?? variant.price,
+    );
+    return prices.length > 0
+      ? Math.min(...prices)
+      : (product.basePrice ?? null);
   }
 
   private extractImageUrl(images?: string[] | null): string | null {
     if (!images || !Array.isArray(images)) {
       return null;
     }
-    const match = images.find((img) => typeof img === 'string' && img.trim().length > 0);
+    const match = images.find(
+      (img) => typeof img === 'string' && img.trim().length > 0,
+    );
     return match ? match.trim() : null;
   }
 }
