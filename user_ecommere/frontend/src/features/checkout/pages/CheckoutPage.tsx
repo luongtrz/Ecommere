@@ -33,6 +33,12 @@ function generateCheckoutKey(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+function CardLabel(props: React.ComponentPropsWithoutRef<'label'>) {
+  // Every call site renders a RadioGroupItem whose id is the label's htmlFor, so the label names a control.
+  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+  return <label {...props} />;
+}
+
 export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { data: addresses } = useAddresses();
@@ -175,12 +181,12 @@ export function CheckoutPage() {
       controller.abort();
     };
   }, [
-    selectedAddress?.id,
-    selectedAddress?.province,
-    shippingMethod,
+    items,
     itemsFingerprint,
-    totalPrice,
     previewRetryTrigger,
+    selectedAddress,
+    shippingMethod,
+    totalPrice,
   ]);
 
   const handleNextStep = () => {
@@ -509,10 +515,9 @@ export function CheckoutPage() {
                         {addresses.map((addr) => {
                           const isSelected = selectedAddressId === addr.id;
                           return (
-                            <label
+                            <CardLabel
                               key={addr.id}
                               htmlFor={`address-${addr.id}`}
-                              tabIndex={0}
                               onKeyDown={(e) => {
                                 if (e.key === ' ' || e.key === 'Enter') {
                                   e.preventDefault();
@@ -558,7 +563,7 @@ export function CheckoutPage() {
                                   )}
                                 </div>
                               </div>
-                            </label>
+                            </CardLabel>
                           );
                         })}
                       </RadioGroup>
@@ -586,10 +591,9 @@ export function CheckoutPage() {
                       {SHIPPING_METHODS.map((method) => {
                         const isSelected = shippingMethod === method.id;
                         return (
-                          <label
+                          <CardLabel
                             key={method.id}
                             htmlFor={`shipping-${method.id}`}
-                            tabIndex={0}
                             onKeyDown={(e) => {
                               if (e.key === ' ' || e.key === 'Enter') {
                                 e.preventDefault();
@@ -636,7 +640,7 @@ export function CheckoutPage() {
                                 </div>
                               )}
                             </div>
-                          </label>
+                          </CardLabel>
                         );
                       })}
                     </RadioGroup>
@@ -665,10 +669,10 @@ export function CheckoutPage() {
                         const isSelected = paymentMethod === method.id;
 
                         return (
-                          <label
+                          <CardLabel
                             key={method.id}
                             htmlFor={`payment-${method.id}`}
-                            tabIndex={isCOD ? 0 : -1}
+                            tabIndex={!isCOD ? -1 : undefined}
                             aria-disabled={!isCOD}
                             onKeyDown={(e) => {
                               if (isCOD && (e.key === ' ' || e.key === 'Enter')) {
@@ -717,7 +721,7 @@ export function CheckoutPage() {
                                 )}
                               </div>
                             </div>
-                          </label>
+                          </CardLabel>
                         );
                       })}
                     </RadioGroup>

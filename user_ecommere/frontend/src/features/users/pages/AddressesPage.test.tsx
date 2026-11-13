@@ -38,7 +38,7 @@ const mockUseAddresses = vi.fn();
 const mockDeleteAddressMutateAsync = vi.fn();
 const mockUpdateAddressMutateAsync = vi.fn();
 let mockDeleteAddressPending = false;
-let mockUpdateAddressPending = false;
+const mockUpdateAddressPending = false;
 
 vi.mock('../hooks/useAddresses', () => ({
   useAddresses: () => mockUseAddresses(),
